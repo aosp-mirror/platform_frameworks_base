@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Neveljavna kartica"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Baterija napolnjena"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • brezžično polnjenje"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Polnjenje"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Polnjenje na nosilcu"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • polnjenje"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • hitro polnjenje"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • počasno polnjenje"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Zaradi zaščite baterije je polnjenje začasno zaustavljeno"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Polnjenje začasno omejeno"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Če želite odkleniti, pritisnite meni."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Omrežje je zaklenjeno"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Ni kartice SIM"</string>
@@ -68,9 +68,19 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Geslo ste <xliff:g id="NUMBER_0">%1$d</xliff:g>-krat vnesli napačno. \n\nPoskusite znova čez <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Vzorec za odklepanje ste <xliff:g id="NUMBER_0">%1$d</xliff:g>-krat nepravilno narisali. \n\nPoskusite znova čez <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Napačna koda PIN kartice SIM. Zdaj se boste morali za odklenitev naprave obrniti na operaterja."</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{Napačna koda PIN kartice SIM. Na voljo imate še # poskus. Nato se boste morali za odklepanje naprave obrniti na operaterja.}one{Napačna koda PIN kartice SIM. Na voljo imate še # poskus. }two{Napačna koda PIN kartice SIM. Na voljo imate še # poskusa. }few{Napačna koda PIN kartice SIM. Na voljo imate še # poskuse. }other{Napačna koda PIN kartice SIM. Na voljo imate še # poskusov. }}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="one">Napačna koda PIN kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskus.</item>
+      <item quantity="two">Napačna koda PIN kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskusa.</item>
+      <item quantity="few">Napačna koda PIN kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskuse.</item>
+      <item quantity="other">Napačna koda PIN kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskusov.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"Kartica SIM ni več uporabna. Obrnite se na operaterja."</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Napačna koda PUK kartice SIM. Na voljo imate še # poskus. Nato bo kartica SIM postala trajno neuporabna.}one{Napačna koda PUK kartice SIM. Na voljo imate še # poskus. Nato bo kartica SIM postala trajno neuporabna.}two{Napačna koda PUK kartice SIM. Na voljo imate še # poskusa. Nato bo kartica SIM postala trajno neuporabna.}few{Napačna koda PUK kartice SIM. Na voljo imate še # poskuse. Nato bo kartica SIM postala trajno neuporabna.}other{Napačna koda PUK kartice SIM. Na voljo imate še # poskusov. Nato bo kartica SIM postala trajno neuporabna.}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="one">Napačna koda PUK kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskus. Potem bo kartica SIM postala trajno neuporabna.</item>
+      <item quantity="two">Napačna koda PUK kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskusa. Potem bo kartica SIM postala trajno neuporabna.</item>
+      <item quantity="few">Napačna koda PUK kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskuse. Potem bo kartica SIM postala trajno neuporabna.</item>
+      <item quantity="other">Napačna koda PUK kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskusov. Potem bo kartica SIM postala trajno neuporabna.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Postopek za odklepanje s kodo PIN kartice SIM ni uspel."</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Postopek za odklepanje s kodo PUK kartice SIM ni uspel."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Preklop načina vnosa"</string>
@@ -84,9 +94,19 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Napravo je zaklenil skrbnik"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Naprava je bila ročno zaklenjena"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Ni prepoznano"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Odklepanje z obrazom potrebuje dostop do fotoaparata."</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Vnesite kodo PIN kartice SIM. Na voljo imate še # poskus. Nato se boste morali za odklepanje naprave obrniti na operaterja.}one{Vnesite kodo PIN kartice SIM. Na voljo imate še # poskus.}two{Vnesite kodo PIN kartice SIM. Na voljo imate še # poskusa.}few{Vnesite kodo PIN kartice SIM. Na voljo imate še # poskuse.}other{Vnesite kodo PIN kartice SIM. Na voljo imate še # poskusov.}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{Kartica SIM je zdaj onemogočena. Če želite nadaljevati, vnesite kodo PUK. Na voljo imate še # poskus. Nato bo kartica SIM postala trajno neuporabna. Za podrobnosti se obrnite na operaterja.}one{Kartica SIM je zdaj onemogočena. Če želite nadaljevati, vnesite kodo PUK. Na voljo imate še # poskus. Nato bo kartica SIM postala trajno neuporabna. Za podrobnosti se obrnite na operaterja.}two{Kartica SIM je zdaj onemogočena. Če želite nadaljevati, vnesite kodo PUK. Na voljo imate še # poskusa. Nato bo kartica SIM postala trajno neuporabna. Za podrobnosti se obrnite na operaterja.}few{Kartica SIM je zdaj onemogočena. Če želite nadaljevati, vnesite kodo PUK. Na voljo imate še # poskuse. Nato bo kartica SIM postala trajno neuporabna. Za podrobnosti se obrnite na operaterja.}other{Kartica SIM je zdaj onemogočena. Če želite nadaljevati, vnesite kodo PUK. Na voljo imate še # poskusov. Nato bo kartica SIM postala trajno neuporabna. Za podrobnosti se obrnite na operaterja.}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Če želite uporabljati odklepanje z obrazom, v meniju »Nastavitve« &gt; »Zasebnost« vklopite možnost "<b>"Dostop do fotoaparata"</b>"."</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="one">Vnesite kodo PIN kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskus.</item>
+      <item quantity="two">Vnesite kodo PIN kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskusa.</item>
+      <item quantity="few">Vnesite kodo PIN kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskuse.</item>
+      <item quantity="other">Vnesite kodo PIN kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskusov.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="one">Kartica SIM je zdaj onemogočena. Če želite nadaljevati, vnesite kodo PUK. Na voljo imate še <xliff:g id="_NUMBER_1">%d</xliff:g> poskus. Potem bo kartica SIM postala trajno neuporabna. Za podrobnosti se obrnite na operaterja.</item>
+      <item quantity="two">Kartica SIM je zdaj onemogočena. Če želite nadaljevati, vnesite kodo PUK. Na voljo imate še <xliff:g id="_NUMBER_1">%d</xliff:g> poskusa. Potem bo kartica SIM postala trajno neuporabna. Za podrobnosti se obrnite na operaterja.</item>
+      <item quantity="few">Kartica SIM je zdaj onemogočena. Če želite nadaljevati, vnesite kodo PUK. Na voljo imate še <xliff:g id="_NUMBER_1">%d</xliff:g> poskuse. Potem bo kartica SIM postala trajno neuporabna. Za podrobnosti se obrnite na operaterja.</item>
+      <item quantity="other">Kartica SIM je zdaj onemogočena. Če želite nadaljevati, vnesite kodo PUK. Na voljo imate še <xliff:g id="_NUMBER_1">%d</xliff:g> poskusov. Potem bo kartica SIM postala trajno neuporabna. Za podrobnosti se obrnite na operaterja.</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"Privzeto"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Mehurček"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analogno"</string>

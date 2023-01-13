@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"के.बि."</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;बिना शीर्षक&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(कुनै फोन नम्बर छैन)"</string>
@@ -265,7 +270,7 @@
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"९९९+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"नयाँ सूचना"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"भर्चुअल किबोर्ड"</string>
-    <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"फिजिकल किबोर्ड"</string>
+    <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"वास्तविक किबोर्ड"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"सुरक्षा"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"कार मोड"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"खाताको स्थिति"</string>
@@ -300,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"तपाईंको पात्रोमाथि पहुँच गर्नुहोस्"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS सन्देशहरू पठाउनुहोस् र हेर्नुहोस्"</string>
-    <string name="permgrouplab_storage" msgid="17339216290379241">"फाइलहरू"</string>
-    <string name="permgroupdesc_storage" msgid="5378659041354582769">"आफ्नो डिभाइसमा रहेका फाइलहरू हेर्नुहोस् र प्रयोग गर्नुहोस्"</string>
-    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"सङ्गीत तथा अडियो"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"तपाईंको डिभाइसबाट सङ्गीत तथा अडियो सुन्ने अनुमति"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"फोटो र भिडियोहरू"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"तपाईंको डिभाइसबाट फोटो तथा भिडियोहरू हेर्ने अनुमति"</string>
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"फाइल र डकुमेन्टहरू"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"आफ्नो डिभाइसमा भएका फाइल र डकुमेन्टहरू प्रयोग गर्नुहोस्"</string>
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"सङ्गीत तथा अन्य अडियो"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"तपाईंको डिभाइसमा भएका अडियो फाइलहरू प्रयोग गर्ने"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"फोटो तथा भिडियोहरू"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"तपाईंको डिभाइसमा भएका फोटो तथा भिडियो फाइलहरू प्रयोग गर्ने"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"माइक्रोफोन"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"अडियो रेकर्ड गर्नुहोस्"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"शारीरिक क्रियाकलाप"</string>
@@ -345,7 +350,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"लक गरिएको डिभाइसमा स्क्रिनभरि देखिने सूचनाहरू देखाइयोस्"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"यो अनुमति दिइएमा एपले लक गरिएको डिभाइसमा स्क्रिनभरि देखिने सूचनाहरू देखाउन सक्छ"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"सर्टकट इन्स्टल गर्ने"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"प्रयोगकर्ताको हस्तक्षेप बिना एउटा एपलाई सर्टकटमा हाल्ने अनुमति दिन्छ।"</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"प्रयोगकर्ताको हस्तक्षेप बिना एउटा एपलाई सर्टकटमा थप्नको लागि अनुमति दिन्छ।"</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"सर्टकटहरूको स्थापन रद्द गर्नुहोस्"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"प्रयोगकर्ताको हस्तक्षेप बिना एउटा एपलाई सर्टकटमा हटाउनको लागि अनुमति दिन्छ।"</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"बहिर्गमन कलहरूलाई अर्को मार्ग दिनुहोस्"</string>
@@ -368,7 +373,7 @@
     <string name="permdesc_sendSms" msgid="6757089798435130769">"एपलाई SMS सन्देशहरू पठाउन अनुमति दिन्छ। यसले अप्रत्यासित चार्जहरूको परिणाम दिन सक्दछ। खराब एपहरूले तपाईंको पुष्टि बिना सन्देशहरू पठाएर तपाईंको पैसा खर्च गराउन सक्दछ।"</string>
     <string name="permlab_readSms" msgid="5164176626258800297">"तपाईंका टेक्स्ट म्यासेजहरू (SMS वा MMS) पढ्नुहोस्"</string>
     <string name="permdesc_readSms" product="tablet" msgid="7912990447198112829">"यस एपले तपाईंको ट्याब्लेटमा भण्डारण गरिएका सबै SMS (पाठ) सन्देशहरू पढ्न सक्छ।"</string>
-    <string name="permdesc_readSms" product="tv" msgid="3054753345758011986">"यस एपले तपाईंको Android टिभी डिभाइसमा भण्डारण गरिएका सबै SMS.(पाठ) सन्देशहरू पढ्न सक्छ।"</string>
+    <string name="permdesc_readSms" product="tv" msgid="3054753345758011986">"यस एपले तपाईंको Android टिभी डिभाइसमा भण्डार गरिएका सबै SMS.(पाठ) सन्देशहरू पढ्न सक्छ।"</string>
     <string name="permdesc_readSms" product="default" msgid="774753371111699782">"यस एपले तपाईंको फोनमा भण्डारण गरिएका सबै SMS (पाठ) सन्देशहरू पढ्न सक्छ।"</string>
     <string name="permlab_receiveWapPush" msgid="4223747702856929056">"टेक्स्ट म्यासेजहरू (WAP) प्राप्त गर्नुहोस्"</string>
     <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"WAP सन्देशहरू प्राप्त गर्न र प्रशोधन गर्न एपलाई अनुमति दिन्छ। यो अनुमतिमा मोनिटर गर्ने वा तपाईँलाई पठाइएका म्यासेजहरू तपाईँलाई नदेखाई मेट्ने क्षमता समावेश हुन्छ।"</string>
@@ -390,7 +395,7 @@
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"यो एपले ब्याकग्राउन्डमा डेटा प्रयोग गर्नसक्छ। यसले गर्दा धेरै डेटा प्रयोग हुनसक्छ।"</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"एपहरू जहिले पनि चल्ने बनाउनुहोस्"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"यसको आफ्नै मेमोरीमा दृढ भएकोको अंश बनाउनको लागि एपलाई अनुमति दिन्छ। ट्याब्लेटलाई ढिलो गराउँदै गरेका अन्य एपहरूलाई सीमित मात्रामा यसले मेमोरी उपलब्ध गराउन सक्छ।"</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"एपलाई आफ्ना केही अंशहरू मेमोरीमा स्थायी रूपमा राख्ने अनुमति दिन्छ। यसले गर्दा अन्य एपका लागि मेमोरीको अभाव हुन सक्ने भएकाले तपाईंको Android टिभी यन्त्र सुस्त हुन सक्छ।"</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"एपलाई आफ्ना केही अंशहरू मेमोरीमा स्थायी रूपमा राख्ने अनुमति दिन्छ। यसले गर्दा अन्य अनुप्रयोगहरूका लागि मेमोरीको अभाव हुन सक्ने भएकाले तपाईंको Android टिभी यन्त्र सुस्त हुन सक्छ।"</string>
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"एपलाई मेमोरीमा आफैंको निरन्तरको अंश बनाउन अनुमति दिन्छ। यसले फोनलाई ढिला बनाएर अन्य एपहरूमा मेमोरी SIMित गर्न सक्दछन्।"</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"अग्रभूमिको सेवा सञ्चालन गर्नुहोस्"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"एपलाई अग्रभूमिका सेवाहरू प्रयोग गर्ने अनुमति दिन्छ।"</string>
@@ -407,9 +412,9 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"एपलाई प्रसारण समाप्त भइसकेपछि पनि रहिरहने स्टिकी प्रसारणहरू पठाउने अनुमति दिन्छ। यो सुविधाको अत्यधिक प्रयोगले धेरै मेमोरी प्रयोग हुने भएकाले तपाईंको Android टिभी यन्त्र सुस्त वा अस्थिर हुन सक्छ।"</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"औपचारिक प्रसारणलाई पठाउनको लागि एक एपलाई अनुमति दिन्छ, जुन प्रसारण समाप्त भएपछि बाँकी रहन्छ। अत्यधिक प्रयोगले धेरै मेमोरी प्रयोग गरेको कारणले फोनलाई ढिलो र अस्थिर बनाउन सक्छ।"</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"तपाईँका सम्पर्कहरू पढ्नुहोस्"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"एपलाई तपाईंको ट्याब्लेटमा भण्डारण गरिएका सम्पर्क ठेगानाहरूसँग सम्बन्धित डेटा पढ्ने अनुमति दिन्छ। एपहरूले सम्पर्क ठेगानाहरू बनाउने तपाईंको ट्याब्लेटमा भण्डारण गरिएका खाताहरूमाथि पनि पहुँच प्राप्त गर्ने छन्। यसमा तपाईंले स्थापना गरेका एपहरूले बनाएका खाताहरू पर्न सक्छन्। यस अनुमतिले एपहरूलाई तपाईंको सम्पर्क ठेगानासम्बन्धी डेटा सेभ गर्न दिने भएकाले हानिकारक एपहरूले तपाईंलाई थाहै नदिइकन सम्पर्क ठेगानासम्बन्धी डेटा आदान प्रदान गर्न सक्छन्।"</string>
-    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"एपलाई तपाईंको Android टिभी डिभाइसमा भण्डारण गरिएका सम्पर्क ठेगानासम्बन्धी डेटा पढ्न अनुमति दिन्छ। एपहरूले सम्पर्क ठेगानाहरू बनाउने तपाईंको Android टिभी डिभाइसमा भण्डारण गरिएका खाताहरूमाथि पनि पहुँच प्राप्त गर्ने छन्। यसमा तपाईंले स्थापना गरेका एपहरूले बनाएका खाताहरू पर्न सक्छन्। यस अनुमतिले एपहरूलाई तपाईंको सम्पर्क ठेगानासम्बन्धी डेटा सेभ गर्न दिने भएकाले हानिकारक एपहरूले तपाईंलाई थाहै नदिइकन सम्पर्क ठेगानासम्बन्धी डेटा आदान प्रदान गर्न सक्छन्।"</string>
-    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"एपलाई तपाईंको फोनमा भण्डारण गरिएका सम्पर्क ठेगानाहरूसँग सम्बन्धित डेटा पढ्ने अनुमति दिन्छ। एपहरूले सम्पर्क ठेगानाहरू बनाउने तपाईंको फोनमा भण्डारण गरिएका खाताहरूमाथि पनि पहुँच प्राप्त गर्ने छन्। यसमा तपाईंले स्थापना गरेका एपहरूले बनाएका खाताहरू पर्न सक्छन्। यस अनुमतिले एपहरूलाई तपाईंको सम्पर्क ठेगानासम्बन्धी डेटा सेभ गर्न दिने भएकाले हानिकारक एपहरूले तपाईंलाई थाहै नदिइकन सम्पर्क ठेगानासम्बन्धी डेटा आदान प्रदान गर्न सक्छन्।"</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"एपलाई तपाईंको ट्याब्लेटमा भण्डार गरिएका सम्पर्क ठेगानाहरूसँग सम्बन्धित डेटा पढ्ने अनुमति दिन्छ। एपहरूले सम्पर्क ठेगानाहरू बनाउने तपाईंको ट्याब्लेटमा भण्डार गरिएका खाताहरूमाथि पनि पहुँच प्राप्त गर्ने छन्। यसमा तपाईंले स्थापना गरेका एपहरूले बनाएका खाताहरू पर्न सक्छन्। यस अनुमतिले एपहरूलाई तपाईंको सम्पर्क ठेगानासम्बन्धी डेटा सेभ गर्न दिने भएकाले हानिकारक एपहरूले तपाईंलाई थाहै नदिइकन सम्पर्क ठेगानासम्बन्धी डेटा आदान प्रदान गर्न सक्छन्।"</string>
+    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"एपलाई तपाईंको Android टिभी डिभाइसमा भण्डारण गरिएका सम्पर्क ठेगानासम्बन्धी डेटा पढ्न अनुमति दिन्छ। एपहरूले सम्पर्क ठेगानाहरू बनाउने तपाईंको Android टिभी डिभाइसमा भण्डार गरिएका खाताहरूमाथि पनि पहुँच प्राप्त गर्ने छन्। यसमा तपाईंले स्थापना गरेका एपहरूले बनाएका खाताहरू पर्न सक्छन्। यस अनुमतिले एपहरूलाई तपाईंको सम्पर्क ठेगानासम्बन्धी डेटा सेभ गर्न दिने भएकाले हानिकारक एपहरूले तपाईंलाई थाहै नदिइकन सम्पर्क ठेगानासम्बन्धी डेटा आदान प्रदान गर्न सक्छन्।"</string>
+    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"एपलाई तपाईंको फोनमा भण्डार गरिएका सम्पर्क ठेगानाहरूसँग सम्बन्धित डेटा पढ्ने अनुमति दिन्छ। एपहरूले सम्पर्क ठेगानाहरू बनाउने तपाईंको फोनमा भण्डार गरिएका खाताहरूमाथि पनि पहुँच प्राप्त गर्ने छन्। यसमा तपाईंले स्थापना गरेका एपहरूले बनाएका खाताहरू पर्न सक्छन्। यस अनुमतिले एपहरूलाई तपाईंको सम्पर्क ठेगानासम्बन्धी डेटा सेभ गर्न दिने भएकाले हानिकारक एपहरूले तपाईंलाई थाहै नदिइकन सम्पर्क ठेगानासम्बन्धी डेटा आदान प्रदान गर्न सक्छन्।"</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"तपाईँका सम्पर्कहरू परिवर्तन गर्नुहोस्"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"एपलाई तपाईंको ट्याब्लेटमा भण्डारण गरिएका सम्पर्क ठेगानासम्बन्धी डेटा परिमार्जन गर्न अनुमति दिन्छ। यो अनुमतिले एपलाई सम्पर्क ठेगानासम्बन्धी डेटा मेटाउन अनुमति दिन्छ।"</string>
     <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"एपलाई तपाईंको Android टिभी डिभाइसमा भण्डारण गरिएका सम्पर्क ठेगानासम्बन्धी डेटा परिमार्जन गर्न अनुमति दिन्छ। यो अनुमतिले एपलाई सम्पर्क ठेगानासम्बन्धी डेटा मेटाउन अनुमति दिन्छ।"</string>
@@ -426,7 +431,7 @@
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"यसले यो एप ब्याकग्राउन्डमा चलेका बेला यसलाई हृदयको गति, शरीरको तापक्रम तथा रगतमा रहेको अक्सिजनको प्रतिशत जस्ता बडी सेन्सरसम्बन्धी डेटा हेर्ने तथा प्रयोग गर्ने अनुमति दिन्छ।"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"पात्रोका कार्यक्रम र विवरणहरू पढ्ने"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"यस एपले तपाईंको ट्याब्लेटमा भण्डारण गरिएका पात्रो सम्बन्धी सबै कार्यक्रमहरू पढ्न र तपाईंको पात्रोको डेटा आदान प्रदान वा सुरक्षित गर्न सक्छ।"</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"यस एपले तपाईंको Android टिभी डिभाइसमा भण्डारण गरिएका पात्रोसम्बन्धी सबै कार्यक्रमहरू पढ्न र तपाईंको पात्रोको डेटा आदान प्रदान वा सुरक्षित गर्न सक्छ।"</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"यस एपले तपाईंको Android टिभी डिभाइसमा भण्डार गरिएका पात्रोसम्बन्धी सबै कार्यक्रमहरू पढ्न र तपाईंको पात्रोको डेटा आदान प्रदान वा सुरक्षित गर्न सक्छ।"</string>
     <string name="permdesc_readCalendar" product="default" msgid="9118823807655829957">"यस एपले तपाईंको फोनमा भण्डारण गरिएका पात्रो सम्बन्धी सबै कार्यक्रमहरू पढ्न र तपाईंको पात्रोको डेटा आदान प्रदान वा सुरक्षित गर्न सक्छ।"</string>
     <string name="permlab_writeCalendar" msgid="6422137308329578076">"पात्रो घटनाहरू थप्नुहोस् वा परिमार्जन गर्नुहोस् र मालिकको ज्ञान बिना नै पाहुनाहरूलाई इमेल पठाउनुहोस्"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"यस एपले तपाईंको ट्याब्लेटमा पात्रोका कार्यक्रमहरू थप्न, हटाउन वा परिवर्तन गर्न सक्छ। यस एपले पात्रोका मालिकहरू मार्फत आएको जस्तो लाग्ने सन्देशहरू पठाउन वा तिनीहरूका मालिकहरूलाई सूचित नगरिकन कार्यक्रमहरू परिवर्तन गर्न सक्छ।"</string>
@@ -455,7 +460,7 @@
     <string name="permlab_backgroundCamera" msgid="7549917926079731681">"ब्याकग्राउन्डमा फोटो खिच्नुहोस् तथा भिडियो रेकर्ड गर्नुहोस्"</string>
     <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"यो एपले जुनसुकै बेला क्यामेराको प्रयोग गरी फोटो खिच्न र भिडियो रेकर्ड गर्न सक्छ।"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"एप वा सेवालाई फोटो र भिडियो खिच्न प्रणालीका क्यामेराहरूमाथि पहुँच राख्न दिनुहोस्"</string>
-    <string name="permdesc_systemCamera" msgid="5938360914419175986">"प्रणालीको यस विशेषाधिकार प्राप्त अनुप्रयोगले जुनसुकै बेला प्रणालीको क्यामेरा प्रयोग गरी फोटो खिच्न र भिडियो रेकर्ड गर्न सक्छ। एपसँग पनि android.permission.CAMERA प्रयोग गर्ने अनुमति हुनु पर्छ"</string>
+    <string name="permdesc_systemCamera" msgid="5938360914419175986">"प्रणालीको यस विशेषाधिकार प्राप्त अनुप्रयोगले जुनसुकै बेला प्रणालीको क्यामेरा प्रयोग गरी फोटो खिच्न र भिडियो रेकर्ड गर्न सक्छ। अनुप्रयोगसँग पनि android.permission.CAMERA प्रयोग गर्ने अनुमति हुनु पर्छ"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"कुनै एप वा सेवालाई खोलिँदै वा बन्द गरिँदै गरेका क्यामेरा यन्त्रहरूका बारेमा कलब्याक प्राप्त गर्ने अनुमति दिनुहोस्।"</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"कुनै क्यामेरा यन्त्र खोलिँदा (कुन अनुप्रयोगले खोलेको भन्ने बारेमा) वा बन्द गरिँदा यो एपले कलब्याक प्राप्त गर्न सक्छ।"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"कम्पन नियन्त्रण गर्नुहोस्"</string>
@@ -502,7 +507,7 @@
     <string name="permlab_getAccounts" msgid="5304317160463582791">"उपकरणमा खाताहरू भेट्टाउनुहोस्"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="1784452755887604512">"एपलाई ट्याब्लेटद्वारा ज्ञात खाताहरूको सूची पाउन अनुमति दिन्छ। यसले अनुप्रयोगद्वारा तपाईंले स्थापित गर्नुभएको कुनै पनि खाताहरू समावेश गर्न सक्दछ।"</string>
     <string name="permdesc_getAccounts" product="tv" msgid="437604680436540822">"एपलाई तपाईंको Android टिभी यन्त्रले चिनेका खाताहरूको सूची प्राप्त गर्ने अनुमति दिन्छ। उक्त सूचीमा तपाईंले स्थापना गर्नुभएका एपहरूले बनाएका कुनै पनि खाताहरू पर्न सक्छन्।"</string>
-    <string name="permdesc_getAccounts" product="default" msgid="2491273043569751867">"फोनलाई थाहा भएका खाताहरूको सूची प्राप्त गर्न एपलाई अनुमति दिन्छ। यसले तपाईँले स्थापना गर्नु भएका एपहरूबाट सृजित कुनै खाताहरू समावेश हुन सक्छ।"</string>
+    <string name="permdesc_getAccounts" product="default" msgid="2491273043569751867">"फोनलाई थाहा भएका खाताहरूको सूची प्राप्त गर्न एपलाई अनुमति दिन्छ। यसले तपाईँले स्थापना गर्नु भएका अनुप्रयोगहरूबाट सृजित कुनै खाताहरू समावेश हुन सक्छ।"</string>
     <string name="permlab_accessNetworkState" msgid="2349126720783633918">"नेटवर्क जडानहरू हेर्नहोस्"</string>
     <string name="permdesc_accessNetworkState" msgid="4394564702881662849">"एपलाई नेटवर्क जडानहरू जस्तै कुन नेटवर्कहरू अवस्थित हुन्छन् र जडित छन् जसले हेर्नलाई अनुमति दिन्छ।"</string>
     <string name="permlab_createNetworkSockets" msgid="3224420491603590541">"पूर्ण नेटवर्क पहुँच प्राप्त छ"</string>
@@ -581,14 +586,13 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"स्क्रिन लक प्रयोग गर्नुहोस्"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"जारी राख्न आफ्नो स्क्रिन लक हाल्नुहोस्"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"सेन्सरमा बेसरी थिच्नुहोस्"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"फिंगरप्रिन्ट पहिचान गर्न सकिएन। फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"फिंगरप्रिन्ट प्रशोधन गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"फिंगरप्रिन्ट सेन्सर सफा गरेर फेरि प्रयास गर्नुहोस्"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"सेन्सर सफा गरेर फेरि प्रयास गर्नुहोस्"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"सेन्सरमा बेसरी थिच्नुहोस्"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"औंला निकै सुस्त सारियो। कृपया फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"अर्को फिंगरप्रिन्ट प्रयोग गरी हेर्नुहोस्"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ज्यादै उज्यालो छ"</string>
-    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"पावर बटन प्रेस गरेको कुरा पत्ता लाग्यो"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"सेन्सरमा सही तरिकाले औँला राखेर हेर्नुहोस्"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"हरेक पटक आफ्नो औँला थोरै यताउता सार्नुहोस्"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -600,17 +604,16 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"अनुहार प्रमाणीकरण गरियो, कृपया पुष्टि गर्नुहोस् थिच्नुहोस्"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"औँठाछाप हार्डवेयर उपलब्ध छैन।"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"फिंगरप्रिन्ट सेटअप गर्न सकिएन"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"फिंगरप्रिन्ट सेट अप गर्ने समय सकियो। फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"फिंगरप्रिन्ट समय सकिएको छ। फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"फिंगरप्रिन्ट सञ्चालन रद्द गरियो।"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"प्रयोगकर्ताले फिंगरप्रिन्टसम्बन्धी कारबाही रद्द गर्नुभयो।"</string>
-    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"निकै धेरै पटक प्रयास गरिसकिएको छ। बरु स्क्रिन लक प्रयोग गर्नुहोस्।"</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"निकै धेरै पटक प्रयास गरिसकिएको छ। बरु स्क्रिन लक प्रयोग गर्नुहोस्।"</string>
-    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"फिंगरप्रिन्ट पहिचान गर्ने प्रक्रिया अघि बढाउन सकिएन। फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"धेरै प्रयासहरू। केहि समय पछि पुन: प्रयास गर्नुहोला"</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"अत्यन्त धेरै प्रयासहरू। फिंगरप्रिन्ट सेन्सरलाई असक्षम पारियो।"</string>
+    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"पुन: प्रयास गर्नुहोला।"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"कुनै पनि फिंगरप्रिन्ट दर्ता गरिएको छैन।"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"यो डिभाइसमा कुनै पनि फिंगरप्रिन्ट सेन्सर छैन।"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"केही समयका लागि सेन्सर असक्षम पारियो।"</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"फिंगरप्रिन्ट सेन्सर प्रयोग गर्न मिल्दैन। फिंगरप्रिन्ट सेन्सर मर्मत गर्ने सेवा प्रदायक कम्पनीमा सम्पर्क गर्नुहोस्"</string>
-    <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"पावर बटन थिचियो"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"औंला <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"फिंगरप्रिन्ट प्रयोग गर्नुहोस्"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"फिंगरप्रिन्ट वा स्क्रिन लक प्रयोग गर्नुहोस्"</string>
@@ -631,33 +634,26 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"फिंगरप्रिन्ट अनलक"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"फिंगरप्रिन्ट सेन्सर प्रयोग गर्न मिल्दैन"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"फिंगरप्रिन्ट सेन्सर मर्मत गर्ने सेवा प्रदायक कम्पनीमा सम्पर्क गर्नुहोस्।"</string>
-    <string name="face_acquired_insufficient" msgid="6889245852748492218">"तपाईंको फेस मोडेल सिर्जना गर्न सकिएन। फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="face_acquired_insufficient" msgid="2150805835949162453">"अनुहारको सटीक डेटा खिच्न सकिएन। फेरि प्रयास गर्नुहोस्।"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ज्यादै चम्किलो। अझ मधुरो प्रकाश प्रयोग गरी हेर्नु…"</string>
-    <string name="face_acquired_too_dark" msgid="8539853432479385326">"पर्याप्त उज्यालो छैन"</string>
-    <string name="face_acquired_too_close" msgid="4453646176196302462">"फोन अझै पर सार्नुहोस्"</string>
-    <string name="face_acquired_too_far" msgid="2922278214231064859">"फोन अझै नजिक सार्नुहोस्"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"फोन अझ माथि उठाउनुहोस्"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"फोन अझै तल सार्नुहोस्"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"फोन आफ्नो बायाँतिर सार्नुहोस्"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"फोन आफ्नो दायाँतिर सार्नुहोस्"</string>
+    <string name="face_acquired_too_dark" msgid="252573548464426546">"ज्यादै अँध्यारो छ। अझ बढी प्रकाशमा गई हेर्नुहोस्"</string>
+    <string name="face_acquired_too_close" msgid="1628767882971469833">"फोन अझै पर सार्नुहोस्।"</string>
+    <string name="face_acquired_too_far" msgid="5098567726427173896">"फोन अझै नजिक सार्नुहोस्।"</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"फोन अझ माथि उठाउनुहोस्।"</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"फोन अझै तल सार्नुहोस्।"</string>
+    <string name="face_acquired_too_right" msgid="2513391513020932655">"फोन बायाँतिर सार्नुहोस्।"</string>
+    <string name="face_acquired_too_left" msgid="8882499346502714350">"फोन दायाँतिर सार्नुहोस्।"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"कृपया अझ सीधा गरी आफ्नो स्क्रिनमा हेर्नुहोस्।"</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"तपाईंको अनुहार देखिएन। तपाईंको फोन आफ्नो आँखाअघि राखी समात्नुहोस्।"</string>
+    <string name="face_acquired_not_detected" msgid="2945945257956443257">"आफ्नो अनुहार फोनको सीधा अगाडि पार्नुहोस्।"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"अत्यधिक हल्लियो। फोन स्थिर राख्नुहोस्।"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"कृपया आफ्नो अनुहार पुनः दर्ता गर्नुहोस्।"</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"अनुहार पहिचान गर्न सकिएन। फेरि प्रयास गर्नुहोस्।"</string>
-    <string name="face_acquired_too_similar" msgid="8882920552674125694">"आफ्नो टाउको थोरै यताउता सार्नुहोस्"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"आफ्नो फोनमा अझ सीधा हेर्नुहोस्"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"आफ्नो फोनमा अझ सीधा हेर्नुहोस्"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"आफ्नो फोनमा अझ सीधा हेर्नुहोस्"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"तपाईंको अनुहार लुकाउने सबै कुरा हटाउनुहोस्।"</string>
+    <string name="face_acquired_too_different" msgid="4699657338753282542">"अब उप्रान्त अनुहार पहिचान गर्न सकिएन। फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="face_acquired_too_similar" msgid="7684650785108399370">"अनुहार उस्तै भयो, कृपया आफ्नो पोज बदल्नुहोस्।"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"आफ्नो टाउको अलि थोरै घुमाउनुहोस्।"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"आफ्नो टाउको केही कम झुकाउनुहोस्।"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"आफ्नो टाउको अलि थोरै घुमाउनुहोस्।"</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"तपाईंको अनुहार लुकाउने सबै कुरा लुकाउनुहोस्।"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"कालो रङको पट्टीलगायत आफ्नो स्क्रिनको माथिल्लो भाग सफा गर्नुहोस्"</string>
-    <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
-    <skip />
-    <!-- no translation found for face_acquired_mouth_covering_detected (8219428572168642593) -->
-    <skip />
-    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"तपाईंको फेस मोडेल सिर्जना गर्न सकिएन। फेरि प्रयास गर्नुहोस्।"</string>
-    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"कालो चस्मा लगाइएको पाइयो। तपाईंको अनुहार पूरै देखिनु पर्छ।"</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"अनुहार छोपिएको पाइयो। तपाईंको अनुहार पूरै देखिनु पर्छ।"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"अनुहार पुष्टि गर्न सकिएन। हार्डवेयर उपलब्ध छैन।"</string>
@@ -718,7 +714,7 @@
     <string name="permlab_modifyNetworkAccounting" msgid="7448790834938749041">"नेटवर्क उपयोग लेखालाई परिमार्जन गर्नुहोस्"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5076042642247205390">"एपलाई कसरी अनुप्रयोगहरूको विरूद्धमा कसरी नेटवर्क उपयोगी अकाउन्टेड छ भनेर परिमार्जन गर्न अनुमति दिन्छ। साधारण अनुप्रयोगहरूद्वारा प्रयोगको लागि होइन।"</string>
     <string name="permlab_accessNotifications" msgid="7130360248191984741">"सूचनाहरू पहुँच गर्नुहोस्"</string>
-    <string name="permdesc_accessNotifications" msgid="761730149268789668">"अन्य एपहरूबाट पोस्ट गरिएकासहित पुनःप्राप्त गर्न, परीक्षण गर्न र सूचनाहरू हटाउन एपहरूलाई अनुमति दिन्छ।"</string>
+    <string name="permdesc_accessNotifications" msgid="761730149268789668">"अन्य अनुप्रयोगहरूबाट पोस्ट गरिएकासहित पुनःप्राप्त गर्न, परीक्षण गर्न र सूचनाहरू हटाउन एपहरूलाई अनुमति दिन्छ।"</string>
     <string name="permlab_bindNotificationListenerService" msgid="5848096702733262458">"जानकारी श्रोता सेवामा बाँध्नुहोस्"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="4970553694467137126">"होल्डरलाई सूचना श्रोता सेवाको शीर्ष-स्तरको इन्टरफेस बाँध्न अनुमति दिन्छ। सामान्य एपहरूलाई कहिले पनि आवश्यक नपर्न सक्दछ।"</string>
     <string name="permlab_bindConditionProviderService" msgid="5245421224814878483">"सर्त प्रदायक सेवामा जोड्न"</string>
@@ -1041,7 +1037,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="2323799501008967852">"ब्राउजरले भ्रमण गरेको सबै URL हरूको इतिहास र ब्राउजरका सबै बुकमार्कहरू पढ्नको लागि एपलाई अनुमति दिन्छ। नोट: यो अनुमतिलाई तेस्रो पक्ष ब्राउजरहरूद्वारा वा वेब ब्राउज गर्ने क्षमताद्वारा बलपूर्वक गराउन सकिँदैन।"</string>
     <string name="permlab_writeHistoryBookmarks" msgid="6090259925187986937">"वेब बुकमार्कहरू र इतिहास लेख्नुहोस्"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="573341025292489065">"एपलाई तपाईंको ट्याब्लेटमा भण्डार गरिएको ब्राउजरको इतिहास वा बुकमार्कहरू परिमार्जन गर्न अनुमति दिन्छ। यसले एपलाई ब्राजर डेटा मेटाउन वा परिमार्जन गर्न अनुमति दिन सक्दछ। टिप्पणी: यो अनुमति वेब ब्राउज गर्ने क्षमताहरूको साथ तेस्रो-पार्टी ब्राउजर वा अन्य अनुप्रयोगहरूद्वारा लागू गरिएको होइन।"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="88642768580408561">"एपलाई तपाईंको Android टिभी डिभाइसमा भण्डारण गरिएका ब्राउजरको इतिहास र पुस्तक चिन्हहरू परिमार्जन गर्ने अनुमति दिन्छ। यसले एपलाई ब्राउजरको डेटा मेटाउने वा परिमार्जन गर्ने अनुमति दिन सक्छ। ध्यान दिनुहोस्: तेस्रो पक्षीय ब्राउजर वा वेब ब्राउज गर्ने सुविधा प्रदान गर्ने अन्य एपहरूले यो अनुमति लागू गर्न सक्दैनन्।"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="88642768580408561">"एपलाई तपाईंको Android टिभी डिभाइसमा भण्डार गरिएका ब्राउजरको इतिहास र पुस्तक चिन्हहरू परिमार्जन गर्ने अनुमति दिन्छ। यसले एपलाई ब्राउजरको डेटा मेटाउने वा परिमार्जन गर्ने अनुमति दिन सक्छ। ध्यान दिनुहोस्: तेस्रो पक्षीय ब्राउजर वा वेब ब्राउज गर्ने सुविधा प्रदान गर्ने अन्य एपहरूले यो अनुमति लागू गर्न सक्दैनन्।"</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="2245203087160913652">"तपाईँको फोनमा भण्डारण भएको ब्राउजरको इतिहास वा बुकमार्कहरू परिवर्तन गर्नको लागि एपलाई अनुमति दिन्छ। यसले सायद ब्राउजर डेटालाई मेट्न वा परिवर्तन गर्नको लागि एपलाई अनुमति दिन्छ। नोट: वेब ब्राउज गर्ने क्षमतासहितका अन्य एपहरू वा तेस्रो- पक्ष ब्राउजरद्वारा सायद यस अनुमतिलाई लागु गर्न सकिंदैन।"</string>
     <string name="permlab_setAlarm" msgid="1158001610254173567">"एउटा आलर्म सेट गर्नुहोस्"</string>
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"स्थापना गरिएको सङ्केत घडी एपमा सङ्केत समय मिलाउन एपलाई अनुमति दिन्छ। केही सङ्केत घडी एपहरूले यो सुविधा कार्यान्वयन नगर्न सक्छन्।"</string>
@@ -1245,9 +1241,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> तयारी गर्दै।"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"सुरुवात एपहरू।"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"बुट पुरा हुँदै।"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"सेटअप गर्ने प्रक्रिया जारी राख्ने हो?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"तपाईंले पावर बटन थिच्नुभयो — सामान्यतया स्क्रिन अफ गर्न यो बटन थिच्ने गरिन्छ।\n\nफिंगरप्रिन्ट सेटअप भइन्जेल हल्का तरिकाले यो बटन ट्याप गर्नुहोस्।"</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"सेट अप गरिसक्न स्क्रिन अफ गर्नुहोस्"</string>
-    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"अफ गर्नुहोस्"</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"स्क्रिन अफ गर्नुहोस्"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"सेटअप जारी राख्नुस्"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"फिंगरप्रिन्ट पुष्टि गर्ने क्रम जारी राख्ने हो?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"तपाईंले पावर बटन थिच्नुभयो — सामान्यतया स्क्रिन अफ गर्न यो बटन थिच्ने गरिन्छ।\n\nतपाईं आफ्नो फिंगरप्रिन्ट पुष्टि गर्न चाहनुहुन्छ भने हल्का तरिकाले यो बटन ट्याप गरी हेर्नुहोस्।"</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"स्क्रिन अफ गर्नुहोस्"</string>
@@ -1381,9 +1378,9 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"सेयर गर्नुहोस्"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"अस्वीकार गर्नुहोस्"</string>
     <string name="select_input_method" msgid="3971267998568587025">"निवेश विधि छान्नुहोस्"</string>
-    <string name="show_ime" msgid="6406112007347443383">"फिजिकल किबोर्ड सक्रिय हुँदा यसलाई स्क्रिनमा राखियोस्"</string>
+    <string name="show_ime" msgid="6406112007347443383">"वास्तविक किबोर्ड सक्रिय हुँदा यसलाई स्क्रिनमा राखियोस्"</string>
     <string name="hardware" msgid="1800597768237606953">"भर्चुअल किबोर्ड देखाउनुहोस्"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"फिजिकल किबोर्ड कन्फिगर गर्नुहोस्"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"फिजिकल किबोर्डलाई कन्फिगर गर्नुहोस्"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"भाषा र लेआउट चयन गर्न ट्याप गर्नुहोस्"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1400,16 +1397,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"सेटअप गर्न ट्याप गर्नुहोस्"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"सेटअप गर्न चयन गर्नुहोस्"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"तपाईंले यो डिभाइस पुनः फर्म्याट गर्नु पर्ने हुन सक्छ। यो डिभाइस हटाउन ट्याप गर्नुहोस्।"</string>
-    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"फोटो, भिडियो, सङ्गीत र थप सामग्री भण्डारण गर्न"</string>
+    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"फोटोहरू र मिडिया स्थानान्तरणका लागि"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"मिडिया फाइलहरू ब्राउज गर्नुहोस्"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> मा समस्या देखियो"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> ले काम गरिरहेको छैन"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"समस्या समाधान गर्न ट्याप गर्नुहोस्"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> बिग्रेको छ। समाधान गर्न चयन गर्नुहोस्।"</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"तपाईंले यो डिभाइस पुनः फर्म्याट गर्नु पर्ने हुन सक्छ। यो डिभाइस हटाउन ट्याप गर्नुहोस्।"</string>
-    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"<xliff:g id="NAME">%s</xliff:g> पत्ता लाग्यो"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"असमर्थित <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> ले काम गरिरहेको छैन"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"सेटअप गर्न ट्याप गर्नुहोस् ।"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"यस यन्त्रले यस <xliff:g id="NAME">%s</xliff:g> लाई समर्थन गर्दैन। एक समर्थित ढाँचामा सेटअप गर्न ट्याप गर्नुहोस्।"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"<xliff:g id="NAME">%s</xliff:g> प्रयोग गर्न मिल्ने फर्म्याटमा सेटअप गर्न चयन गर्नुहोस्।"</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"तपाईंले यो डिभाइस पुनः फर्म्याट गर्नु पर्ने हुन सक्छ"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> अप्रत्याशित रूपमा निकालियो"</string>
@@ -1423,7 +1420,7 @@
     <string name="ext_media_browse_action" msgid="344865351947079139">"अन्वेषण गर्नुहोस्"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"आउटपुट बदल्नुहोस्"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> हराइरहेको"</string>
-    <string name="ext_media_missing_message" msgid="4408988706227922909">"डिभाइस फेरि हाल्नुहोस्"</string>
+    <string name="ext_media_missing_message" msgid="4408988706227922909">"यन्त्र फेरि घुसाउनुहोस्"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"<xliff:g id="NAME">%s</xliff:g> सार्दै"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"डेटा सार्दै..."</string>
     <string name="ext_media_move_success_title" msgid="4901763082647316767">"सामग्री स्थानान्तरण गरियो"</string>
@@ -1608,7 +1605,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"टिभी"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"फोन"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"डक स्पिकरहरू"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"बााह्य डिभाइस"</string>
+    <string name="default_audio_route_name_external_device" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"हेडफोनहरू"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"प्रणाली"</string>
@@ -1922,7 +1919,6 @@
     <string name="country_selection_title" msgid="5221495687299014379">"क्षेत्रको प्राथमिकता"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"भाषाको नाम टाइप गर्नुहोस्"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"सिफारिस गरिएको"</string>
-    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"सिफारिस गरिएको"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"सम्पूर्ण भाषाहरू"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"सबै क्षेत्रहरू"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"खोज"</string>
@@ -1940,19 +1936,18 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"क्यामेरा उपलब्ध छैन"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"फोनमा जारी राख्नुहोस्"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"माइक्रोफोन उपलब्ध छैन"</string>
-    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Play स्टोर उपलब्ध छैन"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV सम्बन्धी सेटिङ उपलब्ध छैनन्"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"ट्याब्लेटका सेटिङ उपलब्ध छैनन्"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"फोनका सेटिङ उपलब्ध छैनन्"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"यस बखत तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मा यो एप स्ट्रिम गर्न मिल्दैन। बरु तपाईंको Android TV डिभाइसमा स्ट्रिम गरी हेर्नुहोस्।"</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"यस बखत तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मा यो एप स्ट्रिम गर्न मिल्दैन। बरु तपाईंको ट्याब्लेटमा स्ट्रिम गरी हेर्नुहोस्।"</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"यस बखत तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मा यो एप स्ट्रिम गर्न मिल्दैन। बरु तपाईंको फोनमा स्ट्रिम गरी हेर्नुहोस्।"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"हाल तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मा यो एप चलाउन मिल्दैन। बरु तपाईंको Android TV डिभाइसमा स्ट्रिम गरी हेर्नुहोस्।"</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"हाल तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मा यो एप चलाउन मिल्दैन। बरु तपाईंको ट्याब्लेटमा स्ट्रिम गरी हेर्नुहोस्।"</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"हाल तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मा यो एप चलाउन मिल्दैन। बरु तपाईंको फोनमा स्ट्रिम गरी हेर्नुहोस्।"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"यस बखत तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मा यो एप स्ट्रिम गर्न मिल्दैन। बरु तपाईंको Android TV डिभाइसमा स्ट्रिम गरी हेर्नुहोस्।"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"यस बखत तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मा यो एप स्ट्रिम गर्न मिल्दैन। बरु तपाईंको ट्याब्लेटमा स्ट्रिम गरी हेर्नुहोस्।"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"यस बखत तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मा यो एप स्ट्रिम गर्न मिल्दैन। बरु तपाईंको फोनमा स्ट्रिम गरी हेर्नुहोस्।"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"यो एपले सुरक्षासम्बन्धी अतिरिक्त सुविधा अन गर्न अनुरोध गरिरहेको छ। बरु तपाईंको Android TV डिभाइसमा स्ट्रिम गरी हेर्नुहोस्।"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"यो एपले सुरक्षासम्बन्धी अतिरिक्त सुविधा अन गर्न अनुरोध गरिरहेको छ। बरु तपाईंको ट्याब्लेटमा स्ट्रिम गरी हेर्नुहोस्।"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"यो एपले सुरक्षासम्बन्धी अतिरिक्त सुविधा अन गर्न अनुरोध गरिरहेको छ। बरु तपाईंको फोनमा स्ट्रिम गरी हेर्नुहोस्।"</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मा यो एप चलाउन मिल्दैन। बरु तपाईंको Android TV डिभाइसमा स्ट्रिम गरी हेर्नुहोस्।"</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मा यो एप चलाउन मिल्दैन। बरु तपाईंको ट्याब्लेटमा स्ट्रिम गरी हेर्नुहोस्।"</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मा यो एप चलाउन मिल्दैन। बरु तपाईंको फोनमा स्ट्रिम गरी हेर्नुहोस्।"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"यो एप Android को पुरानो संस्करणका लागि बनाइएको हुनाले यसले सही ढङ्गले काम नगर्न सक्छ। अद्यावधिकहरू उपलब्ध छन् वा छैनन् भनी जाँच गरी हेर्नुहोस् वा यसको विकासकर्तालाई सम्पर्क गर्नुहोस्।"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"अपडेट उपलब्ध छ वा छैन जाँच्नुहोस्"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"तपाईंलाई नयाँ सन्देश आएको छ"</string>
@@ -2045,8 +2040,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> लाई डिभाइसका सबै लग हेर्ने अनुमति दिने हो?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"एक पटक प्रयोग गर्ने अनुमति दिनुहोस्"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"अनुमति नदिनुहोस्"</string>
-    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"डिभाइसका लगले तपाईंको डिभाइसमा भएका विभिन्न गतिविधिको अभिलेख राख्छ। एपहरू यी लगका आधारमा समस्या पत्ता लगाउन र तिनको समाधान गर्न सक्छन्।\n\nकेही लगहरूमा संवेदनशील जानकारी समावेश हुन सक्ने भएकाले आफूले भरोसा गर्ने एपलाई मात्र डिभाइसका सबै लग हेर्ने अनुमति दिनुहोस्। \n\nतपाईंले यो एपलाई डिभाइसका सबै लग हेर्ने अनुमति दिनुभएन भने पनि यसले आफ्नै लग भने हेर्न सक्छ। तपाईंको डिभाइसको उत्पादकले पनि तपाईंको डिभाइसमा भएका केही लग वा जानकारी हेर्न सक्ने सम्भावना हुन्छ।"</string>
-    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"डिभाइसका लगले तपाईंको डिभाइसमा भएका विभिन्न गतिविधिको अभिलेख राख्छ। एपहरू यी लगका आधारमा समस्या पत्ता लगाउन र तिनको समाधान गर्न सक्छन्।\n\nकेही लगहरूमा संवेदनशील जानकारी समावेश हुन सक्ने भएकाले आफूले भरोसा गर्ने एपलाई मात्र डिभाइसका सबै लग हेर्ने अनुमति दिनुहोस्। \n\nतपाईंले यो एपलाई डिभाइसका सबै लग हेर्ने अनुमति दिनुभएन भने पनि यसले आफ्नै लग भने हेर्न सक्छ। तपाईंको डिभाइसको उत्पादकले पनि तपाईंको डिभाइसमा भएका केही लग वा जानकारी हेर्न सक्ने सम्भावना हुन्छ।\n\nतपाईं यस सम्बन्धमा थप जान्न चाहनुहुन्छ भने g.co/android/devicelogs मा जानुहोस्।"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"डिभाइसका लगले तपाईंको डिभाइसमा भएका विभिन्न गतिविधिको अभिलेख राख्छ। एपहरू यी लगका आधारमा समस्या पत्ता लगाउन र तिनको समाधान गर्न सक्छन्।\n\nकेही लगहरूमा संवेदनशील जानकारी समावेश हुन सक्ने भएकाले आफूले भरोसा गर्ने एपलाई मात्र डिभाइसका सबै लग हेर्ने अनुमति दिनुहोस्। \n\nतपाईंले यो एपलाई डिभाइसका सबै लग हेर्ने अनुमति दिनुभएन भने पनि यसले आफ्नै लग भने हेर्न सक्छ। तपाईंको डिभाइसको उत्पादकले पनि तपाईंको डिभाइसमा भएका केही लग वा जानकारी हेर्न सक्ने सम्भावना हुन्छ। थप जान्नुहोस्"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"फेरि नदेखाइयोस्"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> ले <xliff:g id="APP_2">%2$s</xliff:g> का स्लाइसहरू देखाउन चाहन्छ"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"सम्पादन गर्नुहोस्"</string>
@@ -2059,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"बाधा नपुर्‍याउनुहोस् मोड परिवर्तन भएको छ"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"रोक लगाइएका कुराहरू जाँच गर्न ट्याप गर्नुहोस्‌।"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"सूचनाका सेटिङको समीक्षा गर्नुहोस्"</string>
-    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android १३ मा तपाईंले अनुमति दिनुभएका खण्डमा मात्र तपाईंले इन्स्टल गर्नुभएका एपले सूचना पठाउन सक्छन्। यसअघि इन्स्टल गरिसकिएका एपका हकमा यो अनुमति परिवर्तन गर्न ट्याप गर्नुहोस्।"</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"मलाई पछि स्मरण गराइयोस्"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"हटाउनुहोस्"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"प्रणाली"</string>
@@ -2287,6 +2282,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"कुन कुन एप सक्रिय छ भन्ने कुरा जाँच्नुहोस्"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मार्फत फोनको क्यामेरा प्रयोग गर्न मिल्दैन"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मार्फत ट्याब्लेटको क्यामेरा प्रयोग गर्न मिल्दैन"</string>
-    <string name="vdm_secure_window" msgid="161700398158812314">"स्ट्रिम गरिरहेका बेला यो सामग्री हेर्न तथा प्रयोग गर्न मिल्दैन। बरु आफ्नो फोनमार्फत सो सामग्री हेर्ने तथा प्रयोग गर्ने प्रयास गर्नुहोस्।"</string>
-    <string name="system_locale_title" msgid="711882686834677268">"सिस्टम डिफल्ट"</string>
+    <string name="system_locale_title" msgid="3978041860457277638">"सिस्टमको भाषा"</string>
 </resources>

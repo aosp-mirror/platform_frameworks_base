@@ -26,4 +26,8 @@ import javax.inject.Inject
 class MediaTttFlags @Inject constructor(private val featureFlags: FeatureFlags) {
     /** */
     fun isMediaTttEnabled(): Boolean = featureFlags.isEnabled(Flags.MEDIA_TAP_TO_TRANSFER)
+
+    /** Check whether the flag for the receiver success state is enabled. */
+    fun isMediaTttReceiverSuccessRippleEnabled(): Boolean =
+        featureFlags.isEnabled(Flags.MEDIA_TTT_RECEIVER_SUCCESS_RIPPLE)
 }

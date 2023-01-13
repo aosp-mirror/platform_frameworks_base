@@ -74,7 +74,7 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
         super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted,
                 owner, cookie, requireConfirmation, sensorId, logger, biometricContext,
                 isStrongBiometric, null /* taskStackListener */,
-                lockoutTracker, allowBackgroundAuthentication, true /* shouldVibrate */,
+                lockoutTracker, allowBackgroundAuthentication, false /* shouldVibrate */,
                 isKeyguardBypassEnabled);
         setRequestId(requestId);
         mUsageStats = usageStats;

@@ -72,16 +72,13 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Балонче"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Управление"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Балончето е отхвърлено."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Докоснете, за да рестартирате това приложение с цел по-добър изглед."</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"Докоснете, за да рестартирате това приложение в режим на цял екран."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Имате проблеми с камерата?\nДокоснете за ремонтиране"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Проблемът не се отстрани?\nДокоснете за връщане в предишното състояние"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Нямате проблеми с камерата? Докоснете, за да отхвърлите."</string>
-    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Преглеждайте и правете повече неща"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Преместете друго приложение с плъзгане, за да преминете в режим за разделен екран"</string>
-    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Докоснете два пъти извън дадено приложение, за да промените позицията му"</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Някои приложения работят най-добре във вертикален режим"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Изпробвайте една от следните опции, за да се възползвате максимално от мястото на екрана"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Завъртете екрана си, за да преминете в режим на цял екран"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Докоснете два пъти дадено приложение, за да промените позицията му"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Разбрах"</string>
-    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Разгъване за още информация."</string>
-    <string name="maximize_button_text" msgid="1650859196290301963">"Увеличаване"</string>
-    <string name="minimize_button_text" msgid="271592547935841753">"Намаляване"</string>
-    <string name="close_button_text" msgid="2913281996024033299">"Затваряне"</string>
 </resources>

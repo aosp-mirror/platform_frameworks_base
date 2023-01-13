@@ -29,6 +29,8 @@ import android.hardware.SensorPrivacyManager.EXTRA_SENSOR
 import android.hardware.SensorPrivacyManager.Sources.DIALOG
 import android.os.Bundle
 import android.os.Handler
+import android.window.OnBackInvokedDispatcher
+import androidx.annotation.OpenForTesting
 import com.android.internal.util.FrameworkStatsLog.PRIVACY_TOGGLE_DIALOG_INTERACTION
 import com.android.internal.util.FrameworkStatsLog.PRIVACY_TOGGLE_DIALOG_INTERACTION__ACTION__CANCEL
 import com.android.internal.util.FrameworkStatsLog.PRIVACY_TOGGLE_DIALOG_INTERACTION__ACTION__ENABLE
@@ -45,7 +47,8 @@ import javax.inject.Inject
  *
  * <p>The dialog is started for the user the app is running for which might be a secondary users.
  */
-class SensorUseStartedActivity @Inject constructor(
+@OpenForTesting
+open class SensorUseStartedActivity @Inject constructor(
     private val sensorPrivacyController: IndividualSensorPrivacyController,
     private val keyguardStateController: KeyguardStateController,
     private val keyguardDismissUtil: KeyguardDismissUtil,
@@ -67,9 +70,10 @@ class SensorUseStartedActivity @Inject constructor(
     private lateinit var sensorUsePackageName: String
     private var unsuppressImmediately = false
 
-    private lateinit var sensorPrivacyListener: IndividualSensorPrivacyController.Callback
+    private var sensorPrivacyListener: IndividualSensorPrivacyController.Callback? = null
 
     private var mDialog: AlertDialog? = null
+    private val mBackCallback = this::onBackInvoked
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,15 +88,14 @@ class SensorUseStartedActivity @Inject constructor(
 
         if (intent.getBooleanExtra(EXTRA_ALL_SENSORS, false)) {
             sensor = ALL_SENSORS
-            sensorPrivacyListener =
-                    IndividualSensorPrivacyController.Callback { _, _ ->
-                        if (!sensorPrivacyController.isSensorBlocked(MICROPHONE) &&
-                                !sensorPrivacyController.isSensorBlocked(CAMERA)) {
-                            finish()
-                        }
-                    }
-
-            sensorPrivacyController.addCallback(sensorPrivacyListener)
+            val callback = IndividualSensorPrivacyController.Callback { _, _ ->
+                if (!sensorPrivacyController.isSensorBlocked(MICROPHONE) &&
+                        !sensorPrivacyController.isSensorBlocked(CAMERA)) {
+                    finish()
+                }
+            }
+            sensorPrivacyListener = callback
+            sensorPrivacyController.addCallback(callback)
             if (!sensorPrivacyController.isSensorBlocked(MICROPHONE) &&
                     !sensorPrivacyController.isSensorBlocked(CAMERA)) {
                 finish()
@@ -105,14 +108,14 @@ class SensorUseStartedActivity @Inject constructor(
                     return
                 }
             }
-            sensorPrivacyListener =
-                    IndividualSensorPrivacyController.Callback { whichSensor: Int,
-                                                                 isBlocked: Boolean ->
-                        if (whichSensor == sensor && !isBlocked) {
-                            finish()
-                        }
-                    }
-            sensorPrivacyController.addCallback(sensorPrivacyListener)
+            val callback = IndividualSensorPrivacyController.Callback {
+                whichSensor: Int, isBlocked: Boolean ->
+                if (whichSensor == sensor && !isBlocked) {
+                    finish()
+                }
+            }
+            sensorPrivacyListener = callback
+            sensorPrivacyController.addCallback(callback)
 
             if (!sensorPrivacyController.isSensorBlocked(sensor)) {
                 finish()
@@ -122,6 +125,10 @@ class SensorUseStartedActivity @Inject constructor(
 
         mDialog = SensorUseDialog(this, sensor, this, this)
         mDialog!!.show()
+
+        onBackInvokedDispatcher.registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                mBackCallback)
     }
 
     override fun onStart() {
@@ -180,10 +187,15 @@ class SensorUseStartedActivity @Inject constructor(
     override fun onDestroy() {
         super.onDestroy()
         mDialog?.dismiss()
-        sensorPrivacyController.removeCallback(sensorPrivacyListener)
+        sensorPrivacyListener?.also { sensorPrivacyController.removeCallback(it) }
+        onBackInvokedDispatcher.unregisterOnBackInvokedCallback(mBackCallback)
     }
 
     override fun onBackPressed() {
+        onBackInvoked()
+    }
+
+    fun onBackInvoked() {
         // do not allow backing out
     }
 

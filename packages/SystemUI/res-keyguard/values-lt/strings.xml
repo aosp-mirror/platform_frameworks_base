@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Netinkama kortelė."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Įkrauta"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Kraunama be laidų"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Įkraunama"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Įkraunama doke"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Įkraunama"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Greitai įkraunama"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Lėtai įkraunama"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Įkrovimas pristabdytas siekiant apsaugoti akumuliatorių"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Įkrovimas laikinai apribotas"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Paspauskite meniu, jei norite atrakinti."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Tinklas užrakintas"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Nėra SIM kortelės"</string>
@@ -68,9 +68,19 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"<xliff:g id="NUMBER_0">%1$d</xliff:g> kart. netinkamai įvedėte slaptažodį. \n\nBandykite dar kartą po <xliff:g id="NUMBER_1">%2$d</xliff:g> sek."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"<xliff:g id="NUMBER_0">%1$d</xliff:g> kart. netinkamai nupiešėte atrakinimo piešinį. \n\nBandykite dar kartą po <xliff:g id="NUMBER_1">%2$d</xliff:g> sek."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Netinkamas SIM kortelės PIN kodas. Reikės susisiekti su operatoriumi, kad atrakintų įrenginį."</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{Netinkamas SIM kortelės PIN kodas. Jums liko # bandymas. Paskui reikės susisiekti su operatoriumi, kad atrakintumėte įrenginį.}one{Netinkamas SIM kortelės PIN kodas. Jums liko # bandymas. }few{Netinkamas SIM kortelės PIN kodas. Jums liko # bandymai. }many{Netinkamas SIM kortelės PIN kodas. Jums liko # bandymo. }other{Netinkamas SIM kortelės PIN kodas. Jums liko # bandymų. }}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="one">Netinkamas SIM kortelės PIN kodas. Liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymas.</item>
+      <item quantity="few">Netinkamas SIM kortelės PIN kodas. Liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymai.</item>
+      <item quantity="many">Netinkamas SIM kortelės PIN kodas. Liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymo.</item>
+      <item quantity="other">Netinkamas SIM kortelės PIN kodas. Liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymų.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM kortelės naudoti nebegalima. Susisiekite su operatoriumi."</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Netinkamas SIM kortelės PUK kodas. Jums liko # bandymas. Paskui visiškai nebegalėsite naudoti SIM kortelės.}one{Netinkamas SIM kortelės PUK kodas. Jums liko # bandymas. Paskui visiškai nebegalėsite naudoti SIM kortelės.}few{Netinkamas SIM kortelės PUK kodas. Jums liko # bandymai. Paskui visiškai nebegalėsite naudoti SIM kortelės.}many{Netinkamas SIM kortelės PUK kodas. Jums liko # bandymo. Paskui visiškai nebegalėsite naudoti SIM kortelės.}other{Netinkamas SIM kortelės PUK kodas. Jums liko # bandymų. Paskui visiškai nebegalėsite naudoti SIM kortelės.}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="one">Netinkamas SIM kortelės PUK kodas. Liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymas. Paskui visiškai nebegalėsite naudoti SIM kortelės.</item>
+      <item quantity="few">Netinkamas SIM kortelės PUK kodas. Liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymai. Paskui visiškai nebegalėsite naudoti SIM kortelės.</item>
+      <item quantity="many">Netinkamas SIM kortelės PUK kodas. Liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymo. Paskui visiškai nebegalėsite naudoti SIM kortelės.</item>
+      <item quantity="other">Netinkamas SIM kortelės PUK kodas. Liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymų. Paskui visiškai nebegalėsite naudoti SIM kortelės.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Nepavyko atlikti SIM kortelės PIN kodo operacijos."</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Nepavyko atlikti SIM kortelės PUK kodo operacijos."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Perjungti įvesties metodą"</string>
@@ -84,9 +94,19 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Įrenginį užrakino administratorius"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Įrenginys užrakintas neautomatiškai"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Neatpažinta"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Jei nor. naud. atr. pagal veidą, įj. pr. prie fotoap. sk. „Nustatymai“"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Įveskite SIM kortelės PIN kodą. Jums liko # bandymas. Paskui reikės susisiekti su operatoriumi, kad atrakintumėte įrenginį.}one{Įveskite SIM kortelės PIN kodą. Jums liko # bandymas.}few{Įveskite SIM kortelės PIN kodą. Jums liko # bandymai.}many{Įveskite SIM kortelės PIN kodą. Jums liko # bandymo.}other{Įveskite SIM kortelės PIN kodą. Jums liko # bandymų.}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM kortelė dabar yra išjungta. Jei norite tęsti, įveskite PUK kodą. Jums liko # bandymas. Paskui visiškai nebegalėsite naudoti SIM kortelės. Jei reikia išsamios informacijos, susisiekite su operatoriumi.}one{SIM kortelė dabar yra išjungta. Jei norite tęsti, įveskite PUK kodą. Jums liko # bandymas. Paskui visiškai nebegalėsite naudoti SIM kortelės. Jei reikia išsamios informacijos, susisiekite su operatoriumi.}few{SIM kortelė dabar yra išjungta. Jei norite tęsti, įveskite PUK kodą. Jums liko # bandymai. Paskui visiškai nebegalėsite naudoti SIM kortelės. Jei reikia išsamios informacijos, susisiekite su operatoriumi.}many{SIM kortelė dabar yra išjungta. Jei norite tęsti, įveskite PUK kodą. Jums liko # bandymo. Paskui visiškai nebegalėsite naudoti SIM kortelės. Jei reikia išsamios informacijos, susisiekite su operatoriumi.}other{SIM kortelė dabar yra išjungta. Jei norite tęsti, įveskite PUK kodą. Jums liko # bandymų. Paskui visiškai nebegalėsite naudoti SIM kortelės. Jei reikia išsamios informacijos, susisiekite su operatoriumi.}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Jei norite naudoti atrakinimą pagal veidą, įjunkite parinktį "<b>"Prieiga prie fotoaparato"</b>" skiltyje „Nustatymai“ &gt; „Privatumas“"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="one">Įveskite SIM kortelės PIN kodą. Jums liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymas.</item>
+      <item quantity="few">Įveskite SIM kortelės PIN kodą. Jums liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymai.</item>
+      <item quantity="many">Įveskite SIM kortelės PIN kodą. Jums liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymo.</item>
+      <item quantity="other">Įveskite SIM kortelės PIN kodą. Jums liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymų.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="one">SIM kortelė dabar yra išjungta. Jei norite tęsti, įveskite PUK kodą. Jums liko <xliff:g id="_NUMBER_1">%d</xliff:g> bandymas. Paskui visiškai nebegalėsite naudoti SIM kortelės. Jei reikia išsamios informacijos, susisiekite su operatoriumi.</item>
+      <item quantity="few">SIM kortelė dabar yra išjungta. Jei norite tęsti, įveskite PUK kodą. Jums liko <xliff:g id="_NUMBER_1">%d</xliff:g> bandymai. Paskui visiškai nebegalėsite naudoti SIM kortelės. Jei reikia išsamios informacijos, susisiekite su operatoriumi.</item>
+      <item quantity="many">SIM kortelė dabar yra išjungta. Jei norite tęsti, įveskite PUK kodą. Jums liko <xliff:g id="_NUMBER_1">%d</xliff:g> bandymo. Paskui visiškai nebegalėsite naudoti SIM kortelės. Jei reikia išsamios informacijos, susisiekite su operatoriumi.</item>
+      <item quantity="other">SIM kortelė dabar yra išjungta. Jei norite tęsti, įveskite PUK kodą. Jums liko <xliff:g id="_NUMBER_1">%d</xliff:g> bandymų. Paskui visiškai nebegalėsite naudoti SIM kortelės. Jei reikia išsamios informacijos, susisiekite su operatoriumi.</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"Numatytasis"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Debesėlis"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analoginis"</string>

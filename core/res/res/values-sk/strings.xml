@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Bez mena&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(žiadne telefónne číslo)"</string>
@@ -302,12 +307,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"prístup ku kalendáru"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"posielanie a zobrazovanie SMS"</string>
-    <string name="permgrouplab_storage" msgid="17339216290379241">"Súbory"</string>
-    <string name="permgroupdesc_storage" msgid="5378659041354582769">"dostať sa k súborom vo vašom zariadení"</string>
-    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Hudba a zvuk"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"prístup k hudbe a zvuku vo vašom zariadení"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotky a videá"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"prístup k fotkám a videám vo vašom zariadení"</string>
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"Súbory a dokumenty"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"prístup k súborom a dokumentom vo vašom zariadení"</string>
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Hudba a iné zvuky"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"prístup k zvukovým súborom vo vašom zariadení"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Fotky a videá"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"prístup k súborom obrázka a videosúborom vo vašom zariadení"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofón"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"nahrávanie zvuku"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fyzická aktivita"</string>
@@ -346,8 +351,8 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Umožňuje aplikácii rozbaliť alebo zbaliť stavový riadok."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"zobrazovanie upozornení ako aktivít na celej obrazovke v uzamknutom zariadení"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Táto možnosť umožňuje aplikácii zobrazovať upozornenia ako aktivity na celej obrazovke v uzamknutom zariadení"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Inštalovať odkazy"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"povoliť aplikácii pridať odkazy na ploche bez zásahu používateľa."</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"inštalovať odkazy"</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Povoľuje aplikácii pridať odkazy na ploche bez zásahu používateľa."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"odinštalovať odkazy"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Povoľuje aplikácii odstrániť odkazy na ploche bez zásahu používateľa."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"presmerovať odchádzajúce hovory"</string>
@@ -583,14 +588,13 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Použiť zámku obrazovky"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Pokračujte zadaním zámky obrazovky"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Pevne pridržte senzor"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Odtlačok prsta sa nedá rozpoznať. Skúste to znova."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Odtlačok prsta sa nepodarilo spracovať. Skúste to znova."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Vyčistite senzor odtlačkov prstov a skúste to znova"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Vyčistite senzor a skúste to znova"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Pevne pridržte senzor"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Pohli ste prstom príliš pomaly. Skúste to znova."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Vyskúšajte iný odtlačok prsta"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Príliš jasno"</string>
-    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Bolo zistené stlačenie vypínača"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Vyskúšajte upraviť"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Zakaždým trocha zmeňte pozíciu prsta"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -602,17 +606,16 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Tvár bola overená, stlačte tlačidlo potvrdenia"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Hardvér na snímanie odtlačku prsta nie je k dispozícii"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Odtlačok prsta sa nedá nastaviť"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Nastavenie odtlačku prsta vypršalo. Skúste to znova."</string>
+    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Časový limit rozpoznania odtlačku prsta vypršal. Skúste to znova."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Operácia týkajúca sa odtlačku prsta bola zrušená"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Overenie odtlačku prsta zrušil používateľ."</string>
-    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Príliš veľa pokusov. Použite radšej zámku obrazovky."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Príliš veľa pokusov. Použite radšej zámku obrazovky."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Odtlačok prsta sa nedá spracovať. Skúste to znova."</string>
+    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Príliš veľa pokusov. Skúste to neskôr."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Príliš veľa pokusov. Senzor odtlačkov prstov bol deaktivovaný."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Skúste to znova"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Neregistrovali ste žiadne odtlačky prstov."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Toto zariadenie nemá senzor odtlačkov prstov."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Senzor je dočasne vypnutý."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Senzor odtlačkov prstov nie je možné používať. Navštívte poskytovateľa opráv."</string>
-    <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Bol stlačený vypínač"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Prst: <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Použiť odtlačok prsta"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Použiť odtlačok prsta alebo zámku obrazovky"</string>
@@ -633,33 +636,26 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Odomknutie odtlačkom prsta"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Senzor odtlačkov prstov nie je možné používať"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Navštívte poskytovateľa opráv."</string>
-    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Model tváre sa nedá vytvoriť. Skúste to znova."</string>
+    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Nepodarilo sa nasnímať presné údaje o tvári. Skúste to znova."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Príliš veľa svetla. Skúste jemnejšie osvetlenie."</string>
-    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Nie je dostatok svetla"</string>
-    <string name="face_acquired_too_close" msgid="4453646176196302462">"Oddiaľte telefón"</string>
-    <string name="face_acquired_too_far" msgid="2922278214231064859">"Priblížte telefón"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Posuňte telefón vyššie"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Posuňte telefón nižšie"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"Posuňte telefón doľava"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"Posuňte telefón doprava"</string>
+    <string name="face_acquired_too_dark" msgid="252573548464426546">"Príliš veľká tma. Skúste lepšie osvetlenie."</string>
+    <string name="face_acquired_too_close" msgid="1628767882971469833">"Oddiaľte telefón."</string>
+    <string name="face_acquired_too_far" msgid="5098567726427173896">"Priblížte telefón."</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"Posuňte telefón vyššie."</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"Posuňte telefón nižšie."</string>
+    <string name="face_acquired_too_right" msgid="2513391513020932655">"Posuňte telefón doľava."</string>
+    <string name="face_acquired_too_left" msgid="8882499346502714350">"Posuňte telefón doprava."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Pozrite sa priamejšie na zariadenie."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Nie je vidieť vašu tvár. Držte telefón na úrovni očí."</string>
+    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Umiestnite svoju tvár priamo pred telefón."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Priveľa pohybu. Nehýbte telefónom."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Znova zaregistrujte svoju tvár."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Tvár sa nedá rozpoznať. Skúste to znova."</string>
-    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Trocha zmeňte pozíciu hlavy"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Pozrite sa na telefón priamejšie"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Pozrite sa na telefón priamejšie"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Pozrite sa na telefón priamejšie"</string>
+    <string name="face_acquired_too_different" msgid="4699657338753282542">"Tvár už nie je možné rozpoznať. Skúste to znova."</string>
+    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Príliš rovnaké, zmeňte postoj."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Otočte hlavu o niečo menej."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Nakloňte hlavu trocha menej."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Otočte hlavu o niečo menej."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Odstráňte všetko, čo vám zakrýva tvár."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Vyčistite hornú časť obrazovky vrátane čierneho panela"</string>
-    <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
-    <skip />
-    <!-- no translation found for face_acquired_mouth_covering_detected (8219428572168642593) -->
-    <skip />
-    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Model tváre sa nedá vytvoriť. Skúste to znova."</string>
-    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Boli rozpoznané tmavé okuliare. Musí vám byť vidieť celú tvár."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Bolo rozpoznané rúško. Musí vám byť vidieť celú tvár."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Tvár sa nedá overiť. Hardvér nie je k dispozícii."</string>
@@ -1247,9 +1243,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Pripravuje sa aplikácia <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Prebieha spúšťanie aplikácií."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Prebieha dokončovanie spúšťania."</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Chcete pokračovať v nastavovaní?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Stlačili ste vypínač. Obvykle tým vypnete obrazovku.\n\nPri nastavovaní odtlačku prsta skúste klepnúť jemne."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Nastavovanie ukončíte vypnutím obrazovky"</string>
-    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Vypnúť"</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Vypnúť obrazovku"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Pokračovať v nastav."</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Pokračovať v overovaní odtlačku prsta?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Stlačili ste vypínač. Obvykle tým vypnete obrazovku.\n\nAk chcete overiť odtlačok prsta, skúste klepnúť jemne."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Vypnúť obrazovku"</string>
@@ -1402,16 +1399,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Klepnutím médium nastavte"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Vyberte a nastavte"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Zariadenie možno bude potrebné preformátovať. Klepnutím ho vysuniete."</string>
-    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"Na ukladanie fotiek, vdieí, hudby a ďalšieho obsahu"</string>
+    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Na prenos fotiek a médií"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Prehliadajte súbory médií"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problém s médiom <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> nefunguje"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Problém odstránite klepnutím"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"Médium <xliff:g id="NAME">%s</xliff:g> je poškodené. Vyberte ho a vyriešte problém."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Zariadenie možno bude potrebné preformátovať. Klepnutím ho vysuniete."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"Bolo rozpoznané médium <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Nepodporované úložisko <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> nefunguje"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"Nastavte klepnutím."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Toto zariadenie nepodporuje úložisko <xliff:g id="NAME">%s</xliff:g>. Klepnutím ho nastavíte v podporovanom formáte."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Vyberte a vytvorte tak <xliff:g id="NAME">%s</xliff:g> v podporovanom formáte."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Zariadenie možno bude potrebné preformátovať"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Úl. <xliff:g id="NAME">%s</xliff:g> bolo neočakávane odobraté"</string>
@@ -1610,7 +1607,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Televízor"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telefón"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Reproduktory doku"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Externé zariadenie"</string>
+    <string name="default_audio_route_name_external_device" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Slúchadlá"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Systém"</string>
@@ -1849,7 +1846,7 @@
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3. <xliff:g id="LABEL">%1$s</xliff:g> do práce"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Pred odopnutím požiadať o číslo PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Pred uvoľnením požiadať o bezpečnostný vzor"</string>
-    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Pred odopnutím požiadať o heslo"</string>
+    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Pred uvoľnením požiadať o heslo"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"Nainštaloval správca"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Aktualizoval správca"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Odstránil správca"</string>
@@ -1924,7 +1921,6 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Preferovaný región"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Zadajte názov jazyka"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Navrhované"</string>
-    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Navrhované"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Všetky jazyky"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Všetky oblasti"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Vyhľadávanie"</string>
@@ -1942,19 +1938,18 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Kamera nie je k dispozícii"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Pokračujte v telefóne"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofón nie je k dispozícii"</string>
-    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Obchod Play nie je k dispozícii"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Nastavenia zariadenia Android TV nie sú k dispozícii"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Nastavenia tabletu nie sú k dispozícii"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Nastavenia telefónu nie sú k dispozícii"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte k tomuto obsahu prístup. Skúste namiesto toho použiť zariadenie Android TV."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte k tomuto obsahu prístup. Skúste namiesto toho použiť tablet."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte k tomuto obsahu prístup. Skúste použiť telefón."</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte prístup k tomuto obsahu. Skúste namiesto toho použiť zariadenie Android TV."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte prístup k tomuto obsahu. Skúste namiesto toho použiť tablet."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte prístup k tomuto obsahu. Skúste namiesto toho použiť telefón."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte prístup k tomuto obsahu. Skúste namiesto toho použiť zariadenie Android TV."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte prístup k tomuto obsahu. Skúste namiesto toho použiť tablet."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte prístup k tomuto obsahu. Skúste namiesto toho použiť telefón."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Táto aplikácia požaduje dodatočné zabezpečenie. Skúste namiesto toho použiť zariadenie Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Táto aplikácia požaduje dodatočné zabezpečenie. Skúste namiesto toho použiť tablet."</string>
-    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Táto aplikácia požaduje dodatočné zabezpečenie. Skúste použiť telefón."</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte prístup k tomuto obsahu. Skúste namiesto toho použiť zariadenie Android TV."</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte prístup k tomuto obsahu. Skúste namiesto toho použiť tablet."</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte prístup k tomuto obsahu. Skúste použiť telefón."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Táto aplikácia požaduje dodatočné zabezpečenie. Skúste namiesto toho použiť telefón."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Táto aplikácia bola zostavená pre staršiu verziu Androidu a nemusí správne fungovať. Skúste skontrolovať dostupnosť aktualizácií alebo kontaktovať vývojára."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Skontrolovať dostupnosť aktualizácie"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Máte nové správy."</string>
@@ -2047,8 +2042,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Chcete povoliť aplikácii <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> prístup k všetkým denníkom zariadenia?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Povoliť jednorazový prístup"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nepovoliť"</string>
-    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Denníky zariadenia zaznamenávajú, čo sa deje vo vašom zariadení. Aplikácie môžu pomocou týchto denníkov vyhľadávať a riešiť problémy.\n\nNiektoré denníky môžu obsahovať citlivé údaje, preto povoľte prístup k všetkým denníkom zariadenia iba dôveryhodným aplikáciám. \n\nAk tejto aplikácii nepovolíte prístup k všetkým denníkom zariadenia, stále bude mať prístup k vlastným denníkom. Výrobca vášho zariadenia bude mať naďalej prístup k niektorým denníkom alebo informáciám vo vašom zariadení."</string>
-    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Denníky zariadenia zaznamenávajú, čo sa deje vo vašom zariadení. Aplikácie môžu pomocou týchto denníkov vyhľadávať a riešiť problémy.\n\nNiektoré denníky môžu obsahovať citlivé údaje, preto povoľte prístup k všetkým denníkom zariadenia iba dôveryhodným aplikáciám. \n\nAk tejto aplikácii nepovolíte prístup k všetkým denníkom zariadenia, stále bude mať prístup k vlastným denníkom. Výrobca vášho zariadenia bude mať naďalej prístup k niektorým denníkom alebo informáciám vo vašom zariadení.\n\nViac sa dozviete na g.co/android/devicelogs."</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Denníky zariadenia zaznamenávajú, čo sa deje vo vašom zariadení. Aplikácie môžu pomocou týchto denníkov vyhľadávať a riešiť problémy.\n\nNiektoré denníky môžu obsahovať citlivé údaje, preto povoľte prístup k všetkým denníkom zariadenia iba dôveryhodným aplikáciám. \n\nAk tejto aplikácii nepovolíte prístup k všetkým denníkom zariadenia, stále bude mať prístup k vlastným denníkom. Výrobca vášho zariadenia bude mať naďalej prístup k niektorým denníkom alebo informáciám vo vašom zariadení. Ďalšie informácie"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Už nezobrazovať"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> chce zobrazovať rezy z aplikácie <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Upraviť"</string>
@@ -2061,12 +2055,13 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Režim bez vyrušení sa zmenil"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Klepnutím skontrolujete, čo je blokované."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Kontrola nastavení upozornení"</string>
-    <string name="review_notification_settings_text" msgid="5916244866751849279">"V Androide verzie 13 a novších vyžadujú nainštalované aplikácie povolenie, aby mohli odosielať upozornenia. Klepnutím môžete zmeniť toto povolenie pre existujúce aplikácie."</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Pripomenúť neskôr"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Zavrieť"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Systém"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Nastavenia"</string>
-    <string name="notification_appops_camera_active" msgid="8177643089272352083">"Kamera"</string>
+    <string name="notification_appops_camera_active" msgid="8177643089272352083">"Fotoaparát"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofón"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"sa zobrazuje cez ďalšie aplikácie na obrazovke"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Poskytnúť spätnú väzbu"</string>
@@ -2271,7 +2266,7 @@
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Zapnúť v Nastaveniach"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Zavrieť"</string>
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Odblokujte mikrofón zariadenia"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Odblokujte kameru zariadenia"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Odblokujte fotoaparát zariadenia"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Pre aplikáciu &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; a všetky aplikácie a služby"</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Odblokovať"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Ochrana súkromia senzorov"</string>
@@ -2289,6 +2284,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Skontrolovať aktívne aplikácie"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> nemáte prístup ku kamere telefónu"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> nemáte prístup ku kamere tabletu"</string>
-    <string name="vdm_secure_window" msgid="161700398158812314">"K tomuto obsahu nie je počas streamovania prístup. Skúste použiť telefón."</string>
-    <string name="system_locale_title" msgid="711882686834677268">"Predvolené systémom"</string>
+    <string name="system_locale_title" msgid="3978041860457277638">"Jazyk systému"</string>
 </resources>

@@ -18,6 +18,7 @@
 package com.android.systemui.common.shared.model
 
 import android.annotation.StringRes
+import android.content.Context
 
 /**
  * Models a text, that can either be already [loaded][Text.Loaded] or be a [reference]
@@ -31,4 +32,20 @@ sealed class Text {
     data class Resource(
         @StringRes val res: Int,
     ) : Text()
+
+    companion object {
+        /**
+         * Returns the loaded test string, or null if we don't have one.
+         *
+         * Prefer [com.android.systemui.common.ui.binder.TextViewBinder.bind] over this method. This
+         * should only be used for testing or concatenation purposes.
+         */
+        fun Text?.loadText(context: Context): String? {
+            return when (this) {
+                null -> null
+                is Loaded -> this.text
+                is Resource -> context.getString(this.res)
+            }
+        }
+    }
 }

@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"A tarxeta non é válida."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Cargado"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando sen fíos"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Base de carga"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando rapidamente"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando lentamente"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • A carga púxose en pausa para protexer a batería"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Carga limitada temporalmente"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Preme Menú para desbloquear."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Bloqueada pola rede"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Sen tarxeta SIM"</string>
@@ -68,9 +68,15 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Introduciches o contrasinal incorrectamente <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. \n\nTéntao de novo en <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Debuxaches incorrectamente o padrón de desbloqueo <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. \n\nTéntao de novo en <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"O código PIN da SIM non é correcto. Agora debes contactar co operador para desbloquear o dispositivo."</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{O código PIN da SIM é incorrecto. Quédache # intento antes de que teñas que contactar co operador para desbloquear o dispositivo.}other{O código PIN da SIM é incorrecto. Quédanche # intentos. }}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="other">O código PIN da SIM é incorrecto. Quédanche <xliff:g id="NUMBER_1">%d</xliff:g> intentos.</item>
+      <item quantity="one">O código PIN da SIM é incorrecto. Quédache <xliff:g id="NUMBER_0">%d</xliff:g> intento antes de que teñas que contactar co operador para desbloquear o dispositivo.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"A SIM está inutilizable. Contacta co operador."</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{O código PUK da SIM é incorrecto. Quédache # intento antes de que a SIM quede inutilizable para sempre.}other{O código PUK da SIM é incorrecto. Quédanche # intentos antes de que a SIM quede inutilizable para sempre.}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="other">O código PUK da SIM é incorrecto. Quédanche <xliff:g id="NUMBER_1">%d</xliff:g> intentos antes de que a SIM quede inutilizable para sempre.</item>
+      <item quantity="one">O código PUK da SIM non é correcto. Quédache <xliff:g id="NUMBER_0">%d</xliff:g> intento antes de que a SIM quede inutilizable para sempre.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Produciuse un erro no funcionamento do PIN da SIM"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Produciuse un erro ao tentar desbloquear a tarxeta SIM co código PUK."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Cambia o método de introdución"</string>
@@ -84,9 +90,15 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"O administrador bloqueou o dispositivo"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"O dispositivo bloqueouse manualmente"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Non se recoñeceu"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"O Desbloqueo facial necesita acceso á cámara"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Mete o PIN da SIM. Quédache # intento antes de que teñas que contactar co operador para desbloquear o dispositivo.}other{Mete o PIN da SIM. Quédanche # intentos.}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{A SIM está desactivada. Mete o código PUK para continuar. Quédache # intento antes de que a SIM quede inutilizable para sempre. Contacta co operador para obter información.}other{A SIM está desactivada. Mete o código PUK para continuar. Quédanche # intentos antes de que a SIM quede inutilizable para sempre. Contacta co operador para obter información.}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Para usar o desbloqueo facial, activa "<b>"Acceso á cámara"</b>" en Configuración &gt; Privacidade"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="other">Introduce o código PIN da SIM. Quédanche <xliff:g id="NUMBER_1">%d</xliff:g> intentos.</item>
+      <item quantity="one">Introduce o código PIN da SIM. Quédache <xliff:g id="NUMBER_0">%d</xliff:g> intento antes de que teñas que contactar co operador para desbloquear o dispositivo.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="other">A SIM está desactivada. Introduce o código PUK para continuar. Quédanche <xliff:g id="_NUMBER_1">%d</xliff:g> intentos antes de que a SIM quede inutilizable para sempre. Contacta co operador para obter información.</item>
+      <item quantity="one">A SIM está desactivada. Introduce o código PUK para continuar. Quédache <xliff:g id="_NUMBER_0">%d</xliff:g> intento antes de que a SIM quede inutilizable para sempre. Contacta co operador para obter información.</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"Predeterminado"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Burbulla"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analóxico"</string>

@@ -72,16 +72,13 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Бөмбөлөг"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Удирдах"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Бөмбөлгийг үл хэрэгссэн."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Харагдах байдлыг сайжруулахын тулд энэ аппыг товшиж, дахин эхлүүлнэ үү."</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"Энэ аппыг дахин эхлүүлж, бүтэн дэлгэцэд орохын тулд товшино уу."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Камерын асуудал гарсан уу?\nДахин тааруулахын тулд товшино уу"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Үүнийг засаагүй юу?\nБуцаахын тулд товшино уу"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Камерын асуудал байхгүй юу? Хаахын тулд товшино уу."</string>
-    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Харж илүү ихийг хий"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Дэлгэцийг хуваахын тулд өөр апп руу чирнэ үү"</string>
-    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Аппыг дахин байрлуулахын тулд гадна талд нь хоёр товшино"</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Зарим апп нь босоо чиглэлд хамгийн сайн ажилладаг"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Орон зайгаа сайтар ашиглахын тулд эдгээр сонголтуудын аль нэгийг туршиж үзээрэй"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Төхөөрөмжөө бүтэн дэлгэцээр үзэхийн тулд эргүүлнэ"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Аппыг дахин байрлуулахын тулд хажууд нь хоёр товшино"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Ойлголоо"</string>
-    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Нэмэлт мэдээлэл авах бол дэлгэнэ үү."</string>
-    <string name="maximize_button_text" msgid="1650859196290301963">"Томруулах"</string>
-    <string name="minimize_button_text" msgid="271592547935841753">"Багасгах"</string>
-    <string name="close_button_text" msgid="2913281996024033299">"Хаах"</string>
 </resources>

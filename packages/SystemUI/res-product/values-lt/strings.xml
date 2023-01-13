@@ -43,6 +43,4 @@
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Atrakinkite telefoną, kad galėtumėte naudoti daugiau parinkčių"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Atrakinkite planšetinį kompiuterį, kad galėtumėte naudoti daugiau parinkčių"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Atrakinkite įrenginį, kad galėtumėte naudoti daugiau parinkčių"</string>
-    <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"Leidžiama šiame telefone"</string>
-    <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"Leidžiama šiame planšetiniame kompiuteryje"</string>
 </resources>

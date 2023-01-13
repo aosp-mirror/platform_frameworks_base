@@ -220,7 +220,7 @@ public class BiometricLogger {
                     + ", RequireConfirmation: " + requireConfirmation
                     + ", State: " + authState
                     + ", Latency: " + latency
-                    + ", Lux: " + mALSProbe.getCurrentLux());
+                    + ", Lux: " + mALSProbe.getMostRecentLux());
         } else {
             Slog.v(TAG, "Authentication latency: " + latency);
         }
@@ -231,7 +231,7 @@ public class BiometricLogger {
 
         mSink.authenticate(operationContext, mStatsModality, mStatsAction, mStatsClient,
                 Utils.isDebugEnabled(context, targetUserId),
-                latency, authState, requireConfirmation, targetUserId, mALSProbe.getCurrentLux());
+                latency, authState, requireConfirmation, targetUserId, mALSProbe);
     }
 
     /** Log enrollment outcome. */
@@ -245,7 +245,7 @@ public class BiometricLogger {
                     + ", User: " + targetUserId
                     + ", Client: " + mStatsClient
                     + ", Latency: " + latency
-                    + ", Lux: " + mALSProbe.getCurrentLux()
+                    + ", Lux: " + mALSProbe.getMostRecentLux()
                     + ", Success: " + enrollSuccessful);
         } else {
             Slog.v(TAG, "Enroll latency: " + latency);
@@ -256,7 +256,7 @@ public class BiometricLogger {
         }
 
         mSink.enroll(mStatsModality, mStatsAction, mStatsClient,
-                targetUserId, latency, enrollSuccessful, mALSProbe.getCurrentLux());
+                targetUserId, latency, enrollSuccessful, mALSProbe.getMostRecentLux());
     }
 
     /** Report unexpected enrollment reported by the HAL. */

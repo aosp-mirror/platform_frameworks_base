@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Karta e pavlefshme."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"I karikuar"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Po karikohet me valë"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Po karikohet"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Po karikohet në stacion"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Po karikohet"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Po karikohet me shpejtësi"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Po karikohet ngadalë"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Karikimi është vendosur në pauzë për të mbrojtur baterinë"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Karikimi përkohësisht i kufizuar"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Shtyp \"Meny\" për të shkyçur."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Rrjeti është i kyçur"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Nuk ka kartë SIM"</string>
@@ -68,9 +68,15 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"E ke shkruar <xliff:g id="NUMBER_0">%1$d</xliff:g> herë gabimisht fjalëkalimin.\n\nProvo sërish për <xliff:g id="NUMBER_1">%2$d</xliff:g> sekonda."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Ke tentuar <xliff:g id="NUMBER_0">%1$d</xliff:g> herë pa sukses për të vizatuar motivin tënd. \n\nProvo sërish për <xliff:g id="NUMBER_1">%2$d</xliff:g> sekonda."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Kodi PIN i kartës SIM është i pasaktë. Tani duhet të kontaktosh me operatorin për ta shkyçur pajisjen tënde."</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{Kodi PIN i kartës SIM është i pasaktë. Të ka mbetur edhe # përpjekje përpara se të të duhet të kontaktosh me operatorin celular për ta shkyçur pajisjen.}other{Kodi PIN i kartës SIM është i pasaktë. Të kanë mbetur edhe # përpjekje. }}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="other">Kodi PIN i kartës SIM është i pasaktë. Të kanë mbetur edhe <xliff:g id="NUMBER_1">%d</xliff:g> tentativa.</item>
+      <item quantity="one">Kodi PIN i kartës SIM është i pasaktë. Të ka mbetur edhe <xliff:g id="NUMBER_0">%d</xliff:g> tentativë para se të duhet të kontaktosh me operatorin tënd celular për të shkyçur pajisjen.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"Karta SIM është e papërdorshme. Kontakto me operatorin."</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Kodi PUK i kartës SIM është i pasaktë. Të ka mbetur edhe # përpjekje përpara se karta SIM të bëhet përgjithmonë e papërdorshme.}other{Kodi PUK i kartës SIM është i pasaktë. Të kanë mbetur edhe # përpjekje përpara se karta SIM të bëhet përgjithmonë e papërdorshme.}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="other">PUK-u i kartës SIM është i pasaktë. Të kanë mbetur edhe <xliff:g id="NUMBER_1">%d</xliff:g> tentativa para se karta SIM të bëhet e papërdorshme përgjithmonë.</item>
+      <item quantity="one">PUK-u i kartës SIM është i pasaktë. Të ka mbetur edhe <xliff:g id="NUMBER_0">%d</xliff:g> tentativë para se karta SIM të bëhet e papërdorshme përgjithmonë.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Operacioni i kodit PIN të kartës SIM dështoi!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Operacioni i kodit PUK të kartës SIM dështoi!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Ndërro metodën e hyrjes"</string>
@@ -84,9 +90,15 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Pajisja është e kyçur nga administratori"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Pajisja është kyçur manualisht"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nuk njihet"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Për \"Shkyçjen me fytyrë\", aktivizo qasjen te kamera te \"Cilësimet\""</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Fut kodin PIN të kartës SIM. Të ka mbetur edhe # përpjekje përpara se të të duhet të kontaktosh me operatorin celular për ta shkyçur pajisjen.}other{Fut kodin PIN të kartës SIM. Të kanë mbetur edhe # përpjekje.}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{Karta SIM është çaktivizuar tani. Fut kodin PUK për të vazhduar. Të ka mbetur edhe # përpjekje përpara se karta SIM të bëhet përgjithmonë e papërdorshme. Kontakto me operatorin celular për detajet.}other{Karta SIM tani është çaktivizuar. Fut kodin PUK për të vazhduar. Të kanë mbetur edhe # përpjekje përpara se karta SIM të bëhet përgjithmonë e papërdorshme. Kontakto me operatorin celular për detajet.}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Për të përdorur \"Shkyçjen me fytyrë\", aktivizo "<b>"Qasjen te kamera"</b>" te \"Cilësimet\" &gt; \"Privatësia\""</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="other">Fut kodin PIN të kartës SIM. Të kanë mbetur edhe <xliff:g id="NUMBER_1">%d</xliff:g> tentativa.</item>
+      <item quantity="one">Fut kodin PIN të kartës SIM. Të ka mbetur edhe <xliff:g id="NUMBER_0">%d</xliff:g> tentativë para se të duhet të kontaktosh me operatorin tënd celular për ta shkyçur pajisjen.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="other">Karta SIM tani është çaktivizuar. Fut kodin PUK për të vazhduar. Të kanë mbetur edhe <xliff:g id="_NUMBER_1">%d</xliff:g> përpjekje përpara se karta SIM të bëhet përgjithmonë e papërdorshme. Kontakto me operatorin për detaje.</item>
+      <item quantity="one">Karta SIM tani është çaktivizuar. Fut kodin PUK për të vazhduar. Të ka mbetur edhe <xliff:g id="_NUMBER_0">%d</xliff:g> përpjekje përpara se karta SIM të bëhet përgjithmonë e papërdorshme. Kontakto me operatorin për detaje.</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"E parazgjedhur"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Flluskë"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analoge"</string>

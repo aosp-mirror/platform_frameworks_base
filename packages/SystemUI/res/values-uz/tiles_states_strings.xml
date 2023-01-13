@@ -171,9 +171,4 @@
     <item msgid="146088982397753810">"Oʻchiq"</item>
     <item msgid="460891964396502657">"Yoniq"</item>
   </string-array>
-  <string-array name="tile_states_dream">
-    <item msgid="6184819793571079513">"Bandman"</item>
-    <item msgid="8014986104355098744">"Oʻchiq"</item>
-    <item msgid="5966994759929723339">"Yoniq"</item>
-  </string-array>
 </resources>

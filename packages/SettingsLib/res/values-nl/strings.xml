@@ -117,17 +117,17 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Bestandsoverdracht"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Invoerapparaat"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Internettoegang"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Contacten en gespreksgeschiedenis delen"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Gebruiken om contacten en gespreksgeschiedenis te delen"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Contacten delen"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Gebruiken voor contacten delen"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Internetverbinding delen"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Sms-berichten"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Sim-toegang"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD-audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD-audio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Hoortoestellen"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"Le Audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Verbonden met hoortoestellen"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Verbonden met LE Audio"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Verbonden met LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Verbonden met audio van medium"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Verbonden met audio van telefoon"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Verbonden met server voor bestandsoverdracht"</string>
@@ -184,7 +184,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"Enkele standaardwaarden ingesteld"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Geen standaardwaarden ingesteld"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Instellingen tekst-naar-spraak"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Tekst-naar-spraakuitvoer"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Spraakuitvoer"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Spreeksnelheid"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Snelheid waarmee de tekst wordt gesproken"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Toonhoogte"</string>
@@ -312,7 +312,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Toon opties voor certificering van draadloze weergave"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Verhoog het logniveau voor wifi, toon per SSID RSSI in wifi-kiezer"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Verlaag het batterijverbruik en verbeter de netwerkprestaties"</string>
-    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Als dit aanstaat, kan het MAC-adres van dit apparaat veranderen telkens als het apparaat verbinding maakt met een netwerk waarvoor MAC-herschikking aanstaat"</string>
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Als dit aanstaat, kan het MAC-adres van dit apparaat veranderen telkens als het apparaat verbinding maakt met een netwerk waarvoor MAC-herschikking aanstaat."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Met datalimiet"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Gratis"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Logger-buffergrootten"</string>
@@ -326,7 +326,7 @@
     <string name="allow_mock_location" msgid="2102650981552527884">"Neplocaties toestaan"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Neplocaties toestaan"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"Inspectie van weergavekenmerk aanzetten"</string>
-    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Houd mobiele data altijd actief, ook als wifi actief is (voor sneller schakelen tussen netwerken)"</string>
+    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Houd mobiele data altijd actief, ook als wifi actief is (voor sneller schakelen tussen netwerken)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Gebruik hardwareversnelling voor tethering indien beschikbaar"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB-foutopsporing toestaan?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB-foutopsporing is alleen bedoeld voor ontwikkeldoeleinden. Het kan worden gebruikt om gegevens te kopiëren tussen je computer en je apparaat, apps zonder melding op je apparaat te installeren en loggegevens te lezen."</string>
@@ -408,7 +408,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Maak het formaat van alle activiteiten aanpasbaar, ongeacht de manifestwaarden"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Vensters met vrije vorm aanzetten"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Zet ondersteuning voor vensters met experimentele vrije vorm aan"</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Desktopmodus"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Wachtwoord desktopback-up"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Volledige back-ups naar desktops zijn momenteel niet beveiligd"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Tik om het wachtwoord voor volledige back-ups naar desktops te wijzigen of te verwijderen"</string>
@@ -477,13 +476,12 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Vol over <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - vol over <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - Opladen is onderbroken"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Opladen tijdelijk beperkt"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Onbekend"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Opladen"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Snel opladen"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Langzaam opladen"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Draadloos opladen"</string>
-    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Opladen"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Wordt niet opgeladen"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Verbonden, wordt niet opgeladen"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Opgeladen"</string>
@@ -601,7 +599,7 @@
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Verwijderen"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Gast resetten…"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Gastsessie resetten?"</string>
-    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Hiermee start een nieuwe gastsessie en worden alle apps en gegevens van de huidige sessie verwijderd"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Hierdoor wordt een nieuwe gastsessie gestart en worden alle apps en gegevens van de huidige sessie verwijderd"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Gastmodus sluiten?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Hierdoor worden apps en gegevens van de huidige gastsessie verwijderd"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Sluiten"</string>
@@ -623,8 +621,8 @@
     <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"Te veel onjuiste pogingen. Dit werkprofiel en de bijbehorende gegevens worden verwijderd."</string>
     <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"Sluiten"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Apparaatstandaard"</string>
-    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Uit"</string>
-    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Aan"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Uitgezet"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Aangezet"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Je apparaat moet opnieuw worden opgestart om deze wijziging toe te passen. Start nu opnieuw op of annuleer de wijziging."</string>
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Bedrade hoofdtelefoon"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Aan"</string>
@@ -656,6 +654,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernetverbinding verbroken."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Geen gesprekken."</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"Tijd"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"Datum"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"Weer"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Luchtkwaliteit"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Castinformatie"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Kies een profielfoto"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Standaard gebruikersicoon"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Fysiek toetsenbord"</string>
@@ -664,11 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Scherm aanzetten"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Scherm aanzetten toestaan"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Toestaan dat een app het scherm aanzet. Indien toegestaan, kan de app het scherm op elk moment aanzetten zonder jouw expliciete intentie."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR-code scannen"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Centreer de onderstaande QR-code om te beginnen met luisteren"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR-code heeft geen geldige indeling"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Uitzending van <xliff:g id="APP_NAME">%1$s</xliff:g> stopzetten?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Als je <xliff:g id="SWITCHAPP">%1$s</xliff:g> uitzendt of de uitvoer wijzigt, wordt je huidige uitzending gestopt"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> uitzenden"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Uitvoer wijzigen"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"Voorspellende animaties voor gebaren voor terug"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Systeemanimaties aanzetten voor voorspellende animaties voor gebaren voor terug."</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Met deze instelling zet je systeemanimaties aan voor voorspellende gebaaranimaties. Je moet enableOnBackInvokedCallback per app instellen op True in het manifestbestand."</string>
 </resources>

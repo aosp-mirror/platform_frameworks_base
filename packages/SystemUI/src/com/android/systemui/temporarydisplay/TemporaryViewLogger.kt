@@ -16,21 +16,109 @@
 
 package com.android.systemui.temporarydisplay
 
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel
 
 /** A logger for temporary view changes -- see [TemporaryViewDisplayController]. */
-open class TemporaryViewLogger(
+open class TemporaryViewLogger<T : TemporaryViewInfo>(
     internal val buffer: LogBuffer,
     internal val tag: String,
 ) {
-    /** Logs that we added the chip to a new window. */
-    fun logChipAddition() {
-        buffer.log(tag, LogLevel.DEBUG, {}, { "Chip added" })
+    fun logViewExpiration(info: T) {
+        buffer.log(
+            tag,
+            LogLevel.DEBUG,
+            {
+                str1 = info.id
+                str2 = info.windowTitle
+                str3 = info.priority.name
+            },
+            { "View timeout has already expired; removing. id=$str1 window=$str2 priority=$str3" }
+        )
     }
 
-    /** Logs that we removed the chip for the given [reason]. */
-    fun logChipRemoval(reason: String) {
-        buffer.log(tag, LogLevel.DEBUG, { str1 = reason }, { "Chip removed due to $str1" })
+    fun logViewUpdate(info: T) {
+        buffer.log(
+            tag,
+            LogLevel.DEBUG,
+            {
+                str1 = info.id
+                str2 = info.windowTitle
+                str3 = info.priority.name
+            },
+            { "Existing view updated with new data. id=$str1 window=$str2 priority=$str3" }
+        )
+    }
+
+    fun logViewAdditionDelayed(info: T) {
+        buffer.log(
+            tag,
+            LogLevel.DEBUG,
+            {
+                str1 = info.id
+                str2 = info.windowTitle
+                str3 = info.priority.name
+            },
+            {
+                "New view can't be displayed because higher priority view is currently " +
+                    "displayed. New view id=$str1 window=$str2 priority=$str3"
+            }
+        )
+    }
+
+    /** Logs that we added the view with the given information. */
+    fun logViewAddition(info: T) {
+        buffer.log(
+            tag,
+            LogLevel.DEBUG,
+            {
+                str1 = info.id
+                str2 = info.windowTitle
+                str3 = info.priority.name
+            },
+            { "View added. id=$str1 window=$str2 priority=$str3" }
+        )
+    }
+
+    fun logViewHidden(info: T) {
+        buffer.log(
+            tag,
+            LogLevel.DEBUG,
+            {
+                str1 = info.id
+                str2 = info.windowTitle
+                str3 = info.priority.name
+            },
+            {
+                "View hidden in favor of newer view. " +
+                    "Hidden view id=$str1 window=$str2 priority=$str3"
+            }
+        )
+    }
+
+    /** Logs that we removed the view with the given [id] for the given [reason]. */
+    fun logViewRemoval(id: String, reason: String) {
+        buffer.log(
+            tag,
+            LogLevel.DEBUG,
+            {
+                str1 = reason
+                str2 = id
+            },
+            { "View with id=$str2 is removed due to: $str1" }
+        )
+    }
+
+    /** Logs that we ignored removal of the view with the given [id]. */
+    fun logViewRemovalIgnored(id: String, reason: String) {
+        buffer.log(
+            tag,
+            LogLevel.DEBUG,
+            {
+                str1 = reason
+                str2 = id
+            },
+            { "Removal of view with id=$str2 is ignored because $str1" }
+        )
     }
 }

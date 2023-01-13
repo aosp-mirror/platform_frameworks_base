@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Nederīga karte."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Akumulators uzlādēts"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Notiek bezvadu uzlāde"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Notiek uzlāde"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Notiek uzlāde dokā"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Notiek uzlāde"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Notiek ātrā uzlāde"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Notiek lēnā uzlāde"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Uzlāde ir pārtraukta, lai aizsargātu akumulatoru"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Uzlāde īslaicīgi ierobežota"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Lai atbloķētu, nospiediet izvēlnes ikonu."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Tīkls ir bloķēts."</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Nav SIM kartes."</string>
@@ -68,9 +68,17 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Jūs <xliff:g id="NUMBER_0">%1$d</xliff:g> reizi(-es) esat ievadījis nepareizu paroli.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_1">%2$d</xliff:g> sekundes(-ēm)."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Jūs <xliff:g id="NUMBER_0">%1$d</xliff:g> reizi(-es) esat nepareizi uzzīmējis atbloķēšanas kombināciju.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_1">%2$d</xliff:g> sekundes(-ēm)."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Nepareizs SIM kartes PIN kods. Lai atbloķētu ierīci, sazinieties ar mobilo sakaru operatoru."</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{Nepareizs SIM kartes PIN. Varat mēģināt vēl # reizi. Kļūdas gadījumā būs jāsazinās ar mobilo sakaru operatoru, lai tas atbloķētu jūsu ierīci.}zero{Nepareizs SIM kartes PIN. Varat mēģināt vēl # reizes. }one{Nepareizs SIM kartes PIN. Varat mēģināt vēl # reizi. }other{Nepareizs SIM kartes PIN. Varat mēģināt vēl # reizes. }}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="zero">Nepareizs SIM kartes PIN kods. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizes.</item>
+      <item quantity="one">Nepareizs SIM kartes PIN kods. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizi.</item>
+      <item quantity="other">Nepareizs SIM kartes PIN kods. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizes.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM karte nav lietojama. Sazinieties ar mobilo sakaru operatoru."</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Nepareizs SIM kartes PUK kods. Varat mēģināt vēl # reizi. Kļūdas gadījumā SIM karti vairs nevarēs izmantot.}zero{Nepareizs SIM kartes PUK kods. Varat mēģināt vēl # reizes. Ja pēdējais mēģinājums būs kļūdains, SIM karti vairs nevarēs izmantot.}one{Nepareizs SIM kartes PUK kods. Varat mēģināt vēl # reizi. Ja pēdējais mēģinājums būs kļūdains, SIM karti vairs nevarēs izmantot.}other{Nepareizs SIM kartes PUK kods. Varat mēģināt vēl # reizes. Ja pēdējais mēģinājums būs kļūdains, SIM karti vairs nevarēs izmantot.}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="zero">Nepareizs SIM kartes PUK kods. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizes. Ja pēdējais mēģinājums būs kļūdains, SIM karti vairs nevarēs izmantot.</item>
+      <item quantity="one">Nepareizs SIM kartes PUK kods. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizi. Ja pēdējais mēģinājums būs kļūdains, SIM karti vairs nevarēs izmantot.</item>
+      <item quantity="other">Nepareizs SIM kartes PUK kods. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizes. Ja pēdējais mēģinājums būs kļūdains, SIM karti vairs nevarēs izmantot.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"SIM kartes PIN koda ievadīšana neizdevās!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM kartes PUK koda ievadīšana neizdevās!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Pārslēgt ievades metodi"</string>
@@ -84,9 +92,17 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Administrators bloķēja ierīci."</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Ierīce tika bloķēta manuāli."</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nav atpazīts"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Lai izmantotu autorizāciju pēc sejas, iestatījumos ieslēdziet piekļuvi kamerai."</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Ievadiet SIM kartes PIN. Varat mēģināt vēl # reizi. Kļūdas gadījumā jums būs jāsazinās ar mobilo sakaru operatoru, lai atbloķētu savu ierīci.}zero{Ievadiet SIM kartes PIN. Jums ir atlikuši # mēģinājumi.}one{Ievadiet SIM kartes PIN. Jums ir atlicis # mēģinājums.}other{Ievadiet SIM kartes PIN. Jums ir atlikuši # mēģinājumi.}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM karte tagad ir atspējota. Ievadiet PUK kodu, lai turpinātu. Varat mēģināt vēl # reizi. Kļūdas gadījumā SIM karti vairs nevarēs izmantot. Lai iegūtu detalizētu informāciju, sazinieties ar mobilo sakaru operatoru.}zero{SIM karte tagad ir atspējota. Ievadiet PUK kodu, lai turpinātu. Varat mēģināt vēl # reizes. Kļūdas gadījumā SIM karti vairs nevarēs izmantot. Lai iegūtu detalizētu informāciju, sazinieties ar mobilo sakaru operatoru.}one{SIM karte tagad ir atspējota. Ievadiet PUK kodu, lai turpinātu. Varat mēģināt vēl # reizi. Kļūdas gadījumā SIM karti vairs nevarēs izmantot. Lai iegūtu detalizētu informāciju, sazinieties ar mobilo sakaru operatoru.}other{SIM karte tagad ir atspējota. Ievadiet PUK kodu, lai turpinātu. Varat mēģināt vēl # reizes. Kļūdas gadījumā SIM karti vairs nevarēs izmantot. Lai iegūtu detalizētu informāciju, sazinieties ar mobilo sakaru operatoru.}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Lai izmantotu autorizāciju pēc sejas, sadaļā Iestatījumi &gt; Konfidencialitāte ieslēdziet opciju "<b>"Piekļuve kamerai"</b>"."</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="zero">Ievadiet SIM kartes PIN. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizes.</item>
+      <item quantity="one">Ievadiet SIM kartes PIN. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizi.</item>
+      <item quantity="other">Ievadiet SIM kartes PIN. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizes.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="zero">SIM karte tagad ir atspējota. Ievadiet PUK kodu, lai turpinātu. Varat mēģināt vēl <xliff:g id="_NUMBER_1">%d</xliff:g> reizes. Kļūdas gadījumā SIM karti vairs nevarēs izmantot. Lai iegūtu detalizētu informāciju, sazinieties ar mobilo sakaru operatoru.</item>
+      <item quantity="one">SIM karte tagad ir atspējota. Ievadiet PUK kodu, lai turpinātu. Varat mēģināt vēl <xliff:g id="_NUMBER_1">%d</xliff:g> reizi. Kļūdas gadījumā SIM karti vairs nevarēs izmantot. Lai iegūtu detalizētu informāciju, sazinieties ar mobilo sakaru operatoru.</item>
+      <item quantity="other">SIM karte tagad ir atspējota. Ievadiet PUK kodu, lai turpinātu. Varat mēģināt vēl <xliff:g id="_NUMBER_1">%d</xliff:g> reizes. Kļūdas gadījumā SIM karti vairs nevarēs izmantot. Lai iegūtu detalizētu informāciju, sazinieties ar mobilo sakaru operatoru.</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"Noklusējums"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Burbuļi"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analogais"</string>

@@ -676,9 +676,6 @@ public final class NotificationEntry extends ListEntry {
         return row != null && row.areChildrenExpanded();
     }
 
-    public boolean keepInParent() {
-        return row != null && row.keepInParent();
-    }
 
     //TODO: probably less confusing to say "is group fully visible"
     public boolean isGroupNotFullyVisible() {
@@ -696,10 +693,6 @@ public final class NotificationEntry extends ListEntry {
 
     public boolean isSummaryWithChildren() {
         return row != null && row.isSummaryWithChildren();
-    }
-
-    public void setKeepInParent(boolean keep) {
-        if (row != null) row.setKeepInParent(keep);
     }
 
     public void onDensityOrFontScaleChanged() {

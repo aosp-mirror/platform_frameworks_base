@@ -7776,6 +7776,13 @@ public final class Settings {
                 "high_text_contrast_enabled";
 
         /**
+         * The color contrast, float in [-1, 1], 1 being the highest contrast.
+         *
+         * @hide
+         */
+        public static final String CONTRAST_LEVEL = "contrast_level";
+
+        /**
          * Setting that specifies whether the display magnification is enabled via a system-wide
          * triple tap gesture. Display magnifications allows the user to zoom in the display content
          * and is targeted to low vision users. The current magnification scale is controlled by
@@ -9218,6 +9225,14 @@ public final class Settings {
         public static final int DOCK_SETUP_PAUSED = 2;
 
         /**
+         * Indicates that the user has been prompted to start dock setup.
+         * One of the possible states for {@link #DOCK_SETUP_STATE}.
+         *
+         * @hide
+         */
+        public static final int DOCK_SETUP_PROMPTED = 3;
+
+        /**
          * Indicates that the user has completed dock setup.
          * One of the possible states for {@link #DOCK_SETUP_STATE}.
          *
@@ -9231,6 +9246,7 @@ public final class Settings {
                 DOCK_SETUP_NOT_STARTED,
                 DOCK_SETUP_STARTED,
                 DOCK_SETUP_PAUSED,
+                DOCK_SETUP_PROMPTED,
                 DOCK_SETUP_COMPLETED
         })
         public @interface DockSetupState {
@@ -9496,6 +9512,16 @@ public final class Settings {
         @Readable
         public static final String LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS =
                 "lock_screen_show_silent_notifications";
+
+        /**
+         * Indicates whether "seen" notifications should be suppressed from the lockscreen.
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        public static final String LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS =
+                "lock_screen_show_only_unseen_notifications";
 
         /**
          * Indicates whether snooze options should be shown on notifications
@@ -9791,6 +9817,13 @@ public final class Settings {
         @Readable
         public static final String FINGERPRINT_SIDE_FPS_AUTH_DOWNTIME =
                 "fingerprint_side_fps_auth_downtime";
+
+        /**
+         * Whether or not a SFPS device is required to be interactive for auth to unlock the device.
+         * @hide
+         */
+        public static final String SFPS_REQUIRE_SCREEN_ON_TO_AUTH_ENABLED =
+                "sfps_require_screen_on_to_auth_enabled";
 
         /**
          * Whether or not debugging is enabled.
@@ -10302,11 +10335,11 @@ public final class Settings {
         public static final String QS_AUTO_ADDED_TILES = "qs_auto_tiles";
 
         /**
-         * The duration of timeout, in milliseconds, to switch from a non-primary user to the
-         * primary user when the device is docked.
+         * The duration of timeout, in milliseconds, to switch from a non-Dock User to the
+         * Dock User when the device is docked.
          * @hide
          */
-        public static final String TIMEOUT_TO_USER_ZERO = "timeout_to_user_zero";
+        public static final String TIMEOUT_TO_DOCK_USER = "timeout_to_dock_user";
 
         /**
          * Backup manager behavioral parameters.
@@ -15793,6 +15826,15 @@ public final class Settings {
         public static final String STYLUS_HANDWRITING_ENABLED = "stylus_handwriting_enabled";
 
         /**
+         * Indicates whether a stylus has ever been used on the device.
+         *
+         * @hide
+         */
+        @Readable
+        @SuppressLint("NoSettingsProvider")
+        public static final String STYLUS_EVER_USED = "stylus_ever_used";
+
+        /**
          * Exemptions to the hidden API blacklist.
          *
          * @hide
@@ -18446,6 +18488,9 @@ public final class Settings {
     /**
      * Activity Action: For system or preinstalled apps to show their {@link Activity} embedded
      * in Settings app on large screen devices.
+     *
+     * Developers should resolve the Intent action before using it.
+     *
      * <p>
      *     Input: {@link #EXTRA_SETTINGS_EMBEDDED_DEEP_LINK_INTENT_URI} must be included to
      * specify the intent for the activity which will be embedded in Settings app.

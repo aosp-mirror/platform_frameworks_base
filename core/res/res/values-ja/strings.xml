@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"KB"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;新規&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"（電話番号なし）"</string>
@@ -284,7 +289,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"電池を消費しているアプリ"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"拡大"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"ユーザー補助の使用"</string>
-    <string name="foreground_service_app_in_background" msgid="1439289699671273555">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」がバッテリーを使用しています"</string>
+    <string name="foreground_service_app_in_background" msgid="1439289699671273555">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」が電池を使用しています"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> 個のアプリが電池を使用しています"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"タップしてバッテリーやデータの使用量を確認"</string>
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>、<xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
@@ -300,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"カレンダーへのアクセス"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMSメッセージの送信と表示"</string>
-    <string name="permgrouplab_storage" msgid="17339216290379241">"ファイル"</string>
-    <string name="permgroupdesc_storage" msgid="5378659041354582769">"デバイス内のファイルにアクセス"</string>
-    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"音楽とオーディオ"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"デバイス上の音楽とオーディオにアクセスする"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"写真と動画"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"デバイス上の写真と動画にアクセスする"</string>
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"ファイル、ドキュメント"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"デバイス内のファイルやドキュメントへのアクセス"</string>
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"音楽やその他の音声"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"デバイス上の音声ファイルへのアクセス"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"写真と動画"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"デバイス上の画像、動画ファイルへのアクセス"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"マイク"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"音声の録音"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"身体活動"</string>
@@ -581,14 +586,13 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"画面ロックの使用"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"続行するには画面ロックを入力してください"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"センサーにしっかりと押し当ててください"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"指紋を認識できません。もう一度お試しください。"</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"指紋を処理できませんでした。もう一度お試しください。"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"指紋認証センサーの汚れを取り除いて、もう一度お試しください"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"センサーの汚れを取り除いて、もう一度お試しください"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"センサーにしっかりと押し当ててください"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"指の動きが遅すぎました。もう一度お試しください。"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"別の指紋をお試しください"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"明るすぎます"</string>
-    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"電源ボタンが押されました"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"調整してみてください"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"毎回、指を置く位置を少し変えてください"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -600,17 +604,16 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"顔を認証しました。[確認] を押してください"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"指紋認証ハードウェアは使用できません。"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"指紋を設定できません"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"指紋の設定がタイムアウトしました。もう一度お試しください。"</string>
+    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"指紋の読み取りがタイムアウトになりました。もう一度お試しください。"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"指紋の操作をキャンセルしました。"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"指紋の操作がユーザーによりキャンセルされました。"</string>
-    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"試行回数が上限を超えました。代わりに画面ロックを使用してください。"</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"試行回数が上限を超えました。代わりに画面ロックを使用してください。"</string>
-    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"指紋を処理できません。もう一度お試しください。"</string>
+    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"所定の回数以上間違えました。しばらくしてからもう一度お試しください。"</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"試行回数が上限を超えました。指紋認証センサーを無効にしました。"</string>
+    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"もう一度お試しください。"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"指紋が登録されていません。"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"このデバイスには指紋認証センサーがありません。"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"センサーが一時的に無効になっています。"</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"指紋認証センサーを使用できません。修理業者に調整を依頼してください"</string>
-    <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"電源ボタンが押されました"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"指紋 <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"指紋の使用"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"指紋または画面ロックの使用"</string>
@@ -631,33 +634,26 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"指紋認証"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"指紋認証センサーを使用できません"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"修理業者に調整を依頼してください。"</string>
-    <string name="face_acquired_insufficient" msgid="6889245852748492218">"顔モデルを作成できません。もう一度お試しください。"</string>
+    <string name="face_acquired_insufficient" msgid="2150805835949162453">"顔を認識できませんでした。もう一度お試しください。"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"明るすぎます。もっと暗い場所でお試しください。"</string>
-    <string name="face_acquired_too_dark" msgid="8539853432479385326">"十分な光がありません"</string>
-    <string name="face_acquired_too_close" msgid="4453646176196302462">"スマートフォンをもっと離してください"</string>
-    <string name="face_acquired_too_far" msgid="2922278214231064859">"スマートフォンをもっと近づけてください"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"スマートフォンをもっと上げてください"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"スマートフォンをもっと下げてください"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"スマートフォンを左に動かしてください"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"スマートフォンを右に動かしてください"</string>
+    <string name="face_acquired_too_dark" msgid="252573548464426546">"暗すぎます。もっと明るい場所でお試しください。"</string>
+    <string name="face_acquired_too_close" msgid="1628767882971469833">"スマートフォンをもっと離してください。"</string>
+    <string name="face_acquired_too_far" msgid="5098567726427173896">"スマートフォンをもっと近づけてください。"</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"スマートフォンをもっと高い位置に上げてください。"</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"スマートフォンをもっと低い位置に下げてください。"</string>
+    <string name="face_acquired_too_right" msgid="2513391513020932655">"スマートフォンを左に動かしてください。"</string>
+    <string name="face_acquired_too_left" msgid="8882499346502714350">"スマートフォンを右に動かしてください。"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"もっとまっすぐデバイスに顔を向けてください。"</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"顔を確認できません。スマートフォンを目の高さに合わせて持ってください。"</string>
+    <string name="face_acquired_not_detected" msgid="2945945257956443257">"顔をスマートフォンの真正面に向けてください。"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"あまり動かさないでください。安定させてください。"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"顔を登録し直してください。"</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"顔を認識できません。もう一度お試しください。"</string>
-    <string name="face_acquired_too_similar" msgid="8882920552674125694">"顔の位置を少し変えてください"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"もっとまっすぐスマートフォンに顔を向けてください"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"もっとまっすぐスマートフォンに顔を向けてください"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"もっとまっすぐスマートフォンに顔を向けてください"</string>
+    <string name="face_acquired_too_different" msgid="4699657338753282542">"顔を認識できなくなりました。もう一度お試しください。"</string>
+    <string name="face_acquired_too_similar" msgid="7684650785108399370">"似すぎています。ポーズを変えてください。"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"顔の向きを少し戻してください。"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"顔を少し傾けてください。"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"顔の向きを少し戻してください。"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"顔を隠しているものをすべて外してください"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"黒いバーを含め、画面の上部をきれいにしてください"</string>
-    <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
-    <skip />
-    <!-- no translation found for face_acquired_mouth_covering_detected (8219428572168642593) -->
-    <skip />
-    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"顔モデルを作成できません。もう一度お試しください。"</string>
-    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"サングラスが検出されました。顔が完全に写るようにしてください。"</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"マスクが検出されました。顔が完全に写るようにしてください。"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"顔を確認できません。ハードウェアを利用できません。"</string>
@@ -1245,9 +1241,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g>をペア設定しています。"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"アプリを起動しています。"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ブートを終了しています。"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"設定を続行しますか？"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"電源ボタンを押しました。通常、この操作で画面が OFF になります。\n\n指紋を設定する場合は電源ボタンに軽く触れてみましょう。"</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"設定を終了するには画面を OFF にします"</string>
-    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"OFF にする"</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"画面を OFF にする"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"設定を続行"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"指紋の確認を続行しますか？"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"電源ボタンを押しました。通常、この操作で画面が OFF になります。\n\n指紋を確認するには、電源ボタンに軽く触れてみましょう。"</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"画面を OFF にする"</string>
@@ -1359,10 +1356,10 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"アナログのオーディオ アクセサリを検出"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"接続したデバイスはこのスマートフォンと互換性がありません。タップすると、詳細を確認できます。"</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB デバッグが接続されました"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"無効にするにはここをタップしてください"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB デバッグを無効にするにはここをタップしてください"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB デバッグを無効にする場合に選択します。"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"ワイヤレス デバッグが接続されました"</string>
-    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"無効にするにはここをタップしてください"</string>
+    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"ワイヤレス デバッグをUSB デバッグを無効にするにはここをタップしてください"</string>
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"ワイヤレス デバッグを無効にするには選択します。"</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"テストハーネス モード有効"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"出荷時設定にリセットしてテストハーネス モードを無効にしてください。"</string>
@@ -1400,16 +1397,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"タップして設定してください"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"選択してセットアップしてください"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"デバイスの再フォーマットが必要になる場合があります。取り出すにはタップしてください。"</string>
-    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"写真、動画、音楽などを保存できます"</string>
+    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"写真などのメディア転送用"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"メディア ファイルをブラウジングできます"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g>に関する問題"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g>は動作していません"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"タップして修正してください"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g>が破損しています。修正するには選択してください。"</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"デバイスの再フォーマットが必要になる場合があります。取り出すにはタップしてください。"</string>
-    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"<xliff:g id="NAME">%s</xliff:g>検出"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"対応していない<xliff:g id="NAME">%s</xliff:g>です"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g>は動作していません"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"タップしてセットアップしてください。"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"このデバイスはこの <xliff:g id="NAME">%s</xliff:g>に対応していません。タップして、対応している形式でセットアップしてください。"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"<xliff:g id="NAME">%s</xliff:g>を選択して、対応している形式でセットアップしてください。"</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"デバイスの再フォーマットが必要になる場合があります"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g>が不適切に取り外されました"</string>
@@ -1446,7 +1443,7 @@
     <string name="permdesc_route_media_output" msgid="1759683269387729675">"メディア出力を他の外部デバイスにルーティングすることをアプリに許可します。"</string>
     <string name="permlab_readInstallSessions" msgid="7279049337895583621">"インストールセッションの読み取り"</string>
     <string name="permdesc_readInstallSessions" msgid="4012608316610763473">"インストールセッションの読み取りをアプリに許可します。これにより、アプリはアクティブパッケージのインストールに関する詳細情報を参照できるようになります。"</string>
-    <string name="permlab_requestInstallPackages" msgid="7600020863445351154">"request install packages"</string>
+    <string name="permlab_requestInstallPackages" msgid="7600020863445351154">"インストールパッケージのリクエスト"</string>
     <string name="permdesc_requestInstallPackages" msgid="3969369278325313067">"パッケージのインストールをリクエストすることをアプリケーションに許可します。"</string>
     <string name="permlab_requestDeletePackages" msgid="2541172829260106795">"パッケージの削除のリクエスト"</string>
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"パッケージの削除をリクエストすることをアプリに許可します。"</string>
@@ -1608,7 +1605,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"テレビ"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"モバイル デバイス"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"ホルダーのスピーカー"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"外部デバイス"</string>
+    <string name="default_audio_route_name_external_device" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"ヘッドホン"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"システム"</string>
@@ -1684,7 +1681,7 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> にデバイスのフル コントロールを許可しますか？"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"フル コントロールは、ユーザー補助機能が必要な場合には適していますが、その他の多くのアプリには不要です。"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"画面の表示と操作"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"画面上のすべてのコンテンツを読み取り、他のアプリ上にコンテンツを表示することができます。"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"画面上のすべてのコンテンツを読み取り、他のアプリでコンテンツを表示することができます。"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"操作の表示と実行"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"アプリやハードウェア センサーの操作を記録したり、自動的にアプリを操作したりできます。"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"許可"</string>
@@ -1829,7 +1826,7 @@
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"新しいPINの確認"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"制限を変更するためのPINを作成してください"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN が一致しません。もう一度お試しください。"</string>
-    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PINが短すぎます。4桁以上で設定してください。"</string>
+    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PINが短すぎます。4桁以上で作成してください。"</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"しばらくしてから再試行"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"全画面表示"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"終了するには、上から下にスワイプします。"</string>
@@ -1922,7 +1919,6 @@
     <string name="country_selection_title" msgid="5221495687299014379">"地域設定"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"言語名を入力"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"言語の候補"</string>
-    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"候補"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"すべての言語"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"すべての地域"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"検索"</string>
@@ -1940,19 +1936,18 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"カメラ: 使用不可"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"スマートフォンで続行"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"マイク: 使用不可"</string>
-    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Play ストア利用不可"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV の設定: 使用不可"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"タブレットの設定: 使用不可"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"スマートフォンの設定: 使用不可"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"現在、<xliff:g id="DEVICE">%1$s</xliff:g> からアクセスできません。Android TV デバイスでのアクセスをお試しください。"</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"現在、<xliff:g id="DEVICE">%1$s</xliff:g> からアクセスできません。タブレットでのアクセスをお試しください。"</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"現在、<xliff:g id="DEVICE">%1$s</xliff:g> からアクセスできません。スマートフォンでのアクセスをお試しください。"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"<xliff:g id="DEVICE">%1$s</xliff:g> からはアクセスできません。Android TV デバイスでのアクセスをお試しください。"</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"<xliff:g id="DEVICE">%1$s</xliff:g> からはアクセスできません。タブレットでのアクセスをお試しください。"</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"<xliff:g id="DEVICE">%1$s</xliff:g> からはアクセスできません。スマートフォンでのアクセスをお試しください。"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"現在、<xliff:g id="DEVICE">%1$s</xliff:g> からアクセスできません。Android TV デバイスでのアクセスをお試しください。"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"現在、<xliff:g id="DEVICE">%1$s</xliff:g> からアクセスできません。タブレットでのアクセスをお試しください。"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"現在、<xliff:g id="DEVICE">%1$s</xliff:g> からアクセスできません。スマートフォンでのアクセスをお試しください。"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"このアプリはセキュリティの強化を求めています。Android TV デバイスでのアクセスをお試しください。"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"このアプリはセキュリティの強化を求めています。タブレットでのアクセスをお試しください。"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"このアプリはセキュリティの強化を求めています。スマートフォンでのアクセスをお試しください。"</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"<xliff:g id="DEVICE">%1$s</xliff:g> からはアクセスできません。Android TV デバイスでのアクセスをお試しください。"</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"<xliff:g id="DEVICE">%1$s</xliff:g> からはアクセスできません。タブレットでのアクセスをお試しください。"</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"<xliff:g id="DEVICE">%1$s</xliff:g> からはアクセスできません。スマートフォンでのアクセスをお試しください。"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"このアプリは以前のバージョンの Android 用に作成されており、正常に動作しない可能性があります。アップデートを確認するか、デベロッパーにお問い合わせください。"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"アップデートを確認"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"新着メッセージがあります"</string>
@@ -2045,8 +2040,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> にすべてのデバイスログへのアクセスを許可しますか？"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"1 回限りのアクセスを許可"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"許可しない"</string>
-    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"デバイスのログに、このデバイスで発生したことが記録されます。アプリは問題を検出、修正するためにこれらのログを使用することができます。\n\nログによっては機密性の高い情報が含まれている可能性があるため、すべてのデバイスログへのアクセスは信頼できるアプリにのみ許可してください。\n\nすべてのデバイスログへのアクセスを許可しなかった場合も、このアプリはアプリ独自のログにアクセスできます。また、デバイスのメーカーもデバイスの一部のログや情報にアクセスできる可能性があります。"</string>
-    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"デバイスのログに、このデバイスで発生したことが記録されます。アプリは問題を検出、修正するためにこれらのログを使用することができます。\n\nログによっては機密性の高い情報が含まれている可能性があるため、すべてのデバイスログへのアクセスは信頼できるアプリにのみ許可してください。\n\nすべてのデバイスログへのアクセスを許可しなかった場合でも、このアプリはアプリ独自のログにアクセスできます。また、デバイスの製造メーカーもデバイスの一部のログや情報にアクセスできる可能性があります。\n\n詳しくは、g.co/android/devicelogs をご覧ください。"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"デバイスのログに、このデバイスで発生したことが記録されます。アプリは問題を検出、修正するためにこれらのログを使用することができます。\n\nログによっては機密性の高い情報が含まれている可能性があるため、すべてのデバイスログへのアクセスは信頼できるアプリにのみ許可してください。\n\nすべてのデバイスログへのアクセスを許可しなかった場合も、このアプリはアプリ独自のログにアクセスできます。また、デバイスのメーカーもデバイスの一部のログや情報にアクセスできる可能性があります。詳細"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"次回から表示しない"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"「<xliff:g id="APP_0">%1$s</xliff:g>」が「<xliff:g id="APP_2">%2$s</xliff:g>」のスライスの表示をリクエストしています"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"編集"</string>
@@ -2059,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"サイレント モードが変わりました"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"タップしてブロック対象をご確認ください。"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"通知設定の確認"</string>
-    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 以降では、インストールするアプリに、通知を送信する権限を付与する必要があります。既存のアプリのこの権限を変更するには、タップしてください。"</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"後で"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"閉じる"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"システム"</string>
@@ -2145,7 +2140,7 @@
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"このコンテンツを個人用アプリと共有することはできません"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"このコンテンツを個人用アプリで開くことはできません"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"仕事用プロファイルが一時停止しています"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"タップして ON にする"</string>
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"タップすると有効になります"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"仕事用アプリはありません"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"個人用アプリはありません"</string>
     <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"個人用プロファイルで <xliff:g id="APP">%s</xliff:g> を開きますか？"</string>
@@ -2282,11 +2277,10 @@
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"バックグラウンド アクティビティ"</string>
     <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"アプリがバッテリーを消費しています"</string>
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"アプリがまだアクティブです"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> がバックグラウンドで実行されています。タップすると、バッテリー使用状況を管理できます。"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> がバックグラウンドで実行されています。タップすると、バッテリー使用量を管理できます。"</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> がバッテリー駆動時間に影響を与えている可能性があります。タップして、実行中のアプリをご確認ください。"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"実行中のアプリをチェック"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> からスマートフォンのカメラにアクセスできません"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> からタブレットのカメラにアクセスできません"</string>
-    <string name="vdm_secure_window" msgid="161700398158812314">"ストリーミング中はアクセスできません。スマートフォンでのアクセスをお試しください。"</string>
-    <string name="system_locale_title" msgid="711882686834677268">"システムのデフォルト"</string>
+    <string name="system_locale_title" msgid="3978041860457277638">"システムの言語"</string>
 </resources>

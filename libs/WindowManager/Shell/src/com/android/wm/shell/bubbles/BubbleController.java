@@ -24,14 +24,11 @@ import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
+import static com.android.wm.shell.bubbles.Bubble.KEY_APP_BUBBLE;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_CONTROLLER;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_GESTURE;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.wm.shell.bubbles.BubblePositioner.TASKBAR_POSITION_BOTTOM;
-import static com.android.wm.shell.bubbles.BubblePositioner.TASKBAR_POSITION_LEFT;
-import static com.android.wm.shell.bubbles.BubblePositioner.TASKBAR_POSITION_NONE;
-import static com.android.wm.shell.bubbles.BubblePositioner.TASKBAR_POSITION_RIGHT;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_BLOCKED;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_GROUP_CANCELLED;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_INVALID_INTENT;
@@ -59,10 +56,8 @@ import android.content.pm.ShortcutInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -126,18 +121,6 @@ public class BubbleController implements ConfigurationChangeListener {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleController" : TAG_BUBBLES;
 
-    // TODO(b/173386799) keep in sync with Launcher3, not hooked up to anything
-    public static final String EXTRA_TASKBAR_CREATED = "taskbarCreated";
-    public static final String EXTRA_BUBBLE_OVERFLOW_OPENED = "bubbleOverflowOpened";
-    public static final String EXTRA_TASKBAR_VISIBLE = "taskbarVisible";
-    public static final String EXTRA_TASKBAR_POSITION = "taskbarPosition";
-    public static final String EXTRA_TASKBAR_ICON_SIZE = "taskbarIconSize";
-    public static final String EXTRA_TASKBAR_BUBBLE_XY = "taskbarBubbleXY";
-    public static final String EXTRA_TASKBAR_SIZE = "taskbarSize";
-    public static final String LEFT_POSITION = "Left";
-    public static final String RIGHT_POSITION = "Right";
-    public static final String BOTTOM_POSITION = "Bottom";
-
     // Should match with PhoneWindowManager
     private static final String SYSTEM_DIALOG_REASON_KEY = "reason";
     private static final String SYSTEM_DIALOG_REASON_GESTURE_NAV = "gestureNav";
@@ -166,6 +149,9 @@ public class BubbleController implements ConfigurationChangeListener {
     private final Handler mMainHandler;
 
     private final ShellExecutor mBackgroundExecutor;
+
+    // Whether or not we should show bubbles pinned at the bottom of the screen.
+    private boolean mIsBubbleBarEnabled;
 
     private BubbleLogger mLogger;
     private BubbleData mBubbleData;
@@ -227,7 +213,6 @@ public class BubbleController implements ConfigurationChangeListener {
     /** Drag and drop controller to register listener for onDragStarted. */
     private DragAndDropController mDragAndDropController;
 
-  
     public BubbleController(Context context,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
@@ -470,52 +455,6 @@ public class BubbleController implements ConfigurationChangeListener {
         mBubbleData.setExpanded(true);
     }
 
-    /** Called when any taskbar state changes (e.g. visibility, position, sizes). */
-    private void onTaskbarChanged(Bundle b) {
-        if (b == null) {
-            return;
-        }
-        boolean isVisible = b.getBoolean(EXTRA_TASKBAR_VISIBLE, false /* default */);
-        String position = b.getString(EXTRA_TASKBAR_POSITION, RIGHT_POSITION /* default */);
-        @BubblePositioner.TaskbarPosition int taskbarPosition = TASKBAR_POSITION_NONE;
-        switch (position) {
-            case LEFT_POSITION:
-                taskbarPosition = TASKBAR_POSITION_LEFT;
-                break;
-            case RIGHT_POSITION:
-                taskbarPosition = TASKBAR_POSITION_RIGHT;
-                break;
-            case BOTTOM_POSITION:
-                taskbarPosition = TASKBAR_POSITION_BOTTOM;
-                break;
-        }
-        int[] itemPosition = b.getIntArray(EXTRA_TASKBAR_BUBBLE_XY);
-        int iconSize = b.getInt(EXTRA_TASKBAR_ICON_SIZE);
-        int taskbarSize = b.getInt(EXTRA_TASKBAR_SIZE);
-        Log.w(TAG, "onTaskbarChanged:"
-                + " isVisible: " + isVisible
-                + " position: " + position
-                + " itemPosition: " + itemPosition[0] + "," + itemPosition[1]
-                + " iconSize: " + iconSize);
-        PointF point = new PointF(itemPosition[0], itemPosition[1]);
-        mBubblePositioner.setPinnedLocation(isVisible ? point : null);
-        mBubblePositioner.updateForTaskbar(iconSize, taskbarPosition, isVisible, taskbarSize);
-        if (mStackView != null) {
-            if (isVisible && b.getBoolean(EXTRA_TASKBAR_CREATED, false /* default */)) {
-                // If taskbar was created, add and remove the window so that bubbles display on top
-                removeFromWindowManagerMaybe();
-                addToWindowManagerMaybe();
-            }
-            mStackView.updateStackPosition();
-            mBubbleIconFactory = new BubbleIconFactory(mContext);
-            mBubbleBadgeIconFactory = new BubbleBadgeIconFactory(mContext);
-            mStackView.onDisplaySizeChanged();
-        }
-        if (b.getBoolean(EXTRA_BUBBLE_OVERFLOW_OPENED, false)) {
-            openBubbleOverflow();
-        }
-    }
-
     /**
      * Called when the status bar has become visible or invisible (either permanently or
      * temporarily).
@@ -536,8 +475,13 @@ public class BubbleController implements ConfigurationChangeListener {
 
     @VisibleForTesting
     public void onStatusBarStateChanged(boolean isShade) {
+        boolean didChange = mIsStatusBarShade != isShade;
+        if (DEBUG_BUBBLE_CONTROLLER) {
+            Log.d(TAG, "onStatusBarStateChanged isShade=" + isShade + " didChange=" + didChange);
+        }
         mIsStatusBarShade = isShade;
-        if (!mIsStatusBarShade) {
+        if (!mIsStatusBarShade && didChange) {
+            // Only collapse stack on change
             collapseStack();
         }
 
@@ -587,6 +531,12 @@ public class BubbleController implements ConfigurationChangeListener {
         // however, this gets complicated when users are removed (mCurrentUserId won't necessarily
         // be correct for this) so we update the repo directly.
         mDataRepository.removeBubblesForUser(removedUserId, parentUserId);
+    }
+
+    // TODO(b/256873975): Should pass this into the constructor once flags are available to shell.
+    /** Sets whether the bubble bar is enabled (i.e. bubbles pinned to bottom on large screens). */
+    public void setBubbleBarEnabled(boolean enabled) {
+        mIsBubbleBarEnabled = enabled;
     }
 
     /** Whether this userId belongs to the current user. */
@@ -653,6 +603,12 @@ public class BubbleController implements ConfigurationChangeListener {
                 mStackView.setExpandListener(mExpandListener);
             }
             mStackView.setUnbubbleConversationCallback(mSysuiProxy::onUnbubbleConversation);
+        }
+
+        if (mIsBubbleBarEnabled && mBubblePositioner.isLargeScreen()) {
+            mBubblePositioner.setUsePinnedLocation(true);
+        } else {
+            mBubblePositioner.setUsePinnedLocation(false);
         }
 
         addToWindowManagerMaybe();
@@ -1017,14 +973,18 @@ public class BubbleController implements ConfigurationChangeListener {
     }
 
     /**
-     * Adds a bubble for a specific intent. These bubbles are <b>not</b> backed by a notification
-     * and remain until the user dismisses the bubble or bubble stack. Only one intent bubble
-     * is supported at a time.
+     * Adds and expands bubble for a specific intent. These bubbles are <b>not</b> backed by a n
+     * otification and remain until the user dismisses the bubble or bubble stack. Only one intent
+     * bubble is supported at a time.
      *
      * @param intent the intent to display in the bubble expanded view.
      */
-    public void addAppBubble(Intent intent) {
+    public void showAppBubble(Intent intent) {
         if (intent == null || intent.getPackage() == null) return;
+
+        PackageManager packageManager = getPackageManagerForUser(mContext, mCurrentUserId);
+        if (!isResizableActivity(intent, packageManager, KEY_APP_BUBBLE)) return;
+
         Bubble b = new Bubble(intent, UserHandle.of(mCurrentUserId), mMainExecutor);
         b.setShouldAutoExpand(true);
         inflateAndAdd(b, /* suppressFlyout= */ true, /* showInShade= */ false);
@@ -1547,18 +1507,23 @@ public class BubbleController implements ConfigurationChangeListener {
         }
         PackageManager packageManager = getPackageManagerForUser(
                 context, entry.getStatusBarNotification().getUser().getIdentifier());
-        ActivityInfo info =
-                intent.getIntent().resolveActivityInfo(packageManager, 0);
+        return isResizableActivity(intent.getIntent(), packageManager, entry.getKey());
+    }
+
+    static boolean isResizableActivity(Intent intent, PackageManager packageManager, String key) {
+        if (intent == null) {
+            Log.w(TAG, "Unable to send as bubble: " + key + " null intent");
+            return false;
+        }
+        ActivityInfo info = intent.resolveActivityInfo(packageManager, 0);
         if (info == null) {
-            Log.w(TAG, "Unable to send as bubble, "
-                    + entry.getKey() + " couldn't find activity info for intent: "
-                    + intent);
+            Log.w(TAG, "Unable to send as bubble: " + key
+                    + " couldn't find activity info for intent: " + intent);
             return false;
         }
         if (!ActivityInfo.isResizeableMode(info.resizeMode)) {
-            Log.w(TAG, "Unable to send as bubble, "
-                    + entry.getKey() + " activity is not resizable for intent: "
-                    + intent);
+            Log.w(TAG, "Unable to send as bubble: " + key
+                    + " activity is not resizable for intent: " + intent);
             return false;
         }
         return true;
@@ -1732,9 +1697,9 @@ public class BubbleController implements ConfigurationChangeListener {
         }
 
         @Override
-        public void onTaskbarChanged(Bundle b) {
+        public void showAppBubble(Intent intent) {
             mMainExecutor.execute(() -> {
-                BubbleController.this.onTaskbarChanged(b);
+                BubbleController.this.showAppBubble(intent);
             });
         }
 
@@ -1845,6 +1810,13 @@ public class BubbleController implements ConfigurationChangeListener {
         public void onUserRemoved(int removedUserId) {
             mMainExecutor.execute(() -> {
                 BubbleController.this.onUserRemoved(removedUserId);
+            });
+        }
+
+        @Override
+        public void setBubbleBarEnabled(boolean enabled) {
+            mMainExecutor.execute(() -> {
+                BubbleController.this.setBubbleBarEnabled(enabled);
             });
         }
 

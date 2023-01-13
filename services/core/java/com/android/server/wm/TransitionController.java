@@ -38,6 +38,7 @@ import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
+import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.ITransitionMetricsReporter;
 import android.window.ITransitionPlayer;
@@ -116,6 +117,8 @@ class TransitionController {
      */
     boolean mBuildingFinishLayers = false;
 
+    private final SurfaceControl.Transaction mWakeT = new SurfaceControl.Transaction();
+
     TransitionController(ActivityTaskManagerService atm,
             TaskSnapshotController taskSnapshotController,
             TransitionTracer transitionTracer) {
@@ -126,17 +129,25 @@ class TransitionController {
         mTransitionTracer = transitionTracer;
         mTransitionPlayerDeath = () -> {
             synchronized (mAtm.mGlobalLock) {
-                // Clean-up/finish any playing transitions.
-                for (int i = 0; i < mPlayingTransitions.size(); ++i) {
-                    mPlayingTransitions.get(i).cleanUpOnFailure();
-                }
-                mPlayingTransitions.clear();
-                mTransitionPlayer = null;
-                mTransitionPlayerProc = null;
-                mRemotePlayer.clear();
-                mRunningLock.doNotifyLocked();
+                detachPlayer();
             }
         };
+    }
+
+    private void detachPlayer() {
+        if (mTransitionPlayer == null) return;
+        // Clean-up/finish any playing transitions.
+        for (int i = 0; i < mPlayingTransitions.size(); ++i) {
+            mPlayingTransitions.get(i).cleanUpOnFailure();
+        }
+        mPlayingTransitions.clear();
+        if (mCollectingTransition != null) {
+            mCollectingTransition.abort();
+        }
+        mTransitionPlayer = null;
+        mTransitionPlayerProc = null;
+        mRemotePlayer.clear();
+        mRunningLock.doNotifyLocked();
     }
 
     /** @see #createTransition(int, int) */
@@ -193,7 +204,7 @@ class TransitionController {
                 if (mTransitionPlayer.asBinder() != null) {
                     mTransitionPlayer.asBinder().unlinkToDeath(mTransitionPlayerDeath, 0);
                 }
-                mTransitionPlayer = null;
+                detachPlayer();
             }
             if (player.asBinder() != null) {
                 player.asBinder().linkToDeath(mTransitionPlayerDeath, 0);
@@ -450,8 +461,9 @@ class TransitionController {
                 info = new ActivityManager.RunningTaskInfo();
                 startTask.fillTaskInfo(info);
             }
-            mTransitionPlayer.requestStartTransition(transition, new TransitionRequestInfo(
-                    transition.mType, info, remoteTransition, displayChange));
+            mTransitionPlayer.requestStartTransition(transition.getToken(),
+                    new TransitionRequestInfo(transition.mType, info, remoteTransition,
+                            displayChange));
             transition.setRemoteTransition(remoteTransition);
         } catch (RemoteException e) {
             Slog.e(TAG, "Error requesting transition", e);
@@ -523,6 +535,17 @@ class TransitionController {
     void collectVisibleChange(WindowContainer wc) {
         if (!isCollecting()) return;
         mCollectingTransition.collectVisibleChange(wc);
+    }
+
+    /**
+     * Records that a particular container has been reparented. This only effects windows that have
+     * already been collected in the transition. This should be called before reparenting because
+     * the old parent may be removed during reparenting, for example:
+     * {@link Task#shouldRemoveSelfOnLastChildRemoval}
+     */
+    void collectReparentChange(@NonNull WindowContainer wc, @NonNull WindowContainer newParent) {
+        if (!isCollecting()) return;
+        mCollectingTransition.collectReparentChange(wc, newParent);
     }
 
     /** @see Transition#mStatusBarTransitionDelay */
@@ -599,8 +622,16 @@ class TransitionController {
     private void updateRunningRemoteAnimation(Transition transition, boolean isPlaying) {
         if (mTransitionPlayerProc == null) return;
         if (isPlaying) {
+            mWakeT.setEarlyWakeupStart();
+            mWakeT.apply();
+            // Usually transitions put quite a load onto the system already (with all the things
+            // happening in app), so pause task snapshot persisting to not increase the load.
+            mAtm.mWindowManager.mTaskSnapshotController.setPersisterPaused(true);
             mTransitionPlayerProc.setRunningRemoteAnimation(true);
         } else if (mPlayingTransitions.isEmpty()) {
+            mWakeT.setEarlyWakeupEnd();
+            mWakeT.apply();
+            mAtm.mWindowManager.mTaskSnapshotController.setPersisterPaused(false);
             mTransitionPlayerProc.setRunningRemoteAnimation(false);
             mRemotePlayer.clear();
             return;

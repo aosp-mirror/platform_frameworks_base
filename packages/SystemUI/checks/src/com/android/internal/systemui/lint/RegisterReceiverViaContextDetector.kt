@@ -16,6 +16,7 @@
 
 package com.android.internal.systemui.lint
 
+import com.android.SdkConstants.CLASS_CONTEXT
 import com.android.tools.lint.detector.api.Category
 import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Implementation
@@ -27,6 +28,7 @@ import com.android.tools.lint.detector.api.SourceCodeScanner
 import com.intellij.psi.PsiMethod
 import org.jetbrains.uast.UCallExpression
 
+@Suppress("UnstableApiUsage")
 class RegisterReceiverViaContextDetector : Detector(), SourceCodeScanner {
 
     override fun getApplicableMethodNames(): List<String> {
@@ -34,12 +36,12 @@ class RegisterReceiverViaContextDetector : Detector(), SourceCodeScanner {
     }
 
     override fun visitMethodCall(context: JavaContext, node: UCallExpression, method: PsiMethod) {
-        if (context.evaluator.isMemberInSubClassOf(method, "android.content.Context")) {
+        if (context.evaluator.isMemberInSubClassOf(method, CLASS_CONTEXT)) {
             context.report(
-                    ISSUE,
-                    method,
-                    context.getNameLocation(node),
-                    "BroadcastReceivers should be registered via BroadcastDispatcher."
+                    issue = ISSUE,
+                    location = context.getNameLocation(node),
+                    message = "Register `BroadcastReceiver` using `BroadcastDispatcher` instead " +
+                    "of `Context`"
             )
         }
     }
@@ -48,14 +50,16 @@ class RegisterReceiverViaContextDetector : Detector(), SourceCodeScanner {
         @JvmField
         val ISSUE: Issue =
             Issue.create(
-                    id = "RegisterReceiverViaContextDetector",
-                    briefDescription = "Broadcast registrations via Context are blocking " +
-                            "calls. Please use BroadcastDispatcher.",
-                    explanation =
-                    "Context#registerReceiver is a blocking call to the system server, " +
-                            "making it very likely that you'll drop a frame. Please use " +
-                            "BroadcastDispatcher instead (or move this call to a " +
-                            "@Background Executor.)",
+                    id = "RegisterReceiverViaContext",
+                    briefDescription = "Blocking broadcast registration",
+                    // lint trims indents and converts \ to line continuations
+                    explanation = """
+                            `Context.registerReceiver()` is a blocking call to the system server, \
+                            making it very likely that you'll drop a frame. Please use \
+                            `BroadcastDispatcher` instead, which registers the receiver on a \
+                             background thread. `BroadcastDispatcher` also improves our visibility \
+                             into ANRs.""",
+                            moreInfo = "go/identifying-broadcast-threads",
                     category = Category.PERFORMANCE,
                     priority = 8,
                     severity = Severity.WARNING,

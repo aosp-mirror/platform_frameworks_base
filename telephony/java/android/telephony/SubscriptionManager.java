@@ -4037,6 +4037,10 @@ public class SubscriptionManager {
      * cautiously, for example, after formatting the number to a consistent format with
      * {@link android.telephony.PhoneNumberUtils#formatNumberToE164(String, String)}.
      *
+     * <p>The availability and correctness of the phone number depends on the underlying source
+     * and the network etc. Additional verification is needed to use this number for
+     * security-related or other sensitive scenarios.
+     *
      * @param subscriptionId the subscription ID, or {@link #DEFAULT_SUBSCRIPTION_ID}
      *                       for the default one.
      * @return the phone number, or an empty string if not available.

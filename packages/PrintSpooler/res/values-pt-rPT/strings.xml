@@ -56,7 +56,6 @@
     <string name="print_select_printer" msgid="7388760939873368698">"Selecionar impressora"</string>
     <string name="print_forget_printer" msgid="5035287497291910766">"Esquecer impressora"</string>
     <plurals name="print_search_result_count_utterance" formatted="false" msgid="6997663738361080868">
-      <item quantity="many"><xliff:g id="COUNT_1">%1$s</xliff:g> printers found</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g> impressoras encontradas</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$s</xliff:g> impressora encontrada</item>
     </plurals>
@@ -77,7 +76,6 @@
     <string name="disabled_services_title" msgid="7313253167968363211">"Serviços desativados"</string>
     <string name="all_services_title" msgid="5578662754874906455">"Todos os serviços"</string>
     <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
-      <item quantity="many">Install to discover <xliff:g id="COUNT_1">%1$s</xliff:g> printers</item>
       <item quantity="other">Instale para detetar <xliff:g id="COUNT_1">%1$s</xliff:g> impressoras</item>
       <item quantity="one">Instale para detetar <xliff:g id="COUNT_0">%1$s</xliff:g> impressora</item>
     </plurals>

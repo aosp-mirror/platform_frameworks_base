@@ -46,10 +46,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Superior 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Superior 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Pantalla inferior completa"</string>
-    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Usar modo Una mano"</string>
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Usar Modo una mano"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Para salir, desliza el dedo hacia arriba desde la parte inferior de la pantalla o toca cualquier zona que haya encima de la aplicación"</string>
-    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Iniciar modo Una mano"</string>
-    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Salir del modo Una mano"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Iniciar Modo una mano"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Salir del Modo una mano"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"Ajustes de las burbujas de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Menú adicional"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Volver a añadir a la pila"</string>
@@ -63,7 +63,7 @@
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Cerrar burbuja"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"No mostrar conversación en burbuja"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Chatea con burbujas"</string>
-    <string name="bubbles_user_education_description" msgid="4215862563054175407">"Las conversaciones nuevas aparecen como iconos flotantes llamados \"burbujas\". Toca una burbuja para abrirla. Arrástrala para moverla."</string>
+    <string name="bubbles_user_education_description" msgid="4215862563054175407">"Las conversaciones nuevas aparecen como iconos flotantes llamadas \"burbujas\". Toca una burbuja para abrirla. Arrástrala para moverla."</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Controla las burbujas"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Toca Gestionar para desactivar las burbujas de esta aplicación"</string>
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Entendido"</string>
@@ -72,16 +72,13 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Burbuja"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Gestionar"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Burbuja cerrada."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Toca para reiniciar esta aplicación y obtener una mejor vista."</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"Toca para reiniciar esta aplicación e ir a la pantalla completa."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"¿Problemas con la cámara?\nToca para reajustar"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"¿No se ha solucionado?\nToca para revertir"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"¿No hay problemas con la cámara? Toca para cerrar."</string>
-    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Consulta más información y haz más"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Arrastra otra aplicación para activar la pantalla dividida"</string>
-    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Toca dos veces fuera de una aplicación para cambiarla de posición"</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Algunas aplicaciones funcionan mejor en vertical"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Prueba una de estas opciones para sacar el máximo partido al espacio de tu pantalla"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Gira el dispositivo para ir al modo de pantalla completa"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Toca dos veces junto a una aplicación para cambiar su posición"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Entendido"</string>
-    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Mostrar más información"</string>
-    <string name="maximize_button_text" msgid="1650859196290301963">"Maximizar"</string>
-    <string name="minimize_button_text" msgid="271592547935841753">"Minimizar"</string>
-    <string name="close_button_text" msgid="2913281996024033299">"Cerrar"</string>
 </resources>

@@ -35,6 +35,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerFake;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -71,6 +72,8 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
     @Mock
     private KeyguardStateController mKeyguardStateController;
     @Mock
+    private ShadeExpansionStateManager mShadeExpansionStateManager;
+    @Mock
     private BatteryController mBatteryController;
     private final DockManagerFake mDockManager = new DockManagerFake();
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
@@ -85,7 +88,8 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
 
         mFalsingCollector = new FalsingCollectorImpl(mFalsingDataProvider, mFalsingManager,
                 mKeyguardUpdateMonitor, mHistoryTracker, mProximitySensor,
-                mStatusBarStateController, mKeyguardStateController, mBatteryController,
+                mStatusBarStateController, mKeyguardStateController, mShadeExpansionStateManager,
+                mBatteryController,
                 mDockManager, mFakeExecutor, mFakeSystemClock);
     }
 
@@ -137,9 +141,9 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
     public void testUnregisterSensor_QS() {
         mFalsingCollector.onScreenTurningOn();
         reset(mProximitySensor);
-        mFalsingCollector.setQsExpanded(true);
+        mFalsingCollector.onQsExpansionChanged(true);
         verify(mProximitySensor).unregister(any(ThresholdSensor.Listener.class));
-        mFalsingCollector.setQsExpanded(false);
+        mFalsingCollector.onQsExpansionChanged(false);
         verify(mProximitySensor).register(any(ThresholdSensor.Listener.class));
     }
 
@@ -262,5 +266,11 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
         // Up event would flushes
         mFalsingCollector.onTouchEvent(up);
         verify(mFalsingDataProvider, times(2)).onMotionEvent(any(MotionEvent.class));
+    }
+
+    @Test
+    public void testOnA11yAction() {
+        mFalsingCollector.onA11yAction();
+        verify(mFalsingDataProvider).onA11yAction();
     }
 }

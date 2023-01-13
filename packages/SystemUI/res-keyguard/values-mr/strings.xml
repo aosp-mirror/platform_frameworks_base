@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"अवैध कार्ड."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"चार्ज झाली"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • वायरलेस पद्धतीने चार्ज करत आहे"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्ज होत आहे"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्जिंग डॉक"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्ज होत आहे"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • वेगाने चार्ज होत आहे"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • सावकाश चार्ज होत आहे"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • बॅटरीचे संरक्षण करण्यासाठी चार्ज करणे थांबवले आहे"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्जिंग तात्पुरते मर्यादित आहे"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"अनलॉक करण्यासाठी मेनू दाबा."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"नेटवर्क लॉक केले"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"सिम कार्ड नाही"</string>
@@ -68,9 +68,15 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"तुम्ही तुमचा पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा चुकीच्या पद्धतीने टाइप केला आहे. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"तुम्ही तुमचा अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने काढला. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"सिम पिन कोड चुकीचा आहे तुम्ही आता तुमचे डिव्हाइस अनलॉक करण्‍यासाठी तुमच्या वाहकाशी संपर्क साधावा."</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{सिमचा पिन कोड चुकीचा आहे, तुम्ही तुमचे डिव्‍हाइस अनलॉक करण्‍यासाठी तुमच्या वाहकाशी संपर्क साधण्‍यापूर्वी तुमच्याकडे # प्रयत्न शिल्लक आहे.}other{सिमचा पिन कोड चुकीचा आहे, तुमच्याकडे # प्रयत्न शिल्लक आहेत. }}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="other">चुकीचा सिम पिन कोड, तुमच्याकडे <xliff:g id="NUMBER_1">%d</xliff:g> प्रयत्न शिल्लक आहेत.</item>
+      <item quantity="one"> चुकीचा सिम पिन कोड, तुमचे डिव्हाइस अनलॉक करण्‍यासाठी तुमच्या वाहकाशी संपर्क साधण्‍यापूर्वी तुमच्याकडे <xliff:g id="NUMBER_0">%d</xliff:g> प्रयत्न शिल्लक आहेत.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"सिम निरुपयोगी आहे. आपल्या वाहकाशी संपर्क साधा."</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{सिमचा PUK कोड चुकीचा आहे, सिम कायमचे निरुपयोगी होण्‍यापूर्वी तुमच्याकडे # प्रयत्न शिल्लक आहे.}other{सिमचा PUK कोड चुकीचा आहे, सिम कायमचे निरुपयोगी होण्‍यापूर्वी तुमच्याकडे # प्रयत्न शिल्लक आहेत.}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="other">चुकीचा सिम PUK कोड, सिम कायमचे निरुपयोगी होण्यापूर्वी आपल्याकडे <xliff:g id="NUMBER_1">%d</xliff:g> प्रयत्न शिल्लक आहेत.</item>
+      <item quantity="one">चुकीचा सिम PUK कोड, सिम कायमचे निरुपयोगी होण्यापूर्वी आपल्याकडे <xliff:g id="NUMBER_0">%d</xliff:g> प्रयत्न शिल्लक आहे.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"सिम पिन ऑपरेशन अयशस्वी झाले!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"सिम PUK कार्य अयशस्‍वी झाले!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"इनपुट पद्धत स्विच करा"</string>
@@ -84,9 +90,15 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"प्रशासकाद्वारे लॉक केलेले डिव्हाइस"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"डिव्हाइस मॅन्युअली लॉक केले होते"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"ओळखले नाही"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"फेस अनलॉक साठी, सेटिंग्ज मध्ये कॅमेराचा अ‍ॅक्सेस द्या"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{सिमचा पिन एंटर करा. तुम्ही तुमचे डिव्‍हाइस अनलॉक करण्‍यासाठी तुमच्या वाहकाशी संपर्क साधण्‍यापूर्वी, तुमच्याकडे # प्रयत्न शिल्लक आहे.}other{सिमचा पिन एंटर करा. तुमच्याकडे # शिल्लक प्रयत्न आहेत.}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{सिम आता बंद केलेले आहे. पुढे सुरू ठेवण्यासाठी PUK कोड एंटर करा. सिम कायमचे निरुपयोगी होण्यापूर्वी तुमच्याकडे # प्रयत्न शिल्लक आहे. तपशिलांसाठी वाहकाशी संपर्क साधा.}other{सिम आता बंद केलेले आहे. पुढे सुरू ठेवण्यासाठी PUK कोड एंटर करा. सिम कायमचे निरुपयोगी होण्यापूर्वी तुमच्याकडे # प्रयत्न शिल्लक आहेत. तपशिलांसाठी वाहकाशी संपर्क साधा.}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"फेस अनलॉक वापरण्यासाठी, सेटिंग्ज &gt; गोपनीयता येथे "<b>"कॅमेरा अ‍ॅक्सेस"</b>" सुरू करा"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="other">सिम पिन एंटर करा, तुमच्याकडे <xliff:g id="NUMBER_1">%d</xliff:g> प्रयत्न शिल्लक आहेत.</item>
+      <item quantity="one">सिम पिन एंटर करा. तुम्ही तुमचे डिव्‍हाइस अनलॉक करण्‍यासाठी तुमच्या वाहकाशी संपर्क साधण्‍यापूर्वी, तुमच्याकडे <xliff:g id="NUMBER_0">%d</xliff:g> प्रयत्न शिल्लक आहे.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="other">सिम आता बंद केलेले आहे. सुरू ठेवण्यासाठी PUK कोड टाका. सिम कायमचे बंद होण्याआधी तुमच्याकडे <xliff:g id="_NUMBER_1">%d</xliff:g> प्रयत्न शिल्लक आहेत. तपशीलांसाठी वाहकाशी संपर्क साधा.</item>
+      <item quantity="one">सिम आता बंद केलेले आहे. सुरू ठेवण्यासाठी PUK कोड टाका. सिम कायमचे बंद होण्याआधी तुमच्याकडे <xliff:g id="_NUMBER_0">%d</xliff:g> प्रयत्न शिल्लक आहे. तपशीलांसाठी वाहकाशी संपर्क साधा.</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"डीफॉल्ट"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"बबल"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"अ‍ॅनालॉग"</string>

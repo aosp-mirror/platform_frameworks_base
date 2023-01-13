@@ -46,7 +46,7 @@ public class AuthKeyguardMessageAreaTest extends SysuiTestCase {
     @Test
     public void testShowsTextField() {
         mKeyguardMessageArea.setVisibility(View.INVISIBLE);
-        mKeyguardMessageArea.setMessage("oobleck");
+        mKeyguardMessageArea.setMessage("oobleck", /* animate= */ true);
         assertThat(mKeyguardMessageArea.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mKeyguardMessageArea.getText()).isEqualTo("oobleck");
     }
@@ -55,7 +55,7 @@ public class AuthKeyguardMessageAreaTest extends SysuiTestCase {
     public void testHiddenWhenBouncerHidden() {
         mKeyguardMessageArea.setIsVisible(false);
         mKeyguardMessageArea.setVisibility(View.INVISIBLE);
-        mKeyguardMessageArea.setMessage("oobleck");
+        mKeyguardMessageArea.setMessage("oobleck", /* animate= */ true);
         assertThat(mKeyguardMessageArea.getVisibility()).isEqualTo(View.INVISIBLE);
         assertThat(mKeyguardMessageArea.getText()).isEqualTo("oobleck");
     }
@@ -63,7 +63,7 @@ public class AuthKeyguardMessageAreaTest extends SysuiTestCase {
     @Test
     public void testClearsTextField() {
         mKeyguardMessageArea.setVisibility(View.VISIBLE);
-        mKeyguardMessageArea.setMessage("");
+        mKeyguardMessageArea.setMessage("", /* animate= */ true);
         assertThat(mKeyguardMessageArea.getVisibility()).isEqualTo(View.INVISIBLE);
         assertThat(mKeyguardMessageArea.getText()).isEqualTo("");
     }

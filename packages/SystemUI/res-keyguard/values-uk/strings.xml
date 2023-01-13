@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Недійсна картка."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Заряджено"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Бездротове заряджання"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Заряджання"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Док-станція для заряджання"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Заряджання"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Швидке заряджання"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Повільне заряджання"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Заряджання призупинено, щоб захистити акумулятор"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Заряджання тимчасово обмежено"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Натисніть меню, щоб розблокувати."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Мережу заблоковано"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Немає SIM-карти"</string>
@@ -68,9 +68,19 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Пароль неправильно введено стільки разів: <xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\nПовторіть спробу через <xliff:g id="NUMBER_1">%2$d</xliff:g> с."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Ключ розблокування неправильно намальовано стільки разів: <xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\nПовторіть спробу через <xliff:g id="NUMBER_1">%2$d</xliff:g> с."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Неправильний PIN-код SIM-карти. Зв’яжіться зі своїм оператором, щоб розблокувати пристрій."</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{Неправильний PIN-код SIM-карти. У вас залишилась # спроба. Після цього, щоб розблокувати пристрій, потрібно буде зв’язатися з оператором.}one{Неправильний PIN-код SIM-карти. У вас залишилася # спроба. }few{Неправильний PIN-код SIM-карти. У вас залишилося # спроби. }many{Неправильний PIN-код SIM-карти. У вас залишилося # спроб. }other{Неправильний PIN-код SIM-карти. У вас залишилося # спроби. }}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="one">Неправильний PIN-код SIM-карти. У вас залишилася <xliff:g id="NUMBER_1">%d</xliff:g> спроба.</item>
+      <item quantity="few">Неправильний PIN-код SIM-карти. У вас залишилося <xliff:g id="NUMBER_1">%d</xliff:g> спроби.</item>
+      <item quantity="many">Неправильний PIN-код SIM-карти. У вас залишилося <xliff:g id="NUMBER_1">%d</xliff:g> спроб.</item>
+      <item quantity="other">Неправильний PIN-код SIM-карти. У вас залишилося <xliff:g id="NUMBER_1">%d</xliff:g> спроби.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM-карту заблоковано. Зв’яжіться з оператором."</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Неправильний PUK-код SIM-карти. У вас залишилась # спроба. Після цього SIM-карту буде назавжди заблоковано.}one{Неправильний PUK-код SIM-карти. У вас залишилася # спроба. Після цього SIM-карту буде назавжди заблоковано.}few{Неправильний PUK-код SIM-карти. У вас залишилося # спроби. Після цього SIM-карту буде назавжди заблоковано.}many{Неправильний PUK-код SIM-карти. У вас залишилося # спроб. Після цього SIM-карту буде назавжди заблоковано.}other{Неправильний PUK-код SIM-карти. У вас залишилося # спроби. Після цього SIM-карту буде назавжди заблоковано.}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="one">Неправильний PUK-код SIM-карти. У вас залишилася <xliff:g id="NUMBER_1">%d</xliff:g> спроба. Після цього SIM-карту буде назавжди заблоковано.</item>
+      <item quantity="few">Неправильний PUK-код SIM-карти. У вас залишилося <xliff:g id="NUMBER_1">%d</xliff:g> спроби. Після цього SIM-карту буде назавжди заблоковано.</item>
+      <item quantity="many">Неправильний PUK-код SIM-карти. У вас залишилося <xliff:g id="NUMBER_1">%d</xliff:g> спроб. Після цього SIM-карту буде назавжди заблоковано.</item>
+      <item quantity="other">Неправильний PUK-код SIM-карти. У вас залишилося <xliff:g id="NUMBER_1">%d</xliff:g> спроби. Після цього SIM-карту буде назавжди заблоковано.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Помилка введення PIN-коду SIM-карти."</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Помилка введення PUK-коду SIM-карти."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Змінити метод введення"</string>
@@ -84,9 +94,19 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Адміністратор заблокував пристрій"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Пристрій заблоковано вручну"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Не розпізнано"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Для фейсконтролю надайте доступ до камери"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Введіть PIN-код SIM-карти. У вас залишилась # спроба. Після цього, щоб розблокувати пристрій, потрібно буде зв’язатися з оператором.}one{Введіть PIN-код SIM-карти. У вас залишилася # спроба.}few{Введіть PIN-код SIM-карти. У вас залишилося # спроби.}many{Введіть PIN-код SIM-карти. У вас залишилося # спроб.}other{Введіть PIN-код SIM-карти. У вас залишилося # спроби.}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM-карту заблоковано. Щоб продовжити, введіть PUK-код. У вас залишилась # спроба. Після цього SIM-карту буде назавжди заблоковано. Щоб дізнатися більше, зверніться до свого оператора.}one{SIM-карту заблоковано. Щоб продовжити, введіть PUK-код. У вас залишилася # спроба. Після цього SIM-карту буде назавжди заблоковано. Щоб дізнатися більше, зверніться до свого оператора.}few{SIM-карту заблоковано. Щоб продовжити, введіть PUK-код. У вас залишилося # спроби. Після цього SIM-карту буде назавжди заблоковано. Щоб дізнатися більше, зверніться до свого оператора.}many{SIM-карту заблоковано. Щоб продовжити, введіть PUK-код. У вас залишилося # спроб. Після цього SIM-карту буде назавжди заблоковано. Щоб дізнатися більше, зверніться до свого оператора.}other{SIM-карту заблоковано. Щоб продовжити, введіть PUK-код. У вас залишилося # спроби. Після цього SIM-карту буде назавжди заблоковано. Щоб дізнатися більше, зверніться до свого оператора.}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Щоб використовувати фейсконтроль, увімкніть "<b>"Доступ до камери"</b>" в розділі \"Налаштування\" &gt; \"Конфіденційність\""</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="one">Введіть PIN-код SIM-карти. Залишилася <xliff:g id="NUMBER_1">%d</xliff:g> спроба.</item>
+      <item quantity="few">Введіть PIN-код SIM-карти. Залишилося <xliff:g id="NUMBER_1">%d</xliff:g> спроби.</item>
+      <item quantity="many">Введіть PIN-код SIM-карти. Залишилося <xliff:g id="NUMBER_1">%d</xliff:g> спроб.</item>
+      <item quantity="other">Введіть PIN-код SIM-карти. Залишилося <xliff:g id="NUMBER_1">%d</xliff:g> спроби.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="one">SIM-карту заблоковано. Щоб продовжити, введіть PUK-код. Залишилася <xliff:g id="_NUMBER_1">%d</xliff:g> спроба. Після цього SIM-карту буде назавжди заблоковано. Щоб дізнатися більше, зверніться до свого оператора.</item>
+      <item quantity="few">SIM-карту заблоковано. Щоб продовжити, введіть PUK-код. Залишилося <xliff:g id="_NUMBER_1">%d</xliff:g> спроби. Після цього SIM-карту буде назавжди заблоковано. Щоб дізнатися більше, зверніться до свого оператора.</item>
+      <item quantity="many">SIM-карту заблоковано. Щоб продовжити, введіть PUK-код. Залишилося <xliff:g id="_NUMBER_1">%d</xliff:g> спроб. Після цього SIM-карту буде назавжди заблоковано. Щоб дізнатися більше, зверніться до свого оператора.</item>
+      <item quantity="other">SIM-карту заблоковано. Щоб продовжити, введіть PUK-код. Залишилося <xliff:g id="_NUMBER_1">%d</xliff:g> спроби. Після цього SIM-карту буде назавжди заблоковано. Щоб дізнатися більше, зверніться до свого оператора.</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"За умовчанням"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Бульбашковий"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Аналоговий"</string>

@@ -49,12 +49,12 @@ private const val TAG = "ActivityLaunchAnimator"
  */
 class ActivityLaunchAnimator(
     /** The animator used when animating a View into an app. */
-    private val launchAnimator: LaunchAnimator = LaunchAnimator(TIMINGS, INTERPOLATORS),
+    private val launchAnimator: LaunchAnimator = DEFAULT_LAUNCH_ANIMATOR,
 
     /** The animator used when animating a Dialog into an app. */
     // TODO(b/218989950): Remove this animator and instead set the duration of the dim fade out to
     // TIMINGS.contentBeforeFadeOutDuration.
-    private val dialogToAppAnimator: LaunchAnimator = LaunchAnimator(DIALOG_TIMINGS, INTERPOLATORS)
+    private val dialogToAppAnimator: LaunchAnimator = DEFAULT_DIALOG_TO_APP_ANIMATOR
 ) {
     companion object {
         /** The timings when animating a View into an app. */
@@ -84,6 +84,9 @@ class ActivityLaunchAnimator(
                 contentBeforeFadeOutInterpolator = Interpolators.LINEAR_OUT_SLOW_IN,
                 contentAfterFadeInInterpolator = PathInterpolator(0f, 0f, 0.6f, 1f)
             )
+
+        private val DEFAULT_LAUNCH_ANIMATOR = LaunchAnimator(TIMINGS, INTERPOLATORS)
+        private val DEFAULT_DIALOG_TO_APP_ANIMATOR = LaunchAnimator(DIALOG_TIMINGS, INTERPOLATORS)
 
         /** Durations & interpolators for the navigation bar fading in & out. */
         private const val ANIMATION_DURATION_NAV_FADE_IN = 266L
@@ -116,6 +119,22 @@ class ActivityLaunchAnimator(
 
     /** The set of [Listener] that should be notified of any animation started by this animator. */
     private val listeners = LinkedHashSet<Listener>()
+
+    /** Top-level listener that can be used to notify all registered [listeners]. */
+    private val lifecycleListener =
+        object : Listener {
+            override fun onLaunchAnimationStart() {
+                listeners.forEach { it.onLaunchAnimationStart() }
+            }
+
+            override fun onLaunchAnimationEnd() {
+                listeners.forEach { it.onLaunchAnimationEnd() }
+            }
+
+            override fun onLaunchAnimationProgress(linearProgress: Float) {
+                listeners.forEach { it.onLaunchAnimationProgress(linearProgress) }
+            }
+        }
 
     /**
      * Start an intent and animate the opening window. The intent will be started by running
@@ -156,7 +175,7 @@ class ActivityLaunchAnimator(
                 ?: throw IllegalStateException(
                     "ActivityLaunchAnimator.callback must be set before using this animator"
                 )
-        val runner = Runner(controller)
+        val runner = createRunner(controller)
         val hideKeyguardWithAnimation = callback.isOnKeyguard() && !showOverLockscreen
 
         // Pass the RemoteAnimationAdapter to the intent starter only if we are not hiding the
@@ -256,7 +275,18 @@ class ActivityLaunchAnimator(
     }
 
     /** Create a new animation [Runner] controlled by [controller]. */
-    @VisibleForTesting fun createRunner(controller: Controller): Runner = Runner(controller)
+    @VisibleForTesting
+    fun createRunner(controller: Controller): Runner {
+        // Make sure we use the modified timings when animating a dialog into an app.
+        val launchAnimator =
+            if (controller.isDialogLaunch) {
+                dialogToAppAnimator
+            } else {
+                launchAnimator
+            }
+
+        return Runner(controller, callback!!, launchAnimator, lifecycleListener)
+    }
 
     interface PendingIntentStarter {
         /**
@@ -353,14 +383,20 @@ class ActivityLaunchAnimator(
          * this if the animation was already started, i.e. if [onLaunchAnimationStart] was called
          * before the cancellation.
          *
-         * If this launch animation affected the occlusion state of the keyguard, WM will provide
-         * us with [newKeyguardOccludedState] so that we can set the occluded state appropriately.
+         * If this launch animation affected the occlusion state of the keyguard, WM will provide us
+         * with [newKeyguardOccludedState] so that we can set the occluded state appropriately.
          */
         fun onLaunchAnimationCancelled(newKeyguardOccludedState: Boolean? = null) {}
     }
 
-    @VisibleForTesting
-    inner class Runner(private val controller: Controller) : IRemoteAnimationRunner.Stub() {
+    class Runner(
+        private val controller: Controller,
+        private val callback: Callback,
+        /** The animator to use to animate the window launch. */
+        private val launchAnimator: LaunchAnimator = DEFAULT_LAUNCH_ANIMATOR,
+        /** Listener for animation lifecycle events. */
+        private val listener: Listener? = null
+    ) : IRemoteAnimationRunner.Stub() {
         private val launchContainer = controller.launchContainer
         private val context = launchContainer.context
         private val transactionApplierView =
@@ -448,17 +484,8 @@ class ActivityLaunchAnimator(
                     left = windowBounds.left,
                     right = windowBounds.right
                 )
-            val callback = this@ActivityLaunchAnimator.callback!!
             val windowBackgroundColor =
                 window.taskInfo?.let { callback.getBackgroundColor(it) } ?: window.backgroundColor
-
-            // Make sure we use the modified timings when animating a dialog into an app.
-            val launchAnimator =
-                if (controller.isDialogLaunch) {
-                    dialogToAppAnimator
-                } else {
-                    launchAnimator
-                }
 
             // TODO(b/184121838): We should somehow get the top and bottom radius of the window
             // instead of recomputing isExpandingFullyAbove here.
@@ -483,12 +510,12 @@ class ActivityLaunchAnimator(
             val controller =
                 object : Controller by delegate {
                     override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
-                        listeners.forEach { it.onLaunchAnimationStart() }
+                        listener?.onLaunchAnimationStart()
                         delegate.onLaunchAnimationStart(isExpandingFullyAbove)
                     }
 
                     override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
-                        listeners.forEach { it.onLaunchAnimationEnd() }
+                        listener?.onLaunchAnimationEnd()
                         iCallback?.invoke()
                         delegate.onLaunchAnimationEnd(isExpandingFullyAbove)
                     }
@@ -505,7 +532,7 @@ class ActivityLaunchAnimator(
                         }
                         navigationBar?.let { applyStateToNavigationBar(it, state, linearProgress) }
 
-                        listeners.forEach { it.onLaunchAnimationProgress(linearProgress) }
+                        listener?.onLaunchAnimationProgress(linearProgress)
                         delegate.onLaunchAnimationProgress(state, progress, linearProgress)
                     }
                 }

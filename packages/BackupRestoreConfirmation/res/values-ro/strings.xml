@@ -16,22 +16,22 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="backup_confirm_title" msgid="827563724209303345">"Backup complet"</string>
+    <string name="backup_confirm_title" msgid="827563724209303345">"Copiere de rezervă completă"</string>
     <string name="restore_confirm_title" msgid="5469365809567486602">"Restabilire completă"</string>
-    <string name="backup_confirm_text" msgid="1878021282758896593">"S-a solicitat crearea unui backup complet pentru toate datele pe un computer desktop conectat. Permiți acest lucru?\n\nDacă nu tu ai solicitat backupul, nu permite ca operațiunea să continue."</string>
-    <string name="allow_backup_button_label" msgid="4217228747769644068">"Fă backup pentru date"</string>
-    <string name="deny_backup_button_label" msgid="6009119115581097708">"Nu face backup"</string>
-    <string name="restore_confirm_text" msgid="7499866728030461776">"S-a solicitat o restabilire completă a tuturor datelor de pe un computer desktop conectat. Permiți acest lucru?\n\nDacă nu tu ai solicitat această restabilire, nu permite continuarea operațiunii. Acest proces va înlocui toate datele existente pe dispozitiv!"</string>
-    <string name="allow_restore_button_label" msgid="3081286752277127827">"Restabilește datele"</string>
-    <string name="deny_restore_button_label" msgid="1724367334453104378">"Nu restabili"</string>
-    <string name="current_password_text" msgid="8268189555578298067">"Introdu mai jos parola actuală pentru backup:"</string>
-    <string name="device_encryption_restore_text" msgid="1570864916855208992">"Introdu mai jos parola pentru criptarea dispozitivului."</string>
-    <string name="device_encryption_backup_text" msgid="5866590762672844664">"Introdu mai jos parola de criptare a dispozitivului. Aceasta va fi folosită și pentru a cripta arhiva backupului."</string>
-    <string name="backup_enc_password_text" msgid="4981585714795233099">"Introdu o parolă pentru a o folosi la criptarea datelor backupului complet. Dacă acest câmp rămâne necompletat, pentru backup se va folosi parola actuală:"</string>
-    <string name="backup_enc_password_optional" msgid="1350137345907579306">"Dacă vrei să criptezi datele backupului complet, introdu o parolă mai jos:"</string>
-    <string name="restore_enc_password_text" msgid="6140898525580710823">"Dacă datele pentru restabilire sunt criptate, introdu parola mai jos:"</string>
-    <string name="toast_backup_started" msgid="550354281452756121">"Se începe backupul..."</string>
-    <string name="toast_backup_ended" msgid="3818080769548726424">"Backup terminat"</string>
+    <string name="backup_confirm_text" msgid="1878021282758896593">"S-a solicitat crearea unei copii de rezervă complete a tuturor datelor pe un computer desktop conectat. Doriți să permiteți acest lucru?\n\nDacă nu ați solicitat dvs. copierea de rezervă, nu permiteți ca operațiunea să continue."</string>
+    <string name="allow_backup_button_label" msgid="4217228747769644068">"Faceți backup pentru date"</string>
+    <string name="deny_backup_button_label" msgid="6009119115581097708">"Nu creați copii de rezervă"</string>
+    <string name="restore_confirm_text" msgid="7499866728030461776">"S-a solicitat o restabilire completă a tuturor datelor de pe un computer desktop conectat. Doriți să permiteți acest lucru?\n\nDacă nu dvs. ați solicitat această restabilire, nu permiteți continuarea operațiunii. Acest proces va înlocui toate datele existente în prezent pe dispozitiv!"</string>
+    <string name="allow_restore_button_label" msgid="3081286752277127827">"Restabiliți datele dvs."</string>
+    <string name="deny_restore_button_label" msgid="1724367334453104378">"Nu restabiliți"</string>
+    <string name="current_password_text" msgid="8268189555578298067">"Introduceți mai jos parola actuală pentru copia de rezervă:"</string>
+    <string name="device_encryption_restore_text" msgid="1570864916855208992">"Introduceți mai jos parola pentru criptarea dispozitivului."</string>
+    <string name="device_encryption_backup_text" msgid="5866590762672844664">"Introduceți mai jos parola de criptare a dispozitivului. Aceasta va fi utilizată, de asemenea, pentru a cripta arhiva copiei de rezervă."</string>
+    <string name="backup_enc_password_text" msgid="4981585714795233099">"Introduceți o parolă pentru a o utiliza la criptarea datelor copiei de rezervă complete. Dacă acest câmp rămâne necompletat, pentru copierea de rezervă se va utiliza parola dvs. actuală."</string>
+    <string name="backup_enc_password_optional" msgid="1350137345907579306">"Dacă doriți să criptați datele copiei de rezervă complete, introduceți o parolă mai jos:"</string>
+    <string name="restore_enc_password_text" msgid="6140898525580710823">"Dacă datele pentru restabilire sunt criptate, introduceți parola mai jos:"</string>
+    <string name="toast_backup_started" msgid="550354281452756121">"Se începe copierea de rezervă..."</string>
+    <string name="toast_backup_ended" msgid="3818080769548726424">"Copierea de rezervă a fost finalizată"</string>
     <string name="toast_restore_started" msgid="7881679218971277385">"Se pornește restabilirea..."</string>
     <string name="toast_restore_ended" msgid="1764041639199696132">"Restabilirea s-a încheiat"</string>
     <string name="toast_timeout" msgid="5276598587087626877">"Operația a expirat"</string>

@@ -16,15 +16,26 @@
 
 package com.android.systemui
 
+import android.app.Application
 import android.content.Context
-import com.android.systemui.dagger.DaggerGlobalRootComponent
+import com.android.systemui.dagger.DaggerReferenceGlobalRootComponent
 import com.android.systemui.dagger.GlobalRootComponent
 
 /**
  * {@link SystemUIInitializer} that stands up AOSP SystemUI.
  */
 class SystemUIInitializerImpl(context: Context) : SystemUIInitializer(context) {
-    override fun getGlobalRootComponentBuilder(): GlobalRootComponent.Builder {
-        return DaggerGlobalRootComponent.builder()
+
+    override fun getGlobalRootComponentBuilder(): GlobalRootComponent.Builder? {
+        return when (Application.getProcessName()) {
+            SCREENSHOT_CROSS_PROFILE_PROCESS -> null
+            else -> DaggerReferenceGlobalRootComponent.builder()
+        }
+    }
+
+    companion object {
+        private const val SYSTEMUI_PROCESS = "com.android.systemui"
+        private const val SCREENSHOT_CROSS_PROFILE_PROCESS =
+                "$SYSTEMUI_PROCESS:screenshot_cross_profile"
     }
 }

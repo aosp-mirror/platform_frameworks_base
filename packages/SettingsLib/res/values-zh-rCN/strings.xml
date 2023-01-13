@@ -105,7 +105,7 @@
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"已连接（无媒体信号），电量为 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"已连接（无手机或媒体信号），电量为 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"使用中，电池电量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"使用中，左：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> 电量，右：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> 电量"</string>
+    <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"已启用，左：目前电量为 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>；右：目前电量为 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> 的电量"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"左：目前电量为 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>；右：目前电量为 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"使用中"</string>
@@ -117,17 +117,17 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"文件传输"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"输入设备"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"互联网连接"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"联系人信息和通话记录分享"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"用于联系人信息和通话记录分享"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"共享联系人"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"用于共享联系人"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"共享互联网连接"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"短信"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM 卡存取权限"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD 音频：<xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD 音频"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"助听器"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE 音频"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"已连接到助听器"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"已连接到 LE 音频"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"已连接到 LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"已连接到媒体音频"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"已连接到手机音频"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"已连接到文件传输服务器"</string>
@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"取消"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"配对之后，所配对的设备将可以在建立连接后访问您的通讯录和通话记录。"</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"无法与“<xliff:g id="DEVICE_NAME">%1$s</xliff:g>”进行配对。"</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN 码或通行密钥不正确，因此无法与“<xliff:g id="DEVICE_NAME">%1$s</xliff:g>”配对。"</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN 码或密钥不正确，因此无法与“<xliff:g id="DEVICE_NAME">%1$s</xliff:g>”配对。"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"无法与“<xliff:g id="DEVICE_NAME">%1$s</xliff:g>”进行通信。"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> 已拒绝配对。"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"计算机"</string>
@@ -338,7 +338,7 @@
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"通过 USB 验证应用"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"检查通过 ADB/ADT 安装的应用是否存在有害行为。"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"系统将显示没有名称（只有 MAC 地址）的蓝牙设备"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"停用蓝牙绝对音量功能，以防在连接到远程设备时出现音量问题（例如音量高得让人无法接受或无法控制音量等）。"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"停用蓝牙绝对音量功能，即可避免在连接到远程设备时出现音量问题（例如音量高得让人无法接受或无法控制音量等）。"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"启用“蓝牙 Gabeldorsche”功能堆栈。"</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"启用增强连接性功能。"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"本地终端"</string>
@@ -408,7 +408,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"将所有 Activity 设为可配合多窗口环境调整大小（忽略清单值）。"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"启用可自由调整的窗口"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"启用可自由调整的窗口这一实验性功能。"</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"桌面模式"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"桌面备份密码"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"桌面完整备份当前未设置密码保护"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"点按即可更改或移除用于保护桌面完整备份的密码"</string>
@@ -477,13 +476,12 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"还需<xliff:g id="TIME">%1$s</xliff:g>充满"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - 还需<xliff:g id="TIME">%2$s</xliff:g>充满"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充电已暂停"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充电暂时受限"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"未知"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"正在充电"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"正在快速充电"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"正在慢速充电"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"正在无线充电"</string>
-    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"正在充电"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"未在充电"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"已连接，未充电"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"已充满电"</string>
@@ -572,7 +570,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"受限个人资料"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"要添加新用户吗？"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"创建新用户后，您就能够与其他人共用此设备。每位用户都有自己的专属空间，而且在自己的个人空间内还可以自行安装自己想要的应用、设置壁纸等。此外，用户还可以调整会影响所有用户的设备设置（例如 WLAN 设置）。\n\n当您添加新用户后，该用户需要自行设置个人空间。\n\n任何用户都可以为所有其他用户更新应用。无障碍功能设置和服务可能无法转移给新用户。"</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"当您添加新用户后，该用户需要自行设置个人空间。\n\n任何用户都可以为所有其他用户更新应用。"</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"您添加新用户后，该用户必须设置自己的空间。\n\n任何用户均可为其他所有用户更新应用。"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"要现在设置该用户吗？"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"请让相应用户操作设备并设置他们自己的空间。"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"要立即设置个人资料吗？"</string>
@@ -612,7 +610,7 @@
     <string name="guest_exit_button" msgid="5774985819191803960">"退出访客模式"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"重置访客会话"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"退出访客模式"</string>
-    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"退出时所有活动记录都将被删除"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"系统会在退出时删除所有活动记录"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"您可以在退出时保存或删除您的活动记录"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"请立即重置以删除会话活动记录；或者，您也可以在退出时保存或删除活动记录"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"拍摄照片"</string>
@@ -656,6 +654,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"以太网已断开连接。"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"以太网。"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"不启用通话。"</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"时间"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"日期"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"天气"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"空气质量"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"投射信息"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"选择个人资料照片"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"默认用户图标"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"实体键盘"</string>
@@ -664,11 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"开启屏幕"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"允许开启屏幕"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"允许应用开启屏幕。如获授权，该应用便可在您未明确表达意愿的情况下随时开启屏幕。"</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"扫描二维码"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"将扫描器对准下方二维码，即可开始收听"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"二维码的格式无效"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"要停止广播“<xliff:g id="APP_NAME">%1$s</xliff:g>”的内容吗？"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"如果广播“<xliff:g id="SWITCHAPP">%1$s</xliff:g>”的内容或更改输出来源，当前的广播就会停止"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"广播“<xliff:g id="SWITCHAPP">%1$s</xliff:g>”的内容"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"更改输出来源"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"预见式返回动画"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"启用系统动画作为预见式返回动画。"</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"此设置将启用系统动画作为预测性手势动画。这要求在清单文件中将单个应用的 enableOnBackInvokedCallback 设为 true。"</string>
 </resources>

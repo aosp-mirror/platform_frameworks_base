@@ -35,7 +35,6 @@ import com.android.internal.widget.LockPatternView.Cell;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.keyguard.EmergencyButtonController.EmergencyButtonCallback;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
-import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingClassifier;
 import com.android.systemui.classifier.FalsingCollector;
@@ -272,16 +271,6 @@ public class KeyguardPatternViewController
     }
 
     @Override
-    public void reloadColors() {
-        super.reloadColors();
-        mMessageAreaController.reloadColors();
-        int textColor = Utils.getColorAttr(mLockPatternView.getContext(),
-                android.R.attr.textColorSecondary).getDefaultColor();
-        int errorColor = Utils.getColorError(mLockPatternView.getContext()).getDefaultColor();
-        mLockPatternView.setColors(textColor, textColor, errorColor);
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
 
@@ -295,12 +284,6 @@ public class KeyguardPatternViewController
             mPendingLockCheck = null;
         }
         displayDefaultSecurityMessage();
-    }
-
-    @Override
-    public void onResume(int reason) {
-        super.onResume(reason);
-        mMessageAreaController.setMessageIfEmpty(R.string.keyguard_enter_your_pattern);
     }
 
     @Override
@@ -328,6 +311,9 @@ public class KeyguardPatternViewController
                 mMessageAreaController.setMessage(R.string.kg_prompt_reason_timeout_pattern);
                 break;
             case PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT:
+                mMessageAreaController.setMessage(R.string.kg_prompt_reason_timeout_pattern);
+                break;
+            case PROMPT_REASON_TRUSTAGENT_EXPIRED:
                 mMessageAreaController.setMessage(R.string.kg_prompt_reason_timeout_pattern);
                 break;
             case PROMPT_REASON_NONE:
@@ -361,7 +347,7 @@ public class KeyguardPatternViewController
     }
 
     private void displayDefaultSecurityMessage() {
-        mMessageAreaController.setMessage("");
+        mMessageAreaController.setMessage(getInitialMessageResId());
     }
 
     private void handleAttemptLockout(long elapsedRealtimeDeadline) {
@@ -378,10 +364,13 @@ public class KeyguardPatternViewController
                 Map<String, Object> arguments = new HashMap<>();
                 arguments.put("count", secondsRemaining);
 
-                mMessageAreaController.setMessage(PluralsMessageFormatter.format(
-                        mView.getResources(),
-                        arguments,
-                        R.string.kg_too_many_failed_attempts_countdown));
+                mMessageAreaController.setMessage(
+                        PluralsMessageFormatter.format(
+                            mView.getResources(),
+                            arguments,
+                            R.string.kg_too_many_failed_attempts_countdown),
+                        /* animate= */ false
+                );
             }
 
             @Override
@@ -391,5 +380,10 @@ public class KeyguardPatternViewController
             }
 
         }.start();
+    }
+
+    @Override
+    protected int getInitialMessageResId() {
+        return R.string.keyguard_enter_your_pattern;
     }
 }

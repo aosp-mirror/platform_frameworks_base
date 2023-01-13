@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Neplatná karta."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Nabité"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Nabíja sa bezdrôtovo"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Nabíja sa"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Nabíjací dok"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Nabíja sa"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Nabíja sa rýchlo"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Nabíja sa pomaly"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Nabíjanie je pozastavené z dôvodu ochrany batérie"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Nabíjanie je dočasne obmedzené"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Odomknete stlačením tlačidla ponuky."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Sieť je zablokovaná"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Žiadna SIM karta"</string>
@@ -68,9 +68,19 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Už <xliff:g id="NUMBER_0">%1$d</xliff:g>-krát ste zadali nesprávne heslo. \n\nSkúste to znova o <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Už <xliff:g id="NUMBER_0">%1$d</xliff:g>-krát ste použili nesprávny bezpečnostný vzor. \n\nSkúste to znova o <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Nesprávny kód PIN SIM karty. Teraz musíte kontaktovať svojho operátora, aby vám odomkol zariadenie."</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{Nesprávny kód PIN SIM karty. Zostáva vám # pokus, potom budete musieť kontaktovať svojho operátora, aby zariadenie odomkol.}few{Nesprávny kód PIN SIM karty. Zostávajú vám # pokusy. }many{Incorrect SIM PIN code, you have # remaining attempts. }other{Nesprávny kód PIN SIM karty. Zostáva vám # pokusov. }}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="few">Nesprávny kód PIN SIM karty. Zostávajú vám <xliff:g id="NUMBER_1">%d</xliff:g> pokusy.</item>
+      <item quantity="many">Nesprávny kód PIN SIM karty. Zostáva vám <xliff:g id="NUMBER_1">%d</xliff:g> pokusu.</item>
+      <item quantity="other">Nesprávny kód PIN SIM karty. Zostáva vám <xliff:g id="NUMBER_1">%d</xliff:g> pokusov.</item>
+      <item quantity="one">Nesprávny kód PIN SIM karty. Zostáva vám <xliff:g id="NUMBER_0">%d</xliff:g> pokus. Potom budete musieť kontaktovať operátora, aby vám odomkol zariadenie.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM karta je nepoužiteľná. Kontaktujte svojho operátora."</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Nesprávny kód PUK SIM karty. Zostáva vám # pokus, potom sa SIM karta natrvalo zablokuje.}few{Nesprávny kód PUK SIM karty. Zostávajú vám # pokusy, potom sa SIM karta natrvalo zablokuje.}many{Incorrect SIM PUK code, you have # remaining attempts before SIM becomes permanently unusable.}other{Nesprávny kód PUK SIM karty. Zostáva vám # pokusov, potom sa SIM karta natrvalo zablokuje.}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="few">Nesprávny kód PUK SIM karty. Zostávajú vám <xliff:g id="NUMBER_1">%d</xliff:g> pokusy. Potom sa SIM karta natrvalo zablokuje.</item>
+      <item quantity="many">Nesprávny kód PUK SIM karty. Zostáva vám <xliff:g id="NUMBER_1">%d</xliff:g> pokusu. Potom sa SIM karta natrvalo zablokuje.</item>
+      <item quantity="other">Nesprávny kód PUK SIM karty. Zostáva vám <xliff:g id="NUMBER_1">%d</xliff:g> pokusov. Potom sa SIM karta natrvalo zablokuje.</item>
+      <item quantity="one">Nesprávny kód PUK SIM karty. Zostáva vám <xliff:g id="NUMBER_0">%d</xliff:g> pokus. Potom sa vaša SIM karta natrvalo zablokuje.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Operácia kódu PIN SIM karty zlyhala!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Operácia kódu PUK SIM karty zlyhala!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Prepnúť metódu vstupu"</string>
@@ -84,9 +94,19 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Zariadenie zamkol správca"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Zariadenie bolo uzamknuté ručne"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nerozpoznané"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"V nastaveniach zapnite prístup ku kamere"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Zadajte kód PIN SIM karty. Zostáva vám # pokus, potom budete musieť kontaktovať svojho operátora, aby zariadenie odomkol.}few{Zadajte PIN SIM karty. Zostávajú vám # pokusy.}many{Enter SIM PIN. You have # remaining attempts.}other{Zadajte PIN SIM karty. Zostáva vám # pokusov.}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM karta je deaktivovaná. Pokračujte zadaním kódu PUK. Zostáva vám # pokus, potom sa SIM karta natrvalo zablokuje. Podrobnosti vám poskytne operátor.}few{SIM karta je deaktivovaná. Pokračujte zadaním kódu PUK. Zostávajú vám # pokusy, potom sa SIM karta natrvalo zablokuje. Podrobnosti vám poskytne operátor.}many{SIM is now disabled. Enter PUK code to continue. You have # remaining attempts before SIM becomes permanently unusable. Contact carrier for details.}other{SIM karta je deaktivovaná. Pokračujte zadaním kódu PUK. Zostáva vám # pokusov, potom sa SIM karta natrvalo zablokuje. Podrobnosti vám poskytne operátor.}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Ak chcete používať odomknutie tvárou, v sekcii Nastavenia &gt; Ochrana súkromia zapnite "<b>"prístup ku kamere"</b></string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="few">Zadajte kód PIN SIM karty. Zostávajú vám <xliff:g id="NUMBER_1">%d</xliff:g> pokusy.</item>
+      <item quantity="many">Enter SIM PIN. You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts.</item>
+      <item quantity="other">Zadajte kód PIN SIM karty. Zostáva vám <xliff:g id="NUMBER_1">%d</xliff:g> pokusov.</item>
+      <item quantity="one">Zadajte kód PIN SIM karty. Zostáva vám <xliff:g id="NUMBER_0">%d</xliff:g> pokus, potom budete musieť kontaktovať svojho operátora, aby zariadenie odomkol.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="few">SIM karta je deaktivovaná. Pokračujte zadaním kódu PUK. Zostávajú vám <xliff:g id="_NUMBER_1">%d</xliff:g> pokusy, potom sa SIM karta natrvalo zablokuje. Podrobnosti vám poskytne operátor.</item>
+      <item quantity="many">SIM karta je deaktivovaná. Pokračujte zadaním kódu PUK. Zostáva vám <xliff:g id="_NUMBER_1">%d</xliff:g> pokusu, potom sa SIM karta natrvalo zablokuje. Podrobnosti vám poskytne operátor.</item>
+      <item quantity="other">SIM karta je deaktivovaná. Pokračujte zadaním kódu PUK. Zostáva vám <xliff:g id="_NUMBER_1">%d</xliff:g> pokusov, potom sa SIM karta natrvalo zablokuje. Podrobnosti vám poskytne operátor.</item>
+      <item quantity="one">SIM karta je deaktivovaná. Pokračujte zadaním kódu PUK. Zostáva vám <xliff:g id="_NUMBER_0">%d</xliff:g> pokus, potom sa SIM karta natrvalo zablokuje. Podrobnosti vám poskytne operátor.</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"Predvolený"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Bublina"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analógový"</string>

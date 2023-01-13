@@ -18,11 +18,11 @@ package com.android.server.devicestate;
 
 import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE;
 import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE;
-import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.hardware.devicestate.DeviceStateManager;
 
 import com.android.internal.util.Preconditions;
 
@@ -54,6 +54,15 @@ public final class DeviceState {
      * could be a device-state where the {@link DEFAULT_DISPLAY} is not enabled.
      */
     public static final int FLAG_APP_INACCESSIBLE = 1 << 1;
+
+    /**
+     * Some device states can be both entered through a physical configuration as well as emulation
+     * through {@link DeviceStateManager#requestState}, while some states can only be entered
+     * through emulation and have no physical configuration to match.
+     *
+     * This flag indicates that the corresponding state can only be entered through emulation.
+     */
+    public static final int FLAG_EMULATED_ONLY = 1 << 2;
 
     /** @hide */
     @IntDef(prefix = {"FLAG_"}, flag = true, value = {

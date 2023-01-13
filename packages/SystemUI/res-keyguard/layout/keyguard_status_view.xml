@@ -27,6 +27,7 @@
     systemui:layout_constraintEnd_toEndOf="parent"
     systemui:layout_constraintTop_toTopOf="parent"
     android:layout_marginHorizontal="@dimen/status_view_margin_horizontal"
+    android:clipChildren="false"
     android:layout_width="0dp"
     android:layout_height="wrap_content">
     <LinearLayout

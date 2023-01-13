@@ -117,17 +117,17 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Пренос датотеке"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Улазни уређај"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Приступ Интернету"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Дељење контаката и историје позива"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Користите за дељење контаката и историје позива"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Дељење контаката"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Користите за дељење контаката"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Дељење интернет везе"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"SMS-ови"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Приступ SIM картици"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD звук: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD звук"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Слушни апарати"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Повезано са слушним апаратима"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Повезано са LE audio"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Повезано са LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Повезано са звуком медија"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Повезано са звуком телефона"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Повезано са сервером за пренос датотека"</string>
@@ -408,7 +408,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Омогућава промену величине свих активности за режим са више прозора, без обзира на вредности манифеста."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Омогући прозоре произвољног формата"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Омогућава подршку за експерименталне прозоре произвољног формата."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Режим за рачунаре"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Лозинка резервне копије за рачунар"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Резервне копије читавог система тренутно нису заштићене"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Додирните да бисте променили или уклонили лозинку за прављење резервних копија читавог система на рачунару"</string>
@@ -477,13 +476,12 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> до краја пуњења"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> до краја пуњења"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> – Пуњење је заустављено"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> – Пуњење је привремено ограничено"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Непознато"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Пуни се"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Брзо се пуни"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Споро се пуни"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Бежично пуњење"</string>
-    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Пуњење"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Не пуни се"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Повезано, не пуни се"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Напуњено"</string>
@@ -596,13 +594,13 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"Уклони госта"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Ресетуј сесију госта"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Желите ли да ресетујете сесију госта?"</string>
-    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Желите да уклоните госта?"</string>
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Желите ли да уклоните госта?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Ресетуј"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Уклони"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Сесија госта се ресетује…"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Желите да ресетујете сесију госта?"</string>
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Тиме ћете покренути нову сесију госта и избрисати све апликације и податке из актуелне сесије"</string>
-    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Излазите из режима госта?"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Изаћи ћете из режима госта?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Тиме ћете избрисати све апликације и податке из актуелне сесије госта"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Изађи"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Сачуваћете активности госта?"</string>
@@ -611,10 +609,10 @@
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Сачувај"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"Изађи из режима госта"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"Ресетуј сесију госта"</string>
-    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Затвори режим госта"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Изађи из режима госта"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Све активности ће бити избрисане при излазу"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Можете да сачувате или избришете активности при излазу"</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Ресетујете за брисање активности сесије, или сачувајте или избришите активности при излазу"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Ресетујете да бисте избрисали активности сесије одмах или можете да сачувате или избришете активности при излазу"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Сликај"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Одабери слику"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Изаберите слику"</string>
@@ -656,6 +654,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Веза са етернетом је прекинута."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Етернет."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Без позивања."</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"Време"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"Датум"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"Време"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Квалитет ваздуха"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Подаци о пребацивању"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Одаберите слику профила"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Подразумевана икона корисника"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Физичка тастатура"</string>
@@ -664,11 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Укључите екран"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Дозволи укључивање екрана"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Дозвољава апликацији да укључи екран. Ако се омогући, апликација може да укључи екран у било ком тренутку без ваше експлицитне намере."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Скенирајте QR кôд"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Да бисте почели да слушате, центрирајте QR кôд испод"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR кôд није у важећем формату"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Желите да зауставите емитовање апликације <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Ако емитујете апликацију <xliff:g id="SWITCHAPP">%1$s</xliff:g> или промените излаз, актуелно емитовање ће се зауставити"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Емитујте апликацију <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Промените излаз"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"Анимације за покрет повратка са предвиђањем"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Омогућите анимације система за покрет повратка са предвиђањем."</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Ово подешавање омогућава анимације система за покрет повратка са предвиђањем. Захтева подешавање дозволе enableOnBackInvokedCallback по апликацији на true у фајлу манифеста."</string>
 </resources>

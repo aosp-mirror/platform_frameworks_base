@@ -65,6 +65,9 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
     public final DeviceVibrationEffectAdapter deviceEffectAdapter;
     public final VibrationThread.VibratorManagerHooks vibratorManagerHooks;
 
+    // Not guarded by lock because they're not modified by this conductor, it's used here only to
+    // check immutable attributes. The status and other mutable states are changed by the service or
+    // by the vibrator steps.
     private final Vibration mVibration;
     private final SparseArray<VibratorController> mVibrators = new SparseArray<>();
 
@@ -402,6 +405,16 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
                 mSignalVibratorsComplete.add(mVibrators.keyAt(i));
             }
             mLock.notify();
+        }
+    }
+
+    /** Returns true if a cancellation signal was sent via {@link #notifyCancelled}. */
+    public boolean wasNotifiedToCancel() {
+        if (Build.IS_DEBUGGABLE) {
+            expectIsVibrationThread(false);
+        }
+        synchronized (mLock) {
+            return mSignalCancel != null;
         }
     }
 

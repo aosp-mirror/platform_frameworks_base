@@ -16,6 +16,7 @@
 
 package android.window;
 
+import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.Dialog;
 import android.view.Window;
@@ -41,8 +42,35 @@ import android.view.Window;
 @SuppressWarnings("deprecation")
 public interface OnBackInvokedCallback {
     /**
+     * Called when a back gesture has been started, or back button has been pressed down.
+     *
+     * @param backEvent The {@link BackEvent} containing information about the touch or
+     *                  button press.
+     *
+     * @hide
+     */
+    default void onBackStarted(@NonNull BackEvent backEvent) {}
+
+    /**
+     * Called when a back gesture has been progressed.
+     *
+     * @param backEvent The {@link BackEvent} containing information about the latest touch point
+     *                  and the progress that the back animation should seek to.
+     *
+     * @hide
+     */
+    default void onBackProgressed(@NonNull BackEvent backEvent) {}
+
+    /**
      * Called when a back gesture has been completed and committed, or back button pressed
      * has been released and committed.
      */
     void onBackInvoked();
+
+    /**
+     * Called when a back gesture or button press has been cancelled.
+     *
+     * @hide
+     */
+    default void onBackCancelled() {}
 }

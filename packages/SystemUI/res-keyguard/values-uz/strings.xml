@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"SIM karta yaroqsiz."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Quvvat oldi"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Simsiz quvvatlanyapti"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Quvvat olmoqda"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Quvvatlash dok-stansiyasi"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Quvvat olmoqda"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Tezkor quvvat olmoqda"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Sekin quvvat olmoqda"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Quvvatlash batareyani himoyalash uchun pauza qilindi"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Quvvatlash vaqtincha cheklangan"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Qulfdan chiqarish uchun Menyu tugmasini bosing."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Tarmoq qulflangan"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"SIM karta solinmagan"</string>
@@ -68,9 +68,15 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Parol <xliff:g id="NUMBER_0">%1$d</xliff:g> marta xato kiritildi. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> soniyadan keyin qaytadan urining."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Grafik kalit <xliff:g id="NUMBER_0">%1$d</xliff:g> marta xato kiritildi. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> soniyadan keyin qayta urining."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"SIM kartaning PIN kodi xato. Qurilma qulfini ochish uchun operatoringizga murojaat qiling."</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{SIM karta PIN kodi xato kiritildi, yana # marta urinishingiz mumkin, urinishlar tugagandan keyin qurilmangizni qulfdan chiqarish uchun aloqa operatoringizga murojaat qilishingiz kerak.}other{SIM karta PIN kodi xato kiritildi, yana # marta urinishingiz mumkin. }}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="other">SIM kartaning PIN kodi noto‘g‘ri. Sizda yana <xliff:g id="NUMBER_1">%d</xliff:g> ta urinish qoldi.</item>
+      <item quantity="one">SIM karta PIN kodi noto‘g‘ri terildi, yana <xliff:g id="NUMBER_0">%d</xliff:g> marta uirinib ko‘rishingiz mumkin, urinishlar tugagandan keyin qurilmangizni qulfdan chiqarish uchun aloqa operatoringiz bilan bog‘lanishingiz kerak.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM kartadan foydalanib bo‘lmaydi. Operatoringizga murojaat qiling."</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{SIM karta PUK kodi xato kiritildi, yana # marta urinishdan keyin SIM kartadan umuman foydalanib boʻlmay qoladi.}other{SIM karta PUK kodi xato kiritildi, yana # marta urinishdan keyin SIM kartadan umuman foydalanib boʻlmay qoladi.}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="other">SIM kartaning PUK kodi noto‘g‘ri kiritildi. Yana <xliff:g id="NUMBER_1">%d</xliff:g> ta muvaffaqiyatsiz urinishdan keyin SIM karta butunlay ishdan chiqadi.</item>
+      <item quantity="one">SIM karta PUK kodi noto‘g‘ri terildi, yana <xliff:g id="NUMBER_0">%d</xliff:g> marta urinib ko‘rganingizdan keyin SIM kartadan umuman foydalanib bo‘lmaydi.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"SIM kartani qulfdan chiqarib bo‘lmadi!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM kartani qulfdan chiqarib bo‘lmadi!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Matn kiritish usulini almashtirish"</string>
@@ -84,9 +90,15 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Qurilma administrator tomonidan bloklangan"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Qurilma qo‘lda qulflangan"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Aniqlanmadi"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Yuz bilan ochish uchun kamera ruxsatini bering"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{SIM PIN kodini kiriting, qurilmani qulfdan chiqarish uchun sizda # ta urinish bor.}other{SIM karta PIN kodini kiriting. Sizda # ta urinish qoldi.}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM karta faolsizlantirildi. Davom etish uchun PUK kodni kiriting. Yana # marta xato qilsangiz, SIM kartangiz butunlay qulflanadi. Batafsil axborot olish uchun aloqa operatoriga murojaat qiling.}other{SIM karta faolsizlantirildi. Davom etish uchun PUK kodni kiriting. Yana # marta xato qilsangiz, SIM kartangiz butunlay qulflanadi. Batafsil axborot olish uchun aloqa operatoriga murojaat qiling.}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Yuz bilan ochish uchun Sozlamalar va maxfiylik orqali "<b>"kameraga kirishga ruxsat bering"</b></string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="other">SIM PIN kodini kiriting, sizda <xliff:g id="NUMBER_1">%d</xliff:g> ta urinish bor.</item>
+      <item quantity="one">SIM PIN kodini kiriting, qurilmani qulfdan chiqarish uchun sizda <xliff:g id="NUMBER_0">%d</xliff:g> ta urinish bor.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="other">SIM karta faolsizlantirildi. Davom etish uchun PUK kodni kiriting. Yana <xliff:g id="_NUMBER_1">%d</xliff:g> marta xato qilsangiz, SIM kartangiz butunlay qulflanadi. Batafsil axborot olish uchun tarmoq operatoriga murojaat qiling.</item>
+      <item quantity="one">SIM karta faolsizlantirildi. Davom etish uchun PUK kodni kiriting. Yana <xliff:g id="_NUMBER_0">%d</xliff:g> marta xato qilsangiz, SIM kartangiz butunlay qulflanadi. Batafsil axborot olish uchun tarmoq operatoriga murojaat qiling.</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"Odatiy"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Pufaklar"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analog"</string>

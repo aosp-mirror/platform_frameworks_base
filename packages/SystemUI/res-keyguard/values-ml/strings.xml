@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"അസാധുവായ കാർഡ്."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"ചാർജായി"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • വയർലെസ്സ് ആയി ചാർജ് ചെയ്യുന്നു"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ചാർജ് ചെയ്യുന്നു"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ചാർജിംഗ് ഡോക്ക്"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ചാർജ് ചെയ്യുന്നു"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • വേഗത്തിൽ ചാർജ് ചെയ്യുന്നു"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • പതുക്കെ ചാർജ് ചെയ്യുന്നു"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ബാറ്ററി പരിരക്ഷിക്കാൻ ചാർജിംഗ് താൽക്കാലികമായി നിർത്തി"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ചാർജിംഗ് താൽക്കാലികമായി പരിമിതപ്പെടുത്തിയിരിക്കുന്നു"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"അൺലോക്കുചെയ്യാൻ മെനു അമർത്തുക."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"നെറ്റ്‌വർക്ക് ലോക്കുചെയ്‌തു"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"സിം കാർഡില്ല"</string>
@@ -68,9 +68,15 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ നിങ്ങളുടെ പാസ്‌വേഡ് ‌തെറ്റായി ‌ടൈപ്പുചെയ്തു. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> സെക്കന്റിനു‌ശേഷം വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ അൺലോക്ക് പാറ്റേൺ ‌തെറ്റായി ‌വരച്ചു. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> സെക്കന്റിനു‌ശേഷം വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"സിം പിൻ കോഡ് തെറ്റാണ്, നിങ്ങളുടെ ഉപകരണം അൺലോക്കുചെയ്യാൻ ഇനി നിങ്ങളുടെ കാരിയറുമായി ബന്ധപ്പെടണം."</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{സിം പിൻ കോഡ് തെറ്റാണ്, # ശ്രമം ശേഷിക്കുന്നു, അതുകഴിഞ്ഞാൽ ഉപകരണം അൺലോക്ക് ചെയ്യാൻ സേവനദാതാവിനെ ബന്ധപ്പെണം.}other{സിം പിൻ കോഡ് തെറ്റാണ്, # ശ്രമങ്ങൾ ശേഷിക്കുന്നു. }}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="other">സിം പിൻ കോഡ് തെറ്റാണ്, നിങ്ങൾക്ക് <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി ശേഷിക്കുന്നു.</item>
+      <item quantity="one">സിം പിൻ കോഡ് തെറ്റാണ്, ഉപകരണം അൺലോക്കുചെയ്യാൻ സേവനദാതാവുമായി ബന്ധപ്പെടേണ്ടിവരുന്നതിനു മുമ്പായി നിങ്ങൾക്ക് <xliff:g id="NUMBER_0">%d</xliff:g> ശ്രമം കൂടി ശേഷിക്കുന്നു.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"സിം ഉപയോഗയോഗ്യമല്ല. നിങ്ങളുടെ കാരിയറെ ബന്ധപ്പെടുക."</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{സിം PUK കോഡ് തെറ്റാണ്, # ശ്രമം ശേഷിക്കുന്നു, അതുകഴിഞ്ഞാൽ സിം ശാശ്വതമായി ഉപയോഗശൂന്യമാകും.}other{സിം PUK കോഡ് തെറ്റാണ്, # ശ്രമങ്ങൾ ശേഷിക്കുന്നു, അതുകഴിഞ്ഞാൽ സിം ശാശ്വതമായി ഉപയോഗശൂന്യമാകും.}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="other">സിം PUK കോഡ് തെറ്റാണ്, സിം ശാശ്വതമായി ഉപയോഗശൂന്യമാകുന്നതിന് മുമ്പായി നിങ്ങൾക്ക് <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി ശേഷിക്കുന്നു.</item>
+      <item quantity="one">സിം PUK കോഡ് തെറ്റാണ്, സിം ശാശ്വതമായി ഉപയോഗശൂന്യമാകുന്നതിന് മുമ്പായി നിങ്ങൾക്ക് <xliff:g id="NUMBER_0">%d</xliff:g> ശ്രമം കൂടി ശേഷിക്കുന്നു.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"പിൻ ഉപയോഗിച്ച് സിം അൺലോക്കു‌ചെയ്യാനുള്ള ‌ശ്രമം പരാജയപ്പെട്ടു!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"PUK ഉപയോഗിച്ച് സിം അൺലോക്കു‌ചെയ്യാനുള്ള ‌ശ്രമം പരാജയപ്പെട്ടു!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"ഇൻപുട്ട് രീതി മാറുക"</string>
@@ -84,9 +90,15 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"ഉപകരണം അഡ്‌മിൻ ലോക്കുചെയ്തു"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ഉപകരണം നേരിട്ട് ലോക്കുചെയ്തു"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"തിരിച്ചറിയുന്നില്ല"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"ഫെയ്സ് അൺലോക്കിന് ക്രമീകരണത്തിൽ ക്യാമറാ ആക്സസ് ഓണാക്കൂ"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{സിം പിൻ നൽകുക. # ശ്രമം ശേഷിക്കുന്നു, അതുകഴിഞ്ഞാൽ ഉപകരണം അൺലോക്ക് ചെയ്യാൻ സേവനദാതാവിനെ ബന്ധപ്പെടണം.}other{സിം പിൻ നൽകുക. # ശ്രമങ്ങൾ ശേഷിക്കുന്നു.}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{സിം ഇപ്പോൾ പ്രവർത്തനരഹിതമായിരിക്കുന്നു. തുടരുന്നതിന് PUK കോഡ് നൽകുക. # ശ്രമം ശേഷിക്കുന്നു, അതുകഴിഞ്ഞാൽ സിം ശാശ്വതമായി ഉപയോഗശൂന്യമാകും. വിശദാംശങ്ങൾക്ക് സേവനദാതാവിനെ ബന്ധപ്പെടുക.}other{സിം ഇപ്പോൾ പ്രവർത്തനരഹിതമായിരിക്കുന്നു. തുടരുന്നതിന് PUK കോഡ് നൽകുക. # ശ്രമങ്ങൾ ശേഷിക്കുന്നു, അതുകഴിഞ്ഞാൽ സിം ശാശ്വതമായി ഉപയോഗശൂന്യമാകും. വിശദാംശങ്ങൾക്ക് സേവനദാതാവിനെ ബന്ധപ്പെടുക.}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"ഫെയ്‌സ് അൺലോക്ക് ഉപയോഗിക്കാൻ, ക്രമീകരണം &gt; സ്വകാര്യത എന്നതിൽ "<b>"ക്യാമറാ ആക്‌സസ്"</b>" ഓണാക്കുക"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="other">സിം പിൻ നൽകുക. നിങ്ങൾക്ക് <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി ശേഷിക്കുന്നു.</item>
+      <item quantity="one">സിം പിൻ നൽകുക. ഉപകരണം അൺലോക്ക് ചെയ്യാൻ കാരിയറുമായി ബന്ധപ്പെടേണ്ടിവരുന്നതിന് മുമ്പ് <xliff:g id="NUMBER_0">%d</xliff:g> ശ്രമം കൂടി ശേഷിക്കുന്നു.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="other">സിം ഇപ്പോൾ പ്രവർത്തനരഹിതമാക്കി. തുടരുന്നതിന് PUK കോഡ് നൽകുക. സിം ശാശ്വതമായി ഉപയോഗശൂന്യമാകുന്നതിന് മുമ്പായി <xliff:g id="_NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി ശേഷിക്കുന്നു. വിശദാംശങ്ങൾക്ക് കാരിയറുമായി ബന്ധപ്പെടുക.</item>
+      <item quantity="one">സിം ഇപ്പോൾ പ്രവർത്തനരഹിതമാക്കി. തുടരുന്നതിന് PUK കോഡ് നൽകുക. സിം ശാശ്വതമായി ഉപയോഗശൂന്യമാകുന്നതിന് മുമ്പായി <xliff:g id="_NUMBER_0">%d</xliff:g> ശ്രമം കൂടി ശേഷിക്കുന്നു. വിശദാംശങ്ങൾക്ക് കാരിയറുമായി ബന്ധപ്പെടുക.</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"ഡിഫോൾട്ട്"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"ബബിൾ"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"അനലോഗ്"</string>

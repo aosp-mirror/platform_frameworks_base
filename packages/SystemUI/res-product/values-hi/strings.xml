@@ -43,6 +43,4 @@
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"ज़्यादा विकल्प देखने के लिए, अपना फ़ोन अनलॉक करें"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"ज़्यादा विकल्प देखने के लिए, अपना टैबलेट अनलॉक करें"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"ज़्यादा विकल्प देखने के लिए, अपना डिवाइस अनलॉक करें"</string>
-    <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"मीडिया इस फ़ोन पर चल रहा है"</string>
-    <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"मीडिया इस टैबलेट पर चल रहा है"</string>
 </resources>

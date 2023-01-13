@@ -72,16 +72,13 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Dymek"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Zarządzaj"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Zamknięto dymek"</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Kliknij, aby zrestartować aplikację i zyskać lepszą widoczność."</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"Kliknij, by uruchomić tę aplikację ponownie i przejść w tryb pełnoekranowy."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Problemy z aparatem?\nKliknij, aby dopasować"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Naprawa się nie udała?\nKliknij, aby cofnąć"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Brak problemów z aparatem? Kliknij, aby zamknąć"</string>
-    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Zobacz i zrób więcej"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Przeciągnij drugą aplikację, aby podzielić ekran"</string>
-    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Kliknij dwukrotnie poza aplikacją, aby ją przenieść"</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Niektóre aplikacje działają najlepiej w orientacji pionowej"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Wypróbuj jedną z tych opcji, aby jak najlepiej wykorzystać miejsce"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Obróć urządzenie, aby przejść do pełnego ekranu"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Kliknij dwukrotnie obok aplikacji, aby ją przenieść"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"OK"</string>
-    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Rozwiń, aby wyświetlić więcej informacji."</string>
-    <string name="maximize_button_text" msgid="1650859196290301963">"Maksymalizuj"</string>
-    <string name="minimize_button_text" msgid="271592547935841753">"Minimalizuj"</string>
-    <string name="close_button_text" msgid="2913281996024033299">"Zamknij"</string>
 </resources>

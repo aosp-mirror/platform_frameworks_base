@@ -20,24 +20,24 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Introdu codul PIN"</string>
-    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Introdu modelul"</string>
-    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Introdu parola"</string>
+    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Introduceți codul PIN"</string>
+    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Introduceți modelul"</string>
+    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Introduceți parola"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Card nevalid"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Încărcată"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Se încarcă wireless"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Se încarcă"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Suport de încărcare"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Se încarcă"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Se încarcă rapid"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Se încarcă lent"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Încărcarea s-a întrerupt pentru a proteja bateria"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Apasă pe Meniu pentru a debloca."</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Încărcare limitată temporar"</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Apăsați pe Meniu pentru a debloca."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Rețea blocată"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Niciun card SIM"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"Introdu un card SIM."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"Cardul SIM lipsește sau nu poate fi citit. Introdu un card SIM."</string>
+    <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"Introduceți un card SIM."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"Cardul SIM lipsește sau nu poate fi citit. Introduceți un card SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"Card SIM inutilizabil."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="2490584154727897806">"Cardul SIM e dezactivat definitiv.\n Contactează furnizorul de servicii wireless pentru a obține un alt card SIM."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="2490584154727897806">"Cardul dvs. SIM este dezactivat definitiv.\n Contactați furnizorul de servicii wireless pentru a obține un alt card SIM."</string>
     <string name="keyguard_sim_locked_message" msgid="4343544458476911044">"Cardul SIM este blocat."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="6253830777745450550">"Cardul SIM este blocat cu codul PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="2394023844117630429">"Se deblochează cardul SIM…"</string>
@@ -45,35 +45,43 @@
     <string name="keyguard_accessibility_password" msgid="3524161948484801450">"Parola dispozitivului"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="6272116591533888062">"Zona codului PIN pentru cardul SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="5537294043180237374">"Zona codului PUK pentru cardul SIM"</string>
-    <string name="keyboardview_keycode_delete" msgid="8489719929424895174">"Șterge"</string>
-    <string name="disable_carrier_button_text" msgid="7153361131709275746">"Dezactivează cardul eSIM"</string>
+    <string name="keyboardview_keycode_delete" msgid="8489719929424895174">"Ștergeți"</string>
+    <string name="disable_carrier_button_text" msgid="7153361131709275746">"Dezactivați cardul eSIM"</string>
     <string name="error_disable_esim_title" msgid="3802652622784813119">"Nu se poate dezactiva cardul eSIM"</string>
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"Cardul eSIM nu poate fi dezactivat din cauza unei erori."</string>
-    <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Introdu"</string>
+    <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Introduceți"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"Model greșit"</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"Parolă greșită"</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"Cod PIN greșit"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Reîncearcă peste o secundă.}few{Reîncearcă peste # secunde.}other{Reîncearcă peste # de secunde.}}"</string>
-    <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Introdu codul PIN al cardului SIM."</string>
-    <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Introdu codul PIN al cardului SIM pentru „<xliff:g id="CARRIER">%1$s</xliff:g>”."</string>
-    <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Dezactivează cardul eSIM pentru a folosi dispozitivul fără serviciu mobil."</string>
-    <string name="kg_puk_enter_puk_hint" msgid="3005288372875367017">"Cardul SIM e acum dezactivat. Pentru a continua, introdu codul PUK. Pentru detalii, contactează operatorul."</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"Cardul SIM „<xliff:g id="CARRIER">%1$s</xliff:g>\" e acum dezactivat. Pentru a continua, introdu codul PUK. Pentru detalii, contactează operatorul."</string>
-    <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"Introdu codul PIN dorit"</string>
-    <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"Confirmă codul PIN dorit"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Reîncercați peste o secundă.}few{Reîncercați peste # secunde.}other{Reîncercați peste # de secunde.}}"</string>
+    <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Introduceți codul PIN al cardului SIM."</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Introduceți codul PIN al cardului SIM pentru „<xliff:g id="CARRIER">%1$s</xliff:g>”."</string>
+    <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Dezactivați cardul eSIM pentru a folosi dispozitivul fără serviciu mobil."</string>
+    <string name="kg_puk_enter_puk_hint" msgid="3005288372875367017">"Cardul SIM este acum dezactivat. Pentru a continua, introduceți codul PUK. Pentru detalii, contactați operatorul."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"Cardul SIM „<xliff:g id="CARRIER">%1$s</xliff:g>\" este acum dezactivat. Pentru a continua, introduceți codul PUK. Pentru detalii, contactați operatorul."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"Introduceți codul PIN dorit"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"Confirmați codul PIN dorit"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4251352015304070326">"Se deblochează cardul SIM…"</string>
-    <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Introdu un cod PIN alcătuit din 4 până la 8 cifre."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Introduceți un cod PIN alcătuit din 4 până la 8 cifre."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"Codul PUK trebuie să aibă minimum 8 cifre."</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Ai introdus incorect codul PIN de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori.\n\nÎncearcă din nou peste <xliff:g id="NUMBER_1">%2$d</xliff:g> secunde."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Ai introdus incorect parola de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori. \n\nÎncearcă din nou peste <xliff:g id="NUMBER_1">%2$d</xliff:g> secunde."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Ai desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori. \n\nÎncearcă din nou peste <xliff:g id="NUMBER_1">%2$d</xliff:g> secunde."</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Codul PIN pentru cardul SIM este incorect. Contactează operatorul pentru a debloca dispozitivul."</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{PIN-ul cardului SIM e incorect. Ți-a mai rămas # încercare, după care va trebui să contactezi operatorul pentru a debloca dispozitivul.}few{PIN-ul cardului SIM e incorect. Ți-au mai rămas # încercări. }other{PIN-ul cardului SIM e incorect. Ți-au mai rămas # de încercări. }}"</string>
-    <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"Cardul SIM nu poate fi utilizat. Contactează operatorul."</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Codul PUK pentru cardul SIM e incorect. Ți-a mai rămas # încercare până când cardul SIM va deveni inutilizabil definitiv.}few{Codul PUK pentru cardul SIM e incorect. Ți-au mai rămas # încercări până când cardul SIM va deveni inutilizabil definitiv.}other{Codul PUK pentru cardul SIM e incorect. Ți-au mai rămas # de încercări până când cardul SIM va deveni inutilizabil definitiv.}}"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Ați introdus incorect codul PIN de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori.\n\nÎncercați din nou peste <xliff:g id="NUMBER_1">%2$d</xliff:g> secunde."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Ați introdus incorect parola de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori. \n\nÎncercați din nou peste <xliff:g id="NUMBER_1">%2$d</xliff:g> secunde."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Ați desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori. \n\nÎncercați din nou peste <xliff:g id="NUMBER_1">%2$d</xliff:g> secunde."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Codul PIN pentru cardul SIM este incorect. Contactați operatorul pentru a vă debloca dispozitivul."</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="few">Codul PIN pentru cardul SIM este incorect. V-au mai rămas <xliff:g id="NUMBER_1">%d</xliff:g> încercări.</item>
+      <item quantity="other">Codul PIN pentru cardul SIM este incorect. V-au mai rămas <xliff:g id="NUMBER_1">%d</xliff:g> de încercări.</item>
+      <item quantity="one">Codul PIN pentru cardul SIM este incorect. V-a mai rămas <xliff:g id="NUMBER_0">%d</xliff:g> încercare, după care va trebui să contactați operatorul pentru a vă debloca dispozitivul.</item>
+    </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"Cardul SIM nu poate fi utilizat. Contactați operatorul."</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="few">Codul PUK pentru cardul SIM este incorect. V-au mai rămas <xliff:g id="NUMBER_1">%d</xliff:g> încercări până când cardul SIM va deveni inutilizabil definitiv.</item>
+      <item quantity="other">Codul PUK pentru cardul SIM este incorect. V-au mai rămas <xliff:g id="NUMBER_1">%d</xliff:g> de încercări până când cardul SIM va deveni inutilizabil definitiv.</item>
+      <item quantity="one">Codul PUK pentru cardul SIM este incorect. V-a mai rămas <xliff:g id="NUMBER_0">%d</xliff:g> încercare până când cardul SIM va deveni inutilizabil definitiv.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Deblocarea cu ajutorul codului PIN pentru cardul SIM nu a reușit!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Deblocarea cu ajutorul codului PUK pentru cardul SIM nu a reușit!"</string>
-    <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Schimbă metoda de introducere"</string>
+    <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Comutați metoda de introducere"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Mod Avion"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Modelul este necesar după repornirea dispozitivului"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Codul PIN este necesar după repornirea dispozitivului"</string>
@@ -84,9 +92,17 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Dispozitiv blocat de administrator"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Dispozitivul a fost blocat manual"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nu este recunoscut"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Pentru Deblocare facială, activează accesul la cameră"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Introdu PIN-ul cardului SIM. Ți-a mai rămas # încercare, după care va trebui să contactezi operatorul pentru a debloca dispozitivul.}few{Introdu PIN-ul cardului SIM. Ți-au rămas # încercări.}other{Introdu PIN-ul cardului SIM. Ți-au rămas # de încercări.}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{Cardul SIM e acum dezactivat. Introdu codul PUK pentru a continua. Ți-a mai rămas # încercare până când cardul SIM va deveni inutilizabil definitiv. Contactează operatorul pentru detalii.}few{Cardul SIM e acum dezactivat. Introdu codul PUK pentru a continua. Ți-au mai rămas # încercări până când cardul SIM va deveni inutilizabil definitiv. Contactează operatorul pentru detalii.}other{Cardul SIM e acum dezactivat. Introdu codul PUK pentru a continua. Ți-au mai rămas # de încercări până când cardul SIM va deveni inutilizabil definitiv. Contactează operatorul pentru detalii.}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Pentru a folosi Deblocarea facială, activați "<b>"Accesul la cameră"</b>" în Setări și confidențialitate"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="few">Introduceți codul PIN pentru cardul SIM. V-au mai rămas <xliff:g id="NUMBER_1">%d</xliff:g> încercări.</item>
+      <item quantity="other">Introduceți codul PIN pentru cardul SIM. V-au mai rămas <xliff:g id="NUMBER_1">%d</xliff:g> de încercări.</item>
+      <item quantity="one">Introduceți codul PIN pentru cardul SIM. V-a mai rămas <xliff:g id="NUMBER_0">%d</xliff:g> încercare, după care va trebui să contactați operatorul pentru a vă debloca dispozitivul.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="few">Cardul SIM este dezactivat acum. Introduceți codul PUK pentru a continua. V-au mai rămas <xliff:g id="_NUMBER_1">%d</xliff:g> încercări până când cardul SIM va deveni inutilizabil definitiv. Contactați operatorul pentru detalii.</item>
+      <item quantity="other">Cardul SIM este dezactivat acum. Introduceți codul PUK pentru a continua. V-au mai rămas <xliff:g id="_NUMBER_1">%d</xliff:g> de încercări până când cardul SIM va deveni inutilizabil definitiv. Contactați operatorul pentru detalii.</item>
+      <item quantity="one">Cardul SIM este dezactivat acum. Introduceți codul PUK pentru a continua. V-a mai rămas <xliff:g id="_NUMBER_0">%d</xliff:g> încercare până când cardul SIM va deveni inutilizabil definitiv. Contactați operatorul pentru detalii.</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"Prestabilit"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Balon"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analogic"</string>

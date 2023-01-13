@@ -68,7 +68,9 @@ internal open class ScreenshotPolicyImpl @Inject constructor(
     }
 
     override suspend fun isManagedProfile(@UserIdInt userId: Int): Boolean {
-        return withContext(bgDispatcher) { userMgr.isManagedProfile(userId) }
+        val managed = withContext(bgDispatcher) { userMgr.isManagedProfile(userId) }
+        Log.d(TAG, "isManagedProfile: $managed")
+        return managed
     }
 
     private fun nonPipVisibleTask(info: RootTaskInfo): Boolean {

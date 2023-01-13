@@ -28,11 +28,11 @@
     <string name="install_confirm_question_update" msgid="3348888852318388584">"আপুনি এই এপ্‌টো আপডে’ট কৰিবলৈ বিচাৰেনে?"</string>
     <string name="install_failed" msgid="5777824004474125469">"এপ্ ইনষ্টল কৰা হোৱা নাই।"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"পেকেজটোৰ ইনষ্টল অৱৰোধ কৰা হৈছে।"</string>
-    <string name="install_failed_conflict" msgid="3493184212162521426">"এপ্‌টো ইনষ্টল কৰিব পৰা নগ\'ল কাৰণ ইয়াৰ সৈতে আগৰে পৰা থকা এটা পেকেজৰ সংঘাত হৈছে।"</string>
-    <string name="install_failed_incompatible" product="tablet" msgid="6019021440094927928">"আপোনাৰ টেবলেটৰ সৈতে খাপ নোখোৱাৰ বাবে এপ্‌টো ইনষ্টল কৰা নহ\'ল।"</string>
-    <string name="install_failed_incompatible" product="tv" msgid="2890001324362291683">"আপোনাৰ টিভিত এই এপ্‌টো নচলে"</string>
-    <string name="install_failed_incompatible" product="default" msgid="7254630419511645826">"আপোনাৰ ফ\'নৰ সৈতে খাপ নোখোৱাৰ বাবে এপ্‌টো ইনষ্টল কৰা নহ\'ল।"</string>
-    <string name="install_failed_invalid_apk" msgid="8581007676422623930">"পেকেজটো মান্য নোহোৱাৰ বাবে এপ্‌টো ইনষ্টল কৰা নহ\'ল।"</string>
+    <string name="install_failed_conflict" msgid="3493184212162521426">"এপটো ইনষ্টল কৰিব পৰা নগ\'ল কাৰণ ইয়াৰ সৈতে আগৰে পৰা থকা এটা পেকেজৰ সংঘাত হৈছে।"</string>
+    <string name="install_failed_incompatible" product="tablet" msgid="6019021440094927928">"আপোনাৰ টেবলেটৰ সৈতে খাপ নোখোৱাৰ বাবে এপটো ইনষ্টল কৰা নহ\'ল।"</string>
+    <string name="install_failed_incompatible" product="tv" msgid="2890001324362291683">"আপোনাৰ টিভিত এই এপটো নচলে"</string>
+    <string name="install_failed_incompatible" product="default" msgid="7254630419511645826">"আপোনাৰ ফ\'নৰ সৈতে খাপ নোখোৱাৰ বাবে এপটো ইনষ্টল কৰা নহ\'ল।"</string>
+    <string name="install_failed_invalid_apk" msgid="8581007676422623930">"পেকেজটো মান্য নোহোৱাৰ বাবে এপটো ইনষ্টল কৰা নহ\'ল।"</string>
     <string name="install_failed_msg" product="tablet" msgid="6298387264270562442">"আপোনাৰ টে\'বলেটত <xliff:g id="APP_NAME">%1$s</xliff:g> ইনষ্টল কৰিব পৰা নগ\'ল৷"</string>
     <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"আপোনাৰ টিভিত <xliff:g id="APP_NAME">%1$s</xliff:g> ইনষ্টল কৰিব পৰা নগ\'ল।"</string>
     <string name="install_failed_msg" product="default" msgid="6484461562647915707">"আপোনাৰ ফ\'নত <xliff:g id="APP_NAME">%1$s</xliff:g> ইনষ্টল কৰিব পৰা নগ\'ল৷"</string>
@@ -44,21 +44,21 @@
     <string name="manage_applications" msgid="5400164782453975580">"এপ্ পৰিচালনা"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"খালী ঠাই নাই"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> ইনষ্টল কৰিব পৰা নগ\'ল। কিছু খালী ঠাই উলিয়াই আকৌ চেষ্টা কৰক৷"</string>
-    <string name="app_not_found_dlg_title" msgid="5107924008597470285">"এপ্‌টো পোৱা নগ\'ল"</string>
-    <string name="app_not_found_dlg_text" msgid="5219983779377811611">"ইনষ্টল কৰি ৰখা এপৰ তালিকাত এই এপ্‌টো পোৱা নগ\'ল।"</string>
+    <string name="app_not_found_dlg_title" msgid="5107924008597470285">"এপটো পোৱা নগ\'ল"</string>
+    <string name="app_not_found_dlg_text" msgid="5219983779377811611">"ইনষ্টল কৰি ৰখা এপৰ তালিকাত এই এপটো পোৱা নগ\'ল।"</string>
     <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"অনুমতি নাই"</string>
     <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"বর্তমানৰ ব্যৱহাৰকাৰীজনক এইটো আনইনষ্টল কৰিবলৈ অনুমতি দিয়া হোৱা নাই।"</string>
     <string name="generic_error_dlg_title" msgid="5863195085927067752">"আসোঁৱাহ"</string>
     <string name="generic_error_dlg_text" msgid="5287861443265795232">"এপ্ আনইনষ্টল কৰিব পৰা নগ\'ল।"</string>
     <string name="uninstall_application_title" msgid="4045420072401428123">"এপ্ আনইনষ্টল কৰক"</string>
     <string name="uninstall_update_title" msgid="824411791011583031">"আপডে’ট আনইনষ্টল কৰক"</string>
-    <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> হৈছে তলৰ এপ্‌টোৰ এটা অংশ:"</string>
-    <string name="uninstall_application_text" msgid="3816830743706143980">"আপুনি এই এপ্‌টো আনইনষ্টল কৰিব বিচাৰে নেকি?"</string>
-    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"আপুনি "<b>"সকলো"</b>" ব্যৱহাৰকাৰীৰ বাবে এই এপ্‌টো আনইনষ্টল কৰিব বিচাৰেনে? এপ্লিকেশ্বন আৰু ইয়াৰ ডেটা ডিভাইচটোত থকা "<b>"সকলো"</b>" ব্যৱহাৰকাৰীৰ পৰা আঁতৰোৱা হ\'ব৷"</string>
-    <string name="uninstall_application_text_user" msgid="498072714173920526">"আপুনি ব্যৱহাৰকাৰীৰ <xliff:g id="USERNAME">%1$s</xliff:g> বাবে এই এপ্‌টো আনইনষ্টল কৰিব বিচাৰেনে?"</string>
+    <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> হৈছে তলৰ এপটোৰ এটা অংশ:"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"আপুনি এই এপটো আনইনষ্টল কৰিব বিচাৰেনে?"</string>
+    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"আপুনি "<b>"সকলো"</b>" ব্যৱহাৰকাৰীৰ বাবে এই এপটো আনইনষ্টল কৰিব বিচাৰেনে? এপ্লিকেশ্বন আৰু ইয়াৰ ডেটা ডিভাইচটোত থকা "<b>"সকলো"</b>" ব্যৱহাৰকাৰীৰ পৰা আঁতৰোৱা হ\'ব৷"</string>
+    <string name="uninstall_application_text_user" msgid="498072714173920526">"আপুনি ব্যৱহাৰকাৰীৰ <xliff:g id="USERNAME">%1$s</xliff:g> বাবে এই এপটো আনইনষ্টল কৰিব বিচাৰেনে?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"আপুনি নিজৰ কৰ্মস্থানৰ প্ৰ’ফাইলৰ পৰা এই এপ্‌টো আনইনষ্টল কৰিব বিচাৰেনে?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"এই এপ্‌টোৰ ফেক্টৰী সংস্কৰণ ব্যৱহাৰ কৰিব বিচাৰেনে? আটাইবোৰ ডেটা মচা হ\'ব।"</string>
-    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"এই এপ্‌টোৰ ফেক্টৰী সংস্কৰণ ব্যৱহাৰ কৰিব বিচাৰেনে? সকলো ডেটা মচা হ\'ব। কর্মস্থানৰ প্ৰফাইল থকা ব্যৱহাৰকাৰীৰ লগতে ডিভাইচটোৰ সকলো ব্যৱহাৰকাৰীৰ ওপৰত ইয়াৰ প্ৰভাৱ পৰিব।"</string>
+    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"এই এপটোৰ ফেক্টৰী সংস্কৰণ ব্যৱহাৰ কৰিব বিচাৰেনে? সকলো ডেটা মচা হ\'ব। কর্মস্থানৰ প্ৰফাইল থকা ব্যৱহাৰকাৰীৰ লগতে ডিভাইচটোৰ সকলো ব্যৱহাৰকাৰীৰ ওপৰত ইয়াৰ প্ৰভাৱ পৰিব।"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"এপৰ ডেটাৰ <xliff:g id="SIZE">%1$s</xliff:g> ৰাখক"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"আনইনষ্টল কৰি থকা হৈছে"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"যিবোৰ আনইনষ্টল পৰা নগ\'ল"</string>
@@ -70,9 +70,9 @@
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> আনইনষ্টল কৰিব পৰা নগ\'ল।"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"ডিভাইচৰ সক্ৰিয় প্ৰশাসক এপ্ আনইনষ্টল কৰিব নোৱাৰি"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g>ৰ সক্ৰিয় ডিভাইচৰ প্ৰশাসকীয় এপ্ আনইনষ্টল কৰিব নোৱাৰি"</string>
-    <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"এই এপ্‌টো কিছুসংখ্যক ব্যৱহাৰকাৰী বা প্ৰ\'ফাইলৰ বাবে প্ৰয়োজনীয় আৰু বাকীসকলৰ বাবে ইয়াক আনইনষ্টল কৰা হৈছে"</string>
-    <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"আপোনাৰ প্ৰ\'ফাইলৰ বাবে এই এপ্‌টোৰ প্ৰয়োজন আছে গতিকে আনইনষ্টল কৰিব পৰা নাযায়।"</string>
-    <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"এই এপ্‌টো আনইনষ্টল কৰিব পৰা নাযায় কাৰণ আপোনাৰ ডিভাইচৰ প্ৰশাসকে এই এপ্ ৰখাটো বাধ্যতামূলক কৰি ৰাখিছে।"</string>
+    <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"এই এপটো কিছুসংখ্যক ব্যৱহাৰকাৰী বা প্ৰ\'ফাইলৰ বাবে প্ৰয়োজনীয় আৰু বাকীসকলৰ বাবে ইয়াক আনইনষ্টল কৰা হৈছে"</string>
+    <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"আপোনাৰ প্ৰ\'ফাইলৰ বাবে এই এপটোৰ প্ৰয়োজন আছে গতিকে আনইনষ্টল কৰিব পৰা নাযায়।"</string>
+    <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"এই এপটো আনইনষ্টল কৰিব পৰা নাযায় কাৰণ আপোনাৰ ডিভাইচৰ প্ৰশাসকে এই এপ্ ৰখাটো বাধ্যতামূলক কৰি ৰাখিছে।"</string>
     <string name="manage_device_administrators" msgid="3092696419363842816">"ডিভাইচৰ প্ৰশাসক এপসমূহ পৰিচালনা কৰক"</string>
     <string name="manage_users" msgid="1243995386982560813">"ব্যৱহাৰকাৰী পৰিচালনা কৰক"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> আনইনষ্টল কৰিব নোৱাৰি।"</string>
@@ -84,9 +84,9 @@
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"আপোনাৰ সুৰক্ষাৰ বাবে আপোনাৰ টেবলেটটোক বৰ্তমান এই উৎসটোৰ পৰা অজ্ঞাত এপ্‌ ইনষ্টল কৰাৰ অনুমতি দিয়া হোৱা নাই। আপুনি এইটো ছেটিঙত সলনি কৰিব পাৰে।"</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"আপোনাৰ সুৰক্ষাৰ বাবে আপোনাৰ টিভিটোক বৰ্তমান এই উৎসটোৰ পৰা অজ্ঞাত এপ্‌ ইনষ্টল কৰাৰ অনুমতি দিয়া হোৱা নাই। আপুনি এইটো ছেটিঙত সলনি কৰিব পাৰে।"</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"আপোনাৰ সুৰক্ষাৰ বাবে আপোনাৰ ফ’নটোক বৰ্তমান এই উৎসটোৰ পৰা অজ্ঞাত এপ্‌ ইনষ্টল কৰাৰ অনুমতি দিয়া হোৱা নাই। আপুনি এইটো ছেটিঙত সলনি কৰিব পাৰে।"</string>
-    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"আপোনাৰ ফ\'ন আৰু ব্যক্তিগত ডেটা অজ্ঞাত এপৰ আক্ৰমণৰ বলি হোৱাৰ সম্ভাৱনা অধিক। আপুনি এই এপ্‌টো ইনষ্টল কৰি এপ্‌টোৰ ব্যৱহাৰৰ ফলত আপোনাৰ টিভিত হ\'ব পৰা যিকোনো ক্ষতি বা ডেটা ক্ষয়ৰ বাবে আপুনি নিজে দায়ী হ\'ব বুলি সন্মতি দিয়ে।"</string>
-    <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"আপোনাৰ টেবলেট আৰু ব্যক্তিগত ডেটা অজ্ঞাত এপৰ আক্ৰমণৰ বলি হোৱাৰ সম্ভাৱনা অধিক। আপুনি এই এপ্‌টো ইনষ্টল কৰি এপ্‌টোৰ ব্যৱহাৰৰ ফলত আপোনাৰ টিভিত হ\'ব পৰা যিকোনো ক্ষতি বা ডেটা ক্ষয়ৰ বাবে আপুনি নিজে দায়ী হ\'ব বুলি সন্মতি দিয়ে।"</string>
-    <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"আপোনাৰ টিভি আৰু ব্যক্তিগত ডেটা অজ্ঞাত এপৰ আক্ৰমণৰ বলি হোৱাৰ সম্ভাৱনা অধিক। আপুনি এই এপ্‌টো ইনষ্টল কৰি এপ্‌টোৰ ব্যৱহাৰৰ ফলত আপোনাৰ টিভিত হ\'ব পৰা যিকোনো ক্ষতি বা ডেটা ক্ষয়ৰ বাবে আপুনি নিজে দায়ী হ\'ব বুলি সন্মতি দিয়ে।"</string>
+    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"আপোনাৰ ফ\'ন আৰু ব্যক্তিগত ডেটা অজ্ঞাত এপৰ আক্ৰমণৰ বলি হোৱাৰ সম্ভাৱনা অধিক। আপুনি এই এপটো ইনষ্টল কৰি এপটোৰ ব্যৱহাৰৰ ফলত আপোনাৰ টিভিত হ\'ব পৰা যিকোনো ক্ষতি বা ডেটা ক্ষয়ৰ বাবে আপুনি নিজে দায়ী হ\'ব বুলি সন্মতি দিয়ে।"</string>
+    <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"আপোনাৰ টেবলেট আৰু ব্যক্তিগত ডেটা অজ্ঞাত এপৰ আক্ৰমণৰ বলি হোৱাৰ সম্ভাৱনা অধিক। আপুনি এই এপটো ইনষ্টল কৰি এপটোৰ ব্যৱহাৰৰ ফলত আপোনাৰ টিভিত হ\'ব পৰা যিকোনো ক্ষতি বা ডেটা ক্ষয়ৰ বাবে আপুনি নিজে দায়ী হ\'ব বুলি সন্মতি দিয়ে।"</string>
+    <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"আপোনাৰ টিভি আৰু ব্যক্তিগত ডেটা অজ্ঞাত এপৰ আক্ৰমণৰ বলি হোৱাৰ সম্ভাৱনা অধিক। আপুনি এই এপটো ইনষ্টল কৰি এপটোৰ ব্যৱহাৰৰ ফলত আপোনাৰ টিভিত হ\'ব পৰা যিকোনো ক্ষতি বা ডেটা ক্ষয়ৰ বাবে আপুনি নিজে দায়ী হ\'ব বুলি সন্মতি দিয়ে।"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"অব্যাহত ৰাখক"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"ছেটিং"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"ৱেৰ এপসমূহ ইনষ্টল/আনইনষ্টল কৰি থকা হৈছে"</string>

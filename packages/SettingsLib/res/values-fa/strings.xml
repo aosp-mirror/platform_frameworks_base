@@ -117,17 +117,17 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"انتقال فایل"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"دستگاه ورودی"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"دسترسی به اینترنت"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"هم‌رسانی مخاطبین و سابقه تماس"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"استفاده برای هم‌رسانی مخاطبین و سابقه تماس"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"هم‌رسانی مخاطب"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"استفاده برای هم‌رسانی مخاطب"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"اشتراک‌گذاری اتصال اینترنت"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"پیام‌های نوشتاری"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"دسترسی سیم‌کارت"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"‏صدای HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"‏صدای HD"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"سمعک"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"صدای کم‌مصرف"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"سمعک‌ها"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"به سمعک متصل شد"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"به «صدای کم‌مصرف» وصل است"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"‏متصل به LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"به رسانه صوتی متصل شد"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"به تلفن صوتی متصل شد"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"به سرور انتقال فایل متصل شد"</string>
@@ -144,14 +144,14 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"استفاده برای تلفن صوتی"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"استفاده برای انتقال فایل"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"استفاده برای چاپ"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"استفاده کردن برای سمعک"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"استفاده برای سمعک‌ها"</string>
     <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"‏استفاده برای LE_AUDIO"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"مرتبط‌سازی"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"مرتبط‌سازی"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"لغو"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"وقتی وصل باشید، مرتبط‌سازی اجازه دسترسی به مخاطبین و سابقه تماستان را فراهم می‌کند."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"با <xliff:g id="DEVICE_NAME">%1$s</xliff:g> مرتبط‌سازی نشد."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"به‌دلیل پین یا گذرکلید نادرست، مرتبط‌سازی با <xliff:g id="DEVICE_NAME">%1$s</xliff:g> انجام نشد."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"به‌خاطر پین یا کلیدواژه نادرست، مرتبط‌سازی با <xliff:g id="DEVICE_NAME">%1$s</xliff:g> انجام نشد."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"ارتباط با <xliff:g id="DEVICE_NAME">%1$s</xliff:g> امکان‌پذیر نیست."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> مرتبط‌سازی را رد کرد."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"رایانه"</string>
@@ -184,7 +184,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"بعضی پیش‌فرض‌ها تنظیم شده‌اند"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"پیش‌فرضی تنظیم نشده است"</string>
     <string name="tts_settings" msgid="8130616705989351312">"تنظیمات متن به گفتار"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"خروجی نوشتار به گفتار"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"خروجی تبدیل متن به گفتار"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"سرعت گفتار"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"سرعتی که متن خوانده می‌شود"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"زیر و بمی صدا"</string>
@@ -312,7 +312,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"نمایش گزینه‌ها برای گواهینامه نمایش بی‌سیم"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"‏افزایش سطح گزارش‌گیری Wi‑Fi، نمایش به ازای SSID RSSI در انتخاب‌کننده Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"تخلیه باتری راکاهش می‌دهد و عملکرد شبکه را بهبود می‌بخشد"</string>
-    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"اگر این حالت فعال باشد، هر بار این دستگاه به شبکه‌ای متصل شود که تصادفی‌سازی «واپایش دسترسی رسانه» در آن فعال است، ممکن است «مک آدرس» آن تغییر کند."</string>
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"اگر این حالت فعال باشد، هر بار این دستگاه به شبکه‌ای متصل شود که تصادفی‌سازی «واپایش دسترسی رسانه» در آن فعال است، ممکن است «نشانی واد» آن تغییر کند."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"محدودشده"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"محدودنشده"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"اندازه‌های حافظه موقت ثبت‌کننده"</string>
@@ -408,7 +408,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"بدون توجه به مقادیر مانیفست، اندازه همه فعالیت‌ها برای حالت چند پنجره‌ای می‌تواند تغییر کند."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"فعال کردن پنجره‌های آزاد"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"فعال کردن پشتیبانی برای پنجره‌های آزاد آزمایشی."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"حالت رایانه"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"گذرواژه پشتیبان‌گیری محلی"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"پشتیبان‌گیری کامل رایانه درحال حاضر محافظت نمی‌شود"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"برای تغییر یا حذف گذرواژه برای نسخه‌های پشتیبان کامل رایانه‌ای ضربه بزنید"</string>
@@ -477,13 +476,12 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - ‏<xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> تا شارژ کامل باقی مانده است"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> تا شارژ کامل باقی مانده است"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - شارژ موقتاً متوقف شده است"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - شارژ موقتاً محدود شده است"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ناشناس"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"در حال شارژ شدن"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"درحال شارژ شدن سریع"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"درحال شارژ شدن آهسته"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"درحال شارژ بی‌سیم"</string>
-    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"درحال شارژ شدن"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"شارژ نمی‌شود"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"متصل، شارژ نمی‌شود"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"شارژ کامل شد"</string>
@@ -531,7 +529,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"زنگ‌های هشدار و یادآوری‌ها"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"مجاز کردن تنظیم زنگ ساعت و یادآوری"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"زنگ‌های ساعت و یادآوری‌ها"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"به این برنامه اجازه می‌دهد زنگ ساعت تنظیم کند و کنش‌های حساس به زمان را زمان‌بندی کند. این تنظیم به برنامه اجازه می‌دهد در پس‌زمینه اجرا شود که ممکن است باتری بیشتری مصرف کند.\n\nاگر این اجازه خاموش باشد، زنگ‌های ساعت موجود و رویدادهای زمان‌محور که این برنامه زمان‌بندی کرده است کار نخواهند کرد."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"به این برنامه اجازه می‌دهد زنگ ساعت تنظیم کند و کنش‌های حساس به زمان زمان‌بندی کند. این تنظیم به برنامه اجازه می‌دهد در پس‌زمینه اجرا شود که ممکن است باتری بیشتری مصرف کند.\n\nاگر این اجازه خاموش باشد، زنگ‌های ساعت موجود و رویدادهای مبتنی بر زمان که این برنامه زمان‌بندی کرده است کار نخواهند کرد."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"زمان‌بندی، زنگ ساعت، یادآوری، ساعت"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"روشن کردن"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"روشن کردن «مزاحم نشوید»"</string>
@@ -577,7 +575,7 @@
     <string name="user_setup_dialog_message" msgid="269931619868102841">"مطمئن شوید شخص در دسترس است تا دستگاه را بگیرد و فضایش را تنظیم کند"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"اکنون نمایه را تنظیم می‌کنید؟"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"اکنون تنظیم شود"</string>
-    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"حالا نه"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"اکنون نه"</string>
     <string name="user_add_user_type_title" msgid="551279664052914497">"افزودن"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"کاربر جدید"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"نمایه جدید"</string>
@@ -656,6 +654,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"اترنت قطع شد."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"اترنت."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"تماس گرفته نشود."</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"ساعت"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"تاریخ"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"آب‌وهوا"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"کیفیت هوا"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"اطلاعات ارسال محتوا"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"انتخاب عکس نمایه"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"نماد کاربر پیش‌فرض"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"صفحه‌کلید فیزیکی"</string>
@@ -664,11 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"روشن کردن صفحه‌نمایش"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"اعطای اجازه برای روشن کردن صفحه‌نمایش"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"به برنامه اجازه می‌دهد صفحه‌نمایش را روشن کند. اگر اجازه داده شود، ممکن است این برنامه در هر زمانی بدون هدف صریح شما صفحه‌نمایش را روشن کند."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"اسکن رمزینه پاسخ‌سریع"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"برای گوش دادن، رمزینه پاسخ‌سریع زیر را در مرکز کادر قرار دهید"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"قالب رمزینه پاسخ‌سریع معتبر نیست"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"همه‌فرستی <xliff:g id="APP_NAME">%1$s</xliff:g> متوقف شود؟"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"اگر <xliff:g id="SWITCHAPP">%1$s</xliff:g> را همه‌فرستی کنید یا خروجی را تغییر دهید، همه‌فرستی کنونی متوقف خواهد شد"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"همه‌فرستی <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"تغییر خروجی"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"پویانمایی‌های اشاره برگشت پیش‌گویانه"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"پویانمایی‌های سیستم را برای اشاره برگشت پیش‌گویانه فعال کنید."</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"‏این تنظیم پویانمایی‌های سیستم را برای پویانمایی اشاره برگشت پیش‌بینانه فعال می‌کند. این تنظیم مستلزم تنظیم شدن enableOnBackInvokedCallback مربوط به هر برنامه روی صحیح در فایل مانیفست است."</string>
 </resources>

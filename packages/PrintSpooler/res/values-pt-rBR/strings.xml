@@ -57,7 +57,6 @@
     <string name="print_forget_printer" msgid="5035287497291910766">"Esquecer impressora"</string>
     <plurals name="print_search_result_count_utterance" formatted="false" msgid="6997663738361080868">
       <item quantity="one"><xliff:g id="COUNT_1">%1$s</xliff:g> impressoras encontradas</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%1$s</xliff:g> printers found</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g> impressoras encontradas</item>
     </plurals>
     <string name="printer_extended_description_template" msgid="1366699227703381874">"<xliff:g id="PRINT_SERVICE_LABEL">%1$s</xliff:g> - <xliff:g id="PRINTER_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -78,7 +77,6 @@
     <string name="all_services_title" msgid="5578662754874906455">"Todos os serviços"</string>
     <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
       <item quantity="one">Instale para encontrar <xliff:g id="COUNT_1">%1$s</xliff:g> impressoras</item>
-      <item quantity="many">Install to discover <xliff:g id="COUNT_1">%1$s</xliff:g> printers</item>
       <item quantity="other">Instale para encontrar <xliff:g id="COUNT_1">%1$s</xliff:g> impressoras</item>
     </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"Imprimindo <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>

@@ -52,6 +52,7 @@ import com.android.internal.util.ScreenshotHelper;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
@@ -69,7 +70,7 @@ import dagger.Lazy;
  * Class to register system actions with accessibility framework.
  */
 @SysUISingleton
-public class SystemActions extends CoreStartable {
+public class SystemActions implements CoreStartable {
     private static final String TAG = "SystemActions";
 
     /**
@@ -177,20 +178,24 @@ public class SystemActions extends CoreStartable {
     private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
 
     private final SystemActionsBroadcastReceiver mReceiver;
+    private final Context mContext;
     private final Optional<Recents> mRecentsOptional;
     private Locale mLocale;
     private final AccessibilityManager mA11yManager;
     private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final NotificationShadeWindowController mNotificationShadeController;
+    private final ShadeController mShadeController;
     private final StatusBarWindowCallback mNotificationShadeCallback;
     private boolean mDismissNotificationShadeActionRegistered;
 
     @Inject
     public SystemActions(Context context,
             NotificationShadeWindowController notificationShadeController,
+            ShadeController shadeController,
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             Optional<Recents> recentsOptional) {
-        super(context);
+        mContext = context;
+        mShadeController = shadeController;
         mRecentsOptional = recentsOptional;
         mReceiver = new SystemActionsBroadcastReceiver();
         mLocale = mContext.getResources().getConfiguration().getLocales().get(0);
@@ -219,7 +224,6 @@ public class SystemActions extends CoreStartable {
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
         final Locale locale = mContext.getResources().getConfiguration().getLocales().get(0);
         if (!locale.equals(mLocale)) {
             mLocale = locale;
@@ -291,8 +295,11 @@ public class SystemActions extends CoreStartable {
         mA11yManager.registerSystemAction(actionBack, SYSTEM_ACTION_ID_BACK);
         mA11yManager.registerSystemAction(actionHome, SYSTEM_ACTION_ID_HOME);
         mA11yManager.registerSystemAction(actionRecents, SYSTEM_ACTION_ID_RECENTS);
-        mA11yManager.registerSystemAction(actionNotifications, SYSTEM_ACTION_ID_NOTIFICATIONS);
-        mA11yManager.registerSystemAction(actionQuickSettings, SYSTEM_ACTION_ID_QUICK_SETTINGS);
+        if (mCentralSurfacesOptionalLazy.get().isPresent()) {
+            // These two actions require the CentralSurfaces instance.
+            mA11yManager.registerSystemAction(actionNotifications, SYSTEM_ACTION_ID_NOTIFICATIONS);
+            mA11yManager.registerSystemAction(actionQuickSettings, SYSTEM_ACTION_ID_QUICK_SETTINGS);
+        }
         mA11yManager.registerSystemAction(actionPowerDialog, SYSTEM_ACTION_ID_POWER_DIALOG);
         mA11yManager.registerSystemAction(actionLockScreen, SYSTEM_ACTION_ID_LOCK_SCREEN);
         mA11yManager.registerSystemAction(actionTakeScreenshot, SYSTEM_ACTION_ID_TAKE_SCREENSHOT);
@@ -526,9 +533,7 @@ public class SystemActions extends CoreStartable {
     }
 
     private void handleAccessibilityDismissNotificationShade() {
-        mCentralSurfacesOptionalLazy.get().ifPresent(
-                centralSurfaces -> centralSurfaces.animateCollapsePanels(
-                        CommandQueue.FLAG_EXCLUDE_NONE, false /* force */));
+        mShadeController.animateCollapseShade(CommandQueue.FLAG_EXCLUDE_NONE);
     }
 
     private void handleDpadUp() {

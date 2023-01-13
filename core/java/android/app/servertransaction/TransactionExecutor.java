@@ -126,10 +126,13 @@ public class TransactionExecutor {
             final ClientTransactionItem item = callbacks.get(i);
             if (DEBUG_RESOLVER) Slog.d(TAG, tId(transaction) + "Resolving callback: " + item);
             final int postExecutionState = item.getPostExecutionState();
-            final int closestPreExecutionState = mHelper.getClosestPreExecutionState(r,
-                    item.getPostExecutionState());
-            if (closestPreExecutionState != UNDEFINED) {
-                cycleToPath(r, closestPreExecutionState, transaction);
+
+            if (item.shouldHaveDefinedPreExecutionState()) {
+                final int closestPreExecutionState = mHelper.getClosestPreExecutionState(r,
+                        item.getPostExecutionState());
+                if (closestPreExecutionState != UNDEFINED) {
+                    cycleToPath(r, closestPreExecutionState, transaction);
+                }
             }
 
             item.execute(mTransactionHandler, token, mPendingActions);
@@ -223,7 +226,8 @@ public class TransactionExecutor {
                     break;
                 case ON_RESUME:
                     mTransactionHandler.handleResumeActivity(r, false /* finalStateRequest */,
-                            r.isForward, "LIFECYCLER_RESUME_ACTIVITY");
+                            r.isForward, false /* shouldSendCompatFakeFocus */,
+                            "LIFECYCLER_RESUME_ACTIVITY");
                     break;
                 case ON_PAUSE:
                     mTransactionHandler.handlePauseActivity(r, false /* finished */,

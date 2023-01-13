@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 
 
 import android.os.Handler;
+import android.service.quicksettings.Tile;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -38,6 +39,7 @@ import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tiles.dialog.InternetDialogFactory;
 import com.android.systemui.statusbar.connectivity.AccessPointController;
+import com.android.systemui.statusbar.connectivity.IconState;
 import com.android.systemui.statusbar.connectivity.NetworkController;
 
 import org.junit.Before;
@@ -112,5 +114,25 @@ public class InternetTileTest extends SysuiTestCase {
         assertThat(String.valueOf(mTile.getState().secondaryLabel))
             .isNotEqualTo(mContext.getString(R.string.quick_settings_networks_available));
         assertThat(mTile.getLastTileState()).isEqualTo(-1);
+    }
+
+    @Test
+    public void setIsAirplaneMode_APM_enabled_wifi_disabled() {
+        IconState state = new IconState(true, 0, "");
+        mTile.mSignalCallback.setIsAirplaneMode(state);
+        mTestableLooper.processAllMessages();
+        assertThat(mTile.getState().state).isEqualTo(Tile.STATE_INACTIVE);
+        assertThat(mTile.getState().secondaryLabel)
+            .isEqualTo(mContext.getString(R.string.status_bar_airplane));
+    }
+
+    @Test
+    public void setIsAirplaneMode_APM_enabled_wifi_enabled() {
+        IconState state = new IconState(false, 0, "");
+        mTile.mSignalCallback.setIsAirplaneMode(state);
+        mTestableLooper.processAllMessages();
+        assertThat(mTile.getState().state).isEqualTo(Tile.STATE_ACTIVE);
+        assertThat(mTile.getState().secondaryLabel)
+            .isNotEqualTo(mContext.getString(R.string.status_bar_airplane));
     }
 }

@@ -41,6 +41,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -59,6 +60,8 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
 import java.util.Optional;
+
+import dagger.Lazy;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -84,6 +87,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     @Mock private Vibrator mVibrator;
     @Mock private StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     @Mock private SystemBarAttributesListener mSystemBarAttributesListener;
+    @Mock private Lazy<CameraLauncher> mCameraLauncherLazy;
 
     CentralSurfacesCommandQueueCallbacks mSbcqCallbacks;
 
@@ -115,7 +119,8 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 Optional.of(mVibrator),
                 new DisableFlagsLogger(),
                 DEFAULT_DISPLAY,
-                mSystemBarAttributesListener);
+                mSystemBarAttributesListener,
+                mCameraLauncherLazy);
 
         when(mDeviceProvisionedController.isCurrentUserSetup()).thenReturn(true);
         when(mRemoteInputQuickSettingsDisabler.adjustDisableFlags(anyInt()))
@@ -131,7 +136,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 StatusBarManager.DISABLE2_NOTIFICATION_SHADE, false);
 
         verify(mCentralSurfaces).updateQsExpansionEnabled();
-        verify(mShadeController).animateCollapsePanels();
+        verify(mShadeController).animateCollapseShade();
 
         // Trying to open it does nothing.
         mSbcqCallbacks.animateExpandNotificationsPanel();
@@ -149,7 +154,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
         mSbcqCallbacks.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NONE,
                 StatusBarManager.DISABLE2_NONE, false);
         verify(mCentralSurfaces).updateQsExpansionEnabled();
-        verify(mShadeController, never()).animateCollapsePanels();
+        verify(mShadeController, never()).animateCollapseShade();
 
         // Can now be opened.
         mSbcqCallbacks.animateExpandNotificationsPanel();

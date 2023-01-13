@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"کارت نامعتبر"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"شارژ کامل شد"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • درحال شارژ بی‌سیم"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • درحال شارژ شدن"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • پایه شارژ"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • درحال شارژ شدن"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • درحال شارژ سریع"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • آهسته‌آهسته شارژ می‌شود"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • برای محافظت از باتری، شارژ موقتاً متوقف شده است"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • شارژ موقتاً محدود شده است"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"برای باز کردن قفل روی «منو» فشار دهید."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"شبکه قفل شد"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"سیم‌کارت موجود نیست"</string>
@@ -68,9 +68,15 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"گذرواژه خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه تایپ کردید. \n\nپس از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"الگوی بازگشایی قفل را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‌اید. \n\nلطفاً پس‌از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"کد پین سیم‌کارت اشتباه است، اکنون برای باز کردن قفل دستگاهتان باید با شرکت مخابراتی تماس بگیرید."</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{کد پین سیم‌کارت اشتباه است. # فرصت دیگر باقی مانده است و پس‌از آن برای باز کردن قفل دستگاه باید با شرکت مخابراتی‌تان تماس بگیرید.}one{کد پین سیم‌کارت اشتباه است، # فرصت دیگر دارید. }other{کد پین سیم‌کارت اشتباه است، # فرصت دیگر دارید. }}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="one">کد پین سیم‌کارت اشتباه است، <xliff:g id="NUMBER_1">%d</xliff:g> بار دیگر می‌توانید تلاش کنید.</item>
+      <item quantity="other">کد پین سیم‌کارت اشتباه است، <xliff:g id="NUMBER_1">%d</xliff:g> بار دیگر می‌توانید تلاش کنید.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"سیم‌کارت غیرقابل استفاده است. با شرکت مخابراتی‌تان تماس بگیرید."</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{‏کد PUK سیم‌کارت اشتباه است، # فرصت دیگر باقی مانده است و پس‌از آن سیم‌کارت برای همیشه غیرقابل‌استفاده می‌شود.}one{‏کد PUK سیم‌کارت اشتباه است، # فرصت دیگر باقی مانده است و پس‌از آن سیم‌کارت برای همیشه غیرقابل‌استفاده می‌شود.}other{‏کد PUK سیم‌کارت اشتباه است، # فرصت دیگر باقی مانده است و پس‌از آن سیم‌کارت برای همیشه غیرقابل‌استفاده می‌شود.}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="one">‏کد PUK سیم‌کارت اشتباه است، <xliff:g id="NUMBER_1">%d</xliff:g> بار دیگر می‌توانید تلاش کنید و پس از آن سیم‌کارت برای همیشه غیرقابل استفاده می‌شود.</item>
+      <item quantity="other">‏کد PUK سیم‌کارت اشتباه است، <xliff:g id="NUMBER_1">%d</xliff:g> بار دیگر می‌توانید تلاش کنید و پس از آن سیم‌کارت برای همیشه غیرقابل استفاده می‌شود.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"عملیات پین سیم‌کارت ناموفق بود!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"‏عملیات PUK سیم‌کارت ناموفق بود!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"تغییر روش ورودی"</string>
@@ -84,9 +90,15 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"دستگاه توسط سرپرست سیستم قفل شده است"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"دستگاه به‌صورت دستی قفل شده است"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"شناسایی نشد"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"برای استفاده از قفل‌گشایی با چهره، دسترسی دوربین را در تنظیمات روشن کنید"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{پین سیم‌کارت را وارد کنید. # فرصت دیگر باقی مانده است و پس‌از آن برای باز کردن قفل دستگاه باید با شرکت مخابراتی‌تان تماس بگیرید.}one{پین سیم‌کارت را وارد کنید. # فرصت دیگر باقی مانده است.}other{پین سیم‌کارت را وارد کنید. # فرصت دیگر باقی مانده است.}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{‏سیم‌کارت اکنون غیرفعال است. برای ادامه دادن، کد PUK را وارد کنید. # فرصت دیگر باقی مانده است و پس‌از آن سیم‌کارت برای همیشه غیرقابل‌استفاده می‌شود. برای اطلاع از جزئیات، با شرکت مخابراتی تماس بگیرید.}one{‏سیم‌کارت اکنون غیرفعال است. برای ادامه دادن، کد PUK را وارد کنید. # فرصت دیگر باقی مانده است و پس‌از آن سیم‌کارت برای همیشه غیرقابل‌استفاده می‌شود. برای اطلاع از جزئیات، با شرکت مخابراتی تماس بگیرید.}other{‏سیم‌کارت اکنون غیرفعال است. برای ادامه دادن، کد PUK را وارد کنید. # فرصت دیگر باقی مانده است و پس‌از آن سیم‌کارت برای همیشه غیرقابل‌استفاده می‌شود. برای اطلاع از جزئیات، با شرکت مخابراتی تماس بگیرید.}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"‏برای استفاده از «قفل‌گشایی با چهره»، "<b>"دسترسی به دوربین"</b>" را در «تنظیمات &gt; حریم‌خصوصی» روشن کنید"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="one">پین سیم‌کارت را وارد کنید. <xliff:g id="NUMBER_1">%d</xliff:g> تلاش دیگری باقی مانده است.</item>
+      <item quantity="other">پین سیم‌کارت را وارد کنید. <xliff:g id="NUMBER_1">%d</xliff:g> تلاش دیگری باقی مانده است.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="one">‏سیم‌کارت اکنون غیرفعال است. برای ادامه دادن کد PUK را وارد کنید. <xliff:g id="_NUMBER_1">%d</xliff:g> تلاش دیگر باقی مانده است و پس از آن سیم‌کارت برای همیشه غیرقابل‌استفاده می‌شود. برای اطلاع از جزئیات با شرکت مخابراتی تماس بگیرید.</item>
+      <item quantity="other">‏سیم‌کارت اکنون غیرفعال است. برای ادامه دادن کد PUK را وارد کنید. <xliff:g id="_NUMBER_1">%d</xliff:g> تلاش دیگر باقی مانده است و پس از آن سیم‌کارت برای همیشه غیرقابل‌استفاده می‌شود. برای اطلاع از جزئیات با شرکت مخابراتی تماس بگیرید.</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"پیش‌فرض"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"حباب"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"آنالوگ"</string>

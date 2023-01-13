@@ -16,33 +16,52 @@
 
 package com.android.systemui.biometrics;
 
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.view.WindowInsets.Type.ime;
+
 import android.annotation.NonNull;
 import android.content.Context;
+import android.graphics.Insets;
 import android.os.UserHandle;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
+import android.view.View;
+import android.view.View.OnApplyWindowInsetsListener;
+import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImeAwareEditText;
 import android.widget.TextView;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
 
 import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.VerifyCredentialResponse;
+import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+
+import java.io.PrintWriter;
 
 /**
  * Pin and Password UI
  */
 public class AuthCredentialPasswordView extends AuthCredentialView
-        implements TextView.OnEditorActionListener {
+        implements TextView.OnEditorActionListener, OnApplyWindowInsetsListener, Dumpable {
 
     private static final String TAG = "BiometricPrompt/AuthCredentialPasswordView";
 
     private final InputMethodManager mImm;
     private ImeAwareEditText mPasswordField;
+    private ViewGroup mAuthCredentialHeader;
+    private ViewGroup mAuthCredentialInput;
+    private int mBottomInset = 0;
+    private OnBackInvokedDispatcher mOnBackInvokedDispatcher;
+    private final OnBackInvokedCallback mBackCallback = this::onBackInvoked;
 
     public AuthCredentialPasswordView(Context context,
             AttributeSet attrs) {
@@ -53,6 +72,9 @@ public class AuthCredentialPasswordView extends AuthCredentialView
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+
+        mAuthCredentialHeader = findViewById(R.id.auth_credential_header);
+        mAuthCredentialInput = findViewById(R.id.auth_credential_input);
         mPasswordField = findViewById(R.id.lockPassword);
         mPasswordField.setOnEditorActionListener(this);
         // TODO: De-dupe the logic with AuthContainerView
@@ -61,11 +83,17 @@ public class AuthCredentialPasswordView extends AuthCredentialView
                 return false;
             }
             if (event.getAction() == KeyEvent.ACTION_UP) {
-                mContainerView.sendEarlyUserCanceled();
-                mContainerView.animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED);
+                onBackInvoked();
             }
             return true;
         });
+
+        setOnApplyWindowInsetsListener(this);
+    }
+
+    private void onBackInvoked() {
+        mContainerView.sendEarlyUserCanceled();
+        mContainerView.animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED);
     }
 
     @Override
@@ -80,6 +108,12 @@ public class AuthCredentialPasswordView extends AuthCredentialView
 
         mPasswordField.requestFocus();
         mPasswordField.scheduleShowSoftInput();
+
+        mOnBackInvokedDispatcher = findOnBackInvokedDispatcher();
+        if (mOnBackInvokedDispatcher != null) {
+            mOnBackInvokedDispatcher.registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT, mBackCallback);
+        }
     }
 
     @Override
@@ -117,6 +151,15 @@ public class AuthCredentialPasswordView extends AuthCredentialView
     }
 
     @Override
+    public void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (mOnBackInvokedDispatcher != null) {
+            mOnBackInvokedDispatcher.unregisterOnBackInvokedCallback(mBackCallback);
+            mOnBackInvokedDispatcher = null;
+        }
+    }
+
+    @Override
     protected void onCredentialVerified(@NonNull VerifyCredentialResponse response,
             int timeoutMs) {
         super.onCredentialVerified(response, timeoutMs);
@@ -126,5 +169,93 @@ public class AuthCredentialPasswordView extends AuthCredentialView
         } else {
             mPasswordField.setText("");
         }
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+
+        if (mAuthCredentialInput == null || mAuthCredentialHeader == null || mSubtitleView == null
+                || mDescriptionView == null || mPasswordField == null || mErrorView == null) {
+            return;
+        }
+
+        int inputLeftBound;
+        int inputTopBound;
+        int headerRightBound = right;
+        int headerTopBounds = top;
+        final int subTitleBottom = (mSubtitleView.getVisibility() == GONE) ? mTitleView.getBottom()
+                : mSubtitleView.getBottom();
+        final int descBottom = (mDescriptionView.getVisibility() == GONE) ? subTitleBottom
+                : mDescriptionView.getBottom();
+        if (getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE) {
+            inputTopBound = (bottom - mAuthCredentialInput.getHeight()) / 2;
+            inputLeftBound = (right - left) / 2;
+            headerRightBound = inputLeftBound;
+            headerTopBounds -= Math.min(mIconView.getBottom(), mBottomInset);
+        } else {
+            inputTopBound =
+                    descBottom + (bottom - descBottom - mAuthCredentialInput.getHeight()) / 2;
+            inputLeftBound = (right - left - mAuthCredentialInput.getWidth()) / 2;
+        }
+
+        if (mDescriptionView.getBottom() > mBottomInset) {
+            mAuthCredentialHeader.layout(left, headerTopBounds, headerRightBound, bottom);
+        }
+        mAuthCredentialInput.layout(inputLeftBound, inputTopBound, right, bottom);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        final int newWidth = MeasureSpec.getSize(widthMeasureSpec);
+        final int newHeight = MeasureSpec.getSize(heightMeasureSpec) - mBottomInset;
+
+        setMeasuredDimension(newWidth, newHeight);
+
+        final int halfWidthSpec = MeasureSpec.makeMeasureSpec(getWidth() / 2,
+                MeasureSpec.AT_MOST);
+        final int fullHeightSpec = MeasureSpec.makeMeasureSpec(newHeight, MeasureSpec.UNSPECIFIED);
+        if (getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE) {
+            measureChildren(halfWidthSpec, fullHeightSpec);
+        } else {
+            measureChildren(widthMeasureSpec, fullHeightSpec);
+        }
+    }
+
+    @NonNull
+    @Override
+    public WindowInsets onApplyWindowInsets(@NonNull View v, WindowInsets insets) {
+
+        final Insets bottomInset = insets.getInsets(ime());
+        if (v instanceof AuthCredentialPasswordView && mBottomInset != bottomInset.bottom) {
+            mBottomInset = bottomInset.bottom;
+            if (mBottomInset > 0
+                    && getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE) {
+                mTitleView.setSingleLine(true);
+                mTitleView.setEllipsize(TextUtils.TruncateAt.MARQUEE);
+                mTitleView.setMarqueeRepeatLimit(-1);
+                // select to enable marquee unless a screen reader is enabled
+                mTitleView.setSelected(!mAccessibilityManager.isEnabled()
+                        || !mAccessibilityManager.isTouchExplorationEnabled());
+            } else {
+                mTitleView.setSingleLine(false);
+                mTitleView.setEllipsize(null);
+                // select to enable marquee unless a screen reader is enabled
+                mTitleView.setSelected(false);
+            }
+            requestLayout();
+        }
+        return insets;
+    }
+
+    @Override
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+        pw.println(TAG + "State:");
+        pw.println("  mBottomInset=" + mBottomInset);
+        pw.println("  mAuthCredentialHeader size=(" + mAuthCredentialHeader.getWidth() + ","
+                + mAuthCredentialHeader.getHeight());
+        pw.println("  mAuthCredentialInput size=(" + mAuthCredentialInput.getWidth() + ","
+                + mAuthCredentialInput.getHeight());
     }
 }

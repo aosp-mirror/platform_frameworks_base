@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Tarjeta no válida"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Cargada"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando de manera inalámbrica"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Conectado y cargando"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando rápidamente"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando lentamente"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Se pausó la carga para proteger la batería"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Carga limitada temporalmente"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Presiona Menú para desbloquear."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Bloqueada para la red"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Sin tarjeta SIM"</string>
@@ -53,7 +53,7 @@
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"Patrón incorrecto"</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"Contraseña incorrecta"</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"PIN incorrecto"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Vuelve a intentarlo en # segundo.}many{Vuelve a intentarlo en # segundos.}other{Vuelve a intentarlo en # segundos.}}"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Vuelve a intentarlo en # segundo.}other{Vuelve a intentarlo en # segundos.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Ingresa el PIN de la tarjeta SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Ingresa el PIN de la tarjeta SIM de \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Inhabilita la tarjeta eSIM para usar el dispositivo sin servicio móvil."</string>
@@ -68,9 +68,15 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Escribiste tu contraseña <xliff:g id="NUMBER_0">%1$d</xliff:g> veces de manera incorrecta. \n\nVuelve a intentarlo en <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Dibujaste tu patrón de desbloqueo <xliff:g id="NUMBER_0">%1$d</xliff:g> veces de manera incorrecta. \n\nVuelve a intentarlo en <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"El código PIN de la tarjeta SIM es incorrecto. Debes comunicarte con tu proveedor para desbloquear el dispositivo."</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{El código PIN de la tarjeta SIM es incorrecto. Tienes # intento restante antes de que debas comunicarte con tu operador para desbloquear el dispositivo.}many{El código PIN de la tarjeta SIM es incorrecto. Tienes # intentos restantes. }other{El código PIN de la tarjeta SIM es incorrecto. Tienes # intentos restantes. }}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="other">El código PIN de la tarjeta SIM es incorrecto. Te quedan <xliff:g id="NUMBER_1">%d</xliff:g> intentos más.</item>
+      <item quantity="one">El código PIN de la tarjeta SIM es incorrecto. Te queda <xliff:g id="NUMBER_0">%d</xliff:g> intento antes de que debas comunicarte con tu proveedor para desbloquear el dispositivo.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"La tarjeta SIM no se puede usar. Comunícate con tu proveedor."</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{El código PUK de la tarjeta SIM es incorrecto. Tienes # intento restante antes de que la tarjeta SIM quede inutilizable permanentemente.}many{El código PUK de la tarjeta SIM es incorrecto. Tienes # intentos restantes antes de que la tarjeta SIM quede inutilizable permanentemente.}other{El código PUK de la tarjeta SIM es incorrecto. Tienes # intentos restantes antes de que la tarjeta SIM quede inutilizable permanentemente.}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="other">El código PUK de la tarjeta SIM es incorrecto. Tienes <xliff:g id="NUMBER_1">%d</xliff:g> intentos más antes de que la tarjeta SIM quede inutilizable de manera permanente.</item>
+      <item quantity="one">El código PUK de la tarjeta SIM es incorrecto. Tienes <xliff:g id="NUMBER_0">%d</xliff:g> intento antes de que la tarjeta SIM quede inutilizable de manera permanente.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Se produjo un error al desbloquear la tarjeta SIM con el PIN."</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Se produjo un error al desbloquear la tarjeta SIM con el PUK."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Cambiar método de entrada"</string>
@@ -84,9 +90,15 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Dispositivo bloqueado por el administrador"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"El dispositivo se bloqueó de forma manual"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"No se reconoció"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Activa acceso a cámara en Config. y usa Desb. facial"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Ingresa el PIN de la tarjeta SIM. Tienes # intento restante antes de que debas comunicarte con tu operador para desbloquear el dispositivo.}many{Ingresa el PIN de la tarjeta SIM. Tienes # intentos restantes.}other{Ingresa el PIN de la tarjeta SIM. Tienes # intentos restantes.}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{Se inhabilitó la tarjeta SIM. Para continuar, ingresa el código PUK. Tienes # intento restante antes de que la SIM quede inutilizable permanentemente. Comunícate con tu operador para conocer más detalles.}many{Se inhabilitó la tarjeta SIM. Para continuar, ingresa el código PUK. Tienes # intentos restantes antes de que la SIM quede inutilizable permanentemente. Comunícate con tu operador para conocer más detalles.}other{Se inhabilitó la tarjeta SIM. Para continuar, ingresa el código PUK. Tienes # intentos restantes antes de que la SIM quede inutilizable permanentemente. Comunícate con tu operador para conocer más detalles.}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Para usar Desbloqueo facial, activa el "<b>"Acceso a la cámara"</b>" en Configuración y privacidad"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="other">Ingresa el PIN de la SIM. Quedan <xliff:g id="NUMBER_1">%d</xliff:g> intentos más.</item>
+      <item quantity="one">Ingresa el PIN de la SIM. Queda <xliff:g id="NUMBER_0">%d</xliff:g> intento antes de que debas comunicarte con tu proveedor para desbloquear el dispositivo.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="other">Se inhabilitó la SIM. Para continuar, ingresa el código PUK. Te quedan <xliff:g id="_NUMBER_1">%d</xliff:g> intentos más antes de que la SIM quede inutilizable permanentemente. Comunícate con tu proveedor para obtener más detalles.</item>
+      <item quantity="one">Se inhabilitó la SIM. Para continuar, ingresa el código PUK. Te queda <xliff:g id="_NUMBER_0">%d</xliff:g> intento más antes de que la SIM quede inutilizable permanentemente. Comunícate con tu proveedor para obtener más detalles.</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"Predeterminado"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Burbuja"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analógico"</string>

@@ -17,15 +17,22 @@ package com.android.keyguard
 
 import android.content.BroadcastReceiver
 import android.testing.AndroidTestingRunner
+import android.view.View
 import android.widget.TextView
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.plugins.Clock
+import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.plugins.ClockAnimations
+import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockEvents
-import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.plugins.ClockFaceController
+import com.android.systemui.plugins.ClockFaceEvents
+import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.mockito.any
@@ -35,11 +42,15 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import java.util.TimeZone
 import java.util.concurrent.Executor
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.yield
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
@@ -54,29 +65,42 @@ import org.mockito.junit.MockitoJUnit
 class ClockEventControllerTest : SysuiTestCase() {
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
-    @Mock private lateinit var statusBarStateController: StatusBarStateController
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
     @Mock private lateinit var batteryController: BatteryController
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var configurationController: ConfigurationController
     @Mock private lateinit var animations: ClockAnimations
     @Mock private lateinit var events: ClockEvents
-    @Mock private lateinit var clock: Clock
+    @Mock private lateinit var clock: ClockController
     @Mock private lateinit var mainExecutor: Executor
     @Mock private lateinit var bgExecutor: Executor
     @Mock private lateinit var featureFlags: FeatureFlags
-
-    private lateinit var clockEventController: ClockEventController
+    @Mock private lateinit var smallClockController: ClockFaceController
+    @Mock private lateinit var largeClockController: ClockFaceController
+    @Mock private lateinit var smallClockEvents: ClockFaceEvents
+    @Mock private lateinit var largeClockEvents: ClockFaceEvents
+    @Mock private lateinit var parentView: View
+    @Mock private lateinit var transitionRepository: KeyguardTransitionRepository
+    private lateinit var repository: FakeKeyguardRepository
+    @Mock private lateinit var logBuffer: LogBuffer
+    private lateinit var underTest: ClockEventController
 
     @Before
     fun setUp() {
-        whenever(clock.smallClock).thenReturn(TextView(context))
-        whenever(clock.largeClock).thenReturn(TextView(context))
+        whenever(clock.smallClock).thenReturn(smallClockController)
+        whenever(clock.largeClock).thenReturn(largeClockController)
+        whenever(smallClockController.view).thenReturn(TextView(context))
+        whenever(largeClockController.view).thenReturn(TextView(context))
+        whenever(smallClockController.events).thenReturn(smallClockEvents)
+        whenever(largeClockController.events).thenReturn(largeClockEvents)
         whenever(clock.events).thenReturn(events)
         whenever(clock.animations).thenReturn(animations)
 
-        clockEventController = ClockEventController(
-            statusBarStateController,
+        repository = FakeKeyguardRepository()
+
+        underTest = ClockEventController(
+            KeyguardInteractor(repository = repository),
+            KeyguardTransitionInteractor(repository = transitionRepository),
             broadcastDispatcher,
             batteryController,
             keyguardUpdateMonitor,
@@ -85,58 +109,58 @@ class ClockEventControllerTest : SysuiTestCase() {
             context,
             mainExecutor,
             bgExecutor,
+            logBuffer,
             featureFlags
         )
+        underTest.clock = clock
+
+        runBlocking(IMMEDIATE) {
+            underTest.registerListeners(parentView)
+
+            repository.setDozing(true)
+            repository.setDozeAmount(1f)
+        }
     }
 
     @Test
     fun clockSet_validateInitialization() {
-        clockEventController.clock = clock
-
         verify(clock).initialize(any(), anyFloat(), anyFloat())
     }
 
     @Test
     fun clockUnset_validateState() {
-        clockEventController.clock = clock
-        clockEventController.clock = null
+        underTest.clock = null
 
-        assertEquals(clockEventController.clock, null)
+        assertEquals(underTest.clock, null)
     }
 
     @Test
-    fun themeChanged_verifyClockPaletteUpdated() {
-        clockEventController.clock = clock
-        verify(events).onColorPaletteChanged(any(), any(), any())
-
-        clockEventController.registerListeners()
+    fun themeChanged_verifyClockPaletteUpdated() = runBlocking(IMMEDIATE) {
+        verify(smallClockEvents).onRegionDarknessChanged(anyBoolean())
+        verify(largeClockEvents).onRegionDarknessChanged(anyBoolean())
 
         val captor = argumentCaptor<ConfigurationController.ConfigurationListener>()
         verify(configurationController).addCallback(capture(captor))
         captor.value.onThemeChanged()
 
-        verify(events, times(2)).onColorPaletteChanged(any(), any(), any())
+        verify(events).onColorPaletteChanged(any())
     }
 
     @Test
-    fun fontChanged_verifyFontSizeUpdated() {
-        clockEventController.clock = clock
-        verify(events).onColorPaletteChanged(any(), any(), any())
-
-        clockEventController.registerListeners()
+    fun fontChanged_verifyFontSizeUpdated() = runBlocking(IMMEDIATE) {
+        verify(smallClockEvents).onRegionDarknessChanged(anyBoolean())
+        verify(largeClockEvents).onRegionDarknessChanged(anyBoolean())
 
         val captor = argumentCaptor<ConfigurationController.ConfigurationListener>()
         verify(configurationController).addCallback(capture(captor))
         captor.value.onDensityOrFontScaleChanged()
 
-        verify(events).onFontSettingChanged()
+        verify(smallClockEvents, times(2)).onFontSettingChanged(anyFloat())
+        verify(largeClockEvents, times(2)).onFontSettingChanged(anyFloat())
     }
 
     @Test
-    fun batteryCallback_keyguardShowingCharging_verifyChargeAnimation() {
-        clockEventController.clock = clock
-        clockEventController.registerListeners()
-
+    fun batteryCallback_keyguardShowingCharging_verifyChargeAnimation() = runBlocking(IMMEDIATE) {
         val batteryCaptor = argumentCaptor<BatteryController.BatteryStateChangeCallback>()
         verify(batteryController).addCallback(capture(batteryCaptor))
         val keyguardCaptor = argumentCaptor<KeyguardUpdateMonitorCallback>()
@@ -148,26 +172,21 @@ class ClockEventControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun batteryCallback_keyguardShowingCharging_Duplicate_verifyChargeAnimation() {
-        clockEventController.clock = clock
-        clockEventController.registerListeners()
+    fun batteryCallback_keyguardShowingCharging_Duplicate_verifyChargeAnimation() =
+        runBlocking(IMMEDIATE) {
+            val batteryCaptor = argumentCaptor<BatteryController.BatteryStateChangeCallback>()
+            verify(batteryController).addCallback(capture(batteryCaptor))
+            val keyguardCaptor = argumentCaptor<KeyguardUpdateMonitorCallback>()
+            verify(keyguardUpdateMonitor).registerCallback(capture(keyguardCaptor))
+            keyguardCaptor.value.onKeyguardVisibilityChanged(true)
+            batteryCaptor.value.onBatteryLevelChanged(10, false, true)
+            batteryCaptor.value.onBatteryLevelChanged(10, false, true)
 
-        val batteryCaptor = argumentCaptor<BatteryController.BatteryStateChangeCallback>()
-        verify(batteryController).addCallback(capture(batteryCaptor))
-        val keyguardCaptor = argumentCaptor<KeyguardUpdateMonitorCallback>()
-        verify(keyguardUpdateMonitor).registerCallback(capture(keyguardCaptor))
-        keyguardCaptor.value.onKeyguardVisibilityChanged(true)
-        batteryCaptor.value.onBatteryLevelChanged(10, false, true)
-        batteryCaptor.value.onBatteryLevelChanged(10, false, true)
-
-        verify(animations, times(1)).charge()
-    }
+            verify(animations, times(1)).charge()
+        }
 
     @Test
-    fun batteryCallback_keyguardHiddenCharging_verifyChargeAnimation() {
-        clockEventController.clock = clock
-        clockEventController.registerListeners()
-
+    fun batteryCallback_keyguardHiddenCharging_verifyChargeAnimation() = runBlocking(IMMEDIATE) {
         val batteryCaptor = argumentCaptor<BatteryController.BatteryStateChangeCallback>()
         verify(batteryController).addCallback(capture(batteryCaptor))
         val keyguardCaptor = argumentCaptor<KeyguardUpdateMonitorCallback>()
@@ -179,25 +198,20 @@ class ClockEventControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun batteryCallback_keyguardShowingNotCharging_verifyChargeAnimation() {
-        clockEventController.clock = clock
-        clockEventController.registerListeners()
+    fun batteryCallback_keyguardShowingNotCharging_verifyChargeAnimation() =
+        runBlocking(IMMEDIATE) {
+            val batteryCaptor = argumentCaptor<BatteryController.BatteryStateChangeCallback>()
+            verify(batteryController).addCallback(capture(batteryCaptor))
+            val keyguardCaptor = argumentCaptor<KeyguardUpdateMonitorCallback>()
+            verify(keyguardUpdateMonitor).registerCallback(capture(keyguardCaptor))
+            keyguardCaptor.value.onKeyguardVisibilityChanged(true)
+            batteryCaptor.value.onBatteryLevelChanged(10, false, false)
 
-        val batteryCaptor = argumentCaptor<BatteryController.BatteryStateChangeCallback>()
-        verify(batteryController).addCallback(capture(batteryCaptor))
-        val keyguardCaptor = argumentCaptor<KeyguardUpdateMonitorCallback>()
-        verify(keyguardUpdateMonitor).registerCallback(capture(keyguardCaptor))
-        keyguardCaptor.value.onKeyguardVisibilityChanged(true)
-        batteryCaptor.value.onBatteryLevelChanged(10, false, false)
-
-        verify(animations, never()).charge()
-    }
+            verify(animations, never()).charge()
+        }
 
     @Test
-    fun localeCallback_verifyClockNotified() {
-        clockEventController.clock = clock
-        clockEventController.registerListeners()
-
+    fun localeCallback_verifyClockNotified() = runBlocking(IMMEDIATE) {
         val captor = argumentCaptor<BroadcastReceiver>()
         verify(broadcastDispatcher).registerReceiver(
             capture(captor), any(), eq(null), eq(null), anyInt(), eq(null)
@@ -208,10 +222,7 @@ class ClockEventControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun keyguardCallback_visibilityChanged_clockDozeCalled() {
-        clockEventController.clock = clock
-        clockEventController.registerListeners()
-
+    fun keyguardCallback_visibilityChanged_clockDozeCalled() = runBlocking(IMMEDIATE) {
         val captor = argumentCaptor<KeyguardUpdateMonitorCallback>()
         verify(keyguardUpdateMonitor).registerCallback(capture(captor))
 
@@ -223,10 +234,7 @@ class ClockEventControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun keyguardCallback_timeFormat_clockNotified() {
-        clockEventController.clock = clock
-        clockEventController.registerListeners()
-
+    fun keyguardCallback_timeFormat_clockNotified() = runBlocking(IMMEDIATE) {
         val captor = argumentCaptor<KeyguardUpdateMonitorCallback>()
         verify(keyguardUpdateMonitor).registerCallback(capture(captor))
         captor.value.onTimeFormatChanged("12h")
@@ -235,11 +243,8 @@ class ClockEventControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun keyguardCallback_timezoneChanged_clockNotified() {
+    fun keyguardCallback_timezoneChanged_clockNotified() = runBlocking(IMMEDIATE) {
         val mockTimeZone = mock<TimeZone>()
-        clockEventController.clock = clock
-        clockEventController.registerListeners()
-
         val captor = argumentCaptor<KeyguardUpdateMonitorCallback>()
         verify(keyguardUpdateMonitor).registerCallback(capture(captor))
         captor.value.onTimeZoneChanged(mockTimeZone)
@@ -248,10 +253,7 @@ class ClockEventControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun keyguardCallback_userSwitched_clockNotified() {
-        clockEventController.clock = clock
-        clockEventController.registerListeners()
-
+    fun keyguardCallback_userSwitched_clockNotified() = runBlocking(IMMEDIATE) {
         val captor = argumentCaptor<KeyguardUpdateMonitorCallback>()
         verify(keyguardUpdateMonitor).registerCallback(capture(captor))
         captor.value.onUserSwitchComplete(10)
@@ -260,25 +262,27 @@ class ClockEventControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun keyguardCallback_verifyKeyguardChanged() {
-        clockEventController.clock = clock
-        clockEventController.registerListeners()
+    fun keyguardCallback_verifyKeyguardChanged() = runBlocking(IMMEDIATE) {
+        val job = underTest.listenForDozeAmount(this)
+        repository.setDozeAmount(0.4f)
 
-        val captor = argumentCaptor<StatusBarStateController.StateListener>()
-        verify(statusBarStateController).addCallback(capture(captor))
-        captor.value.onDozeAmountChanged(0.4f, 0.6f)
+        yield()
 
         verify(animations).doze(0.4f)
+
+        job.cancel()
     }
 
     @Test
-    fun unregisterListeners_validate() {
-        clockEventController.clock = clock
-        clockEventController.unregisterListeners()
+    fun unregisterListeners_validate() = runBlocking(IMMEDIATE) {
+        underTest.unregisterListeners()
         verify(broadcastDispatcher).unregisterReceiver(any())
         verify(configurationController).removeCallback(any())
         verify(batteryController).removeCallback(any())
         verify(keyguardUpdateMonitor).removeCallback(any())
-        verify(statusBarStateController).removeCallback(any())
+    }
+
+    companion object {
+        private val IMMEDIATE = Dispatchers.Main.immediate
     }
 }

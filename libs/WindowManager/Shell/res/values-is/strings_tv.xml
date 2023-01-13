@@ -19,16 +19,10 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="notification_channel_tv_pip" msgid="2576686079160402435">"Mynd í mynd"</string>
     <string name="pip_notification_unknown_title" msgid="2729870284350772311">"(Efni án titils)"</string>
-    <string name="pip_close" msgid="2955969519031223530">"Loka"</string>
+    <string name="pip_close" msgid="9135220303720555525">"Loka mynd í mynd"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"Allur skjárinn"</string>
-    <string name="pip_move" msgid="158770205886688553">"Færa"</string>
-    <string name="pip_expand" msgid="1051966011679297308">"Stækka"</string>
-    <string name="pip_collapse" msgid="3903295106641385962">"Minnka"</string>
+    <string name="pip_move" msgid="1544227837964635439">"Færa innfellda mynd"</string>
+    <string name="pip_expand" msgid="7605396312689038178">"Stækka innfellda mynd"</string>
+    <string name="pip_collapse" msgid="5732233773786896094">"Minnka innfellda mynd"</string>
     <string name="pip_edu_text" msgid="3672999496647508701">" Ýttu tvisvar á "<annotation icon="home_icon">" HEIM "</annotation>" til að opna stillingar"</string>
-    <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"Valmynd fyrir mynd í mynd."</string>
-    <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"Færa til vinstri"</string>
-    <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"Færa til hægri"</string>
-    <string name="a11y_action_pip_move_up" msgid="98502616918621959">"Færa upp"</string>
-    <string name="a11y_action_pip_move_down" msgid="3858802832725159740">"Færa niður"</string>
-    <string name="a11y_action_pip_move_done" msgid="1486845365134416210">"Lokið"</string>
 </resources>

@@ -84,9 +84,9 @@
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"セキュリティ上の理由から、お使いのタブレットでは現在、この提供元からの不明なアプリをインストールすることはできません。これは [設定] で変更できます。"</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"セキュリティ上の理由から、お使いのテレビでは現在、この提供元からの不明なアプリをインストールすることはできません。これは [設定] で変更できます。"</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"セキュリティ上の理由から、お使いのスマートフォンでは現在、この提供元からの不明なアプリをインストールすることはできません。これは [設定] で変更できます。"</string>
-    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"不明なアプリをインストールするとスマートフォンや個人データの侵害に対する安全性が低下します。このアプリをインストールすることで、アプリの使用により生じる可能性があるスマートフォンへの侵害やデータの損失について、ユーザーご自身が単独で責任を負うことに同意することになります。"</string>
-    <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"不明なアプリをインストールするとタブレットや個人データの侵害に対する安全性が低下します。このアプリをインストールすることで、アプリの使用により生じる可能性があるタブレットへの侵害やデータの損失について、ユーザーご自身が単独で責任を負うことに同意することになります。"</string>
-    <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"不明なアプリをインストールするとテレビや個人データの侵害に対する安全性が低下します。このアプリをインストールすることで、アプリの使用により生じる可能性があるテレビへの侵害やデータの損失について、ユーザーご自身が単独で責任を負うことに同意することになります。"</string>
+    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"不明なアプリをインストールするとスマートフォンや個人データが攻撃を受ける可能性が高くなります。このアプリをインストールすることにより、アプリの使用により生じる可能性があるスマートフォンへの損害やデータの損失について、ユーザーご自身が単独で責任を負うことに同意するものとします。"</string>
+    <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"不明なアプリをインストールするとタブレットや個人データが攻撃を受ける可能性が高くなります。このアプリをインストールすることにより、アプリの使用により生じる可能性があるタブレットへの損害やデータの損失について、ユーザーご自身が単独で責任を負うことに同意するものとします。"</string>
+    <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"不明なアプリをインストールするとテレビや個人データが攻撃を受ける可能性が高くなります。このアプリをインストールすることにより、アプリの使用により生じる可能性があるテレビへの損害やデータの損失について、ユーザーご自身が単独で責任を負うことに同意するものとします。"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"次へ"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"設定"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wearアプリ インストール/アンインストール"</string>

@@ -20,7 +20,6 @@ import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWA
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
 
 import android.annotation.MainThread;
-import android.app.UiModeManager;
 import android.content.res.Configuration;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Trace;
@@ -145,10 +144,9 @@ public class DozeMachine {
 
     private final Service mDozeService;
     private final WakeLock mWakeLock;
-    private final AmbientDisplayConfiguration mConfig;
+    private final AmbientDisplayConfiguration mAmbientDisplayConfig;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
     private final DozeHost mDozeHost;
-    private final UiModeManager mUiModeManager;
     private final DockManager mDockManager;
     private final Part[] mParts;
 
@@ -156,18 +154,18 @@ public class DozeMachine {
     private State mState = State.UNINITIALIZED;
     private int mPulseReason;
     private boolean mWakeLockHeldForCurrentState = false;
+    private int mUiModeType = Configuration.UI_MODE_TYPE_NORMAL;
 
     @Inject
-    public DozeMachine(@WrappedService Service service, AmbientDisplayConfiguration config,
+    public DozeMachine(@WrappedService Service service,
+            AmbientDisplayConfiguration ambientDisplayConfig,
             WakeLock wakeLock, WakefulnessLifecycle wakefulnessLifecycle,
-            UiModeManager uiModeManager,
             DozeLog dozeLog, DockManager dockManager,
             DozeHost dozeHost, Part[] parts) {
         mDozeService = service;
-        mConfig = config;
+        mAmbientDisplayConfig = ambientDisplayConfig;
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mWakeLock = wakeLock;
-        mUiModeManager = uiModeManager;
         mDozeLog = dozeLog;
         mDockManager = dockManager;
         mDozeHost = dozeHost;
@@ -183,6 +181,18 @@ public class DozeMachine {
     public void destroy() {
         for (Part part : mParts) {
             part.destroy();
+        }
+    }
+
+    /**
+     * Notifies the {@link DozeMachine} that {@link Configuration} has changed.
+     */
+    public void onConfigurationChanged(Configuration newConfiguration) {
+        int newUiModeType = newConfiguration.uiMode & Configuration.UI_MODE_TYPE_MASK;
+        if (mUiModeType == newUiModeType) return;
+        mUiModeType = newUiModeType;
+        for (Part part : mParts) {
+            part.onUiModeTypeChanged(mUiModeType);
         }
     }
 
@@ -209,6 +219,14 @@ public class DozeMachine {
         // code to not have to worry about keeping the pulseReason in mQueuedRequests.
         Preconditions.checkState(!isExecutingTransition());
         requestState(State.DOZE_REQUEST_PULSE, pulseReason);
+    }
+
+    /**
+     * @return true if {@link DozeMachine} is currently in either {@link State#UNINITIALIZED}
+     *  or {@link State#FINISH}
+     */
+    public boolean isUninitializedOrFinished() {
+        return mState == State.UNINITIALIZED || mState == State.FINISH;
     }
 
     void onScreenState(int state) {
@@ -360,7 +378,7 @@ public class DozeMachine {
         if (mState == State.FINISH) {
             return State.FINISH;
         }
-        if (mUiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_CAR
+        if (mUiModeType == Configuration.UI_MODE_TYPE_CAR
                 && (requestedState.canPulse() || requestedState.staysAwake())) {
             Log.i(TAG, "Doze is suppressed with all triggers disabled as car mode is active");
             mDozeLog.traceCarModeStarted();
@@ -411,7 +429,7 @@ public class DozeMachine {
                     nextState = State.FINISH;
                 } else if (mDockManager.isDocked()) {
                     nextState = mDockManager.isHidden() ? State.DOZE : State.DOZE_AOD_DOCKED;
-                } else if (mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT)) {
+                } else if (mAmbientDisplayConfig.alwaysOnEnabled(UserHandle.USER_CURRENT)) {
                     nextState = State.DOZE_AOD;
                 } else {
                     nextState = State.DOZE;
@@ -427,6 +445,7 @@ public class DozeMachine {
     /** Dumps the current state */
     public void dump(PrintWriter pw) {
         pw.print(" state="); pw.println(mState);
+        pw.print(" mUiModeType="); pw.println(mUiModeType);
         pw.print(" wakeLockHeldForCurrentState="); pw.println(mWakeLockHeldForCurrentState);
         pw.print(" wakeLock="); pw.println(mWakeLock);
         pw.println("Parts:");
@@ -459,6 +478,19 @@ public class DozeMachine {
 
         /** Sets the {@link DozeMachine} when this Part is associated with one. */
         default void setDozeMachine(DozeMachine dozeMachine) {}
+
+        /**
+         * Notifies the Part about a change in {@link Configuration#uiMode}.
+         *
+         * @param newUiModeType {@link Configuration#UI_MODE_TYPE_NORMAL},
+         *                   {@link Configuration#UI_MODE_TYPE_DESK},
+         *                   {@link Configuration#UI_MODE_TYPE_CAR},
+         *                   {@link Configuration#UI_MODE_TYPE_TELEVISION},
+         *                   {@link Configuration#UI_MODE_TYPE_APPLIANCE},
+         *                   {@link Configuration#UI_MODE_TYPE_WATCH},
+         *                   or {@link Configuration#UI_MODE_TYPE_VR_HEADSET}
+         */
+        default void onUiModeTypeChanged(int newUiModeType) {}
     }
 
     /** A wrapper interface for {@link android.service.dreams.DreamService} */

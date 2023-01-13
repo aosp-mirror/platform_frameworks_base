@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"ကတ် မမှန်ကန်ပါ။"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"အားသွင်းပြီးပါပြီ"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ကြိုးမဲ့ အားသွင်းနေသည်"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • အားသွင်းနေသည်"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • အားသွင်းအထိုင်"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • အားသွင်းနေသည်"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • အမြန်အားသွင်းနေသည်"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • နှေးကွေးစွာ အားသွင်းနေသည်"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ဘက်ထရီကို ကာကွယ်ရန် အားသွင်းခြင်းကို ခဏရပ်ထားသည်"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • အားသွင်းခြင်းကို လောလောဆယ် ကန့်သတ်ထားသည်"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"မီနူးကို နှိပ်၍ လော့ခ်ဖွင့်ပါ။"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ကွန်ရက်ကို လော့ခ်ချထားသည်"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"ဆင်းမ်ကတ် မရှိပါ"</string>
@@ -68,9 +68,15 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"သင်သည် စကားဝှက်ကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ်မှားယွင်းစွာ ထည့်ခဲ့ပါသည်။ \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> စက္ကန့်အကြာတွင် ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"သင်သည် ပုံစံကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ်မှားယွင်းစွာ ဆွဲခဲ့ပါသည်။ \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> စက္ကန့်အကြာတွင် ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"ဆင်းမ်ကဒ်ပင်နံပါတ် မှားယွင်းနေသောကြောင့် ယခုအခါ သင့်စက်ပစ္စည်းအား လော့ခ်ဖွင့်ရန် ဝန်ဆောင်မှုပေးသူကို ဆက်သွယ်ရပါမည်။"</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{ဆင်းမ်ပင်နံပါတ်ကုဒ် မှားနေသည်။ စက်ကို လော့ခ်ဖွင့်ရန် မိုဘိုင်းဖုန်းကုမ္ပဏီသို့ မဆက်သွယ်မီ သင့်တွင် # ကြိမ် ကြိုးစားခွင့်ရှိသေးသည်။}other{ဆင်းမ်ပင်နံပါတ်ကုဒ် မှားနေသည်။ သင့်တွင် # ကြိမ် ကြိုးစားခွင့်ရှိသေးသည်။ }}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="other">ဆင်းမ်ပင်နံပါတ် မှန်ကန်မှုမရှိပါ။ <xliff:g id="NUMBER_1">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့်ရှိပါသေးသည်။</item>
+      <item quantity="one">ဆင်းမ်ပင်နံပါတ် မှန်ကန်မှုမရှိပါ။ သင့်စက်ပစ္စည်းအား လော့ခ်ဖွင့်ပေးရန်အတွက် မိုဘိုင်းဝန်ဆောင်မှုပေးသူကို မဆက်သွယ်မီ <xliff:g id="NUMBER_0">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့်ရှိပါသေးသည်။</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"ဆင်းမ်ကဒ်ကို အသုံးပြု၍ မရတော့ပါ။ ဝန်ဆောင်မှုပေးသူကို ဆက်သွယ်ပါ။"</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{ဆင်းမ် PUK ကုဒ် မှားနေသည်။ ဆင်းမ် အပြီးပိတ်မသွားမီ သင့်တွင် # ကြိမ် ကြိုးစားခွင့်ရှိသေးသည်။}other{ဆင်းမ် PUK ကုဒ် မှားနေသည်။ ဆင်းမ် အပြီးပိတ်မသွားမီ သင့်တွင် # ကြိမ် ကြိုးစားခွင့်ရှိသေးသည်။}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="other">ဆင်းမ် ပင်နံပါတ် ပြန်ဖွင့်သည့်ကုဒ် မှန်ကန်မှုမရှိပါ။ ဆင်းမ်ကဒ်ကို အပြီးအပိုင်မပိတ်ခင် <xliff:g id="NUMBER_1">%d</xliff:g> ကြိမ်စမ်းသပ်ခွင့် ရှိပါသေးသည်။</item>
+      <item quantity="one">ဆင်းမ် ပင်နံပါတ် ပြန်ဖွင့်သည့်ကုဒ် မှန်ကန်မှုမရှိပါ။ ဆင်းမ်ကဒ်ကို အပြီးအပိုင်မပိတ်ခင် <xliff:g id="NUMBER_0">%d</xliff:g> ကြိမ်စမ်းသပ်ခွင့် ရှိပါသေးသည်။</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"ဆင်းမ်ကဒ်ပင်နံပါတ် လုပ်ဆောင်ချက် မအောင်မြင်ပါ။"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"ဆင်းမ်ကတ် ပင်နံပါတ် ပြန်ဖွင့်သည့်ကုဒ် လုပ်ဆောင်ချက် မအောင်မြင်ပါ။"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"စာရိုက်စနစ်ပြောင်းရန်"</string>
@@ -84,9 +90,15 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"စက်ပစ္စည်းကို စီမံခန့်ခွဲသူက လော့ခ်ချထားပါသည်"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"စက်ပစ္စည်းကို ကိုယ်တိုင်ကိုယ်ကျ လော့ခ်ချထားခဲ့သည်"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"မသိ"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"‘မျက်နှာပြ လော့ခ်ဖွင့်ခြင်း’ သုံးရန် ‘ဆက်တင်များ’ တွင်ကင်မရာသုံးခွင့်ကိုဖွင့်ပါ"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{ဆင်းမ်ပင်နံပါတ် ထည့်သွင်းပါ။ သင့်စက်ကို လော့ခ်ဖွင့်ရန် မိုဘိုင်းဖုန်းကုမ္ပဏီသို့ မဆက်သွယ်မီ # ကြိမ် ကြိုးစားခွင့်ရှိသေးသည်။}other{ဆင်းမ်ပင်နံပါတ် ထည့်သွင်းပါ။ သင့်တွင် # ကြိမ် ကြိုးစားခွင့်ရှိသေးသည်။}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{ဆင်းမ်သည် ယခု ပိတ်သွားပါပြီ။ ရှေ့ဆက်ရန် PUK ကုဒ်ကို ထည့်ပါ။ ဆင်းမ် အပြီးပိတ်မသွားမီ သင့်တွင် # ကြိမ် ကြိုးစားခွင့်ရှိသေးသည်။ အသေးစိတ်အတွက် မိုဘိုင်းဖုန်းကုမ္ပဏီကို ဆက်သွယ်ပါ။}other{ဆင်းမ်သည် ယခု ပိတ်သွားပါပြီ။ ရှေ့ဆက်ရန် PUK ကုဒ်ကို ထည့်ပါ။ ဆင်းမ် အပြီးပိတ်မသွားမီ သင့်တွင် # ကြိမ် ကြိုးစားခွင့်ရှိသေးသည်။ အသေးစိတ်အတွက် မိုဘိုင်းဖုန်းကုမ္ပဏီကို ဆက်သွယ်ပါ။}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"မျက်နှာပြ လော့ခ်ဖွင့်ခြင်းကို သုံးရန် "<b>"ကင်မရာ သုံးခွင့်"</b>" ကို ‘ဆက်တင်များ &gt; ကန့်သတ်ဆက်တင်’ တွင်ဖွင့်ပါ"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="other">ဆင်းမ်ကတ် ပင်နံပါတ် ထည့်ပါ။ <xliff:g id="NUMBER_1">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့်ရှိပါသေးသည်။</item>
+      <item quantity="one">ဆင်းမ်ကတ် ပင်နံပါတ် ထည့်ပါ။ သင့်စက်ကို လော့ခ်ဖွင့်ပေးရန်အတွက် ဝန်ဆောင်မှုပေးသူသို့ မဆက်သွယ်မီ <xliff:g id="NUMBER_0">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့်ရှိပါသေးသည်။</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="other">ဆင်းမ်ကတ်သည် ယခု ပိတ်သွားပါပြီ။ ရှေ့ဆက်ရန် PUK ကုဒ်ကို ထည့်ပါ။ ဆင်းမ်ကတ် အပြီးပိတ်မသွားမီ သင့်တွင် <xliff:g id="_NUMBER_1">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့် ကျန်ပါသေးသည်။ အသေးစိတ်အချက်များအတွက် ဝန်ဆောင်မှုပေးသူကို ဆက်သွယ်ပါ။</item>
+      <item quantity="one">ဆင်းမ်ကတ်သည် ယခု ပိတ်သွားပါပြီ။ ရှေ့ဆက်ရန် PUK ကုဒ်ကို ထည့်ပါ။ ဆင်းမ်ကတ် အပြီးပိတ်မသွားမီ သင့်တွင် <xliff:g id="_NUMBER_0">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့် ကျန်ပါသေးသည်။ အသေးစိတ်အချက်များအတွက် ဝန်ဆောင်မှုပေးသူကို ဆက်သွယ်ပါ။</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"မူလ"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"ပူဖောင်းကွက်"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"ရိုးရိုး"</string>

@@ -17,21 +17,36 @@
 package com.android.systemui.qs.logging
 
 import android.service.quicksettings.Tile
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
-import com.android.systemui.log.LogLevel.DEBUG
-import com.android.systemui.log.LogLevel.VERBOSE
-import com.android.systemui.log.LogMessage
 import com.android.systemui.log.dagger.QSLog
+import com.android.systemui.plugins.log.ConstantStringsLogger
+import com.android.systemui.plugins.log.ConstantStringsLoggerImpl
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel
+import com.android.systemui.plugins.log.LogLevel.DEBUG
+import com.android.systemui.plugins.log.LogLevel.ERROR
+import com.android.systemui.plugins.log.LogLevel.VERBOSE
+import com.android.systemui.plugins.log.LogMessage
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.statusbar.StatusBarState
+import com.google.errorprone.annotations.CompileTimeConstant
 import javax.inject.Inject
 
 private const val TAG = "QSLog"
 
-class QSLogger @Inject constructor(
-    @QSLog private val buffer: LogBuffer
-) {
+class QSLogger @Inject constructor(@QSLog private val buffer: LogBuffer) :
+    ConstantStringsLogger by ConstantStringsLoggerImpl(buffer, TAG) {
+
+    fun logException(@CompileTimeConstant logMsg: String, ex: Exception) {
+        buffer.log(TAG, ERROR, {}, { logMsg }, exception = ex)
+    }
+
+    fun v(@CompileTimeConstant msg: String, arg: Any) {
+        buffer.log(TAG, VERBOSE, { str1 = arg.toString() }, { "$msg: $str1" })
+    }
+
+    fun d(@CompileTimeConstant msg: String, arg: Any) {
+        buffer.log(TAG, DEBUG, { str1 = arg.toString() }, { "$msg: $str1" })
+    }
 
     fun logTileAdded(tileSpec: String) {
         log(DEBUG, {
@@ -129,12 +144,36 @@ class QSLogger @Inject constructor(
         })
     }
 
-    fun logInternetTileUpdate(lastType: Int, callback: String) {
+    fun logInternetTileUpdate(tileSpec: String, lastType: Int, callback: String) {
         log(VERBOSE, {
+            str1 = tileSpec
             int1 = lastType
-            str1 = callback
+            str2 = callback
         }, {
-            "mLastTileState=$int1, Callback=$str1."
+            "[$str1] mLastTileState=$int1, Callback=$str2."
+        })
+    }
+
+    // TODO(b/250618218): Remove this method once we know the root cause of b/250618218.
+    fun logTileBackgroundColorUpdateIfInternetTile(
+        tileSpec: String,
+        state: Int,
+        disabledByPolicy: Boolean,
+        color: Int
+    ) {
+        // This method is added to further debug b/250618218 which has only been observed from the
+        // InternetTile, so we are only logging the background color change for the InternetTile
+        // to avoid spamming the QSLogger.
+        if (tileSpec != "internet") {
+            return
+        }
+        log(VERBOSE, {
+            str1 = tileSpec
+            int1 = state
+            bool1 = disabledByPolicy
+            int2 = color
+        }, {
+            "[$str1] state=$int1, disabledByPolicy=$bool1, color=$int2."
         })
     }
 
@@ -209,6 +248,24 @@ class QSLogger @Inject constructor(
             bool3 = force
         }, {
             "change tile layout: $str1 horizontal=$bool1 (was $bool2), force? $bool3"
+        })
+    }
+
+    fun logTileDistributionInProgress(tilesPerPageCount: Int, totalTilesCount: Int) {
+        log(DEBUG, {
+            int1 = tilesPerPageCount
+            int2 = totalTilesCount
+        }, {
+            "Distributing tiles: [tilesPerPageCount=$int1] [totalTilesCount=$int2]"
+        })
+    }
+
+    fun logTileDistributed(tileName: String, pageIndex: Int) {
+        log(DEBUG, {
+            str1 = tileName
+            int1 = pageIndex
+        }, {
+            "Adding $str1 to page number $int1"
         })
     }
 

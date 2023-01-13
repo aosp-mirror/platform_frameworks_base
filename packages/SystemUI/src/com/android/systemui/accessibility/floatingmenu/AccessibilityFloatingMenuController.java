@@ -61,8 +61,8 @@ public class AccessibilityFloatingMenuController implements
         }
 
         @Override
-        public void onKeyguardVisibilityChanged(boolean showing) {
-            mIsKeyguardVisible = showing;
+        public void onKeyguardVisibilityChanged(boolean visible) {
+            mIsKeyguardVisible = visible;
             handleFloatingMenuVisibility(mIsKeyguardVisible, mBtnMode, mBtnTargets);
         }
 

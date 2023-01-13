@@ -86,10 +86,10 @@ class ShadeViewDiffer(
     }
 
     private fun maybeDetachChild(
-        parentNode: ShadeNode,
-        parentSpec: NodeSpec?,
-        childNode: ShadeNode,
-        childSpec: NodeSpec?
+            parentNode: ShadeNode,
+            parentSpec: NodeSpec?,
+            childNode: ShadeNode,
+            childSpec: NodeSpec?
     ) {
         val newParentNode = childSpec?.parent?.let { getNode(it) }
 
@@ -100,14 +100,27 @@ class ShadeViewDiffer(
                 nodes.remove(childNode.controller)
             }
 
-            logger.logDetachingChild(
-                key = childNode.label,
-                isTransfer = !childCompletelyRemoved,
-                isParentRemoved = parentSpec == null,
-                oldParent = parentNode.label,
-                newParent = newParentNode?.label)
-            parentNode.removeChild(childNode, isTransfer = !childCompletelyRemoved)
-            childNode.parent = null
+            if (childCompletelyRemoved && parentSpec == null &&
+                    childNode.offerToKeepInParentForAnimation()) {
+                // If both the child and the parent are being removed at the same time, then
+                // keep the child attached to the parent for animation purposes
+                logger.logSkipDetachingChild(
+                        key = childNode.label,
+                        parentKey = parentNode.label,
+                        isTransfer = !childCompletelyRemoved,
+                        isParentRemoved = true
+                )
+            } else {
+                logger.logDetachingChild(
+                        key = childNode.label,
+                        isTransfer = !childCompletelyRemoved,
+                        isParentRemoved = parentSpec == null,
+                        oldParent = parentNode.label,
+                        newParent = newParentNode?.label
+                )
+                parentNode.removeChild(childNode, isTransfer = !childCompletelyRemoved)
+                childNode.parent = null
+            }
         }
     }
 
@@ -119,6 +132,16 @@ class ShadeViewDiffer(
             val childNode = getNode(childSpec)
 
             if (childNode.view != currView) {
+                val removedFromParent = childNode.removeFromParentIfKeptForAnimation()
+                if (removedFromParent) {
+                    logger.logDetachingChild(
+                            key = childNode.label,
+                            isTransfer = false,
+                            isParentRemoved = true,
+                            oldParent = null,
+                            newParent = null
+                    )
+                }
 
                 when (childNode.parent) {
                     null -> {
@@ -141,6 +164,8 @@ class ShadeViewDiffer(
                     }
                 }
             }
+
+            childNode.resetKeepInParentForAnimation()
 
             if (childSpec.children.isNotEmpty()) {
                 attachChildren(childNode, specMap)
@@ -212,5 +237,17 @@ private class ShadeNode(val controller: NodeController) {
     fun removeChild(child: ShadeNode, isTransfer: Boolean) {
         controller.removeChild(child.controller, isTransfer)
         child.controller.onViewRemoved()
+    }
+
+    fun offerToKeepInParentForAnimation(): Boolean {
+        return controller.offerToKeepInParentForAnimation()
+    }
+
+    fun removeFromParentIfKeptForAnimation(): Boolean {
+        return controller.removeFromParentIfKeptForAnimation()
+    }
+
+    fun resetKeepInParentForAnimation() {
+        controller.resetKeepInParentForAnimation()
     }
 }

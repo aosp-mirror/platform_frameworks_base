@@ -52,16 +52,20 @@ android_library {
         "SystemUIUnfoldLib",
         "androidx.dynamicanimation_dynamicanimation",
         "androidx.concurrent_concurrent-futures",
-        "gson",
+        "androidx.lifecycle_lifecycle-runtime-ktx",
+        "androidx.lifecycle_lifecycle-viewmodel-ktx",
+        "androidx.recyclerview_recyclerview",
+        "kotlinx_coroutines_android",
+        "kotlinx_coroutines",
         "dagger2",
         "jsr330",
     ],
     resource_dirs: [
         "res",
     ],
-    java_version: "1.8",
     min_sdk_version: "current",
     plugins: ["dagger2-compiler"],
+    kotlincflags: ["-Xjvm-default=enable"],
 }
 
 java_library {

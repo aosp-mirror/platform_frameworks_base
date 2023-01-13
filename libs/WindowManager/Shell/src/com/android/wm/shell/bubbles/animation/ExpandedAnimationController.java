@@ -20,7 +20,6 @@ import static android.view.View.LAYOUT_DIRECTION_RTL;
 
 import static com.android.wm.shell.bubbles.BubblePositioner.NUM_VISIBLE_WHEN_RESTING;
 import static com.android.wm.shell.bubbles.BubbleStackView.ENABLE_FLING_TO_DISMISS_BUBBLE;
-import static com.android.wm.shell.bubbles.BubbleStackView.HOME_GESTURE_ENABLED;
 
 import android.content.res.Resources;
 import android.graphics.Path;
@@ -80,11 +79,6 @@ public class ExpandedAnimationController
     private final PhysicsAnimator.SpringConfig mAnimateOutSpringConfig =
             new PhysicsAnimator.SpringConfig(
                     EXPAND_COLLAPSE_ANIM_STIFFNESS, SpringForce.DAMPING_RATIO_NO_BOUNCY);
-
-    private final PhysicsAnimator.SpringConfig mAnimateOutSpringConfigWithoutHomeGesture =
-            new PhysicsAnimator.SpringConfig(
-                    EXPAND_COLLAPSE_ANIM_STIFFNESS_WITHOUT_HOME_GESTURE,
-                    SpringForce.DAMPING_RATIO_NO_BOUNCY);
 
     /** Horizontal offset between bubbles, which we need to know to re-stack them. */
     private float mStackOffsetPx;
@@ -307,14 +301,8 @@ public class ExpandedAnimationController
                     (firstBubbleLeads && index == 0)
                             || (!firstBubbleLeads && index == mLayout.getChildCount() - 1);
 
-            Interpolator interpolator;
-            if (HOME_GESTURE_ENABLED) {
-                // When home gesture is enabled, we use a different animation timing for collapse
-                interpolator = expanding
-                        ? Interpolators.EMPHASIZED_ACCELERATE : Interpolators.EMPHASIZED_DECELERATE;
-            } else {
-                interpolator = Interpolators.LINEAR;
-            }
+            Interpolator interpolator = expanding
+                    ? Interpolators.EMPHASIZED_ACCELERATE : Interpolators.EMPHASIZED_DECELERATE;
 
             animation
                     .followAnimatedTargetAlongPath(
@@ -564,16 +552,10 @@ public class ExpandedAnimationController
             finishRemoval.run();
             mOnBubbleAnimatedOutAction.run();
         } else {
-            PhysicsAnimator.SpringConfig springConfig;
-            if (HOME_GESTURE_ENABLED) {
-                springConfig = mAnimateOutSpringConfig;
-            } else {
-                springConfig = mAnimateOutSpringConfigWithoutHomeGesture;
-            }
             PhysicsAnimator.getInstance(child)
                     .spring(DynamicAnimation.ALPHA, 0f)
-                    .spring(DynamicAnimation.SCALE_X, 0f, springConfig)
-                    .spring(DynamicAnimation.SCALE_Y, 0f, springConfig)
+                    .spring(DynamicAnimation.SCALE_X, 0f, mAnimateOutSpringConfig)
+                    .spring(DynamicAnimation.SCALE_Y, 0f, mAnimateOutSpringConfig)
                     .withEndActions(finishRemoval, mOnBubbleAnimatedOutAction)
                     .start();
         }

@@ -1,9 +1,9 @@
 package com.android.systemui.media.muteawait
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
 import com.android.systemui.log.dagger.MediaMuteAwaitLog
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel
 import javax.inject.Inject
 
 /** Log messages for [MediaMuteAwaitConnectionManager]. */

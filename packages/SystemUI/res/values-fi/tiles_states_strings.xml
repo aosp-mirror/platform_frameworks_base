@@ -171,9 +171,4 @@
     <item msgid="146088982397753810">"Poissa päältä"</item>
     <item msgid="460891964396502657">"Päällä"</item>
   </string-array>
-  <string-array name="tile_states_dream">
-    <item msgid="6184819793571079513">"Ei saatavilla"</item>
-    <item msgid="8014986104355098744">"Poissa päältä"</item>
-    <item msgid="5966994759929723339">"Päällä"</item>
-  </string-array>
 </resources>

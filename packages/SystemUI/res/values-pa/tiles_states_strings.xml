@@ -47,7 +47,7 @@
     <item msgid="287997784730044767">"ਚਾਲੂ ਹੈ"</item>
   </string-array>
   <string-array name="tile_states_battery">
-    <item msgid="6311253873330062961">"ਅਣਉਪਲਬਧ"</item>
+    <item msgid="6311253873330062961">"ਅਣਉਪਲਬਧ ਹੈ"</item>
     <item msgid="7838121007534579872">"ਬੰਦ ਹੈ"</item>
     <item msgid="1578872232501319194">"ਚਾਲੂ ਹੈ"</item>
   </string-array>
@@ -170,10 +170,5 @@
     <item msgid="8189342855739930015">"ਅਣਉਪਲਬਧ"</item>
     <item msgid="146088982397753810">"ਬੰਦ"</item>
     <item msgid="460891964396502657">"ਚਾਲੂ"</item>
-  </string-array>
-  <string-array name="tile_states_dream">
-    <item msgid="6184819793571079513">"ਉਪਲਬਧ ਨਹੀਂ"</item>
-    <item msgid="8014986104355098744">"ਬੰਦ"</item>
-    <item msgid="5966994759929723339">"ਚਾਲੂ"</item>
   </string-array>
 </resources>

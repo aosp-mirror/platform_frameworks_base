@@ -24,6 +24,7 @@ import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_NON_STRONG
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_PREPARE_FOR_UPDATE;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_RESTART;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TIMEOUT;
+import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TRUSTAGENT_EXPIRED;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_USER_REQUEST;
 
 import android.animation.Animator;
@@ -34,6 +35,7 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Trace;
 import android.util.AttributeSet;
+import android.view.WindowInsets;
 import android.view.WindowInsetsAnimationControlListener;
 import android.view.WindowInsetsAnimationController;
 import android.view.animation.AnimationUtils;
@@ -105,6 +107,8 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
             case PROMPT_REASON_PREPARE_FOR_UPDATE:
                 return R.string.kg_prompt_reason_timeout_password;
             case PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT:
+                return R.string.kg_prompt_reason_timeout_password;
+            case PROMPT_REASON_TRUSTAGENT_EXPIRED:
                 return R.string.kg_prompt_reason_timeout_password;
             case PROMPT_REASON_NONE:
                 return 0;
@@ -235,5 +239,51 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
     public CharSequence getTitle() {
         return getResources().getString(
                 com.android.internal.R.string.keyguard_accessibility_password_unlock);
+    }
+
+    @Override
+    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        if (!mPasswordEntry.isFocused() && isVisibleToUser()) {
+            mPasswordEntry.requestFocus();
+        }
+        return super.onApplyWindowInsets(insets);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        super.onWindowFocusChanged(hasWindowFocus);
+        if (hasWindowFocus) {
+            if (isVisibleToUser()) {
+                showKeyboard();
+            } else {
+                hideKeyboard();
+            }
+        }
+    }
+
+    /**
+     * Sends signal to the focused window to show the keyboard.
+     */
+    public void showKeyboard() {
+        post(() -> {
+            if (mPasswordEntry.isAttachedToWindow()
+                    && !mPasswordEntry.getRootWindowInsets().isVisible(WindowInsets.Type.ime())) {
+                mPasswordEntry.requestFocus();
+                mPasswordEntry.getWindowInsetsController().show(WindowInsets.Type.ime());
+            }
+        });
+    }
+
+    /**
+     * Sends signal to the focused window to hide the keyboard.
+     */
+    public void hideKeyboard() {
+        post(() -> {
+            if (mPasswordEntry.isAttachedToWindow()
+                    && mPasswordEntry.getRootWindowInsets().isVisible(WindowInsets.Type.ime())) {
+                mPasswordEntry.clearFocus();
+                mPasswordEntry.getWindowInsetsController().hide(WindowInsets.Type.ime());
+            }
+        });
     }
 }

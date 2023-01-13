@@ -16,37 +16,32 @@
 
 package com.android.systemui.qs.footer.domain.interactor
 
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.os.UserHandle
 import android.provider.Settings
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
-import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.nano.MetricsProto
 import com.android.internal.logging.testing.FakeMetricsLogger
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityLaunchAnimator
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
+import com.android.systemui.animation.Expandable
 import com.android.systemui.globalactions.GlobalActionsDialogLite
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.QSSecurityFooterUtils
 import com.android.systemui.qs.footer.FooterActionsTestUtils
-import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.truth.correspondence.FakeUiEvent
 import com.android.systemui.truth.correspondence.LogMaker
-import com.android.systemui.user.UserSwitcherActivity
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.nullable
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -61,7 +56,7 @@ class FooterActionsInteractorTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        utils = FooterActionsTestUtils(context, TestableLooper.get(this))
+        utils = FooterActionsTestUtils(context, TestableLooper.get(this), TestCoroutineScheduler())
     }
 
     @Test
@@ -70,13 +65,13 @@ class FooterActionsInteractorTest : SysuiTestCase() {
         val underTest = utils.footerActionsInteractor(qsSecurityFooterUtils = qsSecurityFooterUtils)
 
         val quickSettingsContext = mock<Context>()
-        underTest.showDeviceMonitoringDialog(quickSettingsContext)
+
+        underTest.showDeviceMonitoringDialog(quickSettingsContext, null)
         verify(qsSecurityFooterUtils).showDeviceMonitoringDialog(quickSettingsContext, null)
 
-        val view = mock<View>()
-        whenever(view.context).thenReturn(quickSettingsContext)
-        underTest.showDeviceMonitoringDialog(view)
-        verify(qsSecurityFooterUtils).showDeviceMonitoringDialog(quickSettingsContext, null)
+        val expandable = mock<Expandable>()
+        underTest.showDeviceMonitoringDialog(quickSettingsContext, expandable)
+        verify(qsSecurityFooterUtils).showDeviceMonitoringDialog(quickSettingsContext, expandable)
     }
 
     @Test
@@ -85,8 +80,8 @@ class FooterActionsInteractorTest : SysuiTestCase() {
         val underTest = utils.footerActionsInteractor(uiEventLogger = uiEventLogger)
 
         val globalActionsDialogLite = mock<GlobalActionsDialogLite>()
-        val view = mock<View>()
-        underTest.showPowerMenuDialog(globalActionsDialogLite, view)
+        val expandable = mock<Expandable>()
+        underTest.showPowerMenuDialog(globalActionsDialogLite, expandable)
 
         // Event is logged.
         val logs = uiEventLogger.logs
@@ -99,7 +94,7 @@ class FooterActionsInteractorTest : SysuiTestCase() {
             .showOrHideDialog(
                 /* keyguardShowing= */ false,
                 /* isDeviceProvisioned= */ true,
-                view,
+                expandable,
             )
     }
 
@@ -155,58 +150,5 @@ class FooterActionsInteractorTest : SysuiTestCase() {
 
         // We only unlock the device.
         verify(activityStarter).postQSRunnableDismissingKeyguard(any())
-    }
-
-    @Test
-    fun showUserSwitcher_fullScreenDisabled() {
-        val featureFlags = FakeFeatureFlags().apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
-        val userSwitchDialogController = mock<UserSwitchDialogController>()
-        val underTest =
-            utils.footerActionsInteractor(
-                featureFlags = featureFlags,
-                userSwitchDialogController = userSwitchDialogController,
-            )
-
-        val view = mock<View>()
-        underTest.showUserSwitcher(view)
-
-        // Dialog is shown.
-        verify(userSwitchDialogController).showDialog(view)
-    }
-
-    @Test
-    fun showUserSwitcher_fullScreenEnabled() {
-        val featureFlags = FakeFeatureFlags().apply { set(Flags.FULL_SCREEN_USER_SWITCHER, true) }
-        val activityStarter = mock<ActivityStarter>()
-        val underTest =
-            utils.footerActionsInteractor(
-                featureFlags = featureFlags,
-                activityStarter = activityStarter,
-            )
-
-        // The clicked view. The context is necessary because it's used to build the intent, that
-        // we check below.
-        val view = mock<View>()
-        whenever(view.context).thenReturn(context)
-
-        underTest.showUserSwitcher(view)
-
-        // Dialog is shown.
-        val intentCaptor = argumentCaptor<Intent>()
-        verify(activityStarter)
-            .startActivity(
-                intentCaptor.capture(),
-                /* dismissShade= */ eq(true),
-                /* ActivityLaunchAnimator.Controller= */ nullable(),
-                /* showOverLockscreenWhenLocked= */ eq(true),
-                eq(UserHandle.SYSTEM),
-            )
-        assertThat(intentCaptor.value.component)
-            .isEqualTo(
-                ComponentName(
-                    context,
-                    UserSwitcherActivity::class.java,
-                )
-            )
     }
 }

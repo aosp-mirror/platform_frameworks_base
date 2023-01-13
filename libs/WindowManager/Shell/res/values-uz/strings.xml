@@ -72,16 +72,13 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Pufaklar"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Boshqarish"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Bulutcha yopildi."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Yaxshiroq koʻrish maqsadida bu ilovani qayta ishga tushirish uchun bosing."</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"Bu ilovani qaytadan ishga tushirish va butun ekranda ochish uchun bosing."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Kamera nosozmi?\nQayta moslash uchun bosing"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Tuzatilmadimi?\nQaytarish uchun bosing"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Kamera muammosizmi? Yopish uchun bosing."</string>
-    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Yana boshqa amallar"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Ekranni ikkiga ajratish uchun boshqa ilovani bu yerga torting"</string>
-    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Qayta joylash uchun ilova tashqarisiga ikki marta bosing"</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Ayrim ilovalar tik holatda ishlashga eng mos"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Muhitdan yanada samarali foydalanish uchun quyidagilardan birini sinang"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Butun ekranda ochish uchun qurilmani buring"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Qayta joylash uchun keyingi ilova ustiga ikki marta bosing"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"OK"</string>
-    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Batafsil axborot olish uchun kengaytiring."</string>
-    <string name="maximize_button_text" msgid="1650859196290301963">"Yoyish"</string>
-    <string name="minimize_button_text" msgid="271592547935841753">"Kichraytirish"</string>
-    <string name="close_button_text" msgid="2913281996024033299">"Yopish"</string>
 </resources>

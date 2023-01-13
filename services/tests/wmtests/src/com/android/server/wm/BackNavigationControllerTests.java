@@ -242,7 +242,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
     private IOnBackInvokedCallback createOnBackInvokedCallback() {
         return new IOnBackInvokedCallback.Stub() {
             @Override
-            public void onBackStarted() {
+            public void onBackStarted(BackEvent backEvent) {
             }
 
             @Override

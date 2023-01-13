@@ -43,6 +43,4 @@
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Diğer seçenekler için telefonunuzun kilidini açın"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Diğer seçenekler için tabletinizin kilidini açın"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Diğer seçenekler için cihazınızın kilidini açın"</string>
-    <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"Bu telefonda oynatılıyor"</string>
-    <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"Bu tablette oynatılıyor"</string>
 </resources>

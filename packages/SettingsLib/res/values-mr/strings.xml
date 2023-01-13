@@ -117,17 +117,17 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"फाइल स्थानांतरण"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"इनपुट डिव्हाइस"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"इंटरनेट अ‍ॅक्सेस"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"संपर्क आणि कॉल इतिहास शेअरिंग"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"संपर्क आणि कॉल इतिहास शेअरिंगसाठी वापरा"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"संपर्क शेअरिंग"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"संपर्क सामायिकरणासाठी वापरा"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"इंटरनेट कनेक्शन शेअररण"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"मजकूर मेसेज"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"सिम अ‍ॅक्सेस"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ऑडिओ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD ऑडिओ"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"श्रवणयंत्रे"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE ऑडिओ"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"श्रवण यंत्रांशी कनेक्ट केले आहे"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE ऑडिओशी कनेक्ट केले आहे"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"LE_AUDIO शी कनेक्ट केले आहे"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"मीडिया ऑडिओवर कनेक्ट केले"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"फोन ऑडिओ वर कनेक्ट केले"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"फाइल स्थानांतर सर्व्हरवर कनेक्ट केले"</string>
@@ -201,9 +201,9 @@
     <string name="tts_engine_network_required" msgid="8722087649733906851">"या भाषेस टेक्‍स्‍ट टू स्‍पीचसाठी एका नेटवर्क कनेक्शनची आवश्यकता आहे."</string>
     <string name="tts_default_sample_string" msgid="6388016028292967973">"हे उच्चार संश्लेषणाचे एक उदाहरण आहे"</string>
     <string name="tts_status_title" msgid="8190784181389278640">"डीफॉल्ट भाषा स्थिती"</string>
-    <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> ला पूर्ण सपोर्ट आहे"</string>
+    <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> पूर्णपणे समर्थित आहे"</string>
     <string name="tts_status_requires_network" msgid="8327617638884678896">"<xliff:g id="LOCALE">%1$s</xliff:g> ला नेटवर्क कनेक्शनची आवश्यकता आहे"</string>
-    <string name="tts_status_not_supported" msgid="2702997696245523743">"<xliff:g id="LOCALE">%1$s</xliff:g> ला सपोर्ट नाही"</string>
+    <string name="tts_status_not_supported" msgid="2702997696245523743">"<xliff:g id="LOCALE">%1$s</xliff:g> समर्थित नाही"</string>
     <string name="tts_status_checking" msgid="8026559918948285013">"तपासत आहे..."</string>
     <string name="tts_engine_settings_title" msgid="7849477533103566291">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> साठी सेटिंग्ज"</string>
     <string name="tts_engine_settings_button" msgid="477155276199968948">"इंजीन सेटिंग्ज लाँच करा"</string>
@@ -408,7 +408,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"मॅनिफेस्‍ट मूल्ये काहीही असू देत, एकाहून अधिक विंडोसाठी सर्व अ‍ॅक्टिव्हिटीचा आकार बदलण्यायोग्य करा."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"freeform विंडो सुरू करा"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"प्रायोगिक मुक्तस्वरूपाच्या विंडोसाठी सपोर्ट सुरू करा."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"डेस्कटॉप मोड"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"डेस्कटॉप बॅकअप पासवर्ड"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"डेस्कटॉप पूर्ण बॅक अप सध्या संरक्षित नाहीत"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"डेस्कटॉपच्या पूर्ण बॅकअपसाठी असलेला पासवर्ड बदलण्यासाठी किंवा काढण्यासाठी टॅप  करा"</string>
@@ -477,13 +476,12 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"पूर्ण चार्ज होण्यासाठी <xliff:g id="TIME">%1$s</xliff:g> शिल्लक आहेत"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - पूर्ण चार्ज होण्यासाठी <xliff:g id="TIME">%2$s</xliff:g> शिल्लक आहे"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्ज करणे थांबवले आहे"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> • चार्जिंग तात्पुरते मर्यादित आहे"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज होत आहे"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"वेगाने चार्ज होत आहे"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"हळू चार्ज होत आहे"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"वायरलेसने चार्ज होत आहे"</string>
-    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"चार्ज होत आहे"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"चार्ज होत नाही"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"कनेक्ट केले, चार्ज होत नाही"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"चार्ज झाली"</string>
@@ -656,6 +654,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"इथरनेट डिस्कनेक्ट केले."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"इथरनेट."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"कॉलिंग उपलब्ध नाही."</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"वेळ"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"तारीख"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"हवामान"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"हवेची गुणवत्ता"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"कास्टसंबंधित माहिती"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"प्रोफाइल फोटो निवडा"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"डीफॉल्ट वापरकर्ता आयकन"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"वास्तविक कीबोर्ड"</string>
@@ -664,11 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"स्क्रीन सुरू करा"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"स्क्रीन सुरू करण्यासाठी अनुमती द्या"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"स्क्रीन सुरू करण्यासाठी ॲपला अनुमती द्या. अनुमती दिल्यास, ॲप तुमच्या स्पष्ट हेतूशिवाय कधीही स्क्रीन सुरू करू शकते."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR कोड स्कॅन करा"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"ऐकणे सुरू करण्यासाठी, खालील QR कोड मध्यभागी ठेवा"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR कोडचा फॉरमॅट चुकीचा आहे"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> चे प्रसारण थांबवायचे आहे का?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"तुम्ही <xliff:g id="SWITCHAPP">%1$s</xliff:g> चे प्रसारण केल्यास किंवा आउटपुट बदलल्यास, तुमचे सध्याचे प्रसारण बंद होईल"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> चे प्रसारण करा"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"आउटपूट बदला"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"पूर्वानुमानित मागे जाण्याचे अ‍ॅनिमेशन"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"पूर्वानुमानित मागे जाण्यासाठीचे सिस्टीम अ‍ॅनिमेशन सुरू करा."</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"हे सेटिंग पूर्वानुमानित जेश्चर ॲनिमेशनसाठी सिस्टीम ॲनिमेशन सुरू करते. यासाठी मॅनिफेस्ट फाइलमध्ये प्रति ॲप enableOnBackInvokedCallback सत्य वर सेट करणे आवश्यक आहे."</string>
 </resources>

@@ -117,17 +117,17 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Pemindahan fail"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Peranti input"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Akses Internet"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Perkongsian kenalan &amp; sejarah panggilan"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Digunakan untuk perkongsian kenalan dan sejarah panggilan"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Perkongsian kenalan"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Gunakan untuk perkongsian kenalan"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Perkongsian sambungan Internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Mesej Teks"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Akses SIM"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Audio HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Audio HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Alat Bantu Dengar"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Disambungkan pada Alat Bantu Dengar"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Disambungkan kepada LE Audio"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Disambungkan kepada LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Disambungkan ke audio media"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Disambungkan ke audio telefon"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Bersambung ke pelayan pemindahan fail"</string>
@@ -408,7 +408,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Bolehkan semua saiz aktiviti diubah untuk berbilang tetingkap, tanpa mengambil kira nilai manifes."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Dayakan tetingkap bentuk bebas"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Dayakan sokongan untuk tetingkap bentuk bebas percubaan."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Mod desktop"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Kata laluan sandaran komputer meja"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Sandaran penuh komputer meja tidak dilindungi pada masa ini"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Ketik untuk menukar atau mengalih keluar kata laluan untuk sandaran penuh desktop"</string>
@@ -449,7 +448,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomali (merah-hijau)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomali (biru-kuning)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Pembetulan warna"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Pembetulan warna dapat membantu apabila anda mahu:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Melihat warna dengan lebih tepat&lt;/li&gt; &lt;li&gt;&amp;nbsp;Mengalih keluar warna agar anda dapat menumpukan perhatian&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Pembetulan warna dapat membantu apabila anda mahu:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Melihat warna dengan lebih tepat&lt;/li&gt; &lt;li&gt;&amp;nbsp;Mengalih keluar warna untuk membantu anda menumpukan perhatian&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Diatasi oleh <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Kira-kira <xliff:g id="TIME_REMAINING">%1$s</xliff:g> lagi"</string>
@@ -475,15 +474,14 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Tablet mungkin ditutup tidak lama lagi (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Peranti mungkin ditutup tidak lama lagi (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> lagi sebelum penuh"</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> lagi sebelum penuh"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - Pengecasan dijeda"</string>
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> lagi hingga penuh"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> lagi hingga penuh"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Pengecasan terhad sementara"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Tidak diketahui"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Mengecas"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Mengecas dgn cepat"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Mengecas perlahan"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Mengecas tanpa wayar"</string>
-    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Pengecasan"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Tidak mengecas"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Bersambung, tidak mengecas"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Sudah dicas"</string>
@@ -656,6 +654,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet diputuskan sambungan."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Tiada panggilan."</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"Masa"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"Tarikh"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"Cuaca"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Kualiti Udara"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Maklumat Pelakon"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Pilih gambar profil"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Ikon pengguna lalai"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Papan kekunci fizikal"</string>
@@ -664,11 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Hidupkan skrin"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Benarkan menghidupkan skrin"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Benarkan apl menghidupkan skrin. Jika dibenarkan, apl boleh menghidupkan skrin pada bila-bila masa tanpa niat eksplisit anda."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Imbas kod QR"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Untuk mula mendengar, pusatkan kod QR di bawah"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Kod QR bukan dalam format yang sah"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Hentikan siaran <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Jika anda siarkan <xliff:g id="SWITCHAPP">%1$s</xliff:g> atau tukarkan output, siaran semasa anda akan berhenti"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Siarkan <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Tukar output"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"Animasi kembali ramalan"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Dayakan animasi sistem untuk kembali ramalan."</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Tetapan ini mendayakan animasi sistem untuk animasi gerak isyarat ramalan. Animasi sistem memerlukan tetapan enableOnBackInvokedCallback untuk setiap apl kepada benar dalam fail manifes."</string>
 </resources>

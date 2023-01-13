@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"KB"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Titelloos&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Geen foonnommer)"</string>
@@ -300,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"by jou kalender in te gaan"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS-boodskappe te stuur en te bekyk"</string>
-    <string name="permgrouplab_storage" msgid="17339216290379241">"Lêers"</string>
-    <string name="permgroupdesc_storage" msgid="5378659041354582769">"kry toegang tot lêers op jou toestel"</string>
-    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musiek en oudio"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"kry toegang tot musiek en oudio op jou toestel"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Foto\'s en video\'s"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"kry toegang tot foto\'s en video\'s op jou toestel"</string>
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"Lêers en dokumente"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"kry toegang tot lêers en dokumente op jou toestel"</string>
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Musiek en ander oudio"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"kry toegang tot oudiolêers op jou toestel"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Foto\'s en video\'s"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"kry toegang tot prente en videolêers op jou toestel"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofoon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"oudio op te neem"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fisieke aktiwiteit"</string>
@@ -581,14 +586,13 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Gebruik skermslot"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Voer jou skermslot in om voort te gaan"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Druk ferm op die sensor"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Kan nie vingerafdruk herken nie. Probeer weer."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Kon nie vingerafdruk verwerk nie. Probeer asseblief weer."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Maak vingerafdruksensor skoon en probeer weer"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Maak sensor skoon en probeer weer"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Druk ferm op sensor"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Vinger is te stadig beweer. Probeer asseblief weer."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Probeer \'n ander vingerafdruk"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Te helder"</string>
-    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Druk van aan/af-skakelaar bespeur"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Probeer om dit te verstel"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Verander elke keer die posisie van jou vinger so effens"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -600,17 +604,16 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Gesig is gestaaf; druk asseblief bevestig"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Vingerafdrukhardeware is nie beskikbaar nie."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Kan nie vingerafdruk opstel nie"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Vingerafdrukopstelling het uitgetel. Probeer weer."</string>
+    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Vingerafdrukuittelling is bereik. Probeer weer."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Vingerafdrukhandeling is gekanselleer."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Vingerafdrukhandeling is deur gebruiker gekanselleer."</string>
-    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Te veel pogings. Gebruik eerder skermslot."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Te veel pogings. Gebruik eerder skermslot."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Kan nie vingerafdruk verwerk nie. Probeer weer."</string>
+    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Te veel pogings. Probeer later weer."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Te veel pogings. Vingerafdruksensor is gedeaktiveer."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Probeer weer."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Geen vingerafdrukke is geregistreer nie."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Hierdie toetstel het nie \'n vingerafdruksensor nie."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensor is tydelik gedeaktiveer."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Kan nie vingerafdruksensor gebruik nie. Besoek \'n verskaffer wat herstelwerk doen"</string>
-    <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Aan/af-skakelaar is gedruk"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Vinger <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Gebruik vingerafdruk"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Gebruik vingerafdruk of skermslot"</string>
@@ -631,33 +634,26 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Vingerafdrukslot"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Kan nie vingerafdruksensor gebruik nie"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Besoek \'n verskaffer wat herstelwerk doen."</string>
-    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Kan nie jou gesigmodel skep nie. Probeer weer."</string>
+    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Kon nie gesigdata akkuraat vasvang nie. Probeer weer."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Te helder. Probeer sagter beligting."</string>
-    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Nie genoeg lig nie"</string>
-    <string name="face_acquired_too_close" msgid="4453646176196302462">"Beweeg foon verder weg"</string>
-    <string name="face_acquired_too_far" msgid="2922278214231064859">"Beweeg foon nader"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Beweeg foon hoër op"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Beweeg foon laer af"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"Beweeg foon na jou linkerkant"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"Beweeg foon na jou regterkant"</string>
+    <string name="face_acquired_too_dark" msgid="252573548464426546">"Te donker. Probeer helderder beligting."</string>
+    <string name="face_acquired_too_close" msgid="1628767882971469833">"Beweeg foon verder weg"</string>
+    <string name="face_acquired_too_far" msgid="5098567726427173896">"Beweeg foon nader."</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"Beweeg foon hoër op."</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"Beweeg foon laer af."</string>
+    <string name="face_acquired_too_right" msgid="2513391513020932655">"Beweeg foon na links."</string>
+    <string name="face_acquired_too_left" msgid="8882499346502714350">"Beweeg foon na regs."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Kyk asseblief meer reguit na jou toestel."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Kan nie jou gesig sien nie. Hou jou foon op oogvlak."</string>
+    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Posisioneer jou gesig direk voor die foon."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Te veel beweging. Hou foon stil."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Skryf jou gesig asseblief weer in."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Kan nie gesig herken nie. Probeer weer."</string>
-    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Verander die posisie van jou kop effens"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Kyk meer reguit na jou foon"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Kyk meer reguit na jou foon"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Kyk meer reguit na jou foon"</string>
+    <string name="face_acquired_too_different" msgid="4699657338753282542">"Kan nie meer gesig herken nie. Probeer weer."</string>
+    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Te eenders. Verander asseblief jou pose."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Draai jou kop \'n bietjie minder."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Kantel jou kop \'n bietjie minder."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Draai jou kop \'n bietjie minder."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Verwyder enigiets wat jou gesig versteek."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Maak die bokant van jou skerm skoon, insluitend die swart balk"</string>
-    <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
-    <skip />
-    <!-- no translation found for face_acquired_mouth_covering_detected (8219428572168642593) -->
-    <skip />
-    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Kan nie jou gesigmodel skep nie. Probeer weer."</string>
-    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Donkerbril bespeur. Jou gesig moet heeltemal sigbaar wees."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Gesigbedekking bespeur. Jou gesig moet heeltemal sigbaar wees."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Kan nie gesig verifieer nie. Hardeware nie beskikbaar nie."</string>
@@ -1245,9 +1241,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Berei tans <xliff:g id="APPNAME">%1$s</xliff:g> voor."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Begin programme."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Voltooi herlaai."</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Gaan voort met opstelling?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Jy het die aan/af-skakelaar gedruk – dit skakel gewoonlik die skerm af.\n\nProbeer liggies tik terwyl jy jou vingerafdruk opstel."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Skakel skerm af om opstelling te stop"</string>
-    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Skakel af"</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Skakel skerm af"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Doen opstelling"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Gaan voort met vingerafdrukverifiëring?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Jy het die aan/af-skakelaar gedruk – dit skakel gewoonlik die skerm af.\n\nProbeer liggies tik om jou vingerafdruk te verifieer."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Skakel skerm af"</string>
@@ -1400,16 +1397,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Tik om op te stel"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Kies om op te stel"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Jy sal dalk die toestel moet herformateer. Tik om uit te skiet."</string>
-    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"Om foto\'s, video\'s, musiek en meer te berg"</string>
+    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Om foto\'s en media oor te dra"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Blaai deur medialêers"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Kwessie met <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> werk nie"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Tik om reg te stel"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> is korrup. Kies om reg te stel."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Jy sal dalk die toestel moet herformateer. Tik om uit te skiet."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"<xliff:g id="NAME">%s</xliff:g> is bespeur"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Niegesteunde <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> werk nie"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"Tik om op te stel ."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Hierdie toestel steun nie hierdie <xliff:g id="NAME">%s</xliff:g> nie. Tik om in \'n gesteunde formaat op te stel."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Kies om <xliff:g id="NAME">%s</xliff:g> in \'n gesteunde formaat op te stel."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Jy sal dalk die toestel moet herformateer"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> is onverwags verwyder"</string>
@@ -1608,7 +1605,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Foon"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Dokluidsprekers"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Eksterne toestel"</string>
+    <string name="default_audio_route_name_external_device" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Oorfone"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Stelsel"</string>
@@ -1922,7 +1919,6 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Streekvoorkeur"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Voer taalnaam in"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Voorgestel"</string>
-    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Voorgestel"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Alle tale"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Allle streke"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Soek"</string>
@@ -1940,19 +1936,18 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Kamera is nie beskikbaar nie"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Gaan voort op foon"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofoon is nie beskikbaar nie"</string>
-    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Play Winkel is nie beskikbaar nie"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV-instellings is nie beskikbaar nie"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Tabletinstellings is nie beskikbaar nie"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Fooninstellings is nie beskikbaar nie"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Jy kan nie nou toegang hiertoe op jou <xliff:g id="DEVICE">%1$s</xliff:g> kry nie. Probeer eerder op jou Android TV-toestel."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Jy kan nie nou toegang hiertoe op jou <xliff:g id="DEVICE">%1$s</xliff:g> kry nie. Probeer eerder op jou tablet."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Jy kan nie nou toegang hiertoe op jou <xliff:g id="DEVICE">%1$s</xliff:g> kry nie. Probeer eerder op jou foon."</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"Jou <xliff:g id="DEVICE">%1$s</xliff:g> kan nie toegang hiertoe kry nie. Probeer eerder op jou Android TV-toestel."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"Jou <xliff:g id="DEVICE">%1$s</xliff:g> kan nie toegang hiertoe kry nie. Probeer eerder op jou tablet."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"Jou <xliff:g id="DEVICE">%1$s</xliff:g> kan nie toegang hiertoe kry nie. Probeer eerder op jou foon."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"Jy kan nie nou toegang hiertoe op jou <xliff:g id="DEVICE">%1$s</xliff:g> kry nie. Probeer eerder op jou Android TV-toestel."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"Jy kan nie nou toegang hiertoe op jou <xliff:g id="DEVICE">%1$s</xliff:g> kry nie. Probeer eerder op jou tablet."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"Jy kan nie nou toegang hiertoe op jou <xliff:g id="DEVICE">%1$s</xliff:g> kry nie. Probeer eerder op jou foon."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Hierdie program versoek tans bykomende sekuriteit. Probeer eerder op jou Android TV-toestel."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Hierdie program versoek tans bykomende sekuriteit. Probeer eerder op jou tablet."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Hierdie program versoek tans bykomende sekuriteit. Probeer eerder op jou foon."</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Jy kan nie op jou <xliff:g id="DEVICE">%1$s</xliff:g> toegang hiertoe kry nie. Probeer eerder op jou Android TV-toestel."</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Jy kan nie op jou <xliff:g id="DEVICE">%1$s</xliff:g> toegang hiertoe kry nie. Probeer eerder op jou tablet."</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Jy kan nie op jou <xliff:g id="DEVICE">%1$s</xliff:g> toegang hiertoe kry nie. Probeer eerder op jou foon."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Hierdie program is vir \'n ouer weergawe van Android gebou en sal dalk nie behoorlik werk nie. Probeer kyk vir opdaterings, of kontak die ontwikkelaar."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Kyk vir opdatering"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Jy het nuwe boodskappe"</string>
@@ -2045,8 +2040,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Gee <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> toegang tot alle toestelloglêers?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Gee eenmalige toegang"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Moenie toelaat nie"</string>
-    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Toestelloglêers teken aan wat op jou toestel gebeur. Programme kan hierdie loglêers gebruik om kwessies op te spoor en reg te stel.\n\nSommige loglêers bevat dalk sensitiewe inligting en daarom moet jy toegang tot alle toestelloglêers net gee aan programme wat jy vertrou. \n\nAs jy nie vir hierdie program toegang tot alle toestelloglêers gee nie, het die program steeds toegang tot eie loglêers. Jou toestelvervaardiger het dalk steeds toegang tot sommige loglêers of inligting op jou toestel."</string>
-    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Toestelloglêers teken aan wat op jou toestel gebeur. Programme kan hierdie loglêers gebruik om kwessies op te spoor en reg te stel.\n\nSommige loglêers bevat dalk sensitiewe inligting, en daarom moet jy toegang tot alle toestelloglêers net gee aan programme wat jy vertrou. \n\nHierdie program het steeds toegang tot eie loglêers as jy nie vir hierdie program toegang tot alle toestelloglêers gee nie. Jou toestelvervaardiger het dalk steeds toegang tot sommige loglêers of inligting op jou toestel.\n\nKom meer te wete by g.co/android/devicelogs."</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Toestelloglêers teken aan wat op jou toestel gebeur. Programme kan hierdie loglêers gebruik om kwessies op te spoor en reg te stel.\n\nSommige loglêers bevat dalk sensitiewe inligting en daarom moet jy toegang tot alle toestelloglêers net gee aan programme wat jy vertrou. \n\nAs jy nie vir hierdie program toegang tot alle toestelloglêers gee nie, het dit steeds toegang tot sy eie loglêers. Jou toestelvervaardiger het dalk steeds toegang tot sommige loglêers of inligting op jou toestel. Kom meer te wete"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Moenie weer wys nie"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> wil <xliff:g id="APP_2">%2$s</xliff:g>-skyfies wys"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Wysig"</string>
@@ -2059,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Moenie Steur Nie het verander"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tik om te kyk wat geblokkeer word."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Gaan kennisgewinginstellings na"</string>
-    <string name="review_notification_settings_text" msgid="5916244866751849279">"Vanaf Android 13 het programme wat jy installeer jou toestemming nodig om kennisgewings te stuur. Tik om hierdie toestemming vir bestaande programme te verander."</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Herinner my later"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Maak toe"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Stelsel"</string>
@@ -2287,6 +2282,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Gaan aktiewe programme na"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Kan nie toegang tot die foon se kamera op jou <xliff:g id="DEVICE">%1$s</xliff:g> kry nie"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Kan nie toegang tot die tablet se kamera op jou <xliff:g id="DEVICE">%1$s</xliff:g> kry nie"</string>
-    <string name="vdm_secure_window" msgid="161700398158812314">"Jy kan nie toegang hiertoe kry terwyl daar gestroom word nie. Probeer eerder op jou foon."</string>
-    <string name="system_locale_title" msgid="711882686834677268">"Stelselverstek"</string>
+    <string name="system_locale_title" msgid="3978041860457277638">"Stelseltaal"</string>
 </resources>

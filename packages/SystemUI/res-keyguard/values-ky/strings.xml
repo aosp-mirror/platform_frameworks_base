@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"SIM-карта жараксыз."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Кубатталды"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Зымсыз кубатталууда"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Кубатталууда"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Кубаттоо догу"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Кубатталууда"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Тез кубатталууда"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Жай кубатталууда"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Батареяны коргоо үчүн кубаттоо тындырылды"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Кубаттоо убактылуу чектелген"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Кулпуну ачуу үчүн Менюну басыңыз."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Тармак кулпуланган"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"SIM карта жок"</string>
@@ -68,9 +68,15 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Сырсөзүңүздү <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тердиңиз. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секунддан кийин дагы аракет кылып көрүңүз."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Түзмөктү ачуучу графикалык  ачкычты <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тарттыңыз. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секунддан кийин дагы аракет кылып көрүңүз."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"SIM-картанын PIN-коду туура эмес. Эми түзмөктү бөгөттөн чыгаруу үчүн байланыш операторуңузга кайрылышыңыз керек."</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{SIM-картанын PIN коду туура эмес киргизилди. # аракет калды. Болбосо, түзмөктү бөгөттөн чыгаруу үчүн операторуңузга кайрылышыңыз керек болот.}other{SIM-картанын PIN коду туура эмес киргизилди. # аракет калды. }}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="other">SIM-картанын PIN-коду туура эмес, сизде <xliff:g id="NUMBER_1">%d</xliff:g> аракет калды.</item>
+      <item quantity="one">SIM-картанын PIN-коду туура эмес, сизде <xliff:g id="NUMBER_0">%d</xliff:g> аракет калды. Болбосо, түзмөктү бөгөттөн чыгаруу үчүн байланыш операторуңузга кайрылышыңыз керек.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM-карта жараксыз. Байланыш операторуңузга кайрылыңыз."</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{SIM-картанын PUK коду туура эмес киргизилди. SIM-картанын биротоло жарактан чыгаарына # аракет калды.}other{SIM-картанын PUK коду туура эмес киргизилди. SIM-картанын биротоло жарактан чыгаарына # аракет калды.}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="other">SIM-картанын PUK-коду туура эмес, SIM-картанын биротоло жарактан чыгаарына <xliff:g id="NUMBER_1">%d</xliff:g> аракет калды.</item>
+      <item quantity="one">SIM-картанын PUK-коду туура эмес, SIM-картанын биротоло жарактан чыгаарына <xliff:g id="NUMBER_0">%d</xliff:g> аракет калды.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"SIM-картанын PIN-кодун ачуу кыйрады!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM-картанын PUK-кодун ачуу кыйрады!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Киргизүү ыкмасын өзгөртүү"</string>
@@ -84,9 +90,15 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Түзмөктү администратор кулпулап койгон"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Түзмөк кол менен кулпуланды"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Таанылган жок"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Жөндөөлөрдөн камерага уруксат беришиңиз керек"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{SIM-картанын PIN кодун киргизиңиз. Сизде # аракет калды, андан кийин түзмөктү бөгөттөн чыгаруу үчүн байланыш операторуна кайрылышыңыз керек болот.}other{SIM-картанын PIN кодун киргизиңиз. # аракет калды.}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM-карта азыр жарактан чыкты. Улантуу үчүн PUK кодду киргизиңиз. SIM-картанын биротоло жарактан чыгаарына # аракет калды. Чоо-жайын билүү үчүн байланыш операторуна кайрылыңыз.}other{SIM-карта азыр жарактан чыкты. Улантуу үчүн PUK кодду киргизиңиз. SIM-картанын биротоло жарактан чыгарына # аракет калды. Чоо-жайын билүү үчүн байланыш операторуна кайрылыңыз.}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Жүзүнөн таанып ачуу функциясын колдонуу үчүн Жөндөөлөр &gt; Купуялык бөлүмүнө өтүп, "<b>"Камераны колдонууну"</b>" күйгүзүңүз"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="other">SIM-картанын PIN кодун киргизиңиз. Сизде <xliff:g id="NUMBER_1">%d</xliff:g> аракет калды.</item>
+      <item quantity="one">SIM-картанын PIN кодун киргизиңиз. Сизде <xliff:g id="NUMBER_0">%d</xliff:g> аракет калды, андан кийин түзмөктү бөгөттөн чыгаруу үчүн байланыш операторуна кайрылышыңыз керек болот.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="other">SIM-карта азыр жарактан чыкты. Улантуу үчүн PUK-кодду киргизиңиз. SIM-картанын биротоло жарактан чыгарына <xliff:g id="_NUMBER_1">%d</xliff:g> аракет калды. Чоо-жайын билүү үчүн байланыш операторуна кайрылыңыз.</item>
+      <item quantity="one">SIM-карта азыр жарактан чыкты. Улантуу үчүн PUK-кодду киргизиңиз. SIM-картанын биротоло жарактан чыгаарына <xliff:g id="_NUMBER_0">%d</xliff:g> аракет калды. Чоо-жайын билүү үчүн байланыш операторуна кайрылыңыз.</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"Демейки"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Көбүк"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Аналог"</string>

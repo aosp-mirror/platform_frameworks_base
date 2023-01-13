@@ -24,7 +24,7 @@
     <string name="installing" msgid="4921993079741206516">"इंस्टॉल हो रहा है..."</string>
     <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> इंस्टॉल हो रहा है…"</string>
     <string name="install_done" msgid="5987363587661783896">"ऐप्लिकेशन इंस्‍टॉल हो गया."</string>
-    <string name="install_confirm_question" msgid="7663733664476363311">"क्या आपको यह ऐप्लिकेशन इंस्टॉल करना है?"</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"क्या आप इस ऐप्लिकेशन को इंस्टॉल करना चाहते हैं?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"क्या आप इस ऐप्लिकेशन को अपडेट करना चाहते हैं?"</string>
     <string name="install_failed" msgid="5777824004474125469">"ऐप्लिकेशन इंस्‍टॉल नहीं हुआ."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"पैकेज को इंस्टॉल होने से ब्लॉक किया हुआ है."</string>
@@ -53,7 +53,7 @@
     <string name="uninstall_application_title" msgid="4045420072401428123">"ऐप्लिकेशन अनइंस्‍टॉल करें"</string>
     <string name="uninstall_update_title" msgid="824411791011583031">"अपडेट अनइंस्‍टॉल करें"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> इस ऐप्लिकेशन का भाग है:"</string>
-    <string name="uninstall_application_text" msgid="3816830743706143980">"क्‍या आपको इस ऐप्लिकेशन को अनइंस्‍टॉल करना है?"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"क्‍या आप इस ऐप्लिकेशन को अनइंस्‍टॉल करना चाहते हैं?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"क्या आप इस ऐप्लिकेशन को "<b>"सभी"</b>" उपयोगकर्ताओं के लिए अनइंस्टॉल करना चाहते हैं? ऐप्लिकेशन और उसके डेटा को डिवाइस पर "<b>"सभी"</b>" उपयोगकर्ताओं से हटा दिया जाएगा."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"क्या आप उपयोगकर्ता <xliff:g id="USERNAME">%1$s</xliff:g> के लिए इस ऐप्लिकेशन को अनइंस्टॉल करना चाहते हैं?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"क्या अपनी वर्क प्रोफ़ाइल से इस ऐप्लिकेशन को अनइंस्टॉल करना है?"</string>
@@ -74,7 +74,7 @@
     <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"आपकी प्रोफ़ाइल के लिए यह ऐप्लिकेशन ज़रूरी है और उसे अनइंस्टॉल नहीं किया जा सकता."</string>
     <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"आपके डिवाइस एडमिन के लिए यह ऐप्लिकेशन ज़रूरी है और इसे अनइंस्टॉल नहीं किया जा सकता."</string>
     <string name="manage_device_administrators" msgid="3092696419363842816">"डिवाइस एडमिन ऐप्लिकेशन प्रबंधित करें"</string>
-    <string name="manage_users" msgid="1243995386982560813">"उपयोगकर्ताओं को मैनेज करें"</string>
+    <string name="manage_users" msgid="1243995386982560813">"उपयोगकर्ताओं को प्रबंधित करें"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> को अनइंस्‍टॉल नहीं किया जा सका."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"पैकेज को पार्स करने में कोई समस्‍या थी."</string>
     <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
@@ -83,7 +83,7 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"अनजान"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"आपकी सुरक्षा के लिए, आपके टैबलेट को फ़िलहाल इस स्रोत से अनजान ऐप्लिकेशन इंस्टॉल करने की अनुमति नहीं है. आप \'सेटिंग\' में जाकर इसे बदल सकते हैं."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"आपकी सुरक्षा के लिए, आपके टीवी को फ़िलहाल इस स्रोत से अनजान ऐप्लिकेशन इंस्टॉल करने की अनुमति नहीं है. आप \'सेटिंग\' में जाकर इसे बदल सकते हैं."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"आपकी सुरक्षा के लिए, आपके फ़ोन को फ़िलहाल इस सोर्स से अनजान ऐप्लिकेशन इंस्टॉल करने की अनुमति नहीं है. \'सेटिंग\' में जाकर इसे बदला जा सकता है."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"आपकी सुरक्षा के लिए, आपके फ़ोन को फ़िलहाल इस स्रोत से अनजान ऐप्लिकेशन इंस्टॉल करने की अनुमति नहीं है. आप \'सेटिंग\' में जाकर इसे बदल सकते हैं."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"आपका फ़ोन और निजी डेटा अनजान ऐप्लिकेशन के हमले को लेकर ज़्यादा संवेदनशील हैं. इस ऐप्लिकेशन को इंस्टॉल करके, आप सहमति देते हैं कि इसके इस्तेमाल के चलते आपके फ़ोन को होने वाले किसी भी नुकसान या डेटा के मिट जाने पर, आप ज़िम्मेदार होंगे."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"आपका टैबलेट और निजी डेटा अनजान ऐप्लिकेशन के हमले को लेकर ज़्यादा संवेदनशील हैं. इस ऐप्लिकेशन को इंस्टॉल करके, आप सहमति देते हैं कि इसके इस्तेमाल के चलते आपके टैबलेट को होने वाले किसी भी नुकसान या डेटा के मिट जाने पर, आप ज़िम्मेदार होंगे."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"आपका टीवी और निजी डेटा अनजान ऐप्लिकेशन के हमले को लेकर ज़्यादा संवेदनशील हैं. इस ऐप्लिकेशन को इंस्टॉल करके, आप सहमति देते हैं कि इसके इस्तेमाल के चलते आपके टीवी को होने वाले किसी भी नुकसान या डेटा के मिट जाने पर, आप ज़िम्मेदार होंगे."</string>

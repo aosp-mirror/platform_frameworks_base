@@ -731,10 +731,9 @@ public abstract class ActivityManagerInternal {
      */
     public interface VoiceInteractionManagerProvider {
         /**
-         * Notifies the service when a high-level activity event has been changed, for example,
-         * an activity was resumed or stopped.
+         * Notifies the service when an activity is destroyed.
          */
-        void notifyActivityEventChanged();
+        void notifyActivityDestroyed(IBinder activityToken);
     }
 
     /**

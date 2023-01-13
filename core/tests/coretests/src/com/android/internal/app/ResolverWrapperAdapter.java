@@ -46,14 +46,14 @@ public class ResolverWrapperAdapter extends ResolverListAdapter {
     }
 
     @Override
-    protected LoadLabelTask getLoadLabelTask(DisplayResolveInfo info, ViewHolder holder) {
-        return new LoadLabelWrapperTask(info, holder);
+    protected LoadLabelTask createLoadLabelTask(DisplayResolveInfo info) {
+        return new LoadLabelWrapperTask(info);
     }
 
     class LoadLabelWrapperTask extends LoadLabelTask {
 
-        protected LoadLabelWrapperTask(DisplayResolveInfo dri, ViewHolder holder) {
-            super(dri, holder);
+        protected LoadLabelWrapperTask(DisplayResolveInfo dri) {
+            super(dri);
         }
 
         @Override

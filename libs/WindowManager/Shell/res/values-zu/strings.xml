@@ -19,7 +19,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="pip_phone_close" msgid="5783752637260411309">"Vala"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Nweba"</string>
-    <string name="pip_phone_settings" msgid="5468987116750491918">"Amasethingi"</string>
+    <string name="pip_phone_settings" msgid="5468987116750491918">"Izilungiselelo"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"Faka ukuhlukanisa isikrini"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Imenyu"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"U-<xliff:g id="NAME">%s</xliff:g> ungaphakathi kwesithombe esiphakathi kwesithombe"</string>
@@ -72,16 +72,13 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Ibhamuza"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Phatha"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Ibhamuza licashisiwe."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Thepha ukuze uqale kabusha le app ukuze ibonakale kangcono."</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"Thepha ukuze uqale kabusha lolu hlelo lokusebenza uphinde uye kusikrini esigcwele."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Izinkinga zekhamera?\nThepha ukuze uyilinganise kabusha"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Akuyilungisanga?\nThepha ukuze ubuyele"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Azikho izinkinga zekhamera? Thepha ukuze ucashise."</string>
-    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Bona futhi wenze okuningi"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Hudula kwenye i-app mayelana nokuhlukanisa isikrini"</string>
-    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Thepha kabili ngaphandle kwe-app ukuze uyimise kabusha"</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Amanye ama-app asebenza ngcono uma eme ngobude"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Zama enye yalezi zinketho ukuze usebenzise isikhala sakho ngokugcwele"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Zungezisa idivayisi yakho ukuze uye esikrinini esigcwele"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Thepha kabili eduze kwe-app ukuze uyimise kabusha"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Ngiyezwa"</string>
-    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Nweba ukuze uthole ulwazi olwengeziwe"</string>
-    <string name="maximize_button_text" msgid="1650859196290301963">"Khulisa"</string>
-    <string name="minimize_button_text" msgid="271592547935841753">"Nciphisa"</string>
-    <string name="close_button_text" msgid="2913281996024033299">"Vala"</string>
 </resources>

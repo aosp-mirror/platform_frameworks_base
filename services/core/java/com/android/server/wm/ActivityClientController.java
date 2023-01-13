@@ -27,6 +27,8 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.service.voice.VoiceInteractionSession.SHOW_SOURCE_APPLICATION;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.WindowManager.TRANSIT_TO_BACK;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IMMERSIVE;
@@ -156,6 +158,15 @@ class ActivityClientController extends IActivityClientController.Stub {
         final long origId = Binder.clearCallingIdentity();
         synchronized (mGlobalLock) {
             ActivityRecord.activityResumedLocked(token, handleSplashScreenExit);
+        }
+        Binder.restoreCallingIdentity(origId);
+    }
+
+    @Override
+    public void activityRefreshed(IBinder token) {
+        final long origId = Binder.clearCallingIdentity();
+        synchronized (mGlobalLock) {
+            ActivityRecord.activityRefreshedLocked(token);
         }
         Binder.restoreCallingIdentity(origId);
     }
@@ -332,8 +343,8 @@ class ActivityClientController extends IActivityClientController.Stub {
     }
 
     @Override
-    public boolean navigateUpTo(IBinder token, Intent destIntent, int resultCode,
-            Intent resultData) {
+    public boolean navigateUpTo(IBinder token, Intent destIntent, String resolvedType,
+            int resultCode, Intent resultData) {
         final ActivityRecord r;
         synchronized (mGlobalLock) {
             r = ActivityRecord.isInRootTaskLocked(token);
@@ -348,7 +359,7 @@ class ActivityClientController extends IActivityClientController.Stub {
 
         synchronized (mGlobalLock) {
             return r.getRootTask().navigateUpTo(
-                    r, destIntent, destGrants, resultCode, resultData, resultGrants);
+                    r, destIntent, resolvedType, destGrants, resultCode, resultData, resultGrants);
         }
     }
 
@@ -578,17 +589,18 @@ class ActivityClientController extends IActivityClientController.Stub {
     }
 
     /**
-     * Returns the windowing mode of the task that hosts the activity, or {@code -1} if task is not
-     * found.
+     * Returns the {@link Configuration} of the task which hosts the Activity, or {@code null} if
+     * the task {@link Configuration} cannot be obtained.
      */
     @Override
-    public int getTaskWindowingMode(IBinder activityToken) {
+    @Nullable
+    public Configuration getTaskConfiguration(IBinder activityToken) {
         synchronized (mGlobalLock) {
             final ActivityRecord ar = ActivityRecord.isInAnyTask(activityToken);
             if (ar == null) {
-                return -1;
+                return null;
             }
-            return ar.getTask().getWindowingMode();
+            return ar.getTask().getConfiguration();
         }
     }
 
@@ -707,7 +719,26 @@ class ActivityClientController extends IActivityClientController.Stub {
         try {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
-                return r != null && r.setOccludesParent(true);
+                // Create a transition if the activity is playing in case the below activity didn't
+                // commit invisible. That's because if any activity below this one has changed its
+                // visibility while playing transition, there won't able to commit visibility until
+                // the running transition finish.
+                final Transition transition = r != null
+                        && r.mTransitionController.inPlayingTransition(r)
+                        ? r.mTransitionController.createTransition(TRANSIT_TO_BACK) : null;
+                if (transition != null) {
+                    r.mTransitionController.requestStartTransition(transition, null /*startTask */,
+                            null /* remoteTransition */, null /* displayChange */);
+                }
+                final boolean changed = r != null && r.setOccludesParent(true);
+                if (transition != null) {
+                    if (changed) {
+                        r.mTransitionController.setReady(r.getDisplayContent());
+                    } else {
+                        transition.abort();
+                    }
+                }
+                return changed;
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -728,7 +759,25 @@ class ActivityClientController extends IActivityClientController.Stub {
                 if (under != null) {
                     under.returningOptions = safeOptions != null ? safeOptions.getOptions(r) : null;
                 }
-                return r.setOccludesParent(false);
+                // Create a transition if the activity is playing in case the current activity
+                // didn't commit invisible. That's because if this activity has changed its
+                // visibility while playing transition, there won't able to commit visibility until
+                // the running transition finish.
+                final Transition transition = r.mTransitionController.inPlayingTransition(r)
+                        ? r.mTransitionController.createTransition(TRANSIT_TO_FRONT) : null;
+                if (transition != null) {
+                    r.mTransitionController.requestStartTransition(transition, null /*startTask */,
+                            null /* remoteTransition */, null /* displayChange */);
+                }
+                final boolean changed = r.setOccludesParent(false);
+                if (transition != null) {
+                    if (changed) {
+                        r.mTransitionController.setReady(r.getDisplayContent());
+                    } else {
+                        transition.abort();
+                    }
+                }
+                return changed;
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -1308,8 +1357,38 @@ class ActivityClientController extends IActivityClientController.Stub {
         }
     }
 
+    /**
+     * Return {@code true} when the given Activity is a relative Task root. That is, the rest of
+     * the Activities in the Task should be finished when it finishes. Otherwise, return {@code
+     * false}.
+     */
+    private boolean isRelativeTaskRootActivity(ActivityRecord r, ActivityRecord taskRoot) {
+        // Not a relative root if the given Activity is not the root Activity of its TaskFragment.
+        final TaskFragment taskFragment = r.getTaskFragment();
+        if (r != taskFragment.getActivity(ar -> !ar.finishing || ar == r,
+                false /* traverseTopToBottom */)) {
+            return false;
+        }
+
+        // The given Activity is the relative Task root if its TaskFragment is a companion
+        // TaskFragment to the taskRoot (i.e. the taskRoot TF will be finished together).
+        return taskRoot.getTaskFragment().getCompanionTaskFragment() == taskFragment;
+    }
+
+    private boolean isTopActivityInTaskFragment(ActivityRecord activity) {
+        return activity.getTaskFragment().topRunningActivity() == activity;
+    }
+
+    private void requestCallbackFinish(IRequestFinishCallback callback) {
+        try {
+            callback.requestFinish();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to invoke request finish callback", e);
+        }
+    }
+
     @Override
-    public void onBackPressedOnTaskRoot(IBinder token, IRequestFinishCallback callback) {
+    public void onBackPressed(IBinder token, IRequestFinishCallback callback) {
         final long origId = Binder.clearCallingIdentity();
         try {
             final Intent baseActivityIntent;
@@ -1319,20 +1398,29 @@ class ActivityClientController extends IActivityClientController.Stub {
                 final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
                 if (r == null) return;
 
-                if (mService.mWindowOrganizerController.mTaskOrganizerController
+                final Task task = r.getTask();
+                final ActivityRecord root = task.getRootActivity(false /*ignoreRelinquishIdentity*/,
+                        true /*setToBottomIfNone*/);
+                final boolean isTaskRoot = r == root;
+                if (isTaskRoot) {
+                    if (mService.mWindowOrganizerController.mTaskOrganizerController
                         .handleInterceptBackPressedOnTaskRoot(r.getRootTask())) {
-                    // This task is handled by a task organizer that has requested the back pressed
-                    // callback.
+                        // This task is handled by a task organizer that has requested the back
+                        // pressed callback.
+                        return;
+                    }
+                } else if (!isRelativeTaskRootActivity(r, root)) {
+                    // Finish the Activity if the activity is not the task root or relative root.
+                    requestCallbackFinish(callback);
                     return;
                 }
 
-                final Task task = r.getTask();
-                isLastRunningActivity = task.topRunningActivity() == r;
+                isLastRunningActivity = isTopActivityInTaskFragment(isTaskRoot ? root : r);
 
-                final boolean isBaseActivity = r.mActivityComponent.equals(task.realActivity);
-                baseActivityIntent = isBaseActivity ? r.intent : null;
+                final boolean isBaseActivity = root.mActivityComponent.equals(task.realActivity);
+                baseActivityIntent = isBaseActivity ? root.intent : null;
 
-                launchedFromHome = r.isLaunchSourceType(ActivityRecord.LAUNCH_SOURCE_TYPE_HOME);
+                launchedFromHome = root.isLaunchSourceType(ActivityRecord.LAUNCH_SOURCE_TYPE_HOME);
             }
 
             // If the activity is one of the main entry points for the application, then we should
@@ -1347,16 +1435,12 @@ class ActivityClientController extends IActivityClientController.Stub {
             if (baseActivityIntent != null && isLastRunningActivity
                     && ((launchedFromHome && ActivityRecord.isMainIntent(baseActivityIntent))
                         || isLauncherActivity(baseActivityIntent.getComponent()))) {
-                moveActivityTaskToBack(token, false /* nonRoot */);
+                moveActivityTaskToBack(token, true /* nonRoot */);
                 return;
             }
 
             // The default option for handling the back button is to finish the Activity.
-            try {
-                callback.requestFinish();
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to invoke request finish callback", e);
-            }
+            requestCallbackFinish(callback);
         } finally {
             Binder.restoreCallingIdentity(origId);
         }

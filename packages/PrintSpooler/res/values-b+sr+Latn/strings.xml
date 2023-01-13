@@ -66,7 +66,7 @@
     <string name="notification_channel_failure" msgid="9042250774797916414">"Neuspeli zadaci štampanja"</string>
     <string name="could_not_create_file" msgid="3425025039427448443">"Pravljenje datoteke nije uspelo"</string>
     <string name="print_services_disabled_toast" msgid="9089060734685174685">"Neke usluge štampanja su onemogućene"</string>
-    <string name="print_searching_for_printers" msgid="6550424555079932867">"Traženje štampača"</string>
+    <string name="print_searching_for_printers" msgid="6550424555079932867">"Pretraga štampača"</string>
     <string name="print_no_print_services" msgid="8561247706423327966">"Nijedna usluga štampanja nije omogućena"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"Nije pronađen nijedan štampač"</string>
     <string name="cannot_add_printer" msgid="7840348733668023106">"Nije moguće dodati štampače"</string>

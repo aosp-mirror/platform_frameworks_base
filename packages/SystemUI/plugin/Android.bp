@@ -33,6 +33,7 @@ java_library {
 
     static_libs: [
         "androidx.annotation_annotation",
+        "error_prone_annotations",
         "PluginCoreLib",
         "SystemUIAnimationLib",
     ],

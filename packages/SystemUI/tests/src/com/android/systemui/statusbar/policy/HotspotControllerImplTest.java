@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -25,6 +26,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.net.TetheringManager;
@@ -36,8 +38,10 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.settings.UserTracker;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -57,6 +61,8 @@ import java.util.concurrent.Executor;
 @TestableLooper.RunWithLooper
 public class HotspotControllerImplTest extends SysuiTestCase {
 
+    @Mock
+    private UserTracker mUserTracker;
     @Mock
     private DumpManager mDumpManager;
     @Mock
@@ -96,9 +102,13 @@ public class HotspotControllerImplTest extends SysuiTestCase {
         }).when(mWifiManager).registerSoftApCallback(any(Executor.class),
                 any(WifiManager.SoftApCallback.class));
 
+        mContext.getOrCreateTestableResources()
+                .addOverride(R.bool.config_show_wifi_tethering, true);
+
         Handler handler = new Handler(mLooper.getLooper());
 
-        mController = new HotspotControllerImpl(mContext, handler, handler, mDumpManager);
+        mController = new HotspotControllerImpl(mContext, mUserTracker, handler, handler,
+                mDumpManager);
         verify(mTetheringManager)
                 .registerTetheringEventCallback(any(), mTetheringCallbackCaptor.capture());
     }
@@ -175,5 +185,19 @@ public class HotspotControllerImplTest extends SysuiTestCase {
                 .onTetherableInterfaceRegexpsChanged(mTetheringInterfaceRegexps);
 
         verify(mCallback1).onHotspotAvailabilityChanged(false);
+    }
+
+    @Test
+    public void testHotspotSupported_resource_false() {
+        mContext.getOrCreateTestableResources()
+                .addOverride(R.bool.config_show_wifi_tethering, false);
+
+        Handler handler = new Handler(mLooper.getLooper());
+
+        HotspotController controller =
+                new HotspotControllerImpl(mContext, mUserTracker, handler, handler, mDumpManager);
+
+        verifyNoMoreInteractions(mTetheringManager);
+        assertFalse(controller.isHotspotSupported());
     }
 }

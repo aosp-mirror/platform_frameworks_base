@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Érvénytelen kártya."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Feltöltve"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Vezeték nélküli töltés"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Töltés…"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Töltődokk"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Töltés"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Gyors töltés"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Lassú töltés"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Az akkumulátor védelmének biztosítása érdekében a töltés szünetel"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Töltés ideiglenesen korlátozva"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"A feloldáshoz nyomja meg a Menü gombot."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Hálózat zárolva"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Nincs SIM-kártya"</string>
@@ -68,9 +68,15 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"<xliff:g id="NUMBER_0">%1$d</xliff:g> alkalommal helytelenül adta meg a jelszót.\n\nPróbálja újra <xliff:g id="NUMBER_1">%2$d</xliff:g> másodperc múlva."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"<xliff:g id="NUMBER_0">%1$d</xliff:g> alkalommal rosszul rajzolta le a feloldási mintát.\n\nPróbálja újra <xliff:g id="NUMBER_1">%2$d</xliff:g> másodperc múlva."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Helytelen PIN-kód a SIM-kártyához. Az eszköz feloldása érdekében, kérjük, vegye fel a kapcsolatot szolgáltatójával."</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{Helytelen PIN-kód a SIM-kártyához; még # próbálkozása van, mielőtt fel kell vennie a kapcsolatot szolgáltatójával az eszköz feloldásához.}other{Helytelen PIN-kód a SIM-kártyához; még # próbálkozása van. }}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="other">Helytelen PIN-kód a SIM-kártyához. Még <xliff:g id="NUMBER_1">%d</xliff:g> próbálkozása maradt.</item>
+      <item quantity="one">Helytelen PIN-kód a SIM-kártyához. Még <xliff:g id="NUMBER_0">%d</xliff:g> próbálkozása maradt, az eszköz feloldásához azt követően fel kell vennie a kapcsolatot szolgáltatójával.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"A SIM-kártya használhatatlan. Vegye fel a kapcsolatot szolgáltatójával."</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Helytelen PUK-kód a SIM-kártyához. Még # próbálkozása maradt, mielőtt a SIM-kártya végleg használhatatlanná válik.}other{Helytelen PUK-kód a SIM-kártyához; még # próbálkozása van, mielőtt a SIM-kártya végleg használhatatlan lesz.}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="other">Helytelen PUK-kód a SIM-kártyához. Még <xliff:g id="NUMBER_1">%d</xliff:g> próbálkozása maradt, mielőtt a SIM-kártya végleg használhatatlanná válik.</item>
+      <item quantity="one">Helytelen PUK-kód a SIM-kártyához. Még <xliff:g id="NUMBER_0">%d</xliff:g> próbálkozása maradt, mielőtt a SIM-kártya végleg használhatatlanná válik.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"A SIM-kártya PIN-művelete sikertelen!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"A SIM-kártya PUK-művelete sikertelen!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Beviteli módszer váltása"</string>
@@ -84,9 +90,15 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"A rendszergazda zárolta az eszközt"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Az eszközt manuálisan lezárták"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nem ismerhető fel"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Arcalapú feloldáshoz Hozzáférés a kamerához szükséges"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Adja meg a SIM-kártya PIN-kódját. # próbálkozása maradt. Ha elfogynak a próbálkozási lehetőségek, az eszköz feloldásához fel kell vennie a kapcsolatot szolgáltatójával.}other{Adja meg a SIM-kártya PIN-kódját. # próbálkozási lehetősége maradt.}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{A SIM-kártya le van tiltva. A folytatáshoz adja meg a PUK-kódot. Még # próbálkozása van, mielőtt végleg használhatatlanná válik a SIM-kártya. További információért forduljon a szolgáltatóhoz.}other{A SIM-kártya le van tiltva. A folytatáshoz adja meg a PUK-kódot. Még # próbálkozása van, mielőtt végleg használhatatlanná válik a SIM-kártya. További információért forduljon a szolgáltatóhoz.}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Az Arcalapú feloldás funkció használatához kapcsolja be a "<b>"Hozzáférés a kamerához"</b>" beállítást a Beállítások &gt; Adatvédelem szakaszban."</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="other">Adja meg a SIM-kártya PIN-kódját. <xliff:g id="NUMBER_1">%d</xliff:g> próbálkozása maradt.</item>
+      <item quantity="one">Adja meg a SIM-kártya PIN-kódját. <xliff:g id="NUMBER_0">%d</xliff:g> próbálkozása maradt. Ha elfogynak a próbálkozási lehetőségek, az eszköz feloldásához fel kell vennie a kapcsolatot szolgáltatójával.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="other">A SIM-kártya le van tiltva. A folytatáshoz adja meg a PUK-kódot. Még <xliff:g id="_NUMBER_1">%d</xliff:g> próbálkozása van, mielőtt végleg használhatatlanná válik a SIM-kártya. További információért forduljon a szolgáltatóhoz.</item>
+      <item quantity="one">A SIM-kártya le van tiltva. A folytatáshoz adja meg a PUK-kódot. Még <xliff:g id="_NUMBER_0">%d</xliff:g> próbálkozása van, mielőtt végleg használhatatlanná válik a SIM-kártya. További információért forduljon a szolgáltatóhoz.</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"Alapértelmezett"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Buborék"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analóg"</string>

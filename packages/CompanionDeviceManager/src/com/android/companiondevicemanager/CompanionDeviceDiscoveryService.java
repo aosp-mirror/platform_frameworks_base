@@ -103,7 +103,7 @@ public class CompanionDeviceDiscoveryService extends Service {
 
     private final Runnable mTimeoutRunnable = this::timeout;
 
-    private boolean mStopAfterFirstMatch;;
+    private boolean mStopAfterFirstMatch;
 
     /**
      * A state enum for devices' discovery.
@@ -350,7 +350,7 @@ public class CompanionDeviceDiscoveryService extends Service {
                 }
                 return;
             }
-            if (DEBUG) Log.i(TAG, "onDeviceFound() " + device.toShortString() + " - New device.");
+            Log.i(TAG, "onDeviceFound() " + device.toShortString() + " - New device.");
 
             // First: make change.
             mDevicesFound.add(device);
@@ -363,9 +363,9 @@ public class CompanionDeviceDiscoveryService extends Service {
         });
     }
 
-    private void onDeviceLost(@Nullable DeviceFilterPair<?> device) {
+    private void onDeviceLost(@NonNull DeviceFilterPair<?> device) {
         runOnMainThread(() -> {
-            if (DEBUG) Log.i(TAG, "onDeviceLost(), device=" + device.toShortString());
+            Log.i(TAG, "onDeviceLost(), device=" + device.toShortString());
 
             // First: make change.
             mDevicesFound.remove(device);

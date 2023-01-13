@@ -356,7 +356,7 @@ public class CachedBluetoothDeviceManager {
      * @return {@code true}, if the device should pair automatically; Otherwise, return
      * {@code false}.
      */
-    public synchronized boolean shouldPairByCsip(BluetoothDevice device, int groupId) {
+    private synchronized boolean shouldPairByCsip(BluetoothDevice device, int groupId) {
         boolean isOngoingSetMemberPair = mOngoingSetMemberPair != null;
         int bondState = device.getBondState();
         if (isOngoingSetMemberPair || bondState != BluetoothDevice.BOND_NONE
@@ -365,10 +365,47 @@ public class CachedBluetoothDeviceManager {
                     + " , device.getBondState: " + bondState);
             return false;
         }
-
-        Log.d(TAG, "Bond " + device.getName() + " by CSIP");
-        mOngoingSetMemberPair = device;
         return true;
+    }
+
+    /**
+     * Called when we found a set member of a group. The function will check the {@code groupId} if
+     * it exists and the bond state of the device is BOND_NONE, and if there isn't any ongoing pair
+     * , and then pair the device automatically.
+     *
+     * @param device The found device
+     * @param groupId The group id of the found device
+     */
+    public synchronized void pairDeviceByCsip(BluetoothDevice device, int groupId) {
+        if (!shouldPairByCsip(device, groupId)) {
+            return;
+        }
+        Log.d(TAG, "Bond " + device.getAnonymizedAddress() + " by CSIP");
+        mOngoingSetMemberPair = device;
+        syncConfigFromMainDevice(device, groupId);
+        if (!device.createBond(BluetoothDevice.TRANSPORT_LE)) {
+            Log.d(TAG, "Bonding could not be started");
+            mOngoingSetMemberPair = null;
+        }
+    }
+
+    private void syncConfigFromMainDevice(BluetoothDevice device, int groupId) {
+        if (!isOngoingPairByCsip(device)) {
+            return;
+        }
+        CachedBluetoothDevice memberDevice = findDevice(device);
+        CachedBluetoothDevice mainDevice = mCsipDeviceManager.findMainDevice(memberDevice);
+        if (mainDevice == null) {
+            mainDevice = mCsipDeviceManager.getCachedDevice(groupId);
+        }
+
+        if (mainDevice == null || mainDevice.equals(memberDevice)) {
+            Log.d(TAG, "no mainDevice");
+            return;
+        }
+
+        // The memberDevice set PhonebookAccessPermission
+        device.setPhonebookAccessPermission(mainDevice.getDevice().getPhonebookAccessPermission());
     }
 
     /**

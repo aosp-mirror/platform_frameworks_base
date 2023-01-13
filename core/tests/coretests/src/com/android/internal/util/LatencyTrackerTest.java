@@ -23,36 +23,53 @@ import static com.android.internal.util.LatencyTracker.STATSD_ACTION;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import android.provider.DeviceConfig;
+import android.util.Log;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.google.common.truth.Expect;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.time.Duration;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @SmallTest
+@RunWith(AndroidJUnit4.class)
 public class LatencyTrackerTest {
+    private static final String TAG = LatencyTrackerTest.class.getSimpleName();
     private static final String ENUM_NAME_PREFIX = "UIACTION_LATENCY_REPORTED__ACTION__";
+    private static final String ACTION_ENABLE_SUFFIX = "_enable";
+    private static final Duration TEST_TIMEOUT = Duration.ofMillis(500);
 
     @Rule
     public final Expect mExpect = Expect.create();
 
+    @Before
+    public void setUp() {
+        DeviceConfig.deleteProperty(DeviceConfig.NAMESPACE_LATENCY_TRACKER,
+                LatencyTracker.SETTINGS_ENABLED_KEY);
+        getAllActions().forEach(action -> {
+            DeviceConfig.deleteProperty(DeviceConfig.NAMESPACE_LATENCY_TRACKER,
+                    action.getName().toLowerCase() + ACTION_ENABLE_SUFFIX);
+        });
+    }
+
     @Test
     public void testCujsMapToEnumsCorrectly() {
-        List<Field> actions = Arrays.stream(LatencyTracker.class.getDeclaredFields())
-                .filter(f -> f.getName().startsWith("ACTION_")
-                        && Modifier.isStatic(f.getModifiers())
-                        && f.getType() == int.class)
-                .collect(Collectors.toList());
-
+        List<Field> actions = getAllActions();
         Map<Integer, String> enumsMap = Arrays.stream(FrameworkStatsLog.class.getDeclaredFields())
                 .filter(f -> f.getName().startsWith(ENUM_NAME_PREFIX)
                         && Modifier.isStatic(f.getModifiers())
@@ -84,13 +101,7 @@ public class LatencyTrackerTest {
 
     @Test
     public void testCujTypeEnumCorrectlyDefined() throws Exception {
-        List<Field> cujEnumFields =
-                Arrays.stream(LatencyTracker.class.getDeclaredFields())
-                        .filter(field -> field.getName().startsWith("ACTION_")
-                                && Modifier.isStatic(field.getModifiers())
-                                && field.getType() == int.class)
-                        .collect(Collectors.toList());
-
+        List<Field> cujEnumFields = getAllActions();
         HashSet<Integer> allValues = new HashSet<>();
         for (Field field : cujEnumFields) {
             int fieldValue = field.getInt(null);
@@ -104,6 +115,95 @@ public class LatencyTrackerTest {
                     .that(allValues.add(fieldValue))
                     .isTrue();
         }
+    }
+
+    @Test
+    public void testIsEnabled_globalEnabled() {
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_LATENCY_TRACKER,
+                LatencyTracker.SETTINGS_ENABLED_KEY, "true", false);
+        LatencyTracker latencyTracker = new LatencyTracker();
+        waitForLatencyTrackerToUpdateProperties(latencyTracker);
+        assertThat(latencyTracker.isEnabled()).isTrue();
+    }
+
+    @Test
+    public void testIsEnabled_globalDisabled() {
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_LATENCY_TRACKER,
+                LatencyTracker.SETTINGS_ENABLED_KEY, "false", false);
+        LatencyTracker latencyTracker = new LatencyTracker();
+        waitForLatencyTrackerToUpdateProperties(latencyTracker);
+        assertThat(latencyTracker.isEnabled()).isFalse();
+    }
+
+    @Test
+    public void testIsEnabledAction_useGlobalValueWhenActionEnableIsNotSet() {
+        LatencyTracker latencyTracker = new LatencyTracker();
+        // using a single test action, but this applies to all actions
+        int action = LatencyTracker.ACTION_SHOW_VOICE_INTERACTION;
+        Log.i(TAG, "setting property=" + LatencyTracker.SETTINGS_ENABLED_KEY + ", value=true");
+        latencyTracker.mDeviceConfigPropertiesUpdated.close();
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_LATENCY_TRACKER,
+                LatencyTracker.SETTINGS_ENABLED_KEY, "true", false);
+        waitForLatencyTrackerToUpdateProperties(latencyTracker);
+        assertThat(
+                latencyTracker.isEnabled(action)).isTrue();
+
+        Log.i(TAG, "setting property=" + LatencyTracker.SETTINGS_ENABLED_KEY
+                + ", value=false");
+        latencyTracker.mDeviceConfigPropertiesUpdated.close();
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_LATENCY_TRACKER,
+                LatencyTracker.SETTINGS_ENABLED_KEY, "false", false);
+        waitForLatencyTrackerToUpdateProperties(latencyTracker);
+        assertThat(latencyTracker.isEnabled(action)).isFalse();
+    }
+
+    @Test
+    public void testIsEnabledAction_actionPropertyOverridesGlobalProperty()
+            throws DeviceConfig.BadConfigException {
+        LatencyTracker latencyTracker = new LatencyTracker();
+        // using a single test action, but this applies to all actions
+        int action = LatencyTracker.ACTION_SHOW_VOICE_INTERACTION;
+        String actionEnableProperty = "action_show_voice_interaction" + ACTION_ENABLE_SUFFIX;
+        Log.i(TAG, "setting property=" + actionEnableProperty + ", value=true");
+
+        latencyTracker.mDeviceConfigPropertiesUpdated.close();
+        Map<String, String> properties = new HashMap<String, String>() {{
+            put(LatencyTracker.SETTINGS_ENABLED_KEY, "false");
+            put(actionEnableProperty, "true");
+        }};
+        DeviceConfig.setProperties(
+                new DeviceConfig.Properties(DeviceConfig.NAMESPACE_LATENCY_TRACKER,
+                        properties));
+        waitForLatencyTrackerToUpdateProperties(latencyTracker);
+        assertThat(latencyTracker.isEnabled(action)).isTrue();
+
+        latencyTracker.mDeviceConfigPropertiesUpdated.close();
+        Log.i(TAG, "setting property=" + actionEnableProperty + ", value=false");
+        properties.put(LatencyTracker.SETTINGS_ENABLED_KEY, "true");
+        properties.put(actionEnableProperty, "false");
+        DeviceConfig.setProperties(
+                    new DeviceConfig.Properties(DeviceConfig.NAMESPACE_LATENCY_TRACKER,
+                            properties));
+        waitForLatencyTrackerToUpdateProperties(latencyTracker);
+        assertThat(latencyTracker.isEnabled(action)).isFalse();
+    }
+
+    private void waitForLatencyTrackerToUpdateProperties(LatencyTracker latencyTracker) {
+        try {
+            Thread.sleep(TEST_TIMEOUT.toMillis());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        assertThat(latencyTracker.mDeviceConfigPropertiesUpdated.block(
+                TEST_TIMEOUT.toMillis())).isTrue();
+    }
+
+    private List<Field> getAllActions() {
+        return Arrays.stream(LatencyTracker.class.getDeclaredFields())
+                .filter(field -> field.getName().startsWith("ACTION_")
+                        && Modifier.isStatic(field.getModifiers())
+                        && field.getType() == int.class)
+                .collect(Collectors.toList());
     }
 
     private int getIntFieldChecked(Field field) {

@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"SIM 卡无效。"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"已充满电"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 正在无线充电"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 正在充电"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 正在基座上充电"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 正在充电"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 正在快速充电"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 正在慢速充电"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 为保护电池，充电已暂停"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 充电暂时受限"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"按“菜单”即可解锁。"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"网络已锁定"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"没有 SIM 卡"</string>
@@ -68,9 +68,15 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"您已经 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次输错密码。\n\n请在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒后重试。"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"您已经 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次画错解锁图案。\n\n请在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒后重试。"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"SIM 卡 PIN 码不正确，您现在必须联系运营商为您解锁设备。"</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{SIM 卡 PIN 码不正确，您还可以尝试 # 次，如果仍不正确，则必须联系运营商帮您解锁设备。}other{SIM 卡 PIN 码不正确，您还可以尝试 # 次。}}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="other">SIM 卡 PIN 码不正确，您还有 <xliff:g id="NUMBER_1">%d</xliff:g> 次尝试机会。</item>
+      <item quantity="one">SIM 卡 PIN 码不正确，您还有 <xliff:g id="NUMBER_0">%d</xliff:g> 次尝试机会。如果仍不正确，则需要联系运营商帮您解锁设备。</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM 卡无法使用，请与您的运营商联系。"</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{SIM 卡 PUK 码不正确，您还可以尝试 # 次，如果仍不正确，SIM 卡将永远无法使用。}other{SIM 卡 PUK 码不正确，您还可以尝试 # 次，如果仍不正确，SIM 卡将永远无法使用。}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="other">SIM 卡 PUK 码不正确，您还有 <xliff:g id="NUMBER_1">%d</xliff:g> 次尝试机会。如果仍不正确，SIM 卡将永远无法使用。</item>
+      <item quantity="one">SIM 卡 PUK 码不正确，您还有 <xliff:g id="NUMBER_0">%d</xliff:g> 次尝试机会。如果仍不正确，SIM 卡将永远无法使用。</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"SIM 卡 PIN 码操作失败！"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM 卡 PUK 码操作失败！"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"切换输入法"</string>
@@ -84,9 +90,15 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"管理员已锁定设备"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"此设备已手动锁定"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"无法识别"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"如需使用人脸解锁功能，请在“设置”中开启摄像头使用权限"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{请输入 SIM 卡 PIN 码。您还可以尝试 # 次，如果仍不正确，则必须联系运营商帮您解锁设备。}other{请输入 SIM 卡 PIN 码。您还可以尝试 # 次。}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM 卡现已停用，请输入 PUK 码继续使用。您还可以尝试 # 次，如果仍不正确，SIM 卡将永远无法使用。有关详情，请联系运营商。}other{SIM 卡现已停用，请输入 PUK 码继续使用。您还可以尝试 # 次，如果仍不正确，SIM 卡将永远无法使用。有关详情，请联系运营商。}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"如需使用人脸解锁功能，请在“设置”&gt;“隐私权”中开启"<b>"摄像头使用权限"</b></string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="other">请输入 SIM 卡 PIN 码，您还可以尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次。</item>
+      <item quantity="one">请输入 SIM 卡 PIN 码，您还可以尝试 <xliff:g id="NUMBER_0">%d</xliff:g> 次。如果仍不正确，则需要联系运营商帮您解锁设备。</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="other">SIM 卡现已停用，请输入 PUK 码继续使用。您还可以尝试 <xliff:g id="_NUMBER_1">%d</xliff:g> 次。如果仍不正确，该 SIM 卡将永远无法使用。有关详情，请联系您的运营商。</item>
+      <item quantity="one">SIM 卡现已停用，请输入 PUK 码继续使用。您还可以尝试 <xliff:g id="_NUMBER_0">%d</xliff:g> 次。如果仍不正确，该 SIM 卡将永远无法使用。有关详情，请联系您的运营商。</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"默认"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"泡泡"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"指针"</string>

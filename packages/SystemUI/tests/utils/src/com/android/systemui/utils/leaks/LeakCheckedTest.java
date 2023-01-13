@@ -18,7 +18,7 @@ import android.testing.LeakCheck;
 import android.util.ArrayMap;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.phone.StatusBarIconController;

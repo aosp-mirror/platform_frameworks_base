@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Ugyldigt kort."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Opladet"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Trådløs opladning"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Oplader"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Oplader i dockingstation"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Oplader"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Oplader hurtigt"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Oplader langsomt"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Opladningen er sat på pause for at beskytte batteriet"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Opladningen er midlertidigt begrænset"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Tryk på menuen for at låse op."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Netværket er låst"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Intet SIM-kort"</string>
@@ -68,9 +68,15 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Du har indtastet din adgangskode forkert <xliff:g id="NUMBER_0">%1$d</xliff:g> gange. \n\nPrøv igen om <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunder."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%1$d</xliff:g> gange. \n\nPrøv igen om <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunder."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Forkert pinkode til SIM-kort. Du er nu nødt til at kontakte dit mobilselskab for at låse din enhed op."</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{Du har angivet en forkert pinkode til SIM-kortet. Du har # forsøg tilbage, før du skal kontakte dit mobilselskab for at få låst din enhed op.}one{Du har angivet en forkert pinkode til SIM-kortet. Du har # forsøg tilbage. }other{Du har angivet en forkert pinkode til SIM-kortet. Du har # forsøg tilbage. }}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="one">Forkert pinkode til SIM-kort. Du har <xliff:g id="NUMBER_1">%d</xliff:g> forsøg tilbage.</item>
+      <item quantity="other">Forkert pinkode til SIM-kort. Du har <xliff:g id="NUMBER_1">%d</xliff:g> forsøg tilbage.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM-kortet er ubrugeligt. Kontakt dit mobilselskab."</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Du har angivet en forkert PUK-kode til SIM-kortet. Du har # forsøg tilbage, før SIM-kortet bliver permanent ubrugeligt.}one{Du har angivet en forkert PUK-kode til SIM-kortet. Du har # forsøg tilbage, før SIM-kortet bliver permanent ubrugeligt.}other{Du har angivet en forkert PUK-kode til SIM-kortet. Du har # forsøg tilbage, før SIM-kortet bliver permanent ubrugeligt.}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="one">Forkert PUK-kode til SIM-kort. Du har <xliff:g id="NUMBER_1">%d</xliff:g> forsøg tilbage, før SIM-kortet bliver permanent ubrugeligt.</item>
+      <item quantity="other">Forkert PUK-kode til SIM-kort. Du har <xliff:g id="NUMBER_1">%d</xliff:g> forsøg tilbage, før SIM-kortet bliver permanent ubrugeligt.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Pinkoden til SIM-kortet blev afvist"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"PUK-koden til SIM-kortet blev afvist"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Skift indtastningsmetode"</string>
@@ -84,9 +90,15 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Enheden er blevet låst af administratoren"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Enheden blev låst manuelt"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Ikke genkendt"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Aktivér kameraadgang i Indstillinger for at bruge ansigtslås"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Angiv pinkoden til SIM-kortet. Du har # forsøg tilbage, før du skal kontakte dit mobilselskab for at låse din enhed op.}one{Angiv pinkoden til SIM-kortet. Du har # forsøg tilbage.}other{Angiv pinkoden til SIM-kortet. Du har # forsøg tilbage.}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM-kortet er nu deaktiveret. Angiv PUK-koden for at fortsætte. Du har # forsøg tilbage, før SIM-kortet bliver permanent ubrugeligt. Kontakt dit mobilselskab for at få flere oplysninger.}one{SIM-kortet er nu deaktiveret. Angiv PUK-koden for at fortsætte. Du har # forsøg tilbage, før SIM-kortet bliver permanent ubrugeligt. Kontakt dit mobilselskab for at få flere oplysninger.}other{SIM-kortet er nu deaktiveret. Angiv PUK-koden for at fortsætte. Du har # forsøg tilbage, før SIM-kortet bliver permanent ubrugeligt. Kontakt dit mobilselskab for at få flere oplysninger.}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Hvis du vil bruge ansigtslåsen, skal du aktivere "<b>"Kameraadgang"</b>" under Indstillinger &gt; Privatliv"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="one">Angiv pinkoden til SIM-kortet. Du har <xliff:g id="NUMBER_1">%d</xliff:g> forsøg tilbage.</item>
+      <item quantity="other">Angiv pinkoden til SIM-kortet. Du har <xliff:g id="NUMBER_1">%d</xliff:g> forsøg tilbage.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="one">SIM-kortet er nu deaktiveret. Angiv PUK-koden for at fortsætte. Du har <xliff:g id="_NUMBER_1">%d</xliff:g> forsøg tilbage, før SIM-kortet bliver permanent ubrugeligt. Kontakt dit mobilselskab for at få flere oplysninger.</item>
+      <item quantity="other">SIM-kortet er nu deaktiveret. Angiv PUK-koden for at fortsætte. Du har <xliff:g id="_NUMBER_1">%d</xliff:g> forsøg tilbage, før SIM-kortet bliver permanent ubrugeligt. Kontakt dit mobilselskab for at få flere oplysninger.</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"Standard"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Boble"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analog"</string>

@@ -117,17 +117,17 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transfert de fichiers"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Périphérique d\'entrée"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Accès Internet"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Partage contacts/historique des appels"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"À utiliser pour partage des contacts/historique des appels"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Partage de contacts"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Utiliser pour le partage de contacts"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Partage de connexion Internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"SMS"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Accès à la carte SIM"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Audio HD : <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Audio HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Appareils auditifs"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Connexion établie avec les appareils auditifs"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Connecté à LE Audio"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Connecté à LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Connecté aux paramètres audio du média"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Connecté aux paramètres audio du téléphone"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Connexion au serveur de transfert de fichiers"</string>
@@ -185,7 +185,7 @@
     <string name="launch_defaults_none" msgid="8049374306261262709">"Aucun paramètre par défaut défini"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Paramètres de la synthèse vocale"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Sortie de la synthèse vocale"</string>
-    <string name="tts_default_rate_title" msgid="3964187817364304022">"Débit"</string>
+    <string name="tts_default_rate_title" msgid="3964187817364304022">"Cadence"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Vitesse à laquelle le texte est énoncé"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Ton"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"Affecte le ton utilisé pour la synthèse vocale"</string>
@@ -408,7 +408,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Rendre toutes les activités redimensionnables pour le mode multifenêtre, indépendamment des valeurs du fichier manifeste"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Activer les fenêtres de forme libre"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Activer la compatibilité avec les fenêtres de forme libre expérimentales"</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Mode ordinateur"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Mot de passe de sauvegarde ordi"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Les sauvegardes complètes sur ordi ne sont actuellement pas protégées"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Appuyez pour modifier ou supprimer le mot de passe des sauvegardes complètes sur ordi."</string>
@@ -477,13 +476,12 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Chargée à 100 %% dans <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - chargée à 100 %% dans <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> – La recharge est en pause"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Recharge momentanément limitée"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Inconnu"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Batterie en charge"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Charge rapide"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Charge lente"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"En charge sans fil"</string>
-    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Recharge"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Pas en charge"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Connectée, pas en charge"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Chargée"</string>
@@ -531,7 +529,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmes et rappels"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Autoriser à définir des alarmes et des rappels"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmes et rappels"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Autoriser cette appli à définir des alarmes et à programmer des actions à certaines heures. Elle s\'exécutera alors en arrière-plan, ce qui peut solliciter davantage la batterie.\n\nSi l\'autorisation est désactivée, les alarmes existantes et les événements programmés par l\'appli ne fonctionneront pas."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Autorisez cette appli à définir des alarmes et à programmer des actions à certaines heures. Elle s\'exécutera alors en arrière-plan, ce qui peut solliciter davantage la batterie.\n\nSi l\'autorisation est désactivée, les alarmes existantes et les événements programmés par l\'appli ne fonctionneront pas."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"définir, alarme, rappel, horloge"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activer"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activer le mode Ne pas déranger"</string>
@@ -612,9 +610,9 @@
     <string name="guest_exit_button" msgid="5774985819191803960">"Quitter le mode Invité"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"Réinitialiser la session Invité"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Quitter le mode Invité"</string>
-    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Toute l\'activité sera supprimée à la fin de la session"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Toute l\'activité sera supprimée une fois la session quittée"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Vous pouvez enregistrer ou supprimer l\'activité en quittant"</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Réinitialisez la session pour supprimer immédiatement l\'activité. Vous pourrez aussi l\'enregistrer ou la supprimer en quittant la session."</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Réinitialisez la session pour supprimer immédiatement l\'activité, qui pourra aussi être enregistrée ou supprimée lorsque vous quitterez la session"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Prendre une photo"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Choisir une image"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Sélectionner une photo"</string>
@@ -656,6 +654,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet déconnecté"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Pas d\'appels."</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"Heure"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"Date"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"Météo"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Qualité de l\'air"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Infos distribution"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Choisissez une photo de profil"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Icône de l\'utilisateur par défaut"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Clavier physique"</string>
@@ -664,11 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Activer l\'écran"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Autoriser l\'activation de l\'écran"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Autoriser une appli à activer l\'écran. Si l\'autorisation est accordée, l\'appli peut activer l\'écran à tout moment sans votre intention explicite."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Scanner un code QR"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Pour commencer à écouter, centrez le code QR ci-dessous"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Le format de code QR n\'est pas valide"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Arrêter la diffusion de <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Si vous diffusez <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou que vous modifiez le résultat, votre annonce actuelle s\'arrêtera"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Diffuser <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Modifier le résultat"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"Animations pour prévisualiser le retour en arrière"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Activer les animations système pour la prévisualisation du geste de retour."</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Ce paramètre active les animations système pour la prévisualisation du geste de retour. Pour cela, enableOnBackInvokedCallback doit être défini sur \"True\" dans le fichier manifeste de chaque appli."</string>
 </resources>

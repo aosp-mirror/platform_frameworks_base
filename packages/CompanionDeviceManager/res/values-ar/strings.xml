@@ -17,15 +17,16 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"تطبيق \"مدير الجهاز المصاحب\""</string>
-    <string name="confirmation_title" msgid="3785000297483688997">"‏السماح لتطبيق &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; بالوصول إلى &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
-    <string name="profile_name_watch" msgid="576290739483672360">"الساعة"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"‏اختَر <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ليديرها تطبيق &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
-    <string name="summary_watch" msgid="3002344206574997652">"هذا التطبيق مطلوب لإدارة <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. سيتم السماح لتطبيق <xliff:g id="APP_NAME">%2$s</xliff:g> بالتفاعل مع الإشعارات والوصول إلى أذونات الهاتف والرسائل القصيرة وجهات الاتصال والتقويم وسجلّات المكالمات والأجهزة المجاورة."</string>
+    <string name="confirmation_title" msgid="8455544820286920304">"‏السماح للتطبيق &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; بإدارة &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="profile_name_watch" msgid="576290739483672360">"ساعة"</string>
+    <string name="chooser_title" msgid="2262294130493605839">"‏اختَر <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ليديره تطبيق &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="summary_watch" product="default" msgid="7113724443198337683">"سيتم السماح لتطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> بالتفاعل مع الإشعارات والوصول إلى أذونات الهاتف والرسائل القصيرة وجهات الاتصال والتقويم."</string>
+    <string name="summary_watch" product="tablet" msgid="7113724443198337683">"سيتم السماح لتطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> بالتفاعل مع الإشعارات والوصول إلى أذونات الهاتف والرسائل القصيرة وجهات الاتصال والتقويم."</string>
     <string name="permission_apps" msgid="6142133265286656158">"التطبيقات"</string>
     <string name="permission_apps_summary" msgid="798718816711515431">"بث تطبيقات هاتفك"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"‏السماح لتطبيق &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; بالوصول إلى هذه المعلومات من هاتفك"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"الخدمات التي تعمل بين الأجهزة"</string>
-    <string name="helper_summary_app_streaming" msgid="5977509499890099">"يطلب تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> الحصول على إذن نيابةً عن <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> لمشاركة التطبيقات بين أجهزتك."</string>
+    <string name="helper_summary_app_streaming" msgid="7380294597268573523">"يطلب التطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> الحصول على إذن نيابةً عن <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> للوصول إلى صور ووسائط وإشعارات هاتفك."</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"‏السماح لتطبيق &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; بالوصول إلى هذه المعلومات من هاتفك"</string>
@@ -35,7 +36,7 @@
     <string name="permission_storage" msgid="6831099350839392343">"الصور والوسائط"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"‏خدمات Google Play"</string>
-    <string name="helper_summary_computer" msgid="9050724687678157852">"يطلب تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> الحصول على إذن نيابةً عن <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> للوصول إلى الصور والوسائط والإشعارات في هاتفك."</string>
+    <string name="helper_summary_computer" msgid="1676407599909474428">"يطلب التطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> الحصول على إذن نيابةً عن <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> لمشاركة التطبيقات بين أجهزتك."</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"جهاز"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"السماح"</string>
@@ -43,6 +44,4 @@
     <string name="consent_back" msgid="2560683030046918882">"رجوع"</string>
     <string name="permission_sync_confirmation_title" msgid="667074294393493186">"نقل أذونات التطبيقات إلى ساعتك"</string>
     <string name="permission_sync_summary" msgid="8873391306499120778">"لتسهيل إعداد ساعتك، فإن التطبيقات التي يتم تثبيتها على ساعتك أثناء الإعداد ستستخدم الأذونات نفسها التي يستخدمها هاتفك.\n\n قد تشتمل هذه الأذونات على الوصول إلى ميكروفون ساعتك وبيانات موقعها الجغرافي."</string>
-    <string name="vendor_icon_description" msgid="4445875290032225965">"رمز التطبيق"</string>
-    <string name="vendor_header_button_description" msgid="6566660389500630608">"زر مزيد من المعلومات"</string>
 </resources>

@@ -137,6 +137,13 @@ public class Paint {
      * <p>Enabling this flag will cause all draw operations that support
      * antialiasing to use it.</p>
      *
+     * <p>Notable draw operations that do <b>not</b> support antialiasing include:</p>
+     * <ul>
+     *      <li>{@link android.graphics.Canvas#drawBitmapMesh}</li>
+     *      <li>{@link android.graphics.Canvas#drawPatch}</li>
+     *      <li>{@link android.graphics.Canvas#drawVertices}</li>
+     * </ul>
+     *
      * @see #Paint(int)
      * @see #setFlags(int)
      */

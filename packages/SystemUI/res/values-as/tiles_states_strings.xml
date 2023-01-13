@@ -171,9 +171,4 @@
     <item msgid="146088982397753810">"অফ"</item>
     <item msgid="460891964396502657">"অন"</item>
   </string-array>
-  <string-array name="tile_states_dream">
-    <item msgid="6184819793571079513">"উপলব্ধ নহয়"</item>
-    <item msgid="8014986104355098744">"অফ আছে"</item>
-    <item msgid="5966994759929723339">"অন আছে"</item>
-  </string-array>
 </resources>
