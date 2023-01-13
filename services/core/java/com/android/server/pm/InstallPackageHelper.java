@@ -158,6 +158,8 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.EventLogTags;
+import com.android.server.LocalManagerRegistry;
+import com.android.server.art.model.DexoptParams;
 import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.DexManager;
@@ -2392,6 +2394,7 @@ final class InstallPackageHelper {
                             || installRequest.getInstallReason() == INSTALL_REASON_DEVICE_SETUP;
 
             final int dexoptFlags = DexoptOptions.DEXOPT_BOOT_COMPLETE
+                    | DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES
                     | DexoptOptions.DEXOPT_INSTALL_WITH_DEX_METADATA_FILE
                     | (isBackupOrRestore ? DexoptOptions.DEXOPT_FOR_RESTORE : 0);
             DexoptOptions dexoptOptions =
@@ -2452,13 +2455,25 @@ final class InstallPackageHelper {
 
                 realPkgSetting.getPkgState().setUpdatedSystemApp(isUpdatedSystemApp);
 
-                // TODO(b/251903639): Call into ART Service.
-                try {
-                    mPackageDexOptimizer.performDexOpt(pkg, realPkgSetting,
-                            null /* instructionSets */, mPm.getOrCreateCompilerPackageStats(pkg),
-                            mDexManager.getPackageUseInfoOrDefault(packageName), dexoptOptions);
-                } catch (LegacyDexoptDisabledException e) {
-                    throw new RuntimeException(e);
+                if (useArtService()) {
+                    PackageManagerLocal packageManagerLocal =
+                            LocalManagerRegistry.getManager(PackageManagerLocal.class);
+                    try (PackageManagerLocal.FilteredSnapshot snapshot =
+                                    packageManagerLocal.withFilteredSnapshot()) {
+                        DexoptParams params =
+                                dexoptOptions.convertToDexoptParams(0 /* extraFlags */);
+                        DexOptHelper.getArtManagerLocal().dexoptPackage(
+                                snapshot, packageName, params);
+                    }
+                } else {
+                    try {
+                        mPackageDexOptimizer.performDexOpt(pkg, realPkgSetting,
+                                null /* instructionSets */,
+                                mPm.getOrCreateCompilerPackageStats(pkg),
+                                mDexManager.getPackageUseInfoOrDefault(packageName), dexoptOptions);
+                    } catch (LegacyDexoptDisabledException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
