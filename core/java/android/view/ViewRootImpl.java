@@ -8747,6 +8747,10 @@ public final class ViewRootImpl implements ViewParent,
             mAdded = false;
             AnimationHandler.removeRequestor(this);
         }
+        if (mSyncBufferCallback != null) {
+            mSyncBufferCallback.onBufferReady(null);
+            mSyncBufferCallback = null;
+        }
         WindowManagerGlobal.getInstance().doRemoveView(this);
     }
 
