@@ -754,12 +754,9 @@ public class Build {
          * PackageManager.setComponentEnabledSetting} will now throw an
          * IllegalArgumentException if the given component class name does not
          * exist in the application's manifest.
-         * <li> {@link android.nfc.NfcAdapter#setNdefPushMessage
-         * NfcAdapter.setNdefPushMessage},
-         * {@link android.nfc.NfcAdapter#setNdefPushMessageCallback
-         * NfcAdapter.setNdefPushMessageCallback} and
-         * {@link android.nfc.NfcAdapter#setOnNdefPushCompleteCallback
-         * NfcAdapter.setOnNdefPushCompleteCallback} will throw
+         * <li> {@code NfcAdapter.setNdefPushMessage},
+         * {@code NfcAdapter.setNdefPushMessageCallback} and
+         * {@code NfcAdapter.setOnNdefPushCompleteCallback} will throw
          * IllegalStateException if called after the Activity has been destroyed.
          * <li> Accessibility services must require the new
          * {@link android.Manifest.permission#BIND_ACCESSIBILITY_SERVICE} permission or
