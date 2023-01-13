@@ -414,21 +414,6 @@ class BluetoothRouteProvider {
             }
         }
     }
-    private void addActiveHearingAidDevices(BluetoothDevice device) {
-        if (DEBUG) {
-            Log.d(TAG, "Setting active hearing aid devices. device=" + device);
-        }
-
-        addActiveDevices(device);
-    }
-
-    private void addActiveLeAudioDevices(BluetoothDevice device) {
-        if (DEBUG) {
-            Log.d(TAG, "Setting active le audio devices. device=" + device);
-        }
-
-        addActiveDevices(device);
-    }
 
     interface BluetoothRoutesUpdatedListener {
         void onBluetoothRoutesUpdated(@NonNull List<MediaRoute2Info> routes);
@@ -542,14 +527,22 @@ class BluetoothRouteProvider {
                 case BluetoothHearingAid.ACTION_ACTIVE_DEVICE_CHANGED:
                     clearActiveRoutesWithType(MediaRoute2Info.TYPE_HEARING_AID);
                     if (device != null) {
-                        addActiveHearingAidDevices(device);
+                        if (DEBUG) {
+                            Log.d(TAG, "Setting active hearing aid devices. device=" + device);
+                        }
+
+                        addActiveDevices(device);
                     }
                     notifyBluetoothRoutesUpdated();
                     break;
                 case BluetoothLeAudio.ACTION_LE_AUDIO_ACTIVE_DEVICE_CHANGED:
                     clearActiveRoutesWithType(MediaRoute2Info.TYPE_BLE_HEADSET);
                     if (device != null) {
-                        addActiveLeAudioDevices(device);
+                        if (DEBUG) {
+                            Log.d(TAG, "Setting active le audio devices. device=" + device);
+                        }
+
+                        addActiveDevices(device);
                     }
                     notifyBluetoothRoutesUpdated();
                     break;
