@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package android.hardware.radio.tests.unittests;
+package android.hardware.radio;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertThrows;
 
 import android.graphics.Bitmap;
-import android.hardware.radio.RadioMetadata;
 import android.os.Parcel;
 
 import org.junit.Test;

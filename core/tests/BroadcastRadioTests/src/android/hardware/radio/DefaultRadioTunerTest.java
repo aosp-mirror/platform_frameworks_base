@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package android.hardware.radio.tests.unittests;
+package android.hardware.radio;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertThrows;
 
 import android.graphics.Bitmap;
-import android.hardware.radio.ProgramList;
-import android.hardware.radio.ProgramSelector;
-import android.hardware.radio.RadioManager;
-import android.hardware.radio.RadioTuner;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -167,9 +163,7 @@ public final class DefaultRadioTunerTest {
     @Test
     public void setConfigFlag_forRadioTuner_throwsException() {
         UnsupportedOperationException thrown = assertThrows(UnsupportedOperationException.class,
-                () -> {
-            DEFAULT_RADIO_TUNER.setConfigFlag(/* flag= */ 1, /* value= */ false);
-        });
+                () -> DEFAULT_RADIO_TUNER.setConfigFlag(/* flag= */ 1, /* value= */ false));
 
         assertWithMessage("Exception for setting config flag on default radio tuner")
                 .that(thrown).hasMessageThat().contains("Setting config flag is not supported");
@@ -178,9 +172,7 @@ public final class DefaultRadioTunerTest {
     @Test
     public void setParameters_forRadioTuner_throwsException() {
         UnsupportedOperationException thrown = assertThrows(UnsupportedOperationException.class,
-                () -> {
-            DEFAULT_RADIO_TUNER.setParameters(Map.of("testKey", "testValue"));
-        });
+                () -> DEFAULT_RADIO_TUNER.setParameters(Map.of("testKey", "testValue")));
 
         assertWithMessage("Exception for setting parameters from default radio tuner")
                 .that(thrown).hasMessageThat().contains("Setting parameters is not supported");
@@ -189,9 +181,7 @@ public final class DefaultRadioTunerTest {
     @Test
     public void getParameters_forRadioTuner_throwsException() {
         UnsupportedOperationException thrown = assertThrows(UnsupportedOperationException.class,
-                () -> {
-            DEFAULT_RADIO_TUNER.getParameters(List.of("testKey"));
-        });
+                () -> DEFAULT_RADIO_TUNER.getParameters(List.of("testKey")));
 
         assertWithMessage("Exception for getting parameters from default radio tuner")
                 .that(thrown).hasMessageThat().contains("Getting parameters is not supported");
