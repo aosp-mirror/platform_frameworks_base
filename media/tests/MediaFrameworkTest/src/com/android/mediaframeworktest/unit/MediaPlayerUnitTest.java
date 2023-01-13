@@ -23,6 +23,7 @@ import static android.media.AudioManager.AUDIO_SESSION_ID_GENERATE;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -56,6 +57,7 @@ public class MediaPlayerUnitTest {
         MediaPlayer mediaPlayer = new MediaPlayer(virtualDeviceContext);
 
         assertNotEquals(vdmPlaybackSessionId, mediaPlayer.getAudioSessionId());
+        assertTrue(mediaPlayer.getAudioSessionId() > 0);
     }
 
     @Test

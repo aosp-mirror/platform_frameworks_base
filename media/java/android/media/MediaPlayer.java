@@ -708,12 +708,10 @@ public class MediaPlayer extends PlayerBase
          * It's easier to create it here than in C++.
          */
         try (ScopedParcelState attributionSourceState = attributionSource.asScopedParcelState()) {
-            native_setup(new WeakReference<MediaPlayer>(this), attributionSourceState.getParcel());
+            native_setup(new WeakReference<>(this), attributionSourceState.getParcel(),
+                    resolvePlaybackSessionId(context, sessionId));
         }
-
-        int effectiveSessionId = resolvePlaybackSessionId(context, sessionId);
-        baseRegisterPlayer(effectiveSessionId);
-        native_setAudioSessionId(effectiveSessionId);
+        baseRegisterPlayer(getAudioSessionId());
     }
 
     private Parcel createPlayerIIdParcel() {
@@ -1022,8 +1020,6 @@ public class MediaPlayer extends PlayerBase
             final AudioAttributes aa = audioAttributes != null ? audioAttributes :
                 new AudioAttributes.Builder().build();
             mp.setAudioAttributes(aa);
-            mp.native_setAudioSessionId(audioSessionId);
-
             mp.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
             afd.close();
             mp.prepare();
@@ -2521,7 +2517,7 @@ public class MediaPlayer extends PlayerBase
 
     private static native final void native_init();
     private native void native_setup(Object mediaplayerThis,
-            @NonNull Parcel attributionSource);
+            @NonNull Parcel attributionSource, int audioSessionId);
     private native final void native_finalize();
 
     /**
