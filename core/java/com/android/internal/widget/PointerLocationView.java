@@ -92,12 +92,6 @@ public class PointerLocationView extends View implements InputDeviceListener,
         private float mBoundingRight;
         private float mBoundingBottom;
 
-        // Position estimator.
-        private VelocityTracker.Estimator mEstimatorX = new VelocityTracker.Estimator();
-        private VelocityTracker.Estimator mAltEstimatorX = new VelocityTracker.Estimator();
-        private VelocityTracker.Estimator mEstimatorY = new VelocityTracker.Estimator();
-        private VelocityTracker.Estimator mAltEstimatorY = new VelocityTracker.Estimator();
-
         @UnsupportedAppUsage
         public PointerState() {
         }
@@ -669,13 +663,9 @@ public class PointerLocationView extends View implements InputDeviceListener,
                 ps.addTrace(coords.x, coords.y, true);
                 ps.mXVelocity = mVelocity.getXVelocity(id);
                 ps.mYVelocity = mVelocity.getYVelocity(id);
-                mVelocity.getEstimator(MotionEvent.AXIS_X, id, ps.mEstimatorX);
-                mVelocity.getEstimator(MotionEvent.AXIS_Y, id, ps.mEstimatorY);
                 if (mAltVelocity != null) {
                     ps.mAltXVelocity = mAltVelocity.getXVelocity(id);
                     ps.mAltYVelocity = mAltVelocity.getYVelocity(id);
-                    mAltVelocity.getEstimator(MotionEvent.AXIS_X, id, ps.mAltEstimatorX);
-                    mAltVelocity.getEstimator(MotionEvent.AXIS_Y, id, ps.mAltEstimatorY);
                 }
                 ps.mToolType = event.getToolType(i);
 
