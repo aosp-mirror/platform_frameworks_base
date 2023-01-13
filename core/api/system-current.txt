@@ -12584,6 +12584,11 @@ package android.service.voice {
 
   public static final class VisualQueryDetectionService.Callback {
     ctor public VisualQueryDetectionService.Callback();
+    method public void onAttentionGained();
+    method public void onAttentionLost();
+    method public void onQueryDetected(@NonNull String) throws java.lang.IllegalStateException;
+    method public void onQueryFinished() throws java.lang.IllegalStateException;
+    method public void onQueryRejected() throws java.lang.IllegalStateException;
   }
 
   public class VoiceInteractionService extends android.app.Service {
