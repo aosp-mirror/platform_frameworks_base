@@ -1108,28 +1108,16 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         }
     }
 
-    private void notifyStartListeners(boolean isReversing) {
+    private void notifyStartListeners() {
         if (mListeners != null && !mStartListenersCalled) {
             ArrayList<AnimatorListener> tmpListeners =
                     (ArrayList<AnimatorListener>) mListeners.clone();
             int numListeners = tmpListeners.size();
             for (int i = 0; i < numListeners; ++i) {
-                tmpListeners.get(i).onAnimationStart(this, isReversing);
+                tmpListeners.get(i).onAnimationStart(this, mReversing);
             }
         }
         mStartListenersCalled = true;
-    }
-
-    private void notifyEndListeners(boolean isReversing) {
-        if (mListeners != null && mStartListenersCalled) {
-            ArrayList<AnimatorListener> tmpListeners =
-                    (ArrayList<AnimatorListener>) mListeners.clone();
-            int numListeners = tmpListeners.size();
-            for (int i = 0; i < numListeners; ++i) {
-                tmpListeners.get(i).onAnimationEnd(this, isReversing);
-            }
-        }
-        mStartListenersCalled = false;
     }
 
     /**
@@ -1222,7 +1210,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         if ((mStarted || mRunning) && mListeners != null) {
             if (!mRunning) {
                 // If it's not yet running, then start listeners weren't called. Call them now.
-                notifyStartListeners(mReversing);
+                notifyStartListeners();
             }
             int listenersSize = mListeners.size();
             if (listenersSize > 0) {
@@ -1336,14 +1324,22 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         boolean notify = (mStarted || mRunning) && mListeners != null;
         if (notify && !mRunning) {
             // If it's not yet running, then start listeners weren't called. Call them now.
-            notifyStartListeners(mReversing);
+            notifyStartListeners();
         }
         mRunning = false;
         mStarted = false;
+        mStartListenersCalled = false;
         mLastFrameTime = -1;
         mFirstFrameTime = -1;
         mStartTime = -1;
-        notifyEndListeners(mReversing);
+        if (notify && mListeners != null) {
+            ArrayList<AnimatorListener> tmpListeners =
+                    (ArrayList<AnimatorListener>) mListeners.clone();
+            int numListeners = tmpListeners.size();
+            for (int i = 0; i < numListeners; ++i) {
+                tmpListeners.get(i).onAnimationEnd(this, mReversing);
+            }
+        }
         // mReversing needs to be reset *after* notifying the listeners for the end callbacks.
         mReversing = false;
         if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
@@ -1370,8 +1366,9 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         } else {
             mOverallFraction = 0f;
         }
-
-        notifyStartListeners(mReversing);
+        if (mListeners != null) {
+            notifyStartListeners();
+        }
     }
 
     /**
@@ -1462,22 +1459,13 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      * will be called.
      */
     @Override
-    void animateValuesInRange(long currentPlayTime, long lastPlayTime, boolean notify) {
-        if (currentPlayTime < 0 || lastPlayTime < -1) {
+    void animateValuesInRange(long currentPlayTime, long lastPlayTime) {
+        if (currentPlayTime < mStartDelay || lastPlayTime < -1) {
             throw new UnsupportedOperationException("Error: Play time should never be negative.");
         }
 
         initAnimation();
         long duration = getTotalDuration();
-        if (notify) {
-            if (lastPlayTime < 0 || (lastPlayTime == 0 && currentPlayTime > 0)) {
-                notifyStartListeners(false);
-            } else if (lastPlayTime > duration
-                    || (lastPlayTime == duration && currentPlayTime < duration)
-            ) {
-                notifyStartListeners(true);
-            }
-        }
         if (duration >= 0) {
             lastPlayTime = Math.min(duration, lastPlayTime);
         }
@@ -1486,8 +1474,8 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
 
         // Check whether repeat callback is needed only when repeat count is non-zero
         if (mRepeatCount > 0) {
-            int iteration = Math.max(0, (int) (currentPlayTime / mDuration));
-            int lastIteration = Math.max(0, (int) (lastPlayTime / mDuration));
+            int iteration = (int) (currentPlayTime / mDuration);
+            int lastIteration = (int) (lastPlayTime / mDuration);
 
             // Clamp iteration to [0, mRepeatCount]
             iteration = Math.min(iteration, mRepeatCount);
@@ -1503,33 +1491,24 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
             }
         }
 
-        if (mRepeatCount != INFINITE && currentPlayTime > (mRepeatCount + 1) * mDuration) {
+        if (mRepeatCount != INFINITE && currentPlayTime >= (mRepeatCount + 1) * mDuration) {
             throw new IllegalStateException("Can't animate a value outside of the duration");
         } else {
             // Find the current fraction:
-            float fraction = Math.max(0, currentPlayTime) / (float) mDuration;
+            float fraction = currentPlayTime / (float) mDuration;
             fraction = getCurrentIterationFraction(fraction, false);
             animateValue(fraction);
         }
     }
 
     @Override
-    void animateSkipToEnds(long currentPlayTime, long lastPlayTime, boolean notify) {
-        boolean inReverse = currentPlayTime < lastPlayTime;
-        boolean doSkip;
-        if (currentPlayTime <= 0 && lastPlayTime > 0) {
-            doSkip = true;
+    void animateSkipToEnds(long currentPlayTime, long lastPlayTime) {
+        if (currentPlayTime <= mStartDelay && lastPlayTime > mStartDelay) {
+            skipToEndValue(true);
         } else {
             long duration = getTotalDuration();
-            doSkip = duration >= 0 && currentPlayTime >= duration && lastPlayTime < duration;
-        }
-        if (doSkip) {
-            if (notify) {
-                notifyStartListeners(inReverse);
-            }
-            skipToEndValue(inReverse);
-            if (notify) {
-                notifyEndListeners(inReverse);
+            if (duration >= 0 && currentPlayTime >= duration && lastPlayTime < duration) {
+                skipToEndValue(false);
             }
         }
     }
