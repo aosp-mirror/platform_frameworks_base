@@ -8563,6 +8563,7 @@ package android.app.job {
     method public int getClipGrantFlags();
     method @NonNull public android.os.PersistableBundle getExtras();
     method public int getJobId();
+    method @Nullable public String getJobNamespace();
     method @Nullable public android.net.Network getNetwork();
     method public int getStopReason();
     method @NonNull public android.os.Bundle getTransientExtras();
@@ -8596,10 +8597,14 @@ package android.app.job {
     method public boolean canRunLongJobs();
     method public abstract void cancel(int);
     method public abstract void cancelAll();
+    method public void cancelInAllNamespaces();
     method public abstract int enqueue(@NonNull android.app.job.JobInfo, @NonNull android.app.job.JobWorkItem);
+    method @NonNull public android.app.job.JobScheduler forNamespace(@NonNull String);
     method @NonNull public abstract java.util.List<android.app.job.JobInfo> getAllPendingJobs();
+    method @Nullable public String getNamespace();
     method @Nullable public abstract android.app.job.JobInfo getPendingJob(int);
     method public int getPendingJobReason(int);
+    method @NonNull public java.util.Map<java.lang.String,java.util.List<android.app.job.JobInfo>> getPendingJobsInAllNamespaces();
     method public abstract int schedule(@NonNull android.app.job.JobInfo);
     field public static final int PENDING_JOB_REASON_APP = 1; // 0x1
     field public static final int PENDING_JOB_REASON_APP_STANDBY = 2; // 0x2
