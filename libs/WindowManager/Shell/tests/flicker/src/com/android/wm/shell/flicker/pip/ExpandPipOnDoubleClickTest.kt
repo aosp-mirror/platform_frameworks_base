@@ -54,7 +54,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class ExpandPipOnDoubleClickTest(flicker: FlickerTest) : PipTransition(flicker) {
+open class ExpandPipOnDoubleClickTest(flicker: FlickerTest) : PipTransition(flicker) {
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition { transitions { pipApp.doubleClickPipWindow(wmHelper) } }
 

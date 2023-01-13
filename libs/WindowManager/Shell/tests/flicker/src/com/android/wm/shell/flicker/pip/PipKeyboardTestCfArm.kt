@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,50 +16,25 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Presubmit
-import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
-/** Test expanding a pip window via pinch out gesture. */
-@RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class ExpandPipOnPinchOpenTest(flicker: FlickerTest) : PipTransition(flicker) {
-    override val transition: FlickerBuilder.() -> Unit
-        get() = buildTransition { transitions { pipApp.pinchOpenPipWindow(wmHelper, 0.4f, 30) } }
-
-    /** Checks that the visible region area of [pipApp] always increases during the animation. */
-    @Presubmit
-    @Test
-    fun pipLayerAreaIncreases() {
-        flicker.assertLayers {
-            val pipLayerList = this.layers { pipApp.layerMatchesAnyOf(it) && it.isVisible }
-            pipLayerList.zipWithNext { previous, current ->
-                previous.visibleRegion.notBiggerThan(current.visibleRegion.region)
-            }
-        }
-    }
-
+class PipKeyboardTestCfArm(flicker: FlickerTest) : PipKeyboardTest(flicker) {
     companion object {
-        /**
-         * Creates the test configurations.
-         *
-         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
-         * navigation modes.
-         */
+        private const val TAG_IME_VISIBLE = "imeIsVisible"
+
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<FlickerTest> {
+        fun getParams(): Collection<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
                 supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
             )
