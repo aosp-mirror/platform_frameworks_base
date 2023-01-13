@@ -271,6 +271,7 @@ android_library {
         "LowLightDreamLib",
         "motion_tool_lib",
         "androidx.core_core-animation-testing-nodeps",
+        "androidx.compose.ui_ui",
     ],
 }
 
