@@ -146,6 +146,7 @@ uint64_t consumeBytes(VmaBatch& batch, uint64_t bytesToConsume) {
 // vmas vector, instead it iterates on it until the end.
 class VmaBatchCreator {
     const std::vector<Vma>* sourceVmas;
+    const int totalVmasInSource;
     // This is the destination array where batched VMAs will be stored
     // it gets encapsulated into a VmaBatch which is the object
     // meant to be used by client code.
@@ -156,8 +157,13 @@ class VmaBatchCreator {
     uint64_t currentOffset_;
 
 public:
-    VmaBatchCreator(const std::vector<Vma>* vmasToBatch, struct iovec* destVmasVec)
-          : sourceVmas(vmasToBatch), destVmas(destVmasVec), currentIndex_(0), currentOffset_(0) {}
+    VmaBatchCreator(const std::vector<Vma>* vmasToBatch, struct iovec* destVmasVec,
+                    int vmasInSource)
+          : sourceVmas(vmasToBatch),
+            totalVmasInSource(vmasInSource),
+            destVmas(destVmasVec),
+            currentIndex_(0),
+            currentOffset_(0) {}
 
     int currentIndex() { return currentIndex_; }
     uint64_t currentOffset() { return currentOffset_; }
@@ -177,7 +183,7 @@ public:
 
         // Add VMAs to the batch up until we consumed all the VMAs or
         // reached any imposed limit of VMAs per batch.
-        while (indexInBatch < MAX_VMAS_PER_BATCH && currentIndex_ < vmas.size()) {
+        while (indexInBatch < MAX_VMAS_PER_BATCH && currentIndex_ < totalVmasInSource) {
             uint64_t vmaStart = vmas[currentIndex_].start + currentOffset_;
             uint64_t vmaSize = vmas[currentIndex_].end - vmaStart;
             uint64_t bytesAvailableInBatch = MAX_BYTES_PER_BATCH - totalBytesInBatch;
@@ -272,8 +278,9 @@ static inline void compactProcessProcfs(int pid, const std::string& compactionTy
 //
 // If any VMA fails compaction due to -EINVAL it will be skipped and continue.
 // However, if it fails for any other reason, it will bail out and forward the error
-static int64_t compactMemory(const std::vector<Vma>& vmas, int pid, int madviseType) {
-    if (vmas.empty()) {
+static int64_t compactMemory(const std::vector<Vma>& vmas, int pid, int madviseType,
+                             int totalVmas) {
+    if (totalVmas == 0) {
         return 0;
     }
 
@@ -286,7 +293,7 @@ static int64_t compactMemory(const std::vector<Vma>& vmas, int pid, int madviseT
     struct iovec destVmas[MAX_VMAS_PER_BATCH];
 
     VmaBatch batch;
-    VmaBatchCreator batcher(&vmas, destVmas);
+    VmaBatchCreator batcher(&vmas, destVmas, totalVmas);
 
     int64_t totalBytesProcessed = 0;
     while (batcher.createNextBatch(batch)) {
@@ -346,34 +353,53 @@ static int getAnyPageAdvice(const Vma& vma) {
 // Returns the total number of bytes compacted on success. On error
 // returns process_madvise errno code or if compaction was cancelled
 // it returns ERROR_COMPACTION_CANCELLED.
+//
+// Not thread safe. We reuse vectors so we assume this is called only
+// on one thread at most.
 static int64_t compactProcess(int pid, VmaToAdviseFunc vmaToAdviseFunc) {
     cancelRunningCompaction.store(false);
-
+    static std::string mapsBuffer;
     ATRACE_BEGIN("CollectVmas");
     ProcMemInfo meminfo(pid);
-    std::vector<Vma> pageoutVmas, coldVmas;
-    auto vmaCollectorCb = [&coldVmas,&pageoutVmas,&vmaToAdviseFunc](const Vma& vma) {
+    static std::vector<Vma> pageoutVmas(2000), coldVmas(2000);
+    int coldVmaIndex = 0;
+    int pageoutVmaIndex = 0;
+    auto vmaCollectorCb = [&vmaToAdviseFunc, &pageoutVmaIndex, &coldVmaIndex](const Vma& vma) {
         int advice = vmaToAdviseFunc(vma);
         switch (advice) {
             case MADV_COLD:
-                coldVmas.push_back(vma);
+                if (coldVmaIndex < coldVmas.size()) {
+                    coldVmas[coldVmaIndex] = vma;
+                } else {
+                    coldVmas.push_back(vma);
+                }
+                ++coldVmaIndex;
                 break;
             case MADV_PAGEOUT:
-                pageoutVmas.push_back(vma);
+                if (pageoutVmaIndex < pageoutVmas.size()) {
+                    pageoutVmas[pageoutVmaIndex] = vma;
+                } else {
+                    pageoutVmas.push_back(vma);
+                }
+                ++pageoutVmaIndex;
                 break;
         }
     };
-    meminfo.ForEachVmaFromMaps(vmaCollectorCb);
+    meminfo.ForEachVmaFromMaps(vmaCollectorCb, mapsBuffer);
     ATRACE_END();
+#ifdef DEBUG_COMPACTION
+    ALOGE("Total VMAs sent for compaction anon=%d file=%d", pageoutVmaIndex,
+            coldVmaIndex);
+#endif
 
-    int64_t pageoutBytes = compactMemory(pageoutVmas, pid, MADV_PAGEOUT);
+    int64_t pageoutBytes = compactMemory(pageoutVmas, pid, MADV_PAGEOUT, pageoutVmaIndex);
     if (pageoutBytes < 0) {
         // Error, just forward it.
         cancelRunningCompaction.store(false);
         return pageoutBytes;
     }
 
-    int64_t coldBytes = compactMemory(coldVmas, pid, MADV_COLD);
+    int64_t coldBytes = compactMemory(coldVmas, pid, MADV_COLD, coldVmaIndex);
     if (coldBytes < 0) {
         // Error, just forward it.
         cancelRunningCompaction.store(false);
