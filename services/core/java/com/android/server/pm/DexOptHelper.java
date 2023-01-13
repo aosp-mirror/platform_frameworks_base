@@ -82,10 +82,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 
 /**
@@ -413,9 +411,8 @@ public final class DexOptHelper {
 
         @DexOptResult int dexoptStatus;
         if (options.isDexoptOnlySecondaryDex()) {
-            Optional<Integer> artSrvRes = performDexOptWithArtService(options, 0 /* extraFlags */);
-            if (artSrvRes.isPresent()) {
-                dexoptStatus = artSrvRes.get();
+            if (useArtService()) {
+                dexoptStatus = performDexOptWithArtService(options, 0 /* extraFlags */);
             } else {
                 try {
                     return mPm.getDexManager().dexoptSecondaryDex(options);
@@ -455,10 +452,8 @@ public final class DexOptHelper {
     // if the package can now be considered up to date for the given filter.
     @DexOptResult
     private int performDexOptInternal(DexoptOptions options) {
-        Optional<Integer> artSrvRes =
-                performDexOptWithArtService(options, ArtFlags.FLAG_SHOULD_INCLUDE_DEPENDENCIES);
-        if (artSrvRes.isPresent()) {
-            return artSrvRes.get();
+        if (useArtService()) {
+            return performDexOptWithArtService(options, ArtFlags.FLAG_SHOULD_INCLUDE_DEPENDENCIES);
         }
 
         AndroidPackage p;
@@ -488,46 +483,26 @@ public final class DexOptHelper {
     }
 
     /**
-     * Performs dexopt on the given package using ART Service.
-     *
-     * @return a {@link DexOptResult}, or empty if the request isn't supported so that it is
-     *     necessary to fall back to the legacy code paths.
+     * Performs dexopt on the given package using ART Service. May only be called when ART Service
+     * is enabled, i.e. when {@link useArtService} returns true.
      */
-    private Optional<Integer> performDexOptWithArtService(DexoptOptions options,
+    @DexOptResult
+    private int performDexOptWithArtService(DexoptOptions options,
             /*@DexoptFlags*/ int extraFlags) {
-        ArtManagerLocal artManager = getArtManagerLocal();
-        if (artManager == null) {
-            return Optional.empty();
-        }
-
         try (PackageManagerLocal.FilteredSnapshot snapshot =
                         getPackageManagerLocal().withFilteredSnapshot()) {
             PackageState ops = snapshot.getPackageState(options.getPackageName());
             if (ops == null) {
-                return Optional.of(PackageDexOptimizer.DEX_OPT_FAILED);
+                return PackageDexOptimizer.DEX_OPT_FAILED;
             }
             AndroidPackage oap = ops.getAndroidPackage();
             if (oap == null) {
-                return Optional.of(PackageDexOptimizer.DEX_OPT_FAILED);
+                return PackageDexOptimizer.DEX_OPT_FAILED;
             }
-            if (oap.isApex()) {
-                return Optional.of(PackageDexOptimizer.DEX_OPT_SKIPPED);
-            }
-
             DexoptParams params = options.convertToDexoptParams(extraFlags);
-            if (params == null) {
-                return Optional.empty();
-            }
-
-            DexoptResult result;
-            try {
-                result = artManager.dexoptPackage(snapshot, options.getPackageName(), params);
-            } catch (UnsupportedOperationException e) {
-                reportArtManagerFallback(options.getPackageName(), e.toString());
-                return Optional.empty();
-            }
-
-            return Optional.of(convertToDexOptResult(result));
+            DexoptResult result =
+                    getArtManagerLocal().dexoptPackage(snapshot, options.getPackageName(), params);
+            return convertToDexOptResult(result);
         }
     }
 
@@ -605,14 +580,12 @@ public final class DexOptHelper {
                 getDefaultCompilerFilter(), null /* splitName */,
                 DexoptOptions.DEXOPT_FORCE | DexoptOptions.DEXOPT_BOOT_COMPLETE);
 
-        // performDexOptWithArtService ignores the snapshot and takes its own, so it can race with
-        // the package checks above, but at worst the effect is only a bit less friendly error
-        // below.
-        Optional<Integer> artSrvRes =
-                performDexOptWithArtService(options, ArtFlags.FLAG_SHOULD_INCLUDE_DEPENDENCIES);
-        int res;
-        if (artSrvRes.isPresent()) {
-            res = artSrvRes.get();
+        @DexOptResult int res;
+        if (useArtService()) {
+            // performDexOptWithArtService ignores the snapshot and takes its own, so it can race
+            // with the package checks above, but at worst the effect is only a bit less friendly
+            // error below.
+            res = performDexOptWithArtService(options, ArtFlags.FLAG_SHOULD_INCLUDE_DEPENDENCIES);
         } else {
             try {
                 res = performDexOptInternalWithDependenciesLI(pkg, packageState, options);
@@ -909,15 +882,6 @@ public final class DexOptHelper {
     }
 
     /**
-     * Called whenever we need to fall back from ART Service to the legacy dexopt code.
-     */
-    public static void reportArtManagerFallback(String packageName, String reason) {
-        // STOPSHIP(b/251903639): Minimize these calls to avoid platform getting shipped with code
-        // paths that will always bypass ART Service.
-        Slog.i(TAG, "Falling back to old PackageManager dexopt for " + packageName + ": " + reason);
-    }
-
-    /**
      * Returns true if ART Service should be used for package optimization.
      */
     public static boolean useArtService() {
@@ -1006,12 +970,9 @@ public final class DexOptHelper {
     }
 
     /**
-     * Returns {@link ArtManagerLocal} if ART Service should be used for package dexopt.
+     * Returns the registered {@link ArtManagerLocal} instance, or else throws an unchecked error.
      */
-    public static @Nullable ArtManagerLocal getArtManagerLocal() {
-        if (!useArtService()) {
-            return null;
-        }
+    public static @NonNull ArtManagerLocal getArtManagerLocal() {
         try {
             return LocalManagerRegistry.getManagerOrThrow(ArtManagerLocal.class);
         } catch (ManagerNotFoundException e) {

@@ -21,18 +21,19 @@ import static com.android.server.pm.PackageManagerServiceCompilerMapping.getComp
 import static dalvik.system.DexFile.isProfileGuidedCompilerFilter;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
+import android.util.Log;
 
 import com.android.server.art.ReasonMapping;
 import com.android.server.art.model.ArtFlags;
 import com.android.server.art.model.DexoptParams;
-import com.android.server.pm.DexOptHelper;
 import com.android.server.pm.PackageManagerService;
 
 /**
  * Options used for dexopt invocations.
  */
 public final class DexoptOptions {
+    private static final String TAG = "DexoptOptions";
+
     // When set, the profiles will be checked for updates before calling dexopt. If
     // the apps profiles didn't update in a meaningful way (decided by the compiler), dexopt
     // will be skipped.
@@ -88,8 +89,9 @@ public final class DexoptOptions {
     // The set of flags for the dexopt options. It's a mix of the DEXOPT_* flags.
     private final int mFlags;
 
-    // When not null, dexopt will optimize only the split identified by this name.
-    // It only applies for primary apk and it's always null if mOnlySecondaryDex is true.
+    // When not null, dexopt will optimize only the split identified by this APK file name (not
+    // split name). It only applies for primary apk and it's always null if mOnlySecondaryDex is
+    // true.
     private final String mSplitName;
 
     // The reason for invoking dexopt (see PackageManagerService.REASON_* constants).
@@ -250,14 +252,20 @@ public final class DexoptOptions {
      *
      * @param extraFlags extra {@link ArtFlags#DexoptFlags} to set in the returned
      *     {@code DexoptParams} beyond those converted from this object
-     * @return null if the settings cannot be accurately represented, and hence the old
-     *     PackageManager/installd code paths need to be used.
+     * @throws UnsupportedOperationException if the settings cannot be accurately represented.
      */
-    public @Nullable DexoptParams convertToDexoptParams(/*@DexoptFlags*/ int extraFlags) {
+    public @NonNull DexoptParams convertToDexoptParams(/*@DexoptFlags*/ int extraFlags) {
         if (mSplitName != null) {
-            DexOptHelper.reportArtManagerFallback(
-                    mPackageName, "Request to optimize only split " + mSplitName);
-            return null;
+            // ART Service supports dexopting a single split - see ArtFlags.FLAG_FOR_SINGLE_SPLIT.
+            // However using it here requires searching through the splits to find the one matching
+            // the APK file name in mSplitName, and we don't have the AndroidPackage available for
+            // that.
+            //
+            // Hence we throw here instead, under the assumption that no code paths that dexopt
+            // splits need this conversion (e.g. shell commands with the --split argument are
+            // handled by ART Service directly).
+            throw new UnsupportedOperationException(
+                    "Request to optimize only split " + mSplitName + " for " + mPackageName);
         }
 
         /*@DexoptFlags*/ int flags = extraFlags;
@@ -280,11 +288,11 @@ public final class DexoptOptions {
             flags |= ArtFlags.FLAG_SHOULD_DOWNGRADE;
         }
         if ((mFlags & DEXOPT_INSTALL_WITH_DEX_METADATA_FILE) == 0) {
-            // ART Service cannot be instructed to ignore a DM file if present, so not setting this
-            // flag is not supported.
-            DexOptHelper.reportArtManagerFallback(
-                    mPackageName, "DEXOPT_INSTALL_WITH_DEX_METADATA_FILE not set");
-            return null;
+            // ART Service cannot be instructed to ignore a DM file if present.
+            Log.w(TAG,
+                    "DEXOPT_INSTALL_WITH_DEX_METADATA_FILE not set in request to optimise "
+                            + mPackageName
+                            + " - ART Service will unconditionally use a DM file if present.");
         }
 
         /*@PriorityClassApi*/ int priority;
