@@ -40580,7 +40580,7 @@ package android.service.voice {
     method public void onRequestCompleteVoice(android.service.voice.VoiceInteractionSession.CompleteVoiceRequest);
     method public void onRequestConfirmation(android.service.voice.VoiceInteractionSession.ConfirmationRequest);
     method public void onRequestPickOption(android.service.voice.VoiceInteractionSession.PickOptionRequest);
-    method public void onShow(android.os.Bundle, int);
+    method public void onShow(@Nullable android.os.Bundle, int);
     method public void onTaskFinished(android.content.Intent, int);
     method public void onTaskStarted(android.content.Intent, int);
     method public void onTrimMemory(int);
