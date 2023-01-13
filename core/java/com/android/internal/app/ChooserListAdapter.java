@@ -197,8 +197,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
                     ri.nonLocalizedLabel = li.getNonLocalizedLabel();
                     ri.icon = li.getIconResource();
                     ri.iconResourceId = ri.icon;
-                    // TODO: Uncomment the below line once userHandle is added to ResolveInfo
-                    //ri.userHandle = getUserHandle();
+                    ri.userHandle = getUserHandle();
                 }
                 if (userManager.isManagedProfile()) {
                     ri.noResourceId = true;

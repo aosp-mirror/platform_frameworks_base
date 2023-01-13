@@ -102,6 +102,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.AbstractMultiProfilePagerAdapter.CompositeEmptyStateProvider;
 import com.android.internal.app.AbstractMultiProfilePagerAdapter.CrossProfileIntentsChecker;
 import com.android.internal.app.AbstractMultiProfilePagerAdapter.EmptyStateProvider;
+import com.android.internal.app.AbstractMultiProfilePagerAdapter.MyUserIdProvider;
 import com.android.internal.app.AbstractMultiProfilePagerAdapter.OnSwitchOnWorkSelectedListener;
 import com.android.internal.app.AbstractMultiProfilePagerAdapter.Profile;
 import com.android.internal.app.AbstractMultiProfilePagerAdapter.QuietModeManager;
@@ -503,6 +504,11 @@ public class ResolverActivity extends Activity implements
                     initialIntents, rList, filterLastUsed);
         }
         return resolverMultiProfilePagerAdapter;
+    }
+
+    @VisibleForTesting
+    protected MyUserIdProvider createMyUserIdProvider() {
+        return new MyUserIdProvider();
     }
 
     @VisibleForTesting
@@ -2526,6 +2532,6 @@ public class ResolverActivity extends Activity implements
      */
     public static UserHandle getResolveInfoUserHandle(ResolveInfo resolveInfo,
             UserHandle predictedHandle) {
-        return predictedHandle;
+        return resolveInfo.userHandle;
     }
 }

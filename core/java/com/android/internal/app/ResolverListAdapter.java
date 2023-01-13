@@ -440,6 +440,7 @@ public class ResolverListAdapter extends BaseAdapter {
                         ri.nonLocalizedLabel = li.getNonLocalizedLabel();
                         ri.icon = li.getIconResource();
                         ri.iconResourceId = ri.icon;
+                        ri.userHandle = getUserHandle();
                     }
                     if (userManager.isManagedProfile()) {
                         ri.noResourceId = true;

@@ -70,6 +70,7 @@ public class ChooserActivityOverrideData {
     public int alternateProfileSetting;
     public Resources resources;
     public UserHandle workProfileUserHandle;
+    public UserHandle cloneProfileUserHandle;
     public UserHandle tabOwnerUserHandleForLaunch;
     public boolean hasCrossProfileIntents;
     public boolean isQuietModeEnabled;
@@ -97,6 +98,7 @@ public class ChooserActivityOverrideData {
         alternateProfileSetting = 0;
         resources = null;
         workProfileUserHandle = null;
+        cloneProfileUserHandle = null;
         tabOwnerUserHandleForLaunch = null;
         hasCrossProfileIntents = true;
         isQuietModeEnabled = false;

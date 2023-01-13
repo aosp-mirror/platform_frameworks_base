@@ -44,6 +44,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 
+import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
@@ -75,6 +76,8 @@ public class ResolverListControllerTest {
 
     private ResolverListController mController;
     private UsageStatsManager mUsm;
+    private static final UserHandle PERSONAL_USER_HANDLE = InstrumentationRegistry
+            .getInstrumentation().getTargetContext().getUser();
 
     @Before
     public void setUp() throws Exception {
@@ -159,7 +162,8 @@ public class ResolverListControllerTest {
     public void getResolversForIntent_usesResultsFromPackageManager() {
         mockStats();
         List<ResolveInfo> infos = new ArrayList<>();
-        infos.add(ResolverDataProvider.createResolveInfo(0, UserHandle.USER_CURRENT));
+        infos.add(ResolverDataProvider.createResolveInfo(0, UserHandle.USER_CURRENT,
+                PERSONAL_USER_HANDLE));
         when(mMockPackageManager.queryIntentActivitiesAsUser(any(), anyInt(),
                 any(UserHandle.class))).thenReturn(infos);
         mController = new ResolverListController(mMockContext, mMockPackageManager,
@@ -183,7 +187,8 @@ public class ResolverListControllerTest {
     public void getResolversForIntent_shouldGetOnlyDefaultActivitiesTrue_addsFlag() {
         mockStats();
         List<ResolveInfo> infos = new ArrayList<>();
-        infos.add(ResolverDataProvider.createResolveInfo(0, UserHandle.USER_CURRENT));
+        infos.add(ResolverDataProvider.createResolveInfo(0, UserHandle.USER_CURRENT,
+                PERSONAL_USER_HANDLE));
         when(mMockPackageManager.queryIntentActivitiesAsUser(any(), anyInt(),
                 any(UserHandle.class))).thenReturn(infos);
         mController = new ResolverListController(mMockContext, mMockPackageManager,
@@ -207,7 +212,8 @@ public class ResolverListControllerTest {
     public void getResolversForIntent_shouldGetOnlyDefaultActivitiesFalse_doesNotAddFlag() {
         mockStats();
         List<ResolveInfo> infos = new ArrayList<>();
-        infos.add(ResolverDataProvider.createResolveInfo(0, UserHandle.USER_CURRENT));
+        infos.add(ResolverDataProvider.createResolveInfo(0, UserHandle.USER_CURRENT,
+                PERSONAL_USER_HANDLE));
         when(mMockPackageManager.queryIntentActivitiesAsUser(any(), anyInt(),
                 any(UserHandle.class))).thenReturn(infos);
         mController = new ResolverListController(mMockContext, mMockPackageManager,
@@ -225,6 +231,32 @@ public class ResolverListControllerTest {
 
         verify(mMockPackageManager).queryIntentActivitiesAsUser(any(),
                 doesNotContainFlag(PackageManager.MATCH_DEFAULT_ONLY), any());
+    }
+
+
+    @Test
+    public void testResolveInfoWithNoUserHandle_isNotAddedToResults()
+            throws Exception {
+        List<ResolveInfo> infos = new ArrayList<>();
+        infos.add(ResolverDataProvider.createResolveInfo(0, UserHandle.USER_CURRENT,
+                PERSONAL_USER_HANDLE));
+        infos.add(ResolverDataProvider.createResolveInfo(0, UserHandle.USER_CURRENT, null));
+        when(mMockPackageManager.queryIntentActivitiesAsUser(any(), anyInt(),
+                any(UserHandle.class))).thenReturn(infos);
+        mController = new ResolverListController(mMockContext, mMockPackageManager,
+                createSendImageIntent("test"), null, UserHandle.USER_CURRENT,
+                /* userHandle= */ UserHandle.SYSTEM, UserHandle.SYSTEM);
+        List<Intent> intents = new ArrayList<>();
+        intents.add(createActionMainIntent());
+
+        List<ResolverActivity.ResolvedComponentInfo> result = mController
+                .getResolversForIntent(
+                        /* shouldGetResolvedFilter= */ true,
+                        /* shouldGetActivityMetadata= */ true,
+                        /* shouldGetOnlyDefaultActivities= */ false,
+                        intents);
+
+        assertThat(result.size(), is(1));
     }
 
     private int containsFlag(int flag) {
@@ -310,7 +342,7 @@ public class ResolverListControllerTest {
     private List<ResolvedComponentInfo> createResolvedComponentsForTest(int numberOfResults) {
         List<ResolvedComponentInfo> infoList = new ArrayList<>(numberOfResults);
         for (int i = 0; i < numberOfResults; i++) {
-            infoList.add(ResolverDataProvider.createResolvedComponentInfo(i));
+            infoList.add(ResolverDataProvider.createResolvedComponentInfo(i, PERSONAL_USER_HANDLE));
         }
         return infoList;
     }

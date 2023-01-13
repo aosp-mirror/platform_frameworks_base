@@ -325,6 +325,18 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     }
 
     /**
+     * Class to get user id of the current process
+     */
+    public static class MyUserIdProvider {
+        /**
+         * @return user id of the current process
+         */
+        public int getMyUserId() {
+            return UserHandle.myUserId();
+        }
+    }
+
+    /**
      * Utility class to check if there are cross profile intents, it is in a separate class so
      * it could be mocked in tests
      */

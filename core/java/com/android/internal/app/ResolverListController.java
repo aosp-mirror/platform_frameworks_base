@@ -174,10 +174,10 @@ public class ResolverListController {
         final int intoCount = into.size();
         for (int i = 0; i < fromCount; i++) {
             final ResolveInfo newInfo = from.get(i);
-            // TODO: Once resolveInfo.userHandle is available, add the logic to drop any ResolveInfo
-            //  with userHandle as null, with a warning logged. This is necessary as sharesheet is
-            //  going to use userHandle to determine icon badging and starting the activity in
-            //  correct userSpace.
+            if (newInfo.userHandle == null) {
+                Log.w(TAG, "Skipping ResolveInfo with no userHandle: " + newInfo);
+                continue;
+            }
             boolean found = false;
             // Only loop to the end of into as it was before we started; no dupes in from.
             for (int j = 0; j < intoCount; j++) {

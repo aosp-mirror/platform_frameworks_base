@@ -238,19 +238,21 @@ public class ChooserActivityWorkProfileTest {
     }
 
     private List<ResolvedComponentInfo> createResolvedComponentsForTestWithOtherProfile(
-            int numberOfResults, int userId) {
+            int numberOfResults, int userId, UserHandle resolvedForUser) {
         List<ResolvedComponentInfo> infoList = new ArrayList<>(numberOfResults);
         for (int i = 0; i < numberOfResults; i++) {
             infoList.add(
-                    ResolverDataProvider.createResolvedComponentInfoWithOtherId(i, userId));
+                    ResolverDataProvider
+                            .createResolvedComponentInfoWithOtherId(i, userId, resolvedForUser));
         }
         return infoList;
     }
 
-    private List<ResolvedComponentInfo> createResolvedComponentsForTest(int numberOfResults) {
+    private List<ResolvedComponentInfo> createResolvedComponentsForTest(int numberOfResults,
+            UserHandle resolvedForUser) {
         List<ResolvedComponentInfo> infoList = new ArrayList<>(numberOfResults);
         for (int i = 0; i < numberOfResults; i++) {
-            infoList.add(ResolverDataProvider.createResolvedComponentInfo(i));
+            infoList.add(ResolverDataProvider.createResolvedComponentInfo(i, resolvedForUser));
         }
         return infoList;
     }
@@ -262,9 +264,9 @@ public class ChooserActivityWorkProfileTest {
         int workProfileTargets = 4;
         List<ResolvedComponentInfo> personalResolvedComponentInfos =
                 createResolvedComponentsForTestWithOtherProfile(3,
-                        /* userId */ WORK_USER_HANDLE.getIdentifier());
+                        /* userId */ WORK_USER_HANDLE.getIdentifier(), PERSONAL_USER_HANDLE);
         List<ResolvedComponentInfo> workResolvedComponentInfos =
-                createResolvedComponentsForTest(workProfileTargets);
+                createResolvedComponentsForTest(workProfileTargets, WORK_USER_HANDLE);
         setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
     }
 
