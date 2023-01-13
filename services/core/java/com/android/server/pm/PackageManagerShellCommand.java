@@ -1979,63 +1979,53 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int runBgDexOpt() throws RemoteException {
-        // TODO(b/251903639): Call into ART Service.
-        try {
-            String opt = getNextOption();
+    private int runBgDexOpt() throws RemoteException, LegacyDexoptDisabledException {
+        String opt = getNextOption();
 
-            if (opt == null) {
-                List<String> packageNames = new ArrayList<>();
-                String arg;
-                while ((arg = getNextArg()) != null) {
-                    packageNames.add(arg);
-                }
-                if (!BackgroundDexOptService.getService().runBackgroundDexoptJob(
-                            packageNames.isEmpty() ? null : packageNames)) {
-                    getOutPrintWriter().println("Failure");
-                    return -1;
-                }
-            } else {
-                String extraArg = getNextArg();
-                if (extraArg != null) {
-                    getErrPrintWriter().println("Invalid argument: " + extraArg);
-                    return -1;
-                }
-
-                switch (opt) {
-                    case "--cancel":
-                        return cancelBgDexOptJob();
-
-                    case "--disable":
-                        BackgroundDexOptService.getService().setDisableJobSchedulerJobs(true);
-                        break;
-
-                    case "--enable":
-                        BackgroundDexOptService.getService().setDisableJobSchedulerJobs(false);
-                        break;
-
-                    default:
-                        getErrPrintWriter().println("Unknown option: " + opt);
-                        return -1;
-                }
+        if (opt == null) {
+            List<String> packageNames = new ArrayList<>();
+            String arg;
+            while ((arg = getNextArg()) != null) {
+                packageNames.add(arg);
+            }
+            if (!BackgroundDexOptService.getService().runBackgroundDexoptJob(
+                        packageNames.isEmpty() ? null : packageNames)) {
+                getOutPrintWriter().println("Failure");
+                return -1;
+            }
+        } else {
+            String extraArg = getNextArg();
+            if (extraArg != null) {
+                getErrPrintWriter().println("Invalid argument: " + extraArg);
+                return -1;
             }
 
-            getOutPrintWriter().println("Success");
-            return 0;
-        } catch (LegacyDexoptDisabledException e) {
-            throw new RuntimeException(e);
+            switch (opt) {
+                case "--cancel":
+                    return cancelBgDexOptJob();
+
+                case "--disable":
+                    BackgroundDexOptService.getService().setDisableJobSchedulerJobs(true);
+                    break;
+
+                case "--enable":
+                    BackgroundDexOptService.getService().setDisableJobSchedulerJobs(false);
+                    break;
+
+                default:
+                    getErrPrintWriter().println("Unknown option: " + opt);
+                    return -1;
+            }
         }
+
+        getOutPrintWriter().println("Success");
+        return 0;
     }
 
-    private int cancelBgDexOptJob() throws RemoteException {
-        // TODO(b/251903639): Call into ART Service.
-        try {
-            BackgroundDexOptService.getService().cancelBackgroundDexoptJob();
-            getOutPrintWriter().println("Success");
-            return 0;
-        } catch (LegacyDexoptDisabledException e) {
-            throw new RuntimeException(e);
-        }
+    private int cancelBgDexOptJob() throws RemoteException, LegacyDexoptDisabledException {
+        BackgroundDexOptService.getService().cancelBackgroundDexoptJob();
+        getOutPrintWriter().println("Success");
+        return 0;
     }
 
     private int runDeleteDexOpt() throws RemoteException {
