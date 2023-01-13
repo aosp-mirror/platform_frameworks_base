@@ -15759,9 +15759,9 @@ package android.telephony.ims {
 
   public static interface RcsUceAdapter.CapabilitiesCallback {
     method public void onCapabilitiesReceived(@NonNull java.util.List<android.telephony.ims.RcsContactUceCapability>);
-    method @Deprecated public void onComplete();
+    method public default void onComplete();
     method public default void onComplete(@Nullable android.telephony.ims.SipDetails);
-    method @Deprecated public void onError(int, long);
+    method public default void onError(int, long);
     method public default void onError(int, long, @Nullable android.telephony.ims.SipDetails);
   }
 
