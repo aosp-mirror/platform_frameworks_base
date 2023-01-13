@@ -4316,7 +4316,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_STYLUS_BUTTON_SECONDARY:
             case KeyEvent.KEYCODE_STYLUS_BUTTON_TERTIARY:
             case KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL: {
-                if (!mStylusButtonsDisabled) {
+                if (down && !mStylusButtonsDisabled) {
                     sendSystemKeyToStatusBarAsync(keyCode);
                 }
                 result &= ~ACTION_PASS_TO_USER;
