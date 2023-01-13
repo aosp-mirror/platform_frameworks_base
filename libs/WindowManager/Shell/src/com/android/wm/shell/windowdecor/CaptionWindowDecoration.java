@@ -48,14 +48,12 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     private View.OnClickListener mOnCaptionButtonClickListener;
     private View.OnTouchListener mOnCaptionTouchListener;
     private DragResizeCallback mDragResizeCallback;
-
     private DragResizeInputListener mDragResizeListener;
+    private final DragDetector mDragDetector;
 
     private RelayoutParams mRelayoutParams = new RelayoutParams();
     private final RelayoutResult<WindowDecorLinearLayout> mResult =
             new RelayoutResult<>();
-
-    private DragDetector mDragDetector;
 
     CaptionWindowDecoration(
             Context context,
@@ -104,14 +102,14 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
                 taskInfo.getWindowingMode() == WindowConfiguration.WINDOWING_MODE_FREEFORM;
         final boolean isDragResizeable = isFreeform && taskInfo.isResizeable;
 
-        WindowDecorLinearLayout oldRootView = mResult.mRootView;
+        final WindowDecorLinearLayout oldRootView = mResult.mRootView;
         final SurfaceControl oldDecorationSurface = mDecorationContainerSurface;
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
-        int outsetLeftId = R.dimen.freeform_resize_handle;
-        int outsetTopId = R.dimen.freeform_resize_handle;
-        int outsetRightId = R.dimen.freeform_resize_handle;
-        int outsetBottomId = R.dimen.freeform_resize_handle;
+        final int outsetLeftId = R.dimen.freeform_resize_handle;
+        final int outsetTopId = R.dimen.freeform_resize_handle;
+        final int outsetRightId = R.dimen.freeform_resize_handle;
+        final int outsetBottomId = R.dimen.freeform_resize_handle;
 
         mRelayoutParams.reset();
         mRelayoutParams.mRunningTaskInfo = taskInfo;
@@ -123,7 +121,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         }
 
         relayout(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);
-        taskInfo = null; // Clear it just in case we use it accidentally
+        // After this line, mTaskInfo is up-to-date and should be used instead of taskInfo
 
         mTaskOrganizer.applyTransaction(wct);
 
@@ -152,12 +150,13 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
                     mDragResizeCallback);
         }
 
-        int touchSlop = ViewConfiguration.get(mResult.mRootView.getContext()).getScaledTouchSlop();
+        final int touchSlop = ViewConfiguration.get(mResult.mRootView.getContext())
+                .getScaledTouchSlop();
         mDragDetector.setTouchSlop(touchSlop);
 
-        int resize_handle = mResult.mRootView.getResources()
+        final int resize_handle = mResult.mRootView.getResources()
                 .getDimensionPixelSize(R.dimen.freeform_resize_handle);
-        int resize_corner = mResult.mRootView.getResources()
+        final int resize_corner = mResult.mRootView.getResources()
                 .getDimensionPixelSize(R.dimen.freeform_resize_corner);
         mDragResizeListener.setGeometry(
                 mResult.mWidth, mResult.mHeight, resize_handle, resize_corner, touchSlop);
@@ -167,15 +166,15 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
      * Sets up listeners when a new root view is created.
      */
     private void setupRootView() {
-        View caption = mResult.mRootView.findViewById(R.id.caption);
+        final View caption = mResult.mRootView.findViewById(R.id.caption);
         caption.setOnTouchListener(mOnCaptionTouchListener);
-        View close = caption.findViewById(R.id.close_window);
+        final View close = caption.findViewById(R.id.close_window);
         close.setOnClickListener(mOnCaptionButtonClickListener);
-        View back = caption.findViewById(R.id.back_button);
+        final View back = caption.findViewById(R.id.back_button);
         back.setOnClickListener(mOnCaptionButtonClickListener);
-        View minimize = caption.findViewById(R.id.minimize_window);
+        final View minimize = caption.findViewById(R.id.minimize_window);
         minimize.setOnClickListener(mOnCaptionButtonClickListener);
-        View maximize = caption.findViewById(R.id.maximize_window);
+        final View maximize = caption.findViewById(R.id.maximize_window);
         maximize.setOnClickListener(mOnCaptionButtonClickListener);
     }
 
@@ -184,31 +183,31 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             return;
         }
 
-        View caption = mResult.mRootView.findViewById(R.id.caption);
-        GradientDrawable captionDrawable = (GradientDrawable) caption.getBackground();
+        final View caption = mResult.mRootView.findViewById(R.id.caption);
+        final GradientDrawable captionDrawable = (GradientDrawable) caption.getBackground();
         captionDrawable.setColor(captionColor);
 
-        int buttonTintColorRes =
+        final int buttonTintColorRes =
                 Color.valueOf(captionColor).luminance() < 0.5
                         ? R.color.decor_button_light_color
                         : R.color.decor_button_dark_color;
-        ColorStateList buttonTintColor =
+        final ColorStateList buttonTintColor =
                 caption.getResources().getColorStateList(buttonTintColorRes, null /* theme */);
 
-        View back = caption.findViewById(R.id.back_button);
-        VectorDrawable backBackground = (VectorDrawable) back.getBackground();
+        final View back = caption.findViewById(R.id.back_button);
+        final VectorDrawable backBackground = (VectorDrawable) back.getBackground();
         backBackground.setTintList(buttonTintColor);
 
-        View minimize = caption.findViewById(R.id.minimize_window);
-        VectorDrawable minimizeBackground = (VectorDrawable) minimize.getBackground();
+        final View minimize = caption.findViewById(R.id.minimize_window);
+        final VectorDrawable minimizeBackground = (VectorDrawable) minimize.getBackground();
         minimizeBackground.setTintList(buttonTintColor);
 
-        View maximize = caption.findViewById(R.id.maximize_window);
-        VectorDrawable maximizeBackground = (VectorDrawable) maximize.getBackground();
+        final View maximize = caption.findViewById(R.id.maximize_window);
+        final VectorDrawable maximizeBackground = (VectorDrawable) maximize.getBackground();
         maximizeBackground.setTintList(buttonTintColor);
 
-        View close = caption.findViewById(R.id.close_window);
-        VectorDrawable closeBackground = (VectorDrawable) close.getBackground();
+        final View close = caption.findViewById(R.id.close_window);
+        final VectorDrawable closeBackground = (VectorDrawable) close.getBackground();
         closeBackground.setTintList(buttonTintColor);
     }
 
