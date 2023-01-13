@@ -574,8 +574,10 @@ public class MobileRadioPowerCalculatorTest {
     }
 
     @Test
-    public void testMeasuredEnergyBasedModel() {
+    public void testMeasuredEnergyBasedModel_mobileRadioActiveTimeModel() {
         mStatsRule.setTestPowerProfile(R.xml.power_profile_test_legacy_modem)
+                .setPerUidModemModel(
+                        BatteryStatsImpl.PER_UID_MODEM_POWER_MODEL_MOBILE_RADIO_ACTIVE_TIME)
                 .initMeasuredEnergyStatsLocked();
         BatteryStatsImpl stats = mStatsRule.getBatteryStats();
 
@@ -633,6 +635,263 @@ public class MobileRadioPowerCalculatorTest {
         UidBatteryConsumer uidConsumer = mStatsRule.getUidBatteryConsumer(APP_UID);
         assertThat(uidConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
                 .isWithin(PRECISION).of(1.53934);
+        assertThat(uidConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
+    }
+
+
+
+    @Test
+    public void testMeasuredEnergyBasedModel_modemActivityInfoRxTxModel() {
+        mStatsRule.setTestPowerProfile(R.xml.power_profile_test_modem_calculator_multiactive)
+                .setPerUidModemModel(
+                        BatteryStatsImpl.PER_UID_MODEM_POWER_MODEL_MODEM_ACTIVITY_INFO_RX_TX)
+                .initMeasuredEnergyStatsLocked();
+        BatteryStatsImpl stats = mStatsRule.getBatteryStats();
+
+        // Scan for a cell
+        stats.notePhoneStateLocked(ServiceState.STATE_OUT_OF_SERVICE,
+                TelephonyManager.SIM_STATE_READY,
+                2000, 2000);
+
+        // Found a cell
+        stats.notePhoneStateLocked(ServiceState.STATE_IN_SERVICE, TelephonyManager.SIM_STATE_READY,
+                5000, 5000);
+
+        ArrayList<CellSignalStrength> perRatCellStrength = new ArrayList();
+        CellSignalStrength gsmSignalStrength = mock(CellSignalStrength.class);
+        when(gsmSignalStrength.getLevel()).thenReturn(
+                SignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN);
+        perRatCellStrength.add(gsmSignalStrength);
+
+        // Note cell signal strength
+        SignalStrength signalStrength = mock(SignalStrength.class);
+        when(signalStrength.getCellSignalStrengths()).thenReturn(perRatCellStrength);
+        stats.notePhoneSignalStrengthLocked(signalStrength, 5000, 5000);
+
+        stats.noteMobileRadioPowerStateLocked(DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH,
+                8_000_000_000L, APP_UID, 8000, 8000);
+
+        // Note established network
+        stats.noteNetworkInterfaceForTransports("cellular",
+                new int[]{NetworkCapabilities.TRANSPORT_CELLULAR});
+
+        // Spend some time in each signal strength level. It doesn't matter how long.
+        // The ModemActivityInfo reported level residency should be trusted over the BatteryStats
+        // timers.
+        when(gsmSignalStrength.getLevel()).thenReturn(
+                SignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN);
+        stats.notePhoneSignalStrengthLocked(signalStrength, 8111, 8111);
+        when(gsmSignalStrength.getLevel()).thenReturn(SignalStrength.SIGNAL_STRENGTH_POOR);
+        stats.notePhoneSignalStrengthLocked(signalStrength, 8333, 8333);
+        when(gsmSignalStrength.getLevel()).thenReturn(SignalStrength.SIGNAL_STRENGTH_MODERATE);
+        stats.notePhoneSignalStrengthLocked(signalStrength, 8666, 8666);
+        when(gsmSignalStrength.getLevel()).thenReturn(SignalStrength.SIGNAL_STRENGTH_GOOD);
+        stats.notePhoneSignalStrengthLocked(signalStrength, 9110, 9110);
+
+        stats.noteMobileRadioPowerStateLocked(DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH,
+                9_500_000_000L, APP_UID2, 9500, 9500);
+
+        when(gsmSignalStrength.getLevel()).thenReturn(SignalStrength.SIGNAL_STRENGTH_GREAT);
+        stats.notePhoneSignalStrengthLocked(signalStrength, 9665, 9665);
+
+        // Note application network activity
+        NetworkStats networkStats = new NetworkStats(10000, 1)
+                .addEntry(new NetworkStats.Entry("cellular", APP_UID, 0, 0,
+                        METERED_NO, ROAMING_NO, DEFAULT_NETWORK_NO, 1000, 150, 300, 10, 100))
+                .addEntry(new NetworkStats.Entry("cellular", APP_UID2, 0, 0,
+                        METERED_NO, ROAMING_NO, DEFAULT_NETWORK_NO, 500, 50, 2000, 30, 111));
+        mStatsRule.setNetworkStats(networkStats);
+
+        ActivityStatsTechSpecificInfo cdmaInfo = new ActivityStatsTechSpecificInfo(
+                AccessNetwork.CDMA2000, ServiceState.FREQUENCY_RANGE_UNKNOWN,
+                new int[]{10, 11, 12, 13, 14}, 15);
+        ActivityStatsTechSpecificInfo lteInfo = new ActivityStatsTechSpecificInfo(
+                AccessNetwork.EUTRAN, ServiceState.FREQUENCY_RANGE_UNKNOWN,
+                new int[]{20, 21, 22, 23, 24}, 25);
+        ActivityStatsTechSpecificInfo nrLowFreqInfo = new ActivityStatsTechSpecificInfo(
+                AccessNetwork.NGRAN, ServiceState.FREQUENCY_RANGE_LOW,
+                new int[]{30, 31, 32, 33, 34}, 35);
+        ActivityStatsTechSpecificInfo nrMidFreqInfo = new ActivityStatsTechSpecificInfo(
+                AccessNetwork.NGRAN, ServiceState.FREQUENCY_RANGE_MID,
+                new int[]{40, 41, 42, 43, 44}, 45);
+        ActivityStatsTechSpecificInfo nrHighFreqInfo = new ActivityStatsTechSpecificInfo(
+                AccessNetwork.NGRAN, ServiceState.FREQUENCY_RANGE_HIGH,
+                new int[]{50, 51, 52, 53, 54}, 55);
+        ActivityStatsTechSpecificInfo nrMmwaveFreqInfo = new ActivityStatsTechSpecificInfo(
+                AccessNetwork.NGRAN, ServiceState.FREQUENCY_RANGE_MMWAVE,
+                new int[]{60, 61, 62, 63, 64}, 65);
+
+        ActivityStatsTechSpecificInfo[] ratInfos =
+                new ActivityStatsTechSpecificInfo[]{cdmaInfo, lteInfo, nrLowFreqInfo, nrMidFreqInfo,
+                        nrHighFreqInfo, nrMmwaveFreqInfo};
+
+        ModemActivityInfo mai = new ModemActivityInfo(10000, 2000, 3000, ratInfos);
+        stats.noteModemControllerActivity(mai, 10_000_000, 10000, 10000,
+                mNetworkStatsManager);
+
+        mStatsRule.setTime(10_000, 10_000);
+
+        MobileRadioPowerCalculator calculator =
+                new MobileRadioPowerCalculator(mStatsRule.getPowerProfile());
+
+        mStatsRule.apply(calculator);
+
+        BatteryConsumer deviceConsumer = mStatsRule.getDeviceBatteryConsumer();
+        assertThat(deviceConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isWithin(PRECISION).of(2.77778);
+        assertThat(deviceConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
+
+        // CDMA2000 [Tx0, Tx1, Tx2, Tx3, Tx4, Rx] drain * duration
+        //   [720, 1080, 1440, 1800, 2160, 1440] mA . [10, 11, 12, 13, 14, 15] ms = 111600 mA-ms
+        // LTE [Tx0, Tx1, Tx2, Tx3, Tx4, Rx] drain * duration
+        //   [800, 1200, 1600, 2000, 2400, 2000] mA . [20, 21, 22, 23, 24, 25] ms = 230000 mA-ms
+        // 5G Low Frequency [Tx0, Tx1, Tx2, Tx3, Tx4, Rx] drain * duration
+        // (nrFrequency="LOW" values was not defined so fall back to nrFrequency="DEFAULT")
+        //   [999, 1333, 1888, 2222, 2666, 2222] mA . [30, 31, 32, 33, 34, 35] ms = 373449 mA-ms
+        // 5G Mid Frequency [Tx0, Tx1, Tx2, Tx3, Tx4, Rx] drain * duration
+        // (nrFrequency="MID" values was not defined so fall back to nrFrequency="DEFAULT")
+        //   [999, 1333, 1888, 2222, 2666, 2222] mA . [40, 41, 42, 43, 44, 45] ms = 486749 mA-ms
+        // 5G High Frequency [Tx0, Tx1, Tx2, Tx3, Tx4, Rx] drain * duration
+        //   [1818, 2727, 3636, 4545, 5454, 2727] mA . [50, 51, 52, 53, 54, 55] ms = 1104435 mA-ms
+        // 5G Mmwave Frequency [Tx0, Tx1, Tx2, Tx3, Tx4, Rx] drain * duration
+        //   [2345, 3456, 4567, 5678, 6789, 3456] mA . [60, 61, 62, 63, 64, 65] ms = 1651520 mA-ms
+        // _________________
+        // =    3957753 mA-ms estimated active consumption
+        //
+        // Idle drain rate * idle duration
+        //   360 mA * 3000 ms = 1080000 mA-ms
+        // Sleep drain rate * sleep duration
+        //   70 mA * 2000 ms = 140000 mA-ms
+        // _________________
+        // =    5177753 mA-ms estimated total consumption
+        //
+        // 2.77778 mA-h measured total consumption * 3957753 / 5177753 = 2.123268 mA-h
+        BatteryConsumer appsConsumer = mStatsRule.getAppsBatteryConsumer();
+        assertThat(appsConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isWithin(PRECISION).of(2.123268);
+        assertThat(appsConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
+
+        // 240 ms Rx Time, 1110 ms Tx Time, 1350 ms active time
+        // 150 App 1 Rx Packets, 10 App 1 Tx packets
+        // 50 App 2 Rx Packets, 30 App 2 Tx packets
+        // 200 total Rx Packets, 40 total Tx packets
+        // 623985 mA-ms Rx consumption, 3333768 mA-ms Tx consumption
+        //
+        // Rx Power consumption * Ratio of App1 / Total Rx Packets:
+        // 623985 * 150 / 200 = 467988.75 mA-ms App 1 Rx Power Consumption
+        //
+        // App 1 Tx Packets + App 1 Rx Packets * Ratio of Tx / Total active time
+        // 10 + 150 * 1110 / 1350 = 133.3333 Estimated App 1 Rx/Tx Packets during Tx
+        // Total Tx Packets + Total Rx Packets * Ratio of Tx / Total active time
+        // 40 + 200 * 1110 / 1350 = 204.44444 Estimated Total Rx/Tx Packets during Tx
+        // Tx Power consumption * Ratio of App 1 / Total Estimated Tx Packets:
+        // 3333768 * 133.33333 / 204.44444 = 2174196.52174 mA-ms App 1 Tx Power Consumption
+        //
+        // Total App Power consumption * Ratio of App 1 / Total Estimated Power Consumption
+        // 2.123268 * (467988.75 + 2174196.52174) / 3957753 = 1.41749 App 1 Power Consumption
+        UidBatteryConsumer uidConsumer = mStatsRule.getUidBatteryConsumer(APP_UID);
+        assertThat(uidConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isWithin(PRECISION).of(1.41749);
+        assertThat(uidConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
+
+        // Rest should go to the other app
+        UidBatteryConsumer uidConsumer2 = mStatsRule.getUidBatteryConsumer(APP_UID2);
+        assertThat(uidConsumer2.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isWithin(PRECISION).of(0.705778);
+        assertThat(uidConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
+    }
+
+    @Test
+    public void testMeasuredEnergyBasedModel_modemActivityInfoRxTxModel_legacyPowerProfile() {
+        mStatsRule.setTestPowerProfile(R.xml.power_profile_test_legacy_modem)
+                .setPerUidModemModel(
+                        BatteryStatsImpl.PER_UID_MODEM_POWER_MODEL_MODEM_ACTIVITY_INFO_RX_TX)
+                .initMeasuredEnergyStatsLocked();
+        BatteryStatsImpl stats = mStatsRule.getBatteryStats();
+
+        // Scan for a cell
+        stats.notePhoneStateLocked(ServiceState.STATE_OUT_OF_SERVICE,
+                TelephonyManager.SIM_STATE_READY,
+                2000, 2000);
+
+        ArrayList<CellSignalStrength> perRatCellStrength = new ArrayList();
+        CellSignalStrength gsmSignalStrength = mock(CellSignalStrength.class);
+        when(gsmSignalStrength.getLevel()).thenReturn(
+                SignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN);
+        perRatCellStrength.add(gsmSignalStrength);
+
+        // Found a cell
+        stats.notePhoneStateLocked(ServiceState.STATE_IN_SERVICE, TelephonyManager.SIM_STATE_READY,
+                5000, 5000);
+
+        // Note cell signal strength
+        SignalStrength signalStrength = mock(SignalStrength.class);
+        when(signalStrength.getCellSignalStrengths()).thenReturn(perRatCellStrength);
+        stats.notePhoneSignalStrengthLocked(signalStrength, 5000, 5000);
+
+        stats.noteMobileRadioPowerStateLocked(DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH,
+                8_000_000_000L, APP_UID, 8000, 8000);
+
+        // Note established network
+        stats.noteNetworkInterfaceForTransports("cellular",
+                new int[]{NetworkCapabilities.TRANSPORT_CELLULAR});
+
+        // Spend some time in each signal strength level. It doesn't matter how long.
+        // The ModemActivityInfo reported level residency should be trusted over the BatteryStats
+        // timers.
+        when(gsmSignalStrength.getLevel()).thenReturn(
+                SignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN);
+        stats.notePhoneSignalStrengthLocked(signalStrength, 8111, 8111);
+        when(gsmSignalStrength.getLevel()).thenReturn(SignalStrength.SIGNAL_STRENGTH_POOR);
+        stats.notePhoneSignalStrengthLocked(signalStrength, 8333, 8333);
+        when(gsmSignalStrength.getLevel()).thenReturn(SignalStrength.SIGNAL_STRENGTH_MODERATE);
+        stats.notePhoneSignalStrengthLocked(signalStrength, 8666, 8666);
+        when(gsmSignalStrength.getLevel()).thenReturn(SignalStrength.SIGNAL_STRENGTH_GOOD);
+        stats.notePhoneSignalStrengthLocked(signalStrength, 9110, 9110);
+        when(gsmSignalStrength.getLevel()).thenReturn(SignalStrength.SIGNAL_STRENGTH_GREAT);
+        stats.notePhoneSignalStrengthLocked(signalStrength, 9665, 9665);
+
+        // Note application network activity
+        NetworkStats networkStats = new NetworkStats(10000, 1)
+                .addEntry(new NetworkStats.Entry("cellular", APP_UID, 0, 0,
+                        METERED_NO, ROAMING_NO, DEFAULT_NETWORK_NO, 1000, 100, 2000, 20, 100));
+        mStatsRule.setNetworkStats(networkStats);
+
+        ModemActivityInfo mai = new ModemActivityInfo(10000, 2000, 3000,
+                new int[]{100, 200, 300, 400, 500}, 600);
+        stats.noteModemControllerActivity(mai, 10_000_000, 10000, 10000, mNetworkStatsManager);
+
+        mStatsRule.setTime(12_000, 12_000);
+
+        MobileRadioPowerCalculator calculator =
+                new MobileRadioPowerCalculator(mStatsRule.getPowerProfile());
+
+        mStatsRule.apply(calculator);
+
+        BatteryConsumer deviceConsumer = mStatsRule.getDeviceBatteryConsumer();
+        // 10_000_000 micro-Coulomb * 1/1000 milli/micro * 1/3600 hour/second = 2.77778 mAh
+        assertThat(deviceConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isWithin(PRECISION).of(2.77778);
+        assertThat(deviceConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
+
+        BatteryConsumer appsConsumer = mStatsRule.getAppsBatteryConsumer();
+        // Estimated Rx/Tx modem consumption = 0.94 mAh
+        // Estimated total modem consumption = 1.27888 mAh
+        // 2.77778 * 0.94 / 1.27888 = 2.04170 mAh
+        assertThat(appsConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isWithin(PRECISION).of(2.04170);
+        assertThat(appsConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
+
+        UidBatteryConsumer uidConsumer = mStatsRule.getUidBatteryConsumer(APP_UID);
+        assertThat(uidConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isWithin(PRECISION).of(2.04170);
         assertThat(uidConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
                 .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
     }

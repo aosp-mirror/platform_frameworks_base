@@ -137,6 +137,13 @@ public class BatteryUsageStatsRule implements TestRule {
         return this;
     }
 
+    public BatteryUsageStatsRule setPerUidModemModel(int perUidModemModel) {
+        synchronized (mBatteryStats) {
+            mBatteryStats.setPerUidModemModel(perUidModemModel);
+        }
+        return this;
+    }
+
     /** Call only after setting the power profile information. */
     public BatteryUsageStatsRule initMeasuredEnergyStatsLocked() {
         return initMeasuredEnergyStatsLocked(new String[0]);
