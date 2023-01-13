@@ -18,8 +18,6 @@ package com.android.server.backup;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Mockito.when;
-
 import android.annotation.UserIdInt;
 import android.app.job.JobScheduler;
 import android.content.Context;
@@ -33,8 +31,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
@@ -49,20 +45,14 @@ public class FullBackupJobTest {
     private BackupManagerConstants mConstants;
     private ShadowJobScheduler mShadowJobScheduler;
 
-    @Mock
-    private UserBackupManagerService mUserBackupManagerService;
-
     @UserIdInt private int mUserOneId;
     @UserIdInt private int mUserTwoId;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         mContext = RuntimeEnvironment.application;
         mConstants = new BackupManagerConstants(Handler.getMain(), mContext.getContentResolver());
         mConstants.start();
-        when(mUserBackupManagerService.getConstants()).thenReturn(mConstants);
-        when(mUserBackupManagerService.isFrameworkSchedulingEnabled()).thenReturn(true);
 
         mShadowJobScheduler = Shadows.shadowOf(mContext.getSystemService(JobScheduler.class));
 
@@ -79,8 +69,8 @@ public class FullBackupJobTest {
 
     @Test
     public void testSchedule_afterScheduling_jobExists() {
-        FullBackupJob.schedule(mUserOneId, mContext, 0, mUserBackupManagerService);
-        FullBackupJob.schedule(mUserTwoId, mContext, 0, mUserBackupManagerService);
+        FullBackupJob.schedule(mUserOneId, mContext, 0, mConstants);
+        FullBackupJob.schedule(mUserTwoId, mContext, 0, mConstants);
 
         assertThat(mShadowJobScheduler.getPendingJob(getJobIdForUserId(mUserOneId))).isNotNull();
         assertThat(mShadowJobScheduler.getPendingJob(getJobIdForUserId(mUserTwoId))).isNotNull();
@@ -88,34 +78,18 @@ public class FullBackupJobTest {
 
     @Test
     public void testCancel_afterCancelling_jobDoesntExist() {
-        FullBackupJob.schedule(mUserOneId, mContext, 0, mUserBackupManagerService);
-        FullBackupJob.schedule(mUserTwoId, mContext, 0, mUserBackupManagerService);
+        FullBackupJob.schedule(mUserOneId, mContext, 0, mConstants);
+        FullBackupJob.schedule(mUserTwoId, mContext, 0, mConstants);
         FullBackupJob.cancel(mUserOneId, mContext);
         FullBackupJob.cancel(mUserTwoId, mContext);
 
         assertThat(mShadowJobScheduler.getPendingJob(getJobIdForUserId(mUserOneId))).isNull();
         assertThat(mShadowJobScheduler.getPendingJob(getJobIdForUserId(mUserTwoId))).isNull();
     }
-
-    @Test
-    public void testSchedule_isNoopIfDisabled() {
-        when(mUserBackupManagerService.isFrameworkSchedulingEnabled()).thenReturn(false);
-        FullBackupJob.schedule(mUserOneId, mContext, 0, mUserBackupManagerService);
-
-        assertThat(mShadowJobScheduler.getPendingJob(getJobIdForUserId(mUserOneId))).isNull();
-    }
-
-    @Test
-    public void testSchedule_schedulesJobIfEnabled() {
-        when(mUserBackupManagerService.isFrameworkSchedulingEnabled()).thenReturn(true);
-        FullBackupJob.schedule(mUserOneId, mContext, 0, mUserBackupManagerService);
-
-        assertThat(mShadowJobScheduler.getPendingJob(getJobIdForUserId(mUserOneId))).isNotNull();
-    }
 //
     @Test
     public void testSchedule_onlySchedulesForRequestedUser() {
-        FullBackupJob.schedule(mUserOneId, mContext, 0, mUserBackupManagerService);
+        FullBackupJob.schedule(mUserOneId, mContext, 0, mConstants);
 
         assertThat(mShadowJobScheduler.getPendingJob(getJobIdForUserId(mUserOneId))).isNotNull();
         assertThat(mShadowJobScheduler.getPendingJob(getJobIdForUserId(mUserTwoId))).isNull();
@@ -123,8 +97,8 @@ public class FullBackupJobTest {
 //
     @Test
     public void testCancel_onlyCancelsForRequestedUser() {
-        FullBackupJob.schedule(mUserOneId, mContext, 0, mUserBackupManagerService);
-        FullBackupJob.schedule(mUserTwoId, mContext, 0, mUserBackupManagerService);
+        FullBackupJob.schedule(mUserOneId, mContext, 0, mConstants);
+        FullBackupJob.schedule(mUserTwoId, mContext, 0, mConstants);
         FullBackupJob.cancel(mUserOneId, mContext);
 
         assertThat(mShadowJobScheduler.getPendingJob(getJobIdForUserId(mUserOneId))).isNull();
