@@ -6133,7 +6133,7 @@ package android.app {
   }
 
   public static class Notification.Action implements android.os.Parcelable {
-    ctor @Deprecated public Notification.Action(int, CharSequence, android.app.PendingIntent);
+    ctor @Deprecated public Notification.Action(int, CharSequence, @Nullable android.app.PendingIntent);
     method public android.app.Notification.Action clone();
     method public int describeContents();
     method public boolean getAllowGeneratedReplies();
@@ -6163,8 +6163,8 @@ package android.app {
   }
 
   public static final class Notification.Action.Builder {
-    ctor @Deprecated public Notification.Action.Builder(int, CharSequence, android.app.PendingIntent);
-    ctor public Notification.Action.Builder(android.graphics.drawable.Icon, CharSequence, android.app.PendingIntent);
+    ctor @Deprecated public Notification.Action.Builder(int, CharSequence, @Nullable android.app.PendingIntent);
+    ctor public Notification.Action.Builder(android.graphics.drawable.Icon, CharSequence, @Nullable android.app.PendingIntent);
     ctor public Notification.Action.Builder(android.app.Notification.Action);
     method @NonNull public android.app.Notification.Action.Builder addExtras(android.os.Bundle);
     method @NonNull public android.app.Notification.Action.Builder addRemoteInput(android.app.RemoteInput);
