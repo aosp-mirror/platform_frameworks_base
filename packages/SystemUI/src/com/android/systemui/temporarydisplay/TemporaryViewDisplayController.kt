@@ -119,15 +119,26 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
         dumpManager.registerNormalDumpable(this)
     }
 
+    private val listeners: MutableSet<Listener> = mutableSetOf()
+
+    /** Registers a listener. */
+    fun registerListener(listener: Listener) {
+        listeners.add(listener)
+    }
+
+    /** Unregisters a listener. */
+    fun unregisterListener(listener: Listener) {
+        listeners.remove(listener)
+    }
+
     /**
      * Displays the view with the provided [newInfo].
      *
      * This method handles inflating and attaching the view, then delegates to [updateView] to
      * display the correct information in the view.
-     * @param onViewTimeout a runnable that runs after the view timeout.
      */
     @Synchronized
-    fun displayView(newInfo: T, onViewTimeout: Runnable? = null) {
+    fun displayView(newInfo: T) {
         val timeout = accessibilityManager.getRecommendedTimeoutMillis(
             newInfo.timeoutMs,
             // Not all views have controls so FLAG_CONTENT_CONTROLS might be superfluous, but
@@ -146,14 +157,13 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
             logger.logViewUpdate(newInfo)
             currentDisplayInfo.info = newInfo
             currentDisplayInfo.timeExpirationMillis = timeExpirationMillis
-            updateTimeout(currentDisplayInfo, timeout, onViewTimeout)
+            updateTimeout(currentDisplayInfo, timeout)
             updateView(newInfo, view)
             return
         }
 
         val newDisplayInfo = DisplayInfo(
             info = newInfo,
-            onViewTimeout = onViewTimeout,
             timeExpirationMillis = timeExpirationMillis,
             // Null values will be updated to non-null if/when this view actually gets displayed
             view = null,
@@ -196,7 +206,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
     private fun showNewView(newDisplayInfo: DisplayInfo, timeout: Int) {
         logger.logViewAddition(newDisplayInfo.info)
         createAndAcquireWakeLock(newDisplayInfo)
-        updateTimeout(newDisplayInfo, timeout, newDisplayInfo.onViewTimeout)
+        updateTimeout(newDisplayInfo, timeout)
         inflateAndUpdateView(newDisplayInfo)
     }
 
@@ -227,19 +237,16 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
     /**
      * Creates a runnable that will remove [displayInfo] in [timeout] ms from now.
      *
-     * @param onViewTimeout an optional runnable that will be run if the view times out.
      * @return a runnable that, when run, will *cancel* the view's timeout.
      */
-    private fun updateTimeout(displayInfo: DisplayInfo, timeout: Int, onViewTimeout: Runnable?) {
+    private fun updateTimeout(displayInfo: DisplayInfo, timeout: Int) {
         val cancelViewTimeout = mainExecutor.executeDelayed(
             {
                 removeView(displayInfo.info.id, REMOVAL_REASON_TIMEOUT)
-                onViewTimeout?.run()
             },
             timeout.toLong()
         )
 
-        displayInfo.onViewTimeout = onViewTimeout
         // Cancel old view timeout and re-set it.
         displayInfo.cancelViewTimeout?.run()
         displayInfo.cancelViewTimeout = cancelViewTimeout
@@ -317,6 +324,9 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
         // event comes in while this view is animating out, we still display the new view
         // appropriately.
         activeViews.remove(displayInfo)
+        listeners.forEach {
+            it.onInfoPermanentlyRemoved(id)
+        }
 
         // No need to time the view out since it's already gone
         displayInfo.cancelViewTimeout?.run()
@@ -380,6 +390,9 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
         invalidViews.forEach {
             activeViews.remove(it)
             logger.logViewExpiration(it.info)
+            listeners.forEach { listener ->
+                listener.onInfoPermanentlyRemoved(it.info.id)
+            }
         }
     }
 
@@ -436,6 +449,15 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
         onAnimationEnd.run()
     }
 
+    /** A listener interface to be notified of various view events. */
+    fun interface Listener {
+        /**
+         * Called whenever a [DisplayInfo] with the given [id] has been removed and will never be
+         * displayed again (unless another call to [updateView] is made).
+         */
+        fun onInfoPermanentlyRemoved(id: String)
+    }
+
     /** A container for all the display-related state objects. */
     inner class DisplayInfo(
         /**
@@ -459,11 +481,6 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
          * Null if this info isn't currently being displayed.
          */
         var wakeLock: WakeLock?,
-
-        /**
-         * See [displayView].
-         */
-        var onViewTimeout: Runnable?,
 
         /**
          * A runnable that, when run, will cancel this view's timeout.
