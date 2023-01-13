@@ -908,9 +908,6 @@ public class AudioService extends IAudioService.Stub
 
     private final SoundDoseHelper mSoundDoseHelper;
 
-    @GuardedBy("mSettingsLock")
-    private int mCurrentImeUid;
-
     private final Object mSupportedSystemUsagesLock = new Object();
     @GuardedBy("mSupportedSystemUsagesLock")
     private @AttributeSystemUsage int[] mSupportedSystemUsages =
@@ -9939,6 +9936,55 @@ public class AudioService extends IAudioService.Stub
                 "com.android.server.audio", "AudioService");
     }
 
+    @Override
+    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    public float getRs2Value() {
+        super.getRs2Value_enforcePermission();
+        return mSoundDoseHelper.getRs2Value();
+    }
+
+    @Override
+    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    public void setRs2Value(float rs2Value) {
+        super.setRs2Value_enforcePermission();
+        mSoundDoseHelper.setRs2Value(rs2Value);
+    }
+
+    @Override
+    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    public float getCsd() {
+        super.getCsd_enforcePermission();
+        return mSoundDoseHelper.getCsd();
+    }
+
+    @Override
+    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    public void setCsd(float csd) {
+        super.setCsd_enforcePermission();
+        mSoundDoseHelper.setCsd(csd);
+    }
+
+    @Override
+    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    public void forceUseFrameworkMel(boolean useFrameworkMel) {
+        super.forceUseFrameworkMel_enforcePermission();
+        mSoundDoseHelper.forceUseFrameworkMel(useFrameworkMel);
+    }
+
+    @Override
+    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    public void forceComputeCsdOnAllDevices(boolean computeCsdOnAllDevices) {
+        super.forceComputeCsdOnAllDevices_enforcePermission();
+        mSoundDoseHelper.forceComputeCsdOnAllDevices(computeCsdOnAllDevices);
+    }
+
+    @Override
+    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    public boolean isCsdEnabled() {
+        super.isCsdEnabled_enforcePermission();
+        return mSoundDoseHelper.isCsdEnabled();
+    }
+
     //==========================================================================================
     // Hdmi CEC:
     // - System audio mode:
@@ -10290,7 +10336,6 @@ public class AudioService extends IAudioService.Stub
                         + " FromRestrictions=" + mMicMuteFromRestrictions
                         + " FromApi=" + mMicMuteFromApi
                         + " from system=" + mMicMuteFromSystemCached);
-        pw.print("  mCurrentImeUid="); pw.println(mCurrentImeUid);
         dumpAccessibilityServiceUids(pw);
         dumpAssistantServicesUids(pw);
 
@@ -10425,6 +10470,15 @@ public class AudioService extends IAudioService.Stub
     }
 
     @Override
+    @Nullable
+    public IVolumeController getVolumeController() {
+        enforceVolumeController("get the volume controller");
+        if (DEBUG_VOL) Log.d(TAG, "Volume controller: " + mVolumeController);
+
+        return mVolumeController.getController();
+    }
+
+    @Override
     public void notifyVolumeControllerVisible(final IVolumeController controller, boolean visible) {
         enforceVolumeController("notify about volume controller visibility");
 
@@ -10467,6 +10521,10 @@ public class AudioService extends IAudioService.Stub
         public void setController(IVolumeController controller) {
             mController = controller;
             mVisible = false;
+        }
+
+        public IVolumeController getController() {
+            return mController;
         }
 
         public void loadSettings(ContentResolver cr) {
