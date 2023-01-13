@@ -931,6 +931,11 @@ public class HdmiControlService extends SystemService {
     }
 
     @VisibleForTesting
+    void setEarcController(HdmiEarcController earcController) {
+        mEarcController = earcController;
+    }
+
+    @VisibleForTesting
     void setHdmiCecNetwork(HdmiCecNetwork hdmiCecNetwork) {
         mHdmiCecNetwork = hdmiCecNetwork;
     }

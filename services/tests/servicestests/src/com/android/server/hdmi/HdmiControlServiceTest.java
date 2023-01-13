@@ -87,6 +87,8 @@ public class HdmiControlServiceTest {
     private MockAudioSystemDevice mAudioSystemDeviceSpy;
     private MockPlaybackDevice mPlaybackDeviceSpy;
     private FakeNativeWrapper mNativeWrapper;
+    private HdmiEarcController mHdmiEarcController;
+    private FakeEArcNativeWrapper mEArcNativeWrapper;
     private FakePowerManagerWrapper mPowerManager;
     private Looper mMyLooper;
     private TestLooper mTestLooper = new TestLooper();
@@ -126,6 +128,10 @@ public class HdmiControlServiceTest {
         mHdmiCecController = HdmiCecController.createWithNativeWrapper(
                 mHdmiControlServiceSpy, mNativeWrapper, mHdmiControlServiceSpy.getAtomWriter());
         mHdmiControlServiceSpy.setCecController(mHdmiCecController);
+        mEArcNativeWrapper = new FakeEArcNativeWrapper();
+        mHdmiEarcController = HdmiEarcController.createWithNativeWrapper(
+                mHdmiControlServiceSpy, mEArcNativeWrapper);
+        mHdmiControlServiceSpy.setEarcController(mHdmiEarcController);
         mHdmiControlServiceSpy.setHdmiMhlController(HdmiMhlControllerStub.create(
                 mHdmiControlServiceSpy));
 
