@@ -744,6 +744,7 @@ package android {
     field public static final int focusableInTouchMode = 16842971; // 0x10100db
     field public static final int focusedByDefault = 16844100; // 0x1010544
     field @Deprecated public static final int focusedMonthDateColor = 16843587; // 0x1010343
+    field public static final int focusedSearchResultHighlightColor;
     field public static final int font = 16844082; // 0x1010532
     field public static final int fontFamily = 16843692; // 0x10103ac
     field public static final int fontFeatureSettings = 16843959; // 0x10104b7
@@ -1355,6 +1356,7 @@ package android {
     field public static final int searchHintIcon = 16843988; // 0x10104d4
     field public static final int searchIcon = 16843907; // 0x1010483
     field public static final int searchMode = 16843221; // 0x10101d5
+    field public static final int searchResultHighlightColor;
     field public static final int searchSettingsDescription = 16843402; // 0x101028a
     field public static final int searchSuggestAuthority = 16843222; // 0x10101d6
     field public static final int searchSuggestIntentAction = 16843225; // 0x10101d9
@@ -59278,6 +59280,7 @@ package android.widget {
     method public void append(CharSequence, int, int);
     method public void beginBatchEdit();
     method public boolean bringPointIntoView(int);
+    method public boolean bringPointIntoView(@IntRange(from=0) int, boolean);
     method public void clearComposingText();
     method public void debug(int);
     method public boolean didTouchFocusSelect();
@@ -59315,6 +59318,8 @@ package android.widget {
     method public int getExtendedPaddingTop();
     method public android.text.InputFilter[] getFilters();
     method public int getFirstBaselineToTopHeight();
+    method @ColorInt public int getFocusedSearchResultHighlightColor();
+    method public int getFocusedSearchResultIndex();
     method @Nullable public String getFontFeatureSettings();
     method @Nullable public String getFontVariationSettings();
     method public boolean getFreezesText();
@@ -59359,6 +59364,8 @@ package android.widget {
     method public android.text.TextPaint getPaint();
     method public int getPaintFlags();
     method public String getPrivateImeOptions();
+    method @ColorInt public int getSearchResultHighlightColor();
+    method @Nullable public int[] getSearchResultHighlights();
     method public int getSelectionEnd();
     method public int getSelectionStart();
     method @ColorInt public int getShadowColor();
@@ -59443,6 +59450,8 @@ package android.widget {
     method public void setFallbackLineSpacing(boolean);
     method public void setFilters(android.text.InputFilter[]);
     method public void setFirstBaselineToTopHeight(@IntRange(from=0) @Px int);
+    method public void setFocusedSearchResultHighlightColor(@ColorInt int);
+    method public void setFocusedSearchResultIndex(int);
     method public void setFontFeatureSettings(@Nullable String);
     method public boolean setFontVariationSettings(@Nullable String);
     method protected boolean setFrame(int, int, int, int);
@@ -59490,6 +59499,8 @@ package android.widget {
     method public void setPrivateImeOptions(String);
     method public void setRawInputType(int);
     method public void setScroller(android.widget.Scroller);
+    method public void setSearchResultHighlightColor(@ColorInt int);
+    method public void setSearchResultHighlights(@Nullable int...);
     method public void setSelectAllOnFocus(boolean);
     method public void setShadowLayer(float, float, float, int);
     method public final void setShowSoftInputOnFocus(boolean);
@@ -59529,6 +59540,7 @@ package android.widget {
     method public void setWidth(int);
     field public static final int AUTO_SIZE_TEXT_TYPE_NONE = 0; // 0x0
     field public static final int AUTO_SIZE_TEXT_TYPE_UNIFORM = 1; // 0x1
+    field public static final int FOCUSED_SEARCH_RESULT_INDEX_NONE = -1; // 0xffffffff
   }
 
   public enum TextView.BufferType {
