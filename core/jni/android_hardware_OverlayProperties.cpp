@@ -60,8 +60,14 @@ static jboolean android_hardware_OverlayProperties_supportFp16ForHdr(JNIEnv* env
             if (std::find(i.pixelFormats.begin(), i.pixelFormats.end(),
                           static_cast<int32_t>(HAL_PIXEL_FORMAT_RGBA_FP16)) !=
                         i.pixelFormats.end() &&
-                std::find(i.dataspaces.begin(), i.dataspaces.end(),
-                          static_cast<int32_t>(HAL_DATASPACE_BT2020_PQ)) != i.dataspaces.end()) {
+                std::find(i.standards.begin(), i.standards.end(),
+                          static_cast<int32_t>(HAL_DATASPACE_STANDARD_BT2020)) !=
+                        i.standards.end() &&
+                std::find(i.transfers.begin(), i.transfers.end(),
+                          static_cast<int32_t>(HAL_DATASPACE_TRANSFER_ST2084)) !=
+                        i.transfers.end() &&
+                std::find(i.ranges.begin(), i.ranges.end(),
+                          static_cast<int32_t>(HAL_DATASPACE_RANGE_FULL)) != i.ranges.end()) {
                 return true;
             }
         }
