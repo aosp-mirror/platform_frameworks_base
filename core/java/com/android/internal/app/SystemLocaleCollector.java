@@ -26,9 +26,15 @@ import java.util.Set;
 /** The Locale data collector for System language. */
 class SystemLocaleCollector implements LocalePickerWithRegion.LocaleCollectorBase {
     private final Context mContext;
+    private LocaleList mExplicitLocales;
 
     SystemLocaleCollector(Context context) {
+        this(context, null);
+    }
+
+    SystemLocaleCollector(Context context, LocaleList explicitLocales) {
         mContext = context;
+        mExplicitLocales = explicitLocales;
     }
 
     @Override
@@ -47,17 +53,15 @@ class SystemLocaleCollector implements LocalePickerWithRegion.LocaleCollectorBas
             boolean translatedOnly, boolean isForCountryMode) {
         Set<String> langTagsToIgnore = getIgnoredLocaleList(translatedOnly);
         Set<LocaleStore.LocaleInfo> localeList;
-
         if (isForCountryMode) {
             localeList = LocaleStore.getLevelLocales(mContext,
-                    langTagsToIgnore, parent, translatedOnly);
+                    langTagsToIgnore, parent, translatedOnly, mExplicitLocales);
         } else {
             localeList = LocaleStore.getLevelLocales(mContext, langTagsToIgnore,
-                    null /* no parent */, translatedOnly);
+                    null /* no parent */, translatedOnly, mExplicitLocales);
         }
         return localeList;
     }
-
 
     @Override
     public boolean hasSpecificPackageName() {
