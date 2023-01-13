@@ -8635,6 +8635,7 @@ package android.app.job {
     ctor public JobService();
     method public final void jobFinished(android.app.job.JobParameters, boolean);
     method public final android.os.IBinder onBind(android.content.Intent);
+    method public void onNetworkChanged(@NonNull android.app.job.JobParameters);
     method public abstract boolean onStartJob(android.app.job.JobParameters);
     method public abstract boolean onStopJob(android.app.job.JobParameters);
     method public final void setNotification(@NonNull android.app.job.JobParameters, int, @NonNull android.app.Notification, int);
@@ -8649,6 +8650,7 @@ package android.app.job {
     ctor public JobServiceEngine(android.app.Service);
     method public final android.os.IBinder getBinder();
     method public void jobFinished(android.app.job.JobParameters, boolean);
+    method public void onNetworkChanged(@NonNull android.app.job.JobParameters);
     method public abstract boolean onStartJob(android.app.job.JobParameters);
     method public abstract boolean onStopJob(android.app.job.JobParameters);
     method public void setNotification(@NonNull android.app.job.JobParameters, int, @NonNull android.app.Notification, int);

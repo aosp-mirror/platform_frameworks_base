@@ -61,6 +61,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
+import android.net.Network;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
@@ -1935,6 +1936,17 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
                     mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
                 }
+            }
+        }
+    }
+
+    @Override
+    public void onNetworkChanged(JobStatus jobStatus, Network newNetwork) {
+        synchronized (mLock) {
+            final JobServiceContext jsc =
+                    mConcurrencyManager.getRunningJobServiceContextLocked(jobStatus);
+            if (jsc != null) {
+                jsc.informOfNetworkChangeLocked(newNetwork);
             }
         }
     }
