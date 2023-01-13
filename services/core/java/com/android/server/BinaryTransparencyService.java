@@ -253,7 +253,9 @@ public class BinaryTransparencyService extends SystemService {
         /**
          * Measures and records digests for *all* covered binaries/packages.
          *
-         * This method will be called in a Job scheduled to take measurements periodically.
+         * This method will be called in a Job scheduled to take measurements periodically. If the
+         * last measurement was performaned recently (less than RECORD_MEASUREMENT_COOLDOWN_MS
+         * ago), the measurement and recording will be skipped.
          *
          * Packages that are covered so far are:
          * - all APEXs (introduced in Android T)
@@ -262,18 +264,19 @@ public class BinaryTransparencyService extends SystemService {
          * - dynamically installed mobile bundled apps (MBAs) (new in Android U)
          */
         public void recordMeasurementsForAllPackages() {
-            PackageManager pm = mContext.getPackageManager();
-            Set<String> packagesMeasured = new HashSet<>();
-
             // check if we should record the resulting measurements
             long currentTimeMs = System.currentTimeMillis();
-            boolean record = false;
-            if ((currentTimeMs - mMeasurementsLastRecordedMs) >= RECORD_MEASUREMENTS_COOLDOWN_MS) {
-                Slog.d(TAG, "Measurement was last taken at " + mMeasurementsLastRecordedMs
-                        + " and is now updated to: " + currentTimeMs);
-                mMeasurementsLastRecordedMs = currentTimeMs;
-                record = true;
+            if ((currentTimeMs - mMeasurementsLastRecordedMs) < RECORD_MEASUREMENTS_COOLDOWN_MS) {
+                Slog.d(TAG, "Skip measurement since the last measurement was only taken at "
+                        + mMeasurementsLastRecordedMs + " within the cooldown period");
+                return;
             }
+            Slog.d(TAG, "Measurement was last taken at " + mMeasurementsLastRecordedMs
+                    + " and is now updated to: " + currentTimeMs);
+            mMeasurementsLastRecordedMs = currentTimeMs;
+
+            PackageManager pm = mContext.getPackageManager();
+            Set<String> packagesMeasured = new HashSet<>();
 
             // measure all APEXs first
             if (DEBUG) {
@@ -284,18 +287,16 @@ public class BinaryTransparencyService extends SystemService {
 
                 Bundle apexMeasurement = measurePackage(packageInfo);
 
-                if (record) {
-                    var apexInfo = new IBinaryTransparencyService.ApexInfo();
-                    apexInfo.packageName = packageInfo.packageName;
-                    apexInfo.longVersion = packageInfo.getLongVersionCode();
-                    apexInfo.digest = apexMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST);
-                    apexInfo.digestAlgorithm =
-                            apexMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM);
-                    apexInfo.signerDigests =
-                            computePackageSignerSha256Digests(packageInfo.signingInfo);
+                var apexInfo = new IBinaryTransparencyService.ApexInfo();
+                apexInfo.packageName = packageInfo.packageName;
+                apexInfo.longVersion = packageInfo.getLongVersionCode();
+                apexInfo.digest = apexMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST);
+                apexInfo.digestAlgorithm =
+                        apexMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM);
+                apexInfo.signerDigests =
+                        computePackageSignerSha256Digests(packageInfo.signingInfo);
 
-                    recordApexInfo(apexInfo);
-                }
+                recordApexInfo(apexInfo);
             }
             if (DEBUG) {
                 Slog.d(TAG, "Measured " + packagesMeasured.size()
@@ -330,7 +331,7 @@ public class BinaryTransparencyService extends SystemService {
                     }
                 }
 
-                if (record && (mbaStatus == MBA_STATUS_UPDATED_PRELOAD)) {
+                if (mbaStatus == MBA_STATUS_UPDATED_PRELOAD) {
                     Bundle packageMeasurement = measurePackage(packageInfo);
 
                     var appInfo = new IBinaryTransparencyService.AppInfo();
@@ -361,38 +362,36 @@ public class BinaryTransparencyService extends SystemService {
 
                     Bundle packageMeasurement = measurePackage(packageInfo);
 
-                    if (record) {
-                        if (DEBUG) {
-                            Slog.d(TAG,
-                                    "Extracting InstallSourceInfo for " + packageInfo.packageName);
-                        }
-                        var appInfo = new IBinaryTransparencyService.AppInfo();
-                        appInfo.packageName = packageInfo.packageName;
-                        appInfo.longVersion = packageInfo.getLongVersionCode();
-                        appInfo.digest = packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST);
-                        appInfo.digestAlgorithm =
-                                packageMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM);
-                        appInfo.signerDigests =
-                                computePackageSignerSha256Digests(packageInfo.signingInfo);
-                        appInfo.mbaStatus = MBA_STATUS_NEW_INSTALL;
-
-                        // extract package's InstallSourceInfo
-                        InstallSourceInfo installSourceInfo = getInstallSourceInfo(
-                                packageInfo.packageName);
-                        if (installSourceInfo != null) {
-                            appInfo.initiator = installSourceInfo.getInitiatingPackageName();
-                            SigningInfo initiatorSignerInfo =
-                                    installSourceInfo.getInitiatingPackageSigningInfo();
-                            if (initiatorSignerInfo != null) {
-                                appInfo.initiatorSignerDigests =
-                                        computePackageSignerSha256Digests(initiatorSignerInfo);
-                            }
-                            appInfo.installer = installSourceInfo.getInstallingPackageName();
-                            appInfo.originator = installSourceInfo.getOriginatingPackageName();
-                        }
-
-                        writeAppInfoToLog(appInfo);
+                    if (DEBUG) {
+                        Slog.d(TAG,
+                                "Extracting InstallSourceInfo for " + packageInfo.packageName);
                     }
+                    var appInfo = new IBinaryTransparencyService.AppInfo();
+                    appInfo.packageName = packageInfo.packageName;
+                    appInfo.longVersion = packageInfo.getLongVersionCode();
+                    appInfo.digest = packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST);
+                    appInfo.digestAlgorithm =
+                            packageMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM);
+                    appInfo.signerDigests =
+                            computePackageSignerSha256Digests(packageInfo.signingInfo);
+                    appInfo.mbaStatus = MBA_STATUS_NEW_INSTALL;
+
+                    // extract package's InstallSourceInfo
+                    InstallSourceInfo installSourceInfo = getInstallSourceInfo(
+                            packageInfo.packageName);
+                    if (installSourceInfo != null) {
+                        appInfo.initiator = installSourceInfo.getInitiatingPackageName();
+                        SigningInfo initiatorSignerInfo =
+                                installSourceInfo.getInitiatingPackageSigningInfo();
+                        if (initiatorSignerInfo != null) {
+                            appInfo.initiatorSignerDigests =
+                                    computePackageSignerSha256Digests(initiatorSignerInfo);
+                        }
+                        appInfo.installer = installSourceInfo.getInstallingPackageName();
+                        appInfo.originator = installSourceInfo.getOriginatingPackageName();
+                    }
+
+                    writeAppInfoToLog(appInfo);
                 }
             }
             if (DEBUG) {
