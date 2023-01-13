@@ -21,7 +21,10 @@ import static android.view.inputmethod.ImeTracker.DEBUG_IME_VISIBILITY;
 import static com.android.server.EventLogTags.IMF_HIDE_IME;
 import static com.android.server.EventLogTags.IMF_SHOW_IME;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_HIDE_IME;
+import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_HIDE_IME_EXPLICIT;
+import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_HIDE_IME_NOT_ALWAYS;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_SHOW_IME;
+import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_SHOW_IME_IMPLICIT;
 
 import android.annotation.Nullable;
 import android.os.Binder;
@@ -30,6 +33,7 @@ import android.os.ResultReceiver;
 import android.util.EventLog;
 import android.util.Slog;
 import android.view.inputmethod.ImeTracker;
+import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.InputMethodDebug;
@@ -124,6 +128,12 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
     @Override
     public void applyImeVisibility(IBinder windowToken, @Nullable ImeTracker.Token statsToken,
             @ImeVisibilityStateComputer.VisibilityState int state) {
+        applyImeVisibility(windowToken, statsToken, state, -1 /* ignore reason */);
+    }
+
+    @GuardedBy("ImfLock.class")
+    void applyImeVisibility(IBinder windowToken, @Nullable ImeTracker.Token statsToken,
+            @ImeVisibilityStateComputer.VisibilityState int state, int reason) {
         switch (state) {
             case STATE_SHOW_IME:
                 ImeTracker.get().onProgress(statsToken,
@@ -147,6 +157,17 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
                     ImeTracker.get().onFailed(statsToken,
                             ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
                 }
+                break;
+            case STATE_HIDE_IME_EXPLICIT:
+                mService.hideCurrentInputLocked(windowToken, statsToken, 0, null, reason);
+                break;
+            case STATE_HIDE_IME_NOT_ALWAYS:
+                mService.hideCurrentInputLocked(windowToken, statsToken,
+                        InputMethodManager.HIDE_NOT_ALWAYS, null, reason);
+                break;
+            case STATE_SHOW_IME_IMPLICIT:
+                mService.showCurrentInputLocked(windowToken, statsToken,
+                        InputMethodManager.SHOW_IMPLICIT, null, reason);
                 break;
             default:
                 throw new IllegalArgumentException("Invalid IME visibility state: " + state);
