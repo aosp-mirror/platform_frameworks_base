@@ -35,7 +35,7 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.LongRunning;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
@@ -61,17 +61,16 @@ public class ImageWallpaper extends WallpaperService {
     private final UserTracker mUserTracker;
 
     // used for most tasks (call canvas.drawBitmap, load/unload the bitmap)
-    @Background
-    private final DelayableExecutor mBackgroundExecutor;
+    @LongRunning
+    private final DelayableExecutor mLongExecutor;
 
     // wait at least this duration before unloading the bitmap
     private static final int DELAY_UNLOAD_BITMAP = 2000;
 
     @Inject
-    public ImageWallpaper(@Background DelayableExecutor backgroundExecutor,
-            UserTracker userTracker) {
+    public ImageWallpaper(@LongRunning DelayableExecutor longExecutor, UserTracker userTracker) {
         super();
-        mBackgroundExecutor = backgroundExecutor;
+        mLongExecutor = longExecutor;
         mUserTracker = userTracker;
     }
 
@@ -105,7 +104,7 @@ public class ImageWallpaper extends WallpaperService {
             setFixedSizeAllowed(true);
             setShowForAllUsers(true);
             mWallpaperLocalColorExtractor = new WallpaperLocalColorExtractor(
-                    mBackgroundExecutor,
+                    mLongExecutor,
                     new WallpaperLocalColorExtractor.WallpaperLocalColorExtractorCallback() {
                         @Override
                         public void onColorsProcessed(List<RectF> regions,
@@ -202,7 +201,7 @@ public class ImageWallpaper extends WallpaperService {
         }
 
         private void drawFrame() {
-            mBackgroundExecutor.execute(this::drawFrameSynchronized);
+            mLongExecutor.execute(this::drawFrameSynchronized);
         }
 
         private void drawFrameSynchronized() {
@@ -257,7 +256,7 @@ public class ImageWallpaper extends WallpaperService {
         }
 
         private void unloadBitmapIfNotUsed() {
-            mBackgroundExecutor.execute(this::unloadBitmapIfNotUsedSynchronized);
+            mLongExecutor.execute(this::unloadBitmapIfNotUsedSynchronized);
         }
 
         private void unloadBitmapIfNotUsedSynchronized() {
@@ -341,7 +340,7 @@ public class ImageWallpaper extends WallpaperService {
                  *   - the mini bitmap from color extractor is recomputed
                  *   - the DELAY_UNLOAD_BITMAP has passed
                  */
-                mBackgroundExecutor.executeDelayed(
+                mLongExecutor.executeDelayed(
                         this::unloadBitmapIfNotUsedSynchronized, DELAY_UNLOAD_BITMAP);
             }
             // even if the bitmap cannot be loaded, call reportEngineShown
