@@ -183,7 +183,6 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
         if (!animate) {
             out.setAlpha(0f);
-            out.setVisibility(INVISIBLE);
             in.setAlpha(1f);
             in.setVisibility(VISIBLE);
             mStatusArea.setTranslationY(statusAreaYTranslation);
@@ -199,10 +198,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
                         direction * -mClockSwitchYAmount));
         mClockOutAnim.addListener(new AnimatorListenerAdapter() {
             public void onAnimationEnd(Animator animation) {
-                if (mClockOutAnim == animation) {
-                    out.setVisibility(INVISIBLE);
-                    mClockOutAnim = null;
-                }
+                mClockOutAnim = null;
             }
         });
 
@@ -216,9 +212,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mClockInAnim.setStartDelay(CLOCK_OUT_MILLIS / 2);
         mClockInAnim.addListener(new AnimatorListenerAdapter() {
             public void onAnimationEnd(Animator animation) {
-                if (mClockInAnim == animation) {
-                    mClockInAnim = null;
-                }
+                mClockInAnim = null;
             }
         });
 
@@ -231,9 +225,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mStatusAreaAnim.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         mStatusAreaAnim.addListener(new AnimatorListenerAdapter() {
             public void onAnimationEnd(Animator animation) {
-                if (mStatusAreaAnim == animation) {
-                    mStatusAreaAnim = null;
-                }
+                mStatusAreaAnim = null;
             }
         });
         mStatusAreaAnim.start();
