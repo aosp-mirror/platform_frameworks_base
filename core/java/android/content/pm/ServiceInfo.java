@@ -214,12 +214,15 @@ public class ServiceInfo extends ComponentInfo
      * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and later, will require permission
      * {@link android.Manifest.permission#FOREGROUND_SERVICE_CONNECTED_DEVICE} and one of the
      * following permissions:
+     * {@link android.Manifest.permission#BLUETOOTH_ADVERTISE},
      * {@link android.Manifest.permission#BLUETOOTH_CONNECT},
+     * {@link android.Manifest.permission#BLUETOOTH_SCAN},
      * {@link android.Manifest.permission#CHANGE_NETWORK_STATE},
      * {@link android.Manifest.permission#CHANGE_WIFI_STATE},
      * {@link android.Manifest.permission#CHANGE_WIFI_MULTICAST_STATE},
      * {@link android.Manifest.permission#NFC},
      * {@link android.Manifest.permission#TRANSMIT_IR},
+     * {@link android.Manifest.permission#UWB_RANGING},
      * or has been granted the access to one of the attached USB devices/accessories.
      */
     @RequiresPermission(
@@ -227,12 +230,15 @@ public class ServiceInfo extends ComponentInfo
                 Manifest.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE,
             },
             anyOf = {
+                Manifest.permission.BLUETOOTH_ADVERTISE,
                 Manifest.permission.BLUETOOTH_CONNECT,
+                Manifest.permission.BLUETOOTH_SCAN,
                 Manifest.permission.CHANGE_NETWORK_STATE,
                 Manifest.permission.CHANGE_WIFI_STATE,
                 Manifest.permission.CHANGE_WIFI_MULTICAST_STATE,
                 Manifest.permission.NFC,
                 Manifest.permission.TRANSMIT_IR,
+                Manifest.permission.UWB_RANGING,
             },
             conditional = true
     )
