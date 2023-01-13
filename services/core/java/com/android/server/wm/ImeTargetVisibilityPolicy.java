@@ -17,7 +17,10 @@
 package com.android.server.wm;
 
 
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+
 import android.os.IBinder;
+import android.view.WindowManager;
 
 /**
  * A class for {@link com.android.server.inputmethod.InputMethodManagerService} to
@@ -42,4 +45,36 @@ public abstract class ImeTargetVisibilityPolicy {
      * @return {@code true} if success, {@code false} otherwise.
      */
     public abstract boolean updateImeParent(IBinder imeTarget, int displayId);
+
+    /**
+     * Called when {@link DisplayContent#computeImeParent()} to check if it's valid to keep
+     * computing the ime parent.
+     *
+     * @return {@code true} to keep computing the ime parent, {@code false} to defer this operation
+     */
+    public static boolean isReadyToComputeImeParent(WindowState imeLayeringTarget,
+            InputTarget imeInputTarget) {
+        if (imeLayeringTarget == null) {
+            return false;
+        }
+        // Ensure changing the IME parent when the layering target that may use IME has
+        // became to the input target for preventing IME flickers.
+        // Note that:
+        // 1) For the imeLayeringTarget that may not use IME but requires IME on top
+        // of it (e.g. an overlay window with NOT_FOCUSABLE|ALT_FOCUSABLE_IM flags), we allow
+        // it to re-parent the IME on top the display to keep the legacy behavior.
+        // 2) Even though the starting window won't use IME, the associated activity
+        // behind the starting window may request the input. If so, then we should still hold
+        // the IME parent change until the activity started the input.
+        boolean imeLayeringTargetMayUseIme =
+                WindowManager.LayoutParams.mayUseInputMethod(imeLayeringTarget.mAttrs.flags)
+                        || imeLayeringTarget.mAttrs.type == TYPE_APPLICATION_STARTING;
+
+        // Do not change parent if the window hasn't requested IME.
+        var inputAndLayeringTargetsDisagree = (imeInputTarget == null
+                || imeLayeringTarget.mActivityRecord != imeInputTarget.getActivityRecord());
+        var inputTargetStale = imeLayeringTargetMayUseIme && inputAndLayeringTargetsDisagree;
+
+        return !inputTargetStale;
+    }
 }
