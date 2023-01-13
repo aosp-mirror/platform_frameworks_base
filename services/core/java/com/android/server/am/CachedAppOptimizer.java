@@ -106,6 +106,8 @@ public final class CachedAppOptimizer {
 
     private static final int FREEZE_BINDER_TIMEOUT_MS = 100;
 
+    @VisibleForTesting static final boolean ENABLE_FILE_COMPACT = false;
+
     // Defaults for phenotype flags.
     @VisibleForTesting static final Boolean DEFAULT_USE_COMPACTION = true;
     @VisibleForTesting static final Boolean DEFAULT_USE_FREEZER = true;
@@ -143,22 +145,15 @@ public final class CachedAppOptimizer {
     @VisibleForTesting
     interface ProcessDependencies {
         long[] getRss(int pid);
-        void performCompaction(CompactAction action, int pid) throws IOException;
+        void performCompaction(CompactProfile action, int pid) throws IOException;
     }
 
     // This indicates the compaction we want to perform
     public enum CompactProfile {
-        SOME, // File compaction
-        FULL // File+anon compaction
-    }
-
-    // Low level actions that can be performed for compaction
-    // currently determined by the compaction profile
-    public enum CompactAction {
         NONE, // No compaction
-        FILE, // File+anon compaction
-        ANON,
-        ALL
+        SOME, // File compaction
+        ANON, // Anon compaction
+        FULL // File+anon compaction
     }
 
     // This indicates the process OOM memory state that initiated the compaction request
@@ -1415,8 +1410,10 @@ public final class CachedAppOptimizer {
 
         if (oldAdj <= ProcessList.PERCEPTIBLE_APP_ADJ
                 && (newAdj == ProcessList.PREVIOUS_APP_ADJ || newAdj == ProcessList.HOME_APP_ADJ)) {
-            // Perform a minor compaction when a perceptible app becomes the prev/home app
-            compactApp(app, CompactProfile.SOME, CompactSource.APP, false);
+            if (ENABLE_FILE_COMPACT) {
+                // Perform a minor compaction when a perceptible app becomes the prev/home app
+                compactApp(app, CompactProfile.SOME, CompactSource.APP, false);
+            }
         } else if (oldAdj < ProcessList.CACHED_APP_MIN_ADJ
                 && newAdj >= ProcessList.CACHED_APP_MIN_ADJ
                 && newAdj <= ProcessList.CACHED_APP_MAX_ADJ) {
@@ -1426,20 +1423,34 @@ public final class CachedAppOptimizer {
     }
 
     /**
-     * Applies a compaction downgrade when swap is low.
+     * Computes the final compaction profile to be used which depends on compaction
+     * features enabled and swap usage.
      */
-    CompactProfile downgradeCompactionIfRequired(CompactProfile profile) {
-        // Downgrade compaction under swap memory pressure
+    CompactProfile resolveCompactionProfile(CompactProfile profile) {
         if (profile == CompactProfile.FULL) {
             double swapFreePercent = getFreeSwapPercent();
+            // Downgrade compaction under swap memory pressure
             if (swapFreePercent < COMPACT_DOWNGRADE_FREE_SWAP_THRESHOLD) {
                 profile = CompactProfile.SOME;
+
                 ++mTotalCompactionDowngrades;
                 if (DEBUG_COMPACTION) {
                     Slog.d(TAG_AM,
-                            "Downgraded compaction to file only due to low swap."
+                            "Downgraded compaction to "+ profile +" due to low swap."
                                     + " Swap Free% " + swapFreePercent);
                 }
+            }
+        }
+
+        if (!ENABLE_FILE_COMPACT) {
+            if (profile == CompactProfile.SOME) {
+                profile = CompactProfile.NONE;
+            } else if (profile == CompactProfile.FULL) {
+                profile = CompactProfile.ANON;
+            }
+            if (DEBUG_COMPACTION) {
+                Slog.d(TAG_AM,
+                        "Final compaction profile "+ profile +" due to file compact disabled");
             }
         }
 
@@ -1673,7 +1684,6 @@ public final class CachedAppOptimizer {
                     ProcessRecord proc;
                     final ProcessCachedOptimizerRecord opt;
                     int pid;
-                    CompactAction resolvedAction;
                     final String name;
                     CompactProfile lastCompactProfile;
                     long lastCompactTime;
@@ -1751,17 +1761,24 @@ public final class CachedAppOptimizer {
                     }
 
                     CompactProfile resolvedProfile =
-                            downgradeCompactionIfRequired(requestedProfile);
-                    resolvedAction = resolveCompactActionForProfile(resolvedProfile);
+                            resolveCompactionProfile(requestedProfile);
+                    if (resolvedProfile == CompactProfile.NONE) {
+                        // No point on issuing compaction call as we don't want to compact.
+                        if (DEBUG_COMPACTION) {
+                            Slog.d(TAG_AM, "Resolved no compaction for "+ name +
+                                    " requested profile="+requestedProfile);
+                        }
+                        return;
+                    }
 
                     try {
                         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
-                                "Compact " + resolvedAction.name() + ": " + name
+                                "Compact " + resolvedProfile.name() + ": " + name
                                         + " lastOomAdjReason: " + oomAdjReason
                                         + " source: " + compactSource.name());
                         long zramUsedKbBefore = getUsedZramMemory();
                         long startCpuTime = threadCpuTimeNs();
-                        mProcessDependencies.performCompaction(resolvedAction, pid);
+                        mProcessDependencies.performCompaction(resolvedProfile, pid);
                         long endCpuTime = threadCpuTimeNs();
                         long[] rssAfter = mProcessDependencies.getRss(pid);
                         long end = SystemClock.uptimeMillis();
@@ -1817,7 +1834,7 @@ public final class CachedAppOptimizer {
                                 return;
                         }
                         EventLog.writeEvent(EventLogTags.AM_COMPACT, pid, name,
-                                resolvedAction.name(), rssBefore[RSS_TOTAL_INDEX],
+                                resolvedProfile.name(), rssBefore[RSS_TOTAL_INDEX],
                                 rssBefore[RSS_FILE_INDEX], rssBefore[RSS_ANON_INDEX],
                                 rssBefore[RSS_SWAP_INDEX], deltaTotalRss, deltaFileRss,
                                 deltaAnonRss, deltaSwapRss, time, lastCompactProfile.name(),
@@ -2110,14 +2127,14 @@ public final class CachedAppOptimizer {
 
         // Compact process.
         @Override
-        public void performCompaction(CompactAction action, int pid) throws IOException {
+        public void performCompaction(CompactProfile profile, int pid) throws IOException {
             mPidCompacting = pid;
-            if (action == CompactAction.ALL) {
-                    compactProcess(pid, COMPACT_ACTION_FILE_FLAG | COMPACT_ACTION_ANON_FLAG);
-            } else if (action == CompactAction.FILE) {
-                    compactProcess(pid, COMPACT_ACTION_FILE_FLAG);
-            } else if (action == CompactAction.ANON) {
-                    compactProcess(pid, COMPACT_ACTION_ANON_FLAG);
+            if (profile == CompactProfile.FULL) {
+                compactProcess(pid, COMPACT_ACTION_FILE_FLAG | COMPACT_ACTION_ANON_FLAG);
+            } else if (profile == CompactProfile.SOME) {
+                compactProcess(pid, COMPACT_ACTION_FILE_FLAG);
+            } else if (profile == CompactProfile.ANON) {
+                compactProcess(pid, COMPACT_ACTION_ANON_FLAG);
             }
             mPidCompacting = -1;
         }

@@ -19,7 +19,6 @@ package com.android.server.am;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 
 import static com.android.server.am.ActivityManagerService.Injector;
-import static com.android.server.am.CachedAppOptimizer.compactActionIntToAction;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -1024,14 +1023,17 @@ public final class CachedAppOptimizerTest extends ExtendedMockitoTestCase {
 
         mCachedAppOptimizerUnderTest.mLastCompactionStats.clear();
 
-        // We force a some compaction
-        mCachedAppOptimizerUnderTest.compactApp(processRecord,
-                CachedAppOptimizer.CompactProfile.SOME, CachedAppOptimizer.CompactSource.APP, true);
-        waitForHandler();
-        // then process is compacted.
-        CachedAppOptimizer.CompactProfile executedCompactProfile =
-                processRecord.mOptRecord.getLastCompactProfile();
-        assertThat(executedCompactProfile).isEqualTo(CachedAppOptimizer.CompactProfile.SOME);
+        if (CachedAppOptimizer.ENABLE_FILE_COMPACT) {
+            // We force a some compaction
+            mCachedAppOptimizerUnderTest.compactApp(processRecord,
+                    CachedAppOptimizer.CompactProfile.SOME, CachedAppOptimizer.CompactSource.APP,
+                    true);
+            waitForHandler();
+            // then process is compacted.
+            CachedAppOptimizer.CompactProfile executedCompactProfile =
+                    processRecord.mOptRecord.getLastCompactProfile();
+            assertThat(executedCompactProfile).isEqualTo(CachedAppOptimizer.CompactProfile.SOME);
+        }
     }
 
     private void setFlag(String key, String value, boolean defaultValue) throws Exception {
@@ -1108,7 +1110,7 @@ public final class CachedAppOptimizerTest extends ExtendedMockitoTestCase {
         }
 
         @Override
-        public void performCompaction(CachedAppOptimizer.CompactAction action, int pid)
+        public void performCompaction(CachedAppOptimizer.CompactProfile profile, int pid)
                 throws IOException {
             mRss = mRssAfterCompaction;
         }
