@@ -554,9 +554,6 @@ public final class ActivityThread extends ClientTransactionHandler
         boolean hideForNow;
         Configuration createdConfig;
         Configuration overrideConfig;
-        // TODO(b/263402465): pass deviceId directly in LaunchActivityItem#execute
-        // The deviceId assigned by the server when this activity was first started.
-        int mDeviceId;
         // Used for consolidating configs before sending on to Activity.
         private Configuration tmpConfig = new Configuration();
         // Callback used for updating activity override config and camera compat control state.
@@ -619,7 +616,7 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         public ActivityClientRecord(IBinder token, Intent intent, int ident,
-                ActivityInfo info, Configuration overrideConfig, int deviceId,
+                ActivityInfo info, Configuration overrideConfig,
                 String referrer, IVoiceInteractor voiceInteractor, Bundle state,
                 PersistableBundle persistentState, List<ResultInfo> pendingResults,
                 List<ReferrerIntent> pendingNewIntents, ActivityOptions activityOptions,
@@ -641,7 +638,6 @@ public final class ActivityThread extends ClientTransactionHandler
             this.isForward = isForward;
             this.profilerInfo = profilerInfo;
             this.overrideConfig = overrideConfig;
-            this.mDeviceId = deviceId;
             this.packageInfo = client.getPackageInfoNoCheck(activityInfo.applicationInfo);
             mActivityOptions = activityOptions;
             mLaunchedFromBubble = launchedFromBubble;
@@ -3872,7 +3868,7 @@ public final class ActivityThread extends ClientTransactionHandler
      */
     @Override
     public Activity handleLaunchActivity(ActivityClientRecord r,
-            PendingTransactionActions pendingActions, Intent customIntent) {
+            PendingTransactionActions pendingActions, int deviceId, Intent customIntent) {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
         unscheduleGcIdler();
@@ -3885,7 +3881,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
         // Make sure we are running with the most recent config.
         mConfigurationController.handleConfigurationChanged(null, null);
-        updateDeviceIdForNonUIContexts(r.mDeviceId);
+        updateDeviceIdForNonUIContexts(deviceId);
 
         if (localLOGV) Slog.v(
             TAG, "Handling launch of " + r);
@@ -5942,7 +5938,7 @@ public final class ActivityThread extends ClientTransactionHandler
         r.startsNotResumed = startsNotResumed;
         r.overrideConfig = overrideConfig;
 
-        handleLaunchActivity(r, pendingActions, customIntent);
+        handleLaunchActivity(r, pendingActions, mLastReportedDeviceId, customIntent);
     }
 
     @Override

@@ -1432,8 +1432,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return;
         }
 
-        dispatchConfiguration(config, topActivityDeviceChanged ? mLastTopActivityDeviceId
-                : Context.DEVICE_ID_INVALID);
+        dispatchConfiguration(config);
     }
 
     private int getTopActivityDeviceId() {
@@ -1483,10 +1482,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     void dispatchConfiguration(Configuration config) {
-        dispatchConfiguration(config, getTopActivityDeviceId());
-    }
-
-    void dispatchConfiguration(Configuration config, int deviceId) {
         mHasPendingConfigurationChange = false;
         if (mThread == null) {
             if (Build.IS_DEBUGGABLE && mHasImeService) {
@@ -1513,16 +1508,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             }
         }
 
-        scheduleConfigurationChange(mThread, config, deviceId);
+        scheduleConfigurationChange(mThread, config);
     }
 
     private void scheduleConfigurationChange(IApplicationThread thread, Configuration config) {
-        // By default send invalid deviceId as no-op signal so it's not updated on the client side.
-        scheduleConfigurationChange(thread, config, Context.DEVICE_ID_INVALID);
-    }
-
-    private void scheduleConfigurationChange(IApplicationThread thread, Configuration config,
-            int deviceId) {
         ProtoLog.v(WM_DEBUG_CONFIGURATION, "Sending to proc %s new config %s", mName,
                 config);
         if (Build.IS_DEBUGGABLE && mHasImeService) {
@@ -1532,7 +1521,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mHasCachedConfiguration = false;
         try {
             mAtm.getLifecycleManager().scheduleTransaction(thread,
-                    ConfigurationChangeItem.obtain(config, deviceId));
+                    ConfigurationChangeItem.obtain(config, mLastTopActivityDeviceId));
         } catch (Exception e) {
             Slog.e(TAG_CONFIGURATION, "Failed to schedule configuration change: " + mOwner, e);
         }
