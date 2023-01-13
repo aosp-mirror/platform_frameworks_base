@@ -57,7 +57,7 @@ data class TurbulenceNoiseAnimationConfig(
     val onAnimationEnd: Runnable? = null
 ) {
     companion object {
-        const val DEFAULT_MAX_DURATION_IN_MILLIS = 7500f
+        const val DEFAULT_MAX_DURATION_IN_MILLIS = 30_000f // Max 30 sec
         const val DEFAULT_EASING_DURATION_IN_MILLIS = 750f
         const val DEFAULT_LUMINOSITY_MULTIPLIER = 1f
         const val DEFAULT_NOISE_GRID_COUNT = 1.2f

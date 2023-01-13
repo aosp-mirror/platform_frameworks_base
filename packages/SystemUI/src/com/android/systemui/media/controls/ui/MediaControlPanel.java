@@ -112,6 +112,7 @@ import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseAnimat
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseController;
 import com.android.systemui.util.ColorUtilKt;
 import com.android.systemui.util.animation.TransitionLayout;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.time.SystemClock;
 
 import dagger.Lazy;
@@ -169,10 +170,13 @@ public class MediaControlPanel {
             R.id.action1
     );
 
+    // Time in millis for playing turbulence noise that is played after a touch ripple.
+    @VisibleForTesting static final long TURBULENCE_NOISE_PLAY_DURATION = 7500L;
+
     private final SeekBarViewModel mSeekBarViewModel;
     private SeekBarObserver mSeekBarObserver;
     protected final Executor mBackgroundExecutor;
-    private final Executor mMainExecutor;
+    private final DelayableExecutor mMainExecutor;
     private final ActivityStarter mActivityStarter;
     private final BroadcastSender mBroadcastSender;
 
@@ -225,10 +229,10 @@ public class MediaControlPanel {
     private String mSwitchBroadcastApp;
     private MultiRippleController mMultiRippleController;
     private TurbulenceNoiseController mTurbulenceNoiseController;
-    private FeatureFlags mFeatureFlags;
-    private TurbulenceNoiseAnimationConfig mTurbulenceNoiseAnimationConfig = null;
+    private final FeatureFlags mFeatureFlags;
+    private TurbulenceNoiseAnimationConfig mTurbulenceNoiseAnimationConfig;
     @VisibleForTesting
-    MultiRippleController.Companion.RipplesFinishedListener mRipplesFinishedListener = null;
+    MultiRippleController.Companion.RipplesFinishedListener mRipplesFinishedListener;
 
     /**
      * Initialize a new control panel
@@ -242,7 +246,7 @@ public class MediaControlPanel {
     public MediaControlPanel(
             Context context,
             @Background Executor backgroundExecutor,
-            @Main Executor mainExecutor,
+            @Main DelayableExecutor mainExecutor,
             ActivityStarter activityStarter,
             BroadcastSender broadcastSender,
             MediaViewController mediaViewController,
@@ -413,10 +417,12 @@ public class MediaControlPanel {
         if (mFeatureFlags.isEnabled(Flags.UMO_TURBULENCE_NOISE)) {
             mRipplesFinishedListener = () -> {
                 if (mTurbulenceNoiseAnimationConfig == null) {
-                    mTurbulenceNoiseAnimationConfig = createLingeringNoiseAnimation();
+                    mTurbulenceNoiseAnimationConfig = createTurbulenceNoiseAnimation();
                 }
                 // Color will be correctly updated in ColorSchemeTransition.
                 mTurbulenceNoiseController.play(mTurbulenceNoiseAnimationConfig);
+                mMainExecutor.executeDelayed(
+                        mTurbulenceNoiseController::finish, TURBULENCE_NOISE_PLAY_DURATION);
             };
             mMultiRippleController.addRipplesFinishedListener(mRipplesFinishedListener);
         }
@@ -1066,7 +1072,7 @@ public class MediaControlPanel {
         );
     }
 
-    private TurbulenceNoiseAnimationConfig createLingeringNoiseAnimation() {
+    private TurbulenceNoiseAnimationConfig createTurbulenceNoiseAnimation() {
         return new TurbulenceNoiseAnimationConfig(
                 TurbulenceNoiseAnimationConfig.DEFAULT_NOISE_GRID_COUNT,
                 TurbulenceNoiseAnimationConfig.DEFAULT_LUMINOSITY_MULTIPLIER,
@@ -1081,7 +1087,9 @@ public class MediaControlPanel {
                 /* width= */ mMediaViewHolder.getMultiRippleView().getWidth(),
                 /* height= */ mMediaViewHolder.getMultiRippleView().getHeight(),
                 TurbulenceNoiseAnimationConfig.DEFAULT_MAX_DURATION_IN_MILLIS,
+                /* easeInDuration= */
                 TurbulenceNoiseAnimationConfig.DEFAULT_EASING_DURATION_IN_MILLIS,
+                /* easeOutDuration= */
                 TurbulenceNoiseAnimationConfig.DEFAULT_EASING_DURATION_IN_MILLIS,
                 this.getContext().getResources().getDisplayMetrics().density,
                 BlendMode.PLUS,
