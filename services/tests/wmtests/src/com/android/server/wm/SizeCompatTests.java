@@ -295,6 +295,15 @@ public class SizeCompatTests extends WindowTestsBase {
 
         assertEquals(RESTARTING_PROCESS, mActivity.getState());
         assertNotEquals(originalOverrideBounds, mActivity.getBounds());
+
+        // Even if the state is changed (e.g. a floating activity on top is finished and make it
+        // resume), the restart procedure should recover the state and continue to kill the process.
+        mActivity.setState(RESUMED, "anyStateChange");
+        doReturn(true).when(mSupervisor).hasScheduledRestartTimeouts(mActivity);
+        mAtm.mActivityClientController.activityStopped(mActivity.token, null /* icicle */,
+                null /* persistentState */, null /* description */);
+        assertEquals(RESTARTING_PROCESS, mActivity.getState());
+        verify(mSupervisor).removeRestartTimeouts(mActivity);
     }
 
     @Test
