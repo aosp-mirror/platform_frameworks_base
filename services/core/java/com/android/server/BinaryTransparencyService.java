@@ -100,7 +100,6 @@ import java.util.stream.Collectors;
  */
 public class BinaryTransparencyService extends SystemService {
     private static final String TAG = "TransparencyService";
-    private static final String EXTRA_SERVICE = "service";
 
     @VisibleForTesting
     static final String VBMETA_DIGEST_UNINITIALIZED = "vbmeta-digest-uninitialized";
@@ -261,12 +260,8 @@ public class BinaryTransparencyService extends SystemService {
          * - all mainline modules (introduced in Android T)
          * - all preloaded apps and their update(s) (new in Android U)
          * - dynamically installed mobile bundled apps (MBAs) (new in Android U)
-         *
-         * @return a {@code List<Bundle>}. Each Bundle item contains values as
-         *          defined by the return value of {@link #measurePackage(PackageInfo)}.
          */
-        public List getMeasurementsForAllPackages() {
-            List<Bundle> results = new ArrayList<>();
+        public void recordMeasurementsForAllPackages() {
             PackageManager pm = mContext.getPackageManager();
             Set<String> packagesMeasured = new HashSet<>();
 
@@ -288,7 +283,6 @@ public class BinaryTransparencyService extends SystemService {
                 packagesMeasured.add(packageInfo.packageName);
 
                 Bundle apexMeasurement = measurePackage(packageInfo);
-                results.add(apexMeasurement);
 
                 if (record) {
                     // compute digests of signing info
@@ -340,7 +334,6 @@ public class BinaryTransparencyService extends SystemService {
 
 
                 Bundle packageMeasurement = measurePackage(packageInfo);
-                results.add(packageMeasurement);
 
                 if (record && (mba_status == MBA_STATUS_UPDATED_PRELOAD)) {
                     // compute digests of signing info
@@ -377,7 +370,6 @@ public class BinaryTransparencyService extends SystemService {
                     packagesMeasured.add(packageInfo.packageName);
 
                     Bundle packageMeasurement = measurePackage(packageInfo);
-                    results.add(packageMeasurement);
 
                     if (record) {
                         // compute digests of signing info
@@ -432,8 +424,6 @@ public class BinaryTransparencyService extends SystemService {
                 Slog.d(TAG, "Measured " + packagesMeasured.size()
                         + " packages altogether in " + timeSpentMeasuring + "ms");
             }
-
-            return results;
         }
 
         /**
@@ -1179,14 +1169,11 @@ public class BinaryTransparencyService extends SystemService {
             // where this operation might take longer than expected, and so that we don't block
             // system_server's main thread.
             Executors.defaultThreadFactory().newThread(() -> {
-                // we discard the return value of getMeasurementsForAllPackages() as the
-                // results of the measurements will be recorded, and that is what we're aiming
-                // for with this job.
                 IBinder b = ServiceManager.getService(Context.BINARY_TRANSPARENCY_SERVICE);
                 IBinaryTransparencyService iBtsService =
                         IBinaryTransparencyService.Stub.asInterface(b);
                 try {
-                    iBtsService.getMeasurementsForAllPackages();
+                    iBtsService.recordMeasurementsForAllPackages();
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Taking binary measurements was interrupted.", e);
                     return;

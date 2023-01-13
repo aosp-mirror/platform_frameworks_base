@@ -28,5 +28,5 @@ interface IBinaryTransparencyService {
 
     List getApexInfo();
 
-    List getMeasurementsForAllPackages();
+    void recordMeasurementsForAllPackages();
 }
