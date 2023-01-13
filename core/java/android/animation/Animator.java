@@ -23,7 +23,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.ConstantState;
 import android.os.Build;
-import android.util.LongArray;
 
 import java.util.ArrayList;
 
@@ -560,36 +559,9 @@ public abstract class Animator implements Cloneable {
     }
 
     /**
-     * Internal use only. Changes the value of the animator as if currentPlayTime has passed since
-     * the start of the animation. Therefore, currentPlayTime includes the start delay, and any
-     * repetition. lastPlayTime is similar and is used to calculate how many repeats have been
-     * done between the two times.
+     * Internal use only.
      */
-    void animateValuesInRange(long currentPlayTime, long lastPlayTime) {}
-
-    /**
-     * Internal use only. This animates any animation that has ended since lastPlayTime.
-     * If an animation hasn't been finished, no change will be made.
-     */
-    void animateSkipToEnds(long currentPlayTime, long lastPlayTime) {}
-
-    /**
-     * Internal use only. Adds all start times (after delay) to and end times to times.
-     * The value must include offset.
-     */
-    void getStartAndEndTimes(LongArray times, long offset) {
-        long startTime = offset + getStartDelay();
-        if (times.indexOf(startTime) < 0) {
-            times.add(startTime);
-        }
-        long duration = getTotalDuration();
-        if (duration != DURATION_INFINITE) {
-            long endTime = duration + offset;
-            if (times.indexOf(endTime) < 0) {
-                times.add(endTime);
-            }
-        }
-    }
+    void animateBasedOnPlayTime(long currentPlayTime, long lastPlayTime, boolean inReverse) {}
 
     /**
      * <p>An animation listener receives notifications from an animation.
