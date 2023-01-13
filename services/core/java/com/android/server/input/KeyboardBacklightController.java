@@ -47,7 +47,8 @@ import java.util.TreeSet;
  * A thread-safe component of {@link InputManagerService} responsible for managing the keyboard
  * backlight for supported keyboards.
  */
-final class KeyboardBacklightController implements InputManager.InputDeviceListener {
+final class KeyboardBacklightController implements
+        InputManagerService.KeyboardBacklightControllerInterface, InputManager.InputDeviceListener {
 
     private static final String TAG = "KbdBacklightController";
 
@@ -96,7 +97,8 @@ final class KeyboardBacklightController implements InputManager.InputDeviceListe
         mHandler = new Handler(looper, this::handleMessage);
     }
 
-    void systemRunning() {
+    @Override
+    public void systemRunning() {
         InputManager inputManager = Objects.requireNonNull(
                 mContext.getSystemService(InputManager.class));
         inputManager.registerInputDeviceListener(this, mHandler);
@@ -106,11 +108,13 @@ final class KeyboardBacklightController implements InputManager.InputDeviceListe
         }
     }
 
+    @Override
     public void incrementKeyboardBacklight(int deviceId) {
         Message msg = Message.obtain(mHandler, MSG_INCREMENT_KEYBOARD_BACKLIGHT, deviceId);
         mHandler.sendMessage(msg);
     }
 
+    @Override
     public void decrementKeyboardBacklight(int deviceId) {
         Message msg = Message.obtain(mHandler, MSG_DECREMENT_KEYBOARD_BACKLIGHT, deviceId);
         mHandler.sendMessage(msg);
@@ -232,6 +236,7 @@ final class KeyboardBacklightController implements InputManager.InputDeviceListe
 
     /** Register the keyboard backlight listener for a process. */
     @BinderThread
+    @Override
     public void registerKeyboardBacklightListener(IKeyboardBacklightListener listener,
             int pid) {
         synchronized (mKeyboardBacklightListenerRecords) {
@@ -252,6 +257,7 @@ final class KeyboardBacklightController implements InputManager.InputDeviceListe
 
     /** Unregister the keyboard backlight listener for a process. */
     @BinderThread
+    @Override
     public void unregisterKeyboardBacklightListener(IKeyboardBacklightListener listener,
             int pid) {
         synchronized (mKeyboardBacklightListenerRecords) {
@@ -286,7 +292,8 @@ final class KeyboardBacklightController implements InputManager.InputDeviceListe
         }
     }
 
-    void dump(PrintWriter pw) {
+    @Override
+    public void dump(PrintWriter pw) {
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
         ipw.println(TAG + ": " + mKeyboardBacklights.size() + " keyboard backlights");
         ipw.increaseIndent();
