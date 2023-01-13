@@ -8643,6 +8643,8 @@ package android.app.job {
     method public final void updateEstimatedNetworkBytes(@NonNull android.app.job.JobParameters, @NonNull android.app.job.JobWorkItem, long, long);
     method public final void updateTransferredNetworkBytes(@NonNull android.app.job.JobParameters, long, long);
     method public final void updateTransferredNetworkBytes(@NonNull android.app.job.JobParameters, @NonNull android.app.job.JobWorkItem, long, long);
+    field public static final int JOB_END_NOTIFICATION_POLICY_DETACH = 0; // 0x0
+    field public static final int JOB_END_NOTIFICATION_POLICY_REMOVE = 1; // 0x1
     field public static final String PERMISSION_BIND = "android.permission.BIND_JOB_SERVICE";
   }
 
