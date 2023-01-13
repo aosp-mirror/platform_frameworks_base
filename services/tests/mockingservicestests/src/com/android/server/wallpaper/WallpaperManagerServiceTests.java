@@ -71,7 +71,6 @@ import android.util.SparseArray;
 import android.util.Xml;
 import android.view.Display;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -89,6 +88,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -110,7 +110,6 @@ import java.nio.charset.StandardCharsets;
  * atest FrameworksMockingServicesTests:WallpaperManagerServiceTests
  */
 @Presubmit
-@FlakyTest(bugId = 129797242)
 @RunWith(AndroidJUnit4.class)
 public class WallpaperManagerServiceTests {
 
@@ -273,8 +272,10 @@ public class WallpaperManagerServiceTests {
 
     /**
      * Tests setWallpaperComponent and clearWallpaper should work as expected.
+     * TODO ignored since the assumption never passes. to be investigated.
      */
     @Test
+    @Ignore("b/264533465")
     public void testSetThenClearComponent() {
         // Skip if there is no pre-defined default wallpaper component.
         assumeThat(sDefaultWallpaperComponent,
@@ -285,7 +286,7 @@ public class WallpaperManagerServiceTests {
         verifyLastWallpaperData(testUserId, sDefaultWallpaperComponent);
         verifyCurrentSystemData(testUserId);
 
-        mService.setWallpaperComponent(sImageWallpaperComponentName);
+        mService.setWallpaperComponent(sImageWallpaperComponentName, FLAG_SYSTEM, testUserId);
         verifyLastWallpaperData(testUserId, sImageWallpaperComponentName);
         verifyCurrentSystemData(testUserId);
 
@@ -312,7 +313,7 @@ public class WallpaperManagerServiceTests {
 
         WallpaperManagerService.WallpaperConnection.DisplayConnector connector =
                 mService.mLastWallpaper.connection.getDisplayConnectorOrCreate(DEFAULT_DISPLAY);
-        mService.setWallpaperComponent(sDefaultWallpaperComponent);
+        mService.setWallpaperComponent(sDefaultWallpaperComponent, FLAG_SYSTEM, testUserId);
 
         verify(connector.mEngine).dispatchWallpaperCommand(
                 eq(COMMAND_REAPPLY), anyInt(), anyInt(), anyInt(), any());
@@ -454,7 +455,7 @@ public class WallpaperManagerServiceTests {
     public void testGetAdjustedWallpaperColorsOnDimming() throws RemoteException {
         final int testUserId = USER_SYSTEM;
         mService.switchUser(testUserId, null);
-        mService.setWallpaperComponent(sDefaultWallpaperComponent);
+        mService.setWallpaperComponent(sDefaultWallpaperComponent, FLAG_SYSTEM, testUserId);
         WallpaperData wallpaper = mService.getCurrentWallpaperData(FLAG_SYSTEM, testUserId);
 
         // Mock a wallpaper data with color hints that support dark text and dark theme
