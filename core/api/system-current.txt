@@ -13845,6 +13845,7 @@ package android.telephony {
     method @Deprecated public boolean disableCellBroadcastRange(int, int, int);
     method @Deprecated public boolean enableCellBroadcastRange(int, int, int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getPremiumSmsConsent(@NonNull String);
+    method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public android.net.Uri getSmscIdentity();
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_CELL_BROADCASTS) public void resetAllCellBroadcastRanges();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void sendMultipartTextMessageWithoutPersisting(String, String, java.util.List<java.lang.String>, java.util.List<android.app.PendingIntent>, java.util.List<android.app.PendingIntent>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setPremiumSmsConsent(@NonNull String, int);
