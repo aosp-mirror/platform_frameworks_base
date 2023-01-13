@@ -89,6 +89,7 @@ package android {
     field public static final String DISABLE_KEYGUARD = "android.permission.DISABLE_KEYGUARD";
     field public static final String DUMP = "android.permission.DUMP";
     field public static final String ENFORCE_UPDATE_OWNERSHIP = "android.permission.ENFORCE_UPDATE_OWNERSHIP";
+    field public static final String EXECUTE_APP_ACTION = "android.permission.EXECUTE_APP_ACTION";
     field public static final String EXPAND_STATUS_BAR = "android.permission.EXPAND_STATUS_BAR";
     field public static final String FACTORY_TEST = "android.permission.FACTORY_TEST";
     field public static final String FOREGROUND_SERVICE = "android.permission.FOREGROUND_SERVICE";

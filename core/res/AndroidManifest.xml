@@ -6862,6 +6862,15 @@
     <permission android:name="android.permission.READ_HOME_APP_SEARCH_DATA"
         android:protectionLevel="internal|role" />
 
+    <!-- Allows an assistive application to perform actions on behalf of users inside of
+         applications.
+         <p>For now, this permission is only granted to system applications fulfilling the
+         ASSISTANT role.
+         <p>Protection level: internal|role
+    -->
+    <permission android:name="android.permission.EXECUTE_APP_ACTION"
+                android:protectionLevel="internal|role" />
+
     <!-- @SystemApi Allows an application to create virtual devices in VirtualDeviceManager.
          @hide -->
     <permission android:name="android.permission.CREATE_VIRTUAL_DEVICE"
