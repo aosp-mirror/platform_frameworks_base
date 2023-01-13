@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2022 The Android Open Source Project
+  ~ Copyright (C) 2023 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -13,12 +14,9 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:width="32.0dp"
-        android:height="32.0dp"
-        android:viewportWidth="32.0"
-        android:viewportHeight="32.0"
-        android:tint="@color/decor_button_dark_color">
-    <path
-        android:fillColor="@android:color/white" android:pathData="M6,21V19H18V21Z"/>
-</vector>
+<shape android:shape="rectangle"
+       android:tintMode="multiply"
+       android:tint="@color/decor_title_color"
+       xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@android:color/white" />
+</shape>
