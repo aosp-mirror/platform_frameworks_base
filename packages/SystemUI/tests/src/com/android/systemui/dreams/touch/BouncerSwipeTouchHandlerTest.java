@@ -41,11 +41,11 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
-import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
@@ -302,12 +302,13 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         final float velocityY = -1;
         swipeToPosition(swipeUpPercentage, Direction.UP, velocityY);
 
-        verify(mValueAnimatorCreator).create(eq(expansion), eq(KeyguardBouncer.EXPANSION_HIDDEN));
+        verify(mValueAnimatorCreator).create(eq(expansion),
+                eq(KeyguardBouncerConstants.EXPANSION_HIDDEN));
         verify(mValueAnimator, never()).addListener(any());
 
         verify(mFlingAnimationUtilsClosing).apply(eq(mValueAnimator),
                 eq(SCREEN_HEIGHT_PX * expansion),
-                eq(SCREEN_HEIGHT_PX * KeyguardBouncer.EXPANSION_HIDDEN),
+                eq(SCREEN_HEIGHT_PX * KeyguardBouncerConstants.EXPANSION_HIDDEN),
                 eq(velocityY), eq((float) SCREEN_HEIGHT_PX));
         verify(mValueAnimator).start();
         verify(mUiEventLogger, never()).log(any());
@@ -324,7 +325,8 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         final float velocityY = 1;
         swipeToPosition(swipeUpPercentage, Direction.UP, velocityY);
 
-        verify(mValueAnimatorCreator).create(eq(expansion), eq(KeyguardBouncer.EXPANSION_VISIBLE));
+        verify(mValueAnimatorCreator).create(eq(expansion),
+                eq(KeyguardBouncerConstants.EXPANSION_VISIBLE));
 
         ArgumentCaptor<AnimatorListenerAdapter> endAnimationListenerCaptor =
                 ArgumentCaptor.forClass(AnimatorListenerAdapter.class);
@@ -332,7 +334,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         AnimatorListenerAdapter endAnimationListener = endAnimationListenerCaptor.getValue();
 
         verify(mFlingAnimationUtils).apply(eq(mValueAnimator), eq(SCREEN_HEIGHT_PX * expansion),
-                eq(SCREEN_HEIGHT_PX * KeyguardBouncer.EXPANSION_VISIBLE),
+                eq(SCREEN_HEIGHT_PX * KeyguardBouncerConstants.EXPANSION_VISIBLE),
                 eq(velocityY), eq((float) SCREEN_HEIGHT_PX));
         verify(mValueAnimator).start();
         verify(mUiEventLogger).log(BouncerSwipeTouchHandler.DreamEvent.DREAM_SWIPED);
@@ -355,12 +357,12 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         swipeToPosition(swipeDownPercentage, Direction.DOWN, velocityY);
 
         verify(mValueAnimatorCreator).create(eq(swipeDownPercentage),
-                eq(KeyguardBouncer.EXPANSION_VISIBLE));
+                eq(KeyguardBouncerConstants.EXPANSION_VISIBLE));
         verify(mValueAnimator, never()).addListener(any());
 
         verify(mFlingAnimationUtils).apply(eq(mValueAnimator),
                 eq(SCREEN_HEIGHT_PX * swipeDownPercentage),
-                eq(SCREEN_HEIGHT_PX * KeyguardBouncer.EXPANSION_VISIBLE),
+                eq(SCREEN_HEIGHT_PX * KeyguardBouncerConstants.EXPANSION_VISIBLE),
                 eq(velocityY), eq((float) SCREEN_HEIGHT_PX));
         verify(mValueAnimator).start();
         verify(mUiEventLogger, never()).log(any());
@@ -381,12 +383,12 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         swipeToPosition(swipeDownPercentage, Direction.DOWN, velocityY);
 
         verify(mValueAnimatorCreator).create(eq(swipeDownPercentage),
-                eq(KeyguardBouncer.EXPANSION_HIDDEN));
+                eq(KeyguardBouncerConstants.EXPANSION_HIDDEN));
         verify(mValueAnimator, never()).addListener(any());
 
         verify(mFlingAnimationUtilsClosing).apply(eq(mValueAnimator),
                 eq(SCREEN_HEIGHT_PX * swipeDownPercentage),
-                eq(SCREEN_HEIGHT_PX * KeyguardBouncer.EXPANSION_HIDDEN),
+                eq(SCREEN_HEIGHT_PX * KeyguardBouncerConstants.EXPANSION_HIDDEN),
                 eq(velocityY), eq((float) SCREEN_HEIGHT_PX));
         verify(mValueAnimator).start();
         verify(mUiEventLogger, never()).log(any());
@@ -405,7 +407,8 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         final float velocityY = -1;
         swipeToPosition(swipeUpPercentage, Direction.UP, velocityY);
 
-        verify(mValueAnimatorCreator).create(eq(expansion), eq(KeyguardBouncer.EXPANSION_VISIBLE));
+        verify(mValueAnimatorCreator).create(eq(expansion),
+                eq(KeyguardBouncerConstants.EXPANSION_VISIBLE));
 
         ArgumentCaptor<AnimatorListenerAdapter> endAnimationListenerCaptor =
                 ArgumentCaptor.forClass(AnimatorListenerAdapter.class);
@@ -413,7 +416,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         AnimatorListenerAdapter endAnimationListener = endAnimationListenerCaptor.getValue();
 
         verify(mFlingAnimationUtils).apply(eq(mValueAnimator), eq(SCREEN_HEIGHT_PX * expansion),
-                eq(SCREEN_HEIGHT_PX * KeyguardBouncer.EXPANSION_VISIBLE),
+                eq(SCREEN_HEIGHT_PX * KeyguardBouncerConstants.EXPANSION_VISIBLE),
                 eq(velocityY), eq((float) SCREEN_HEIGHT_PX));
         verify(mValueAnimator).start();
         verify(mUiEventLogger).log(BouncerSwipeTouchHandler.DreamEvent.DREAM_SWIPED);
