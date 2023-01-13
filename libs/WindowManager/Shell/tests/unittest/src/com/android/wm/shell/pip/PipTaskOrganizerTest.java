@@ -98,7 +98,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
         mPipBoundsState = new PipBoundsState(mContext);
         mPipTransitionState = new PipTransitionState();
         mPipBoundsAlgorithm = new PipBoundsAlgorithm(mContext, mPipBoundsState,
-                new PipSnapAlgorithm(), new PipKeepClearAlgorithm() {});
+                new PipSnapAlgorithm(), new PipKeepClearAlgorithmInterface() {});
         mMainExecutor = new TestShellExecutor();
         mPipTaskOrganizer = new PipTaskOrganizer(mContext,
                 mMockSyncTransactionQueue, mPipTransitionState, mPipBoundsState,
