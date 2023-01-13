@@ -12165,7 +12165,6 @@ package android.content.pm {
     field public static final String FEATURE_RAM_NORMAL = "android.hardware.ram.normal";
     field public static final String FEATURE_SCREEN_LANDSCAPE = "android.hardware.screen.landscape";
     field public static final String FEATURE_SCREEN_PORTRAIT = "android.hardware.screen.portrait";
-    field public static final String FEATURE_SEAMLESS_REFRESH_RATE_SWITCHING = "android.software.seamless_refresh_rate_switching";
     field public static final String FEATURE_SECURELY_REMOVES_USERS = "android.software.securely_removes_users";
     field public static final String FEATURE_SECURE_LOCK_SCREEN = "android.software.secure_lock_screen";
     field public static final String FEATURE_SECURITY_MODEL_COMPATIBLE = "android.hardware.security.model.compatible";

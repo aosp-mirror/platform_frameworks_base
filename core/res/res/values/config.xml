@@ -4411,6 +4411,9 @@
     <!-- Allow SystemUI to show the shutdown dialog -->
     <bool name="config_showSysuiShutdown">true</bool>
 
+    <!-- Flag indicating whether seamless refresh rate switching is supported by a device. -->
+    <bool name="config_supportsSeamlessRefreshRateSwitching">true</bool>
+
     <!-- The stable device width and height in pixels. If these aren't set to a positive number
          then the device will use the width and height of the default display the first time it's
          booted.  -->

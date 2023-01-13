@@ -50,6 +50,8 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.Surface;
 
+import com.android.internal.R;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -1307,6 +1309,22 @@ public final class DisplayManager {
     @RequiresPermission(Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS)
     public boolean shouldAlwaysRespectAppRequestedMode() {
         return mGlobal.shouldAlwaysRespectAppRequestedMode();
+    }
+
+    /**
+     * Returns whether device supports seamless refresh rate switching.
+     *
+     * Match content frame rate setting has three options: seamless, non-seamless and never.
+     * The seamless option does nothing if the device does not support seamless refresh rate
+     * switching. This API is used in such a case to hide the seamless option.
+     *
+     * @see DisplayManager#setRefreshRateSwitchingType
+     * @see DisplayManager#getMatchContentFrameRateUserPreference
+     * @hide
+     */
+    public boolean supportsSeamlessRefreshRateSwitching() {
+        return mContext.getResources().getBoolean(
+                R.bool.config_supportsSeamlessRefreshRateSwitching);
     }
 
     /**

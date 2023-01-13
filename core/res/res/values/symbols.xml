@@ -3879,6 +3879,7 @@
   <java-symbol type="id" name="messaging_group_icon_container" />
   <java-symbol type="id" name="messaging_group_sending_progress" />
   <java-symbol type="id" name="messaging_group_sending_progress_container" />
+  <java-symbol type="bool" name="config_supportsSeamlessRefreshRateSwitching" />
 
   <java-symbol type="integer" name="config_stableDeviceDisplayWidth" />
   <java-symbol type="integer" name="config_stableDeviceDisplayHeight" />

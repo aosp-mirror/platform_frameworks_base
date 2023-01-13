@@ -2979,14 +2979,6 @@ public abstract class PackageManager {
             "android.software.virtualization_framework";
 
     /**
-     * Feature for {@link #getSystemAvailableFeatures()} and {@link #hasSystemFeature(String)}.
-     * This feature indicates whether device supports seamless refresh rate switching.
-     */
-    @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_SEAMLESS_REFRESH_RATE_SWITCHING
-            = "android.software.seamless_refresh_rate_switching";
-
-    /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature(String, int)}: If this feature is supported, the Vulkan
      * implementation on this device is hardware accelerated, and the Vulkan native API will
