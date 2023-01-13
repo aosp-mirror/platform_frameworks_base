@@ -3248,7 +3248,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         if (targetName.equals(MAGNIFICATION_CONTROLLER_NAME)) {
             final boolean enabled =
                     !getMagnificationController().getFullScreenMagnificationController()
-                            .isMagnifying(displayId);
+                            .isActivated(displayId);
             logAccessibilityShortcutActivated(mContext, MAGNIFICATION_COMPONENT_NAME, shortcutType,
                     enabled);
             sendAccessibilityButtonToInputFilter(displayId);

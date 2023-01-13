@@ -313,13 +313,13 @@ public class MagnificationProcessor {
     }
 
     /**
-     * {@link FullScreenMagnificationController#isMagnifying(int)}
+     * {@link FullScreenMagnificationController#isActivated(int)}
      * {@link WindowMagnificationManager#isWindowMagnifierEnabled(int)}
      */
     public boolean isMagnifying(int displayId) {
         int mode = getControllingMode(displayId);
         if (mode == MAGNIFICATION_MODE_FULLSCREEN) {
-            return mController.getFullScreenMagnificationController().isMagnifying(displayId);
+            return mController.getFullScreenMagnificationController().isActivated(displayId);
         } else if (mode == MAGNIFICATION_MODE_WINDOW) {
             return mController.getWindowMagnificationMgr().isWindowMagnifierEnabled(displayId);
         }
