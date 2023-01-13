@@ -2010,9 +2010,9 @@ public class PackageInstaller {
          * @return {@code true} if this session will keep the existing application enabled setting
          * after installation.
          */
-        public boolean isKeepApplicationEnabledSetting() {
+        public boolean isApplicationEnabledSettingPersistent() {
             try {
-                return mSession.isKeepApplicationEnabledSetting();
+                return mSession.isApplicationEnabledSettingPersistent();
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -2265,7 +2265,7 @@ public class PackageInstaller {
         /** {@hide} */
         public int requireUserAction = USER_ACTION_UNSPECIFIED;
         /** {@hide} */
-        public boolean keepApplicationEnabledSetting = false;
+        public boolean applicationEnabledSettingPersistent = false;
 
         /**
          * Construct parameters for a new package install session.
@@ -2310,7 +2310,7 @@ public class PackageInstaller {
             rollbackDataPolicy = source.readInt();
             requireUserAction = source.readInt();
             packageSource = source.readInt();
-            keepApplicationEnabledSetting = source.readBoolean();
+            applicationEnabledSettingPersistent = source.readBoolean();
         }
 
         /** {@hide} */
@@ -2341,7 +2341,7 @@ public class PackageInstaller {
             ret.rollbackDataPolicy = rollbackDataPolicy;
             ret.requireUserAction = requireUserAction;
             ret.packageSource = packageSource;
-            ret.keepApplicationEnabledSetting = keepApplicationEnabledSetting;
+            ret.applicationEnabledSettingPersistent = applicationEnabledSettingPersistent;
             return ret;
         }
 
@@ -2839,8 +2839,8 @@ public class PackageInstaller {
          * Request to keep the original application enabled setting. This will prevent the
          * application from being enabled if it was previously in a disabled state.
          */
-        public void setKeepApplicationEnabledSetting() {
-            this.keepApplicationEnabledSetting = true;
+        public void setApplicationEnabledSettingPersistent() {
+            this.applicationEnabledSettingPersistent = true;
         }
 
         /**
@@ -2895,7 +2895,8 @@ public class PackageInstaller {
             pw.printPair("requiredInstalledVersionCode", requiredInstalledVersionCode);
             pw.printPair("dataLoaderParams", dataLoaderParams);
             pw.printPair("rollbackDataPolicy", rollbackDataPolicy);
-            pw.printPair("keepApplicationEnabledSetting", keepApplicationEnabledSetting);
+            pw.printPair("applicationEnabledSettingPersistent",
+                    applicationEnabledSettingPersistent);
             pw.println();
         }
 
@@ -2936,7 +2937,7 @@ public class PackageInstaller {
             dest.writeInt(rollbackDataPolicy);
             dest.writeInt(requireUserAction);
             dest.writeInt(packageSource);
-            dest.writeBoolean(keepApplicationEnabledSetting);
+            dest.writeBoolean(applicationEnabledSettingPersistent);
         }
 
         public static final Parcelable.Creator<SessionParams>
@@ -3139,7 +3140,7 @@ public class PackageInstaller {
         public boolean isPreapprovalRequested;
 
         /** @hide */
-        public boolean keepApplicationEnabledSetting;
+        public boolean applicationEnabledSettingPersistent;
 
         /** @hide */
         public int pendingUserActionReason;
@@ -3197,7 +3198,7 @@ public class PackageInstaller {
             requireUserAction = source.readInt();
             installerUid = source.readInt();
             packageSource = source.readInt();
-            keepApplicationEnabledSetting = source.readBoolean();
+            applicationEnabledSettingPersistent = source.readBoolean();
             pendingUserActionReason = source.readInt();
         }
 
@@ -3732,8 +3733,8 @@ public class PackageInstaller {
          * Returns {@code true} if this session will keep the existing application enabled setting
          * after installation.
          */
-        public boolean isKeepApplicationEnabledSetting() {
-            return keepApplicationEnabledSetting;
+        public boolean isApplicationEnabledSettingPersistent() {
+            return applicationEnabledSettingPersistent;
         }
 
         /**
@@ -3811,7 +3812,7 @@ public class PackageInstaller {
             dest.writeInt(requireUserAction);
             dest.writeInt(installerUid);
             dest.writeInt(packageSource);
-            dest.writeBoolean(keepApplicationEnabledSetting);
+            dest.writeBoolean(applicationEnabledSettingPersistent);
             dest.writeInt(pendingUserActionReason);
         }
 

@@ -2129,7 +2129,7 @@ final class InstallPackageHelper {
                     }
                     // Enable system package for requested users
                     if (installedForUsers != null
-                            && !installRequest.isKeepApplicationEnabledSetting()) {
+                            && !installRequest.isApplicationEnabledSettingPersistent()) {
                         for (int origUserId : installedForUsers) {
                             if (userId == UserHandle.USER_ALL || userId == origUserId) {
                                 ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT,
@@ -2182,7 +2182,7 @@ final class InstallPackageHelper {
                     // be installed and enabled. The caller, however, can explicitly specify to
                     // keep the existing enabled state.
                     ps.setInstalled(true, userId);
-                    if (!installRequest.isKeepApplicationEnabledSetting()) {
+                    if (!installRequest.isApplicationEnabledSettingPersistent()) {
                         ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, userId,
                                 installerPackageName);
                     }
@@ -2191,7 +2191,7 @@ final class InstallPackageHelper {
                     // Thus, updating the settings to install the app for all users.
                     for (int currentUserId : allUsers) {
                         ps.setInstalled(true, currentUserId);
-                        if (!installRequest.isKeepApplicationEnabledSetting()) {
+                        if (!installRequest.isApplicationEnabledSettingPersistent()) {
                             ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, currentUserId,
                                     installerPackageName);
                         }

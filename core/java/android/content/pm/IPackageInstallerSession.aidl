@@ -64,7 +64,7 @@ interface IPackageInstallerSession {
 
     void requestUserPreapproval(in PackageInstaller.PreapprovalDetails details, in IntentSender statusReceiver);
 
-    boolean isKeepApplicationEnabledSetting();
+    boolean isApplicationEnabledSettingPersistent();
     boolean isRequestUpdateOwnership();
 
     ParcelFileDescriptor getAppMetadataFd();

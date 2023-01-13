@@ -11992,7 +11992,7 @@ package android.content.pm {
     method @NonNull public int[] getChildSessionIds();
     method @NonNull public String[] getNames() throws java.io.IOException;
     method public int getParentSessionId();
-    method public boolean isKeepApplicationEnabledSetting();
+    method public boolean isApplicationEnabledSettingPersistent();
     method public boolean isMultiPackage();
     method public boolean isRequestUpdateOwnership();
     method public boolean isStaged();
@@ -12047,8 +12047,8 @@ package android.content.pm {
     method @NonNull public android.os.UserHandle getUser();
     method public boolean hasParentSessionId();
     method public boolean isActive();
+    method public boolean isApplicationEnabledSettingPersistent();
     method public boolean isCommitted();
-    method public boolean isKeepApplicationEnabledSetting();
     method public boolean isMultiPackage();
     method public boolean isRequestUpdateOwnership();
     method public boolean isSealed();
@@ -12078,12 +12078,12 @@ package android.content.pm {
     method public void setAppIcon(@Nullable android.graphics.Bitmap);
     method public void setAppLabel(@Nullable CharSequence);
     method public void setAppPackageName(@Nullable String);
+    method public void setApplicationEnabledSettingPersistent();
     method @Deprecated public void setAutoRevokePermissionsMode(boolean);
     method public void setInstallLocation(int);
     method public void setInstallReason(int);
     method public void setInstallScenario(int);
     method public void setInstallerPackageName(@Nullable String);
-    method public void setKeepApplicationEnabledSetting();
     method public void setMultiPackage();
     method public void setOriginatingUid(int);
     method public void setOriginatingUri(@Nullable android.net.Uri);
