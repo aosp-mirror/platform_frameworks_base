@@ -1904,7 +1904,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     }
 
     boolean shouldSleepActivities() {
-        return false;
+        final Task task = getRootTask();
+        return task != null && task.shouldSleepActivities();
     }
 
     @Override
