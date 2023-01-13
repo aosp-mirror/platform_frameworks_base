@@ -48,6 +48,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.animation.ShadeInterpolation;
+import com.android.systemui.compose.ComposeFacade;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.controls.ui.MediaHost;
@@ -227,9 +228,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
         mQSFooterActionsViewModel = mFooterActionsViewModelFactory.create(/* lifecycleOwner */
                 this);
-        LinearLayout footerActionsView = view.findViewById(R.id.qs_footer_actions);
-        FooterActionsViewBinder.bind(footerActionsView, mQSFooterActionsViewModel,
-                mListeningAndVisibilityLifecycleOwner);
+        bindFooterActionsView(view);
         mFooterActionsController.init();
 
         mQSPanelScrollView = view.findViewById(R.id.expanded_qs_scroll_view);
@@ -288,6 +287,33 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                     mQSPanelController.getMediaHost().getHostView().setAlpha(1.0f);
                     mQSAnimator.requestAnimatorUpdate();
                 });
+    }
+
+    private void bindFooterActionsView(View root) {
+        LinearLayout footerActionsView = root.findViewById(R.id.qs_footer_actions);
+
+        if (!ComposeFacade.INSTANCE.isComposeAvailable()) {
+            Log.d(TAG, "Binding the View implementation of the QS footer actions");
+            FooterActionsViewBinder.bind(footerActionsView, mQSFooterActionsViewModel,
+                    mListeningAndVisibilityLifecycleOwner);
+            return;
+        }
+
+        // Compose is available, so let's use the Compose implementation of the footer actions.
+        Log.d(TAG, "Binding the Compose implementation of the QS footer actions");
+        View composeView = ComposeFacade.INSTANCE.createFooterActionsView(root.getContext(),
+                mQSFooterActionsViewModel, mListeningAndVisibilityLifecycleOwner);
+
+        // The id R.id.qs_footer_actions is used by QSContainerImpl to set the horizontal margin
+        // to all views except for qs_footer_actions, so we set it to the Compose view.
+        composeView.setId(R.id.qs_footer_actions);
+
+        // Replace the View by the Compose provided one.
+        ViewGroup parent = (ViewGroup) footerActionsView.getParent();
+        ViewGroup.LayoutParams layoutParams = footerActionsView.getLayoutParams();
+        int index = parent.indexOfChild(footerActionsView);
+        parent.removeViewAt(index);
+        parent.addView(composeView, index, layoutParams);
     }
 
     @Override
