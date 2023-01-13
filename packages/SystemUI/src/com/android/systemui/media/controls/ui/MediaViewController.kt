@@ -77,6 +77,7 @@ constructor(
             setOf(
                 R.id.header_title,
                 R.id.header_artist,
+                R.id.media_explicit_indicator,
                 R.id.actionPlayPause,
             )
 

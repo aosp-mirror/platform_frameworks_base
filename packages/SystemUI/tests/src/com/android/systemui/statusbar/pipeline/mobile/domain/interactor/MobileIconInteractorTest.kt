@@ -25,6 +25,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.CarrierMergedNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.OverrideNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionRepository
@@ -266,6 +267,23 @@ class MobileIconInteractorTest : SysuiTestCase() {
             val job = underTest.networkTypeIconGroup.onEach { latest = it }.launchIn(this)
 
             assertThat(latest).isEqualTo(FakeMobileIconsInteractor.DEFAULT_ICON)
+
+            job.cancel()
+        }
+
+    @Test
+    fun iconGroup_carrierMerged_usesOverride() =
+        runBlocking(IMMEDIATE) {
+            connectionRepository.setConnectionInfo(
+                MobileConnectionModel(
+                    resolvedNetworkType = CarrierMergedNetworkType,
+                ),
+            )
+
+            var latest: MobileIconGroup? = null
+            val job = underTest.networkTypeIconGroup.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isEqualTo(CarrierMergedNetworkType.iconGroupOverride)
 
             job.cancel()
         }

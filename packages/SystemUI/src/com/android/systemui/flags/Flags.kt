@@ -200,7 +200,7 @@ object Flags {
     /** A different path for unocclusion transitions back to keyguard */
     // TODO(b/262859270): Tracking Bug
     @JvmField
-    val UNOCCLUSION_TRANSITION = unreleasedFlag(223, "unocclusion_transition", teamfood = false)
+    val UNOCCLUSION_TRANSITION = unreleasedFlag(223, "unocclusion_transition", teamfood = true)
 
     // flag for controlling auto pin confirmation and material u shapes in bouncer
     @JvmField
@@ -335,6 +335,9 @@ object Flags {
     // TODO(b/263272731): Tracking Bug
     val MEDIA_TTT_RECEIVER_SUCCESS_RIPPLE =
         unreleasedFlag(910, "media_ttt_receiver_success_ripple", teamfood = true)
+
+    // TODO(b/263512203): Tracking Bug
+    val MEDIA_EXPLICIT_INDICATOR = unreleasedFlag(911, "media_explicit_indicator", teamfood = true)
 
     // 1000 - dock
     val SIMULATE_DOCK_THROUGH_CHARGING = releasedFlag(1000, "simulate_dock_through_charging")

@@ -29,6 +29,7 @@ import android.net.NetworkRequest
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.net.wifi.WifiManager.TrafficStateCallback
+import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import com.android.settingslib.Utils
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
@@ -269,7 +270,19 @@ constructor(
             wifiManager: WifiManager,
         ): WifiNetworkModel {
             return if (wifiInfo.isCarrierMerged) {
-                WifiNetworkModel.CarrierMerged
+                if (wifiInfo.subscriptionId == INVALID_SUBSCRIPTION_ID) {
+                    WifiNetworkModel.Invalid(CARRIER_MERGED_INVALID_SUB_ID_REASON)
+                } else {
+                    WifiNetworkModel.CarrierMerged(
+                        networkId = network.getNetId(),
+                        subscriptionId = wifiInfo.subscriptionId,
+                        level = wifiManager.calculateSignalLevel(wifiInfo.rssi),
+                        // The WiFi signal level returned by WifiManager#calculateSignalLevel start
+                        // from 0, so WifiManager#getMaxSignalLevel + 1 represents the total level
+                        // buckets count.
+                        numberOfLevels = wifiManager.maxSignalLevel + 1,
+                    )
+                }
             } else {
                 WifiNetworkModel.Active(
                     network.getNetId(),
@@ -302,6 +315,9 @@ constructor(
                 .build()
 
         private const val WIFI_NETWORK_CALLBACK_NAME = "wifiNetworkModel"
+
+        private const val CARRIER_MERGED_INVALID_SUB_ID_REASON =
+            "Wifi network was carrier merged but had invalid sub ID"
     }
 
     @SysUISingleton

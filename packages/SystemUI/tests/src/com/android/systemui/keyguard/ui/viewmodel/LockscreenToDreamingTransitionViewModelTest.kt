@@ -67,8 +67,7 @@ class LockscreenToDreamingTransitionViewModelTest : SysuiTestCase() {
             repository.sendTransitionStep(step(1f))
 
             // Only three values should be present, since the dream overlay runs for a small
-            // fraction
-            // of the overall animation time
+            // fraction of the overall animation time
             assertThat(values.size).isEqualTo(3)
             assertThat(values[0]).isEqualTo(1f - animValue(0f, LOCKSCREEN_ALPHA))
             assertThat(values[1]).isEqualTo(1f - animValue(0.1f, LOCKSCREEN_ALPHA))
@@ -92,8 +91,10 @@ class LockscreenToDreamingTransitionViewModelTest : SysuiTestCase() {
             repository.sendTransitionStep(step(0.5f))
             // ...up to here
             repository.sendTransitionStep(step(1f))
+            // And a final reset event on FINISHED
+            repository.sendTransitionStep(step(1f, TransitionState.FINISHED))
 
-            assertThat(values.size).isEqualTo(3)
+            assertThat(values.size).isEqualTo(4)
             assertThat(values[0])
                 .isEqualTo(
                     EMPHASIZED_ACCELERATE.getInterpolation(
@@ -112,6 +113,8 @@ class LockscreenToDreamingTransitionViewModelTest : SysuiTestCase() {
                         animValue(0.5f, LOCKSCREEN_TRANSLATION_Y)
                     ) * pixels
                 )
+            assertThat(values[3]).isEqualTo(0f)
+
             job.cancel()
         }
 
@@ -123,12 +126,15 @@ class LockscreenToDreamingTransitionViewModelTest : SysuiTestCase() {
         return (stepValue - startValue) * multiplier
     }
 
-    private fun step(value: Float): TransitionStep {
+    private fun step(
+        value: Float,
+        state: TransitionState = TransitionState.RUNNING
+    ): TransitionStep {
         return TransitionStep(
             from = KeyguardState.LOCKSCREEN,
             to = KeyguardState.DREAMING,
             value = value,
-            transitionState = TransitionState.RUNNING,
+            transitionState = state,
             ownerName = "LockscreenToDreamingTransitionViewModelTest"
         )
     }

@@ -27,17 +27,12 @@ import android.content.Context;
 import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.SystemClock;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.Choreographer;
 import android.view.InputChannel;
-import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.InputMonitor;
-import android.view.KeyCharacterMap;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
@@ -55,7 +50,6 @@ import com.android.wm.shell.desktopmode.DesktopModeController;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
-import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
 
@@ -85,6 +79,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             new SparseArray<>();
     private final DragStartListenerImpl mDragStartListener = new DragStartListenerImpl();
     private InputMonitorFactory mInputMonitorFactory;
+    private TaskOperations mTaskOperations;
 
     public DesktopModeWindowDecorViewModel(
             Context context,
@@ -136,7 +131,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
     @Override
     public void setFreeformTaskTransitionStarter(FreeformTaskTransitionStarter transitionStarter) {
-        mTransitionStarter = transitionStarter;
+        mTaskOperations = new TaskOperations(transitionStarter, mContext, mSyncQueue);
     }
 
     @Override
@@ -210,7 +205,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         }
     }
 
-    private class CaptionTouchEventListener implements
+    private class DesktopModeTouchEventListener implements
             View.OnClickListener, View.OnTouchListener {
 
         private final int mTaskId;
@@ -220,7 +215,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
         private int mDragPointerId = -1;
 
-        private CaptionTouchEventListener(
+        private DesktopModeTouchEventListener(
                 RunningTaskInfo taskInfo,
                 DragResizeCallback dragResizeCallback,
                 DragDetector dragDetector) {
@@ -235,15 +230,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
             final int id = v.getId();
             if (id == R.id.close_window) {
-                WindowContainerTransaction wct = new WindowContainerTransaction();
-                wct.removeTask(mTaskToken);
-                if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-                    mTransitionStarter.startRemoveTransition(wct);
-                } else {
-                    mSyncQueue.queue(wct);
-                }
+                mTaskOperations.closeTask(mTaskToken);
             } else if (id == R.id.back_button) {
-                injectBackKey();
+                mTaskOperations.injectBackKey();
             } else if (id == R.id.caption_handle) {
                 decoration.createHandleMenu();
             } else if (id == R.id.desktop_button) {
@@ -255,25 +244,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 mDesktopTasksController.ifPresent(c -> c.moveToFullscreen(mTaskId));
                 decoration.closeHandleMenu();
                 decoration.setButtonVisibility(false);
-            }
-        }
-
-        private void injectBackKey() {
-            sendBackEvent(KeyEvent.ACTION_DOWN);
-            sendBackEvent(KeyEvent.ACTION_UP);
-        }
-
-        private void sendBackEvent(int action) {
-            final long when = SystemClock.uptimeMillis();
-            final KeyEvent ev = new KeyEvent(when, when, action, KeyEvent.KEYCODE_BACK,
-                    0 /* repeat */, 0 /* metaState */, KeyCharacterMap.VIRTUAL_KEYBOARD,
-                    0 /* scancode */, KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
-                    InputDevice.SOURCE_KEYBOARD);
-
-            ev.setDisplayId(mContext.getDisplay().getDisplayId());
-            if (!InputManager.getInstance()
-                    .injectInputEvent(ev, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC)) {
-                Log.e(TAG, "Inject input event fail");
             }
         }
 
@@ -590,8 +560,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
         TaskPositioner taskPositioner =
                 new TaskPositioner(mTaskOrganizer, windowDecoration, mDragStartListener);
-        CaptionTouchEventListener touchEventListener =
-                new CaptionTouchEventListener(
+        DesktopModeTouchEventListener touchEventListener =
+                new DesktopModeTouchEventListener(
                         taskInfo, taskPositioner, windowDecoration.getDragDetector());
         windowDecoration.setCaptionListeners(touchEventListener, touchEventListener);
         windowDecoration.setDragResizeCallback(taskPositioner);

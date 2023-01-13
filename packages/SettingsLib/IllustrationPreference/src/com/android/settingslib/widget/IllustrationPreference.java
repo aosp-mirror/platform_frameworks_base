@@ -59,6 +59,18 @@ public class IllustrationPreference extends Preference {
     private Uri mImageUri;
     private Drawable mImageDrawable;
     private View mMiddleGroundView;
+    private OnBindListener mOnBindListener;
+
+    /**
+     * Interface to listen in on when {@link #onBindViewHolder(PreferenceViewHolder)} occurs.
+     */
+    public interface OnBindListener {
+        /**
+         * Called when when {@link #onBindViewHolder(PreferenceViewHolder)} occurs.
+         * @param animationView the animation view for this preference.
+         */
+        void onBind(LottieAnimationView animationView);
+    }
 
     private final Animatable2.AnimationCallback mAnimationCallback =
             new Animatable2.AnimationCallback() {
@@ -133,6 +145,17 @@ public class IllustrationPreference extends Preference {
         if (IS_ENABLED_LOTTIE_ADAPTIVE_COLOR) {
             ColorUtils.applyDynamicColors(getContext(), illustrationView);
         }
+
+        if (mOnBindListener != null) {
+            mOnBindListener.onBind(illustrationView);
+        }
+    }
+
+    /**
+     * Sets a listener to be notified when the views are binded.
+     */
+    public void setOnBindListener(OnBindListener listener) {
+        mOnBindListener = listener;
     }
 
     /**

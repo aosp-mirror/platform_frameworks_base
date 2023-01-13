@@ -168,6 +168,25 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
         assertThat(wtfHandler.failed).isTrue()
     }
 
+    @Test
+    fun `Attempt to manually update transition after CANCELED state throws exception`() {
+        val uuid =
+            underTest.startTransition(
+                TransitionInfo(
+                    ownerName = OWNER_NAME,
+                    from = AOD,
+                    to = LOCKSCREEN,
+                    animator = null,
+                )
+            )
+
+        checkNotNull(uuid).let {
+            underTest.updateTransition(it, 0.2f, TransitionState.CANCELED)
+            underTest.updateTransition(it, 0.5f, TransitionState.RUNNING)
+        }
+        assertThat(wtfHandler.failed).isTrue()
+    }
+
     private fun listWithStep(
         step: BigDecimal,
         start: BigDecimal = BigDecimal.ZERO,

@@ -106,7 +106,9 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
     // region handleSystemKey
     @Test
     fun handleSystemKey_receiveValidSystemKey_shouldShowNoteTask() {
-        createNoteTaskInitializer().callbacks.handleSystemKey(KeyEvent.KEYCODE_VIDEO_APP_1)
+        createNoteTaskInitializer()
+            .callbacks
+            .handleSystemKey(NoteTaskController.NOTE_TASK_KEY_EVENT)
 
         verify(noteTaskController).showNoteTask()
     }

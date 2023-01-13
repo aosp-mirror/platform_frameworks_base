@@ -47,6 +47,10 @@ class TaskPositioner implements DragResizeCallback {
     private int mCtrlType;
     private DragStartListener mDragStartListener;
 
+    TaskPositioner(ShellTaskOrganizer taskOrganizer, WindowDecoration windowDecoration) {
+        this(taskOrganizer, windowDecoration, dragStartListener -> {});
+    }
+
     TaskPositioner(ShellTaskOrganizer taskOrganizer, WindowDecoration windowDecoration,
             DragStartListener dragStartListener) {
         mTaskOrganizer = taskOrganizer;
