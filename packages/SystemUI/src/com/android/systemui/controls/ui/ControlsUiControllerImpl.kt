@@ -232,6 +232,8 @@ class ControlsUiControllerImpl @Inject constructor (
                     ControlKey(selected.structure.componentName, it.ci.controlId)
                 }
                 controlsController.get().subscribeToFavorites(selected.structure)
+            } else {
+                controlsController.get().bindComponentForPanel(selected.componentName)
             }
             listingCallback = createCallback(::showControlsView)
         }

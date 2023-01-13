@@ -23,11 +23,10 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.ResolveInfoFlags
 import android.content.pm.ResolveInfo
-import android.content.pm.ServiceInfo
 import android.test.suitebuilder.annotation.SmallTest
 import androidx.test.runner.AndroidJUnit4
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.notetask.NoteTaskIntentResolver.Companion.NOTES_ACTION
+import com.android.systemui.notetask.NoteTaskIntentResolver.Companion.ACTION_CREATE_NOTE
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -58,19 +57,13 @@ internal class NoteTaskIntentResolverTest : SysuiTestCase() {
     }
 
     private fun createResolveInfo(
-        packageName: String = "PackageName",
-        activityInfo: ActivityInfo? = null,
+        activityInfo: ActivityInfo? = createActivityInfo(),
     ): ResolveInfo {
-        return ResolveInfo().apply {
-            serviceInfo =
-                ServiceInfo().apply {
-                    applicationInfo = ApplicationInfo().apply { this.packageName = packageName }
-                }
-            this.activityInfo = activityInfo
-        }
+        return ResolveInfo().apply { this.activityInfo = activityInfo }
     }
 
     private fun createActivityInfo(
+        packageName: String = "PackageName",
         name: String? = "ActivityName",
         exported: Boolean = true,
         enabled: Boolean = true,
@@ -87,6 +80,7 @@ internal class NoteTaskIntentResolverTest : SysuiTestCase() {
             if (turnScreenOn) {
                 flags = flags or ActivityInfo.FLAG_TURN_SCREEN_ON
             }
+            this.applicationInfo = ApplicationInfo().apply { this.packageName = packageName }
         }
     }
 
@@ -107,7 +101,8 @@ internal class NoteTaskIntentResolverTest : SysuiTestCase() {
         val actual = resolver.resolveIntent()
 
         val expected =
-            Intent(NOTES_ACTION)
+            Intent(ACTION_CREATE_NOTE)
+                .setPackage("PackageName")
                 .setComponent(ComponentName("PackageName", "ActivityName"))
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         // Compares the string representation of both intents, as they are different instances.
@@ -204,7 +199,9 @@ internal class NoteTaskIntentResolverTest : SysuiTestCase() {
 
     @Test
     fun resolveIntent_packageNameIsBlank_shouldReturnNull() {
-        givenQueryIntentActivities { listOf(createResolveInfo(packageName = "")) }
+        givenQueryIntentActivities {
+            listOf(createResolveInfo(createActivityInfo(packageName = "")))
+        }
 
         val actual = resolver.resolveIntent()
 

@@ -22,8 +22,8 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState.Connected
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository.Companion.DEFAULT_NUM_LEVELS
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -138,7 +138,11 @@ class MobileIconInteractorImpl(
                 defaultMobileIconMapping,
                 defaultMobileIconGroup,
             ) { info, mapping, defaultGroup ->
-                mapping[info.resolvedNetworkType.lookupKey] ?: defaultGroup
+                when (info.resolvedNetworkType) {
+                    is ResolvedNetworkType.CarrierMergedNetworkType ->
+                        info.resolvedNetworkType.iconGroupOverride
+                    else -> mapping[info.resolvedNetworkType.lookupKey] ?: defaultGroup
+                }
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), defaultMobileIconGroup.value)
 

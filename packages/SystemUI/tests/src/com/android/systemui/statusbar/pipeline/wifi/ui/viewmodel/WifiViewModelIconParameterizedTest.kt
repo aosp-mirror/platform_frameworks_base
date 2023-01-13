@@ -206,7 +206,8 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                 // Enabled = false => no networks shown
                 TestCase(
                     enabled = false,
-                    network = WifiNetworkModel.CarrierMerged,
+                    network =
+                        WifiNetworkModel.CarrierMerged(NETWORK_ID, subscriptionId = 1, level = 1),
                     expected = null,
                 ),
                 TestCase(
@@ -228,7 +229,8 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                 // forceHidden = true => no networks shown
                 TestCase(
                     forceHidden = true,
-                    network = WifiNetworkModel.CarrierMerged,
+                    network =
+                        WifiNetworkModel.CarrierMerged(NETWORK_ID, subscriptionId = 1, level = 1),
                     expected = null,
                 ),
                 TestCase(
@@ -369,7 +371,8 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
 
                 // network = CarrierMerged => not shown
                 TestCase(
-                    network = WifiNetworkModel.CarrierMerged,
+                    network =
+                        WifiNetworkModel.CarrierMerged(NETWORK_ID, subscriptionId = 1, level = 1),
                     expected = null,
                 ),
 

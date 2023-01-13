@@ -16,6 +16,7 @@
 
 package com.android.systemui.navigationbar;
 
+import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
 import static android.inputmethodservice.InputMethodService.canImeRenderGesturalNavButtons;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
@@ -80,6 +81,7 @@ import com.android.systemui.shared.rotation.RotationButton.RotationButtonUpdates
 import com.android.systemui.shared.rotation.RotationButtonController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
+import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
@@ -160,6 +162,7 @@ public class NavigationBarView extends FrameLayout {
      * fully locked mode we only show that unlocking is blocked.
      */
     private ScreenPinningNotify mScreenPinningNotify;
+    private boolean mScreenPinningActive = false;
 
     /**
      * {@code true} if the IME can render the back button and the IME switcher button.
@@ -636,14 +639,13 @@ public class NavigationBarView extends FrameLayout {
         // When screen pinning, don't hide back and home when connected service or back and
         // recents buttons when disconnected from launcher service in screen pinning mode,
         // as they are used for exiting.
-        final boolean pinningActive = ActivityManagerWrapper.getInstance().isScreenPinningActive();
         if (mOverviewProxyEnabled) {
             // Force disable recents when not in legacy mode
             disableRecent |= !QuickStepContract.isLegacyMode(mNavBarMode);
-            if (pinningActive && !QuickStepContract.isGesturalMode(mNavBarMode)) {
+            if (mScreenPinningActive && !QuickStepContract.isGesturalMode(mNavBarMode)) {
                 disableBack = disableHome = false;
             }
-        } else if (pinningActive) {
+        } else if (mScreenPinningActive) {
             disableBack = disableRecent = false;
         }
 
@@ -738,15 +740,17 @@ public class NavigationBarView extends FrameLayout {
     public void updateDisabledSystemUiStateFlags(SysUiState sysUiState) {
         int displayId = mContext.getDisplayId();
 
-        sysUiState.setFlag(SYSUI_STATE_SCREEN_PINNING,
-                        ActivityManagerWrapper.getInstance().isScreenPinningActive())
-                .setFlag(SYSUI_STATE_OVERVIEW_DISABLED,
+        sysUiState.setFlag(SYSUI_STATE_OVERVIEW_DISABLED,
                         (mDisabledFlags & View.STATUS_BAR_DISABLE_RECENT) != 0)
                 .setFlag(SYSUI_STATE_HOME_DISABLED,
                         (mDisabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0)
                 .setFlag(SYSUI_STATE_SEARCH_DISABLED,
                         (mDisabledFlags & View.STATUS_BAR_DISABLE_SEARCH) != 0)
                 .commitUpdate(displayId);
+    }
+
+    public void setInScreenPinning(boolean active) {
+        mScreenPinningActive = active;
     }
 
     private void updatePanelSystemUiStateFlags() {

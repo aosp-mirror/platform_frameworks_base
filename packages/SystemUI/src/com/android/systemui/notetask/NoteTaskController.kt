@@ -104,4 +104,9 @@ constructor(
             PackageManager.DONT_KILL_APP,
         )
     }
+
+    companion object {
+        // TODO(b/254604589): Use final KeyEvent.KEYCODE_* instead.
+        const val NOTE_TASK_KEY_EVENT = 311
+    }
 }

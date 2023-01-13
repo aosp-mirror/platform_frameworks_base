@@ -51,6 +51,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.recents.utilities.Utilities;
+import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.LightBarController;
@@ -102,10 +103,10 @@ public class NavigationBarControllerTest extends SysuiTestCase {
                         mock(NavBarHelper.class),
                         mTaskbarDelegate,
                         mNavigationBarFactory,
-                        mock(StatusBarKeyguardViewManager.class),
                         mock(DumpManager.class),
                         mock(AutoHideController.class),
                         mock(LightBarController.class),
+                        TaskStackChangeListeners.getTestInstance(),
                         Optional.of(mock(Pip.class)),
                         Optional.of(mock(BackAnimation.class)),
                         mock(FeatureFlags.class)));
