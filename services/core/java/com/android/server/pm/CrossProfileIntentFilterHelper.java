@@ -54,7 +54,8 @@ public class CrossProfileIntentFilterHelper {
             UserProperties currentUserProperties = mUserManagerInternal
                     .getUserProperties(userInfo.id);
 
-            if (currentUserProperties.getUpdateCrossProfileIntentFiltersOnOTA()) {
+            if (currentUserProperties != null
+                    && currentUserProperties.getUpdateCrossProfileIntentFiltersOnOTA()) {
                 int parentUserId = mUserManagerInternal.getProfileParentId(userInfo.id);
                 if (parentUserId != userInfo.id) {
                     clearCrossProfileIntentFilters(userInfo.id,
