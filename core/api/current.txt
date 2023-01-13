@@ -919,6 +919,7 @@ package android {
     field public static final int isAlwaysSyncable = 16843571; // 0x1010333
     field public static final int isAsciiCapable = 16843753; // 0x10103e9
     field public static final int isAuxiliary = 16843647; // 0x101037f
+    field public static final int isCredential;
     field public static final int isDefault = 16843297; // 0x1010221
     field public static final int isFeatureSplit = 16844123; // 0x101055b
     field public static final int isGame = 16843764; // 0x10103f4
@@ -5905,7 +5906,7 @@ package android.app {
     ctor public LocaleConfig(@NonNull android.content.Context);
     ctor public LocaleConfig(@NonNull android.os.LocaleList);
     method public int describeContents();
-    method @NonNull public static android.app.LocaleConfig fromResources(@NonNull android.content.Context);
+    method @NonNull public static android.app.LocaleConfig fromContextIgnoringOverride(@NonNull android.content.Context);
     method public int getStatus();
     method @Nullable public android.os.LocaleList getSupportedLocales();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -9231,15 +9232,18 @@ package android.companion {
   }
 
   public final class CompanionDeviceManager {
+    method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public void addOnAssociationsChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.companion.CompanionDeviceManager.OnAssociationsChangedListener);
     method @RequiresPermission(anyOf={android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH, android.Manifest.permission.REQUEST_COMPANION_PROFILE_COMPUTER, android.Manifest.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING, android.Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION}, conditional=true) public void associate(@NonNull android.companion.AssociationRequest, @NonNull android.companion.CompanionDeviceManager.Callback, @Nullable android.os.Handler);
     method @RequiresPermission(anyOf={android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH, android.Manifest.permission.REQUEST_COMPANION_PROFILE_COMPUTER, android.Manifest.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING, android.Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION}, conditional=true) public void associate(@NonNull android.companion.AssociationRequest, @NonNull java.util.concurrent.Executor, @NonNull android.companion.CompanionDeviceManager.Callback);
     method @Nullable public android.content.IntentSender buildAssociationCancellationIntent();
     method @Nullable public android.content.IntentSender buildPermissionTransferUserConsentIntent(int) throws android.companion.DeviceNotAssociatedException;
     method @Deprecated public void disassociate(@NonNull String);
     method public void disassociate(int);
+    method @NonNull @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public java.util.List<android.companion.AssociationInfo> getAllAssociations();
     method @Deprecated @NonNull public java.util.List<java.lang.String> getAssociations();
     method @NonNull public java.util.List<android.companion.AssociationInfo> getMyAssociations();
     method @Deprecated public boolean hasNotificationAccess(android.content.ComponentName);
+    method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public void removeOnAssociationsChangedListener(@NonNull android.companion.CompanionDeviceManager.OnAssociationsChangedListener);
     method public void requestNotificationAccess(android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE) public void startObservingDevicePresence(@NonNull String) throws android.companion.DeviceNotAssociatedException;
     method @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE) public void stopObservingDevicePresence(@NonNull String) throws android.companion.DeviceNotAssociatedException;
@@ -9258,6 +9262,10 @@ package android.companion {
     method public void onAssociationPending(@NonNull android.content.IntentSender);
     method @Deprecated public void onDeviceFound(@NonNull android.content.IntentSender);
     method public abstract void onFailure(@Nullable CharSequence);
+  }
+
+  public static interface CompanionDeviceManager.OnAssociationsChangedListener {
+    method public void onAssociationsChanged(@NonNull java.util.List<android.companion.AssociationInfo>);
   }
 
   public abstract class CompanionDeviceService extends android.app.Service {
@@ -11876,6 +11884,7 @@ package android.content.pm {
   public class PackageInstaller {
     method public void abandonSession(int);
     method public void checkInstallConstraints(@NonNull java.util.List<java.lang.String>, @NonNull android.content.pm.PackageInstaller.InstallConstraints, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.content.pm.PackageInstaller.InstallConstraintsResult>);
+    method public void commitSessionAfterInstallConstraintsAreMet(int, @NonNull android.content.IntentSender, @NonNull android.content.pm.PackageInstaller.InstallConstraints, long);
     method public int createSession(@NonNull android.content.pm.PackageInstaller.SessionParams) throws java.io.IOException;
     method @Deprecated @Nullable public android.content.pm.PackageInstaller.SessionInfo getActiveStagedSession();
     method @NonNull public java.util.List<android.content.pm.PackageInstaller.SessionInfo> getActiveStagedSessions();
@@ -11920,6 +11929,7 @@ package android.content.pm {
     field public static final int STATUS_FAILURE_INCOMPATIBLE = 7; // 0x7
     field public static final int STATUS_FAILURE_INVALID = 4; // 0x4
     field public static final int STATUS_FAILURE_STORAGE = 6; // 0x6
+    field public static final int STATUS_FAILURE_TIMEOUT = 8; // 0x8
     field public static final int STATUS_PENDING_USER_ACTION = -1; // 0xffffffff
     field public static final int STATUS_SUCCESS = 0; // 0x0
   }
@@ -13356,9 +13366,8 @@ package android.credentials {
 
   public final class GetCredentialResponse implements android.os.Parcelable {
     ctor public GetCredentialResponse(@NonNull android.credentials.Credential);
-    ctor public GetCredentialResponse();
     method public int describeContents();
-    method @Nullable public android.credentials.Credential getCredential();
+    method @NonNull public android.credentials.Credential getCredential();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.credentials.GetCredentialResponse> CREATOR;
   }
@@ -18220,7 +18229,7 @@ package android.hardware.camera2 {
     method public int capture(@NonNull android.hardware.camera2.CaptureRequest, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.CameraExtensionSession.ExtensionCaptureCallback) throws android.hardware.camera2.CameraAccessException;
     method public void close() throws android.hardware.camera2.CameraAccessException;
     method @NonNull public android.hardware.camera2.CameraDevice getDevice();
-    method @Nullable public android.util.Pair<java.lang.Long,java.lang.Long> getRealtimeStillCaptureLatency() throws android.hardware.camera2.CameraAccessException;
+    method @Nullable public android.hardware.camera2.CameraExtensionSession.StillCaptureLatency getRealtimeStillCaptureLatency() throws android.hardware.camera2.CameraAccessException;
     method public int setRepeatingRequest(@NonNull android.hardware.camera2.CaptureRequest, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.CameraExtensionSession.ExtensionCaptureCallback) throws android.hardware.camera2.CameraAccessException;
     method public void stopRepeating() throws android.hardware.camera2.CameraAccessException;
   }
@@ -18241,6 +18250,12 @@ package android.hardware.camera2 {
     method public void onClosed(@NonNull android.hardware.camera2.CameraExtensionSession);
     method public abstract void onConfigureFailed(@NonNull android.hardware.camera2.CameraExtensionSession);
     method public abstract void onConfigured(@NonNull android.hardware.camera2.CameraExtensionSession);
+  }
+
+  public static final class CameraExtensionSession.StillCaptureLatency {
+    ctor public CameraExtensionSession.StillCaptureLatency(long, long);
+    method public long getCaptureLatency();
+    method public long getProcessingLatency();
   }
 
   public final class CameraManager {
@@ -39939,6 +39954,7 @@ package android.service.credentials {
     method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public abstract void onClearCredentialState(@NonNull android.service.credentials.ClearCredentialStateRequest, @NonNull android.os.CancellationSignal, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.credentials.ClearCredentialStateException>);
     field public static final String CAPABILITY_META_DATA_KEY = "android.credentials.capabilities";
+    field public static final String EXTRA_BEGIN_GET_CREDENTIAL_REQUEST = "android.service.credentials.extra.BEGIN_GET_CREDENTIAL_REQUEST";
     field public static final String EXTRA_CREATE_CREDENTIAL_EXCEPTION = "android.service.credentials.extra.CREATE_CREDENTIAL_EXCEPTION";
     field public static final String EXTRA_CREATE_CREDENTIAL_REQUEST = "android.service.credentials.extra.CREATE_CREDENTIAL_REQUEST";
     field public static final String EXTRA_CREATE_CREDENTIAL_RESPONSE = "android.service.credentials.extra.CREATE_CREDENTIAL_RESPONSE";
@@ -46635,8 +46651,8 @@ package android.text {
     field public static final int DONE = -1; // 0xffffffff
   }
 
-  public static class SegmentFinder.DefaultSegmentFinder extends android.text.SegmentFinder {
-    ctor public SegmentFinder.DefaultSegmentFinder(@NonNull int[]);
+  public static class SegmentFinder.PrescribedSegmentFinder extends android.text.SegmentFinder {
+    ctor public SegmentFinder.PrescribedSegmentFinder(@NonNull int[]);
     method public int nextEndBoundary(@IntRange(from=0) int);
     method public int nextStartBoundary(@IntRange(from=0) int);
     method public int previousEndBoundary(@IntRange(from=0) int);
@@ -51415,6 +51431,7 @@ package android.view {
     method public boolean isAutoHandwritingEnabled();
     method public boolean isClickable();
     method public boolean isContextClickable();
+    method public boolean isCredential();
     method public boolean isDirty();
     method @Deprecated public boolean isDrawingCacheEnabled();
     method public boolean isDuplicateParentStateEnabled();
@@ -51648,6 +51665,7 @@ package android.view {
     method public void setImportantForAccessibility(int);
     method public void setImportantForAutofill(int);
     method public void setImportantForContentCapture(int);
+    method public void setIsCredential(boolean);
     method public void setKeepScreenOn(boolean);
     method public void setKeyboardNavigationCluster(boolean);
     method public void setLabelFor(@IdRes int);
@@ -54598,14 +54616,6 @@ package android.view.inputmethod {
 
   public abstract class HandwritingGesture {
     method @Nullable public final String getFallbackText();
-    field public static final int GESTURE_TYPE_DELETE = 4; // 0x4
-    field public static final int GESTURE_TYPE_DELETE_RANGE = 64; // 0x40
-    field public static final int GESTURE_TYPE_INSERT = 2; // 0x2
-    field public static final int GESTURE_TYPE_JOIN_OR_SPLIT = 16; // 0x10
-    field public static final int GESTURE_TYPE_NONE = 0; // 0x0
-    field public static final int GESTURE_TYPE_REMOVE_SPACE = 8; // 0x8
-    field public static final int GESTURE_TYPE_SELECT = 1; // 0x1
-    field public static final int GESTURE_TYPE_SELECT_RANGE = 32; // 0x20
     field public static final int GRANULARITY_CHARACTER = 2; // 0x2
     field public static final int GRANULARITY_WORD = 1; // 0x1
   }
@@ -55105,15 +55115,15 @@ package android.view.inputmethod {
   public final class TextBoundsInfo implements android.os.Parcelable {
     method public int describeContents();
     method @IntRange(from=0, to=125) public int getCharacterBidiLevel(int);
-    method @NonNull public android.graphics.RectF getCharacterBounds(int);
+    method @NonNull public void getCharacterBounds(int, @NonNull android.graphics.RectF);
     method public int getCharacterFlags(int);
-    method public int getEnd();
+    method public int getEndIndex();
     method @NonNull public android.text.SegmentFinder getGraphemeSegmentFinder();
     method @NonNull public android.text.SegmentFinder getLineSegmentFinder();
-    method @NonNull public android.graphics.Matrix getMatrix();
+    method @NonNull public void getMatrix(@NonNull android.graphics.Matrix);
     method public int getOffsetForPosition(float, float);
     method @Nullable public int[] getRangeForRect(@NonNull android.graphics.RectF, @NonNull android.text.SegmentFinder, @NonNull android.text.Layout.TextInclusionStrategy);
-    method public int getStart();
+    method public int getStartIndex();
     method @NonNull public android.text.SegmentFinder getWordSegmentFinder();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.TextBoundsInfo> CREATOR;
@@ -55124,7 +55134,7 @@ package android.view.inputmethod {
   }
 
   public static final class TextBoundsInfo.Builder {
-    ctor public TextBoundsInfo.Builder();
+    ctor public TextBoundsInfo.Builder(int, int);
     method @NonNull public android.view.inputmethod.TextBoundsInfo build();
     method @NonNull public android.view.inputmethod.TextBoundsInfo.Builder clear();
     method @NonNull public android.view.inputmethod.TextBoundsInfo.Builder setCharacterBidiLevel(@NonNull int[]);

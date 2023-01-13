@@ -29,5 +29,11 @@ sealed interface FakeWifiEventModel {
         val validated: Boolean?,
     ) : FakeWifiEventModel
 
+    data class CarrierMerged(
+        val subscriptionId: Int,
+        val level: Int,
+        val numberOfLevels: Int,
+    ) : FakeWifiEventModel
+
     object WifiDisabled : FakeWifiEventModel
 }

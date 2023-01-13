@@ -687,8 +687,8 @@ public class ScreenshotController {
                     }
                 });
         if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)) {
-            mScreenshotView.badgeScreenshot(
-                    mContext.getPackageManager().getUserBadgeForDensity(owner, 0));
+            mScreenshotView.badgeScreenshot(mContext.getPackageManager().getUserBadgedIcon(
+                    mContext.getDrawable(R.drawable.overlay_badge_background), owner));
         }
         mScreenshotView.setScreenshot(mScreenBitmap, screenInsets);
         if (DEBUG_WINDOW) {

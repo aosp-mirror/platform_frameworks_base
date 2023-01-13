@@ -239,6 +239,11 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
 
     void setAdjacentTaskFragments(@NonNull WindowContainerTransaction wct,
             @NonNull IBinder primary, @Nullable IBinder secondary, @Nullable SplitRule splitRule) {
+        if (secondary == null) {
+            wct.clearAdjacentTaskFragments(primary);
+            return;
+        }
+
         WindowContainerTransaction.TaskFragmentAdjacentParams adjacentParams = null;
         final boolean finishSecondaryWithPrimary =
                 splitRule != null && SplitContainer.shouldFinishSecondaryWithPrimary(splitRule);

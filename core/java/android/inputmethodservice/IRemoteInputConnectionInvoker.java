@@ -767,20 +767,20 @@ final class IRemoteInputConnectionInvoker {
     /**
      * Invokes {@link IRemoteInputConnection#requestTextBoundsInfo(InputConnectionCommandHeader,
      * RectF, ResultReceiver)}
-     * @param rectF {@code rectF} parameter to be passed.
+     * @param bounds {@code rectF} parameter to be passed.
      * @param executor {@code Executor} parameter to be passed.
      * @param consumer {@code Consumer} parameter to be passed.
      */
     @AnyThread
     public void requestTextBoundsInfo(
-            @NonNull RectF rectF, @NonNull @CallbackExecutor Executor executor,
+            @NonNull RectF bounds, @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<TextBoundsInfoResult> consumer) {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(consumer);
 
         final ResultReceiver resultReceiver = new TextBoundsInfoResultReceiver(executor, consumer);
         try {
-            mConnection.requestTextBoundsInfo(createHeader(), rectF, resultReceiver);
+            mConnection.requestTextBoundsInfo(createHeader(), bounds, resultReceiver);
         } catch (RemoteException e) {
             executor.execute(() -> consumer.accept(new TextBoundsInfoResult(CODE_CANCELLED)));
         }

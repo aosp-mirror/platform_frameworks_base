@@ -32,6 +32,7 @@ import static com.android.internal.util.FrameworkStatsLog.PACKAGE_MANAGER_APPS_F
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_MANAGER_APPS_FILTER_CACHE_UPDATE_REPORTED__EVENT_TYPE__PACKAGE_DELETED;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_MANAGER_APPS_FILTER_CACHE_UPDATE_REPORTED__EVENT_TYPE__PACKAGE_REPLACED;
 import static com.android.server.pm.AppsFilterUtils.canQueryAsInstaller;
+import static com.android.server.pm.AppsFilterUtils.canQueryAsUpdateOwner;
 import static com.android.server.pm.AppsFilterUtils.canQueryViaComponents;
 import static com.android.server.pm.AppsFilterUtils.canQueryViaPackage;
 import static com.android.server.pm.AppsFilterUtils.canQueryViaUsesLibrary;
@@ -670,7 +671,8 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
                     }
                 }
                 if (canQueryViaPackage(existingPkg, newPkg)
-                        || canQueryAsInstaller(existingSetting, newPkg)) {
+                        || canQueryAsInstaller(existingSetting, newPkg)
+                        || canQueryAsUpdateOwner(existingSetting, newPkg)) {
                     synchronized (mQueriesViaPackageLock) {
                         mQueriesViaPackage.add(existingSetting.getAppId(),
                                 newPkgSetting.getAppId());
@@ -697,7 +699,8 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
                     }
                 }
                 if (canQueryViaPackage(newPkg, existingPkg)
-                        || canQueryAsInstaller(newPkgSetting, existingPkg)) {
+                        || canQueryAsInstaller(newPkgSetting, existingPkg)
+                        || canQueryAsUpdateOwner(newPkgSetting, existingPkg)) {
                     synchronized (mQueriesViaPackageLock) {
                         mQueriesViaPackage.add(newPkgSetting.getAppId(),
                                 existingSetting.getAppId());

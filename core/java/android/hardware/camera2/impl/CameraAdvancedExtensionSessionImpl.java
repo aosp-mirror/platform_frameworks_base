@@ -361,7 +361,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
     }
 
     @Override
-    public Pair<Long, Long> getRealtimeStillCaptureLatency() throws CameraAccessException {
+    public StillCaptureLatency getRealtimeStillCaptureLatency() throws CameraAccessException {
         synchronized (mInterfaceLock) {
             if (!mInitialized) {
                 throw new IllegalStateException("Uninitialized component");
@@ -370,7 +370,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             try {
                 LatencyPair latency = mSessionProcessor.getRealtimeCaptureLatency();
                 if (latency != null) {
-                    return new Pair<>(latency.first, latency.second);
+                    return new StillCaptureLatency(latency.first, latency.second);
                 }
 
                 return null;

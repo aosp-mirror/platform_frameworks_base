@@ -102,8 +102,7 @@ constructor(
             registerBatteryListener(deviceId)
         }
 
-        // TODO(b/257936830): get address once input api available
-        val btAddress: String? = null
+        val btAddress: String? = device.bluetoothAddress
         inputDeviceAddressMap[deviceId] = btAddress
         executeStylusCallbacks { cb -> cb.onStylusAdded(deviceId) }
 
@@ -120,8 +119,7 @@ constructor(
         val device: InputDevice = inputManager.getInputDevice(deviceId) ?: return
         if (!device.supportsSource(InputDevice.SOURCE_STYLUS)) return
 
-        // TODO(b/257936830): get address once input api available
-        val currAddress: String? = null
+        val currAddress: String? = device.bluetoothAddress
         val prevAddress: String? = inputDeviceAddressMap[deviceId]
         inputDeviceAddressMap[deviceId] = currAddress
 
@@ -212,7 +210,6 @@ constructor(
      * physical stylus device has actually been used.
      */
     private fun onStylusUsed() {
-        if (true) return // TODO(b/261826950): remove on main
         if (!featureFlags.isEnabled(Flags.TRACK_STYLUS_EVER_USED)) return
         if (inputManager.isStylusEverUsed(context)) return
 
@@ -250,8 +247,7 @@ constructor(
         for (deviceId: Int in inputManager.inputDeviceIds) {
             val device: InputDevice = inputManager.getInputDevice(deviceId) ?: continue
             if (device.supportsSource(InputDevice.SOURCE_STYLUS)) {
-                // TODO(b/257936830): get address once input api available
-                inputDeviceAddressMap[deviceId] = null
+                inputDeviceAddressMap[deviceId] = device.bluetoothAddress
 
                 if (!device.isExternal) { // TODO(b/263556967): add supportsUsi check once available
                     // For most devices, an active (non-bluetooth) stylus is represented by an

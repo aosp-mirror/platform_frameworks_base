@@ -2582,6 +2582,22 @@ class ContextImpl extends Context {
     }
 
     @Override
+    public Context createContextForSdkInSandbox(ApplicationInfo sdkInfo, int flags)
+            throws NameNotFoundException {
+        if (!Process.isSdkSandbox()) {
+            throw new SecurityException("API can only be called from SdkSandbox process");
+        }
+
+        ContextImpl ctx = (ContextImpl) createApplicationContext(sdkInfo, flags);
+
+        // Set sandbox app's context as the application context for sdk context
+        ctx.mPackageInfo.makeApplicationInner(/*forceDefaultAppClass=*/false,
+                /*instrumentation=*/null);
+
+        return ctx;
+    }
+
+    @Override
     public Context createPackageContext(String packageName, int flags)
             throws NameNotFoundException {
         return createPackageContextAsUser(packageName, flags, mUser);
@@ -3032,8 +3048,11 @@ class ContextImpl extends Context {
             throw new UnsupportedOperationException(
                     "Cannot update device ID on a Context created with createDeviceContext()");
         }
-        mDeviceId = updatedDeviceId;
-        notifyOnDeviceChangedListeners(updatedDeviceId);
+
+        if (mDeviceId != updatedDeviceId) {
+            mDeviceId = updatedDeviceId;
+            notifyOnDeviceChangedListeners(updatedDeviceId);
+        }
     }
 
     @Override

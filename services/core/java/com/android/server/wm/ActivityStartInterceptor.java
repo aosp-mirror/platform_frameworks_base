@@ -284,7 +284,7 @@ class ActivityStartInterceptor {
         IntentSender target = createIntentSenderForOriginalIntent(mCallingUid,
                 FLAG_CANCEL_CURRENT | FLAG_ONE_SHOT);
 
-        mIntent = UnlaunchableAppActivity.createInQuietModeDialogIntent(mUserId, target);
+        mIntent = UnlaunchableAppActivity.createInQuietModeDialogIntent(mUserId, target, mRInfo);
         mCallingPid = mRealCallingPid;
         mCallingUid = mRealCallingUid;
         mResolvedType = null;

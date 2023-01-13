@@ -271,9 +271,9 @@ public final class EditableInputConnection extends BaseInputConnection
 
     @Override
     public void requestTextBoundsInfo(
-            @NonNull RectF rectF, @Nullable @CallbackExecutor Executor executor,
+            @NonNull RectF bounds, @Nullable @CallbackExecutor Executor executor,
             @NonNull Consumer<TextBoundsInfoResult> consumer) {
-        final TextBoundsInfo textBoundsInfo = mTextView.getTextBoundsInfo(rectF);
+        final TextBoundsInfo textBoundsInfo = mTextView.getTextBoundsInfo(bounds);
         final int resultCode;
         if (textBoundsInfo != null) {
             resultCode = TextBoundsInfoResult.CODE_SUCCESS;

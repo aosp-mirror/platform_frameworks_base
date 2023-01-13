@@ -19,10 +19,7 @@ package android.hardware.camera2;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.hardware.camera2.impl.PublicKey;
-import android.hardware.camera2.utils.TypeReference;
-import android.util.Pair;
-import android.util.Range;
+import android.hardware.camera2.utils.HashCodeHelpers;
 
 import java.util.concurrent.Executor;
 
@@ -434,14 +431,66 @@ public abstract class CameraExtensionSession implements AutoCloseable {
     }
 
     /**
-     * Return the realtime still {@link #capture} latency.
+     * Realtime calculated still {@link #capture} latency.
      *
-     * <p>The pair will be in milliseconds with the first value indicating the capture latency from
-     * the {@link ExtensionCaptureCallback#onCaptureStarted} until
-     * {@link ExtensionCaptureCallback#onCaptureProcessStarted}
-     * and the second value containing the estimated post-processing latency from
-     * {@link ExtensionCaptureCallback#onCaptureProcessStarted} until the processed frame returns
-     * to the client.</p>
+     * @see #getRealtimeStillCaptureLatency()
+     */
+    public final static class StillCaptureLatency {
+        private final long mCaptureLatency, mProcessingLatency;
+
+        public StillCaptureLatency(long captureLatency, long processingLatency) {
+            mCaptureLatency = captureLatency;
+            mProcessingLatency = processingLatency;
+        }
+        /**
+         * Return the capture latency from
+         * {@link ExtensionCaptureCallback#onCaptureStarted} until
+         * {@link ExtensionCaptureCallback#onCaptureProcessStarted}.
+         *
+         * @return The realtime capture latency in milliseconds.
+         */
+        public long getCaptureLatency() {
+            return mCaptureLatency;
+        }
+
+        /**
+         * Return the estimated post-processing latency from
+         * {@link ExtensionCaptureCallback#onCaptureProcessStarted} until the processed frame
+         * returns to the client.
+         *
+         * @return returns post-processing latency in milliseconds
+         */
+        public long getProcessingLatency() {
+            return mProcessingLatency;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            StillCaptureLatency latency = (StillCaptureLatency) o;
+
+            if (mCaptureLatency != latency.mCaptureLatency) return false;
+            if (mProcessingLatency != latency.mProcessingLatency) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            return HashCodeHelpers.hashCode(mCaptureLatency, mProcessingLatency);
+        }
+
+        @Override
+        public String toString() {
+            return "StillCaptureLatency(processingLatency:" + mProcessingLatency +
+                    ", captureLatency: " + mCaptureLatency + ")";
+        }
+    }
+
+    /**
+     * Return the realtime still {@link #capture} latency.
      *
      * <p>The estimations will take into account the current environment conditions, the camera
      * state and will include the time spent processing the multi-frame capture request along with
@@ -451,7 +500,7 @@ public abstract class CameraExtensionSession implements AutoCloseable {
      * or {@code null} if the estimation is not supported.
      */
     @Nullable
-    public Pair<Long, Long> getRealtimeStillCaptureLatency() throws CameraAccessException {
+    public StillCaptureLatency getRealtimeStillCaptureLatency() throws CameraAccessException {
         throw new UnsupportedOperationException("Subclasses must override this method");
     }
 

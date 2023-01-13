@@ -111,7 +111,7 @@ import com.android.internal.inputmethod.InputConnectionCommandHeader;
                 int cursorUpdateMode, int cursorUpdateFilter, int imeDisplayId,
                  in AndroidFuture future /* T=Boolean */);
 
-    void requestTextBoundsInfo(in InputConnectionCommandHeader header, in RectF rect,
+    void requestTextBoundsInfo(in InputConnectionCommandHeader header, in RectF bounds,
            in ResultReceiver resultReceiver /* T=TextBoundsInfoResult */);
 
     void commitContent(in InputConnectionCommandHeader header, in InputContentInfo inputContentInfo,

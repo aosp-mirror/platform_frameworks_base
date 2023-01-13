@@ -919,6 +919,12 @@ class ControlsControllerImplTest : SysuiTestCase() {
             .getFile(ControlsFavoritePersistenceWrapper.FILE_NAME, context.user.identifier)
         assertThat(userStructure.file).isNotNull()
     }
+
+    @Test
+    fun testBindForPanel() {
+        controller.bindComponentForPanel(TEST_COMPONENT)
+        verify(bindingController).bindServiceForPanel(TEST_COMPONENT)
+    }
 }
 
 private class DidRunRunnable() : Runnable {

@@ -18,10 +18,10 @@ package com.android.server.wallpaper;
 
 import static android.app.WallpaperManager.FLAG_LOCK;
 
-import static com.android.server.wallpaper.WallpaperManagerService.WALLPAPER;
-import static com.android.server.wallpaper.WallpaperManagerService.WALLPAPER_CROP;
-import static com.android.server.wallpaper.WallpaperManagerService.WALLPAPER_LOCK_CROP;
-import static com.android.server.wallpaper.WallpaperManagerService.WALLPAPER_LOCK_ORIG;
+import static com.android.server.wallpaper.WallpaperUtils.WALLPAPER;
+import static com.android.server.wallpaper.WallpaperUtils.WALLPAPER_CROP;
+import static com.android.server.wallpaper.WallpaperUtils.WALLPAPER_LOCK_CROP;
+import static com.android.server.wallpaper.WallpaperUtils.WALLPAPER_LOCK_ORIG;
 import static com.android.server.wallpaper.WallpaperUtils.getWallpaperDir;
 
 import android.app.IWallpaperManagerCallback;

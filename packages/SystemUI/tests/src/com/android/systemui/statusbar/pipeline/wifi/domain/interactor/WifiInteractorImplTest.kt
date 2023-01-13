@@ -84,7 +84,9 @@ class WifiInteractorImplTest : SysuiTestCase() {
 
     @Test
     fun ssid_carrierMergedNetwork_outputsNull() = runBlocking(IMMEDIATE) {
-        wifiRepository.setWifiNetwork(WifiNetworkModel.CarrierMerged)
+        wifiRepository.setWifiNetwork(
+            WifiNetworkModel.CarrierMerged(networkId = 1, subscriptionId = 2, level = 1)
+        )
 
         var latest: String? = "default"
         val job = underTest

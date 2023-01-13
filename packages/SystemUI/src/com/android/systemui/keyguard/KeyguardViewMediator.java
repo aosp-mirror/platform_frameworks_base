@@ -41,6 +41,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
+import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.app.WindowConfiguration;
@@ -390,6 +391,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             .addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
                     | Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
                     | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
+
+    private static final Bundle USER_PRESENT_INTENT_OPTIONS =
+            BroadcastOptions.makeBasic()
+                    .setDeferUntilActive(true)
+                    .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                    .toBundle();
 
     /**
      * {@link #setKeyguardEnabled} waits on this condition when it re-enables
@@ -1921,13 +1928,23 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             return;
         }
 
-        // if the keyguard is already showing, don't bother. check flags in both files
-        // to account for the hiding animation which results in a delay and discrepancy
-        // between flags
+        // If the keyguard is already showing, see if we don't need to bother re-showing it. Check
+        // flags in both files to account for the hiding animation which results in a delay and
+        // discrepancy between flags.
         if (mShowing && mKeyguardStateController.isShowing()) {
-            if (DEBUG) Log.d(TAG, "doKeyguard: not showing because it is already showing");
-            resetStateLocked();
-            return;
+            if (mPM.isInteractive()) {
+                // It's already showing, and we're not trying to show it while the screen is off.
+                // We can simply reset all of the views.
+                if (DEBUG) Log.d(TAG, "doKeyguard: not showing because it is already showing");
+                resetStateLocked();
+                return;
+            } else {
+                // We are trying to show the keyguard while the screen is off - this results from
+                // race conditions involving locking while unlocking. Don't short-circuit here and
+                // ensure the keyguard is fully re-shown.
+                Log.e(TAG,
+                        "doKeyguard: already showing, but re-showing since we're not interactive");
+            }
         }
 
         // In split system user mode, we never unlock system user.
@@ -2319,7 +2336,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                         Context.USER_SERVICE);
                 mUiBgExecutor.execute(() -> {
                     for (int profileId : um.getProfileIdsWithDisabled(currentUser.getIdentifier())) {
-                        mContext.sendBroadcastAsUser(USER_PRESENT_INTENT, UserHandle.of(profileId));
+                        mContext.sendBroadcastAsUser(USER_PRESENT_INTENT,
+                                UserHandle.of(profileId),
+                                null,
+                                USER_PRESENT_INTENT_OPTIONS);
                     }
                     mLockPatternUtils.userPresent(currentUserId);
                 });

@@ -16,11 +16,13 @@
 
 package android.content.res
 
+import android.platform.test.annotations.Presubmit
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertWithMessage
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@Presubmit
 @RunWith(AndroidJUnit4::class)
 class FontScaleConverterTest {
 

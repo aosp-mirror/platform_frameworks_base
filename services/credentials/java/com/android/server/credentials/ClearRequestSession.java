@@ -84,14 +84,12 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
         respondToClientWithResponseAndFinish();
     }
 
-    @Override
     protected void onProviderResponseComplete(ComponentName componentName) {
         if (!isAnyProviderPending()) {
             onFinalResponseReceived(componentName, null);
         }
     }
 
-    @Override
     protected void onProviderTerminated(ComponentName componentName) {
         if (!isAnyProviderPending()) {
             processResponses();

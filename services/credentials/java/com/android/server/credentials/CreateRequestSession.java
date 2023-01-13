@@ -81,15 +81,10 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
                             mClientAppInfo.getPackageName()),
                     providerDataList));
         } catch (RemoteException e) {
-            Log.i(TAG, "Issue with invoking pending intent: " + e.getMessage());
-            // TODO: Propagate failure
+            respondToClientWithErrorAndFinish(
+                    CreateCredentialException.TYPE_UNKNOWN,
+                    "Unable to invoke selector");
         }
-    }
-
-    @Override
-    public void onProviderStatusChanged(ProviderSession.Status status,
-            ComponentName componentName) {
-        super.onProviderStatusChanged(status, componentName);
     }
 
     @Override
@@ -112,8 +107,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
 
     @Override
     public void onUiCancellation() {
-        // TODO("Replace with properly defined error type")
-        respondToClientWithErrorAndFinish(CreateCredentialException.TYPE_NO_CREDENTIAL,
+        respondToClientWithErrorAndFinish(CreateCredentialException.TYPE_USER_CANCELED,
                 "User cancelled the selector");
     }
 
@@ -135,5 +129,23 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
             Log.i(TAG, "Issue while responding to client: " + e.getMessage());
         }
         finishSession();
+    }
+
+    @Override
+    public void onProviderStatusChanged(ProviderSession.Status status,
+            ComponentName componentName) {
+        Log.i(TAG, "in onProviderStatusChanged with status: " + status);
+        // If all provider responses have been received, we can either need the UI,
+        // or we need to respond with error. The only other case is the entry being
+        // selected after the UI has been invoked which has a separate code path.
+        if (!isAnyProviderPending()) {
+            if (isUiInvocationNeeded()) {
+                Log.i(TAG, "in onProviderStatusChanged - isUiInvocationNeeded");
+                getProviderDataAndInitiateUi();
+            } else {
+                respondToClientWithErrorAndFinish(CreateCredentialException.TYPE_NO_CREDENTIAL,
+                        "No credentials available");
+            }
+        }
     }
 }

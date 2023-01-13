@@ -88,6 +88,7 @@ public final class Entry implements Parcelable {
     /** Constructor to be used for an entry that requires a pending intent to be invoked
      * when clicked.
      */
+    // TODO: Remove this constructor as it is no longer used
     public Entry(@NonNull String key, @NonNull String subkey, @NonNull Slice slice,
             @NonNull PendingIntent pendingIntent, @NonNull Intent intent) {
         this(key, subkey, slice);

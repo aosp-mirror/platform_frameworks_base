@@ -2640,7 +2640,7 @@ public final class ActivityThread extends ClientTransactionHandler
             ClassLoader baseLoader, boolean securityViolation, boolean includeCode,
             boolean registerPackage) {
         return getPackageInfo(aInfo, compatInfo, baseLoader, securityViolation, includeCode,
-                registerPackage, /*isSdkSandbox=*/false);
+                registerPackage, Process.isSdkSandbox());
     }
 
     private LoadedApk getPackageInfo(ApplicationInfo aInfo, CompatibilityInfo compatInfo,

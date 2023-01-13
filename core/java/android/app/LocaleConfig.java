@@ -110,7 +110,7 @@ public class LocaleConfig implements Parcelable {
      * @see Context#createPackageContext(String, int).
      */
     @NonNull
-    public static LocaleConfig fromResources(@NonNull Context context) {
+    public static LocaleConfig fromContextIgnoringOverride(@NonNull Context context) {
         return new LocaleConfig(context, false);
     }
 

@@ -189,15 +189,20 @@ public final class BatteryService extends SystemService {
     private long mLastBatteryLevelChangedSentMs;
 
     private Bundle mBatteryChangedOptions = BroadcastOptions.makeRemovingMatchingFilter(
-            new IntentFilter(Intent.ACTION_BATTERY_CHANGED)).toBundle();
+            new IntentFilter(Intent.ACTION_BATTERY_CHANGED)).setDeferUntilActive(true)
+            .toBundle();
     private Bundle mPowerConnectedOptions = BroadcastOptions.makeRemovingMatchingFilter(
-            new IntentFilter(Intent.ACTION_POWER_DISCONNECTED)).toBundle();
+            new IntentFilter(Intent.ACTION_POWER_DISCONNECTED)).setDeferUntilActive(true)
+            .toBundle();
     private Bundle mPowerDisconnectedOptions = BroadcastOptions.makeRemovingMatchingFilter(
-            new IntentFilter(Intent.ACTION_POWER_CONNECTED)).toBundle();
+            new IntentFilter(Intent.ACTION_POWER_CONNECTED)).setDeferUntilActive(true)
+            .toBundle();
     private Bundle mBatteryLowOptions = BroadcastOptions.makeRemovingMatchingFilter(
-            new IntentFilter(Intent.ACTION_BATTERY_OKAY)).toBundle();
+            new IntentFilter(Intent.ACTION_BATTERY_OKAY)).setDeferUntilActive(true)
+            .toBundle();
     private Bundle mBatteryOkayOptions = BroadcastOptions.makeRemovingMatchingFilter(
-            new IntentFilter(Intent.ACTION_BATTERY_LOW)).toBundle();
+            new IntentFilter(Intent.ACTION_BATTERY_LOW)).setDeferUntilActive(true)
+            .toBundle();
 
     private MetricsLogger mMetricsLogger;
 

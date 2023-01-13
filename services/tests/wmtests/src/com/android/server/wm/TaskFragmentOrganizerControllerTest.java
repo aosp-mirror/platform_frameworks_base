@@ -545,6 +545,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mTransaction.reparentActivityToTaskFragment(mFragmentToken, mock(IBinder.class));
         mTransaction.setAdjacentTaskFragments(mFragmentToken, mock(IBinder.class),
                 null /* options */);
+        mTransaction.clearAdjacentTaskFragments(mFragmentToken);
         assertApplyTransactionAllowed(mTransaction);
 
         // Successfully created a TaskFragment.
@@ -619,12 +620,16 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         // Not allowed because TaskFragments are not organized by the caller organizer.
         assertApplyTransactionDisallowed(mTransaction);
+        assertNull(mTaskFragment.getAdjacentTaskFragment());
+        assertNull(taskFragment2.getAdjacentTaskFragment());
 
         mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* uid */,
                 "Test:TaskFragmentOrganizer" /* processName */);
 
         // Not allowed because TaskFragment2 is not organized by the caller organizer.
         assertApplyTransactionDisallowed(mTransaction);
+        assertNull(mTaskFragment.getAdjacentTaskFragment());
+        assertNull(taskFragment2.getAdjacentTaskFragment());
 
         mTaskFragment.onTaskFragmentOrganizerRemoved();
         taskFragment2.setTaskFragmentOrganizer(mOrganizerToken, 10 /* uid */,
@@ -632,11 +637,46 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         // Not allowed because mTaskFragment is not organized by the caller organizer.
         assertApplyTransactionDisallowed(mTransaction);
+        assertNull(mTaskFragment.getAdjacentTaskFragment());
+        assertNull(taskFragment2.getAdjacentTaskFragment());
 
         mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* uid */,
                 "Test:TaskFragmentOrganizer" /* processName */);
 
         assertApplyTransactionAllowed(mTransaction);
+        assertEquals(taskFragment2, mTaskFragment.getAdjacentTaskFragment());
+    }
+
+    @Test
+    public void testApplyTransaction_enforceTaskFragmentOrganized_clearAdjacentTaskFragments() {
+        final Task task = createTask(mDisplayContent);
+        mTaskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setFragmentToken(mFragmentToken)
+                .build();
+        mWindowOrganizerController.mLaunchTaskFragments.put(mFragmentToken, mTaskFragment);
+        final IBinder fragmentToken2 = new Binder();
+        final TaskFragment taskFragment2 = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setFragmentToken(fragmentToken2)
+                .build();
+        mWindowOrganizerController.mLaunchTaskFragments.put(fragmentToken2, taskFragment2);
+        mTaskFragment.setAdjacentTaskFragment(taskFragment2);
+
+        mTransaction.clearAdjacentTaskFragments(mFragmentToken);
+        mOrganizer.applyTransaction(mTransaction, TASK_FRAGMENT_TRANSIT_CHANGE,
+                false /* shouldApplyIndependently */);
+
+        // Not allowed because TaskFragment is not organized by the caller organizer.
+        assertApplyTransactionDisallowed(mTransaction);
+        assertEquals(taskFragment2, mTaskFragment.getAdjacentTaskFragment());
+
+        mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* uid */,
+                "Test:TaskFragmentOrganizer" /* processName */);
+
+        assertApplyTransactionAllowed(mTransaction);
+        assertNull(mTaskFragment.getAdjacentTaskFragment());
+        assertNull(taskFragment2.getAdjacentTaskFragment());
     }
 
     @Test
@@ -1016,8 +1056,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         spyOn(mWindowOrganizerController);
 
         // Not allow to set adjacent on a TaskFragment that is in a PIP Task.
-        mTransaction.setAdjacentTaskFragments(mFragmentToken, null /* fragmentToken2 */,
-                        null /* options */)
+        mTransaction.setAdjacentTaskFragments(mFragmentToken, new Binder(), null /* options */)
                 .setErrorCallbackToken(mErrorToken);
         assertApplyTransactionAllowed(mTransaction);
 

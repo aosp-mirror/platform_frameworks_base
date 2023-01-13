@@ -27,4 +27,6 @@
     <string name="app_permission_summary_not_allowed">Not allowed</string>
     <!-- Manage applications, version string displayed in app snippet -->
     <string name="version_text">version <xliff:g id="version_num">%1$s</xliff:g></string>
+    <!-- Label of an app on App Info page of Cloned Apps menu [CHAR LIMIT=40] -->
+    <string name="cloned_app_info_label"><xliff:g id="package_label">%1$s</xliff:g> clone</string>
 </resources>
