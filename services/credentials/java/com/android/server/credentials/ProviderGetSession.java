@@ -375,6 +375,11 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     private void onAuthenticationEntrySelected(
             @Nullable ProviderPendingIntentResponse providerPendingIntentResponse) {
         //TODO: Other provider intent statuses
+        if (providerPendingIntentResponse == null) {
+            Log.i(TAG, "providerPendingIntentResponse is null");
+            onUpdateEmptyResponse();
+        }
+
         GetCredentialException exception = maybeGetPendingIntentException(
                 providerPendingIntentResponse);
         if (exception != null) {
@@ -393,7 +398,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         }
 
         Log.i(TAG, "No error or respond found in pending intent response");
-        invokeCallbackOnInternalInvalidState();
+        onUpdateEmptyResponse();
     }
 
     private void onActionEntrySelected(ProviderPendingIntentResponse
@@ -415,12 +420,16 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         }
     }
 
+    private void onUpdateEmptyResponse() {
+        updateStatusAndInvokeCallback(Status.NO_CREDENTIALS);
+    }
+
     @Nullable
     private GetCredentialException maybeGetPendingIntentException(
             ProviderPendingIntentResponse pendingIntentResponse) {
         if (pendingIntentResponse == null) {
             Log.i(TAG, "pendingIntentResponse is null");
-            return new GetCredentialException(GetCredentialException.TYPE_NO_CREDENTIAL);
+            return null;
         }
         if (PendingIntentResultHandler.isValidResponse(pendingIntentResponse)) {
             GetCredentialException exception = PendingIntentResultHandler

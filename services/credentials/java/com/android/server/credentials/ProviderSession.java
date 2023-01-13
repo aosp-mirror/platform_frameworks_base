@@ -133,7 +133,7 @@ public abstract class ProviderSession<T, R>
         PENDING_INTENT_INVOKED,
         CREDENTIAL_RECEIVED_FROM_SELECTION,
         SAVE_ENTRIES_RECEIVED, CANCELED,
-        COMPLETE
+        NO_CREDENTIALS, COMPLETE
     }
 
     /** Converts exception to a provider session status. */
