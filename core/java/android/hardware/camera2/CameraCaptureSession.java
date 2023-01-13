@@ -1246,7 +1246,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * between frames.</p>
          *
          * <p>The timestamps match the timestamps of the output surfaces with readout timestamp
-         * enabled (via {@link OutputConfiguration#useReadoutTimestamp}) if:</p>
+         * enabled (via {@link OutputConfiguration#setReadoutTimestampEnabled}) if:</p>
          * <ul>
          * <li> Timestamp base is {@link OutputConfiguration#TIMESTAMP_BASE_DEFAULT} and the
          * output

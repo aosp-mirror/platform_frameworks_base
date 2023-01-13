@@ -19035,15 +19035,15 @@ package android.hardware.camera2.params {
     method public int getSurfaceGroupId();
     method @NonNull public java.util.List<android.view.Surface> getSurfaces();
     method public int getTimestampBase();
-    method public boolean isReadoutTimestampUsed();
+    method public boolean isReadoutTimestampEnabled();
     method public void removeSensorPixelModeUsed(int);
     method public void removeSurface(@NonNull android.view.Surface);
     method public void setDynamicRangeProfile(long);
     method public void setMirrorMode(int);
     method public void setPhysicalCameraId(@Nullable String);
+    method public void setReadoutTimestampEnabled(boolean);
     method public void setStreamUseCase(long);
     method public void setTimestampBase(int);
-    method public void useReadoutTimestamp(boolean);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.camera2.params.OutputConfiguration> CREATOR;
     field public static final int MIRROR_MODE_AUTO = 0; // 0x0
