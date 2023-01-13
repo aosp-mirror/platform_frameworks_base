@@ -6994,14 +6994,12 @@
     <permission android:name="android.permission.MANAGE_WEARABLE_SENSING_SERVICE"
                 android:protectionLevel="signature|privileged" />
 
-    <!-- Allows applications to use the long running jobs APIs.
-         <p>This is a special access permission that can be revoked by the system or the user.
-         <p>Apps need to target API {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or above
-         to be able to request this permission.
-         <p>Protection level: appop
+    <!-- Allows applications to use the long running jobs APIs. For more details
+         see {@link android.app.job.JobInfo.Builder#setUserInitiated}.
+         <p>Protection level: normal
      -->
     <permission android:name="android.permission.RUN_LONG_JOBS"
-                android:protectionLevel="normal|appop"/>
+                android:protectionLevel="normal"/>
 
     <!-- Allows an app access to the installer provided app metadata.
         @SystemApi
