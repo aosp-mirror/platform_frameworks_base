@@ -52,6 +52,7 @@ import android.service.voice.HotwordDetectionService;
 import android.service.voice.HotwordDetector;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.ISandboxedDetectionService;
+import android.service.voice.IVisualQueryDetectionVoiceInteractionCallback;
 import android.service.voice.VisualQueryDetectionService;
 import android.service.voice.VoiceInteractionManagerInternal.HotwordDetectionServiceIdentity;
 import android.speech.IRecognitionServiceManager;
@@ -288,6 +289,34 @@ final class HotwordDetectionConnection {
             return;
         }
         session.startListeningFromMicLocked(audioFormat, callback);
+    }
+
+    /**
+     * This method is only used by VisualQueryDetector.
+     */
+    void startPerceivingLocked(IVisualQueryDetectionVoiceInteractionCallback callback) {
+        if (DEBUG) {
+            Slog.d(TAG, "startPerceivingLocked");
+        }
+        final VisualQueryDetectorSession session = getVisualQueryDetectorSessionLocked();
+        if (session == null) {
+            return;
+        }
+        session.startPerceivingLocked(callback);
+    }
+
+    /**
+     * This method is only used by VisaulQueryDetector.
+     */
+    void stopPerceivingLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "stopPerceivingLocked");
+        }
+        final VisualQueryDetectorSession session = getVisualQueryDetectorSessionLocked();
+        if (session == null) {
+            return;
+        }
+        session.stopPerceivingLocked();
     }
 
     public void startListeningFromExternalSourceLocked(

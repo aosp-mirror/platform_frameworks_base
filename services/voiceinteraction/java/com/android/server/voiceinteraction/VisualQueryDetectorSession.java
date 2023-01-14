@@ -24,13 +24,18 @@ import android.media.permission.Identity;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
+import android.os.RemoteException;
 import android.os.SharedMemory;
+import android.service.voice.IDetectorSessionVisualQueryDetectionCallback;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
+import android.service.voice.ISandboxedDetectionService;
+import android.service.voice.IVisualQueryDetectionVoiceInteractionCallback;
 import android.util.Slog;
 
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 
 import java.io.PrintWriter;
+import java.util.Objects;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
@@ -44,6 +49,8 @@ import java.util.concurrent.ScheduledExecutorService;
 final class VisualQueryDetectorSession extends DetectorSession {
 
     private static final String TAG = "VisualQueryDetectorSession";
+    private boolean mEgressingData;
+    private boolean mQueryStreaming;
 
     //TODO(b/261783819): Determines actual functionalities, e.g., startRecognition etc.
     VisualQueryDetectorSession(
@@ -55,6 +62,8 @@ final class VisualQueryDetectorSession extends DetectorSession {
         super(remoteService, lock, context, token, callback,
                 voiceInteractionServiceUid, voiceInteractorIdentity, scheduledExecutorService,
                 logging);
+        mEgressingData = false;
+        mQueryStreaming = false;
     }
 
     @Override
@@ -63,6 +72,77 @@ final class VisualQueryDetectorSession extends DetectorSession {
         Slog.v(TAG, "informRestartProcessLocked");
         mUpdateStateAfterStartFinished.set(false);
         //TODO(b/261783819): Starts detection in VisualQueryDetectionService.
+    }
+
+    @SuppressWarnings("GuardedBy")
+    void startPerceivingLocked(IVisualQueryDetectionVoiceInteractionCallback callback) {
+        if (DEBUG) {
+            Slog.d(TAG, "startPerceivingLocked");
+        }
+
+        IDetectorSessionVisualQueryDetectionCallback internalCallback =
+                new IDetectorSessionVisualQueryDetectionCallback.Stub(){
+
+            @Override
+            public void onAttentionGained() {
+                Slog.v(TAG, "BinderCallback#onAttentionGained");
+                //TODO check to see if there is an active SysUI listener registered
+                mEgressingData = true;
+            }
+
+            @Override
+            public void onAttentionLost() {
+                Slog.v(TAG, "BinderCallback#onAttentionLost");
+                //TODO check to see if there is an active SysUI listener registered
+                mEgressingData = false;
+            }
+
+            @Override
+            public void onQueryDetected(@NonNull String partialQuery) throws RemoteException {
+                Objects.requireNonNull(partialQuery);
+                Slog.v(TAG, "BinderCallback#onQueryDetected");
+                if (!mEgressingData) {
+                    Slog.v(TAG, "Query should not be egressed within the unattention state.");
+                    return;
+                }
+                mQueryStreaming = true;
+                callback.onQueryDetected(partialQuery);
+                Slog.i(TAG, "Egressed from visual query detection process.");
+            }
+
+            @Override
+            public void onQueryFinished() throws RemoteException {
+                Slog.v(TAG, "BinderCallback#onQueryFinished");
+                if (!mQueryStreaming) {
+                    Slog.v(TAG, "Query streaming state signal FINISHED is block since there is"
+                            + " no active query being streamed.");
+                    return;
+                }
+                callback.onQueryFinished();
+                mQueryStreaming = false;
+            }
+
+            @Override
+            public void onQueryRejected() throws RemoteException {
+                Slog.v(TAG, "BinderCallback#onQueryRejected");
+                if (!mQueryStreaming) {
+                    Slog.v(TAG, "Query streaming state signal REJECTED is block since there is"
+                            + " no active query being streamed.");
+                    return;
+                }
+                callback.onQueryRejected();
+                mQueryStreaming = false;
+            }
+        };
+        mRemoteDetectionService.run(service -> service.detectWithVisualSignals(internalCallback));
+    }
+
+    @SuppressWarnings("GuardedBy")
+    void stopPerceivingLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "stopPerceivingLocked");
+        }
+        mRemoteDetectionService.run(ISandboxedDetectionService::stopDetection);
     }
 
     @Override
