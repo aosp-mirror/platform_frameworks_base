@@ -15711,8 +15711,13 @@ public final class Settings {
         public static final String NETWORK_SCORING_PROVISIONED = "network_scoring_provisioned";
 
         /**
-         * Indicates whether the user wants to be prompted for password to decrypt the device on
-         * boot. This only matters if the storage is encrypted.
+         * On devices that use full-disk encryption, indicates whether the primary user's lockscreen
+         * credential is required to decrypt the device on boot.
+         * <p>
+         * This setting does not do anything on devices that use file-based encryption.  With
+         * file-based encryption, the device boots without a credential being needed, but the
+         * lockscreen credential is required to unlock credential-encrypted storage.  All devices
+         * that launched with Android 10 or higher use file-based encryption.
          * <p>
          * Type: int (0 for false, 1 for true)
          *
