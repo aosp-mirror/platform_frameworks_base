@@ -31,13 +31,6 @@ namespace android {
 // Special constant to request the velocity of the active pointer.
 static const int ACTIVE_POINTER_ID = -1;
 
-static struct {
-    jfieldID coeff;
-    jfieldID degree;
-    jfieldID confidence;
-} gEstimatorClassInfo;
-
-
 // --- VelocityTrackerState ---
 
 class VelocityTrackerState {
@@ -50,7 +43,6 @@ public:
     // a subset of the supported axes.
     void computeCurrentVelocity(int32_t units, float maxVelocity);
     float getVelocity(int32_t axis, int32_t id);
-    bool getEstimator(int32_t axis, int32_t id, VelocityTracker::Estimator* outEstimator);
 
 private:
     VelocityTracker mVelocityTracker;
@@ -78,11 +70,6 @@ float VelocityTrackerState::getVelocity(int32_t axis, int32_t id) {
     }
 
     return mComputedVelocity.getVelocity(axis, id).value_or(0);
-}
-
-bool VelocityTrackerState::getEstimator(int32_t axis, int32_t id,
-                                        VelocityTracker::Estimator* outEstimator) {
-    return mVelocityTracker.getEstimator(axis, id, outEstimator);
 }
 
 // Return a strategy enum from integer value.
@@ -135,24 +122,6 @@ static jfloat android_view_VelocityTracker_nativeGetVelocity(JNIEnv* env, jclass
     return state->getVelocity(axis, id);
 }
 
-static jboolean android_view_VelocityTracker_nativeGetEstimator(JNIEnv* env, jclass clazz,
-                                                                jlong ptr, jint axis, jint id,
-                                                                jobject outEstimatorObj) {
-    VelocityTrackerState* state = reinterpret_cast<VelocityTrackerState*>(ptr);
-    VelocityTracker::Estimator estimator;
-
-    bool result = state->getEstimator(axis, id, &estimator);
-
-    jfloatArray coeffObj =
-            jfloatArray(env->GetObjectField(outEstimatorObj, gEstimatorClassInfo.coeff));
-
-    env->SetFloatArrayRegion(coeffObj, 0, VelocityTracker::Estimator::MAX_DEGREE + 1,
-                             estimator.coeff);
-    env->SetIntField(outEstimatorObj, gEstimatorClassInfo.degree, estimator.degree);
-    env->SetFloatField(outEstimatorObj, gEstimatorClassInfo.confidence, estimator.confidence);
-    return result;
-}
-
 static jboolean android_view_VelocityTracker_nativeIsAxisSupported(JNIEnv* env, jclass clazz,
                                                                    jint axis) {
     return VelocityTracker::isAxisSupported(axis);
@@ -170,23 +139,13 @@ static const JNINativeMethod gVelocityTrackerMethods[] = {
         {"nativeComputeCurrentVelocity", "(JIF)V",
          (void*)android_view_VelocityTracker_nativeComputeCurrentVelocity},
         {"nativeGetVelocity", "(JII)F", (void*)android_view_VelocityTracker_nativeGetVelocity},
-        {"nativeGetEstimator", "(JIILandroid/view/VelocityTracker$Estimator;)Z",
-         (void*)android_view_VelocityTracker_nativeGetEstimator},
         {"nativeIsAxisSupported", "(I)Z",
          (void*)android_view_VelocityTracker_nativeIsAxisSupported},
 };
 
 int register_android_view_VelocityTracker(JNIEnv* env) {
-    int res = RegisterMethodsOrDie(env, "android/view/VelocityTracker", gVelocityTrackerMethods,
-                                   NELEM(gVelocityTrackerMethods));
-
-    jclass clazz = FindClassOrDie(env, "android/view/VelocityTracker$Estimator");
-
-    gEstimatorClassInfo.coeff = GetFieldIDOrDie(env, clazz, "coeff", "[F");
-    gEstimatorClassInfo.degree = GetFieldIDOrDie(env, clazz, "degree", "I");
-    gEstimatorClassInfo.confidence = GetFieldIDOrDie(env, clazz, "confidence", "F");
-
-    return res;
+    return RegisterMethodsOrDie(env, "android/view/VelocityTracker", gVelocityTrackerMethods,
+                                NELEM(gVelocityTrackerMethods));
 }
 
 } // namespace android

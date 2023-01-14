@@ -19,7 +19,6 @@ package android.view;
 import android.annotation.IntDef;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.input.InputManager;
-import android.os.Build;
 import android.util.ArrayMap;
 import android.util.Pools.SynchronizedPool;
 
@@ -190,8 +189,6 @@ public final class VelocityTracker {
     private static native void nativeAddMovement(long ptr, MotionEvent event);
     private static native void nativeComputeCurrentVelocity(long ptr, int units, float maxVelocity);
     private static native float nativeGetVelocity(long ptr, int axis, int id);
-    private static native boolean nativeGetEstimator(
-            long ptr, int axis, int id, Estimator outEstimator);
     private static native boolean nativeIsAxisSupported(int axis);
 
     static {
@@ -436,7 +433,7 @@ public final class VelocityTracker {
      * method:
      * <ul>
      *   <li> {@link MotionEvent#AXIS_SCROLL}: supported starting
-     *        {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}
+     *        {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}
      * </ul>
      *
      * <p>Before accessing velocities of an axis using this method, check that your
@@ -466,90 +463,5 @@ public final class VelocityTracker {
      */
     public float getAxisVelocity(@VelocityTrackableMotionEventAxis int axis) {
         return nativeGetVelocity(mPtr, axis, ACTIVE_POINTER_ID);
-    }
-
-    /**
-     * Get an estimator for the movements of a pointer using past movements of the
-     * pointer to predict future movements.
-     *
-     * It is not necessary to call {@link #computeCurrentVelocity(int)} before calling
-     * this method.
-     *
-     * @param axis Which axis's velocity to return.
-     *             Should be one of the axes defined in {@link MotionEvent}.
-     * @param id Which pointer's velocity to return.
-     * @param outEstimator The estimator to populate.
-     * @return True if an estimator was obtained, false if there is no information
-     * available about the pointer.
-     *
-     * @hide For internal use only.  Not a final API.
-     */
-    public boolean getEstimator(int axis, int id, Estimator outEstimator) {
-        if (outEstimator == null) {
-            throw new IllegalArgumentException("outEstimator must not be null");
-        }
-        return nativeGetEstimator(mPtr, axis, id, outEstimator);
-    }
-
-    /**
-     * An estimator for the movements of a pointer based on a polynomial model.
-     *
-     * The last recorded position of the pointer is at time zero seconds.
-     * Past estimated positions are at negative times and future estimated positions
-     * are at positive times.
-     *
-     * First coefficient is position (in units), second is velocity (in units per second),
-     * third is acceleration (in units per second squared).
-     *
-     * @hide For internal use only.  Not a final API.
-     */
-    public static final class Estimator {
-        // Must match VelocityTracker::Estimator::MAX_DEGREE
-        private static final int MAX_DEGREE = 4;
-
-        /**
-         * Polynomial coefficients describing motion.
-         */
-        public final float[] coeff = new float[MAX_DEGREE + 1];
-
-        /**
-         * Polynomial degree, or zero if only position information is available.
-         */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-        public int degree;
-
-        /**
-         * Confidence (coefficient of determination), between 0 (no fit) and 1 (perfect fit).
-         */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-        public float confidence;
-
-        /**
-         * Gets an estimate of the position of the pointer at the specified time point.
-         * @param time The time point in seconds, 0 is the last recorded time.
-         * @return The estimated axis value.
-         */
-        public float estimate(float time) {
-            return estimate(time, coeff);
-        }
-
-        /**
-         * Gets the coefficient with the specified index.
-         * @param index The index of the coefficient to return.
-         * @return The coefficient, or 0 if the index is greater than the degree.
-         */
-        public float getCoeff(int index) {
-            return index <= degree ? coeff[index] : 0;
-        }
-
-        private float estimate(float time, float[] c) {
-            float a = 0;
-            float scale = 1;
-            for (int i = 0; i <= degree; i++) {
-                a += c[i] * scale;
-                scale *= time;
-            }
-            return a;
-        }
     }
 }
