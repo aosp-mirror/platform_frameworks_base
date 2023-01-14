@@ -1489,7 +1489,6 @@ package android {
     field public static final int strokeLineJoin = 16843788; // 0x101040c
     field public static final int strokeMiterLimit = 16843789; // 0x101040d
     field public static final int strokeWidth = 16843783; // 0x1010407
-    field public static final int stylusHandwritingSettingsActivity;
     field public static final int subMenuArrow = 16844019; // 0x10104f3
     field public static final int submitBackground = 16843912; // 0x1010488
     field public static final int subtitle = 16843473; // 0x10102d1
@@ -54811,7 +54810,6 @@ package android.view.inputmethod {
   public final class InputMethodInfo implements android.os.Parcelable {
     ctor public InputMethodInfo(android.content.Context, android.content.pm.ResolveInfo) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     ctor public InputMethodInfo(String, String, CharSequence, String);
-    method @Nullable public android.content.Intent createStylusHandwritingSettingsActivityIntent();
     method public int describeContents();
     method public void dump(android.util.Printer, String);
     method public android.content.ComponentName getComponent();
@@ -54830,7 +54828,6 @@ package android.view.inputmethod {
     method public boolean supportsStylusHandwriting();
     method public boolean suppressesSpellChecker();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final String ACTION_STYLUS_HANDWRITING_SETTINGS = "android.view.inputmethod.action.STYLUS_HANDWRITING_SETTINGS";
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.InputMethodInfo> CREATOR;
   }
 
