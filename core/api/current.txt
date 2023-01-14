@@ -50655,6 +50655,13 @@ package android.view {
     field public int toolType;
   }
 
+  public final class MotionPredictor {
+    ctor public MotionPredictor(@NonNull android.content.Context);
+    method public boolean isPredictionAvailable(int, int);
+    method @NonNull public java.util.List<android.view.MotionEvent> predict(long);
+    method public void record(@NonNull android.view.MotionEvent);
+  }
+
   public interface OnReceiveContentListener {
     method @Nullable public android.view.ContentInfo onReceiveContent(@NonNull android.view.View, @NonNull android.view.ContentInfo);
   }
