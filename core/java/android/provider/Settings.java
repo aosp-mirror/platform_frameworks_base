@@ -9820,9 +9820,11 @@ public final class Settings {
 
         /**
          * Whether or not a SFPS device is enabling the performant auth setting.
+         * The "_V2" suffix was added to re-introduce the default behavior for
+         * users. See b/265264294 fore more details.
          * @hide
          */
-        public static final String SFPS_PERFORMANT_AUTH_ENABLED = "sfps_performant_auth_enabled";
+        public static final String SFPS_PERFORMANT_AUTH_ENABLED = "sfps_performant_auth_enabled_v2";
 
         /**
          * Whether or not debugging is enabled.
