@@ -35,7 +35,8 @@ import android.util.AndroidException;
 import java.io.PrintWriter;
 
 /**
- * Basic functionality for sandboxed detectors.
+ * Basic functionality for sandboxed detectors. This interface will be used by detectors that
+ * manages their service lifecycle.
  *
  * @hide
  */
@@ -81,9 +82,20 @@ public interface HotwordDetector {
     int DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE = 2;
 
     /**
+     * Indicates that it is a visual query detector.
+     *
+     * @hide
+     */
+    int DETECTOR_TYPE_VISUAL_QUERY_DETECTOR = 3;
+
+    /**
      * Starts sandboxed detection recognition.
      * <p>
-     * On calling this, the system streams audio from the device microphone to this application's
+     * If a {@link VisualQueryDetector} calls this method, {@link VisualQueryDetectionService
+     * #onStartDetection(VisualQueryDetectionService.Callback)} will be called to start detection.
+     * <p>
+     * Otherwise if a {@link AlwaysOnHotwordDetector} or {@link SoftwareHotwordDetector} calls this,
+     * the system streams audio from the device microphone to this application's
      * {@link HotwordDetectionService}. Audio is streamed until {@link #stopRecognition()} is
      * called.
      * <p>
@@ -192,6 +204,8 @@ public interface HotwordDetector {
                 return "trusted_hotword_dsp";
             case DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE:
                 return "trusted_hotword_software";
+            case DETECTOR_TYPE_VISUAL_QUERY_DETECTOR:
+                return "visual_query_detector";
             default:
                 return Integer.toString(detectorType);
         }
@@ -244,18 +258,21 @@ public interface HotwordDetector {
         void onRejected(@NonNull HotwordRejectedResult result);
 
         /**
-         * Called when the {@link HotwordDetectionService} is created by the system and given a
-         * short amount of time to report its initialization state.
+         * Called when the {@link HotwordDetectionService} or {@link VisualQueryDetectionService} is
+         * created by the system and given a short amount of time to report their initialization
+         * state.
          *
-         * @param status Info about initialization state of {@link HotwordDetectionService}; the
-         * allowed values are {@link SandboxedDetectionServiceBase#INITIALIZATION_STATUS_SUCCESS},
+         * @param status Info about initialization state of {@link HotwordDetectionService} or
+         * {@link VisualQueryDetectionService}; allowed values are
+         * {@link SandboxedDetectionServiceBase#INITIALIZATION_STATUS_SUCCESS},
          * 1<->{@link SandboxedDetectionServiceBase#getMaxCustomInitializationStatus()},
          * {@link SandboxedDetectionServiceBase#INITIALIZATION_STATUS_UNKNOWN}.
          */
         void onHotwordDetectionServiceInitialized(int status);
 
         /**
-         * Called with the {@link HotwordDetectionService} is restarted.
+         * Called with the {@link HotwordDetectionService} or {@link VisualQueryDetectionService} is
+         * restarted.
          *
          * Clients are expected to call {@link HotwordDetector#updateState} to share the state with
          * the newly created service.
