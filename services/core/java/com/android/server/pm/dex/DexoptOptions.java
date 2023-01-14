@@ -20,6 +20,7 @@ import static com.android.server.pm.PackageManagerServiceCompilerMapping.getComp
 
 import static dalvik.system.DexFile.isProfileGuidedCompilerFilter;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 import com.android.server.art.ReasonMapping;
@@ -201,6 +202,49 @@ public final class DexoptOptions {
     }
 
     /**
+     * Returns the ART Service reason for the given PackageManagerService reason. Throws unchecked
+     * exceptions for reasons that aren't supported.
+     */
+    public static @NonNull String convertToArtServiceDexoptReason(int pmDexoptReason) {
+        switch (pmDexoptReason) {
+            case PackageManagerService.REASON_FIRST_BOOT:
+                return ReasonMapping.REASON_FIRST_BOOT;
+            case PackageManagerService.REASON_BOOT_AFTER_OTA:
+                return ReasonMapping.REASON_BOOT_AFTER_OTA;
+            case PackageManagerService.REASON_INSTALL:
+                return ReasonMapping.REASON_INSTALL;
+            case PackageManagerService.REASON_INSTALL_FAST:
+                return ReasonMapping.REASON_INSTALL_FAST;
+            case PackageManagerService.REASON_INSTALL_BULK:
+                return ReasonMapping.REASON_INSTALL_BULK;
+            case PackageManagerService.REASON_INSTALL_BULK_SECONDARY:
+                return ReasonMapping.REASON_INSTALL_BULK_SECONDARY;
+            case PackageManagerService.REASON_INSTALL_BULK_DOWNGRADED:
+                return ReasonMapping.REASON_INSTALL_BULK_DOWNGRADED;
+            case PackageManagerService.REASON_INSTALL_BULK_SECONDARY_DOWNGRADED:
+                return ReasonMapping.REASON_INSTALL_BULK_SECONDARY_DOWNGRADED;
+            case PackageManagerService.REASON_BACKGROUND_DEXOPT:
+                return ReasonMapping.REASON_BG_DEXOPT;
+            case PackageManagerService.REASON_INACTIVE_PACKAGE_DOWNGRADE:
+                return ReasonMapping.REASON_INACTIVE;
+            case PackageManagerService.REASON_CMDLINE:
+                return ReasonMapping.REASON_CMDLINE;
+            case PackageManagerService.REASON_POST_BOOT:
+            case PackageManagerService.REASON_SHARED:
+            case PackageManagerService.REASON_AB_OTA:
+                // REASON_POST_BOOT isn't supported - that dexopt stage is getting removed.
+                // REASON_SHARED shouldn't go to ART Service - it's only used at lower levels
+                // in PackageDexOptimizer.
+                // TODO(b/251921228): OTA isn't supported, so REASON_AB_OTA shouldn't come this way
+                // either.
+                throw new UnsupportedOperationException(
+                        "ART Service unsupported compilation reason " + pmDexoptReason);
+            default:
+                throw new IllegalArgumentException("Invalid compilation reason " + pmDexoptReason);
+        }
+    }
+
+    /**
      * Returns an {@link DexoptParams} instance corresponding to this object, for use with
      * {@link com.android.server.art.ArtManagerLocal}.
      *
@@ -269,60 +313,7 @@ public final class DexoptOptions {
         // -  DEXOPT_IDLE_BACKGROUND_JOB: Its only effect is to allow the debug variant dex2oatd to
         //    be used, but ART Service never uses that (cf. Artd::GetDex2Oat in artd.cc).
 
-        String reason;
-        switch (mCompilationReason) {
-            case PackageManagerService.REASON_FIRST_BOOT:
-                reason = ReasonMapping.REASON_FIRST_BOOT;
-                break;
-            case PackageManagerService.REASON_BOOT_AFTER_OTA:
-                reason = ReasonMapping.REASON_BOOT_AFTER_OTA;
-                break;
-            case PackageManagerService.REASON_POST_BOOT:
-                // This reason will go away with the legacy dexopt code.
-                DexOptHelper.reportArtManagerFallback(
-                        mPackageName, "Unsupported compilation reason REASON_POST_BOOT");
-                return null;
-            case PackageManagerService.REASON_INSTALL:
-                reason = ReasonMapping.REASON_INSTALL;
-                break;
-            case PackageManagerService.REASON_INSTALL_FAST:
-                reason = ReasonMapping.REASON_INSTALL_FAST;
-                break;
-            case PackageManagerService.REASON_INSTALL_BULK:
-                reason = ReasonMapping.REASON_INSTALL_BULK;
-                break;
-            case PackageManagerService.REASON_INSTALL_BULK_SECONDARY:
-                reason = ReasonMapping.REASON_INSTALL_BULK_SECONDARY;
-                break;
-            case PackageManagerService.REASON_INSTALL_BULK_DOWNGRADED:
-                reason = ReasonMapping.REASON_INSTALL_BULK_DOWNGRADED;
-                break;
-            case PackageManagerService.REASON_INSTALL_BULK_SECONDARY_DOWNGRADED:
-                reason = ReasonMapping.REASON_INSTALL_BULK_SECONDARY_DOWNGRADED;
-                break;
-            case PackageManagerService.REASON_BACKGROUND_DEXOPT:
-                reason = ReasonMapping.REASON_BG_DEXOPT;
-                break;
-            case PackageManagerService.REASON_INACTIVE_PACKAGE_DOWNGRADE:
-                reason = ReasonMapping.REASON_INACTIVE;
-                break;
-            case PackageManagerService.REASON_CMDLINE:
-                reason = ReasonMapping.REASON_CMDLINE;
-                break;
-            case PackageManagerService.REASON_SHARED:
-            case PackageManagerService.REASON_AB_OTA:
-                // REASON_SHARED shouldn't go into this code path - it's only used at lower levels
-                // in PackageDexOptimizer.
-                // TODO(b/251921228): OTA isn't supported, so REASON_AB_OTA shouldn't come this way
-                // either.
-                throw new UnsupportedOperationException(
-                        "ART Service unsupported compilation reason " + mCompilationReason);
-            default:
-                throw new IllegalArgumentException(
-                        "Invalid compilation reason " + mCompilationReason);
-        }
-
-        return new DexoptParams.Builder(reason, flags)
+        return new DexoptParams.Builder(convertToArtServiceDexoptReason(mCompilationReason), flags)
                 .setCompilerFilter(mCompilerFilter)
                 .setPriorityClass(priority)
                 .build();
