@@ -104,6 +104,12 @@ public class JobParameters implements Parcelable {
      */
     public static final int INTERNAL_STOP_REASON_USER_UI_STOP =
             JobProtoEnums.INTERNAL_STOP_REASON_USER_UI_STOP; // 11.
+    /**
+     * The app didn't respond quickly enough from JobScheduler's perspective.
+     * @hide
+     */
+    public static final int INTERNAL_STOP_REASON_ANR =
+            JobProtoEnums.INTERNAL_STOP_REASON_ANR; // 12.
 
     /**
      * All the stop reason codes. This should be regarded as an immutable array at runtime.
@@ -128,6 +134,7 @@ public class JobParameters implements Parcelable {
             INTERNAL_STOP_REASON_RTC_UPDATED,
             INTERNAL_STOP_REASON_SUCCESSFUL_FINISH,
             INTERNAL_STOP_REASON_USER_UI_STOP,
+            INTERNAL_STOP_REASON_ANR,
     };
 
     /**
@@ -149,6 +156,7 @@ public class JobParameters implements Parcelable {
             case INTERNAL_STOP_REASON_RTC_UPDATED: return "rtc_updated";
             case INTERNAL_STOP_REASON_SUCCESSFUL_FINISH: return "successful_finish";
             case INTERNAL_STOP_REASON_USER_UI_STOP: return "user_ui_stop";
+            case INTERNAL_STOP_REASON_ANR: return "anr";
             default: return "unknown:" + reasonCode;
         }
     }
@@ -290,7 +298,8 @@ public class JobParameters implements Parcelable {
     private final boolean mIsUserInitiated;
     private final Uri[] mTriggeredContentUris;
     private final String[] mTriggeredContentAuthorities;
-    private final Network network;
+    @Nullable
+    private Network mNetwork;
 
     private int mStopReason = STOP_REASON_UNDEFINED;
     private int mInternalStopReason = INTERNAL_STOP_REASON_UNKNOWN;
@@ -313,7 +322,7 @@ public class JobParameters implements Parcelable {
         this.mIsUserInitiated = isUserInitiated;
         this.mTriggeredContentUris = triggeredContentUris;
         this.mTriggeredContentAuthorities = triggeredContentAuthorities;
-        this.network = network;
+        this.mNetwork = network;
         this.mJobNamespace = namespace;
     }
 
@@ -330,7 +339,6 @@ public class JobParameters implements Parcelable {
      * @see JobScheduler#forNamespace(String)
      * @return The namespace this job was scheduled in. Will be {@code null} if there was no
      * explicit namespace set and this job is therefore in the default namespace.
-     * @hide
      */
     @Nullable
     public String getJobNamespace() {
@@ -478,7 +486,7 @@ public class JobParameters implements Parcelable {
      * @see JobInfo.Builder#setRequiredNetwork(NetworkRequest)
      */
     public @Nullable Network getNetwork() {
-        return network;
+        return mNetwork;
     }
 
     /**
@@ -573,13 +581,18 @@ public class JobParameters implements Parcelable {
         mTriggeredContentUris = in.createTypedArray(Uri.CREATOR);
         mTriggeredContentAuthorities = in.createStringArray();
         if (in.readInt() != 0) {
-            network = Network.CREATOR.createFromParcel(in);
+            mNetwork = Network.CREATOR.createFromParcel(in);
         } else {
-            network = null;
+            mNetwork = null;
         }
         mStopReason = in.readInt();
         mInternalStopReason = in.readInt();
         debugStopReason = in.readString();
+    }
+
+    /** @hide */
+    public void setNetwork(@Nullable Network network) {
+        mNetwork = network;
     }
 
     /** @hide */
@@ -614,9 +627,9 @@ public class JobParameters implements Parcelable {
         dest.writeBoolean(mIsUserInitiated);
         dest.writeTypedArray(mTriggeredContentUris, flags);
         dest.writeStringArray(mTriggeredContentAuthorities);
-        if (network != null) {
+        if (mNetwork != null) {
             dest.writeInt(1);
-            network.writeToParcel(dest, flags);
+            mNetwork.writeToParcel(dest, flags);
         } else {
             dest.writeInt(0);
         }

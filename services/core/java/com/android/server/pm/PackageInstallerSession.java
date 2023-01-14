@@ -278,8 +278,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String ATTR_SIGNATURE = "signature";
     private static final String ATTR_CHECKSUM_KIND = "checksumKind";
     private static final String ATTR_CHECKSUM_VALUE = "checksumValue";
-    private static final String ATTR_KEEP_APPLICATION_ENABLED_SETTING =
-            "keepApplicationEnabledSetting";
+    private static final String ATTR_APPLICATION_ENABLED_SETTING_PERSISTENT =
+            "applicationEnabledSettingPersistent";
 
     private static final String PROPERTY_NAME_INHERIT_NATIVE = "pi.inherit_native_on_dont_kill";
     private static final int[] EMPTY_CHILD_SESSION_ARRAY = EmptyArray.INT;
@@ -1163,7 +1163,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             info.requireUserAction = params.requireUserAction;
             info.installerUid = mInstallerUid;
             info.packageSource = params.packageSource;
-            info.keepApplicationEnabledSetting = params.keepApplicationEnabledSetting;
+            info.applicationEnabledSettingPersistent = params.applicationEnabledSettingPersistent;
             info.pendingUserActionReason = userActionRequirementToReason(mUserActionRequirement);
         }
         return info;
@@ -4553,8 +4553,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @Override
-    public boolean isKeepApplicationEnabledSetting() {
-        return params.keepApplicationEnabledSetting;
+    public boolean isApplicationEnabledSettingPersistent() {
+        return params.applicationEnabledSettingPersistent;
     }
 
     @Override
@@ -4945,8 +4945,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             writeStringAttribute(out, ATTR_ABI_OVERRIDE, params.abiOverride);
             writeStringAttribute(out, ATTR_VOLUME_UUID, params.volumeUuid);
             out.attributeInt(null, ATTR_INSTALL_REASON, params.installReason);
-            writeBooleanAttribute(out, ATTR_KEEP_APPLICATION_ENABLED_SETTING,
-                    params.keepApplicationEnabledSetting);
+            writeBooleanAttribute(out, ATTR_APPLICATION_ENABLED_SETTING_PERSISTENT,
+                    params.applicationEnabledSettingPersistent);
 
             final boolean isDataLoader = params.dataLoaderParams != null;
             writeBooleanAttribute(out, ATTR_IS_DATALOADER, isDataLoader);
@@ -5110,8 +5110,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         params.volumeUuid = readStringAttribute(in, ATTR_VOLUME_UUID);
         params.installReason = in.getAttributeInt(null, ATTR_INSTALL_REASON);
         params.packageSource = in.getAttributeInt(null, ATTR_PACKAGE_SOURCE);
-        params.keepApplicationEnabledSetting = in.getAttributeBoolean(null,
-                ATTR_KEEP_APPLICATION_ENABLED_SETTING, false);
+        params.applicationEnabledSettingPersistent = in.getAttributeBoolean(null,
+                ATTR_APPLICATION_ENABLED_SETTING_PERSISTENT, false);
 
         if (in.getAttributeBoolean(null, ATTR_IS_DATALOADER, false)) {
             params.dataLoaderParams = new DataLoaderParams(

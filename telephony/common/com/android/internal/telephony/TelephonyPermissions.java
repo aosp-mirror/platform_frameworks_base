@@ -108,6 +108,21 @@ public final class TelephonyPermissions {
         }
     }
 
+    /**
+     * Check whether the caller (or self, if not processing an IPC) has internet permission.
+     * @param context app context
+     * @param message detail message
+     * @return true if permission is granted, else false
+     */
+    public static boolean checkInternetPermissionNoThrow(Context context, String message) {
+        try {
+            context.enforcePermission(Manifest.permission.INTERNET,
+                    Binder.getCallingPid(), Binder.getCallingUid(), message);
+            return true;
+        } catch (SecurityException se) {
+            return false;
+        }
+    }
 
     /**
      * Check whether the caller (or self, if not processing an IPC) has non dangerous

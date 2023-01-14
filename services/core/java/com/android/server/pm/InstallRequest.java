@@ -44,6 +44,7 @@ import android.util.Slog;
 
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
@@ -81,7 +82,7 @@ final class InstallRequest {
     /** Package Installed Info */
     @Nullable
     private String mName;
-    private int mUid = INVALID_UID;
+    private int mAppId = INVALID_UID;
     // The set of users that originally had this package installed.
     @Nullable
     private int[] mOrigUsers;
@@ -107,6 +108,12 @@ final class InstallRequest {
     @Nullable
     private ApexInfo mApexInfo;
 
+    /**
+     * For tracking {@link PackageState#getApexModuleName()}.
+     */
+    @Nullable
+    private String mApexModuleName;
+
     @Nullable
     private ScanResult mScanResult;
 
@@ -129,7 +136,7 @@ final class InstallRequest {
                 params.mTraceMethod, params.mTraceCookie, params.mSigningDetails,
                 params.mInstallReason, params.mInstallScenario, params.mForceQueryableOverride,
                 params.mDataLoaderType, params.mPackageSource,
-                params.mKeepApplicationEnabledSetting);
+                params.mApplicationEnabledSettingPersistent);
         mPackageMetrics = new PackageMetrics(this);
         mIsInstallInherit = params.mIsInherit;
         mSessionId = params.mSessionId;
@@ -158,7 +165,7 @@ final class InstallRequest {
             mUserId = user.getIdentifier();
         } else {
             // APEX
-            mUserId = INVALID_UID;
+            mUserId = UserHandle.USER_SYSTEM;
         }
         mInstallArgs = null;
         mParsedPackage = parsedPackage;
@@ -348,6 +355,11 @@ final class InstallRequest {
     }
 
     @Nullable
+    public String getApexModuleName() {
+        return mApexModuleName;
+    }
+
+    @Nullable
     public String getSourceInstallerPackageName() {
         return mInstallArgs.mInstallSource.mInstallerPackageName;
     }
@@ -367,8 +379,8 @@ final class InstallRequest {
         return mOrigUsers;
     }
 
-    public int getUid() {
-        return mUid;
+    public int getAppId() {
+        return mAppId;
     }
 
     @Nullable
@@ -499,8 +511,8 @@ final class InstallRequest {
         return mScanResult.mChangedAbiCodePath;
     }
 
-    public boolean isKeepApplicationEnabledSetting() {
-        return mInstallArgs == null ? false : mInstallArgs.mKeepApplicationEnabledSetting;
+    public boolean isApplicationEnabledSettingPersistent() {
+        return mInstallArgs == null ? false : mInstallArgs.mApplicationEnabledSettingPersistent;
     }
 
     public boolean isForceQueryableOverride() {
@@ -644,12 +656,16 @@ final class InstallRequest {
         mApexInfo = apexInfo;
     }
 
+    public void setApexModuleName(@Nullable String apexModuleName) {
+        mApexModuleName = apexModuleName;
+    }
+
     public void setPkg(AndroidPackage pkg) {
         mPkg = pkg;
     }
 
-    public void setUid(int uid) {
-        mUid = uid;
+    public void setAppId(int appId) {
+        mAppId = appId;
     }
 
     public void setNewUsers(int[] newUsers) {
@@ -773,10 +789,10 @@ final class InstallRequest {
         }
     }
 
-    public void onInstallCompleted(int userId) {
+    public void onInstallCompleted() {
         if (getReturnCode() == INSTALL_SUCCEEDED) {
             if (mPackageMetrics != null) {
-                mPackageMetrics.onInstallSucceed(userId);
+                mPackageMetrics.onInstallSucceed();
             }
         }
     }

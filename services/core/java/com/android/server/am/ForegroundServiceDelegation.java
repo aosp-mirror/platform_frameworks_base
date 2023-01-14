@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ForegroundServiceDelegationOptions;
 import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.IBinder;

@@ -15,7 +15,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="android.hardware.radio.tests">
+    package="com.android.frameworks.broadcastradiotests">
 
     <uses-permission android:name="android.permission.ACCESS_BROADCAST_RADIO" />
 
@@ -25,7 +25,7 @@
 
     <instrumentation
         android:name="androidx.test.runner.AndroidJUnitRunner"
-        android:targetPackage="android.hardware.radio.tests"
+        android:targetPackage="com.android.frameworks.broadcastradiotests"
         android:label="Tests for Broadcast Radio APIs" >
     </instrumentation>
 </manifest>

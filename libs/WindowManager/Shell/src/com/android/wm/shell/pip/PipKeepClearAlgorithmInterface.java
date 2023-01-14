@@ -24,7 +24,7 @@ import java.util.Set;
  * Interface for interacting with keep clear algorithm used to move PiP window out of the way of
  * keep clear areas.
  */
-public interface PipKeepClearAlgorithm {
+public interface PipKeepClearAlgorithmInterface {
 
     /**
      * Adjust the position of picture in picture window based on the registered keep clear areas.

@@ -1747,7 +1747,7 @@ class PermissionService(
     override fun writeLegacyPermissionStateTEMP() {}
 
     override fun onSystemReady() {
-        // TODO STOPSHIP privappPermissionsViolationsfix check
+        service.onSystemReady()
         permissionControllerManager = PermissionControllerManager(
             context, PermissionThread.getHandler()
         )

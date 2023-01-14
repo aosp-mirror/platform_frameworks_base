@@ -39,15 +39,17 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
         implements ProviderSession.ProviderInternalCallback<Void> {
     private static final String TAG = "GetRequestSession";
 
-    public ClearRequestSession(Context context, int userId,
+    public ClearRequestSession(Context context, int userId, int callingUid,
             IClearCredentialStateCallback callback, ClearCredentialStateRequest request,
             CallingAppInfo callingAppInfo) {
-        super(context, userId, request, callback, RequestInfo.TYPE_UNDEFINED, callingAppInfo);
+        super(context, userId, callingUid, request, callback, RequestInfo.TYPE_UNDEFINED,
+                callingAppInfo);
     }
 
     /**
      * Creates a new provider session, and adds it list of providers that are contributing to
      * this session.
+     *
      * @return the provider session created within this request session, for the given provider
      * info.
      */
@@ -111,8 +113,10 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
         Log.i(TAG, "respondToClientWithResponseAndFinish");
         try {
             mClientCallback.onSuccess();
+            logApiCalled(RequestType.CLEAR_CREDENTIALS, /* isSuccessful */ true);
         } catch (RemoteException e) {
             Log.i(TAG, "Issue while propagating the response to the client");
+            logApiCalled(RequestType.CLEAR_CREDENTIALS, /* isSuccessful */ false);
         }
         finishSession();
     }
@@ -124,10 +128,12 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+        logApiCalled(RequestType.CLEAR_CREDENTIALS, /* isSuccessful */ false);
         finishSession();
     }
+
     private void processResponses() {
-        for (ProviderSession session: mProviders.values()) {
+        for (ProviderSession session : mProviders.values()) {
             if (session.isProviderResponseSet()) {
                 // If even one provider responded successfully, send back the response
                 // TODO: Aggregate other exceptions

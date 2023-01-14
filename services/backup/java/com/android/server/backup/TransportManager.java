@@ -156,14 +156,16 @@ public class TransportManager {
             } catch (IllegalArgumentException ex) {
                 // packageName doesn't exist: likely due to a race with it being uninstalled.
                 if (MORE_DEBUG) {
-                    Slog.d(TAG, "Package " + packageName + " was changed, but no longer exists.");
+                    Slog.d(TAG, addUserIdToLogMessage(mUserId, "Package " + packageName
+                            + " was changed, but no longer exists."));
                 }
                 return;
             }
             switch (enabled) {
                 case COMPONENT_ENABLED_STATE_ENABLED: {
                     if (MORE_DEBUG) {
-                        Slog.d(TAG, "Package " + packageName + " was enabled.");
+                        Slog.d(TAG, addUserIdToLogMessage(mUserId, "Package " + packageName
+                                + " was enabled."));
                     }
                     onPackageEnabled(packageName);
                     return;
@@ -173,28 +175,31 @@ public class TransportManager {
                     // Unless explicitly specified in manifest, the default enabled state
                     // is 'enabled'. Here, we assume that default state always means enabled.
                     if (MORE_DEBUG) {
-                        Slog.d(TAG, "Package " + packageName
-                                + " was put in default enabled state.");
+                        Slog.d(TAG, addUserIdToLogMessage(mUserId, "Package " + packageName
+                                + " was put in default enabled state."));
                     }
                     onPackageEnabled(packageName);
                     return;
                 }
                 case COMPONENT_ENABLED_STATE_DISABLED: {
                     if (MORE_DEBUG) {
-                        Slog.d(TAG, "Package " + packageName + " was disabled.");
+                        Slog.d(TAG, addUserIdToLogMessage(mUserId, "Package " + packageName
+                                + " was disabled."));
                     }
                     onPackageDisabled(packageName);
                     return;
                 }
                 case COMPONENT_ENABLED_STATE_DISABLED_USER: {
                     if (MORE_DEBUG) {
-                        Slog.d(TAG, "Package " + packageName + " was disabled by user.");
+                        Slog.d(TAG, addUserIdToLogMessage(mUserId, "Package " + packageName
+                                + " was disabled by user."));
                     }
                     onPackageDisabled(packageName);
                     return;
                 }
                 default: {
-                    Slog.w(TAG, "Package " + packageName + " enabled setting: " + enabled);
+                    Slog.w(TAG, addUserIdToLogMessage(mUserId, "Package " + packageName
+                            + " enabled setting: " + enabled));
                     return;
                 }
             }
@@ -405,7 +410,8 @@ public class TransportManager {
             TransportDescription description =
                     mRegisteredTransportsDescriptionMap.get(transportComponent);
             if (description == null) {
-                Slog.e(TAG, "Transport " + name + " not registered tried to change description");
+                Slog.e(TAG, addUserIdToLogMessage(mUserId, "Transport " + name
+                        + " not registered tried to change description"));
                 return;
             }
             description.name = name;
@@ -413,7 +419,8 @@ public class TransportManager {
             description.currentDestinationString = currentDestinationString;
             description.dataManagementIntent = dataManagementIntent;
             description.dataManagementLabel = dataManagementLabel;
-            Slog.d(TAG, "Transport " + name + " updated its attributes");
+            Slog.d(TAG, addUserIdToLogMessage(mUserId, "Transport " + name
+                    + " updated its attributes"));
         }
     }
 
@@ -493,7 +500,8 @@ public class TransportManager {
         try {
             return getTransportClientOrThrow(transportName, caller);
         } catch (TransportNotRegisteredException e) {
-            Slog.w(TAG, "Transport " + transportName + " not registered");
+            Slog.w(TAG, addUserIdToLogMessage(mUserId, "Transport " + transportName
+                    + " not registered"));
             return null;
         }
     }
@@ -620,7 +628,7 @@ public class TransportManager {
                 selectTransport(getTransportName(transportComponent));
                 return BackupManager.SUCCESS;
             } catch (TransportNotRegisteredException e) {
-                Slog.wtf(TAG, "Transport got unregistered");
+                Slog.wtf(TAG, addUserIdToLogMessage(mUserId, "Transport got unregistered"));
                 return BackupManager.ERROR_TRANSPORT_UNAVAILABLE;
             }
         }
@@ -637,7 +645,8 @@ public class TransportManager {
         try {
             mPackageManager.getPackageInfoAsUser(packageName, 0, mUserId);
         } catch (PackageManager.NameNotFoundException e) {
-            Slog.e(TAG, "Trying to register transports from package not found " + packageName);
+            Slog.e(TAG, addUserIdToLogMessage(mUserId,
+                    "Trying to register transports from package not found " + packageName));
             return;
         }
 
@@ -668,7 +677,8 @@ public class TransportManager {
         if (!mTransportWhitelist.contains(transport)) {
             Slog.w(
                     TAG,
-                    "BackupTransport " + transport.flattenToShortString() + " not whitelisted.");
+                    addUserIdToLogMessage(mUserId, "BackupTransport "
+                            + transport.flattenToShortString() + " not whitelisted."));
             return false;
         }
         try {
@@ -676,11 +686,12 @@ public class TransportManager {
                     mPackageManager.getPackageInfoAsUser(transport.getPackageName(), 0, mUserId);
             if ((packInfo.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED)
                     == 0) {
-                Slog.w(TAG, "Transport package " + transport.getPackageName() + " not privileged");
+                Slog.w(TAG, addUserIdToLogMessage(mUserId, "Transport package "
+                        + transport.getPackageName() + " not privileged"));
                 return false;
             }
         } catch (PackageManager.NameNotFoundException e) {
-            Slog.w(TAG, "Package not found.", e);
+            Slog.w(TAG, addUserIdToLogMessage(mUserId, "Package not found."), e);
             return false;
         }
         return true;
@@ -716,7 +727,8 @@ public class TransportManager {
         try {
             transport = transportConnection.connectOrThrow(callerLogString);
         } catch (TransportNotAvailableException e) {
-            Slog.e(TAG, "Couldn't connect to transport " + transportString + " for registration");
+            Slog.e(TAG, addUserIdToLogMessage(mUserId, "Couldn't connect to transport "
+                    + transportString + " for registration"));
             mTransportConnectionManager.disposeOfTransportClient(transportConnection,
                     callerLogString);
             return BackupManager.ERROR_TRANSPORT_UNAVAILABLE;
@@ -728,11 +740,13 @@ public class TransportManager {
             String transportDirName = transport.transportDirName();
             registerTransport(transportComponent, transport);
             // If registerTransport() hasn't thrown...
-            Slog.d(TAG, "Transport " + transportString + " registered");
+            Slog.d(TAG, addUserIdToLogMessage(mUserId, "Transport " + transportString
+                    + " registered"));
             mOnTransportRegisteredListener.onTransportRegistered(transportName, transportDirName);
             result = BackupManager.SUCCESS;
         } catch (RemoteException e) {
-            Slog.e(TAG, "Transport " + transportString + " died while registering");
+            Slog.e(TAG, addUserIdToLogMessage(mUserId, "Transport " + transportString
+                    + " died while registering"));
             result = BackupManager.ERROR_TRANSPORT_UNAVAILABLE;
         }
 
@@ -797,5 +811,9 @@ public class TransportManager {
             this.dataManagementIntent = dataManagementIntent;
             this.dataManagementLabel = dataManagementLabel;
         }
+    }
+
+    private static String addUserIdToLogMessage(int userId, String message) {
+        return "[UserID:" + userId + "] " + message;
     }
 }

@@ -17,7 +17,9 @@ per-file android_view_Input* = file:/services/core/java/com/android/server/input
 per-file android_view_KeyCharacterMap.* = file:/services/core/java/com/android/server/input/OWNERS
 per-file android_view_*KeyEvent.* = file:/services/core/java/com/android/server/input/OWNERS
 per-file android_view_*MotionEvent.* = file:/services/core/java/com/android/server/input/OWNERS
+per-file android_view_MotionPredictor.* = file:/services/core/java/com/android/server/input/OWNERS
 per-file android_view_PointerIcon.* = file:/services/core/java/com/android/server/input/OWNERS
+per-file android_view_VelocityTracker.* = file:/services/core/java/com/android/server/input/OWNERS
 
 # WindowManager
 per-file android_graphics_BLASTBufferQueue.cpp = file:/services/core/java/com/android/server/wm/OWNERS

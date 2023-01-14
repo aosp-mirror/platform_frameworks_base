@@ -32,6 +32,8 @@ oneway interface IJobService {
     /** Stop execution of application's job. */
     @UnsupportedAppUsage
     void stopJob(in JobParameters jobParams);
+    /** Inform the job of a change in the network it should use. */
+    void onNetworkChanged(in JobParameters jobParams);
     /** Update JS of how much data has been downloaded. */
     void getTransferredDownloadBytes(in JobParameters jobParams, in JobWorkItem jobWorkItem);
     /** Update JS of how much data has been uploaded. */

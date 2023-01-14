@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.server.am;
+package android.app;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.IApplicationThread;
 import android.content.ComponentName;
 
 import java.lang.annotation.Retention;
@@ -32,6 +31,8 @@ import java.lang.annotation.RetentionPolicy;
  * is higher than the app's actual process state if the app is in the background. This can help to
  * keep the app in the memory and extra run-time.
  * The app does not need to define an actual service component nor add it into manifest file.
+ *
+ * @hide
  */
 public class ForegroundServiceDelegationOptions {
 
@@ -191,6 +192,11 @@ public class ForegroundServiceDelegationOptions {
         }
     }
 
+    /**
+     * The helper class to build the instance of {@link ForegroundServiceDelegate}.
+     *
+     * @hide
+     */
     public static class Builder {
         int mClientPid; // The actual app PID
         int mClientUid; // The actual app UID
@@ -202,51 +208,81 @@ public class ForegroundServiceDelegationOptions {
         int mForegroundServiceTypes; // The foreground service types it consists of
         @DelegationService int mDelegationService; // The internal service's name, i.e. VOIP
 
+        /**
+         * Set the client app's PID.
+         */
         public Builder setClientPid(int clientPid) {
             mClientPid = clientPid;
             return this;
         }
 
+        /**
+         * Set the client app's UID.
+         */
         public Builder setClientUid(int clientUid) {
             mClientUid = clientUid;
             return this;
         }
 
+        /**
+         * Set the client app's package name.
+         */
         public Builder setClientPackageName(@NonNull String clientPackageName) {
             mClientPackageName = clientPackageName;
             return this;
         }
 
+        /**
+         * Set the notification ID from the client app.
+         */
         public Builder setClientNotificationId(int clientNotificationId) {
             mClientNotificationId = clientNotificationId;
             return this;
         }
 
+        /**
+         * Set the client app's application thread.
+         */
         public Builder setClientAppThread(@NonNull IApplicationThread clientAppThread) {
             mClientAppThread = clientAppThread;
             return this;
         }
 
+        /**
+         * Set the client instance of this service.
+         */
         public Builder setClientInstanceName(@NonNull String clientInstanceName) {
             mClientInstanceName = clientInstanceName;
             return this;
         }
 
+        /**
+         * Set stickiness of this service.
+         */
         public Builder setSticky(boolean isSticky) {
             mSticky = isSticky;
             return this;
         }
 
+        /**
+         * Set the foreground service type.
+         */
         public Builder setForegroundServiceTypes(int foregroundServiceTypes) {
             mForegroundServiceTypes = foregroundServiceTypes;
             return this;
         }
 
+        /**
+         * Set the delegation service type.
+         */
         public Builder setDelegationService(@DelegationService int delegationService) {
             mDelegationService = delegationService;
             return this;
         }
 
+        /**
+         * @return An instance of {@link ForegroundServiceDelegationOptions}.
+         */
         public ForegroundServiceDelegationOptions build() {
             return new ForegroundServiceDelegationOptions(mClientPid,
                 mClientUid,

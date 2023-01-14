@@ -281,6 +281,7 @@ final class ResolveIntentHelper {
                 ri.handleAllWebDataURI = browserCount == n;
                 ri.activityInfo = new ActivityInfo(ri.activityInfo);
                 ri.activityInfo.labelRes = ResolverActivity.getLabelRes(intent.getAction());
+                if (ri.userHandle == null) ri.userHandle = UserHandle.of(userId);
                 // If all of the options come from the same package, show the application's
                 // label and icon instead of the generic resolver's.
                 // Some calls like Intent.resolveActivityInfo query the ResolveInfo from here

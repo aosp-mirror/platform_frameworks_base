@@ -111,6 +111,8 @@ final class DumpHelper {
                 dumpState.setOptionEnabled(DumpState.OPTION_DUMP_ALL_COMPONENTS);
             } else if ("-f".equals(opt)) {
                 dumpState.setOptionEnabled(DumpState.OPTION_SHOW_FILTERS);
+            } else if ("--include-apex".equals(opt)) {
+                dumpState.setOptionEnabled(DumpState.OPTION_INCLUDE_APEX);
             } else if ("--proto".equals(opt)) {
                 dumpProto(snapshot, fd);
                 return;

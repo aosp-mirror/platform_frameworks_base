@@ -1755,6 +1755,7 @@ public class ComputerEngine implements Computer {
         forwardingResolveInfo.isDefault = true;
         forwardingResolveInfo.filter = new IntentFilter(filter.getIntentFilter());
         forwardingResolveInfo.targetUserId = targetUserId;
+        forwardingResolveInfo.userHandle = UserHandle.of(sourceUserId);
         return forwardingResolveInfo;
     }
 

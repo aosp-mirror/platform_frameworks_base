@@ -74,9 +74,7 @@ abstract class PipTransition(flicker: FlickerTest) : BaseTest(flicker) {
                 removeAllTasksButHome()
                 pipApp.launchViaIntentAndWaitForPip(wmHelper, stringExtras = stringExtras)
             }
-            teardown {
-                pipApp.exit(wmHelper)
-            }
+            teardown { pipApp.exit(wmHelper) }
 
             extraSpec(this)
         }
@@ -87,11 +85,10 @@ abstract class PipTransition(flicker: FlickerTest) : BaseTest(flicker) {
     fun hasAtMostOnePipDismissOverlayWindow() {
         val matcher = ComponentNameMatcher("", "pip-dismiss-overlay")
         flicker.assertWm {
-            val overlaysPerState = trace.entries.map { entry ->
-                entry.windowStates.count { window ->
-                    matcher.windowMatchesAnyOf(window)
-                } <= 1
-            }
+            val overlaysPerState =
+                trace.entries.map { entry ->
+                    entry.windowStates.count { window -> matcher.windowMatchesAnyOf(window) } <= 1
+                }
 
             Truth.assertWithMessage("Number of dismiss overlays per state")
                 .that(overlaysPerState)

@@ -716,7 +716,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
      * The list of all system partitions that may contain packages in ascending order of
      * specificity (the more generic, the earlier in the list a partition appears).
      */
-    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    @VisibleForTesting(visibility = Visibility.PACKAGE)
     public static final List<ScanPartition> SYSTEM_PARTITIONS = Collections.unmodifiableList(
             PackagePartitions.getOrderedPartitions(ScanPartition::new));
 

@@ -19,9 +19,11 @@ package com.android.server.pm;
 import static android.os.Process.INVALID_UID;
 
 import android.annotation.IntDef;
+import android.app.ActivityManager;
 import android.app.admin.SecurityLog;
 import android.content.pm.PackageManager;
 import android.content.pm.parsing.ApkLiteParseUtils;
+import android.os.UserHandle;
 import android.util.Pair;
 import android.util.SparseArray;
 
@@ -68,8 +70,8 @@ final class PackageMetrics {
         mInstallRequest = installRequest;
     }
 
-    public void onInstallSucceed(int userId) {
-        reportInstallationToSecurityLog(userId);
+    public void onInstallSucceed() {
+        reportInstallationToSecurityLog(mInstallRequest.getUserId());
         reportInstallationStats(true /* success */);
     }
 
@@ -110,10 +112,11 @@ final class PackageMetrics {
             }
         }
 
+
         FrameworkStatsLog.write(FrameworkStatsLog.PACKAGE_INSTALLATION_SESSION_REPORTED,
                 mInstallRequest.getSessionId() /* session_id */,
                 packageName /* package_name */,
-                mInstallRequest.getUid() /* uid */,
+                getUid(mInstallRequest.getAppId(), mInstallRequest.getUserId()) /* uid */,
                 newUsers /* user_ids */,
                 userManagerInternal.getUserTypesForStatsd(newUsers) /* user_types */,
                 originalUsers /* original_user_ids */,
@@ -138,6 +141,13 @@ final class PackageMetrics {
                 mInstallRequest.isInstallMove() /* is_move_install */,
                 false /* is_staged */
         );
+    }
+
+    private static int getUid(int appId, int userId) {
+        if (userId == UserHandle.USER_ALL) {
+            userId = ActivityManager.getCurrentUser();
+        }
+        return UserHandle.getUid(userId, appId);
     }
 
     private long getApksSize(File apkDir) {
@@ -218,9 +228,9 @@ final class PackageMetrics {
         final int[] originalUsers = info.mOrigUsers;
         final int[] originalUserTypes = userManagerInternal.getUserTypesForStatsd(originalUsers);
         FrameworkStatsLog.write(FrameworkStatsLog.PACKAGE_UNINSTALLATION_REPORTED,
-                info.mUid, removedUsers, removedUserTypes, originalUsers, originalUserTypes,
-                deleteFlags, PackageManager.DELETE_SUCCEEDED, info.mIsRemovedPackageSystemUpdate,
-                !info.mRemovedForAllUsers);
+                getUid(info.mUid, userId), removedUsers, removedUserTypes, originalUsers,
+                originalUserTypes, deleteFlags, PackageManager.DELETE_SUCCEEDED,
+                info.mIsRemovedPackageSystemUpdate, !info.mRemovedForAllUsers);
         final String packageName = info.mRemovedPackage;
         final long versionCode = info.mRemovedPackageVersionCode;
         reportUninstallationToSecurityLog(packageName, versionCode, userId);

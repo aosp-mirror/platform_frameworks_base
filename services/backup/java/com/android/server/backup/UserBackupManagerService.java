@@ -1958,8 +1958,8 @@ public class UserBackupManagerService {
             }
             // We don't want the backup jobs to kick in any time soon.
             // Reschedules them to run in the distant future.
-            KeyValueBackupJob.schedule(mUserId, mContext, BUSY_BACKOFF_MIN_MILLIS, mConstants);
-            FullBackupJob.schedule(mUserId, mContext, 2 * BUSY_BACKOFF_MIN_MILLIS, mConstants);
+            KeyValueBackupJob.schedule(mUserId, mContext, BUSY_BACKOFF_MIN_MILLIS, this);
+            FullBackupJob.schedule(mUserId, mContext, 2 * BUSY_BACKOFF_MIN_MILLIS, this);
         } finally {
             Binder.restoreCallingIdentity(oldToken);
         }
@@ -2088,7 +2088,7 @@ public class UserBackupManagerService {
                 final long interval = mConstants.getFullBackupIntervalMilliseconds();
                 final long appLatency = (timeSinceLast < interval) ? (interval - timeSinceLast) : 0;
                 final long latency = Math.max(transportMinLatency, appLatency);
-                FullBackupJob.schedule(mUserId, mContext, latency, mConstants);
+                FullBackupJob.schedule(mUserId, mContext, latency, this);
             } else {
                 if (DEBUG_SCHEDULING) {
                     Slog.i(
@@ -2226,7 +2226,7 @@ public class UserBackupManagerService {
                         addUserIdToLogMessage(
                                 mUserId, "Deferring scheduled full backups in battery saver mode"));
             }
-            FullBackupJob.schedule(mUserId, mContext, keyValueBackupInterval, mConstants);
+            FullBackupJob.schedule(mUserId, mContext, keyValueBackupInterval, this);
             return false;
         }
 
@@ -2392,7 +2392,7 @@ public class UserBackupManagerService {
                                             + "operation; rescheduling +" + latency));
                 }
                 final long deferTime = latency;     // pin for the closure
-                FullBackupJob.schedule(mUserId, mContext, deferTime, mConstants);
+                FullBackupJob.schedule(mUserId, mContext, deferTime, this);
                 return false;
             }
 
@@ -2495,7 +2495,7 @@ public class UserBackupManagerService {
         }
 
         // ...and schedule a backup pass if necessary
-        KeyValueBackupJob.schedule(mUserId, mContext, mConstants);
+        KeyValueBackupJob.schedule(mUserId, mContext, this);
     }
 
     // Note: packageName is currently unused, but may be in the future
@@ -2730,7 +2730,7 @@ public class UserBackupManagerService {
                                     mUserId, "Not running backup while in battery save mode"));
                 }
                 // Try again in several hours.
-                KeyValueBackupJob.schedule(mUserId, mContext, mConstants);
+                KeyValueBackupJob.schedule(mUserId, mContext, this);
             } else {
                 if (DEBUG) {
                     Slog.v(TAG, addUserIdToLogMessage(mUserId, "Scheduling immediate backup pass"));
@@ -3208,12 +3208,49 @@ public class UserBackupManagerService {
         }
     }
 
+    synchronized void setFrameworkSchedulingEnabled(boolean isEnabled) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
+                "setFrameworkSchedulingEnabled");
+
+        boolean wasEnabled = isFrameworkSchedulingEnabled();
+        if (wasEnabled == isEnabled) return;
+
+        Slog.i(TAG, addUserIdToLogMessage(mUserId,
+                (isEnabled ? "Enabling" : "Disabling") + " backup scheduling"));
+
+        final long oldId = Binder.clearCallingIdentity();
+        try {
+            // TODO(b/264889098): Consider at a later point if we should us a sentinel file as
+            // setBackupEnabled.
+            Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.BACKUP_SCHEDULING_ENABLED, isEnabled ? 1 : 0, mUserId);
+
+            if (!isEnabled) {
+                KeyValueBackupJob.cancel(mUserId, mContext);
+                FullBackupJob.cancel(mUserId, mContext);
+            } else {
+                KeyValueBackupJob.schedule(mUserId, mContext, this);
+                scheduleNextFullBackupJob(/* transportMinLatency */ 0);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(oldId);
+        }
+    }
+
+    synchronized boolean isFrameworkSchedulingEnabled() {
+        // By default scheduling is enabled
+        final int defaultSetting = 1;
+        int isEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.BACKUP_SCHEDULING_ENABLED, defaultSetting, mUserId);
+        return isEnabled == 1;
+    }
+
     @VisibleForTesting
     void updateStateOnBackupEnabled(boolean wasEnabled, boolean enable) {
         synchronized (mQueueLock) {
             if (enable && !wasEnabled && mSetupComplete) {
                 // if we've just been enabled, start scheduling backup passes
-                KeyValueBackupJob.schedule(mUserId, mContext, mConstants);
+                KeyValueBackupJob.schedule(mUserId, mContext, this);
                 scheduleNextFullBackupJob(0);
             } else if (!enable) {
                 // No longer enabled, so stop running backups
@@ -4127,6 +4164,8 @@ public class UserBackupManagerService {
             pw.println("Auto-restore is " + (mAutoRestore ? "enabled" : "disabled"));
             if (mBackupRunning) pw.println("Backup currently running");
             pw.println(isBackupOperationInProgress() ? "Backup in progress" : "No backups running");
+            pw.println("Framework scheduling is "
+                    + (isFrameworkSchedulingEnabled() ? "enabled" : "disabled"));
             pw.println("Last backup pass started: " + mLastBackupPass
                     + " (now = " + System.currentTimeMillis() + ')');
             pw.println("  next scheduled: " + KeyValueBackupJob.nextScheduled(mUserId));

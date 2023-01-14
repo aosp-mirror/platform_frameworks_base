@@ -279,7 +279,6 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                 @Override
                 public void triggerBack() {
                     // Notify FalsingManager that an intentional gesture has occurred.
-                    // TODO(b/186519446): use a different method than isFalseTouch
                     mFalsingManager.isFalseTouch(BACK_GESTURE);
                     // Only inject back keycodes when ahead-of-time back dispatching is disabled.
                     if (mBackAnimation == null) {
@@ -955,6 +954,10 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                             mThresholdCrossed = true;
                             // Capture inputs
                             mInputMonitor.pilferPointers();
+                            if (mBackAnimation != null) {
+                                // Notify FalsingManager that an intentional gesture has occurred.
+                                mFalsingManager.isFalseTouch(BACK_GESTURE);
+                            }
                             mInputEventReceiver.setBatchingEnabled(true);
                         } else {
                             logGesture(SysUiStatsLog.BACK_GESTURE__TYPE__INCOMPLETE_FAR_FROM_EDGE);

@@ -3326,7 +3326,9 @@ package android.view.displayhash {
 package android.view.inputmethod {
 
   public abstract class HandwritingGesture {
+    method @NonNull public static android.view.inputmethod.HandwritingGesture fromByteArray(@NonNull byte[]);
     method public final int getGestureType();
+    method @NonNull public final byte[] toByteArray();
     field public static final int GESTURE_TYPE_DELETE = 4; // 0x4
     field public static final int GESTURE_TYPE_DELETE_RANGE = 64; // 0x40
     field public static final int GESTURE_TYPE_INSERT = 2; // 0x2

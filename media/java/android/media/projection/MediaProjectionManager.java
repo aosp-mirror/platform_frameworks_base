@@ -109,8 +109,8 @@ public final class MediaProjectionManager {
      * If {@link MediaProjectionConfig} was created from:
      * <ul>
      *     <li>
-     *         {@link MediaProjectionConfig#createConfigForDisplay(int)}, then creates an
-     *         {@link Intent} for capturing this particular display. The activity limits the user's
+     *         {@link MediaProjectionConfig#createConfigForDefaultDisplay()}, then creates an
+     *         {@link Intent} for capturing the default display. The activity limits the user's
      *         choice to just the display specified.
      *     </li>
      *     <li>

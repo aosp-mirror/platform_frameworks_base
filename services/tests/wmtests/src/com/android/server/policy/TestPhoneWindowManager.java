@@ -407,7 +407,7 @@ class TestPhoneWindowManager {
 
     void assertShowRecentApps() {
         waitForIdle();
-        verify(mStatusBarManagerInternal).showRecentApps(anyBoolean());
+        verify(mStatusBarManagerInternal).showRecentApps(anyBoolean(), anyBoolean());
     }
 
     void assertSwitchKeyboardLayout() {

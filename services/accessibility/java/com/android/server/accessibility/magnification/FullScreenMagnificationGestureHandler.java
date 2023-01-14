@@ -122,7 +122,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
     // The MIN_SCALE is different from MagnificationScaleProvider.MIN_SCALE due
     // to AccessibilityService.MagnificationController#setScale() has
     // different scale range
-    private static final float MIN_SCALE = 2.0f;
+    private static final float MIN_SCALE = 1.0f;
     private static final float MAX_SCALE = MagnificationScaleProvider.MAX_SCALE;
 
     @VisibleForTesting final FullScreenMagnificationController mFullScreenMagnificationController;
@@ -220,13 +220,18 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
 
     @Override
     public void handleShortcutTriggered() {
-        boolean wasMagnifying = mFullScreenMagnificationController.resetIfNeeded(mDisplayId,
-                /* animate */ true);
-        if (wasMagnifying) {
+        final boolean isActivated = mFullScreenMagnificationController.isActivated(mDisplayId);
+
+        if (isActivated) {
+            zoomOff();
             clearAndTransitionToStateDetecting();
         } else {
-            mPromptController.showNotificationIfNeeded();
             mDetectingState.toggleShortcutTriggered();
+        }
+
+        if (mDetectingState.isShortcutTriggered()) {
+            mPromptController.showNotificationIfNeeded();
+            zoomToScale(1.0f, Float.NaN, Float.NaN);
         }
     }
 
@@ -441,7 +446,12 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
     final class ViewportDraggingState implements State {
 
         /** Whether to disable zoom after dragging ends */
-        boolean mZoomedInBeforeDrag;
+        @VisibleForTesting boolean mActivatedBeforeDrag;
+        /** Whether to restore scale after dragging ends */
+        private boolean mZoomedInTemporary;
+        /** The cached scale for recovering after dragging ends */
+        private float mScaleBeforeZoomedInTemporary;
+
         private boolean mLastMoveOutsideMagnifiedRegion;
 
         @Override
@@ -474,7 +484,13 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
 
                 case ACTION_UP:
                 case ACTION_CANCEL: {
-                    if (!mZoomedInBeforeDrag) zoomOff();
+                    if (mActivatedBeforeDrag) {
+                        if (mZoomedInTemporary) {
+                            zoomToScale(mScaleBeforeZoomedInTemporary, event.getX(), event.getY());
+                        }
+                    } else {
+                        zoomOff();
+                    }
                     clear();
                     transitionTo(mDetectingState);
                 }
@@ -488,15 +504,27 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             }
         }
 
+        public void prepareForZoomInTemporary() {
+            mViewportDraggingState.mActivatedBeforeDrag =
+                    mFullScreenMagnificationController.isActivated(mDisplayId);
+
+            mViewportDraggingState.mZoomedInTemporary = true;
+            mViewportDraggingState.mScaleBeforeZoomedInTemporary =
+                    mFullScreenMagnificationController.getScale(mDisplayId);
+        }
+
         @Override
         public void clear() {
             mLastMoveOutsideMagnifiedRegion = false;
+
+            mZoomedInTemporary = false;
+            mScaleBeforeZoomedInTemporary = 1.0f;
         }
 
         @Override
         public String toString() {
             return "ViewportDraggingState{"
-                    + "mZoomedInBeforeDrag=" + mZoomedInBeforeDrag
+                    + "mActivatedBeforeDrag=" + mActivatedBeforeDrag
                     + ", mLastMoveOutsideMagnifiedRegion=" + mLastMoveOutsideMagnifiedRegion
                     + '}';
         }
@@ -625,10 +653,10 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                         transitionToDelegatingStateAndClear();
 
                     } else if (mDetectTripleTap
-                            // If magnified, delay an ACTION_DOWN for mMultiTapMaxDelay
+                            // If activated, delay an ACTION_DOWN for mMultiTapMaxDelay
                             // to ensure reachability of
                             // STATE_PANNING_SCALING(triggerable with ACTION_POINTER_DOWN)
-                            || mFullScreenMagnificationController.isMagnifying(mDisplayId)) {
+                            || isActivated()) {
 
                         afterMultiTapTimeoutTransitionToDelegatingState();
 
@@ -640,8 +668,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                 }
                 break;
                 case ACTION_POINTER_DOWN: {
-                    if (mFullScreenMagnificationController.isMagnifying(mDisplayId)
-                            && event.getPointerCount() == 2) {
+                    if (isActivated() && event.getPointerCount() == 2) {
                         storeSecondPointerDownLocation(event);
                         mHandler.sendEmptyMessageDelayed(MESSAGE_TRANSITION_TO_PANNINGSCALING_STATE,
                                 ViewConfiguration.getTapTimeout());
@@ -665,13 +692,13 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                         // (which is a rare combo to be used aside from magnification)
                         if (isMultiTapTriggered(2 /* taps */) && event.getPointerCount() == 1) {
                             transitionToViewportDraggingStateAndClear(event);
-                        } else if (isMagnifying() && event.getPointerCount() == 2) {
+                        } else if (isActivated() && event.getPointerCount() == 2) {
                             //Primary pointer is swiping, so transit to PanningScalingState
                             transitToPanningScalingStateAndClear();
                         } else {
                             transitionToDelegatingStateAndClear();
                         }
-                    } else if (isMagnifying() && secondPointerDownValid()
+                    } else if (isActivated() && secondPointerDownValid()
                             && distanceClosestPointerToPoint(
                             mSecondPointerDownLocation, /* move */ event) > mSwipeMinDistance) {
                         //Second pointer is swiping, so transit to PanningScalingState
@@ -734,7 +761,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
 
             // Only log the triple tap event, use numTaps to filter.
             if (multitapTriggered && numTaps > 2) {
-                final boolean enabled = mFullScreenMagnificationController.isMagnifying(mDisplayId);
+                final boolean enabled = isActivated();
                 logMagnificationTripleTap(enabled);
             }
             return multitapTriggered;
@@ -862,24 +889,33 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             mSecondPointerDownLocation.set(Float.NaN, Float.NaN);
         }
 
+        /**
+         * This method could be triggered by both 2 cases.
+         *      1. direct three tap gesture
+         *      2. one tap while shortcut triggered (it counts as two taps).
+         */
         private void onTripleTap(MotionEvent up) {
             if (DEBUG_DETECTING) {
                 Slog.i(mLogTag, "onTripleTap(); delayed: "
                         + MotionEventInfo.toString(mDelayedEventQueue));
             }
-            clear();
 
-            // Toggle zoom
-            if (mFullScreenMagnificationController.isMagnifying(mDisplayId)) {
-                zoomOff();
-            } else {
+            // We put mShortcutTriggered into conditions.
+            // The reason is when the shortcut is triggered,
+            //   the magnifier is activated and keeps in scale 1.0,
+            //   and in this case, we still want to zoom on the magnifier.
+            if (!isActivated() || mShortcutTriggered) {
                 mPromptController.showNotificationIfNeeded();
                 zoomOn(up.getX(), up.getY());
+            } else {
+                zoomOff();
             }
+
+            clear();
         }
 
-        private boolean isMagnifying() {
-            return mFullScreenMagnificationController.isMagnifying(mDisplayId);
+        private boolean isActivated() {
+            return mFullScreenMagnificationController.isActivated(mDisplayId);
         }
 
         void transitionToViewportDraggingStateAndClear(MotionEvent down) {
@@ -887,14 +923,13 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             if (DEBUG_DETECTING) Slog.i(mLogTag, "onTripleTapAndHold()");
             clear();
 
-            mViewportDraggingState.mZoomedInBeforeDrag =
-                    mFullScreenMagnificationController.isMagnifying(mDisplayId);
-
             // Triple tap and hold also belongs to triple tap event.
-            final boolean enabled = !mViewportDraggingState.mZoomedInBeforeDrag;
+            final boolean enabled = !isActivated();
             logMagnificationTripleTap(enabled);
 
-            zoomOn(down.getX(), down.getY());
+            mViewportDraggingState.prepareForZoomInTemporary();
+
+            zoomInTemporary(down.getX(), down.getY());
 
             transitionTo(mViewportDraggingState);
         }
@@ -919,7 +954,10 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             if (DEBUG_DETECTING) Slog.i(mLogTag, "setShortcutTriggered(" + state + ")");
 
             mShortcutTriggered = state;
-            mFullScreenMagnificationController.setForceShowMagnifiableBounds(mDisplayId, state);
+        }
+
+        private boolean isShortcutTriggered() {
+            return mShortcutTriggered;
         }
 
         /**
@@ -948,12 +986,29 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         }
     }
 
+    private void zoomInTemporary(float centerX, float centerY) {
+        final float currentScale = mFullScreenMagnificationController.getScale(mDisplayId);
+        final float persistedScale = MathUtils.constrain(
+                mFullScreenMagnificationController.getPersistedScale(mDisplayId),
+                MIN_SCALE, MAX_SCALE);
+
+        final float scale = MathUtils.constrain(Math.max(currentScale + 1.0f, persistedScale),
+                MIN_SCALE, MAX_SCALE);
+
+        zoomToScale(scale, centerX, centerY);
+    }
+
     private void zoomOn(float centerX, float centerY) {
         if (DEBUG_DETECTING) Slog.i(mLogTag, "zoomOn(" + centerX + ", " + centerY + ")");
 
         final float scale = MathUtils.constrain(
                 mFullScreenMagnificationController.getPersistedScale(mDisplayId),
                 MIN_SCALE, MAX_SCALE);
+        zoomToScale(scale, centerX, centerY);
+    }
+
+    private void zoomToScale(float scale, float centerX, float centerY) {
+        scale = MathUtils.constrain(scale, MIN_SCALE, MAX_SCALE);
         mFullScreenMagnificationController.setScaleAndCenter(mDisplayId,
                 scale, centerX, centerY,
                 /* animate */ true,

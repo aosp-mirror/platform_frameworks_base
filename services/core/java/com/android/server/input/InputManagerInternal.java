@@ -213,4 +213,10 @@ public abstract class InputManagerInternal {
      * @param enabled When true, stylus buttons will not be reported through motion events.
      */
     public abstract void setStylusButtonMotionEventsEnabled(boolean enabled);
+
+    /**
+     * Notify whether any user activity occurred. This includes any input activity on any
+     * display, external peripherals, fingerprint sensor, etc.
+     */
+    public abstract void notifyUserActivity();
 }

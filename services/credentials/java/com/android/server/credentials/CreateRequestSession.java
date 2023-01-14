@@ -44,11 +44,12 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
         implements ProviderSession.ProviderInternalCallback<CreateCredentialResponse> {
     private static final String TAG = "CreateRequestSession";
 
-    CreateRequestSession(@NonNull Context context, int userId,
+    CreateRequestSession(@NonNull Context context, int userId, int callingUid,
             CreateCredentialRequest request,
             ICreateCredentialCallback callback,
             CallingAppInfo callingAppInfo) {
-        super(context, userId, request, callback, RequestInfo.TYPE_CREATE, callingAppInfo);
+        super(context, userId, callingUid, request, callback, RequestInfo.TYPE_CREATE,
+                callingAppInfo);
     }
 
     /**
@@ -63,7 +64,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
             RemoteCredentialService remoteCredentialService) {
         ProviderCreateSession providerCreateSession = ProviderCreateSession
                 .createNewSession(mContext, mUserId, providerInfo,
-                this, remoteCredentialService);
+                        this, remoteCredentialService);
         if (providerCreateSession != null) {
             Log.i(TAG, "In startProviderSession - provider session created and being added");
             mProviders.put(providerCreateSession.getComponentName().flattenToString(),
@@ -115,8 +116,10 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
         Log.i(TAG, "respondToClientWithResponseAndFinish");
         try {
             mClientCallback.onResponse(response);
+            logApiCalled(RequestType.CREATE_CREDENTIALS, /* isSuccessful */ true);
         } catch (RemoteException e) {
             Log.i(TAG, "Issue while responding to client: " + e.getMessage());
+            logApiCalled(RequestType.CREATE_CREDENTIALS, /* isSuccessful */ false);
         }
         finishSession();
     }
@@ -128,6 +131,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
         } catch (RemoteException e) {
             Log.i(TAG, "Issue while responding to client: " + e.getMessage());
         }
+        logApiCalled(RequestType.CREATE_CREDENTIALS, /* isSuccessful */ false);
         finishSession();
     }
 

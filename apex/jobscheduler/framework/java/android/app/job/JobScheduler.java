@@ -271,7 +271,6 @@ public abstract class JobScheduler {
      * but will instead create or update the job inside the current namespace. A JobScheduler
      * instance dedicated to a namespace must be used to schedule or update jobs in that namespace.
      * @see #getNamespace()
-     * @hide
      */
     @NonNull
     public JobScheduler forNamespace(@NonNull String namespace) {
@@ -282,7 +281,6 @@ public abstract class JobScheduler {
      * Get the namespace this JobScheduler instance is operating in. A {@code null} value means
      * that the app has not specified a namespace for this instance, and it is therefore using the
      * default namespace.
-     * @hide
      */
     @Nullable
     public String getNamespace() {
@@ -395,14 +393,21 @@ public abstract class JobScheduler {
     public abstract void cancel(int jobId);
 
     /**
-     * Cancel <em>all</em> jobs that have been scheduled by the calling application.
+     * Cancel all jobs that have been scheduled in the current namespace by the
+     * calling application.
+     *
+     * <p>
+     * Starting with Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, this
+     * will only cancel within the current namespace. If a namespace hasn't been explicitly set
+     * with {@link #forNamespace(String)}, then this will cancel jobs in the default namespace.
+     * To cancel all jobs scheduled by the application,
+     * use {@link #cancelInAllNamespaces()} instead.
      */
     public abstract void cancelAll();
 
     /**
      * Cancel <em>all</em> jobs that have been scheduled by the calling application, regardless of
      * namespace.
-     * @hide
      */
     public void cancelInAllNamespaces() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
@@ -424,7 +429,6 @@ public abstract class JobScheduler {
      * If a namespace hasn't been explicitly set with {@link #forNamespace(String)},
      * then this will return jobs in the default namespace.
      * This includes jobs that are currently started as well as those that are still waiting to run.
-     * @hide
      */
     @NonNull
     public Map<String, List<JobInfo>> getPendingJobsInAllNamespaces() {

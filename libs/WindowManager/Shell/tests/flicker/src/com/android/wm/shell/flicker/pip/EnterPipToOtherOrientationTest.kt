@@ -17,6 +17,7 @@
 package com.android.wm.shell.flicker.pip
 
 import android.app.Activity
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerBuilder
@@ -28,6 +29,7 @@ import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.testapp.ActivityOptions.Pip.ACTION_ENTER_PIP
 import com.android.server.wm.flicker.testapp.ActivityOptions.PortraitOnlyActivity.EXTRA_FIXED_ORIENTATION
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.service.PlatformConsts
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_PORTRAIT
@@ -163,7 +165,22 @@ open class EnterPipToOtherOrientationTest(flicker: FlickerTest) : PipTransition(
     @Presubmit
     @Test
     fun pipAppLayerCoversFullScreenOnStart() {
+        Assume.assumeFalse(tapl.isTablet)
         flicker.assertLayersStart { visibleRegion(pipApp).coversExactly(startingBounds) }
+    }
+
+    /**
+     * Checks that the visible region of [pipApp] covers the full display area at the start of the
+     * transition
+     */
+    @Postsubmit
+    @Test
+    fun pipAppLayerPlusLetterboxCoversFullScreenOnStartTablet() {
+        Assume.assumeFalse(tapl.isTablet)
+        flicker.assertLayersStart {
+            visibleRegion(pipApp.or(ComponentNameMatcher.LETTERBOX))
+                .coversExactly(startingBounds)
+        }
     }
 
     /**

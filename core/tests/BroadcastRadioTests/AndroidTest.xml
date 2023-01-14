@@ -25,7 +25,7 @@
     <option name="test-tag" value="BroadcastRadioTests" />
 
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
-        <option name="package" value="android.hardware.radio.tests" />
+        <option name="package" value="com.android.frameworks.broadcastradiotests" />
         <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />
         <option name="hidden-api-checks" value="false"/>
     </test>

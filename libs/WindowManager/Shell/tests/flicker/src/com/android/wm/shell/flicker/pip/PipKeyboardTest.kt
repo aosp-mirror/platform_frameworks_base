@@ -56,9 +56,7 @@ open class PipKeyboardTest(flicker: FlickerTest) : PipTransition(flicker) {
                 imeApp.launchViaIntent(wmHelper)
                 setRotation(flicker.scenario.startRotation)
             }
-            teardown {
-                imeApp.exit(wmHelper)
-            }
+            teardown { imeApp.exit(wmHelper) }
             transitions {
                 // open the soft keyboard
                 imeApp.openIME(wmHelper)

@@ -165,6 +165,7 @@ public class BackgroundRestrictionsTest {
                 awaitJobStart(DEFAULT_WAIT_TIMEOUT));
     }
 
+    @FlakyTest
     @Test
     public void testFeatureFlag() throws Exception {
         Settings.Global.putInt(mContext.getContentResolver(),

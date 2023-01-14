@@ -2406,7 +2406,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (isDisplayRotation) {
                 // This isn't cheap, so only do it for display rotations.
                 changeInfo.mSnapshotLuma = TransitionAnimation.getBorderLuma(
-                        screenshotBuffer.getHardwareBuffer(), screenshotBuffer.getColorSpace());
+                        buffer, screenshotBuffer.getColorSpace());
             }
             SurfaceControl.Transaction t = wc.mWmService.mTransactionFactory.get();
 
@@ -2418,6 +2418,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             t.setLayer(snapshotSurface, Integer.MAX_VALUE);
             t.apply();
             t.close();
+            buffer.close();
 
             // Detach the screenshot on the sync transaction (the screenshot is just meant to
             // freeze the window until the sync transaction is applied (with all its other

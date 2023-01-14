@@ -46,6 +46,7 @@ import static com.android.server.wm.ActivityRecord.State.DESTROYING;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityRecord.State.RESTARTING_PROCESS;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
+import static com.android.server.wm.ActivityRecord.State.STOPPING;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
@@ -240,11 +241,21 @@ class ActivityClientController extends IActivityClientController.Stub {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "activityStopped");
             r = ActivityRecord.isInRootTaskLocked(token);
             if (r != null) {
+                if (!r.isState(STOPPING, RESTARTING_PROCESS)
+                        && mTaskSupervisor.hasScheduledRestartTimeouts(r)) {
+                    // Recover the restarting state which was replaced by other lifecycle changes.
+                    r.setState(RESTARTING_PROCESS, "continue-restart");
+                }
                 if (r.attachedToProcess() && r.isState(RESTARTING_PROCESS)) {
                     // The activity was requested to restart from
                     // {@link #restartActivityProcessIfVisible}.
                     restartingName = r.app.mName;
                     restartingUid = r.app.mUid;
+                    // Make EnsureActivitiesVisibleHelper#makeVisibleAndRestartIfNeeded not skip
+                    // restarting non-top activity.
+                    if (r != r.getTask().topRunningActivity()) {
+                        r.setVisibleRequested(false);
+                    }
                 }
                 r.activityStopped(icicle, persistentState, description);
             }

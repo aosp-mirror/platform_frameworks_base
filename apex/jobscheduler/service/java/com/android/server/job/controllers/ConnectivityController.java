@@ -1125,6 +1125,17 @@ public final class ConnectivityController extends RestrictingController implemen
                     mFlexibilityController.isFlexibilitySatisfiedLocked(jobStatus));
         }
 
+        // Try to handle network transitions in a reasonable manner. See the lengthy note inside
+        // UidDefaultNetworkCallback for more details.
+        if (!changed && satisfied && jobStatus.network != null
+                && mService.isCurrentlyRunningLocked(jobStatus)) {
+            // The job's connectivity constraint continues to be satisfied even though the network
+            // has changed.
+            // Inform the job of the new network so that it can attempt to switch over. This is the
+            // ideal behavior for certain transitions such as going from a metered network to an
+            // unmetered network.
+            mStateChangedListener.onNetworkChanged(jobStatus, network);
+        }
 
         // Pass along the evaluated network for job to use; prevents race
         // conditions as default routes change over time, and opens the door to
@@ -1419,8 +1430,8 @@ public final class ConnectivityController extends RestrictingController implemen
         // the onBlockedStatusChanged() call, we re-evaluate the job, but keep it running
         // (assuming the new network satisfies constraints). The app continues to use the old
         // network (if they use the network object provided through JobParameters.getNetwork())
-        // because we don't notify them of the default network change. If the old network no
-        // longer satisfies requested constraints, then we have a problem. Depending on the order
+        // because we don't notify them of the default network change. If the old network later
+        // stops satisfying requested constraints, then we have a problem. Depending on the order
         // of calls, if the per-UID callback gets notified of the network change before the
         // general callback gets notified of the capabilities change, then the job's network
         // object will point to the new network and we won't stop the job, even though we told it

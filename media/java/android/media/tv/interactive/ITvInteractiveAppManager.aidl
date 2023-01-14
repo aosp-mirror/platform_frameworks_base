@@ -26,6 +26,7 @@ import android.media.tv.interactive.AppLinkInfo;
 import android.media.tv.interactive.ITvInteractiveAppClient;
 import android.media.tv.interactive.ITvInteractiveAppManagerCallback;
 import android.media.tv.interactive.TvInteractiveAppServiceInfo;
+import android.media.PlaybackParams;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Surface;
@@ -36,6 +37,7 @@ import android.view.Surface;
  */
 interface ITvInteractiveAppManager {
     List<TvInteractiveAppServiceInfo> getTvInteractiveAppServiceList(int userId);
+    List<AppLinkInfo> getAppLinkInfoList(int userId);
     void registerAppLinkInfo(String tiasId, in AppLinkInfo info, int userId);
     void unregisterAppLinkInfo(String tiasId, in AppLinkInfo info, int userId);
     void sendAppLinkCommand(String tiasId, in Bundle command, int userId);
@@ -46,6 +48,7 @@ interface ITvInteractiveAppManager {
             in IBinder sessionToken, in Uri biIAppUri, in Bundle params, int userId);
     void destroyBiInteractiveApp(in IBinder sessionToken, in String biIAppId, int userId);
     void setTeletextAppEnabled(in IBinder sessionToken, boolean enable, int userId);
+    void sendCurrentVideoBounds(in IBinder sessionToken, in Rect bounds, int userId);
     void sendCurrentChannelUri(in IBinder sessionToken, in Uri channelUri, int userId);
     void sendCurrentChannelLcn(in IBinder sessionToken, int lcn, int userId);
     void sendStreamVolume(in IBinder sessionToken, float volume, int userId);
@@ -57,6 +60,14 @@ interface ITvInteractiveAppManager {
     void sendTvRecordingInfoList(in IBinder sessionToken,
             in List<TvRecordingInfo> recordingInfoList, int userId);
     void notifyError(in IBinder sessionToken, in String errMsg, in Bundle params, int userId);
+    void notifyTimeShiftPlaybackParams(
+            in IBinder sessionToken, in PlaybackParams params, int userId);
+    void notifyTimeShiftStatusChanged(
+            in IBinder sessionToken, in String inputId, int status, int userId);
+    void notifyTimeShiftStartPositionChanged(
+            in IBinder sessionToken, in String inputId, long timeMs, int userId);
+    void notifyTimeShiftCurrentPositionChanged(
+            in IBinder sessionToken, in String inputId, long timeMs, int userId);
     void createSession(in ITvInteractiveAppClient client, in String iAppServiceId, int type,
             int seq, int userId);
     void releaseSession(in IBinder sessionToken, int userId);

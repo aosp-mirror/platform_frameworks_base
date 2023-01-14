@@ -5138,6 +5138,15 @@
         <attr name="textLocale" format="string" />
         <!-- Color of the text selection highlight. -->
         <attr name="textColorHighlight" />
+        <!-- Color of search results highlight.
+             This color is typically used when TextView/EditText shows search result in-app text
+             search invoked with Ctrl+F. -->
+        <attr name="searchResultHighlightColor" format="color" />
+        <!-- Color of focused search result highlight.
+             This color is typically used when TextView/EditText shows search result in-app text
+             search invoked with Ctrl+F. -->
+        <attr name="focusedSearchResultHighlightColor" format="color" />
+
         <!-- Color of the hint text. -->
         <attr name="textColorHint" />
         <!-- Color of the links. -->
@@ -5215,6 +5224,14 @@
         <attr name="textColor" />
         <!-- Color of the text selection highlight. -->
         <attr name="textColorHighlight" />
+        <!-- Color of search results highlight.
+             This color is typically used when TextView/EditText shows search result in-app text
+             search invoked with Ctrl+F. -->
+        <attr name="searchResultHighlightColor" format="color" />
+        <!-- Color of focused search result highlight.
+             This color is typically used when TextView/EditText shows search result in-app text
+             search invoked with Ctrl+F. -->
+        <attr name="focusedSearchResultHighlightColor" format="color" />
         <!-- Color of the hint text. -->
         <attr name="textColorHint" />
         <!-- Base text color, typeface, size, and style. -->

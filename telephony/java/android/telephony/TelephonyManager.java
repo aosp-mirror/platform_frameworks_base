@@ -17294,8 +17294,6 @@ public class TelephonyManager {
      * If displaying the performance boost notification is throttled, it will be for the amount of
      * time specified by {@link CarrierConfigManager
      * #KEY_PREMIUM_CAPABILITY_NOTIFICATION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG}.
-     * If a foreground application requests premium capabilities, the performance boost notification
-     * will be displayed to the user regardless of the throttled status.
      * We will show the performance boost notification to the user up to the daily and monthly
      * maximum number of times specified by
      * {@link CarrierConfigManager#KEY_PREMIUM_CAPABILITY_MAXIMUM_DAILY_NOTIFICATION_COUNT_INT} and
@@ -17319,14 +17317,11 @@ public class TelephonyManager {
     public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_ALREADY_IN_PROGRESS = 4;
 
     /**
-     * Purchase premium capability failed because a foreground application requested the same
-     * capability. The notification for the current application will be dismissed and a new
-     * notification will be displayed to the user for the foreground application.
-     * Subsequent attempts will return
-     * {@link #PURCHASE_PREMIUM_CAPABILITY_RESULT_ALREADY_IN_PROGRESS} until the foreground
-     * application's request is completed.
+     * Purchase premium capability failed because the requesting application is not in the
+     * foreground. Subsequent attempts will return the same error until the requesting application
+     * moves to the foreground.
      */
-    public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_OVERRIDDEN = 5;
+    public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_FOREGROUND = 5;
 
     /**
      * Purchase premium capability failed because the user canceled the operation.
@@ -17423,7 +17418,7 @@ public class TelephonyManager {
             PURCHASE_PREMIUM_CAPABILITY_RESULT_THROTTLED,
             PURCHASE_PREMIUM_CAPABILITY_RESULT_ALREADY_PURCHASED,
             PURCHASE_PREMIUM_CAPABILITY_RESULT_ALREADY_IN_PROGRESS,
-            PURCHASE_PREMIUM_CAPABILITY_RESULT_OVERRIDDEN,
+            PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_FOREGROUND,
             PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_CANCELED,
             PURCHASE_PREMIUM_CAPABILITY_RESULT_CARRIER_DISABLED,
             PURCHASE_PREMIUM_CAPABILITY_RESULT_CARRIER_ERROR,
@@ -17453,8 +17448,8 @@ public class TelephonyManager {
                 return "ALREADY_PURCHASED";
             case PURCHASE_PREMIUM_CAPABILITY_RESULT_ALREADY_IN_PROGRESS:
                 return "ALREADY_IN_PROGRESS";
-            case PURCHASE_PREMIUM_CAPABILITY_RESULT_OVERRIDDEN:
-                return "OVERRIDDEN";
+            case PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_FOREGROUND:
+                return "NOT_FOREGROUND";
             case PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_CANCELED:
                 return "USER_CANCELED";
             case PURCHASE_PREMIUM_CAPABILITY_RESULT_CARRIER_DISABLED:
@@ -17491,10 +17486,12 @@ public class TelephonyManager {
      * @param executor The callback executor for the response.
      * @param callback The result of the purchase request.
      *                 One of {@link PurchasePremiumCapabilityResult}.
-     * @throws SecurityException if the caller does not hold permission READ_BASIC_PHONE_STATE.
+     * @throws SecurityException if the caller does not hold permissions
+     *         READ_BASIC_PHONE_STATE or INTERNET.
      * @see #isPremiumCapabilityAvailableForPurchase(int) to check whether the capability is valid.
      */
-    @RequiresPermission(android.Manifest.permission.READ_BASIC_PHONE_STATE)
+    @RequiresPermission(allOf = {android.Manifest.permission.READ_BASIC_PHONE_STATE,
+            android.Manifest.permission.INTERNET})
     public void purchasePremiumCapability(@PremiumCapability int capability,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull @PurchasePremiumCapabilityResult Consumer<Integer> callback) {
@@ -17712,37 +17709,6 @@ public class TelephonyManager {
             Log.e(TAG, "Error in isRemovableEsimDefaultEuicc: " + e);
         }
         return false;
-    }
-
-    /**
-     * Fetches the EFPSISMSC value from the SIM that contains the Public Service Identity
-     * of the SM-SC (either a SIP URI or tel URI), the value is common for both appType
-     * {@link #APPTYPE_ISIM} and {@link #APPTYPE_SIM}.
-     * The EFPSISMSC value is used by the ME to submit SMS over IP as defined in 24.341 [55].
-     *
-     * @param appType ICC Application type {@link #APPTYPE_ISIM} or {@link #APPTYPE_USIM}
-     * @return SIP URI or tel URI of the Public Service Identity of the SM-SC
-     * @throws SecurityException if the caller does not have the required permission/privileges
-     * @hide
-     */
-    @NonNull
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
-    public String getSmscIdentity(int appType) {
-        try {
-            IPhoneSubInfo info = getSubscriberInfoService();
-            if (info == null) {
-                Rlog.e(TAG, "getSmscIdentity(): IPhoneSubInfo instance is NULL");
-                return null;
-            }
-            /** Fetches the SIM PSISMSC params based on subId and appType */
-            return info.getSmscIdentity(getSubId(), appType);
-        } catch (RemoteException ex) {
-            Rlog.e(TAG, "getSmscIdentity(): RemoteException: " + ex.getMessage());
-        } catch (NullPointerException ex) {
-            Rlog.e(TAG, "getSmscIdentity(): NullPointerException: " + ex.getMessage());
-        }
-        return null;
     }
 
     /**

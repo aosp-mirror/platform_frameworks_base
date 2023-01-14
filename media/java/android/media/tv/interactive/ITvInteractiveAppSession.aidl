@@ -20,6 +20,7 @@ import android.graphics.Rect;
 import android.media.tv.BroadcastInfoResponse;
 import android.net.Uri;
 import android.media.tv.AdBuffer;
+import android.media.PlaybackParams;
 import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvTrackInfo;
@@ -39,6 +40,7 @@ oneway interface ITvInteractiveAppSession {
     void createBiInteractiveApp(in Uri biIAppUri, in Bundle params);
     void destroyBiInteractiveApp(in String biIAppId);
     void setTeletextAppEnabled(boolean enable);
+    void sendCurrentVideoBounds(in Rect bounds);
     void sendCurrentChannelUri(in Uri channelUri);
     void sendCurrentChannelLcn(int lcn);
     void sendStreamVolume(float volume);
@@ -48,6 +50,10 @@ oneway interface ITvInteractiveAppSession {
     void sendTvRecordingInfo(in TvRecordingInfo recordingInfo);
     void sendTvRecordingInfoList(in List<TvRecordingInfo> recordingInfoList);
     void notifyError(in String errMsg, in Bundle params);
+    void notifyTimeShiftPlaybackParams(in PlaybackParams params);
+    void notifyTimeShiftStatusChanged(in String inputId, int status);
+    void notifyTimeShiftStartPositionChanged(in String inputId, long timeMs);
+    void notifyTimeShiftCurrentPositionChanged(in String inputId, long timeMs);
     void release();
     void notifyTuned(in Uri channelUri);
     void notifyTrackSelected(int type, in String trackId);

@@ -1279,10 +1279,15 @@ public class TransitionAnimation {
     public static float getBorderLuma(SurfaceControl surfaceControl, int w, int h) {
         final ScreenCapture.ScreenshotHardwareBuffer buffer =
                 ScreenCapture.captureLayers(surfaceControl, new Rect(0, 0, w, h), 1);
-        if (buffer != null) {
-            return getBorderLuma(buffer.getHardwareBuffer(), buffer.getColorSpace());
+        if (buffer == null) {
+            return 0;
         }
-        return 0;
+        final HardwareBuffer hwBuffer = buffer.getHardwareBuffer();
+        final float luma = getBorderLuma(hwBuffer, buffer.getColorSpace());
+        if (hwBuffer != null) {
+            hwBuffer.close();
+        }
+        return luma;
     }
 
     /** Returns the luminance in 0~1. */

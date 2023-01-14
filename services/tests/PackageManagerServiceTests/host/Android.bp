@@ -30,11 +30,16 @@ java_test_host {
         "truth-prebuilt",
     ],
     static_libs: [
+        "ApexInstallHelper",
         "cts-host-utils",
         "frameworks-base-hostutils",
         "PackageManagerServiceHostTestsIntentVerifyUtils",
     ],
     test_suites: ["general-tests"],
+    data: [
+        ":PackageManagerTestApex",
+        ":PackageManagerTestApexApp",
+    ],
     java_resources: [
         ":PackageManagerTestOverlayActor",
         ":PackageManagerTestOverlay",

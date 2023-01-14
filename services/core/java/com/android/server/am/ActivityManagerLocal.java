@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.content.Context;
@@ -118,28 +117,4 @@ public interface ActivityManagerLocal {
      *        sandbox. This is obtained using {@link Context#getIApplicationThreadBinder()}.
      */
     void killSdkSandboxClientAppProcess(@NonNull IBinder clientApplicationThreadBinder);
-
-    /**
-     * Start a foreground service delegate.
-     * @param options foreground service delegate options.
-     * @param connection a service connection served as callback to caller.
-     * @return true if delegate is started successfully, false otherwise.
-     * @hide
-     */
-    boolean startForegroundServiceDelegate(@NonNull ForegroundServiceDelegationOptions options,
-            @Nullable ServiceConnection connection);
-
-    /**
-     * Stop a foreground service delegate.
-     * @param options the foreground service delegate options.
-     * @hide
-     */
-    void stopForegroundServiceDelegate(@NonNull ForegroundServiceDelegationOptions options);
-
-    /**
-     * Stop a foreground service delegate by service connection.
-     * @param connection service connection used to start delegate previously.
-     * @hide
-     */
-    void stopForegroundServiceDelegate(@NonNull ServiceConnection connection);
 }
