@@ -57,6 +57,7 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.art.ArtManagerLocal;
 import com.android.server.art.DexUseManagerLocal;
@@ -841,6 +842,26 @@ public final class DexOptHelper {
 
     /*package*/ void controlDexOptBlocking(boolean block) throws LegacyDexoptDisabledException {
         mPm.mPackageDexOptimizer.controlDexOptBlocking(block);
+    }
+
+    /**
+     * Dumps the dexopt state for the given package, or all packages if it is null.
+     */
+    public static void dumpDexoptState(
+            @NonNull IndentingPrintWriter ipw, @Nullable String packageName) {
+        try (PackageManagerLocal.FilteredSnapshot snapshot =
+                        getPackageManagerLocal().withFilteredSnapshot()) {
+            if (packageName != null) {
+                try {
+                    DexOptHelper.getArtManagerLocal().dumpPackage(ipw, snapshot, packageName);
+                } catch (IllegalArgumentException e) {
+                    // Package isn't found, but that should only happen due to race.
+                    ipw.println(e);
+                }
+            } else {
+                DexOptHelper.getArtManagerLocal().dump(ipw, snapshot);
+            }
+        }
     }
 
     /**

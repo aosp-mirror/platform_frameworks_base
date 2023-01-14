@@ -2998,35 +2998,40 @@ public class ComputerEngine implements Computer {
                 }
                 ipw.println("Dexopt state:");
                 ipw.increaseIndent();
-                Collection<? extends PackageStateInternal> pkgSettings;
-                if (setting != null) {
-                    pkgSettings = Collections.singletonList(setting);
+                if (DexOptHelper.useArtService()) {
+                    DexOptHelper.dumpDexoptState(ipw, packageName);
                 } else {
-                    pkgSettings = mSettings.getPackages().values();
-                }
-
-                for (PackageStateInternal pkgSetting : pkgSettings) {
-                    final AndroidPackage pkg = pkgSetting.getPkg();
-                    if (pkg == null || pkg.isApex()) {
-                        // Skip APEX which is not dex-optimized
-                        continue;
+                    Collection<? extends PackageStateInternal> pkgSettings;
+                    if (setting != null) {
+                        pkgSettings = Collections.singletonList(setting);
+                    } else {
+                        pkgSettings = mSettings.getPackages().values();
                     }
-                    final String pkgName = pkg.getPackageName();
-                    ipw.println("[" + pkgName + "]");
+
+                    for (PackageStateInternal pkgSetting : pkgSettings) {
+                        final AndroidPackage pkg = pkgSetting.getPkg();
+                        if (pkg == null || pkg.isApex()) {
+                            // Skip APEX which is not dex-optimized
+                            continue;
+                        }
+                        final String pkgName = pkg.getPackageName();
+                        ipw.println("[" + pkgName + "]");
+                        ipw.increaseIndent();
+
+                        // TODO(b/251903639): Call into ART Service.
+                        try {
+                            mPackageDexOptimizer.dumpDexoptState(ipw, pkg, pkgSetting,
+                                    mDexManager.getPackageUseInfoOrDefault(pkgName));
+                        } catch (LegacyDexoptDisabledException e) {
+                            throw new RuntimeException(e);
+                        }
+                        ipw.decreaseIndent();
+                    }
+                    ipw.println("BgDexopt state:");
                     ipw.increaseIndent();
-
-                    // TODO(b/251903639): Call into ART Service.
-                    try {
-                        mPackageDexOptimizer.dumpDexoptState(ipw, pkg, pkgSetting,
-                                mDexManager.getPackageUseInfoOrDefault(pkgName));
-                    } catch (LegacyDexoptDisabledException e) {
-                        throw new RuntimeException(e);
-                    }
+                    mBackgroundDexOptService.dump(ipw);
                     ipw.decreaseIndent();
                 }
-                ipw.println("BgDexopt state:");
-                ipw.increaseIndent();
-                mBackgroundDexOptService.dump(ipw);
                 ipw.decreaseIndent();
                 break;
             }
