@@ -7890,6 +7890,7 @@ package android.app.admin {
     method public int getNetworkId();
     method public boolean isEnabled();
     method public boolean isFallbackToDefaultConnectionAllowed();
+    method public boolean shouldBlockNonMatchingNetworks();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.PreferentialNetworkServiceConfig> CREATOR;
     field public static final int PREFERENTIAL_NETWORK_ID_1 = 1; // 0x1
@@ -7907,6 +7908,7 @@ package android.app.admin {
     method @NonNull public android.app.admin.PreferentialNetworkServiceConfig.Builder setFallbackToDefaultConnectionAllowed(boolean);
     method @NonNull public android.app.admin.PreferentialNetworkServiceConfig.Builder setIncludedUids(@NonNull int[]);
     method @NonNull public android.app.admin.PreferentialNetworkServiceConfig.Builder setNetworkId(int);
+    method @NonNull public android.app.admin.PreferentialNetworkServiceConfig.Builder setShouldBlockNonMatchingNetworks(boolean);
   }
 
   public class SecurityLog {
