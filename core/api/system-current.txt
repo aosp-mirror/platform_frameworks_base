@@ -465,6 +465,7 @@ package android {
     field public static final int config_systemAutomotiveCalendarSyncManager = 17039423; // 0x104003f
     field public static final int config_systemAutomotiveCluster = 17039400; // 0x1040028
     field public static final int config_systemAutomotiveProjection = 17039401; // 0x1040029
+    field public static final int config_systemCallStreaming;
     field public static final int config_systemCompanionDeviceProvider = 17039417; // 0x1040039
     field public static final int config_systemContacts = 17039403; // 0x104002b
     field public static final int config_systemFinancedDeviceController;
