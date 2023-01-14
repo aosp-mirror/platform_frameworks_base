@@ -89,6 +89,7 @@ public class WindowMagnification implements CoreStartable, WindowMagnifierCallba
         protected WindowMagnificationController createInstance(Display display) {
             final Context windowContext = mContext.createWindowContext(display,
                     TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY, /* options */ null);
+            windowContext.setTheme(com.android.systemui.R.style.Theme_SystemUI);
             return new WindowMagnificationController(
                     windowContext,
                     mHandler,
