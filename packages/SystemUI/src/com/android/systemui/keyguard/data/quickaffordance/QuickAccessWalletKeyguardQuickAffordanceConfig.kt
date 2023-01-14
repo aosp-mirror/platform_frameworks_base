@@ -128,7 +128,7 @@ constructor(
                     actionComponentName = componentName,
                 )
             }
-            else -> KeyguardQuickAffordanceConfig.PickerScreenState.Default
+            else -> KeyguardQuickAffordanceConfig.PickerScreenState.Default()
         }
     }
 

@@ -1962,6 +1962,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         ownerTask.addChild(taskFragment, position);
         taskFragment.setWindowingMode(creationParams.getWindowingMode());
         taskFragment.setBounds(creationParams.getInitialBounds());
+        // Record the initial relative embedded bounds.
+        taskFragment.updateRelativeEmbeddedBounds();
         mLaunchTaskFragments.put(creationParams.getFragmentToken(), taskFragment);
 
         if (transition != null) transition.collectExistenceChange(taskFragment);

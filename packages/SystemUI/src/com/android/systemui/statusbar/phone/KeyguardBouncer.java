@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar.phone;
 
 import static com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN;
+import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE;
 import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 
 import android.content.Context;
@@ -64,14 +66,6 @@ public class KeyguardBouncer {
     private static final String TAG = "PrimaryKeyguardBouncer";
     static final long BOUNCER_FACE_DELAY = 1200;
     public static final float ALPHA_EXPANSION_THRESHOLD = 0.95f;
-    /**
-     * Values for the bouncer expansion represented as the panel expansion.
-     * Panel expansion 1f = panel fully showing = bouncer fully hidden
-     * Panel expansion 0f = panel fully hiding = bouncer fully showing
-     */
-    public static final float EXPANSION_HIDDEN = 1f;
-    public static final float EXPANSION_VISIBLE = 0f;
-
     protected final Context mContext;
     protected final ViewMediatorCallback mCallback;
     protected final ViewGroup mContainer;

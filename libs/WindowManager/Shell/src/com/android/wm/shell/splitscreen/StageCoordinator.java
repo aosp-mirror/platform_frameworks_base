@@ -1072,6 +1072,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mSideStage.removeAllTasks(wct, false /* toTop */);
             mMainStage.deactivate(wct, false /* toTop */);
             wct.reorder(mRootTaskInfo.token, false /* onTop */);
+            wct.setForceTranslucent(mRootTaskInfo.token, true);
             wct.setBounds(mSideStage.mRootTaskInfo.token, mTempRect1);
             onTransitionAnimationComplete();
         } else {
@@ -1103,6 +1104,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     mMainStage.deactivate(finishedWCT, childrenToTop == mMainStage /* toTop */);
                     mSideStage.removeAllTasks(finishedWCT, childrenToTop == mSideStage /* toTop */);
                     finishedWCT.reorder(mRootTaskInfo.token, false /* toTop */);
+                    finishedWCT.setForceTranslucent(mRootTaskInfo.token, true);
                     finishedWCT.setBounds(mSideStage.mRootTaskInfo.token, mTempRect1);
                     mSyncQueue.queue(finishedWCT);
                     mSyncQueue.runInSync(at -> {
@@ -1485,6 +1487,12 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     private void onStageVisibilityChanged(StageListenerImpl stageListener) {
+        // If split didn't active, just ignore this callback because we should already did these
+        // on #applyExitSplitScreen.
+        if (!isSplitActive()) {
+            return;
+        }
+
         final boolean sideStageVisible = mSideStageListener.mVisible;
         final boolean mainStageVisible = mMainStageListener.mVisible;
 
@@ -1493,20 +1501,23 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             return;
         }
 
+        // Check if it needs to dismiss split screen when both stage invisible.
+        if (!mainStageVisible && mExitSplitScreenOnHide) {
+            exitSplitScreen(null /* childrenToTop */, EXIT_REASON_RETURN_HOME);
+            return;
+        }
+
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (!mainStageVisible) {
+            // Split entering background.
             wct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token,
                     true /* setReparentLeafTaskIfRelaunch */);
             wct.setForceTranslucent(mRootTaskInfo.token, true);
-            // Both stages are not visible, check if it needs to dismiss split screen.
-            if (mExitSplitScreenOnHide) {
-                exitSplitScreen(null /* childrenToTop */, EXIT_REASON_RETURN_HOME);
-            }
         } else {
             wct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token,
                     false /* setReparentLeafTaskIfRelaunch */);
-            wct.setForceTranslucent(mRootTaskInfo.token, false);
         }
+
         mSyncQueue.queue(wct);
         mSyncQueue.runInSync(t -> {
             setDividerVisibility(mainStageVisible, t);
