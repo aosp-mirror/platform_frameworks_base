@@ -297,7 +297,7 @@ object Flags {
 
     // 801 - region sampling
     // TODO(b/254512848): Tracking Bug
-    val REGION_SAMPLING = unreleasedFlag(801, "region_sampling", teamfood = true)
+    val REGION_SAMPLING = unreleasedFlag(801, "region_sampling")
 
     // 803 - screen contents translation
     // TODO(b/254513187): Tracking Bug
