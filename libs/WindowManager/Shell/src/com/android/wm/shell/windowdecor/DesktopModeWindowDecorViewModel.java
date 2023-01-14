@@ -68,9 +68,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private final Choreographer mMainChoreographer;
     private final DisplayController mDisplayController;
     private final SyncTransactionQueue mSyncQueue;
-    private FreeformTaskTransitionStarter mTransitionStarter;
-    private Optional<DesktopModeController> mDesktopModeController;
-    private Optional<DesktopTasksController> mDesktopTasksController;
+    private final Optional<DesktopModeController> mDesktopModeController;
+    private final Optional<DesktopTasksController> mDesktopTasksController;
     private boolean mTransitionDragActive;
 
     private SparseArray<EventReceiver> mEventReceiversByDisplay = new SparseArray<>();
@@ -78,7 +77,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private final SparseArray<DesktopModeWindowDecoration> mWindowDecorByTaskId =
             new SparseArray<>();
     private final DragStartListenerImpl mDragStartListener = new DragStartListenerImpl();
-    private InputMonitorFactory mInputMonitorFactory;
+    private final InputMonitorFactory mInputMonitorFactory;
     private TaskOperations mTaskOperations;
 
     public DesktopModeWindowDecorViewModel(
@@ -199,7 +198,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         if (decoration == null) return;
 
         decoration.close();
-        int displayId = taskInfo.displayId;
+        final int displayId = taskInfo.displayId;
         if (mEventReceiversByDisplay.contains(displayId)) {
             removeTaskFromEventReceiver(displayId);
         }
@@ -227,7 +226,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
         @Override
         public void onClick(View v) {
-            DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
+            final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
             final int id = v.getId();
             if (id == R.id.close_window) {
                 mTaskOperations.closeTask(mTaskToken);
@@ -250,7 +249,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         @Override
         public boolean onTouch(View v, MotionEvent e) {
             boolean isDrag = false;
-            int id = v.getId();
+            final int id = v.getId();
             if (id != R.id.caption_handle && id != R.id.desktop_mode_caption) {
                 return false;
             }
@@ -261,11 +260,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             if (e.getAction() != MotionEvent.ACTION_DOWN) {
                 return isDrag;
             }
-            RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
+            final RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
             if (taskInfo.isFocused) {
                 return isDrag;
             }
-            WindowContainerTransaction wct = new WindowContainerTransaction();
+            final WindowContainerTransaction wct = new WindowContainerTransaction();
             wct.reorder(mTaskToken, true /* onTop */);
             mSyncQueue.queue(wct);
             return true;
@@ -276,7 +275,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
          * @return {@code true} if a drag is happening; or {@code false} if it is not
          */
         private void handleEventForMove(MotionEvent e) {
-            RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
+            final RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
             if (DesktopModeStatus.isProto2Enabled()
                     && taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
                 return;
@@ -295,16 +294,16 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     break;
                 }
                 case MotionEvent.ACTION_MOVE: {
-                    int dragPointerIdx = e.findPointerIndex(mDragPointerId);
+                    final int dragPointerIdx = e.findPointerIndex(mDragPointerId);
                     mDragResizeCallback.onDragResizeMove(
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
                     break;
                 }
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL: {
-                    int dragPointerIdx = e.findPointerIndex(mDragPointerId);
-                    int statusBarHeight = mDisplayController.getDisplayLayout(taskInfo.displayId)
-                            .stableInsets().top;
+                    final int dragPointerIdx = e.findPointerIndex(mDragPointerId);
+                    final int statusBarHeight = mDisplayController
+                            .getDisplayLayout(taskInfo.displayId).stableInsets().top;
                     mDragResizeCallback.onDragResizeEnd(
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
                     if (e.getRawY(dragPointerIdx) <= statusBarHeight) {
@@ -378,7 +377,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
      */
     private void incrementEventReceiverTasks(int displayId) {
         if (mEventReceiversByDisplay.contains(displayId)) {
-            EventReceiver eventReceiver = mEventReceiversByDisplay.get(displayId);
+            final EventReceiver eventReceiver = mEventReceiversByDisplay.get(displayId);
             eventReceiver.incrementTaskNumber();
         } else {
             createInputChannel(displayId);
@@ -388,7 +387,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     // If all tasks on this display are gone, we don't need to monitor its input.
     private void removeTaskFromEventReceiver(int displayId) {
         if (!mEventReceiversByDisplay.contains(displayId)) return;
-        EventReceiver eventReceiver = mEventReceiversByDisplay.get(displayId);
+        final EventReceiver eventReceiver = mEventReceiversByDisplay.get(displayId);
         if (eventReceiver == null) return;
         eventReceiver.decrementTaskNumber();
         if (eventReceiver.getTasksOnDisplay() == 0) {
@@ -403,7 +402,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
      */
     private void handleReceivedMotionEvent(MotionEvent ev, InputMonitor inputMonitor) {
         if (DesktopModeStatus.isProto2Enabled()) {
-            DesktopModeWindowDecoration focusedDecor = getFocusedDecor();
+            final DesktopModeWindowDecoration focusedDecor = getFocusedDecor();
             if (focusedDecor == null
                     || focusedDecor.mTaskInfo.getWindowingMode() != WINDOWING_MODE_FREEFORM) {
                 handleCaptionThroughStatusBar(ev);
@@ -428,9 +427,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
     // If an UP/CANCEL action is received outside of caption bounds, turn off handle menu
     private void handleEventOutsideFocusedCaption(MotionEvent ev) {
-        int action = ev.getActionMasked();
+        final int action = ev.getActionMasked();
         if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-            DesktopModeWindowDecoration focusedDecor = getFocusedDecor();
+            final DesktopModeWindowDecoration focusedDecor = getFocusedDecor();
             if (focusedDecor == null) {
                 return;
             }
@@ -450,7 +449,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         switch (ev.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
                 // Begin drag through status bar if applicable.
-                DesktopModeWindowDecoration focusedDecor = getFocusedDecor();
+                final DesktopModeWindowDecoration focusedDecor = getFocusedDecor();
                 if (focusedDecor != null) {
                     boolean dragFromStatusBarAllowed = false;
                     if (DesktopModeStatus.isProto2Enabled()) {
@@ -469,14 +468,14 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 break;
             }
             case MotionEvent.ACTION_UP: {
-                DesktopModeWindowDecoration focusedDecor = getFocusedDecor();
+                final DesktopModeWindowDecoration focusedDecor = getFocusedDecor();
                 if (focusedDecor == null) {
                     mTransitionDragActive = false;
                     return;
                 }
                 if (mTransitionDragActive) {
                     mTransitionDragActive = false;
-                    int statusBarHeight = mDisplayController
+                    final int statusBarHeight = mDisplayController
                             .getDisplayLayout(focusedDecor.mTaskInfo.displayId).stableInsets().top;
                     if (ev.getY() > statusBarHeight) {
                         if (DesktopModeStatus.isProto2Enabled()) {
@@ -500,10 +499,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
     @Nullable
     private DesktopModeWindowDecoration getFocusedDecor() {
-        int size = mWindowDecorByTaskId.size();
+        final int size = mWindowDecorByTaskId.size();
         DesktopModeWindowDecoration focusedDecor = null;
         for (int i = 0; i < size; i++) {
-            DesktopModeWindowDecoration decor = mWindowDecorByTaskId.valueAt(i);
+            final DesktopModeWindowDecoration decor = mWindowDecorByTaskId.valueAt(i);
             if (decor != null && decor.isFocused()) {
                 focusedDecor = decor;
                 break;
@@ -513,16 +512,16 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     }
 
     private void createInputChannel(int displayId) {
-        InputManager inputManager = InputManager.getInstance();
-        InputMonitor inputMonitor =
+        final InputManager inputManager = InputManager.getInstance();
+        final InputMonitor inputMonitor =
                 mInputMonitorFactory.create(inputManager, mContext);
-        EventReceiver eventReceiver = new EventReceiver(inputMonitor,
+        final EventReceiver eventReceiver = new EventReceiver(inputMonitor,
                 inputMonitor.getInputChannel(), Looper.myLooper());
         mEventReceiversByDisplay.put(displayId, eventReceiver);
     }
 
     private void disposeInputChannel(int displayId) {
-        EventReceiver eventReceiver = mEventReceiversByDisplay.removeReturnOld(displayId);
+        final EventReceiver eventReceiver = mEventReceiversByDisplay.removeReturnOld(displayId);
         if (eventReceiver != null) {
             eventReceiver.dispose();
         }
@@ -541,7 +540,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             SurfaceControl taskSurface,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
-        DesktopModeWindowDecoration oldDecoration = mWindowDecorByTaskId.get(taskInfo.taskId);
+        final DesktopModeWindowDecoration oldDecoration = mWindowDecorByTaskId.get(taskInfo.taskId);
         if (oldDecoration != null) {
             // close the old decoration if it exists to avoid two window decorations being added
             oldDecoration.close();
@@ -558,9 +557,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         mSyncQueue);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 
-        TaskPositioner taskPositioner =
+        final TaskPositioner taskPositioner =
                 new TaskPositioner(mTaskOrganizer, windowDecoration, mDragStartListener);
-        DesktopModeTouchEventListener touchEventListener =
+        final DesktopModeTouchEventListener touchEventListener =
                 new DesktopModeTouchEventListener(
                         taskInfo, taskPositioner, windowDecoration.getDragDetector());
         windowDecoration.setCaptionListeners(touchEventListener, touchEventListener);

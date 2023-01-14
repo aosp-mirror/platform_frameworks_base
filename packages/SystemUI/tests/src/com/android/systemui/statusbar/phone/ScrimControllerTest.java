@@ -58,6 +58,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.statusbar.policy.FakeConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -1562,7 +1563,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void transitionToDreaming() {
         mScrimController.setRawPanelExpansionFraction(0f);
-        mScrimController.setBouncerHiddenFraction(KeyguardBouncer.EXPANSION_HIDDEN);
+        mScrimController.setBouncerHiddenFraction(KeyguardBouncerConstants.EXPANSION_HIDDEN);
         mScrimController.transitionTo(ScrimState.DREAMING);
         finishAnimationsImmediately();
 

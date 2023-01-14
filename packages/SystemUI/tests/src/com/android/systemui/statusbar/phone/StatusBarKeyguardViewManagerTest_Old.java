@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.flags.Flags.MODERN_BOUNCER;
+import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN;
+import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -261,7 +263,7 @@ public class StatusBarKeyguardViewManagerTest_Old extends SysuiTestCase {
         when(mPrimaryBouncer.inTransit()).thenReturn(true);
 
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(EXPANSION_EVENT);
-        verify(mPrimaryBouncer).setExpansion(eq(KeyguardBouncer.EXPANSION_HIDDEN));
+        verify(mPrimaryBouncer).setExpansion(eq(EXPANSION_HIDDEN));
     }
 
     @Test
@@ -289,7 +291,7 @@ public class StatusBarKeyguardViewManagerTest_Old extends SysuiTestCase {
                 .thenReturn(BiometricUnlockController.MODE_WAKE_AND_UNLOCK);
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(
                 expansionEvent(
-                        /* fraction= */ KeyguardBouncer.EXPANSION_VISIBLE,
+                        /* fraction= */ EXPANSION_VISIBLE,
                         /* expanded= */ true,
                         /* tracking= */ false));
         verify(mPrimaryBouncer, never()).setExpansion(anyFloat());
@@ -306,7 +308,7 @@ public class StatusBarKeyguardViewManagerTest_Old extends SysuiTestCase {
                 .thenReturn(BiometricUnlockController.MODE_DISMISS_BOUNCER);
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(
                 expansionEvent(
-                        /* fraction= */ KeyguardBouncer.EXPANSION_VISIBLE,
+                        /* fraction= */ EXPANSION_VISIBLE,
                         /* expanded= */ true,
                         /* tracking= */ false));
         verify(mPrimaryBouncer, never()).setExpansion(anyFloat());
@@ -317,7 +319,7 @@ public class StatusBarKeyguardViewManagerTest_Old extends SysuiTestCase {
         when(mKeyguardStateController.isOccluded()).thenReturn(true);
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(
                 expansionEvent(
-                        /* fraction= */ KeyguardBouncer.EXPANSION_VISIBLE,
+                        /* fraction= */ EXPANSION_VISIBLE,
                         /* expanded= */ true,
                         /* tracking= */ false));
         verify(mPrimaryBouncer, never()).setExpansion(anyFloat());
@@ -334,7 +336,7 @@ public class StatusBarKeyguardViewManagerTest_Old extends SysuiTestCase {
                 .thenReturn(BiometricUnlockController.MODE_SHOW_BOUNCER);
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(
                 expansionEvent(
-                        /* fraction= */ KeyguardBouncer.EXPANSION_VISIBLE,
+                        /* fraction= */ EXPANSION_VISIBLE,
                         /* expanded= */ true,
                         /* tracking= */ false));
         verify(mPrimaryBouncer, never()).setExpansion(anyFloat());
@@ -345,7 +347,7 @@ public class StatusBarKeyguardViewManagerTest_Old extends SysuiTestCase {
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE_LOCKED);
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(
                 expansionEvent(
-                        /* fraction= */ KeyguardBouncer.EXPANSION_VISIBLE,
+                        /* fraction= */ EXPANSION_VISIBLE,
                         /* expanded= */ true,
                         /* tracking= */ false));
         verify(mPrimaryBouncer, never()).setExpansion(anyFloat());

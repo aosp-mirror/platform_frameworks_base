@@ -17,6 +17,7 @@
 package com.android.systemui.media.controls.pipeline
 
 import android.app.Notification
+import android.app.Notification.FLAG_NO_CLEAR
 import android.app.Notification.MediaStyle
 import android.app.PendingIntent
 import android.app.smartspace.SmartspaceAction
@@ -1449,6 +1450,39 @@ class MediaDataManagerTest : SysuiTestCase() {
             )
         assertThat(mediaDataCaptor.value.isPlaying).isFalse()
         assertThat(mediaDataCaptor.value.semanticActions).isNull()
+    }
+
+    @Test
+    fun testNoClearNotOngoing_canDismiss() {
+        mediaNotification =
+            SbnBuilder().run {
+                setPkg(PACKAGE_NAME)
+                modifyNotification(context).also {
+                    it.setSmallIcon(android.R.drawable.ic_media_pause)
+                    it.setStyle(MediaStyle().apply { setMediaSession(session.sessionToken) })
+                    it.setOngoing(false)
+                    it.setFlag(FLAG_NO_CLEAR, true)
+                }
+                build()
+            }
+        addNotificationAndLoad()
+        assertThat(mediaDataCaptor.value.isClearable).isTrue()
+    }
+
+    @Test
+    fun testOngoing_cannotDismiss() {
+        mediaNotification =
+            SbnBuilder().run {
+                setPkg(PACKAGE_NAME)
+                modifyNotification(context).also {
+                    it.setSmallIcon(android.R.drawable.ic_media_pause)
+                    it.setStyle(MediaStyle().apply { setMediaSession(session.sessionToken) })
+                    it.setOngoing(true)
+                }
+                build()
+            }
+        addNotificationAndLoad()
+        assertThat(mediaDataCaptor.value.isClearable).isFalse()
     }
 
     /** Helper function to add a media notification and capture the resulting MediaData */

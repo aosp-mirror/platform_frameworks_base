@@ -791,13 +791,13 @@ private class AnimatedDialog(
         // Move the drawing of the source in the overlay of this dialog, then animate. We trigger a
         // one-off synchronization to make sure that this is done in sync between the two different
         // windows.
+        controller.startDrawingInOverlayOf(decorView)
         synchronizeNextDraw(
             then = {
                 isSourceDrawnInDialog = true
                 maybeStartLaunchAnimation()
             }
         )
-        controller.startDrawingInOverlayOf(decorView)
     }
 
     /**

@@ -16,8 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.statusbar.phone.KeyguardBouncer.EXPANSION_HIDDEN;
-import static com.android.systemui.statusbar.phone.KeyguardBouncer.EXPANSION_VISIBLE;
+import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN;
+import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE;
 
 import static com.google.common.truth.Truth.assertThat;
 

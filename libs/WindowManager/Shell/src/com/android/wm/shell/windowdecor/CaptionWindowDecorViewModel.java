@@ -136,7 +136,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     }
 
     private void setupCaptionColor(RunningTaskInfo taskInfo, CaptionWindowDecoration decoration) {
-        int statusBarColor = taskInfo.taskDescription.getStatusBarColor();
+        final int statusBarColor = taskInfo.taskDescription.getStatusBarColor();
         decoration.setCaptionColor(statusBarColor);
     }
 
@@ -152,7 +152,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             SurfaceControl taskSurface,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
-        CaptionWindowDecoration oldDecoration = mWindowDecorByTaskId.get(taskInfo.taskId);
+        final CaptionWindowDecoration oldDecoration = mWindowDecorByTaskId.get(taskInfo.taskId);
         if (oldDecoration != null) {
             // close the old decoration if it exists to avoid two window decorations being added
             oldDecoration.close();
@@ -169,9 +169,9 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                         mSyncQueue);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 
-        TaskPositioner taskPositioner =
+        final TaskPositioner taskPositioner =
                 new TaskPositioner(mTaskOrganizer, windowDecoration);
-        CaptionTouchEventListener touchEventListener =
+        final CaptionTouchEventListener touchEventListener =
                 new CaptionTouchEventListener(taskInfo, taskPositioner);
         windowDecoration.setCaptionListeners(touchEventListener, touchEventListener);
         windowDecoration.setDragResizeCallback(taskPositioner);
@@ -221,11 +221,11 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             if (e.getAction() != MotionEvent.ACTION_DOWN) {
                 return false;
             }
-            RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
+            final RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
             if (taskInfo.isFocused) {
                 return false;
             }
-            WindowContainerTransaction wct = new WindowContainerTransaction();
+            final WindowContainerTransaction wct = new WindowContainerTransaction();
             wct.reorder(mTaskToken, true /* onTop */);
             mSyncQueue.queue(wct);
             return true;
@@ -236,7 +236,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
          * @return {@code true} if a drag is happening; or {@code false} if it is not
          */
         private void handleEventForMove(MotionEvent e) {
-            RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
+            final RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
             if (taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
                 return;
             }

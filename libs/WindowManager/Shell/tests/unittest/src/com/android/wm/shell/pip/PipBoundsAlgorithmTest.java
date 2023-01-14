@@ -64,7 +64,7 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
         initializeMockResources();
         mPipBoundsState = new PipBoundsState(mContext);
         mPipBoundsAlgorithm = new PipBoundsAlgorithm(mContext, mPipBoundsState,
-                new PipSnapAlgorithm(), new PipKeepClearAlgorithm() {});
+                new PipSnapAlgorithm(), new PipKeepClearAlgorithmInterface() {});
 
         mPipBoundsState.setDisplayLayout(
                 new DisplayLayout(mDefaultDisplayInfo, mContext.getResources(), true, true));

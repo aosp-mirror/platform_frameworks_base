@@ -282,6 +282,7 @@ class CustomizationProvider :
                         .ENABLEMENT_ACTION_TEXT,
                     Contract.LockScreenQuickAffordances.AffordanceTable.Columns
                         .ENABLEMENT_COMPONENT_NAME,
+                    Contract.LockScreenQuickAffordances.AffordanceTable.Columns.CONFIGURE_INTENT,
                 )
             )
             .apply {
@@ -298,6 +299,7 @@ class CustomizationProvider :
                             ),
                             representation.actionText,
                             representation.actionComponentName,
+                            representation.configureIntent?.toUri(0),
                         )
                     )
                 }
