@@ -86,7 +86,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -946,13 +945,10 @@ public final class DexOptHelper {
         }
     }
 
-    private static class DexoptDoneHandler implements ArtManagerLocal.DexoptDoneCallback {
-        @NonNull private final PackageManagerService mPm;
-
-        DexoptDoneHandler(@NonNull PackageManagerService pm) { mPm = pm; }
-
+    private class DexoptDoneHandler implements ArtManagerLocal.DexoptDoneCallback {
         /**
-         * Called after every package dexopt operation done by {@link ArtManagerLocal}.
+         * Called after every package dexopt operation done by {@link ArtManagerLocal} (when ART
+         * Service is in use).
          */
         @Override
         public void onDexoptDone(@NonNull DexoptResult result) {
@@ -983,10 +979,8 @@ public final class DexOptHelper {
         }
 
         ArtManagerLocal artManager = new ArtManagerLocal(systemContext);
-        // There doesn't appear to be any checks that @NonNull is heeded, so use requireNonNull
-        // below to ensure we don't store away a null that we'll fail on later.
-        artManager.addDexoptDoneCallback(false /* onlyIncludeUpdates */,
-                Runnable::run, new DexoptDoneHandler(Objects.requireNonNull(pm)));
+        artManager.addDexoptDoneCallback(false /* onlyIncludeUpdates */, Runnable::run,
+                pm.getDexOptHelper().new DexoptDoneHandler());
         LocalManagerRegistry.addManager(ArtManagerLocal.class, artManager);
 
         artManager.scheduleBackgroundDexoptJob();

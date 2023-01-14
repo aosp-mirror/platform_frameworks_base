@@ -2997,6 +2997,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         return mDexManager;
     }
 
+    /*package*/ DexOptHelper getDexOptHelper() {
+        return mDexOptHelper;
+    }
+
     /*package*/ DynamicCodeLogger getDynamicCodeLogger() {
         return mDynamicCodeLogger;
     }
