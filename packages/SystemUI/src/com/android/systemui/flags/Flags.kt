@@ -208,6 +208,12 @@ object Flags {
     // TODO(b/262859270): Tracking Bug
     @JvmField val FALSING_OFF_FOR_UNFOLDED = releasedFlag(225, "falsing_off_for_unfolded")
 
+    /** Enables code to show contextual loyalty cards in wallet entrypoints */
+    // TODO(b/247587924): Tracking Bug
+    @JvmField
+    val ENABLE_WALLET_CONTEXTUAL_LOYALTY_CARDS =
+        unreleasedFlag(226, "enable_wallet_contextual_loyalty_cards", teamfood = false)
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")
@@ -291,7 +297,7 @@ object Flags {
 
     // 801 - region sampling
     // TODO(b/254512848): Tracking Bug
-    val REGION_SAMPLING = unreleasedFlag(801, "region_sampling", teamfood = true)
+    val REGION_SAMPLING = unreleasedFlag(801, "region_sampling")
 
     // 803 - screen contents translation
     // TODO(b/254513187): Tracking Bug
