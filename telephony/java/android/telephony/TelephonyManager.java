@@ -3217,17 +3217,17 @@ public class TelephonyManager {
             case NETWORK_TYPE_CDMA:
                 return "CDMA";
             case NETWORK_TYPE_EVDO_0:
-                return "CDMA - EvDo rev. 0";
+                return "EVDO-0";
             case NETWORK_TYPE_EVDO_A:
-                return "CDMA - EvDo rev. A";
+                return "EVDO-A";
             case NETWORK_TYPE_EVDO_B:
-                return "CDMA - EvDo rev. B";
+                return "EVDO-B";
             case NETWORK_TYPE_1xRTT:
-                return "CDMA - 1xRTT";
+                return "1xRTT";
             case NETWORK_TYPE_LTE:
                 return "LTE";
             case NETWORK_TYPE_EHRPD:
-                return "CDMA - eHRPD";
+                return "eHRPD";
             case NETWORK_TYPE_IDEN:
                 return "iDEN";
             case NETWORK_TYPE_HSPAP:
@@ -3235,7 +3235,7 @@ public class TelephonyManager {
             case NETWORK_TYPE_GSM:
                 return "GSM";
             case NETWORK_TYPE_TD_SCDMA:
-                return "TD_SCDMA";
+                return "TD-SCDMA";
             case NETWORK_TYPE_IWLAN:
                 return "IWLAN";
             case NETWORK_TYPE_LTE_CA:
@@ -9549,10 +9549,10 @@ public class TelephonyManager {
      */
     public static boolean isValidAllowedNetworkTypesReason(@AllowedNetworkTypesReason int reason) {
         switch (reason) {
-            case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_USER:
-            case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_POWER:
-            case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_CARRIER:
-            case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G:
+            case ALLOWED_NETWORK_TYPES_REASON_USER:
+            case ALLOWED_NETWORK_TYPES_REASON_POWER:
+            case ALLOWED_NETWORK_TYPES_REASON_CARRIER:
+            case ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G:
             case ALLOWED_NETWORK_TYPES_REASON_USER_RESTRICTIONS:
                 return true;
         }
@@ -18041,6 +18041,47 @@ public class TelephonyManager {
                 return "PRESENT";
             default:
                 return "UNKNOWN(" + state + ")";
+        }
+    }
+
+    /**
+     * Convert the allowed network types reason to string.
+     *
+     * @param reason The allowed network types reason.
+     * @return The converted string.
+     *
+     * @hide
+     */
+    @NonNull
+    public static String allowedNetworkTypesReasonToString(@AllowedNetworkTypesReason int reason) {
+        switch (reason) {
+            case ALLOWED_NETWORK_TYPES_REASON_USER: return "user";
+            case ALLOWED_NETWORK_TYPES_REASON_POWER: return "power";
+            case ALLOWED_NETWORK_TYPES_REASON_CARRIER: return "carrier";
+            case ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G: return "enable_2g";
+            case ALLOWED_NETWORK_TYPES_REASON_USER_RESTRICTIONS: return "user_restrictions";
+            default: return "unknown(" + reason + ")";
+        }
+    }
+
+    /**
+     * Convert the allowed network types reason from string.
+     *
+     * @param reason The reason in string format.
+     * @return The allowed network types reason.
+     *
+     * @hide
+     */
+    @AllowedNetworkTypesReason
+    public static int allowedNetworkTypesReasonFromString(@NonNull String reason) {
+        switch (reason) {
+            case "user": return ALLOWED_NETWORK_TYPES_REASON_USER;
+            case "power": return ALLOWED_NETWORK_TYPES_REASON_POWER;
+            case "carrier": return ALLOWED_NETWORK_TYPES_REASON_CARRIER;
+            case "enable_2g": return ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G;
+            case "user_restrictions": return ALLOWED_NETWORK_TYPES_REASON_USER_RESTRICTIONS;
+            default: throw new IllegalArgumentException("allowedNetworkTypesReasonFromString: "
+                    + "invalid reason " + reason);
         }
     }
 }
