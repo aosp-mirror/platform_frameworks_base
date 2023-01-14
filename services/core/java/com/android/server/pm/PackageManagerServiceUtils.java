@@ -24,6 +24,7 @@ import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDWR;
 
 import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
+import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
 import static com.android.server.pm.PackageManagerService.COMPRESSED_EXTENSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_INTENT_MATCHING;
@@ -91,6 +92,7 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.HexDump;
 import com.android.server.EventLogTags;
 import com.android.server.IntentResolver;
+import com.android.server.LocalManagerRegistry;
 import com.android.server.Watchdog;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.dex.PackageDexUsage;
@@ -199,6 +201,17 @@ public class PackageManagerServiceUtils {
      * build fingerprint changes.
      */
     private static final boolean FORCE_PACKAGE_PARSED_CACHE_ENABLED = false;
+
+    /**
+     * Returns the registered PackageManagerLocal instance, or else throws an unchecked error.
+     */
+    public static @NonNull PackageManagerLocal getPackageManagerLocal() {
+        try {
+            return LocalManagerRegistry.getManagerOrThrow(PackageManagerLocal.class);
+        } catch (ManagerNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * Checks if the package was inactive during since <code>thresholdTimeinMillis</code>.

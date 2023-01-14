@@ -32,6 +32,7 @@ import static com.android.server.pm.PackageManagerServiceCompilerMapping.getComp
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getDefaultCompilerFilter;
 import static com.android.server.pm.PackageManagerServiceUtils.REMOVE_IF_APEX_PKG;
 import static com.android.server.pm.PackageManagerServiceUtils.REMOVE_IF_NULL_PKG;
+import static com.android.server.pm.PackageManagerServiceUtils.getPackageManagerLocal;
 
 import static dalvik.system.DexFile.isProfileGuidedCompilerFilter;
 
@@ -88,7 +89,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
@@ -916,14 +916,6 @@ public final class DexOptHelper {
         return false;
     }
 
-    private @NonNull PackageManagerLocal getPackageManagerLocal() {
-        try {
-            return LocalManagerRegistry.getManagerOrThrow(PackageManagerLocal.class);
-        } catch (ManagerNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     /**
      * Called whenever we need to fall back from ART Service to the legacy dexopt code.
      */
@@ -1003,7 +995,7 @@ public final class DexOptHelper {
     /**
      * Returns {@link ArtManagerLocal} if ART Service should be used for package dexopt.
      */
-    private static @Nullable ArtManagerLocal getArtManagerLocal() {
+    public static @Nullable ArtManagerLocal getArtManagerLocal() {
         if (!useArtService()) {
             return null;
         }
