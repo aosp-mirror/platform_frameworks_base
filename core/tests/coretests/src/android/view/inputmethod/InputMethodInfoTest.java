@@ -62,8 +62,6 @@ public class InputMethodInfoTest {
         assertThat(clone.supportsSwitchingToNextInputMethod(), is(false));
         assertThat(imi.isInlineSuggestionsEnabled(), is(false));
         assertThat(imi.supportsInlineSuggestionsWithTouchExploration(), is(false));
-        assertThat(imi.supportsStylusHandwriting(), is(false));
-        assertThat(imi.createStylusHandwritingSettingsActivityIntent(), equalTo(null));
     }
 
     @Test
