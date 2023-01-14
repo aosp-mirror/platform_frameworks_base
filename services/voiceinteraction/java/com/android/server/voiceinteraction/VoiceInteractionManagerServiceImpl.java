@@ -58,6 +58,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SharedMemory;
 import android.os.UserHandle;
+import android.service.voice.HotwordDetector;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
@@ -109,6 +110,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     final ComponentName mSessionComponentName;
     final IWindowManager mIWindowManager;
     final ComponentName mHotwordDetectionComponentName;
+    final ComponentName mVisualQueryDetectionComponentName;
     boolean mBound = false;
     IVoiceInteractionService mService;
     volatile HotwordDetectionConnection mHotwordDetectionConnection;
@@ -211,6 +213,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             mInfo = null;
             mSessionComponentName = null;
             mHotwordDetectionComponentName = null;
+            mVisualQueryDetectionComponentName = null;
             mIWindowManager = null;
             mValid = false;
             return;
@@ -220,6 +223,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             Slog.w(TAG, "Bad voice interaction service: " + mInfo.getParseError());
             mSessionComponentName = null;
             mHotwordDetectionComponentName = null;
+            mVisualQueryDetectionComponentName = null;
             mIWindowManager = null;
             mValid = false;
             return;
@@ -230,6 +234,9 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         final String hotwordDetectionServiceName = mInfo.getHotwordDetectionService();
         mHotwordDetectionComponentName = hotwordDetectionServiceName != null
                 ? new ComponentName(service.getPackageName(), hotwordDetectionServiceName) : null;
+        final String visualQueryDetectionServiceName = mInfo.getVisualQueryDetectionService();
+        mVisualQueryDetectionComponentName = visualQueryDetectionServiceName != null ? new
+                ComponentName(service.getPackageName(), visualQueryDetectionServiceName) : null;
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         IntentFilter filter = new IntentFilter();
@@ -591,14 +598,11 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         }
     }
 
-    public void initAndVerifyDetectorLocked(
-            @NonNull Identity voiceInteractorIdentity,
-            @Nullable PersistableBundle options,
+    private void verifyDetectorForHotwordDetectionLocked(
             @Nullable SharedMemory sharedMemory,
-            @NonNull IBinder token,
             IHotwordRecognitionStatusCallback callback,
             int detectorType) {
-        Slog.v(TAG, "initAndVerifyDetectorLocked");
+        Slog.v(TAG, "verifyDetectorForHotwordDetectionLocked");
         int voiceInteractionServiceUid = mInfo.getServiceInfo().applicationInfo.uid;
         if (mHotwordDetectionComponentName == null) {
             Slog.w(TAG, "Hotword detection service name not found");
@@ -649,11 +653,55 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
 
         logDetectorCreateEventIfNeeded(callback, detectorType, true,
                 voiceInteractionServiceUid);
+    }
+
+    private void verifyDetectorForVisualQueryDetectionLocked(@Nullable SharedMemory sharedMemory) {
+        Slog.v(TAG, "verifyDetectorForVisualQueryDetectionLocked");
+
+        if (mVisualQueryDetectionComponentName == null) {
+            Slog.w(TAG, "Visual query detection service name not found");
+            throw new IllegalStateException("Visual query detection service name not found");
+        }
+        ServiceInfo visualQueryDetectionServiceInfo = getServiceInfoLocked(
+                mVisualQueryDetectionComponentName, mUser);
+        if (visualQueryDetectionServiceInfo == null) {
+            Slog.w(TAG, "Visual query detection service info not found");
+            throw new IllegalStateException("Visual query detection service name not found");
+        }
+        if (!isIsolatedProcessLocked(visualQueryDetectionServiceInfo)) {
+            Slog.w(TAG, "Visual query detection service not in isolated process");
+            throw new IllegalStateException("Visual query detection not in isolated process");
+        }
+        if (sharedMemory != null && !sharedMemory.setProtect(OsConstants.PROT_READ)) {
+            Slog.w(TAG, "Can't set sharedMemory to be read-only");
+            throw new IllegalStateException("Can't set sharedMemory to be read-only");
+        }
+    }
+
+    public void initAndVerifyDetectorLocked(
+            @NonNull Identity voiceInteractorIdentity,
+            @Nullable PersistableBundle options,
+            @Nullable SharedMemory sharedMemory,
+            @NonNull IBinder token,
+            IHotwordRecognitionStatusCallback callback,
+            int detectorType) {
+
+        if (detectorType != HotwordDetector.DETECTOR_TYPE_VISUAL_QUERY_DETECTOR) {
+            verifyDetectorForHotwordDetectionLocked(sharedMemory, callback, detectorType);
+        } else {
+            verifyDetectorForVisualQueryDetectionLocked(sharedMemory);
+        }
+
         if (mHotwordDetectionConnection == null) {
             mHotwordDetectionConnection = new HotwordDetectionConnection(mServiceStub, mContext,
                     mInfo.getServiceInfo().applicationInfo.uid, voiceInteractorIdentity,
-                    mHotwordDetectionComponentName, mUser, /* bindInstantServiceAllowed= */ false,
-                    detectorType);
+                    mHotwordDetectionComponentName, mVisualQueryDetectionComponentName, mUser,
+                    /* bindInstantServiceAllowed= */ false, detectorType);
+        } else if (detectorType != HotwordDetector.DETECTOR_TYPE_VISUAL_QUERY_DETECTOR) {
+            // TODO: Logger events should be handled in session instead. Temporary adding the
+            //  checking to prevent confusion so VisualQueryDetection events won't be logged if the
+            //  connection is instantiated by the VisualQueryDetector.
+            mHotwordDetectionConnection.setDetectorType(detectorType);
         }
         mHotwordDetectionConnection.createDetectorLocked(options, sharedMemory, token, callback,
                 detectorType);

@@ -25,12 +25,16 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.hardware.soundtrigger.SoundTrigger;
 import android.media.AudioFormat;
+import android.os.Binder;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
+import android.os.RemoteException;
 import android.os.SharedMemory;
 import android.util.Slog;
 
+import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVoiceInteractionManagerService;
 
 import java.io.PrintWriter;
@@ -208,8 +212,9 @@ public class VisualQueryDetector {
 
         @Override
         void initialize(@Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory) {
-            //TODO(261783492): call initAndVerify to create VisualQueryDetectionService
-            // from the system server.
+            initAndVerifyDetector(options, sharedMemory,
+                    new InitializationStateListener(mExecutor, mCallback),
+                    DETECTOR_TYPE_VISUAL_QUERY_DETECTOR);
         }
 
         @Override
@@ -236,6 +241,78 @@ public class VisualQueryDetector {
         @Override
         public boolean isUsingSandboxedDetectionService() {
             return true;
+        }
+    }
+
+    private static class InitializationStateListener
+            extends IHotwordRecognitionStatusCallback.Stub {
+        private final Executor mExecutor;
+        private final Callback mCallback;
+
+        InitializationStateListener(Executor executor, Callback callback) {
+            this.mExecutor = executor;
+            this.mCallback = callback;
+        }
+
+        @Override
+        public void onKeyphraseDetected(
+                SoundTrigger.KeyphraseRecognitionEvent recognitionEvent,
+                HotwordDetectedResult result) {
+            if (DEBUG) {
+                Slog.i(TAG, "Ignored #onKeyphraseDetected event");
+            }
+        }
+
+        @Override
+        public void onGenericSoundTriggerDetected(
+                SoundTrigger.GenericRecognitionEvent recognitionEvent) throws RemoteException {
+            if (DEBUG) {
+                Slog.i(TAG, "Ignored #onGenericSoundTriggerDetected event");
+            }
+        }
+
+        @Override
+        public void onRejected(HotwordRejectedResult result) throws RemoteException {
+            if (DEBUG) {
+                Slog.i(TAG, "Ignored #onRejected event");
+            }
+        }
+
+        @Override
+        public void onRecognitionPaused() throws RemoteException {
+            if (DEBUG) {
+                Slog.i(TAG, "Ignored #onRecognitionPaused event");
+            }
+        }
+
+        @Override
+        public void onRecognitionResumed() throws RemoteException {
+            if (DEBUG) {
+                Slog.i(TAG, "Ignored #onRecognitionResumed event");
+            }
+        }
+
+        @Override
+        public void onStatusReported(int status) {
+            Slog.v(TAG, "onStatusReported" + (DEBUG ? "(" + status + ")" : ""));
+            //TODO: rename the target callback with a more general term
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
+                    () -> mCallback.onVisualQueryDetectionServiceInitialized(status)));
+
+        }
+
+        @Override
+        public void onProcessRestarted() throws RemoteException {
+            Slog.v(TAG, "onProcessRestarted()");
+            //TODO: rename the target callback with a more general term
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
+                    () -> mCallback.onVisualQueryDetectionServiceRestarted()));
+        }
+
+        @Override
+        public void onError(int status) throws RemoteException {
+            Slog.v(TAG, "Initialization Error: (" + status + ")");
+            // Do nothing
         }
     }
 }
