@@ -36,10 +36,10 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
+import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
-import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
@@ -274,16 +274,18 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                         (float) Math.hypot(horizontalVelocity, verticalVelocity);
 
                 final float expansion = flingRevealsOverlay(verticalVelocity, velocityVector)
-                        ? KeyguardBouncer.EXPANSION_HIDDEN : KeyguardBouncer.EXPANSION_VISIBLE;
+                        ? KeyguardBouncerConstants.EXPANSION_HIDDEN
+                        : KeyguardBouncerConstants.EXPANSION_VISIBLE;
 
                 // Log the swiping up to show Bouncer event.
-                if (!mBouncerInitiallyShowing && expansion == KeyguardBouncer.EXPANSION_VISIBLE) {
+                if (!mBouncerInitiallyShowing
+                        && expansion == KeyguardBouncerConstants.EXPANSION_VISIBLE) {
                     mUiEventLogger.log(DreamEvent.DREAM_SWIPED);
                 }
 
                 flingToExpansion(verticalVelocity, expansion);
 
-                if (expansion == KeyguardBouncer.EXPANSION_HIDDEN) {
+                if (expansion == KeyguardBouncerConstants.EXPANSION_HIDDEN) {
                     mStatusBarKeyguardViewManager.reset(false);
                 }
                 break;
@@ -302,7 +304,8 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                     float dragDownAmount = expansionFraction * expansionHeight;
                     setPanelExpansion(expansionFraction, dragDownAmount);
                 });
-        if (!mBouncerInitiallyShowing && targetExpansion == KeyguardBouncer.EXPANSION_VISIBLE) {
+        if (!mBouncerInitiallyShowing
+                && targetExpansion == KeyguardBouncerConstants.EXPANSION_VISIBLE) {
             animator.addListener(
                     new AnimatorListenerAdapter() {
                         @Override
@@ -335,7 +338,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
         final float targetHeight = viewHeight * expansion;
         final float expansionHeight = targetHeight - currentHeight;
         final ValueAnimator animator = createExpansionAnimator(expansion, expansionHeight);
-        if (expansion == KeyguardBouncer.EXPANSION_HIDDEN) {
+        if (expansion == KeyguardBouncerConstants.EXPANSION_HIDDEN) {
             // Hides the bouncer, i.e., fully expands the space above the bouncer.
             mFlingAnimationUtilsClosing.apply(animator, currentHeight, targetHeight, velocity,
                     viewHeight);

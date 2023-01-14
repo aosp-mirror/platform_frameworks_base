@@ -33,6 +33,7 @@ import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
+import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeExpansionListener
@@ -40,7 +41,6 @@ import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
-import com.android.systemui.statusbar.phone.KeyguardBouncer
 import com.android.systemui.statusbar.phone.KeyguardBouncer.PrimaryBouncerExpansionCallback
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager.KeyguardViewManagerCallback
@@ -112,10 +112,10 @@ constructor(
         }
     /**
      * Hidden amount of input (pin/pattern/password) bouncer. This is used
-     * [KeyguardBouncer.EXPANSION_VISIBLE] (0f) to [KeyguardBouncer.EXPANSION_HIDDEN] (1f). Only
-     * used for the non-modernBouncer.
+     * [KeyguardBouncerConstants.EXPANSION_VISIBLE] (0f) to
+     * [KeyguardBouncerConstants.EXPANSION_HIDDEN] (1f). Only used for the non-modernBouncer.
      */
-    private var inputBouncerHiddenAmount = KeyguardBouncer.EXPANSION_HIDDEN
+    private var inputBouncerHiddenAmount = KeyguardBouncerConstants.EXPANSION_HIDDEN
     private var inputBouncerExpansion = 0f // only used for modernBouncer
 
     private val stateListener: StatusBarStateController.StateListener =

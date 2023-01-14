@@ -145,7 +145,7 @@ private fun createLifecycleOwnerAndRun(
  * └───────────────┴───────────────────┴──────────────┴─────────────────┘
  * ```
  */
-private class ViewLifecycleOwner(
+class ViewLifecycleOwner(
     private val view: View,
 ) : LifecycleOwner {
 

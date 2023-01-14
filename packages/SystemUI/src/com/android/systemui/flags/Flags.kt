@@ -75,9 +75,7 @@ object Flags {
         unreleasedFlag(119, "notification_memory_logging_enabled", teamfood = true)
 
     // TODO(b/254512731): Tracking Bug
-    @JvmField
-    val NOTIFICATION_DISMISSAL_FADE =
-        unreleasedFlag(113, "notification_dismissal_fade", teamfood = true)
+    @JvmField val NOTIFICATION_DISMISSAL_FADE = releasedFlag(113, "notification_dismissal_fade")
 
     // TODO(b/259558771): Tracking Bug
     val STABILITY_INDEX_FIX = releasedFlag(114, "stability_index_fix")
@@ -499,6 +497,7 @@ object Flags {
     @JvmField val ENABLE_STYLUS_CHARGING_UI = unreleasedFlag(2301, "enable_stylus_charging_ui")
     @JvmField
     val ENABLE_USI_BATTERY_NOTIFICATIONS = unreleasedFlag(2302, "enable_usi_battery_notifications")
+    @JvmField val ENABLE_STYLUS_EDUCATION = unreleasedFlag(2303, "enable_stylus_education")
 
     // 2400 - performance tools and debugging info
     // TODO(b/238923086): Tracking Bug

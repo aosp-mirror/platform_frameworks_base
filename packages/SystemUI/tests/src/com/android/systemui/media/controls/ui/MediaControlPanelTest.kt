@@ -82,6 +82,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.surfaceeffects.ripple.MultiRippleView
+import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseAnimationConfig
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseView
 import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -225,8 +226,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        bgExecutor = FakeExecutor(FakeSystemClock())
-        mainExecutor = FakeExecutor(FakeSystemClock())
+        bgExecutor = FakeExecutor(clock)
+        mainExecutor = FakeExecutor(clock)
         whenever(mediaViewController.expandedLayout).thenReturn(expandedSet)
         whenever(mediaViewController.collapsedLayout).thenReturn(collapsedSet)
 
@@ -2119,6 +2120,27 @@ public class MediaControlPanelTest : SysuiTestCase() {
         player.attachPlayer(viewHolder)
 
         assertThat(player.mRipplesFinishedListener).isNull()
+    }
+
+    @Test
+    fun playTurbulenceNoise_finishesAfterDuration() {
+        fakeFeatureFlag.set(Flags.UMO_SURFACE_RIPPLE, true)
+        fakeFeatureFlag.set(Flags.UMO_TURBULENCE_NOISE, true)
+
+        player.attachPlayer(viewHolder)
+
+        mainExecutor.execute {
+            player.mRipplesFinishedListener.onRipplesFinish()
+
+            assertThat(turbulenceNoiseView.visibility).isEqualTo(View.VISIBLE)
+
+            clock.advanceTime(
+                MediaControlPanel.TURBULENCE_NOISE_PLAY_DURATION +
+                    TurbulenceNoiseAnimationConfig.DEFAULT_EASING_DURATION_IN_MILLIS.toLong()
+            )
+
+            assertThat(turbulenceNoiseView.visibility).isEqualTo(View.INVISIBLE)
+        }
     }
 
     private fun getScrubbingChangeListener(): SeekBarViewModel.ScrubbingChangeListener =

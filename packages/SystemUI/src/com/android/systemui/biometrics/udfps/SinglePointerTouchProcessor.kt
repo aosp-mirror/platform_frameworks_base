@@ -43,74 +43,72 @@ class SinglePointerTouchProcessor @Inject constructor(val overlapDetector: Overl
     ): TouchProcessorResult {
 
         fun preprocess(): PreprocessedTouch {
-            // TODO(b/253085297): Add multitouch support. pointerIndex can be > 0 for ACTION_MOVE.
-            val pointerIndex = 0
-            val touchData = event.normalize(pointerIndex, overlayParams)
-            val isGoodOverlap =
-                overlapDetector.isGoodOverlap(touchData, overlayParams.nativeSensorBounds)
-            return PreprocessedTouch(touchData, previousPointerOnSensorId, isGoodOverlap)
+            val touchData = List(event.pointerCount) { event.normalize(it, overlayParams) }
+            val pointersOnSensor =
+                touchData
+                    .filter { overlapDetector.isGoodOverlap(it, overlayParams.nativeSensorBounds) }
+                    .map { it.pointerId }
+            return PreprocessedTouch(touchData, previousPointerOnSensorId, pointersOnSensor)
         }
 
         return when (event.actionMasked) {
-            MotionEvent.ACTION_DOWN -> processActionDown(preprocess())
+            MotionEvent.ACTION_DOWN,
+            MotionEvent.ACTION_POINTER_DOWN,
             MotionEvent.ACTION_MOVE -> processActionMove(preprocess())
-            MotionEvent.ACTION_UP -> processActionUp(preprocess())
-            MotionEvent.ACTION_CANCEL ->
-                processActionCancel(event.normalize(pointerIndex = 0, overlayParams))
+            MotionEvent.ACTION_UP,
+            MotionEvent.ACTION_POINTER_UP ->
+                processActionUp(preprocess(), event.getPointerId(event.actionIndex))
+            MotionEvent.ACTION_CANCEL -> processActionCancel(NormalizedTouchData())
             else ->
                 Failure("Unsupported MotionEvent." + MotionEvent.actionToString(event.actionMasked))
         }
     }
 }
 
+/**
+ * [data] contains a list of NormalizedTouchData for pointers in the motionEvent ordered by
+ * pointerIndex
+ *
+ * [previousPointerOnSensorId] the pointerId of the previous pointer on the sensor,
+ * [MotionEvent.INVALID_POINTER_ID] if none
+ *
+ * [pointersOnSensor] contains a list of ids of pointers on the sensor
+ */
 private data class PreprocessedTouch(
-    val data: NormalizedTouchData,
+    val data: List<NormalizedTouchData>,
     val previousPointerOnSensorId: Int,
-    val isGoodOverlap: Boolean,
+    val pointersOnSensor: List<Int>,
 )
-
-private fun processActionDown(touch: PreprocessedTouch): TouchProcessorResult {
-    return if (touch.isGoodOverlap) {
-        ProcessedTouch(InteractionEvent.DOWN, pointerOnSensorId = touch.data.pointerId, touch.data)
-    } else {
-        val event =
-            if (touch.data.pointerId == touch.previousPointerOnSensorId) {
-                InteractionEvent.UP
-            } else {
-                InteractionEvent.UNCHANGED
-            }
-        ProcessedTouch(event, pointerOnSensorId = INVALID_POINTER_ID, touch.data)
-    }
-}
 
 private fun processActionMove(touch: PreprocessedTouch): TouchProcessorResult {
     val hadPointerOnSensor = touch.previousPointerOnSensorId != INVALID_POINTER_ID
-    val interactionEvent =
-        when {
-            touch.isGoodOverlap && !hadPointerOnSensor -> InteractionEvent.DOWN
-            !touch.isGoodOverlap && hadPointerOnSensor -> InteractionEvent.UP
-            else -> InteractionEvent.UNCHANGED
-        }
-    val pointerOnSensorId =
-        when (interactionEvent) {
-            InteractionEvent.UNCHANGED -> touch.previousPointerOnSensorId
-            InteractionEvent.DOWN -> touch.data.pointerId
-            else -> INVALID_POINTER_ID
-        }
-    return ProcessedTouch(interactionEvent, pointerOnSensorId, touch.data)
+    val hasPointerOnSensor = touch.pointersOnSensor.isNotEmpty()
+    val pointerOnSensorId = touch.pointersOnSensor.firstOrNull() ?: INVALID_POINTER_ID
+
+    return if (!hadPointerOnSensor && hasPointerOnSensor) {
+        val data = touch.data.find { it.pointerId == pointerOnSensorId } ?: NormalizedTouchData()
+        ProcessedTouch(InteractionEvent.DOWN, data.pointerId, data)
+    } else if (hadPointerOnSensor && !hasPointerOnSensor) {
+        ProcessedTouch(InteractionEvent.UP, INVALID_POINTER_ID, NormalizedTouchData())
+    } else {
+        val data = touch.data.find { it.pointerId == pointerOnSensorId } ?: NormalizedTouchData()
+        ProcessedTouch(InteractionEvent.UNCHANGED, pointerOnSensorId, data)
+    }
 }
 
-private fun processActionUp(touch: PreprocessedTouch): TouchProcessorResult {
-    return if (touch.isGoodOverlap) {
-        ProcessedTouch(InteractionEvent.UP, pointerOnSensorId = INVALID_POINTER_ID, touch.data)
+private fun processActionUp(touch: PreprocessedTouch, actionId: Int): TouchProcessorResult {
+    // Finger lifted and it was the only finger on the sensor
+    return if (touch.pointersOnSensor.size == 1 && touch.pointersOnSensor.contains(actionId)) {
+        ProcessedTouch(
+            InteractionEvent.UP,
+            pointerOnSensorId = INVALID_POINTER_ID,
+            NormalizedTouchData()
+        )
     } else {
-        val event =
-            if (touch.previousPointerOnSensorId != INVALID_POINTER_ID) {
-                InteractionEvent.UP
-            } else {
-                InteractionEvent.UNCHANGED
-            }
-        ProcessedTouch(event, pointerOnSensorId = INVALID_POINTER_ID, touch.data)
+        // Pick new pointerOnSensor that's not the finger that was lifted
+        val pointerOnSensorId = touch.pointersOnSensor.find { it != actionId } ?: INVALID_POINTER_ID
+        val data = touch.data.find { it.pointerId == pointerOnSensorId } ?: NormalizedTouchData()
+        ProcessedTouch(InteractionEvent.UNCHANGED, data.pointerId, data)
     }
 }
 

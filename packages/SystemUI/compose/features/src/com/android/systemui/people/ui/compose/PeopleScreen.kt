@@ -51,6 +51,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.R
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.people.ui.viewmodel.PeopleTileViewModel
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 
@@ -110,7 +111,9 @@ private fun PeopleScreenWithConversations(
     recentTiles: List<PeopleTileViewModel>,
     onTileClicked: (PeopleTileViewModel) -> Unit,
 ) {
-    Column {
+    Column(
+        Modifier.sysuiResTag("top_level_with_conversations"),
+    ) {
         Column(
             Modifier.fillMaxWidth().padding(PeopleSpacePadding),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -132,7 +135,7 @@ private fun PeopleScreenWithConversations(
         }
 
         LazyColumn(
-            Modifier.fillMaxWidth(),
+            Modifier.fillMaxWidth().sysuiResTag("scroll_view"),
             contentPadding =
                 PaddingValues(
                     top = 16.dp,
