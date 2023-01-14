@@ -9840,7 +9840,7 @@ public final class Settings {
          * Whether or not a SFPS device is enabling the performant auth setting.
          * @hide
          */
-        public static final String SFPS_PERFORMANT_AUTH_ENABLED = "sfps_performant_auth_enabled";
+        public static final String SFPS_PERFORMANT_AUTH_ENABLED = "sfps_performant_auth_enabled_v2";
 
         /**
          * Whether or not debugging is enabled.
