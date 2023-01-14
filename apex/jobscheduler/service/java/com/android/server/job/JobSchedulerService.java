@@ -1495,7 +1495,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     /* timingDelayConstraintSatisfied */ false,
                     /* isDeviceIdle */ false,
                     /* hasConnectivityConstraintSatisfied */ false,
-                    /* hasContentTriggerConstraintSatisfied */ false);
+                    /* hasContentTriggerConstraintSatisfied */ false,
+                    0);
 
             // If the job is immediately ready to run, then we can just immediately
             // put it in the pending list and try to schedule it.  This is especially
@@ -1913,7 +1914,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     cancelled.isConstraintSatisfied(JobStatus.CONSTRAINT_TIMING_DELAY),
                     cancelled.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_DEVICE_IDLE),
                     cancelled.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY),
-                    cancelled.isConstraintSatisfied(JobStatus.CONSTRAINT_CONTENT_TRIGGER));
+                    cancelled.isConstraintSatisfied(JobStatus.CONSTRAINT_CONTENT_TRIGGER),
+                    0);
         }
         // If this is a replacement, bring in the new version of the job
         if (incomingJob != null) {
