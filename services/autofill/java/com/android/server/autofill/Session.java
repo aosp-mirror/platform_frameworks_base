@@ -2651,8 +2651,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 final CharSequence serviceLabel;
                 final Drawable serviceIcon;
                 synchronized (mLock) {
-                    serviceLabel = mService.getServiceLabelLocked();
-                    serviceIcon = mService.getServiceIconLocked();
+                    serviceIcon = getServiceIcon(response);
+                    serviceLabel = getServiceLabel(response);
                 }
                 if (serviceLabel == null || serviceIcon == null) {
                     wtf(null, "showSaveLocked(): no service label or icon");
@@ -2662,7 +2662,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
                 getUiForShowing().showSaveUi(serviceLabel, serviceIcon,
                         mService.getServicePackageName(), saveInfo, this,
-                        mComponentName, this, mPendingSaveUi, isUpdate, mCompatMode);
+                        mComponentName, this, mPendingSaveUi, isUpdate, mCompatMode,
+                        response.getShowSaveDialogIcon());
                 if (client != null) {
                     try {
                         client.setSaveUiState(id, true);
@@ -3600,9 +3601,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (sDebug) Log.w(TAG, "Last fill dialog triggered ids are changed.");
                 return false;
             }
+
         }
 
-        final Drawable serviceIcon = getServiceIcon();
+        Drawable serviceIcon = null;
+        synchronized (mLock) {
+            serviceIcon = getServiceIcon(response);
+        }
 
         getUiForShowing().showFillDialog(filledId, response, filterText,
                 mService.getServicePackageName(), mComponentName, serviceIcon, this,
@@ -3610,13 +3615,64 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         return true;
     }
 
+    /**
+     * Get the custom icon that was passed through FillResponse. If the custom icon wasn't able
+     * to be fetched, use the default provider icon instead
+     *
+     * @return Drawable of the provider icon, if it was able to be fetched. Null otherwise
+     */
     @SuppressWarnings("GuardedBy") // ErrorProne says we need to use mService.mLock, but it's
                                    // actually the same object as mLock.
                                    // TODO: Expose mService.mLock or redesign instead.
-    private Drawable getServiceIcon() {
-        synchronized (mLock) {
-            return mService.getServiceIconLocked();
+    @GuardedBy("mLock")
+    private Drawable getServiceIcon(FillResponse response) {
+        Drawable serviceIcon = null;
+        // Try to get the custom Icon, if one was passed through FillResponse
+        int iconResourceId = response.getIconResourceId();
+        if (iconResourceId != 0) {
+            serviceIcon = mService.getMaster().getContext().getPackageManager()
+                .getDrawable(
+                    mService.getServicePackageName(),
+                    iconResourceId,
+                    null);
         }
+
+        // Custom icon wasn't fetched, use the default package icon instead
+        if (serviceIcon == null) {
+            serviceIcon = mService.getServiceIconLocked();
+        }
+
+        return serviceIcon;
+    }
+
+    /**
+     * Get the custom label that was passed through FillResponse. If the custom label
+     * wasn't able to be fetched, use the default provider icon instead
+     *
+     * @return Drawable of the provider icon, if it was able to be fetched. Null otherwise
+     */
+    @SuppressWarnings("GuardedBy") // ErrorProne says we need to use mService.mLock, but it's
+                                   // actually the same object as mLock.
+                                   // TODO: Expose mService.mLock or redesign instead.
+    @GuardedBy("mLock")
+    private CharSequence getServiceLabel(FillResponse response) {
+        CharSequence serviceLabel = null;
+        // Try to get the custom Service name, if one was passed through FillResponse
+        int customServiceNameId = response.getServiceDisplayNameResourceId();
+        if (customServiceNameId != 0) {
+            serviceLabel = mService.getMaster().getContext().getPackageManager()
+                .getText(
+                    mService.getServicePackageName(),
+                    customServiceNameId,
+                    null);
+        }
+
+        // Custom label wasn't fetched, use the default package name instead
+        if (serviceLabel == null) {
+            serviceLabel = mService.getServiceLabelLocked();
+        }
+
+        return serviceLabel;
     }
 
     /**

@@ -177,7 +177,7 @@ final class SaveUi {
            @Nullable String servicePackageName, @NonNull ComponentName componentName,
            @NonNull SaveInfo info, @NonNull ValueFinder valueFinder,
            @NonNull OverlayControl overlayControl, @NonNull OnSaveListener listener,
-           boolean nightMode, boolean isUpdate, boolean compatMode) {
+           boolean nightMode, boolean isUpdate, boolean compatMode, boolean showServiceIcon) {
         if (sVerbose) Slog.v(TAG, "nightMode: " + nightMode);
         mThemeId = nightMode ? THEME_ID_DARK : THEME_ID_LIGHT;
         mPendingUi = pendingUi;
@@ -288,7 +288,9 @@ final class SaveUi {
         }
         titleView.setText(mTitle);
 
-        setServiceIcon(context, view, serviceIcon);
+        if (showServiceIcon) {
+            setServiceIcon(context, view, serviceIcon);
+        }
 
         final boolean hasCustomDescription =
                 applyCustomDescription(context, view, valueFinder, info);

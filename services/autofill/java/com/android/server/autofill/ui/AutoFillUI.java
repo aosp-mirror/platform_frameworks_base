@@ -315,7 +315,7 @@ public final class AutoFillUI {
             @Nullable String servicePackageName, @NonNull SaveInfo info,
             @NonNull ValueFinder valueFinder, @NonNull ComponentName componentName,
             @NonNull AutoFillUiCallback callback, @NonNull PendingUi pendingSaveUi,
-            boolean isUpdate, boolean compatMode) {
+            boolean isUpdate, boolean compatMode, boolean showServiceIcon) {
         if (sVerbose) {
             Slog.v(TAG, "showSaveUi(update=" + isUpdate + ") for " + componentName.toShortString()
                     + ": " + info);
@@ -379,7 +379,7 @@ public final class AutoFillUI {
                 public void startIntentSender(IntentSender intentSender, Intent intent) {
                     callback.startIntentSender(intentSender, intent);
                 }
-            }, mUiModeMgr.isNightMode(), isUpdate, compatMode);
+            }, mUiModeMgr.isNightMode(), isUpdate, compatMode, showServiceIcon);
         });
     }
 

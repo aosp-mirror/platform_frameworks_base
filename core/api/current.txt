@@ -39235,9 +39235,13 @@ package android.service.autofill {
     method @NonNull public android.service.autofill.FillResponse.Builder setFlags(int);
     method @NonNull public android.service.autofill.FillResponse.Builder setFooter(@NonNull android.widget.RemoteViews);
     method @NonNull public android.service.autofill.FillResponse.Builder setHeader(@NonNull android.widget.RemoteViews);
+    method @NonNull public android.service.autofill.FillResponse.Builder setIconResourceId(@DrawableRes int);
     method @NonNull public android.service.autofill.FillResponse.Builder setIgnoredIds(android.view.autofill.AutofillId...);
     method @NonNull public android.service.autofill.FillResponse.Builder setPresentationCancelIds(@Nullable int[]);
     method @NonNull public android.service.autofill.FillResponse.Builder setSaveInfo(@NonNull android.service.autofill.SaveInfo);
+    method @NonNull public android.service.autofill.FillResponse.Builder setServiceDisplayNameResourceId(@StringRes int);
+    method @NonNull public android.service.autofill.FillResponse.Builder setShowFillDialogIcon(boolean);
+    method @NonNull public android.service.autofill.FillResponse.Builder setShowSaveDialogIcon(boolean);
     method @NonNull public android.service.autofill.FillResponse.Builder setUserData(@NonNull android.service.autofill.UserData);
   }
 
