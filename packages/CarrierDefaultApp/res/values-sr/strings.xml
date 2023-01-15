@@ -15,8 +15,10 @@
     <string name="ssl_error_example" msgid="6188711843183058764">"На пример, страница за пријављивање можда не припада приказаној организацији."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"Ипак настави преко прегледача"</string>
     <string name="performance_boost_notification_channel" msgid="3475440855635538592">"Побољшање учинка"</string>
-    <string name="performance_boost_notification_title" msgid="5017421773334474875">"%s препоручује побољшање учинка"</string>
-    <string name="performance_boost_notification_detail" msgid="7216286153533321852">"Купите побољшање учинка за мрежу"</string>
+    <!-- no translation found for performance_boost_notification_title (946857427149305992) -->
+    <skip />
+    <!-- no translation found for performance_boost_notification_detail (362407668982648351) -->
+    <skip />
     <string name="performance_boost_notification_button_not_now" msgid="6459755324243683785">"Не сада"</string>
     <string name="performance_boost_notification_button_manage" msgid="4976836444046497973">"Управљај"</string>
     <string name="slice_purchase_app_label" msgid="7170191659233241166">"Купите побољшање учинка."</string>

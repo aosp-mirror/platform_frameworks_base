@@ -15,8 +15,10 @@
     <string name="ssl_error_example" msgid="6188711843183058764">"Kwa mfano, ukurasa wa kuingia katika akaunti unaweza usiwe unamilikiwa na shirika lililoonyeshwa."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"Endelea hata hivyo kupitia kivinjari"</string>
     <string name="performance_boost_notification_channel" msgid="3475440855635538592">"Kuongeza utendaji"</string>
-    <string name="performance_boost_notification_title" msgid="5017421773334474875">"%s inapendekeza uongeze utendaji"</string>
-    <string name="performance_boost_notification_detail" msgid="7216286153533321852">"Nunua programu ya kuongeza utendaji kwa ajili ya utendaji mzuri wa mtandao"</string>
+    <!-- no translation found for performance_boost_notification_title (946857427149305992) -->
+    <skip />
+    <!-- no translation found for performance_boost_notification_detail (362407668982648351) -->
+    <skip />
     <string name="performance_boost_notification_button_not_now" msgid="6459755324243683785">"Si sasa"</string>
     <string name="performance_boost_notification_button_manage" msgid="4976836444046497973">"Dhibiti"</string>
     <string name="slice_purchase_app_label" msgid="7170191659233241166">"Nunua programu ya kuongeza utendaji."</string>
