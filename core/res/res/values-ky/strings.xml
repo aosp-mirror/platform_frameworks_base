@@ -263,7 +263,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"Учак режими"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"Учак режими КҮЙҮК"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"Учак режими ӨЧҮК"</string>
-    <string name="global_action_settings" msgid="4671878836947494217">"Жөндөөлөр"</string>
+    <string name="global_action_settings" msgid="4671878836947494217">"Параметрлер"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Жардам"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Үн жардамчысы"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"Бекем кулпулоо"</string>
@@ -628,7 +628,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Жүзүңүздүн үлгүсүн өчүрүү үчүн басып, жаңы үлгүнү кошуңуз"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Жүзүнөн таанып ачууну тууралоо"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Телефонуңузду карап туруп эле кулпусун ачып алыңыз"</string>
-    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Жүзүнөн таанып ачуу функциясын колдонуу үчүн Жөндөөлөр &gt; Купуялык бөлүмүнө өтүп, "<b>"Камераны колдонууну"</b>" күйгүзүңүз"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Жүзүнөн таанып ачуу функциясын колдонуу үчүн Параметрлер &gt; Купуялык бөлүмүнө өтүп, "<b>"Камераны колдонууну"</b>" күйгүзүңүз"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Кулпусун ачуунун көбүрөөк жолдорун жөндөңүз"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Манжа изин кошуу үчүн басыңыз"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Кулпуланган түзмөктү манжа изи менен ачуу"</string>
@@ -1617,7 +1617,7 @@
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Түзмөккө туташуу"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Тышкы экранга чыгаруу"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Түзмөктөр изделүүдө..."</string>
-    <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Жөндөөлөр"</string>
+    <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Параметрлер"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Ажыратуу"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Скандоодо..."</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"Туташууда..."</string>
@@ -1672,10 +1672,10 @@
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Ыкчам иштетесизби?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Атайын мүмкүнчүлүктөр функциясын пайдалануу үчүн ал күйгүзүлгөндө, үндү катуулатып/акырындаткан эки баскычты тең 3 секунддай коё бербей басып туруңуз."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Атайын мүмкүнчүлүктөрдүн ыкчам баскычын иштетесизби?"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Атайын мүмкүнчүлүктөр функциясын иштетүү үчүн үндү катуулатуу/акырындатуу баскычтарын бир нече секунд коё бербей басып туруңуз. Ушуну менен, түзмөгүңүз бир аз башкача иштеп калышы мүмкүн.\n\nУчурдагы функциялар:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nТандалган функцияларды өзгөртүү үчүн Жөндөөлөр &gt; Атайын мүмкүнчүлүктөр бөлүмүнө өтүңүз."</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Атайын мүмкүнчүлүктөр функциясын иштетүү үчүн үндү катуулатуу/акырындатуу баскычтарын бир нече секунд коё бербей басып туруңуз. Ушуну менен, түзмөгүңүз бир аз башкача иштеп калышы мүмкүн.\n\nУчурдагы функциялар:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nТандалган функцияларды өзгөртүү үчүн Параметрлер &gt; Атайын мүмкүнчүлүктөр бөлүмүнө өтүңүз."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"<xliff:g id="SERVICE">%1$s</xliff:g> ыкчам баскычын иштетесизби?"</string>
-    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"<xliff:g id="SERVICE">%1$s</xliff:g> кызматын иштетүү үчүн үндү катуулатуу/акырындатуу баскычтарын бир нече секунд коё бербей басып туруңуз. Ушуну менен, түзмөгүңүз бир аз башкача иштеп калышы мүмкүн.\n\nБаскычтардын ушул айкалышын башка функцияга дайындоо үчүн, Жөндөөлөр &gt; Атайын мүмкүнчүлүктөр бөлүмүнө өтүңүз."</string>
+    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"<xliff:g id="SERVICE">%1$s</xliff:g> кызматын иштетүү үчүн үндү катуулатуу/акырындатуу баскычтарын бир нече секунд коё бербей басып туруңуз. Ушуну менен, түзмөгүңүз бир аз башкача иштеп калышы мүмкүн.\n\nБаскычтардын ушул айкалышын башка функцияга дайындоо үчүн, Параметрлер &gt; Атайын мүмкүнчүлүктөр бөлүмүнө өтүңүз."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Ооба"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Жок"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"КҮЙҮК"</string>
@@ -2059,7 +2059,7 @@
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Кийинчерээк эскертүү"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Жабуу"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Тутум"</string>
-    <string name="notification_app_name_settings" msgid="9088548800899952531">"Жөндөөлөр"</string>
+    <string name="notification_app_name_settings" msgid="9088548800899952531">"Параметрлер"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Камера"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Микрофон"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"экрандагы башка терезелердин үстүнөн көрсөтүлүүдө"</string>
