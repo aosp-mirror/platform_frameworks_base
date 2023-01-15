@@ -68,6 +68,7 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -127,6 +128,9 @@ public class WifiNl80211ManagerTest {
     private static final String TEST_QUOTED_SSID_2 = "\"testSsid2\"";
     private static final int[] TEST_FREQUENCIES_1 = {};
     private static final int[] TEST_FREQUENCIES_2 = {2500, 5124};
+    private static final byte[] TEST_VENDOR_IES =
+            new byte[]{(byte) 0xdd, 0x7, 0x00, 0x50, (byte) 0xf2, 0x08, 0x11, 0x22, 0x33,
+                    (byte) 0xdd, 0x7, 0x00, 0x50, (byte) 0xf2, 0x08, 0x44, 0x55, 0x66};
     private static final MacAddress TEST_RAW_MAC_BYTES = MacAddress.fromBytes(
             new byte[]{0x00, 0x01, 0x02, 0x03, 0x04, 0x05});
 
@@ -512,7 +516,7 @@ public class WifiNl80211ManagerTest {
                 SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST));
         verify(mWifiScannerImpl).scan(argThat(new ScanMatcher(
                 IWifiScannerImpl.SCAN_TYPE_LOW_POWER,
-                SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST, false)));
+                SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST, false, null)));
     }
 
     /**
@@ -523,12 +527,13 @@ public class WifiNl80211ManagerTest {
         when(mWifiScannerImpl.scan(any(SingleScanSettings.class))).thenReturn(true);
         Bundle bundle = new Bundle();
         bundle.putBoolean(WifiNl80211Manager.SCANNING_PARAM_ENABLE_6GHZ_RNR, true);
+        bundle.putByteArray(WifiNl80211Manager.EXTRA_SCANNING_PARAM_VENDOR_IES, TEST_VENDOR_IES);
         assertTrue(mWificondControl.startScan(
                 TEST_INTERFACE_NAME, WifiScanner.SCAN_TYPE_LOW_POWER,
                 SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST, bundle));
         verify(mWifiScannerImpl).scan(argThat(new ScanMatcher(
                 IWifiScannerImpl.SCAN_TYPE_LOW_POWER,
-                SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST, true)));
+                SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST, true, TEST_VENDOR_IES)));
     }
 
     /**
@@ -542,7 +547,7 @@ public class WifiNl80211ManagerTest {
                 SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST, null));
         verify(mWifiScannerImpl).scan(argThat(new ScanMatcher(
                 IWifiScannerImpl.SCAN_TYPE_LOW_POWER,
-                SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST, false)));
+                SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST, false, null)));
     }
 
     /**
@@ -556,7 +561,7 @@ public class WifiNl80211ManagerTest {
                 SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST, new Bundle()));
         verify(mWifiScannerImpl).scan(argThat(new ScanMatcher(
                 IWifiScannerImpl.SCAN_TYPE_LOW_POWER,
-                SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST, false)));
+                SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST, false, null)));
     }
 
     /**
@@ -577,7 +582,7 @@ public class WifiNl80211ManagerTest {
         // But the argument passed down should have the duplicate removed.
         verify(mWifiScannerImpl).scan(argThat(new ScanMatcher(
                 IWifiScannerImpl.SCAN_TYPE_LOW_POWER,
-                SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST, false)));
+                SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST, false, null)));
     }
 
     /**
@@ -589,7 +594,7 @@ public class WifiNl80211ManagerTest {
         assertTrue(mWificondControl.startScan(
                 TEST_INTERFACE_NAME, WifiScanner.SCAN_TYPE_HIGH_ACCURACY, null, null));
         verify(mWifiScannerImpl).scan(argThat(new ScanMatcher(
-                IWifiScannerImpl.SCAN_TYPE_HIGH_ACCURACY, null, null, false)));
+                IWifiScannerImpl.SCAN_TYPE_HIGH_ACCURACY, null, null, false, null)));
     }
 
     /**
@@ -1161,13 +1166,15 @@ public class WifiNl80211ManagerTest {
         private final Set<Integer> mExpectedFreqs;
         private final List<byte[]> mExpectedSsids;
         private final boolean mExpectedEnable6GhzRnr;
+        private final byte[] mExpectedVendorIes;
 
         ScanMatcher(int expectedScanType, Set<Integer> expectedFreqs, List<byte[]> expectedSsids,
-                boolean expectedEnable6GhzRnr) {
+                boolean expectedEnable6GhzRnr, byte[] expectedVendorIes) {
             this.mExpectedScanType = expectedScanType;
             this.mExpectedFreqs = expectedFreqs;
             this.mExpectedSsids = expectedSsids;
             this.mExpectedEnable6GhzRnr = expectedEnable6GhzRnr;
+            this.mExpectedVendorIes = expectedVendorIes;
         }
 
         @Override
@@ -1202,11 +1209,14 @@ public class WifiNl80211ManagerTest {
                 if (!mExpectedSsids.equals(ssidSet)) {
                     return false;
                 }
-
             } else {
                 if (hiddenNetworks != null && hiddenNetworks.size() > 0) {
                     return false;
                 }
+            }
+
+            if (!Arrays.equals(mExpectedVendorIes, settings.vendorIes)) {
+                return false;
             }
             return true;
         }

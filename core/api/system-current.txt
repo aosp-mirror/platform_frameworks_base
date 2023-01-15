@@ -9605,6 +9605,7 @@ package android.net.wifi.nl80211 {
     method public boolean tearDownInterfaces();
     method public boolean tearDownSoftApInterface(@NonNull String);
     method public void unregisterCountryCodeChangedListener(@NonNull android.net.wifi.nl80211.WifiNl80211Manager.CountryCodeChangedListener);
+    field public static final String EXTRA_SCANNING_PARAM_VENDOR_IES = "android.net.wifi.nl80211.extra.SCANNING_PARAM_VENDOR_IES";
     field public static final String SCANNING_PARAM_ENABLE_6GHZ_RNR = "android.net.wifi.nl80211.SCANNING_PARAM_ENABLE_6GHZ_RNR";
     field public static final int SCAN_TYPE_PNO_SCAN = 1; // 0x1
     field public static final int SCAN_TYPE_SINGLE_SCAN = 0; // 0x0
