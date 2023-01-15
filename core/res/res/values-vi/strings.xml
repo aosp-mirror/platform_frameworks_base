@@ -796,7 +796,7 @@
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Nhà riêng"</item>
     <item msgid="7740243458912727194">"Di động"</item>
-    <item msgid="8526146065496663766">"Cơ quan"</item>
+    <item msgid="8526146065496663766">"Nơi làm việc"</item>
     <item msgid="8150904584178569699">"Số fax cơ quan"</item>
     <item msgid="4537253139152229577">"Số fax nhà riêng"</item>
     <item msgid="6751245029698664340">"Số máy nhắn tin"</item>
@@ -805,24 +805,24 @@
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="7786349763648997741">"Nhà riêng"</item>
-    <item msgid="435564470865989199">"Cơ quan"</item>
+    <item msgid="435564470865989199">"Nơi làm việc"</item>
     <item msgid="4199433197875490373">"Khác"</item>
     <item msgid="3233938986670468328">"Tùy chỉnh"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="3861463339764243038">"Nhà riêng"</item>
-    <item msgid="5472578890164979109">"Cơ quan"</item>
+    <item msgid="5472578890164979109">"Nơi làm việc"</item>
     <item msgid="5718921296646594739">"Khác"</item>
     <item msgid="5523122236731783179">"Tùy chỉnh"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="588088543406993772">"Nhà riêng"</item>
-    <item msgid="5503060422020476757">"Cơ quan"</item>
+    <item msgid="5503060422020476757">"Nơi làm việc"</item>
     <item msgid="2530391194653760297">"Khác"</item>
     <item msgid="7640927178025203330">"Tùy chỉnh"</item>
   </string-array>
   <string-array name="organizationTypes">
-    <item msgid="6144047813304847762">"Cơ quan"</item>
+    <item msgid="6144047813304847762">"Nơi làm việc"</item>
     <item msgid="7402720230065674193">"Khác"</item>
     <item msgid="808230403067569648">"Tùy chỉnh"</item>
   </string-array>
@@ -839,7 +839,7 @@
     <string name="phoneTypeCustom" msgid="5120365721260686814">"Tùy chỉnh"</string>
     <string name="phoneTypeHome" msgid="3880132427643623588">"Nhà riêng"</string>
     <string name="phoneTypeMobile" msgid="1178852541462086735">"Di động"</string>
-    <string name="phoneTypeWork" msgid="6604967163358864607">"Cơ quan"</string>
+    <string name="phoneTypeWork" msgid="6604967163358864607">"Nơi làm việc"</string>
     <string name="phoneTypeFaxWork" msgid="6757519896109439123">"Số fax cơ quan"</string>
     <string name="phoneTypeFaxHome" msgid="6678559953115904345">"Số fax nhà riêng"</string>
     <string name="phoneTypePager" msgid="576402072263522767">"Số máy nhắn tin"</string>
@@ -863,16 +863,16 @@
     <string name="eventTypeOther" msgid="530671238533887997">"Khác"</string>
     <string name="emailTypeCustom" msgid="1809435350482181786">"Tùy chỉnh"</string>
     <string name="emailTypeHome" msgid="1597116303154775999">"Nhà riêng"</string>
-    <string name="emailTypeWork" msgid="2020095414401882111">"Cơ quan"</string>
+    <string name="emailTypeWork" msgid="2020095414401882111">"Nơi làm việc"</string>
     <string name="emailTypeOther" msgid="5131130857030897465">"Khác"</string>
     <string name="emailTypeMobile" msgid="787155077375364230">"Di Động"</string>
     <string name="postalTypeCustom" msgid="5645590470242939129">"Tùy chỉnh"</string>
     <string name="postalTypeHome" msgid="7562272480949727912">"Nhà riêng"</string>
-    <string name="postalTypeWork" msgid="8553425424652012826">"Cơ quan"</string>
+    <string name="postalTypeWork" msgid="8553425424652012826">"Nơi làm việc"</string>
     <string name="postalTypeOther" msgid="7094245413678857420">"Khác"</string>
     <string name="imTypeCustom" msgid="5653384545085765570">"Tùy chỉnh"</string>
     <string name="imTypeHome" msgid="6996507981044278216">"Nhà riêng"</string>
-    <string name="imTypeWork" msgid="2099668940169903123">"Cơ quan"</string>
+    <string name="imTypeWork" msgid="2099668940169903123">"Nơi làm việc"</string>
     <string name="imTypeOther" msgid="8068447383276219810">"Khác"</string>
     <string name="imProtocolCustom" msgid="4437878287653764692">"Tùy chỉnh"</string>
     <string name="imProtocolAim" msgid="4050198236506604378">"AIM"</string>
@@ -884,7 +884,7 @@
     <string name="imProtocolIcq" msgid="2410325380427389521">"ICQ"</string>
     <string name="imProtocolJabber" msgid="7919269388889582015">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="4985002408136148256">"NetMeeting"</string>
-    <string name="orgTypeWork" msgid="8684458700669564172">"Cơ quan"</string>
+    <string name="orgTypeWork" msgid="8684458700669564172">"Nơi làm việc"</string>
     <string name="orgTypeOther" msgid="5450675258408005553">"Khác"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"Tùy chỉnh"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"Tùy chỉnh"</string>
@@ -904,7 +904,7 @@
     <string name="relationTypeSpouse" msgid="6916682664436031703">"Vợ/chồng"</string>
     <string name="sipAddressTypeCustom" msgid="6283889809842649336">"Tùy chỉnh"</string>
     <string name="sipAddressTypeHome" msgid="5918441930656878367">"Nhà riêng"</string>
-    <string name="sipAddressTypeWork" msgid="7873967986701216770">"Cơ quan"</string>
+    <string name="sipAddressTypeWork" msgid="7873967986701216770">"Nơi làm việc"</string>
     <string name="sipAddressTypeOther" msgid="6317012577345187275">"Khác"</string>
     <string name="quick_contacts_not_available" msgid="1262709196045052223">"Không tìm thấy ứng dụng nào để xem liên hệ này."</string>
     <string name="keyguard_password_enter_pin_code" msgid="6401406801060956153">"Nhập mã PIN"</string>
