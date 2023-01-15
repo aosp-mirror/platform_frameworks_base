@@ -719,8 +719,8 @@ public class VoiceInteractionService extends Service {
 
     private void onHotwordDetectorDestroyed(@NonNull HotwordDetector detector) {
         synchronized (mLock) {
-            if (mActiveVisualQueryDetector!= null &&
-                    detector == mActiveVisualQueryDetector.getInitializationDelegate()) {
+            if (mActiveVisualQueryDetector != null
+                    && detector == mActiveVisualQueryDetector.getInitializationDelegate()) {
                 mActiveVisualQueryDetector = null;
             }
             mActiveDetectors.remove(detector);

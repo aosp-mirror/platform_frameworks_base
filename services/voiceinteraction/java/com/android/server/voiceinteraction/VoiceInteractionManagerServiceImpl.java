@@ -673,6 +673,21 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             Slog.w(TAG, "Visual query detection service not in isolated process");
             throw new IllegalStateException("Visual query detection not in isolated process");
         }
+        if (!Manifest.permission.BIND_VISUAL_QUERY_DETECTION_SERVICE.equals(
+                visualQueryDetectionServiceInfo.permission)) {
+            Slog.w(TAG, "Visual query detection does not require permission "
+                    + Manifest.permission.BIND_VISUAL_QUERY_DETECTION_SERVICE);
+            throw new SecurityException("Visual query detection does not require permission "
+                    + Manifest.permission.BIND_VISUAL_QUERY_DETECTION_SERVICE);
+        }
+        if (mContext.getPackageManager().checkPermission(
+                Manifest.permission.BIND_VISUAL_QUERY_DETECTION_SERVICE,
+                mInfo.getServiceInfo().packageName) == PackageManager.PERMISSION_GRANTED) {
+            Slog.w(TAG, "Voice interaction service should not hold permission "
+                    + Manifest.permission.BIND_VISUAL_QUERY_DETECTION_SERVICE);
+            throw new SecurityException("Voice interaction service should not hold permission "
+                    + Manifest.permission.BIND_VISUAL_QUERY_DETECTION_SERVICE);
+        }
         if (sharedMemory != null && !sharedMemory.setProtect(OsConstants.PROT_READ)) {
             Slog.w(TAG, "Can't set sharedMemory to be read-only");
             throw new IllegalStateException("Can't set sharedMemory to be read-only");

@@ -635,6 +635,7 @@ final class HotwordDetectionConnection {
                     return;
                 }
             }
+            //TODO(b265535257): report error to either service only.
             synchronized (HotwordDetectionConnection.this.mLock) {
                 runForEachDetectorSessionLocked((session) -> {
                     session.reportErrorLocked(
