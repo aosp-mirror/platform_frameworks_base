@@ -57,7 +57,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class ExitPipViaIntentTest(flicker: FlickerTest) : ExitPipToAppTransition(flicker) {
+open class ExitPipViaIntentTest(flicker: FlickerTest) : ExitPipToAppTransition(flicker) {
 
     /** Defines the transition used to run the test */
     override val transition: FlickerBuilder.() -> Unit

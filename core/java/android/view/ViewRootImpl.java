@@ -8823,6 +8823,10 @@ public final class ViewRootImpl implements ViewParent,
             mAdded = false;
             AnimationHandler.removeRequestor(this);
         }
+        if (mActiveSurfaceSyncGroup != null) {
+            mActiveSurfaceSyncGroup.markSyncReady();
+            mActiveSurfaceSyncGroup = null;
+        }
         WindowManagerGlobal.getInstance().doRemoveView(this);
     }
 

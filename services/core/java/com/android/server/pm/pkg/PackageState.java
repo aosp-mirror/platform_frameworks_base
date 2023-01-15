@@ -417,4 +417,11 @@ public interface PackageState {
      * @hide
      */
     boolean isVendor();
+
+    /**
+     * The name of the APEX module containing this package, if it is an APEX or APK-in-APEX.
+     * @hide
+     */
+    @Nullable
+    String getApexModuleName();
 }

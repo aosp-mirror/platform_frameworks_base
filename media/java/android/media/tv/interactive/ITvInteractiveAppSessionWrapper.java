@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Rect;
+import android.media.PlaybackParams;
 import android.media.tv.AdBuffer;
 import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoResponse;
@@ -89,6 +90,11 @@ public class ITvInteractiveAppSessionWrapper
     private static final int DO_NOTIFY_TV_MESSAGE = 33;
     private static final int DO_SEND_RECORDING_INFO = 34;
     private static final int DO_SEND_RECORDING_INFO_LIST = 35;
+    private static final int DO_NOTIFY_TIME_SHIFT_PLAYBACK_PARAMS = 36;
+    private static final int DO_NOTIFY_TIME_SHIFT_STATUS_CHANGED = 37;
+    private static final int DO_NOTIFY_TIME_SHIFT_START_POSITION_CHANGED = 38;
+    private static final int DO_NOTIFY_TIME_SHIFT_CURRENT_POSITION_CHANGED = 39;
+    private static final int DO_SEND_CURRENT_VIDEO_BOUNDS = 40;
 
     private final HandlerCaller mCaller;
     private Session mSessionImpl;
@@ -150,6 +156,10 @@ public class ITvInteractiveAppSessionWrapper
             }
             case DO_SET_TELETEXT_APP_ENABLED: {
                 mSessionImpl.setTeletextAppEnabled((Boolean) msg.obj);
+                break;
+            }
+            case DO_SEND_CURRENT_VIDEO_BOUNDS: {
+                mSessionImpl.sendCurrentVideoBounds((Rect) msg.obj);
                 break;
             }
             case DO_SEND_CURRENT_CHANNEL_URI: {
@@ -277,6 +287,30 @@ public class ITvInteractiveAppSessionWrapper
                 mSessionImpl.notifyAdBufferConsumed((AdBuffer) msg.obj);
                 break;
             }
+            case DO_NOTIFY_TIME_SHIFT_PLAYBACK_PARAMS: {
+                mSessionImpl.notifyTimeShiftPlaybackParams((PlaybackParams) msg.obj);
+                break;
+            }
+            case DO_NOTIFY_TIME_SHIFT_STATUS_CHANGED: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                mSessionImpl.notifyTimeShiftStatusChanged((String) args.arg1, (Integer) args.arg2);
+                args.recycle();
+                break;
+            }
+            case DO_NOTIFY_TIME_SHIFT_START_POSITION_CHANGED: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                mSessionImpl.notifyTimeShiftStartPositionChanged(
+                        (String) args.arg1, (Long) args.arg2);
+                args.recycle();
+                break;
+            }
+            case DO_NOTIFY_TIME_SHIFT_CURRENT_POSITION_CHANGED: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                mSessionImpl.notifyTimeShiftCurrentPositionChanged(
+                        (String) args.arg1, (Long) args.arg2);
+                args.recycle();
+                break;
+            }
             default: {
                 Log.w(TAG, "Unhandled message code: " + msg.what);
                 break;
@@ -323,6 +357,12 @@ public class ITvInteractiveAppSessionWrapper
     public void setTeletextAppEnabled(boolean enable) {
         mCaller.executeOrSendMessage(
                 mCaller.obtainMessageO(DO_SET_TELETEXT_APP_ENABLED, enable));
+    }
+
+    @Override
+    public void sendCurrentVideoBounds(@Nullable Rect bounds) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageO(DO_SEND_CURRENT_VIDEO_BOUNDS, bounds));
     }
 
     @Override
@@ -377,6 +417,30 @@ public class ITvInteractiveAppSessionWrapper
     public void notifyError(@NonNull String errMsg, @NonNull Bundle params) {
         mCaller.executeOrSendMessage(
                 mCaller.obtainMessageOO(DO_NOTIFY_ERROR, errMsg, params));
+    }
+
+    @Override
+    public void notifyTimeShiftPlaybackParams(@NonNull PlaybackParams params) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageO(DO_NOTIFY_TIME_SHIFT_PLAYBACK_PARAMS, params));
+    }
+
+    @Override
+    public void notifyTimeShiftStatusChanged(@NonNull String inputId, int status) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageOO(DO_NOTIFY_TIME_SHIFT_STATUS_CHANGED, inputId, status));
+    }
+
+    @Override
+    public void notifyTimeShiftStartPositionChanged(@NonNull String inputId, long timeMs) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageOO(
+                DO_NOTIFY_TIME_SHIFT_START_POSITION_CHANGED, inputId, timeMs));
+    }
+
+    @Override
+    public void notifyTimeShiftCurrentPositionChanged(@NonNull String inputId, long timeMs) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageOO(
+                DO_NOTIFY_TIME_SHIFT_CURRENT_POSITION_CHANGED, inputId, timeMs));
     }
 
     @Override

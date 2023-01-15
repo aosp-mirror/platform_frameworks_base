@@ -39,7 +39,7 @@ public interface StatusBarManagerInternal {
 
     void cancelPreloadRecentApps();
 
-    void showRecentApps(boolean triggeredFromAltTab);
+    void showRecentApps(boolean triggeredFromAltTab, boolean forward);
 
     void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
 

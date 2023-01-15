@@ -65,8 +65,8 @@ import com.android.server.LocalManagerRegistry;
 import com.android.server.art.ArtManagerLocal;
 import com.android.server.art.DexUseManagerLocal;
 import com.android.server.art.model.ArtFlags;
-import com.android.server.art.model.OptimizeParams;
-import com.android.server.art.model.OptimizeResult;
+import com.android.server.art.model.DexoptParams;
+import com.android.server.art.model.DexoptResult;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.PackageDexOptimizer.DexOptResult;
@@ -502,7 +502,7 @@ public final class DexOptHelper {
      *     necessary to fall back to the legacy code paths.
      */
     private Optional<Integer> performDexOptWithArtService(DexoptOptions options,
-            /*@OptimizeFlags*/ int extraFlags) {
+            /*@DexoptFlags*/ int extraFlags) {
         ArtManagerLocal artManager = getArtManagerLocal();
         if (artManager == null) {
             return Optional.empty();
@@ -522,14 +522,14 @@ public final class DexOptHelper {
                 return Optional.of(PackageDexOptimizer.DEX_OPT_SKIPPED);
             }
 
-            OptimizeParams params = options.convertToOptimizeParams(extraFlags);
+            DexoptParams params = options.convertToDexoptParams(extraFlags);
             if (params == null) {
                 return Optional.empty();
             }
 
-            OptimizeResult result;
+            DexoptResult result;
             try {
-                result = artManager.optimizePackage(snapshot, options.getPackageName(), params);
+                result = artManager.dexoptPackage(snapshot, options.getPackageName(), params);
             } catch (UnsupportedOperationException e) {
                 reportArtManagerFallback(options.getPackageName(), e.toString());
                 return Optional.empty();
@@ -954,22 +954,21 @@ public final class DexOptHelper {
         }
     }
 
-    private static class OptimizePackageDoneHandler
-            implements ArtManagerLocal.OptimizePackageDoneCallback {
+    private static class DexoptDoneHandler implements ArtManagerLocal.DexoptDoneCallback {
         @NonNull private final PackageManagerService mPm;
 
-        OptimizePackageDoneHandler(@NonNull PackageManagerService pm) { mPm = pm; }
+        DexoptDoneHandler(@NonNull PackageManagerService pm) { mPm = pm; }
 
         /**
-         * Called after every package optimization operation done by {@link ArtManagerLocal}.
+         * Called after every package dexopt operation done by {@link ArtManagerLocal}.
          */
         @Override
-        public void onOptimizePackageDone(@NonNull OptimizeResult result) {
-            for (OptimizeResult.PackageOptimizeResult pkgRes : result.getPackageOptimizeResults()) {
+        public void onDexoptDone(@NonNull DexoptResult result) {
+            for (DexoptResult.PackageDexoptResult pkgRes : result.getPackageDexoptResults()) {
                 CompilerStats.PackageStats stats =
                         mPm.getOrCreateCompilerPackageStats(pkgRes.getPackageName());
-                for (OptimizeResult.DexContainerFileOptimizeResult dexRes :
-                        pkgRes.getDexContainerFileOptimizeResults()) {
+                for (DexoptResult.DexContainerFileDexoptResult dexRes :
+                        pkgRes.getDexContainerFileDexoptResults()) {
                     stats.setCompileTime(
                             dexRes.getDexContainerFile(), dexRes.getDex2oatWallTimeMillis());
                 }
@@ -994,13 +993,13 @@ public final class DexOptHelper {
         ArtManagerLocal artManager = new ArtManagerLocal(systemContext);
         // There doesn't appear to be any checks that @NonNull is heeded, so use requireNonNull
         // below to ensure we don't store away a null that we'll fail on later.
-        artManager.addOptimizePackageDoneCallback(false /* onlyIncludeUpdates */,
-                Runnable::run, new OptimizePackageDoneHandler(Objects.requireNonNull(pm)));
+        artManager.addDexoptDoneCallback(false /* onlyIncludeUpdates */,
+                Runnable::run, new DexoptDoneHandler(Objects.requireNonNull(pm)));
         LocalManagerRegistry.addManager(ArtManagerLocal.class, artManager);
     }
 
     /**
-     * Returns {@link ArtManagerLocal} if ART Service should be used for package optimization.
+     * Returns {@link ArtManagerLocal} if ART Service should be used for package dexopt.
      */
     private static @Nullable ArtManagerLocal getArtManagerLocal() {
         if (!useArtService()) {
@@ -1014,25 +1013,25 @@ public final class DexOptHelper {
     }
 
     /**
-     * Converts an ART Service {@link OptimizeResult} to {@link DexOptResult}.
+     * Converts an ART Service {@link DexoptResult} to {@link DexOptResult}.
      *
      * For interfacing {@link ArtManagerLocal} with legacy dex optimization code in PackageManager.
      */
     @DexOptResult
-    private static int convertToDexOptResult(OptimizeResult result) {
-        /*@OptimizeStatus*/ int status = result.getFinalStatus();
+    private static int convertToDexOptResult(DexoptResult result) {
+        /*@DexoptResultStatus*/ int status = result.getFinalStatus();
         switch (status) {
-            case OptimizeResult.OPTIMIZE_SKIPPED:
+            case DexoptResult.DEXOPT_SKIPPED:
                 return PackageDexOptimizer.DEX_OPT_SKIPPED;
-            case OptimizeResult.OPTIMIZE_FAILED:
+            case DexoptResult.DEXOPT_FAILED:
                 return PackageDexOptimizer.DEX_OPT_FAILED;
-            case OptimizeResult.OPTIMIZE_PERFORMED:
+            case DexoptResult.DEXOPT_PERFORMED:
                 return PackageDexOptimizer.DEX_OPT_PERFORMED;
-            case OptimizeResult.OPTIMIZE_CANCELLED:
+            case DexoptResult.DEXOPT_CANCELLED:
                 return PackageDexOptimizer.DEX_OPT_CANCELLED;
             default:
-                throw new IllegalArgumentException("OptimizeResult for "
-                        + result.getPackageOptimizeResults().get(0).getPackageName()
+                throw new IllegalArgumentException("DexoptResult for "
+                        + result.getPackageDexoptResults().get(0).getPackageName()
                         + " has unsupported status " + status);
         }
     }

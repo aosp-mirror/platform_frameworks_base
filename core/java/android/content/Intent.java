@@ -3587,17 +3587,6 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_MEDIA_BUTTON = "android.intent.action.MEDIA_BUTTON";
 
     /**
-     * Broadcast action: Launch System output switcher. Includes a single extra field,
-     * {@link #EXTRA_PACKAGE_NAME}, which specifies the package name of the calling app
-     * so that the system can get the corresponding MediaSession for the output switcher.
-     *
-     * @see #EXTRA_PACKAGE_NAME
-     */
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_SHOW_OUTPUT_SWITCHER =
-            "android.intent.action.SHOW_OUTPUT_SWITCHER";
-
-    /**
      * Broadcast Action:  The "Camera Button" was pressed.  Includes a single
      * extra field, {@link #EXTRA_KEY_EVENT}, containing the key event that
      * caused the broadcast.

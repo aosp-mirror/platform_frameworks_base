@@ -36,7 +36,6 @@ import static com.android.server.wm.utils.CoordinateTransforms.computeRotationMa
 import android.animation.ArgbEvaluator;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -251,9 +250,6 @@ class ScreenRotationAnimation {
                     screenshotBuffer.getColorSpace());
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
 
-            GraphicBuffer buffer = GraphicBuffer.createFromHardwareBuffer(
-                    screenshotBuffer.getHardwareBuffer());
-
             t.setLayer(mScreenshotLayer, SCREEN_FREEZE_LAYER_BASE);
             t.reparent(mBackColorSurface, displayContent.getSurfaceControl());
             // If hdr layers are on-screen, e.g. picture-in-picture mode, the screenshot of
@@ -263,10 +259,11 @@ class ScreenRotationAnimation {
             t.setLayer(mBackColorSurface, -1);
             t.setColor(mBackColorSurface, new float[]{mStartLuma, mStartLuma, mStartLuma});
             t.setAlpha(mBackColorSurface, 1);
-            t.setBuffer(mScreenshotLayer, buffer);
+            t.setBuffer(mScreenshotLayer, hardwareBuffer);
             t.setColorSpace(mScreenshotLayer, screenshotBuffer.getColorSpace());
             t.show(mScreenshotLayer);
             t.show(mBackColorSurface);
+            hardwareBuffer.close();
 
             if (mRoundedCornerOverlay != null) {
                 for (SurfaceControl sc : mRoundedCornerOverlay) {

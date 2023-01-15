@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.hardware.radio.tests.unittests;
+package android.hardware.radio;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
@@ -30,14 +30,6 @@ import static org.mockito.Mockito.when;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.hardware.radio.Announcement;
-import android.hardware.radio.IAnnouncementListener;
-import android.hardware.radio.ICloseHandle;
-import android.hardware.radio.IRadioService;
-import android.hardware.radio.ProgramSelector;
-import android.hardware.radio.RadioManager;
-import android.hardware.radio.RadioMetadata;
-import android.hardware.radio.RadioTuner;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.RemoteException;

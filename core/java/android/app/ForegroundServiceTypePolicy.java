@@ -259,12 +259,15 @@ public abstract class ForegroundServiceTypePolicy {
                 new RegularPermission(Manifest.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE)
             }, true),
             new ForegroundServiceTypePermissions(new ForegroundServiceTypePermission[] {
+                new RegularPermission(Manifest.permission.BLUETOOTH_ADVERTISE),
                 new RegularPermission(Manifest.permission.BLUETOOTH_CONNECT),
+                new RegularPermission(Manifest.permission.BLUETOOTH_SCAN),
                 new RegularPermission(Manifest.permission.CHANGE_NETWORK_STATE),
                 new RegularPermission(Manifest.permission.CHANGE_WIFI_STATE),
                 new RegularPermission(Manifest.permission.CHANGE_WIFI_MULTICAST_STATE),
                 new RegularPermission(Manifest.permission.NFC),
                 new RegularPermission(Manifest.permission.TRANSMIT_IR),
+                new RegularPermission(Manifest.permission.UWB_RANGING),
                 new UsbDevicePermission(),
                 new UsbAccessoryPermission(),
             }, false)

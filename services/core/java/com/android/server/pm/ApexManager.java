@@ -138,7 +138,7 @@ public abstract class ApexManager {
             this.activeApexChanged = activeApexChanged;
         }
 
-        private ActiveApexInfo(ApexInfo apexInfo) {
+        public ActiveApexInfo(ApexInfo apexInfo) {
             this(
                     apexInfo.moduleName,
                     new File(Environment.getApexDirectory() + File.separator

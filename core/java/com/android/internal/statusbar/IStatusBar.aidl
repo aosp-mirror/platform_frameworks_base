@@ -53,7 +53,7 @@ oneway interface IStatusBar
             boolean showImeSwitcher);
     void setWindowState(int display, int window, int state);
 
-    void showRecentApps(boolean triggeredFromAltTab);
+    void showRecentApps(boolean triggeredFromAltTab, boolean forward);
     void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
     void toggleRecentApps();
     void toggleSplitScreen();

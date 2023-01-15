@@ -54,6 +54,8 @@ class UidPermissionPolicy : SchemePolicy() {
         IndexedListSet<OnPermissionFlagsChangedListener>()
     private val onPermissionFlagsChangedListenersLock = Any()
 
+    private val privilegedPermissionAllowlistViolations = IndexedSet<String>()
+
     override val subjectScheme: String
         get() = UidUri.SCHEME
 
@@ -734,7 +736,7 @@ class UidPermissionPolicy : SchemePolicy() {
             } else {
                 newFlags = newFlags andInv PermissionFlags.LEGACY_GRANTED
                 val wasGrantedByImplicit = newFlags.hasBits(PermissionFlags.IMPLICIT_GRANTED)
-                val isLeanBackNotificationsPermission = newState.systemState.isLeanback &&
+                val isLeanbackNotificationsPermission = newState.systemState.isLeanback &&
                     permissionName in NOTIFICATIONS_PERMISSIONS
                 val isImplicitPermission = anyPackageInAppId(appId) {
                     permissionName in it.androidPackage!!.implicitPermissions
@@ -748,7 +750,7 @@ class UidPermissionPolicy : SchemePolicy() {
                     }
                     !sourcePermission.isRuntime
                 } ?: false
-                val shouldGrantByImplicit = isLeanBackNotificationsPermission ||
+                val shouldGrantByImplicit = isLeanbackNotificationsPermission ||
                     (isImplicitPermission && isAnySourcePermissionNonRuntime)
                 if (shouldGrantByImplicit) {
                     newFlags = newFlags or PermissionFlags.IMPLICIT_GRANTED
@@ -917,7 +919,21 @@ class UidPermissionPolicy : SchemePolicy() {
         if (packageState.isUpdatedSystemApp) {
             return true
         }
-        // TODO: Enforce the allowlist on boot
+        // Only enforce the privileged permission allowlist on boot
+        if (!newState.systemState.isSystemReady) {
+            // Apps that are in updated apex's do not need to be allowlisted
+            if (!packageState.isApkInUpdatedApex) {
+                Log.w(
+                    LOG_TAG, "Privileged permission ${permission.name} for package" +
+                    " ${packageState.packageName} (${packageState.path}) not in" +
+                    " privileged permission allowlist"
+                )
+                if (RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_ENFORCE) {
+                    privilegedPermissionAllowlistViolations += "${packageState.packageName}" +
+                        " (${packageState.path}): ${permission.name}"
+                }
+            }
+        }
         return !RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_ENFORCE
     }
 
@@ -1106,6 +1122,12 @@ class UidPermissionPolicy : SchemePolicy() {
             // Special permission for the recents app.
             return true
         }
+        // TODO(b/261913353): STOPSHIP: Add AndroidPackage.apexModuleName.
+        // This should be androidPackage.apexModuleName instead
+        if (permission.isModule && androidPackage.packageName != null) {
+            // Special permission granted for APKs inside APEX modules.
+            return true
+        }
         return false
     }
 
@@ -1153,6 +1175,13 @@ class UidPermissionPolicy : SchemePolicy() {
         val ownerPackageState = newState.systemState.packageStates[ownerPackageName] ?: return false
         val ownerUid = UserHandle.getUid(userId, ownerPackageState.appId)
         return uid == ownerUid
+    }
+
+    override fun MutateStateScope.onSystemReady() {
+        if (!privilegedPermissionAllowlistViolations.isEmpty()) {
+            throw IllegalStateException("Signature|privileged permissions not in privileged" +
+                " permission allowlist: $privilegedPermissionAllowlistViolations")
+        }
     }
 
     override fun BinaryXmlPullParser.parseSystemState(state: AccessState) {

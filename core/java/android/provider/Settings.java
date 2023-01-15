@@ -603,6 +603,8 @@ public final class Settings {
      * Output: When a package data uri is passed as input, the activity result is set to
      * {@link android.app.Activity#RESULT_OK} if the permission was granted to the app. Otherwise,
      * the result is set to {@link android.app.Activity#RESULT_CANCELED}.
+     *
+     * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MANAGE_APP_LONG_RUNNING_JOBS =
@@ -1692,7 +1694,6 @@ public final class Settings {
      * Input: Nothing.
      * <p>
      * Output: Nothing
-     * @see android.nfc.NfcAdapter#isNdefPushEnabled()
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_NFCSHARING_SETTINGS =
@@ -8657,6 +8658,12 @@ public final class Settings {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         @Readable
         public static final String BACKUP_AUTO_RESTORE = "backup_auto_restore";
+
+        /**
+         * Controls whether framework backup scheduling is enabled.
+         * @hide
+         */
+        public static final String BACKUP_SCHEDULING_ENABLED = "backup_scheduling_enabled";
 
         /**
          * Indicates whether settings backup has been fully provisioned.

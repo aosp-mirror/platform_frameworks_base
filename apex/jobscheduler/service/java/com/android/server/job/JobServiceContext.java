@@ -36,6 +36,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.Network;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -187,6 +188,8 @@ public final class JobServiceContext implements ServiceConnection {
     private int mPendingInternalStopReason;
     private String mPendingDebugStopReason;
 
+    private Network mPendingNetworkChange;
+
     // Debugging: reason this job was last stopped.
     public String mStoppedReason;
 
@@ -292,6 +295,7 @@ public final class JobServiceContext implements ServiceConnection {
             mRunningJob = job;
             mRunningJobWorkType = workType;
             mRunningCallback = new JobCallback();
+            mPendingNetworkChange = null;
             final boolean isDeadlineExpired =
                     job.hasDeadlineConstraint() &&
                             (job.getLatestRunTimeElapsed() < sElapsedRealtimeClock.millis());
@@ -513,6 +517,28 @@ public final class JobServiceContext implements ServiceConnection {
 
     long getRemainingGuaranteedTimeMs(long nowElapsed) {
         return Math.max(0, mExecutionStartTimeElapsed + mMinExecutionGuaranteeMillis - nowElapsed);
+    }
+
+    void informOfNetworkChangeLocked(Network newNetwork) {
+        if (mVerb != VERB_EXECUTING) {
+            Slog.w(TAG, "Sending onNetworkChanged for a job that isn't started. " + mRunningJob);
+            if (mVerb == VERB_BINDING || mVerb == VERB_STARTING) {
+                // The network changed before the job has fully started. Hold the change push
+                // until the job has started executing.
+                mPendingNetworkChange = newNetwork;
+            }
+            return;
+        }
+        try {
+            mParams.setNetwork(newNetwork);
+            mPendingNetworkChange = null;
+            service.onNetworkChanged(mParams);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Error sending onNetworkChanged to client.", e);
+            // The job's host app apparently crashed during the job, so we should reschedule.
+            closeAndCleanupJobLocked(/* reschedule */ true,
+                    "host crashed when trying to inform of network change");
+        }
     }
 
     boolean isWithinExecutionGuaranteeTime() {
@@ -972,6 +998,10 @@ public final class JobServiceContext implements ServiceConnection {
                     return;
                 }
                 scheduleOpTimeOutLocked();
+                if (mPendingNetworkChange != null
+                        && !Objects.equals(mParams.getNetwork(), mPendingNetworkChange)) {
+                    informOfNetworkChangeLocked(mPendingNetworkChange);
+                }
                 if (mRunningJob.isUserVisibleJob()) {
                     mService.informObserversOfUserVisibleJobChange(this, mRunningJob, true);
                 }
@@ -1225,6 +1255,7 @@ public final class JobServiceContext implements ServiceConnection {
         mPendingStopReason = JobParameters.STOP_REASON_UNDEFINED;
         mPendingInternalStopReason = 0;
         mPendingDebugStopReason = null;
+        mPendingNetworkChange = null;
         removeOpTimeOutLocked();
         if (completedJob.isUserVisibleJob()) {
             mService.informObserversOfUserVisibleJobChange(this, completedJob, false);

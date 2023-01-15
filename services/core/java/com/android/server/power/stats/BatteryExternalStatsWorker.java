@@ -710,6 +710,11 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
                 if (gnssChargeUC != EnergyConsumerSnapshot.UNAVAILABLE) {
                     mStats.updateGnssEnergyConsumerStatsLocked(gnssChargeUC, elapsedRealtime);
                 }
+
+                final long cameraChargeUC = energyConsumerDeltas.cameraChargeUC;
+                if (cameraChargeUC != EnergyConsumerSnapshot.UNAVAILABLE) {
+                    mStats.updateCameraEnergyConsumerStatsLocked(cameraChargeUC, elapsedRealtime);
+                }
             }
             // Inform mStats about each applicable custom energy bucket.
             if (energyConsumerDeltas != null
@@ -904,6 +909,9 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
                 case EnergyConsumerType.WIFI:
                     buckets[EnergyConsumerStats.POWER_BUCKET_WIFI] = true;
                     break;
+                case EnergyConsumerType.CAMERA:
+                    buckets[EnergyConsumerStats.POWER_BUCKET_CAMERA] = true;
+                    break;
             }
         }
         return buckets;
@@ -954,6 +962,9 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
         }
         if ((flags & UPDATE_WIFI) != 0) {
             addEnergyConsumerIdLocked(energyConsumerIds, EnergyConsumerType.WIFI);
+        }
+        if ((flags & UPDATE_CAMERA) != 0) {
+            addEnergyConsumerIdLocked(energyConsumerIds, EnergyConsumerType.CAMERA);
         }
 
         if (energyConsumerIds.size() == 0) {

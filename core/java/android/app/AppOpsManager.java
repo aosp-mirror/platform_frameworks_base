@@ -2489,7 +2489,7 @@ public class AppOpsManager {
                 "RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO").setDefaultMode(
                 AppOpsManager.MODE_ALLOWED).build(),
         new AppOpInfo.Builder(OP_RUN_LONG_JOBS, OPSTR_RUN_LONG_JOBS, "RUN_LONG_JOBS")
-                .setPermission(Manifest.permission.RUN_LONG_JOBS).build(),
+                .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
             new AppOpInfo.Builder(OP_READ_MEDIA_VISUAL_USER_SELECTED,
                     OPSTR_READ_MEDIA_VISUAL_USER_SELECTED, "READ_MEDIA_VISUAL_USER_SELECTED")
                     .setPermission(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)

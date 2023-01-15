@@ -18,6 +18,7 @@ package com.android.server.input;
 
 import android.annotation.Nullable;
 import android.hardware.input.TouchCalibration;
+import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseIntArray;
@@ -42,6 +43,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.OptionalInt;
@@ -121,6 +123,7 @@ final class PersistentDataStore {
         return false;
     }
 
+    @Nullable
     public String getCurrentKeyboardLayout(String inputDeviceDescriptor) {
         InputDeviceState state = getInputDeviceState(inputDeviceDescriptor);
         return state != null ? state.getCurrentKeyboardLayout() : null;
@@ -130,6 +133,22 @@ final class PersistentDataStore {
             String keyboardLayoutDescriptor) {
         InputDeviceState state = getOrCreateInputDeviceState(inputDeviceDescriptor);
         if (state.setCurrentKeyboardLayout(keyboardLayoutDescriptor)) {
+            setDirty();
+            return true;
+        }
+        return false;
+    }
+
+    @Nullable
+    public String getKeyboardLayout(String inputDeviceDescriptor, String key) {
+        InputDeviceState state = getInputDeviceState(inputDeviceDescriptor);
+        return state != null ? state.getKeyboardLayout(key) : null;
+    }
+
+    public boolean setKeyboardLayout(String inputDeviceDescriptor, String key,
+            String keyboardLayoutDescriptor) {
+        InputDeviceState state = getOrCreateInputDeviceState(inputDeviceDescriptor);
+        if (state.setKeyboardLayout(key, keyboardLayoutDescriptor)) {
             setDirty();
             return true;
         }
@@ -387,6 +406,8 @@ final class PersistentDataStore {
         private final ArrayList<String> mKeyboardLayouts = new ArrayList<String>();
         private final SparseIntArray mKeyboardBacklightBrightnessMap = new SparseIntArray();
 
+        private final Map<String, String> mKeyboardLayoutMap = new ArrayMap<>();
+
         public TouchCalibration getTouchCalibration(int surfaceRotation) {
             try {
                 return mTouchCalibration[surfaceRotation];
@@ -407,6 +428,15 @@ final class PersistentDataStore {
                 Slog.w(InputManagerService.TAG, "Cannot set touch calibration.", ex);
                 return false;
             }
+        }
+
+        @Nullable
+        public String getKeyboardLayout(String key) {
+            return mKeyboardLayoutMap.get(key);
+        }
+
+        public boolean setKeyboardLayout(String key, String keyboardLayout) {
+            return !Objects.equals(mKeyboardLayoutMap.put(key, keyboardLayout), keyboardLayout);
         }
 
         @Nullable
@@ -507,6 +537,18 @@ final class PersistentDataStore {
                     changed = true;
                 }
             }
+            List<String> removedEntries = new ArrayList<>();
+            for (String key : mKeyboardLayoutMap.keySet()) {
+                if (!availableKeyboardLayouts.contains(mKeyboardLayoutMap.get(key))) {
+                    removedEntries.add(key);
+                }
+            }
+            if (!removedEntries.isEmpty()) {
+                for (String key : removedEntries) {
+                    mKeyboardLayoutMap.remove(key);
+                }
+                changed = true;
+            }
             return changed;
         }
 
@@ -534,6 +576,18 @@ final class PersistentDataStore {
                         }
                         mCurrentKeyboardLayout = descriptor;
                     }
+                } else if (parser.getName().equals("keyed-keyboard-layout")) {
+                    String key = parser.getAttributeValue(null, "key");
+                    if (key == null) {
+                        throw new XmlPullParserException(
+                                "Missing key attribute on keyed-keyboard-layout.");
+                    }
+                    String layout = parser.getAttributeValue(null, "layout");
+                    if (layout == null) {
+                        throw new XmlPullParserException(
+                                "Missing layout attribute on keyed-keyboard-layout.");
+                    }
+                    mKeyboardLayoutMap.put(key, layout);
                 } else if (parser.getName().equals("light-info")) {
                     int lightId = parser.getAttributeInt(null, "light-id");
                     int lightBrightness = parser.getAttributeInt(null, "light-brightness");
@@ -605,6 +659,13 @@ final class PersistentDataStore {
                     serializer.attributeBoolean(null, "current", true);
                 }
                 serializer.endTag(null, "keyboard-layout");
+            }
+
+            for (String key : mKeyboardLayoutMap.keySet()) {
+                serializer.startTag(null, "keyed-keyboard-layout");
+                serializer.attribute(null, "key", key);
+                serializer.attribute(null, "layout", mKeyboardLayoutMap.get(key));
+                serializer.endTag(null, "keyed-keyboard-layout");
             }
 
             for (int i = 0; i < mKeyboardBacklightBrightnessMap.size(); i++) {

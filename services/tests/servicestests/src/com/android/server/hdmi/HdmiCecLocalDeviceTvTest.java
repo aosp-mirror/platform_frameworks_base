@@ -90,6 +90,8 @@ public class HdmiCecLocalDeviceTvTest {
     private HdmiCecController mHdmiCecController;
     private HdmiCecLocalDeviceTv mHdmiCecLocalDeviceTv;
     private FakeNativeWrapper mNativeWrapper;
+    private HdmiEarcController mHdmiEarcController;
+    private FakeEArcNativeWrapper mEArcNativeWrapper;
     private FakePowerManagerWrapper mPowerManager;
     private Looper mMyLooper;
     private TestLooper mTestLooper = new TestLooper();
@@ -185,6 +187,10 @@ public class HdmiCecLocalDeviceTvTest {
         mHdmiCecController = HdmiCecController.createWithNativeWrapper(
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(mHdmiCecController);
+        mEArcNativeWrapper = new FakeEArcNativeWrapper();
+        mHdmiEarcController = HdmiEarcController.createWithNativeWrapper(
+                mHdmiControlService, mEArcNativeWrapper);
+        mHdmiControlService.setEarcController(mHdmiEarcController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
         HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[2];
         hdmiPortInfos[0] =

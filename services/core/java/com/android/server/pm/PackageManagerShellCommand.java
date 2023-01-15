@@ -3291,7 +3291,7 @@ class PackageManagerShellCommand extends ShellCommand {
                     sessionParams.installFlags |= PackageManager.INSTALL_DISABLE_VERIFICATION;
                     break;
                 case "--skip-enable":
-                    sessionParams.setKeepApplicationEnabledSetting();
+                    sessionParams.setApplicationEnabledSettingPersistent();
                     break;
                 case "--bypass-low-target-sdk-block":
                     sessionParams.installFlags |=

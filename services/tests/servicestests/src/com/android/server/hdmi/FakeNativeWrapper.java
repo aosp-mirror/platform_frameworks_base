@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Fake {@link NativeWrapper} useful for testing. */
+/** Fake {@link NativeWrapper} for the HDMI CEC HAL, useful for testing. */
 final class FakeNativeWrapper implements NativeWrapper {
     private static final String TAG = "FakeNativeWrapper";
 

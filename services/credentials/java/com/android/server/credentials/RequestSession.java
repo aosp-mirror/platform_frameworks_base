@@ -16,6 +16,13 @@
 
 package com.android.server.credentials;
 
+import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED__API_NAME__API_NAME_CLEAR_CREDENTIAL;
+import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED__API_NAME__API_NAME_CREATE_CREDENTIAL;
+import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED__API_NAME__API_NAME_GET_CREDENTIAL;
+import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED__API_NAME__API_NAME_UNKNOWN;
+import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED__API_STATUS__API_STATUS_FAILURE;
+import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED__API_STATUS__API_STATUS_SUCCESS;
+
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.content.Context;
@@ -29,6 +36,8 @@ import android.service.credentials.CallingAppInfo;
 import android.service.credentials.CredentialProviderInfo;
 import android.util.Log;
 
+import com.android.internal.util.FrameworkStatsLog;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,28 +46,53 @@ import java.util.Map;
  * Base class of a request session, that listens to UI events. This class must be extended
  * every time a new response type is expected from the providers.
  */
-abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialManagerUiCallback{
+abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialManagerUiCallback {
     private static final String TAG = "RequestSession";
 
+    // Metrics constants
+    private static final int METRICS_API_NAME_UNKNOWN =
+            CREDENTIAL_MANAGER_API_CALLED__API_NAME__API_NAME_UNKNOWN;
+    private static final int METRICS_API_NAME_GET_CREDENTIAL =
+            CREDENTIAL_MANAGER_API_CALLED__API_NAME__API_NAME_GET_CREDENTIAL;
+    private static final int METRICS_API_NAME_CREATE_CREDENTIAL =
+            CREDENTIAL_MANAGER_API_CALLED__API_NAME__API_NAME_CREATE_CREDENTIAL;
+    private static final int METRICS_API_NAME_CLEAR_CREDENTIAL =
+            CREDENTIAL_MANAGER_API_CALLED__API_NAME__API_NAME_CLEAR_CREDENTIAL;
+    private static final int METRICS_API_STATUS_SUCCESS =
+            CREDENTIAL_MANAGER_API_CALLED__API_STATUS__API_STATUS_SUCCESS;
+    private static final int METRICS_API_STATUS_FAILURE =
+            CREDENTIAL_MANAGER_API_CALLED__API_STATUS__API_STATUS_FAILURE;
+
     // TODO: Revise access levels of attributes
-    @NonNull protected final T mClientRequest;
-    @NonNull protected final U mClientCallback;
-    @NonNull protected final IBinder mRequestId;
-    @NonNull protected final Context mContext;
-    @NonNull protected final CredentialManagerUi mCredentialManagerUi;
-    @NonNull protected final String mRequestType;
-    @NonNull protected final Handler mHandler;
-    @UserIdInt protected final int mUserId;
-    @NonNull protected final CallingAppInfo mClientAppInfo;
+    @NonNull
+    protected final T mClientRequest;
+    @NonNull
+    protected final U mClientCallback;
+    @NonNull
+    protected final IBinder mRequestId;
+    @NonNull
+    protected final Context mContext;
+    @NonNull
+    protected final CredentialManagerUi mCredentialManagerUi;
+    @NonNull
+    protected final String mRequestType;
+    @NonNull
+    protected final Handler mHandler;
+    @UserIdInt
+    protected final int mUserId;
+    private final int mCallingUid;
+    @NonNull
+    protected final CallingAppInfo mClientAppInfo;
 
     protected final Map<String, ProviderSession> mProviders = new HashMap<>();
 
     protected RequestSession(@NonNull Context context,
-            @UserIdInt int userId, @NonNull T clientRequest, U clientCallback,
+            @UserIdInt int userId, int callingUid, @NonNull T clientRequest, U clientCallback,
             @NonNull String requestType,
             CallingAppInfo callingAppInfo) {
         mContext = context;
         mUserId = userId;
+        mCallingUid = callingUid;
         mClientRequest = clientRequest;
         mClientCallback = clientCallback;
         mRequestType = requestType;
@@ -115,6 +149,33 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
             }
         }
         return false;
+    }
+
+    // TODO: move these definitions to a separate logging focused class.
+    enum RequestType {
+        GET_CREDENTIALS,
+        CREATE_CREDENTIALS,
+        CLEAR_CREDENTIALS,
+    }
+
+    private static int getApiNameFromRequestType(RequestType requestType) {
+        switch (requestType) {
+            case GET_CREDENTIALS:
+                return METRICS_API_NAME_GET_CREDENTIAL;
+            case CREATE_CREDENTIALS:
+                return METRICS_API_NAME_CREATE_CREDENTIAL;
+            case CLEAR_CREDENTIALS:
+                return METRICS_API_NAME_CLEAR_CREDENTIAL;
+            default:
+                return METRICS_API_NAME_UNKNOWN;
+        }
+    }
+
+    protected void logApiCalled(RequestType requestType, boolean isSuccessful) {
+        FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED,
+                /* api_name */getApiNameFromRequestType(requestType), /* caller_uid */
+                mCallingUid, /* api_status */
+                isSuccessful ? METRICS_API_STATUS_SUCCESS : METRICS_API_STATUS_FAILURE);
     }
 
     /**

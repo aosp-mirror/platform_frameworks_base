@@ -24,7 +24,7 @@ import android.annotation.Nullable;
 
 import com.android.server.art.ReasonMapping;
 import com.android.server.art.model.ArtFlags;
-import com.android.server.art.model.OptimizeParams;
+import com.android.server.art.model.DexoptParams;
 import com.android.server.pm.DexOptHelper;
 import com.android.server.pm.PackageManagerService;
 
@@ -201,22 +201,22 @@ public final class DexoptOptions {
     }
 
     /**
-     * Returns an {@link OptimizeParams} instance corresponding to this object, for use with
+     * Returns an {@link DexoptParams} instance corresponding to this object, for use with
      * {@link com.android.server.art.ArtManagerLocal}.
      *
-     * @param extraFlags extra {@link ArtFlags#OptimizeFlags} to set in the returned
-     *     {@code OptimizeParams} beyond those converted from this object
+     * @param extraFlags extra {@link ArtFlags#DexoptFlags} to set in the returned
+     *     {@code DexoptParams} beyond those converted from this object
      * @return null if the settings cannot be accurately represented, and hence the old
      *     PackageManager/installd code paths need to be used.
      */
-    public @Nullable OptimizeParams convertToOptimizeParams(/*@OptimizeFlags*/ int extraFlags) {
+    public @Nullable DexoptParams convertToDexoptParams(/*@DexoptFlags*/ int extraFlags) {
         if (mSplitName != null) {
             DexOptHelper.reportArtManagerFallback(
                     mPackageName, "Request to optimize only split " + mSplitName);
             return null;
         }
 
-        /*@OptimizeFlags*/ int flags = extraFlags;
+        /*@DexoptFlags*/ int flags = extraFlags;
         if ((mFlags & DEXOPT_CHECK_FOR_PROFILES_UPDATES) == 0
                 && isProfileGuidedCompilerFilter(mCompilerFilter)) {
             // ART Service doesn't support bypassing the profile update check when profiles are
@@ -322,7 +322,7 @@ public final class DexoptOptions {
                         "Invalid compilation reason " + mCompilationReason);
         }
 
-        return new OptimizeParams.Builder(reason, flags)
+        return new DexoptParams.Builder(reason, flags)
                 .setCompilerFilter(mCompilerFilter)
                 .setPriorityClass(priority)
                 .build();

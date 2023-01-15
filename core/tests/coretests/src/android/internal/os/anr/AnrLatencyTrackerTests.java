@@ -57,7 +57,9 @@ public class AnrLatencyTrackerTests {
             .thenReturn(158L)
             .thenReturn(165L)
             .thenReturn(175L)
-            .thenReturn(188L);
+            .thenReturn(198L)
+            .thenReturn(203L)
+            .thenReturn(209L);
     }
 
     @Test
@@ -109,7 +111,7 @@ public class AnrLatencyTrackerTests {
         mLatencyTracker.close();
 
         assertThat(mLatencyTracker.dumpAsCommaSeparatedArrayWithHeader())
-            .isEqualTo("DurationsV1: 50,5,25,8,100,2,3,7,8,15,2,7,13,10,3,4\n\n");
+            .isEqualTo("DurationsV2: 50,5,25,8,115,2,3,7,8,15,2,7,23,10,3,6\n\n");
         verify(mLatencyTracker, times(1)).pushAtom();
     }
 

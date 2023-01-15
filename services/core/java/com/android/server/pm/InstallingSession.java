@@ -97,7 +97,7 @@ class InstallingSession {
     final boolean mIsInherit;
     final int mSessionId;
     final int mRequireUserAction;
-    final boolean mKeepApplicationEnabledSetting;
+    final boolean mApplicationEnabledSettingPersistent;
 
     // For move install
     InstallingSession(OriginInfo originInfo, MoveInfo moveInfo, IPackageInstallObserver2 observer,
@@ -130,7 +130,7 @@ class InstallingSession {
         mIsInherit = false;
         mSessionId = -1;
         mRequireUserAction = USER_ACTION_UNSPECIFIED;
-        mKeepApplicationEnabledSetting = false;
+        mApplicationEnabledSettingPersistent = false;
     }
 
     InstallingSession(int sessionId, File stagedDir, IPackageInstallObserver2 observer,
@@ -164,7 +164,7 @@ class InstallingSession {
         mIsInherit = sessionParams.mode == MODE_INHERIT_EXISTING;
         mSessionId = sessionId;
         mRequireUserAction = sessionParams.requireUserAction;
-        mKeepApplicationEnabledSetting = sessionParams.keepApplicationEnabledSetting;
+        mApplicationEnabledSettingPersistent = sessionParams.applicationEnabledSettingPersistent;
     }
 
     @Override
@@ -535,7 +535,7 @@ class InstallingSession {
             mInstallPackageHelper.installPackagesTraced(installRequests);
 
             for (InstallRequest request : installRequests) {
-                request.onInstallCompleted(mUser.getIdentifier());
+                request.onInstallCompleted();
                 doPostInstall(request);
             }
         }
@@ -609,6 +609,7 @@ class InstallingSession {
                 // processApkInstallRequests() fails. Need a way to keep info stored in apexd
                 // and PMS in sync in the face of install failures.
                 request.setApexInfo(apexInfo);
+                request.setApexModuleName(apexInfo.moduleName);
                 mPm.mHandler.post(() -> processApkInstallRequests(true, requests));
                 return;
             }

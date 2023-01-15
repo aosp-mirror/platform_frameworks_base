@@ -18,6 +18,7 @@ package com.android.server.power.stats;
 
 import static com.android.server.power.stats.BatteryStatsImpl.ExternalStatsSync.UPDATE_ALL;
 import static com.android.server.power.stats.BatteryStatsImpl.ExternalStatsSync.UPDATE_BT;
+import static com.android.server.power.stats.BatteryStatsImpl.ExternalStatsSync.UPDATE_CAMERA;
 import static com.android.server.power.stats.BatteryStatsImpl.ExternalStatsSync.UPDATE_CPU;
 import static com.android.server.power.stats.BatteryStatsImpl.ExternalStatsSync.UPDATE_DISPLAY;
 import static com.android.server.power.stats.BatteryStatsImpl.ExternalStatsSync.UPDATE_RADIO;
@@ -104,6 +105,11 @@ public class BatteryExternalStatsWorkerTest {
         tempAllIds.add(gnssId);
         mPowerStatsInternal.incrementEnergyConsumption(gnssId, 787878);
 
+        final int cameraId =
+                mPowerStatsInternal.addEnergyConsumer(EnergyConsumerType.CAMERA, 0, "camera");
+        tempAllIds.add(cameraId);
+        mPowerStatsInternal.incrementEnergyConsumption(cameraId, 901234);
+
         final int mobileRadioId = mPowerStatsInternal.addEnergyConsumer(
                 EnergyConsumerType.MOBILE_RADIO, 0, "mobile_radio");
         tempAllIds.add(mobileRadioId);
@@ -170,6 +176,12 @@ public class BatteryExternalStatsWorkerTest {
         }
         Arrays.sort(receivedCpuIds);
         assertArrayEquals(cpuClusterIds, receivedCpuIds);
+
+        final EnergyConsumerResult[] cameraResults =
+                mBatteryExternalStatsWorker.getEnergyConsumersLocked(UPDATE_CAMERA).getNow(null);
+        // Results should only have the camera energy consumer
+        assertEquals(1, cameraResults.length);
+        assertEquals(cameraId, cameraResults[0].id);
 
         final EnergyConsumerResult[] allResults =
                 mBatteryExternalStatsWorker.getEnergyConsumersLocked(UPDATE_ALL).getNow(null);

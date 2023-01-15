@@ -22,8 +22,6 @@ import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.junit.Assert.assertThrows;
-
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
 
@@ -44,7 +42,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class MediaProjectionConfigTest {
     private static final MediaProjectionConfig DISPLAY_CONFIG =
-            MediaProjectionConfig.createConfigForDisplay(DEFAULT_DISPLAY);
+            MediaProjectionConfig.createConfigForDefaultDisplay();
     private static final MediaProjectionConfig USERS_CHOICE_CONFIG =
             MediaProjectionConfig.createConfigForUserChoice();
 
@@ -60,10 +58,6 @@ public class MediaProjectionConfigTest {
 
     @Test
     public void testCreateDisplayConfig() {
-        assertThrows(IllegalArgumentException.class,
-                () -> MediaProjectionConfig.createConfigForDisplay(-1));
-        assertThrows(IllegalArgumentException.class,
-                () -> MediaProjectionConfig.createConfigForDisplay(DEFAULT_DISPLAY + 1));
         assertThat(DISPLAY_CONFIG.getRegionToCapture()).isEqualTo(CAPTURE_REGION_FIXED_DISPLAY);
         assertThat(DISPLAY_CONFIG.getDisplayToCapture()).isEqualTo(DEFAULT_DISPLAY);
     }
@@ -78,7 +72,7 @@ public class MediaProjectionConfigTest {
         assertThat(MediaProjectionConfig.createConfigForUserChoice()).isEqualTo(
                 USERS_CHOICE_CONFIG);
         assertThat(DISPLAY_CONFIG).isNotEqualTo(USERS_CHOICE_CONFIG);
-        assertThat(MediaProjectionConfig.createConfigForDisplay(DEFAULT_DISPLAY)).isEqualTo(
+        assertThat(MediaProjectionConfig.createConfigForDefaultDisplay()).isEqualTo(
                 DISPLAY_CONFIG);
     }
 }

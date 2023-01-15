@@ -59,12 +59,8 @@ open class EnterPipTest(flicker: FlickerTest) : PipTransition(flicker) {
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
-            setup {
-                pipApp.launchViaIntent(wmHelper)
-            }
-            teardown {
-                pipApp.exit(wmHelper)
-            }
+            setup { pipApp.launchViaIntent(wmHelper) }
+            teardown { pipApp.exit(wmHelper) }
             transitions { pipApp.clickEnterPipButton(wmHelper) }
         }
 

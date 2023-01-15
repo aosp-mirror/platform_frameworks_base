@@ -178,7 +178,7 @@ public class BatteryStatsImpl extends BatteryStats {
     // TODO: remove "tcp" from network methods, since we measure total stats.
 
     // Current on-disk Parcel version. Must be updated when the format of the parcelable changes
-    public static final int VERSION = 210;
+    public static final int VERSION = 211;
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
@@ -649,10 +649,12 @@ public class BatteryStatsImpl extends BatteryStats {
         int UPDATE_BT = 0x08;
         int UPDATE_RPM = 0x10;
         int UPDATE_DISPLAY = 0x20;
-        int RESET = 0x40;
+        int UPDATE_CAMERA = 0x40;
+        int RESET = 0x80;
 
         int UPDATE_ALL =
-                UPDATE_CPU | UPDATE_WIFI | UPDATE_RADIO | UPDATE_BT | UPDATE_RPM | UPDATE_DISPLAY;
+                UPDATE_CPU | UPDATE_WIFI | UPDATE_RADIO | UPDATE_BT | UPDATE_RPM | UPDATE_DISPLAY
+                        | UPDATE_CAMERA;
 
         int UPDATE_ON_PROC_STATE_CHANGE = UPDATE_WIFI | UPDATE_RADIO | UPDATE_BT;
 
@@ -665,6 +667,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 UPDATE_BT,
                 UPDATE_RPM,
                 UPDATE_DISPLAY,
+                UPDATE_CAMERA,
                 UPDATE_ALL,
         })
         @Retention(RetentionPolicy.SOURCE)
@@ -6244,6 +6247,8 @@ public class BatteryStatsImpl extends BatteryStats {
         }
         getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
                 .noteCameraTurnedOnLocked(elapsedRealtimeMs);
+
+        scheduleSyncExternalStatsLocked("camera-on", ExternalStatsSync.UPDATE_CAMERA);
     }
 
     @GuardedBy("this")
@@ -6259,6 +6264,8 @@ public class BatteryStatsImpl extends BatteryStats {
         }
         getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
                 .noteCameraTurnedOffLocked(elapsedRealtimeMs);
+
+        scheduleSyncExternalStatsLocked("camera-off", ExternalStatsSync.UPDATE_CAMERA);
     }
 
     @GuardedBy("this")
@@ -6273,6 +6280,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 uid.noteResetCameraLocked(elapsedRealtimeMs);
             }
         }
+
+        scheduleSyncExternalStatsLocked("camera-reset", ExternalStatsSync.UPDATE_CAMERA);
     }
 
     @GuardedBy("this")
@@ -7414,6 +7423,12 @@ public class BatteryStatsImpl extends BatteryStats {
         return getPowerBucketConsumptionUC(EnergyConsumerStats.POWER_BUCKET_WIFI);
     }
 
+    @GuardedBy("this")
+    @Override
+    public long getCameraEnergyConsumptionUC() {
+        return getPowerBucketConsumptionUC(EnergyConsumerStats.POWER_BUCKET_CAMERA);
+    }
+
     /**
      * Returns the consumption (in microcoulombs) that the given standard power bucket consumed.
      * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable
@@ -8427,6 +8442,12 @@ public class BatteryStatsImpl extends BatteryStats {
                     processState);
         }
 
+        @GuardedBy("mBsi")
+        @Override
+        public long getCameraEnergyConsumptionUC() {
+            return getEnergyConsumptionUC(EnergyConsumerStats.POWER_BUCKET_CAMERA);
+        }
+
         /**
          * Gets the minimum of the uid's foreground activity time and its PROCESS_STATE_TOP time
          * since last marked. Also sets the mark time for both these timers.
@@ -8475,6 +8496,20 @@ public class BatteryStatsImpl extends BatteryStats {
             final long gnssTimeUs = timer.getTimeSinceMarkLocked(elapsedRealtimeMs * 1000);
             timer.setMark(elapsedRealtimeMs);
             return gnssTimeUs;
+        }
+
+        /**
+         * Gets the uid's time spent using the camera since last marked. Also sets the mark time for
+         * the camera timer.
+         */
+        private long markCameraTimeUs(long elapsedRealtimeMs) {
+            final StopwatchTimer timer = mCameraTurnedOnTimer;
+            if (timer == null) {
+                return 0;
+            }
+            final long cameraTimeUs = timer.getTimeSinceMarkLocked(elapsedRealtimeMs * 1000);
+            timer.setMark(elapsedRealtimeMs);
+            return cameraTimeUs;
         }
 
         public StopwatchTimer createAudioTurnedOnTimerLocked() {
@@ -12899,6 +12934,53 @@ public class BatteryStatsImpl extends BatteryStats {
         }
         distributeEnergyToUidsLocked(EnergyConsumerStats.POWER_BUCKET_GNSS, chargeUC,
                 gnssTimeUsArray, 0, elapsedRealtimeMs);
+    }
+
+    /**
+     * Accumulate camera charge consumption and distribute it to the correct state and the apps.
+     *
+     * @param chargeUC amount of charge (microcoulombs) used by the camera since this was last
+     *         called.
+     */
+    @GuardedBy("this")
+    public void updateCameraEnergyConsumerStatsLocked(long chargeUC, long elapsedRealtimeMs) {
+        if (DEBUG_ENERGY) Slog.d(TAG, "Updating camera stats: " + chargeUC);
+        if (mGlobalEnergyConsumerStats == null) {
+            return;
+        }
+
+        if (!mOnBatteryInternal || chargeUC <= 0) {
+            // There's nothing further to update.
+            return;
+        }
+
+        if (mIgnoreNextExternalStats) {
+            // Although under ordinary resets we won't get here, and typically a new sync will
+            // happen right after the reset, strictly speaking we need to set all mark times to now.
+            final int uidStatsSize = mUidStats.size();
+            for (int i = 0; i < uidStatsSize; i++) {
+                final Uid uid = mUidStats.valueAt(i);
+                uid.markCameraTimeUs(elapsedRealtimeMs);
+            }
+            return;
+        }
+
+        mGlobalEnergyConsumerStats.updateStandardBucket(
+                EnergyConsumerStats.POWER_BUCKET_CAMERA, chargeUC);
+
+        // Collect the per uid time since mark so that we can normalize power.
+        final SparseDoubleArray cameraTimeUsArray = new SparseDoubleArray();
+
+        // Note: Iterating over all UIDs may be suboptimal.
+        final int uidStatsSize = mUidStats.size();
+        for (int i = 0; i < uidStatsSize; i++) {
+            final Uid uid = mUidStats.valueAt(i);
+            final long cameraTimeUs = uid.markCameraTimeUs(elapsedRealtimeMs);
+            if (cameraTimeUs == 0) continue;
+            cameraTimeUsArray.put(uid.getUid(), (double) cameraTimeUs);
+        }
+        distributeEnergyToUidsLocked(EnergyConsumerStats.POWER_BUCKET_CAMERA, chargeUC,
+                cameraTimeUsArray, 0, elapsedRealtimeMs);
     }
 
     /**

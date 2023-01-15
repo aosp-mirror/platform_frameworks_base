@@ -79,11 +79,11 @@ public class AnrLatencyTracker implements AutoCloseable {
     private int mAnrType;
     private int mDumpedProcessesCount = 0;
 
-    private long mFirstPidsDumpingStart;
+    private long mFirstPidsDumpingStartUptime;
     private long mFirstPidsDumpingDuration = 0;
-    private long mNativePidsDumpingStart;
+    private long mNativePidsDumpingStartUptime;
     private long mNativePidsDumpingDuration = 0;
-    private long mExtraPidsDumpingStart;
+    private long mExtraPidsDumpingStartUptime;
     private long mExtraPidsDumpingDuration = 0;
 
     private boolean mIsPushed = false;
@@ -223,37 +223,37 @@ public class AnrLatencyTracker implements AutoCloseable {
 
     /** Records the start of pid dumping to file (subject and criticalEventSection). */
     public void dumpingFirstPidsStarted() {
-        mFirstPidsDumpingStart = getUptimeMillis();
+        mFirstPidsDumpingStartUptime = getUptimeMillis();
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "dumpingFirstPids");
     }
 
     /** Records the end of pid dumping to file (subject and criticalEventSection). */
     public void dumpingFirstPidsEnded() {
-        mFirstPidsDumpingDuration = getUptimeMillis() - mFirstPidsDumpingStart;
+        mFirstPidsDumpingDuration = getUptimeMillis() - mFirstPidsDumpingStartUptime;
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
     /** Records the start of pid dumping to file (subject and criticalEventSection). */
     public void dumpingNativePidsStarted() {
-        mNativePidsDumpingStart = getUptimeMillis();
+        mNativePidsDumpingStartUptime = getUptimeMillis();
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "dumpingNativePids");
     }
 
     /** Records the end of pid dumping to file (subject and criticalEventSection). */
     public void dumpingNativePidsEnded() {
-        mNativePidsDumpingDuration =  getUptimeMillis() - mNativePidsDumpingStart;
+        mNativePidsDumpingDuration =  getUptimeMillis() - mNativePidsDumpingStartUptime;
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
     /** Records the start of pid dumping to file (subject and criticalEventSection). */
     public void dumpingExtraPidsStarted() {
-        mExtraPidsDumpingStart = getUptimeMillis();
+        mExtraPidsDumpingStartUptime = getUptimeMillis();
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "dumpingExtraPids");
     }
 
     /** Records the end of pid dumping to file (subject and criticalEventSection). */
     public void dumpingExtraPidsEnded() {
-        mExtraPidsDumpingDuration =  getUptimeMillis() - mExtraPidsDumpingStart;
+        mExtraPidsDumpingDuration =  getUptimeMillis() - mExtraPidsDumpingStartUptime;
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
@@ -337,7 +337,7 @@ public class AnrLatencyTracker implements AutoCloseable {
      * Returns latency data as a comma separated value string for inclusion in ANR report.
      */
     public String dumpAsCommaSeparatedArrayWithHeader() {
-        return "DurationsV1: " + mAnrTriggerUptime
+        return "DurationsV2: " + mAnrTriggerUptime
                 /* triggering_to_app_not_responding_duration = */
                 + "," + (mAppNotRespondingStartUptime -  mAnrTriggerUptime)
                 /* app_not_responding_duration = */
@@ -369,8 +369,8 @@ public class AnrLatencyTracker implements AutoCloseable {
 
                 /* anr_queue_size_when_pushed = */
                 + "," + mAnrQueueSize
-                /* dumped_processes_count = */
-                + "," + mDumpedProcessesCount
+                /* dump_stack_traces_io_time = */
+                + "," + (mFirstPidsDumpingStartUptime - mDumpStackTracesStartUptime)
                 + "\n\n";
 
     }
@@ -422,7 +422,7 @@ public class AnrLatencyTracker implements AutoCloseable {
 
             /* total_duration = */ mEndUptime - mAnrTriggerUptime,
             /* triggering_to_stack_dump_duration = */
-                    mFirstPidsDumpingStart - mAnrTriggerUptime,
+                    mFirstPidsDumpingStartUptime - mAnrTriggerUptime,
             /* triggering_to_app_not_responding_duration = */
                     mAppNotRespondingStartUptime -  mAnrTriggerUptime,
             /* app_not_responding_duration = */

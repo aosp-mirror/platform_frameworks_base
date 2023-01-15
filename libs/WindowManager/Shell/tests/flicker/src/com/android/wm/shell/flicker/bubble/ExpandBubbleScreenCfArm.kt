@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
-package android.nfc;
+package com.android.wm.shell.flicker.bubble
 
-parcelable BeamShareData;
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
+
+@RunWith(Parameterized::class)
+@Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
+class ExpandBubbleScreenCfArm(flicker: FlickerTest) : ExpandBubbleScreen(flicker)

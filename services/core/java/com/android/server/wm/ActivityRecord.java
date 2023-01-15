@@ -9357,6 +9357,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             configChangeFlags = 0;
             return;
         }
+        if (!preserveWindow) {
+            // If the activity is the IME input target, ensure storing the last IME shown state
+            // before relaunching it for restoring the IME visibility once its new window focused.
+            final InputTarget imeInputTarget = mDisplayContent.getImeInputTarget();
+            mLastImeShown = imeInputTarget != null && imeInputTarget.getWindowState() != null
+                    && imeInputTarget.getWindowState().mActivityRecord == this
+                    && mDisplayContent.mInputMethodWindow != null
+                    && mDisplayContent.mInputMethodWindow.isVisible();
+        }
         // Do not waiting for translucent activity if it is going to relaunch.
         final Task rootTask = getRootTask();
         if (rootTask != null && rootTask.mTranslucentActivityWaiting == this) {

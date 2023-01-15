@@ -27,6 +27,7 @@ import android.app.Service;
 import android.compat.Compatibility;
 import android.content.Intent;
 import android.os.IBinder;
+import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -131,6 +132,11 @@ public abstract class JobService extends Service {
                         return JobService.this.getTransferredUploadBytes(params, item);
                     }
                 }
+
+                @Override
+                public void onNetworkChanged(@NonNull JobParameters params) {
+                    JobService.this.onNetworkChanged(params);
+                }
             };
         }
         return mEngine.getBinder();
@@ -230,6 +236,27 @@ public abstract class JobService extends Service {
      * to end the job entirely.  Regardless of the value returned, your job must stop executing.
      */
     public abstract boolean onStopJob(JobParameters params);
+
+    /**
+     * This method is called that for a job that has a network constraint when the network
+     * to be used by the job changes. The new network object will be available via
+     * {@link JobParameters#getNetwork()}. Any network that results in this method call will
+     * match the job's requested network constraints.
+     *
+     * <p>
+     * For example, if a device is on a metered mobile network and then connects to an
+     * unmetered WiFi network, and the job has indicated that both networks satisfy its
+     * network constraint, then this method will be called to notify the job of the new
+     * unmetered WiFi network.
+     *
+     * @param params The parameters identifying this job, similar to what was supplied to the job in
+     *               the {@link #onStartJob(JobParameters)} callback, but with an updated network.
+     * @see JobInfo.Builder#setRequiredNetwork(android.net.NetworkRequest)
+     * @see JobInfo.Builder#setRequiredNetworkType(int)
+     */
+    public void onNetworkChanged(@NonNull JobParameters params) {
+        Log.w(TAG, "onNetworkChanged() not implemented. Must override in a subclass.");
+    }
 
     /**
      * Update the amount of data this job is estimated to transfer after the job has started.

@@ -1283,6 +1283,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * swipe gesture starts at X = 500 then moves to X = 400, this axis would have a value of
      * -0.1.
      * </ul>
+     * These values are relative to the state from the last event, not accumulated, so developers
+     * should make sure to process this axis value for all batched historical events.
      */
     public static final int AXIS_GESTURE_X_OFFSET = 48;
 
@@ -1300,6 +1302,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * <li>For a touch pad, reports the distance that should be scrolled in the X axis as a result
      * of the user's two-finger scroll gesture, in display pixels.
      * </ul>
+     * These values are relative to the state from the last event, not accumulated, so developers
+     * should make sure to process this axis value for all batched historical events.
      */
     public static final int AXIS_GESTURE_SCROLL_X_DISTANCE = 50;
 
@@ -1309,6 +1313,19 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * The same as {@link #AXIS_GESTURE_SCROLL_X_DISTANCE}, but for the Y axis.
      */
     public static final int AXIS_GESTURE_SCROLL_Y_DISTANCE = 51;
+
+    /**
+     * Axis constant: pinch scale factor of a motion event.
+     * <p>
+     * <ul>
+     * <li>For a touch pad, reports the change in distance between the fingers when the user is
+     * making a pinch gesture, as a proportion of the previous distance. For example, if the fingers
+     * were 50 units apart and are now 52 units apart, the scale factor would be 1.04.
+     * </ul>
+     * These values are relative to the state from the last event, not accumulated, so developers
+     * should make sure to process this axis value for all batched historical events.
+     */
+    public static final int AXIS_GESTURE_PINCH_SCALE_FACTOR = 52;
 
     // NOTE: If you add a new axis here you must also add it to:
     //  frameworks/native/include/android/input.h
@@ -1369,6 +1386,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         names.append(AXIS_GESTURE_Y_OFFSET, "AXIS_GESTURE_Y_OFFSET");
         names.append(AXIS_GESTURE_SCROLL_X_DISTANCE, "AXIS_GESTURE_SCROLL_X_DISTANCE");
         names.append(AXIS_GESTURE_SCROLL_Y_DISTANCE, "AXIS_GESTURE_SCROLL_Y_DISTANCE");
+        names.append(AXIS_GESTURE_PINCH_SCALE_FACTOR, "AXIS_GESTURE_PINCH_SCALE_FACTOR");
     }
 
     /**
@@ -1522,11 +1540,22 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      */
     public static final int CLASSIFICATION_MULTI_FINGER_SWIPE = 4;
 
+    /**
+     * Classification constant: touchpad pinch.
+     *
+     * The current event stream represents the user pinching with two fingers on a touchpad. The
+     * gesture is centered around the current cursor position.
+     *
+     * @see #getClassification
+     */
+    public static final int CLASSIFICATION_PINCH = 5;
+
     /** @hide */
     @Retention(SOURCE)
     @IntDef(prefix = { "CLASSIFICATION" }, value = {
             CLASSIFICATION_NONE, CLASSIFICATION_AMBIGUOUS_GESTURE, CLASSIFICATION_DEEP_PRESS,
-            CLASSIFICATION_TWO_FINGER_SWIPE, CLASSIFICATION_MULTI_FINGER_SWIPE})
+            CLASSIFICATION_TWO_FINGER_SWIPE, CLASSIFICATION_MULTI_FINGER_SWIPE,
+            CLASSIFICATION_PINCH})
     public @interface Classification {};
 
     /**

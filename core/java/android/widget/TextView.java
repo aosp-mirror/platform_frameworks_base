@@ -937,6 +937,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private List<Path> mHighlightPaths;
     private List<Paint> mHighlightPaints;
     private Highlights mHighlights;
+    private int[] mSearchResultHighlights = null;
+    private Paint mSearchResultHighlightPaint = null;
+    private Paint mFocusedSearchResultHighlightPaint = null;
+    private int mFocusedSearchResultHighlightColor = 0xFFFF9632;
+    private int mSearchResultHighlightColor = 0xFFFFFF00;
+
+    private int mFocusedSearchResultIndex = -1;
     private int mGesturePreviewHighlightStart = -1;
     private int mGesturePreviewHighlightEnd = -1;
     private Paint mGesturePreviewHighlightPaint;
@@ -4030,6 +4037,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     private static class TextAppearanceAttributes {
         int mTextColorHighlight = 0;
+        int mSearchResultHighlightColor = 0;
+        int mFocusedSearchResultHighlightColor = 0;
         ColorStateList mTextColor = null;
         ColorStateList mTextColorHint = null;
         ColorStateList mTextColorLink = null;
@@ -4062,6 +4071,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public String toString() {
             return "TextAppearanceAttributes {\n"
                     + "    mTextColorHighlight:" + mTextColorHighlight + "\n"
+                    + "    mSearchResultHighlightColor: " + mSearchResultHighlightColor + "\n"
+                    + "    mFocusedSearchResultHighlightColor: "
+                    + mFocusedSearchResultHighlightColor + "\n"
                     + "    mTextColor:" + mTextColor + "\n"
                     + "    mTextColorHint:" + mTextColorHint + "\n"
                     + "    mTextColorLink:" + mTextColorLink + "\n"
@@ -4100,6 +4112,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     static {
         sAppearanceValues.put(com.android.internal.R.styleable.TextView_textColorHighlight,
                 com.android.internal.R.styleable.TextAppearance_textColorHighlight);
+        sAppearanceValues.put(com.android.internal.R.styleable.TextView_searchResultHighlightColor,
+                com.android.internal.R.styleable.TextAppearance_searchResultHighlightColor);
+        sAppearanceValues.put(
+                com.android.internal.R.styleable.TextView_focusedSearchResultHighlightColor,
+                com.android.internal.R.styleable.TextAppearance_focusedSearchResultHighlightColor);
         sAppearanceValues.put(com.android.internal.R.styleable.TextView_textColor,
                 com.android.internal.R.styleable.TextAppearance_textColor);
         sAppearanceValues.put(com.android.internal.R.styleable.TextView_textColorHint,
@@ -4173,6 +4190,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 case com.android.internal.R.styleable.TextAppearance_textColorHighlight:
                     attributes.mTextColorHighlight =
                             appearance.getColor(attr, attributes.mTextColorHighlight);
+                    break;
+                case com.android.internal.R.styleable.TextAppearance_searchResultHighlightColor:
+                    attributes.mSearchResultHighlightColor =
+                            appearance.getColor(attr, attributes.mSearchResultHighlightColor);
+                    break;
+                case com.android.internal.R.styleable
+                        .TextAppearance_focusedSearchResultHighlightColor:
+                    attributes.mFocusedSearchResultHighlightColor =
+                            appearance.getColor(attr,
+                                    attributes.mFocusedSearchResultHighlightColor);
                     break;
                 case com.android.internal.R.styleable.TextAppearance_textColor:
                     attributes.mTextColor = appearance.getColorStateList(attr);
@@ -4288,6 +4315,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (attributes.mTextColorHighlight != 0) {
             setHighlightColor(attributes.mTextColorHighlight);
+        }
+
+        if (attributes.mSearchResultHighlightColor != 0) {
+            setSearchResultHighlightColor(attributes.mSearchResultHighlightColor);
+        }
+
+        if (attributes.mFocusedSearchResultHighlightColor != 0) {
+            setFocusedSearchResultHighlightColor(attributes.mFocusedSearchResultHighlightColor);
         }
 
         if (attributes.mTextSize != -1) {
@@ -6173,6 +6208,238 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Nullable
     public Highlights getHighlights() {
         return mHighlights;
+    }
+
+    /**
+     * Sets the search result ranges with flatten range representation.
+     *
+     * Ranges are represented of flattened inclusive start and exclusive end integers array. The
+     * inclusive start offset of the {@code i}-th range is stored in {@code 2 * i}-th of the array.
+     * The exclusive end offset of the {@code i}-th range is stored in {@code 2* i + 1}-th of the
+     * array. For example, the two ranges: (1, 2) and (3, 4) are flattened into single int array
+     * [1, 2, 3, 4].
+     *
+     * TextView will render the search result with the highlights with specified color in the theme.
+     * If there is a focused search result, it is rendered with focused color. By calling this
+     * method, the focused search index will be cleared.
+     *
+     * @attr ref android.R.styleable#TextView_searchResultHighlightColor
+     * @attr ref android.R.styleable#TextAppearance_searchResultHighlightColor
+     * @attr ref android.R.styleable#TextView_focusedSearchResultHighlightColor
+     * @attr ref android.R.styleable#TextAppearance_focusedSearchResultHighlightColor
+     *
+     * @see #getSearchResultHighlights()
+     * @see #setFocusedSearchResultIndex(int)
+     * @see #getFocusedSearchResultIndex()
+     * @see #setSearchResultHighlightColor(int)
+     * @see #getSearchResultHighlightColor()
+     * @see #setFocusedSearchResultHighlightColor(int)
+     * @see #getFocusedSearchResultHighlightColor()
+     *
+     * @param ranges the flatten ranges of the search result. null for clear.
+     */
+    public void setSearchResultHighlights(@Nullable int... ranges) {
+        if (ranges == null) {
+            mSearchResultHighlights = null;
+            mHighlightPathsBogus = true;
+            return;
+        }
+        if (ranges.length % 2 == 1) {
+            throw new IllegalArgumentException(
+                    "Flatten ranges must have even numbered elements");
+        }
+        for (int j = 0; j < ranges.length / 2; ++j) {
+            int start = ranges[j * 2];
+            int end = ranges[j * 2 + 1];
+            if (start > end) {
+                throw new IllegalArgumentException(
+                        "Reverse range found in the flatten range: " + start + ", " + end + ""
+                                + " at " + j + "-th range");
+            }
+        }
+        mHighlightPathsBogus = true;
+        mSearchResultHighlights = ranges;
+        mFocusedSearchResultIndex = FOCUSED_SEARCH_RESULT_INDEX_NONE;
+        invalidate();
+    }
+
+    /**
+     * Gets the current search result ranges.
+     *
+     * @see #setSearchResultHighlights(int[])
+     * @see #setFocusedSearchResultIndex(int)
+     * @see #getFocusedSearchResultIndex()
+     * @see #setSearchResultHighlightColor(int)
+     * @see #getSearchResultHighlightColor()
+     * @see #setFocusedSearchResultHighlightColor(int)
+     * @see #getFocusedSearchResultHighlightColor()
+     *
+     * @return a flatten search result ranges. null if not available.
+     */
+    @Nullable
+    public int[] getSearchResultHighlights() {
+        return mSearchResultHighlights;
+    }
+
+    /**
+     * A special index used for {@link #setFocusedSearchResultIndex(int)} and
+     * {@link #getFocusedSearchResultIndex()} inidicating there is no focused search result.
+     */
+    public static final int FOCUSED_SEARCH_RESULT_INDEX_NONE = -1;
+
+    /**
+     * Sets the focused search result index.
+     *
+     * The focused search result is drawn in a focused color.
+     * Calling {@link #FOCUSED_SEARCH_RESULT_INDEX_NONE} for clearing focused search result.
+     *
+     * This method must be called after setting search result ranges by
+     * {@link #setSearchResultHighlights(int[])}.
+     *
+     * @attr ref android.R.styleable#TextView_searchResultHighlightColor
+     * @attr ref android.R.styleable#TextAppearance_searchResultHighlightColor
+     * @attr ref android.R.styleable#TextView_focusedSearchResultHighlightColor
+     * @attr ref android.R.styleable#TextAppearance_focusedSearchResultHighlightColor
+     *
+     * @see #setSearchResultHighlights(int[])
+     * @see #getSearchResultHighlights()
+     * @see #setFocusedSearchResultIndex(int)
+     * @see #getFocusedSearchResultIndex()
+     * @see #setSearchResultHighlightColor(int)
+     * @see #getSearchResultHighlightColor()
+     * @see #setFocusedSearchResultHighlightColor(int)
+     * @see #getFocusedSearchResultHighlightColor()
+     *
+     * @param index a focused search index or {@link #FOCUSED_SEARCH_RESULT_INDEX_NONE}
+     */
+    public void setFocusedSearchResultIndex(int index) {
+        if (mSearchResultHighlights == null) {
+            throw new IllegalArgumentException("Search result range must be set beforehand.");
+        }
+        if (index < -1 || index >= mSearchResultHighlights.length / 2) {
+            throw new IllegalArgumentException("Focused index(" + index + ") must be larger than "
+                    + "-1 and less than range count(" + (mSearchResultHighlights.length / 2) + ")");
+        }
+        mFocusedSearchResultIndex = index;
+        mHighlightPathsBogus = true;
+        invalidate();
+    }
+
+    /**
+     * Gets the focused search result index.
+     *
+     * @attr ref android.R.styleable#TextView_searchResultHighlightColor
+     * @attr ref android.R.styleable#TextAppearance_searchResultHighlightColor
+     * @attr ref android.R.styleable#TextView_focusedSearchResultHighlightColor
+     * @attr ref android.R.styleable#TextAppearance_focusedSearchResultHighlightColor
+     *
+     * @see #setSearchResultHighlights(int[])
+     * @see #getSearchResultHighlights()
+     * @see #setFocusedSearchResultIndex(int)
+     * @see #getFocusedSearchResultIndex()
+     * @see #setSearchResultHighlightColor(int)
+     * @see #getSearchResultHighlightColor()
+     * @see #setFocusedSearchResultHighlightColor(int)
+     * @see #getFocusedSearchResultHighlightColor()
+
+     * @return a focused search index or {@link #FOCUSED_SEARCH_RESULT_INDEX_NONE}
+     */
+    public int getFocusedSearchResultIndex() {
+        return mFocusedSearchResultIndex;
+    }
+
+    /**
+     * Sets the search result highlight color.
+     *
+     * @attr ref android.R.styleable#TextView_searchResultHighlightColor
+     * @attr ref android.R.styleable#TextAppearance_searchResultHighlightColor
+     * @attr ref android.R.styleable#TextView_focusedSearchResultHighlightColor
+     * @attr ref android.R.styleable#TextAppearance_focusedSearchResultHighlightColor
+     *
+     * @see #setSearchResultHighlights(int[])
+     * @see #getSearchResultHighlights()
+     * @see #setFocusedSearchResultIndex(int)
+     * @see #getFocusedSearchResultIndex()
+     * @see #setSearchResultHighlightColor(int)
+     * @see #getSearchResultHighlightColor()
+     * @see #setFocusedSearchResultHighlightColor(int)
+     * @see #getFocusedSearchResultHighlightColor()
+
+     * @param color a search result highlight color.
+     */
+    public void setSearchResultHighlightColor(@ColorInt int color) {
+        mSearchResultHighlightColor = color;
+    }
+
+    /**
+     * Gets the search result highlight color.
+     *
+     * @attr ref android.R.styleable#TextView_searchResultHighlightColor
+     * @attr ref android.R.styleable#TextAppearance_searchResultHighlightColor
+     * @attr ref android.R.styleable#TextView_focusedSearchResultHighlightColor
+     * @attr ref android.R.styleable#TextAppearance_focusedSearchResultHighlightColor
+     *
+     * @see #setSearchResultHighlights(int[])
+     * @see #getSearchResultHighlights()
+     * @see #setFocusedSearchResultIndex(int)
+     * @see #getFocusedSearchResultIndex()
+     * @see #setSearchResultHighlightColor(int)
+     * @see #getSearchResultHighlightColor()
+     * @see #setFocusedSearchResultHighlightColor(int)
+     * @see #getFocusedSearchResultHighlightColor()
+
+     * @return a search result highlight color.
+     */
+    @ColorInt
+    public int getSearchResultHighlightColor() {
+        return mSearchResultHighlightColor;
+    }
+
+    /**
+     * Sets focused search result highlight color.
+     *
+     * @attr ref android.R.styleable#TextView_searchResultHighlightColor
+     * @attr ref android.R.styleable#TextAppearance_searchResultHighlightColor
+     * @attr ref android.R.styleable#TextView_focusedSearchResultHighlightColor
+     * @attr ref android.R.styleable#TextAppearance_focusedSearchResultHighlightColor
+     *
+     * @see #setSearchResultHighlights(int[])
+     * @see #getSearchResultHighlights()
+     * @see #setFocusedSearchResultIndex(int)
+     * @see #getFocusedSearchResultIndex()
+     * @see #setSearchResultHighlightColor(int)
+     * @see #getSearchResultHighlightColor()
+     * @see #setFocusedSearchResultHighlightColor(int)
+     * @see #getFocusedSearchResultHighlightColor()
+
+     * @param color a focused search result highlight color.
+     */
+    public void setFocusedSearchResultHighlightColor(@ColorInt int color) {
+        mFocusedSearchResultHighlightColor = color;
+    }
+
+    /**
+     * Gets focused search result highlight color.
+     *
+     * @attr ref android.R.styleable#TextView_searchResultHighlightColor
+     * @attr ref android.R.styleable#TextAppearance_searchResultHighlightColor
+     * @attr ref android.R.styleable#TextView_focusedSearchResultHighlightColor
+     * @attr ref android.R.styleable#TextAppearance_focusedSearchResultHighlightColor
+     *
+     * @see #setSearchResultHighlights(int[])
+     * @see #getSearchResultHighlights()
+     * @see #setFocusedSearchResultIndex(int)
+     * @see #getFocusedSearchResultIndex()
+     * @see #setSearchResultHighlightColor(int)
+     * @see #getSearchResultHighlightColor()
+     * @see #setFocusedSearchResultHighlightColor(int)
+     * @see #getFocusedSearchResultHighlightColor()
+
+     * @return a focused search result highlight color.
+     */
+    @ColorInt
+    public int getFocusedSearchResultHighlightColor() {
+        return mFocusedSearchResultHighlightColor;
     }
 
     /**
@@ -8335,7 +8602,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             for (int i = 0; i < mHighlights.getSize(); ++i) {
                 final int[] ranges = mHighlights.getRanges(i);
                 final Paint paint = mHighlights.getPaint(i);
-
                 final Path path;
                 if (mPathRecyclePool.isEmpty()) {
                     path = new Path();
@@ -8363,6 +8629,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
+        addSearchHighlightPaths();
+
         if (hasGesturePreviewHighlight()) {
             final Path path;
             if (mPathRecyclePool.isEmpty()) {
@@ -8379,6 +8647,67 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         mHighlightPathsBogus = false;
+    }
+
+    private void addSearchHighlightPaths() {
+        if (mSearchResultHighlights != null) {
+            final Path searchResultPath;
+            if (mPathRecyclePool.isEmpty()) {
+                searchResultPath = new Path();
+            } else {
+                searchResultPath = mPathRecyclePool.get(mPathRecyclePool.size() - 1);
+                mPathRecyclePool.remove(mPathRecyclePool.size() - 1);
+                searchResultPath.reset();
+            }
+            final Path focusedSearchResultPath;
+            if (mFocusedSearchResultIndex == FOCUSED_SEARCH_RESULT_INDEX_NONE) {
+                focusedSearchResultPath = null;
+            } else if (mPathRecyclePool.isEmpty()) {
+                focusedSearchResultPath = new Path();
+            } else {
+                focusedSearchResultPath = mPathRecyclePool.get(mPathRecyclePool.size() - 1);
+                mPathRecyclePool.remove(mPathRecyclePool.size() - 1);
+                focusedSearchResultPath.reset();
+            }
+
+            boolean atLeastOnePathAdded = false;
+            for (int j = 0; j < mSearchResultHighlights.length / 2; ++j) {
+                final int start = mSearchResultHighlights[2 * j];
+                final int end = mSearchResultHighlights[2 * j + 1];
+                if (start < end) {
+                    if (j == mFocusedSearchResultIndex) {
+                        mLayout.getSelection(start, end, (left, top, right, bottom, layout) ->
+                                focusedSearchResultPath.addRect(left, top, right, bottom,
+                                        Path.Direction.CW)
+                        );
+                    } else {
+                        mLayout.getSelection(start, end, (left, top, right, bottom, layout) ->
+                                searchResultPath.addRect(left, top, right, bottom,
+                                        Path.Direction.CW)
+                        );
+                        atLeastOnePathAdded = true;
+                    }
+                }
+            }
+            if (atLeastOnePathAdded) {
+                if (mSearchResultHighlightPaint == null) {
+                    mSearchResultHighlightPaint = new Paint();
+                }
+                mSearchResultHighlightPaint.setColor(mSearchResultHighlightColor);
+                mSearchResultHighlightPaint.setStyle(Paint.Style.FILL);
+                mHighlightPaths.add(searchResultPath);
+                mHighlightPaints.add(mSearchResultHighlightPaint);
+            }
+            if (focusedSearchResultPath != null) {
+                if (mFocusedSearchResultHighlightPaint == null) {
+                    mFocusedSearchResultHighlightPaint = new Paint();
+                }
+                mFocusedSearchResultHighlightPaint.setColor(mFocusedSearchResultHighlightColor);
+                mFocusedSearchResultHighlightPaint.setStyle(Paint.Style.FILL);
+                mHighlightPaths.add(focusedSearchResultPath);
+                mHighlightPaints.add(mFocusedSearchResultHighlightPaint);
+            }
+        }
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -10826,6 +11155,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * This has to be called after layout. Returns true if anything changed.
      */
     public boolean bringPointIntoView(int offset) {
+        return bringPointIntoView(offset, false);
+    }
+
+    /**
+     * Move the insertion position of the given offset into visible area of the View.
+     *
+     * If the View is focused or {@code requestRectWithoutFocus} is set to true, this API may call
+     * {@link View#requestRectangleOnScreen(Rect)} to bring the point to the visible area if
+     * necessary.
+     *
+     * @param offset an offset of the character.
+     * @param requestRectWithoutFocus True for calling {@link View#requestRectangleOnScreen(Rect)}
+     *                                in the unfocused state. False for calling it only the View has
+     *                                the focus.
+     * @return true if anything changed, otherwise false.
+     *
+     * @see #bringPointIntoView(int)
+     */
+    public boolean bringPointIntoView(@IntRange(from = 0) int offset,
+            boolean requestRectWithoutFocus) {
         if (isLayoutRequested()) {
             mDeferScroll = offset;
             return false;
@@ -11002,7 +11351,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             changed = true;
         }
 
-        if (isFocused()) {
+        if (requestRectWithoutFocus && isFocused()) {
             // This offsets because getInterestingRect() is in terms of viewport coordinates, but
             // requestRectangleOnScreen() is in terms of content coordinates.
 

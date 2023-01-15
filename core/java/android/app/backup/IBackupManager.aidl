@@ -155,6 +155,22 @@ interface IBackupManager {
      */
     void setBackupEnabledForUser(int userId, boolean isEnabled);
 
+
+    /**
+     * Enable/disable the framework backup scheduling entirely. When disabled, no Key/Value or Full
+     * backup jobs will be scheduled by the Android framework.
+     *
+     * <p>Note: This does not disable backups: only their scheduling is affected and backups can
+     * still be triggered manually.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method. If
+     * {@code userId} is different from the calling user id, then the caller must additionally hold
+     * the android.permission.INTERACT_ACROSS_USERS_FULL permission.
+     *
+     * @param userId The user for which backup scheduling should be enabled/disabled.
+     */
+    void setFrameworkSchedulingEnabledForUser(int userId, boolean isEnabled);
+
     /**
      * {@link android.app.backup.IBackupManager.setBackupEnabledForUser} for the calling user id.
      */

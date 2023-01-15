@@ -89,6 +89,7 @@ package android {
     field public static final String DISABLE_KEYGUARD = "android.permission.DISABLE_KEYGUARD";
     field public static final String DUMP = "android.permission.DUMP";
     field public static final String ENFORCE_UPDATE_OWNERSHIP = "android.permission.ENFORCE_UPDATE_OWNERSHIP";
+    field public static final String EXECUTE_APP_ACTION = "android.permission.EXECUTE_APP_ACTION";
     field public static final String EXPAND_STATUS_BAR = "android.permission.EXPAND_STATUS_BAR";
     field public static final String FACTORY_TEST = "android.permission.FACTORY_TEST";
     field public static final String FOREGROUND_SERVICE = "android.permission.FOREGROUND_SERVICE";
@@ -744,6 +745,7 @@ package android {
     field public static final int focusableInTouchMode = 16842971; // 0x10100db
     field public static final int focusedByDefault = 16844100; // 0x1010544
     field @Deprecated public static final int focusedMonthDateColor = 16843587; // 0x1010343
+    field public static final int focusedSearchResultHighlightColor;
     field public static final int font = 16844082; // 0x1010532
     field public static final int fontFamily = 16843692; // 0x10103ac
     field public static final int fontFeatureSettings = 16843959; // 0x10104b7
@@ -1355,6 +1357,7 @@ package android {
     field public static final int searchHintIcon = 16843988; // 0x10104d4
     field public static final int searchIcon = 16843907; // 0x1010483
     field public static final int searchMode = 16843221; // 0x10101d5
+    field public static final int searchResultHighlightColor;
     field public static final int searchSettingsDescription = 16843402; // 0x101028a
     field public static final int searchSuggestAuthority = 16843222; // 0x10101d6
     field public static final int searchSuggestIntentAction = 16843225; // 0x10101d9
@@ -8563,6 +8566,7 @@ package android.app.job {
     method public int getClipGrantFlags();
     method @NonNull public android.os.PersistableBundle getExtras();
     method public int getJobId();
+    method @Nullable public String getJobNamespace();
     method @Nullable public android.net.Network getNetwork();
     method public int getStopReason();
     method @NonNull public android.os.Bundle getTransientExtras();
@@ -8596,10 +8600,14 @@ package android.app.job {
     method public boolean canRunLongJobs();
     method public abstract void cancel(int);
     method public abstract void cancelAll();
+    method public void cancelInAllNamespaces();
     method public abstract int enqueue(@NonNull android.app.job.JobInfo, @NonNull android.app.job.JobWorkItem);
+    method @NonNull public android.app.job.JobScheduler forNamespace(@NonNull String);
     method @NonNull public abstract java.util.List<android.app.job.JobInfo> getAllPendingJobs();
+    method @Nullable public String getNamespace();
     method @Nullable public abstract android.app.job.JobInfo getPendingJob(int);
     method public int getPendingJobReason(int);
+    method @NonNull public java.util.Map<java.lang.String,java.util.List<android.app.job.JobInfo>> getPendingJobsInAllNamespaces();
     method public abstract int schedule(@NonNull android.app.job.JobInfo);
     field public static final int PENDING_JOB_REASON_APP = 1; // 0x1
     field public static final int PENDING_JOB_REASON_APP_STANDBY = 2; // 0x2
@@ -8627,6 +8635,7 @@ package android.app.job {
     ctor public JobService();
     method public final void jobFinished(android.app.job.JobParameters, boolean);
     method public final android.os.IBinder onBind(android.content.Intent);
+    method public void onNetworkChanged(@NonNull android.app.job.JobParameters);
     method public abstract boolean onStartJob(android.app.job.JobParameters);
     method public abstract boolean onStopJob(android.app.job.JobParameters);
     method public final void setNotification(@NonNull android.app.job.JobParameters, int, @NonNull android.app.Notification, int);
@@ -8641,6 +8650,7 @@ package android.app.job {
     ctor public JobServiceEngine(android.app.Service);
     method public final android.os.IBinder getBinder();
     method public void jobFinished(android.app.job.JobParameters, boolean);
+    method public void onNetworkChanged(@NonNull android.app.job.JobParameters);
     method public abstract boolean onStartJob(android.app.job.JobParameters);
     method public abstract boolean onStopJob(android.app.job.JobParameters);
     method public void setNotification(@NonNull android.app.job.JobParameters, int, @NonNull android.app.Notification, int);
@@ -10609,7 +10619,6 @@ package android.content {
     field public static final String ACTION_SEND_MULTIPLE = "android.intent.action.SEND_MULTIPLE";
     field public static final String ACTION_SET_WALLPAPER = "android.intent.action.SET_WALLPAPER";
     field public static final String ACTION_SHOW_APP_INFO = "android.intent.action.SHOW_APP_INFO";
-    field public static final String ACTION_SHOW_OUTPUT_SWITCHER = "android.intent.action.SHOW_OUTPUT_SWITCHER";
     field public static final String ACTION_SHOW_WORK_APPS = "android.intent.action.SHOW_WORK_APPS";
     field public static final String ACTION_SHUTDOWN = "android.intent.action.ACTION_SHUTDOWN";
     field public static final String ACTION_SYNC = "android.intent.action.SYNC";
@@ -11992,7 +12001,7 @@ package android.content.pm {
     method @NonNull public int[] getChildSessionIds();
     method @NonNull public String[] getNames() throws java.io.IOException;
     method public int getParentSessionId();
-    method public boolean isKeepApplicationEnabledSetting();
+    method public boolean isApplicationEnabledSettingPersistent();
     method public boolean isMultiPackage();
     method public boolean isRequestUpdateOwnership();
     method public boolean isStaged();
@@ -12047,8 +12056,8 @@ package android.content.pm {
     method @NonNull public android.os.UserHandle getUser();
     method public boolean hasParentSessionId();
     method public boolean isActive();
+    method public boolean isApplicationEnabledSettingPersistent();
     method public boolean isCommitted();
-    method public boolean isKeepApplicationEnabledSetting();
     method public boolean isMultiPackage();
     method public boolean isRequestUpdateOwnership();
     method public boolean isSealed();
@@ -12078,12 +12087,12 @@ package android.content.pm {
     method public void setAppIcon(@Nullable android.graphics.Bitmap);
     method public void setAppLabel(@Nullable CharSequence);
     method public void setAppPackageName(@Nullable String);
+    method public void setApplicationEnabledSettingPersistent();
     method @Deprecated public void setAutoRevokePermissionsMode(boolean);
     method public void setInstallLocation(int);
     method public void setInstallReason(int);
     method public void setInstallScenario(int);
     method public void setInstallerPackageName(@Nullable String);
-    method public void setKeepApplicationEnabledSetting();
     method public void setMultiPackage();
     method public void setOriginatingUid(int);
     method public void setOriginatingUri(@Nullable android.net.Uri);
@@ -12702,7 +12711,7 @@ package android.content.pm {
     field public static final int FLAG_STOP_WITH_TASK = 1; // 0x1
     field public static final int FLAG_USE_APP_ZYGOTE = 8; // 0x8
     field @RequiresPermission(allOf={android.Manifest.permission.FOREGROUND_SERVICE_CAMERA}, anyOf={android.Manifest.permission.CAMERA}, conditional=true) public static final int FOREGROUND_SERVICE_TYPE_CAMERA = 64; // 0x40
-    field @RequiresPermission(allOf={android.Manifest.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE}, anyOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.CHANGE_NETWORK_STATE, android.Manifest.permission.CHANGE_WIFI_STATE, android.Manifest.permission.CHANGE_WIFI_MULTICAST_STATE, android.Manifest.permission.NFC, android.Manifest.permission.TRANSMIT_IR}, conditional=true) public static final int FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE = 16; // 0x10
+    field @RequiresPermission(allOf={android.Manifest.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE}, anyOf={android.Manifest.permission.BLUETOOTH_ADVERTISE, android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_SCAN, android.Manifest.permission.CHANGE_NETWORK_STATE, android.Manifest.permission.CHANGE_WIFI_STATE, android.Manifest.permission.CHANGE_WIFI_MULTICAST_STATE, android.Manifest.permission.NFC, android.Manifest.permission.TRANSMIT_IR, android.Manifest.permission.UWB_RANGING}, conditional=true) public static final int FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE = 16; // 0x10
     field @RequiresPermission(value=android.Manifest.permission.FOREGROUND_SERVICE_DATA_SYNC, conditional=true) public static final int FOREGROUND_SERVICE_TYPE_DATA_SYNC = 1; // 0x1
     field @RequiresPermission(android.Manifest.permission.FOREGROUND_SERVICE_FILE_MANAGEMENT) public static final int FOREGROUND_SERVICE_TYPE_FILE_MANAGEMENT = 4096; // 0x1000
     field @RequiresPermission(allOf={android.Manifest.permission.FOREGROUND_SERVICE_HEALTH}, anyOf={android.Manifest.permission.ACTIVITY_RECOGNITION, android.Manifest.permission.BODY_SENSORS, android.Manifest.permission.HIGH_SAMPLING_RATE_SENSORS}) public static final int FOREGROUND_SERVICE_TYPE_HEALTH = 256; // 0x100
@@ -25809,7 +25818,7 @@ package android.media.projection {
   }
 
   public final class MediaProjectionConfig implements android.os.Parcelable {
-    method @NonNull public static android.media.projection.MediaProjectionConfig createConfigForDisplay(@IntRange(from=android.view.Display.DEFAULT_DISPLAY, to=android.view.Display.DEFAULT_DISPLAY) int);
+    method @NonNull public static android.media.projection.MediaProjectionConfig createConfigForDefaultDisplay();
     method @NonNull public static android.media.projection.MediaProjectionConfig createConfigForUserChoice();
     method public int describeContents();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -28376,24 +28385,15 @@ package android.nfc {
 
   public final class NfcAdapter {
     method public void disableForegroundDispatch(android.app.Activity);
-    method @Deprecated public void disableForegroundNdefPush(android.app.Activity);
     method public void disableReaderMode(android.app.Activity);
     method public void enableForegroundDispatch(android.app.Activity, android.app.PendingIntent, android.content.IntentFilter[], String[][]);
-    method @Deprecated public void enableForegroundNdefPush(android.app.Activity, android.nfc.NdefMessage);
     method public void enableReaderMode(android.app.Activity, android.nfc.NfcAdapter.ReaderCallback, int, android.os.Bundle);
     method public static android.nfc.NfcAdapter getDefaultAdapter(android.content.Context);
     method @Nullable public android.nfc.NfcAntennaInfo getNfcAntennaInfo();
     method public boolean ignore(android.nfc.Tag, int, android.nfc.NfcAdapter.OnTagRemovedListener, android.os.Handler);
-    method @Deprecated public boolean invokeBeam(android.app.Activity);
     method public boolean isEnabled();
-    method @Deprecated public boolean isNdefPushEnabled();
     method public boolean isSecureNfcEnabled();
     method public boolean isSecureNfcSupported();
-    method @Deprecated public void setBeamPushUris(android.net.Uri[], android.app.Activity);
-    method @Deprecated public void setBeamPushUrisCallback(android.nfc.NfcAdapter.CreateBeamUrisCallback, android.app.Activity);
-    method @Deprecated public void setNdefPushMessage(android.nfc.NdefMessage, android.app.Activity, android.app.Activity...);
-    method @Deprecated public void setNdefPushMessageCallback(android.nfc.NfcAdapter.CreateNdefMessageCallback, android.app.Activity, android.app.Activity...);
-    method @Deprecated public void setOnNdefPushCompleteCallback(android.nfc.NfcAdapter.OnNdefPushCompleteCallback, android.app.Activity, android.app.Activity...);
     field public static final String ACTION_ADAPTER_STATE_CHANGED = "android.nfc.action.ADAPTER_STATE_CHANGED";
     field public static final String ACTION_NDEF_DISCOVERED = "android.nfc.action.NDEF_DISCOVERED";
     field @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public static final String ACTION_PREFERRED_PAYMENT_CHANGED = "android.nfc.action.PREFERRED_PAYMENT_CHANGED";
@@ -28423,18 +28423,6 @@ package android.nfc {
     field public static final int STATE_ON = 3; // 0x3
     field public static final int STATE_TURNING_OFF = 4; // 0x4
     field public static final int STATE_TURNING_ON = 2; // 0x2
-  }
-
-  @Deprecated public static interface NfcAdapter.CreateBeamUrisCallback {
-    method @Deprecated public android.net.Uri[] createBeamUris(android.nfc.NfcEvent);
-  }
-
-  @Deprecated public static interface NfcAdapter.CreateNdefMessageCallback {
-    method @Deprecated public android.nfc.NdefMessage createNdefMessage(android.nfc.NfcEvent);
-  }
-
-  @Deprecated public static interface NfcAdapter.OnNdefPushCompleteCallback {
-    method @Deprecated public void onNdefPushComplete(android.nfc.NfcEvent);
   }
 
   public static interface NfcAdapter.OnTagRemovedListener {
@@ -36410,7 +36398,6 @@ package android.provider {
     field public static final String ACTION_MANAGE_ALL_SIM_PROFILES_SETTINGS = "android.settings.MANAGE_ALL_SIM_PROFILES_SETTINGS";
     field public static final String ACTION_MANAGE_APPLICATIONS_SETTINGS = "android.settings.MANAGE_APPLICATIONS_SETTINGS";
     field public static final String ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION = "android.settings.MANAGE_APP_ALL_FILES_ACCESS_PERMISSION";
-    field public static final String ACTION_MANAGE_APP_LONG_RUNNING_JOBS = "android.settings.MANAGE_APP_LONG_RUNNING_JOBS";
     field public static final String ACTION_MANAGE_DEFAULT_APPS_SETTINGS = "android.settings.MANAGE_DEFAULT_APPS_SETTINGS";
     field public static final String ACTION_MANAGE_OVERLAY_PERMISSION = "android.settings.action.MANAGE_OVERLAY_PERMISSION";
     field public static final String ACTION_MANAGE_SUPERVISOR_RESTRICTED_SETTING = "android.settings.MANAGE_SUPERVISOR_RESTRICTED_SETTING";
@@ -40534,7 +40521,9 @@ package android.service.voice {
     method public android.os.IBinder onBind(android.content.Intent);
     method @NonNull public java.util.Set<java.lang.String> onGetSupportedVoiceActions(@NonNull java.util.Set<java.lang.String>);
     method public void onLaunchVoiceAssistFromKeyguard();
+    method public void onPrepareToShowSession(@NonNull android.os.Bundle, int);
     method public void onReady();
+    method public void onShowSessionFailed();
     method public void onShutdown();
     method public void setDisabledShowContext(int);
     method public final void setUiHints(@NonNull android.os.Bundle);
@@ -42773,6 +42762,7 @@ package android.telephony {
     field public static final String KEY_SHOW_VIDEO_CALL_CHARGES_ALERT_DIALOG_BOOL = "show_video_call_charges_alert_dialog_bool";
     field public static final String KEY_SHOW_WFC_LOCATION_PRIVACY_POLICY_BOOL = "show_wfc_location_privacy_policy_bool";
     field @Deprecated public static final String KEY_SIMPLIFIED_NETWORK_SETTINGS_BOOL = "simplified_network_settings_bool";
+    field public static final String KEY_SIM_COUNTRY_ISO_OVERRIDE_STRING = "sim_country_iso_override_string";
     field public static final String KEY_SIM_NETWORK_UNLOCK_ALLOW_DISMISS_BOOL = "sim_network_unlock_allow_dismiss_bool";
     field public static final String KEY_SMDP_SERVER_ADDRESS_STRING = "smdp_server_address_string";
     field public static final String KEY_SMS_REQUIRES_DESTINATION_NUMBER_CONVERSION_BOOL = "sms_requires_destination_number_conversion_bool";
@@ -44915,7 +44905,7 @@ package android.telephony {
     method public boolean isVoicemailVibrationEnabled(android.telecom.PhoneAccountHandle);
     method public boolean isWorldPhone();
     method @Deprecated public void listen(android.telephony.PhoneStateListener, int);
-    method @RequiresPermission(android.Manifest.permission.READ_BASIC_PHONE_STATE) public void purchasePremiumCapability(int, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @RequiresPermission(allOf={android.Manifest.permission.READ_BASIC_PHONE_STATE, android.Manifest.permission.INTERNET}) public void purchasePremiumCapability(int, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void rebootModem();
     method public void registerTelephonyCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyCallback);
     method public void registerTelephonyCallback(int, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyCallback);
@@ -45096,7 +45086,7 @@ package android.telephony {
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_FEATURE_NOT_SUPPORTED = 10; // 0xa
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_NOT_AVAILABLE = 12; // 0xc
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA_SUBSCRIPTION = 14; // 0xe
-    field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_OVERRIDDEN = 5; // 0x5
+    field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_FOREGROUND = 5; // 0x5
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_PENDING_NETWORK_SETUP = 15; // 0xf
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_REQUEST_FAILED = 11; // 0xb
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_SUCCESS = 1; // 0x1
@@ -50575,6 +50565,7 @@ package android.view {
     field public static final int AXIS_GENERIC_7 = 38; // 0x26
     field public static final int AXIS_GENERIC_8 = 39; // 0x27
     field public static final int AXIS_GENERIC_9 = 40; // 0x28
+    field public static final int AXIS_GESTURE_PINCH_SCALE_FACTOR = 52; // 0x34
     field public static final int AXIS_GESTURE_SCROLL_X_DISTANCE = 50; // 0x32
     field public static final int AXIS_GESTURE_SCROLL_Y_DISTANCE = 51; // 0x33
     field public static final int AXIS_GESTURE_X_OFFSET = 48; // 0x30
@@ -50615,6 +50606,7 @@ package android.view {
     field public static final int CLASSIFICATION_AMBIGUOUS_GESTURE = 1; // 0x1
     field public static final int CLASSIFICATION_DEEP_PRESS = 2; // 0x2
     field public static final int CLASSIFICATION_NONE = 0; // 0x0
+    field public static final int CLASSIFICATION_PINCH = 5; // 0x5
     field public static final int CLASSIFICATION_TWO_FINGER_SWIPE = 3; // 0x3
     field @NonNull public static final android.os.Parcelable.Creator<android.view.MotionEvent> CREATOR;
     field public static final int EDGE_BOTTOM = 2; // 0x2
@@ -59274,6 +59266,7 @@ package android.widget {
     method public void append(CharSequence, int, int);
     method public void beginBatchEdit();
     method public boolean bringPointIntoView(int);
+    method public boolean bringPointIntoView(@IntRange(from=0) int, boolean);
     method public void clearComposingText();
     method public void debug(int);
     method public boolean didTouchFocusSelect();
@@ -59311,6 +59304,8 @@ package android.widget {
     method public int getExtendedPaddingTop();
     method public android.text.InputFilter[] getFilters();
     method public int getFirstBaselineToTopHeight();
+    method @ColorInt public int getFocusedSearchResultHighlightColor();
+    method public int getFocusedSearchResultIndex();
     method @Nullable public String getFontFeatureSettings();
     method @Nullable public String getFontVariationSettings();
     method public boolean getFreezesText();
@@ -59355,6 +59350,8 @@ package android.widget {
     method public android.text.TextPaint getPaint();
     method public int getPaintFlags();
     method public String getPrivateImeOptions();
+    method @ColorInt public int getSearchResultHighlightColor();
+    method @Nullable public int[] getSearchResultHighlights();
     method public int getSelectionEnd();
     method public int getSelectionStart();
     method @ColorInt public int getShadowColor();
@@ -59439,6 +59436,8 @@ package android.widget {
     method public void setFallbackLineSpacing(boolean);
     method public void setFilters(android.text.InputFilter[]);
     method public void setFirstBaselineToTopHeight(@IntRange(from=0) @Px int);
+    method public void setFocusedSearchResultHighlightColor(@ColorInt int);
+    method public void setFocusedSearchResultIndex(int);
     method public void setFontFeatureSettings(@Nullable String);
     method public boolean setFontVariationSettings(@Nullable String);
     method protected boolean setFrame(int, int, int, int);
@@ -59486,6 +59485,8 @@ package android.widget {
     method public void setPrivateImeOptions(String);
     method public void setRawInputType(int);
     method public void setScroller(android.widget.Scroller);
+    method public void setSearchResultHighlightColor(@ColorInt int);
+    method public void setSearchResultHighlights(@Nullable int...);
     method public void setSelectAllOnFocus(boolean);
     method public void setShadowLayer(float, float, float, int);
     method public final void setShowSoftInputOnFocus(boolean);
@@ -59525,6 +59526,7 @@ package android.widget {
     method public void setWidth(int);
     field public static final int AUTO_SIZE_TEXT_TYPE_NONE = 0; // 0x0
     field public static final int AUTO_SIZE_TEXT_TYPE_UNIFORM = 1; // 0x1
+    field public static final int FOCUSED_SEARCH_RESULT_INDEX_NONE = -1; // 0xffffffff
   }
 
   public enum TextView.BufferType {

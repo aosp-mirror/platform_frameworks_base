@@ -63,6 +63,10 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     private static final String TAG = "MR2SystemProvider";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
+    private static final ComponentName COMPONENT_NAME = new ComponentName(
+            SystemMediaRoute2Provider.class.getPackage().getName(),
+            SystemMediaRoute2Provider.class.getName());
+
     static final String DEFAULT_ROUTE_ID = "DEFAULT_ROUTE";
     static final String DEVICE_ROUTE_ID = "DEVICE_ROUTE";
     static final String SYSTEM_SESSION_ID = "SYSTEM_SESSION";
@@ -74,17 +78,12 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     private final UserHandle mUser;
     private final BluetoothRouteProvider mBtRouteProvider;
 
-    private static ComponentName sComponentName = new ComponentName(
-            SystemMediaRoute2Provider.class.getPackage().getName(),
-            SystemMediaRoute2Provider.class.getName());
-
     private String mSelectedRouteId;
     // For apps without MODIFYING_AUDIO_ROUTING permission.
     // This should be the currently selected route.
     MediaRoute2Info mDefaultRoute;
     MediaRoute2Info mDeviceRoute;
     RoutingSessionInfo mDefaultSessionInfo;
-    final AudioRoutesInfo mCurAudioRoutesInfo = new AudioRoutesInfo();
     int mDeviceVolume;
 
     private final AudioManagerBroadcastReceiver mAudioReceiver =
@@ -108,7 +107,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     };
 
     SystemMediaRoute2Provider(Context context, UserHandle user) {
-        super(sComponentName);
+        super(COMPONENT_NAME);
 
         mIsSystemRouteProvider = true;
         mContext = context;
@@ -275,7 +274,6 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         int name = R.string.default_audio_route_name;
         int type = TYPE_BUILTIN_SPEAKER;
         if (newRoutes != null) {
-            mCurAudioRoutesInfo.mainType = newRoutes.mainType;
             if ((newRoutes.mainType & AudioRoutesInfo.MAIN_HEADPHONES) != 0) {
                 type = TYPE_WIRED_HEADPHONES;
                 name = com.android.internal.R.string.default_audio_route_name_headphones;

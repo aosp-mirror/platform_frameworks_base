@@ -160,6 +160,20 @@ public class VoiceInteractionService extends Service {
                             voiceActions,
                             callback));
         }
+
+        @Override
+        public void prepareToShowSession(Bundle args, int flags) {
+            Handler.getMain().executeOrSendMessage(PooledLambda.obtainMessage(
+                    VoiceInteractionService::onPrepareToShowSession,
+                    VoiceInteractionService.this, args, flags));
+        }
+
+        @Override
+        public void showSessionFailed() {
+            Handler.getMain().executeOrSendMessage(PooledLambda.obtainMessage(
+                    VoiceInteractionService::onShowSessionFailed,
+                    VoiceInteractionService.this));
+        }
     };
 
     IVoiceInteractionManagerService mSystemService;
@@ -181,6 +195,31 @@ public class VoiceInteractionService extends Service {
      * on top of the lock screen.</p>
      */
     public void onLaunchVoiceAssistFromKeyguard() {
+    }
+
+    /**
+     * Notify the interactor when the system prepares to show session. The system is going to
+     * bind the session service.
+     *
+     * @param args  The arguments that were supplied to {@link #showSession(Bundle, int)}.
+     * @param flags The show flags originally provided to {@link #showSession(Bundle, int)}.
+     * @see #showSession(Bundle, int)
+     * @see #onShowSessionFailed()
+     * @see VoiceInteractionSession#onShow(Bundle, int)
+     * @see VoiceInteractionSession#show(Bundle, int)
+     */
+    public void onPrepareToShowSession(@NonNull Bundle args, int flags) {
+    }
+
+    /**
+     * Called when the show session failed. E.g. When the system bound the session service failed.
+     *
+     * @see #showSession(Bundle, int)
+     * @see #onPrepareToShowSession(Bundle, int)
+     * @see VoiceInteractionSession#onShow(Bundle, int)
+     * @see VoiceInteractionSession#show(Bundle, int)
+     */
+    public void onShowSessionFailed() {
     }
 
     /**

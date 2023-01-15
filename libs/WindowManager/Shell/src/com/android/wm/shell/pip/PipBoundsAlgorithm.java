@@ -47,7 +47,7 @@ public class PipBoundsAlgorithm {
 
     private final @NonNull PipBoundsState mPipBoundsState;
     private final PipSnapAlgorithm mSnapAlgorithm;
-    private final PipKeepClearAlgorithm mPipKeepClearAlgorithm;
+    private final PipKeepClearAlgorithmInterface mPipKeepClearAlgorithm;
 
     private float mDefaultSizePercent;
     private float mMinAspectRatioForMinSize;
@@ -62,7 +62,7 @@ public class PipBoundsAlgorithm {
 
     public PipBoundsAlgorithm(Context context, @NonNull PipBoundsState pipBoundsState,
             @NonNull PipSnapAlgorithm pipSnapAlgorithm,
-            @NonNull PipKeepClearAlgorithm pipKeepClearAlgorithm) {
+            @NonNull PipKeepClearAlgorithmInterface pipKeepClearAlgorithm) {
         mPipBoundsState = pipBoundsState;
         mSnapAlgorithm = pipSnapAlgorithm;
         mPipKeepClearAlgorithm = pipKeepClearAlgorithm;

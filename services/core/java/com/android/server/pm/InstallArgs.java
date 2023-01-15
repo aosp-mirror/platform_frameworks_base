@@ -59,7 +59,7 @@ final class InstallArgs {
     final boolean mForceQueryableOverride;
     final int mDataLoaderType;
     final int mPackageSource;
-    final boolean mKeepApplicationEnabledSetting;
+    final boolean mApplicationEnabledSettingPersistent;
 
     // The list of instruction sets supported by this app. This is currently
     // only used during the rmdex() phase to clean up resources. We can get rid of this
@@ -74,7 +74,7 @@ final class InstallArgs {
             int autoRevokePermissionsMode, String traceMethod, int traceCookie,
             SigningDetails signingDetails, int installReason, int installScenario,
             boolean forceQueryableOverride, int dataLoaderType, int packageSource,
-            boolean keepApplicationEnabledSetting) {
+            boolean applicationEnabledSettingPersistent) {
         mOriginInfo = originInfo;
         mMoveInfo = moveInfo;
         mInstallFlags = installFlags;
@@ -95,7 +95,7 @@ final class InstallArgs {
         mForceQueryableOverride = forceQueryableOverride;
         mDataLoaderType = dataLoaderType;
         mPackageSource = packageSource;
-        mKeepApplicationEnabledSetting = keepApplicationEnabledSetting;
+        mApplicationEnabledSettingPersistent = applicationEnabledSettingPersistent;
     }
 
     /**

@@ -32,6 +32,7 @@ import static androidx.constraintlayout.widget.ConstraintSet.START;
 import static androidx.constraintlayout.widget.ConstraintSet.TOP;
 import static androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT;
 
+import static com.android.systemui.animation.InterpolatorsAndroidX.DECELERATE_QUINT;
 import static com.android.systemui.plugins.FalsingManager.LOW_PENALTY;
 
 import static java.lang.Integer.max;
@@ -73,6 +74,8 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.window.BackEvent;
+import android.window.OnBackAnimationCallback;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
@@ -135,7 +138,9 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
     private static final float MIN_DRAG_SIZE = 10;
     // How much to scale the default slop by, to avoid accidental drags.
     private static final float SLOP_SCALE = 4f;
-
+    @VisibleForTesting
+    // How much the view scales down to during back gestures.
+    static final float MIN_BACK_SCALE = 0.9f;
     @VisibleForTesting
     KeyguardSecurityViewFlipper mSecurityViewFlipper;
     private GlobalSettings mGlobalSettings;
@@ -239,6 +244,33 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                     }
                 }
             };
+
+    private final OnBackAnimationCallback mBackCallback = new OnBackAnimationCallback() {
+        @Override
+        public void onBackCancelled() {
+            // TODO(b/259608500): Remove once back API auto animates progress to 0 on cancel.
+            resetScale();
+        }
+
+        @Override
+        public void onBackInvoked() { }
+
+        @Override
+        public void onBackProgressed(BackEvent event) {
+            float progress = event.getProgress();
+            // TODO(b/263819310): Update the interpolator to match spec.
+            float scale = MIN_BACK_SCALE
+                    +  (1 - MIN_BACK_SCALE) * (1 - DECELERATE_QUINT.getInterpolation(progress));
+            setScale(scale);
+        }
+    };
+    /**
+     * @return the {@link OnBackAnimationCallback} to animate this view during a back gesture.
+     */
+    @NonNull
+    OnBackAnimationCallback getBackCallback() {
+        return mBackCallback;
+    }
 
     // Used to notify the container when something interesting happens.
     public interface SecurityCallback {
@@ -734,6 +766,15 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
     /** Handles density or font scale changes. */
     void onDensityOrFontScaleChanged() {
         mViewMode.onDensityOrFontScaleChanged();
+    }
+
+    void resetScale() {
+        setScale(1);
+    }
+
+    private void setScale(float scale) {
+        setScaleX(scale);
+        setScaleY(scale);
     }
 
     /**
