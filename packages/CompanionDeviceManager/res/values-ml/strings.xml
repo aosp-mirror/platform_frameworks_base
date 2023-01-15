@@ -43,7 +43,7 @@
     <string name="consent_no" msgid="2640796915611404382">"അനുവദിക്കരുത്"</string>
     <string name="consent_back" msgid="2560683030046918882">"മടങ്ങുക"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"&lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; എന്നതിലെ അതേ അനുമതികൾ &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; എന്നതിലെ ആപ്പുകൾക്ക് നൽകണോ?"</string>
-    <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;&lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt; എന്നതിലെ മൈക്രോഫോൺ, ക്യാമറ, ലൊക്കേഷൻ ആക്‌സസ്, സെൻസിറ്റീവ് വിവരങ്ങൾക്കുള്ള മറ്റ് അനുമതികൾ എന്നിവയും ഇതിൽ ഉൾപ്പെട്ടേക്കാം&lt;p&gt;നിങ്ങൾക്ക് &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt; എന്നതിലെ ക്രമീകരണത്തിൽ ഏതുസമയത്തും ഈ അനുമതികൾ മാറ്റാം."</string>
+    <string name="permission_sync_summary" msgid="765497944331294275">"&lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;. എന്നതിലെ &lt;strong&gt;മൈക്രോഫോൺ&lt;/strong&gt;, &lt;strong&gt;ക്യാമറ&lt;/strong&gt;, and &lt;strong&gt;ലൊക്കേഷൻ ആക്‌സസ്&lt;/strong&gt;, സെൻസിറ്റീവ് വിവരങ്ങൾക്കുള്ള മറ്റ് അനുമതികൾ എന്നിവയും ഇതിൽ ഉൾപ്പെട്ടേക്കാം. &lt;br/&gt;&lt;br/&gt;നിങ്ങൾക്ക് &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt; എന്നതിലെ ക്രമീകരണത്തിൽ ഏതുസമയത്തും ഈ അനുമതികൾ മാറ്റാം."</string>
     <string name="vendor_icon_description" msgid="4445875290032225965">"ആപ്പ് ഐക്കൺ"</string>
     <string name="vendor_header_button_description" msgid="6566660389500630608">"കൂടുതൽ വിവരങ്ങൾ ബട്ടൺ"</string>
     <string name="permission_phone" msgid="2661081078692784919">"ഫോൺ"</string>
@@ -51,26 +51,19 @@
     <string name="permission_contacts" msgid="3858319347208004438">"Contacts"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"Calendar"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"മൈക്രോഫോൺ"</string>
-    <!-- no translation found for permission_call_logs (5546761417694586041) -->
-    <skip />
+    <string name="permission_call_logs" msgid="5546761417694586041">"കോൾ ചരിത്രം"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"സമീപമുള്ള ഉപകരണങ്ങൾ"</string>
     <string name="permission_storage" msgid="6831099350839392343">"ഫോട്ടോകളും മീഡിയയും"</string>
     <string name="permission_notification" msgid="693762568127741203">"അറിയിപ്പുകൾ"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"ആപ്പുകൾ"</string>
     <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"സമീപമുള്ള ഉപകരണ സ്ട്രീമിംഗ്"</string>
-    <!-- no translation found for permission_phone_summary (6684396967861278044) -->
-    <skip />
-    <!-- no translation found for permission_call_logs_summary (6186103394658755022) -->
-    <skip />
-    <!-- no translation found for permission_sms_summary (3508442683678912017) -->
-    <skip />
-    <!-- no translation found for permission_contacts_summary (675861979475628708) -->
-    <skip />
-    <!-- no translation found for permission_calendar_summary (6460000922511766226) -->
-    <skip />
+    <string name="permission_phone_summary" msgid="6684396967861278044">"ഫോൺ കോളുകൾ ചെയ്യാനും അവ മാനേജ് ചെയ്യാനും കഴിയും"</string>
+    <string name="permission_call_logs_summary" msgid="6186103394658755022">"ഫോൺ കോൾ ചരിത്രം റീഡ് ചെയ്യാനും റൈറ്റ് ചെയ്യാനും കഴിയും"</string>
+    <string name="permission_sms_summary" msgid="3508442683678912017">"SMS സന്ദേശങ്ങൾ അയയ്‌ക്കാനും കാണാനും കഴിയും"</string>
+    <string name="permission_contacts_summary" msgid="675861979475628708">"നിങ്ങളുടെ കോൺടാക്‌റ്റുകൾ ആക്‌സസ് ചെയ്യാൻ കഴിയും"</string>
+    <string name="permission_calendar_summary" msgid="6460000922511766226">"നിങ്ങളുടെ കലണ്ടർ ആക്‌സസ് ചെയ്യാൻ കഴിയും"</string>
     <string name="permission_microphone_summary" msgid="4241354865859396558">"മൈക്രോഫോൺ ഉപയോഗിച്ച് ഓഡിയോ റെക്കോർഡ് ചെയ്യാം"</string>
-    <!-- no translation found for permission_nearby_devices_summary (931940524460876655) -->
-    <skip />
+    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"സമീപമുള്ള ഉപകരണങ്ങൾ കണ്ടെത്താനും അവയിലേക്ക് കണക്റ്റ് ചെയ്യാനും അവയുടെ ആപേക്ഷിക സ്ഥാനം നിർണ്ണയിക്കാനും കഴിയും"</string>
     <string name="permission_notification_summary" msgid="884075314530071011">"കോൺടാക്‌റ്റുകൾ, സന്ദേശങ്ങൾ, ഫോട്ടോകൾ മുതലായ വിവരങ്ങൾ ഉൾപ്പെടെയുള്ള എല്ലാ അറിയിപ്പുകളും വായിക്കാനാകും"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"നിങ്ങളുടെ ഫോണിലെ ആപ്പുകൾ സ്‌ട്രീം ചെയ്യുക"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>

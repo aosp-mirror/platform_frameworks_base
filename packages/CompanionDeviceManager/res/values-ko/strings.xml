@@ -43,7 +43,7 @@
     <string name="consent_no" msgid="2640796915611404382">"허용 안함"</string>
     <string name="consent_back" msgid="2560683030046918882">"뒤로"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"&lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt;에 설치된 앱에 &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;에 설치된 앱과 동일한 권한을 부여하시겠습니까?"</string>
-    <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;여기에는 &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;의 마이크, 카메라, 위치 정보 액세스 권한 및 기타 민감한 권한이 포함될 수 있습니다.&lt;/p&gt; &lt;p&gt;언제든지 &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;의 설정에서 이러한 권한을 변경할 수 있습니다.&lt;/p&gt;"</string>
+    <string name="permission_sync_summary" msgid="765497944331294275">"여기에는 &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;의 &lt;strong&gt;마이크&lt;/strong&gt;, &lt;strong&gt;카메라&lt;/strong&gt;, &lt;strong&gt;위치 정보 액세스&lt;/strong&gt; 및 기타 민감한 권한이 포함될 수 있습니다. &lt;br/&gt;&lt;br/&gt;언제든지 &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;의 설정에서 이러한 권한을 변경할 수 있습니다."</string>
     <string name="vendor_icon_description" msgid="4445875290032225965">"앱 아이콘"</string>
     <string name="vendor_header_button_description" msgid="6566660389500630608">"추가 정보 버튼"</string>
     <string name="permission_phone" msgid="2661081078692784919">"전화"</string>
@@ -51,26 +51,19 @@
     <string name="permission_contacts" msgid="3858319347208004438">"연락처"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"캘린더"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"마이크"</string>
-    <!-- no translation found for permission_call_logs (5546761417694586041) -->
-    <skip />
+    <string name="permission_call_logs" msgid="5546761417694586041">"통화 기록"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"근처 기기"</string>
     <string name="permission_storage" msgid="6831099350839392343">"사진 및 미디어"</string>
     <string name="permission_notification" msgid="693762568127741203">"알림"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"앱"</string>
     <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"근처 기기 스트리밍"</string>
-    <!-- no translation found for permission_phone_summary (6684396967861278044) -->
-    <skip />
-    <!-- no translation found for permission_call_logs_summary (6186103394658755022) -->
-    <skip />
-    <!-- no translation found for permission_sms_summary (3508442683678912017) -->
-    <skip />
-    <!-- no translation found for permission_contacts_summary (675861979475628708) -->
-    <skip />
-    <!-- no translation found for permission_calendar_summary (6460000922511766226) -->
-    <skip />
+    <string name="permission_phone_summary" msgid="6684396967861278044">"전화를 걸고 통화를 관리할 수 있습니다."</string>
+    <string name="permission_call_logs_summary" msgid="6186103394658755022">"통화 기록을 읽고 쓸 수 있습니다."</string>
+    <string name="permission_sms_summary" msgid="3508442683678912017">"SMS 메시지를 전송하고 볼 수 있습니다."</string>
+    <string name="permission_contacts_summary" msgid="675861979475628708">"연락처에 액세스할 수 있습니다."</string>
+    <string name="permission_calendar_summary" msgid="6460000922511766226">"캘린더에 액세스할 수 있습니다."</string>
     <string name="permission_microphone_summary" msgid="4241354865859396558">"마이크를 사용하여 오디오를 녹음할 수 있습니다."</string>
-    <!-- no translation found for permission_nearby_devices_summary (931940524460876655) -->
-    <skip />
+    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"근처 기기를 찾아 연결하고 기기 간 상대적 위치를 파악할 수 있습니다."</string>
     <string name="permission_notification_summary" msgid="884075314530071011">"연락처, 메시지, 사진 등의 정보를 포함한 모든 알림을 읽을 수 있습니다."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"휴대전화의 앱을 스트리밍합니다."</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>

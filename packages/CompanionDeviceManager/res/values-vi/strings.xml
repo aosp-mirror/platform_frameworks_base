@@ -43,7 +43,7 @@
     <string name="consent_no" msgid="2640796915611404382">"Không cho phép"</string>
     <string name="consent_back" msgid="2560683030046918882">"Quay lại"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"Cấp cho các ứng dụng trên &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; các quyền giống như trên &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
-    <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;Những quyền này có thể bao gồm quyền truy cập vào micrô, máy ảnh và thông tin vị trí, cũng như các quyền truy cập thông tin nhạy cảm khác trên &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt; &lt;p&gt;Bạn có thể thay đổi những quyền này bất cứ lúc nào trong phần Cài đặt trên &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt;"</string>
+    <string name="permission_sync_summary" msgid="765497944331294275">"Những quyền này có thể bao gồm quyền truy cập vào &lt;strong&gt;Micrô&lt;/strong&gt;, &lt;strong&gt;Máy ảnh&lt;/strong&gt;, và &lt;strong&gt;Thông tin vị trí&lt;/strong&gt;, cũng như các quyền truy cập thông tin nhạy cảm khác trên &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;. &lt;br/&gt;&lt;br/&gt;Bạn có thể thay đổi những quyền này bất cứ lúc nào trong phần Cài đặt trên &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;."</string>
     <string name="vendor_icon_description" msgid="4445875290032225965">"Biểu tượng ứng dụng"</string>
     <string name="vendor_header_button_description" msgid="6566660389500630608">"Nút thông tin khác"</string>
     <string name="permission_phone" msgid="2661081078692784919">"Điện thoại"</string>
@@ -51,26 +51,19 @@
     <string name="permission_contacts" msgid="3858319347208004438">"Danh bạ"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"Lịch"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"Micrô"</string>
-    <!-- no translation found for permission_call_logs (5546761417694586041) -->
-    <skip />
+    <string name="permission_call_logs" msgid="5546761417694586041">"Nhật ký cuộc gọi"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Thiết bị ở gần"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Ảnh và nội dung nghe nhìn"</string>
     <string name="permission_notification" msgid="693762568127741203">"Thông báo"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Ứng dụng"</string>
     <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"Truyền đến thiết bị ở gần"</string>
-    <!-- no translation found for permission_phone_summary (6684396967861278044) -->
-    <skip />
-    <!-- no translation found for permission_call_logs_summary (6186103394658755022) -->
-    <skip />
-    <!-- no translation found for permission_sms_summary (3508442683678912017) -->
-    <skip />
-    <!-- no translation found for permission_contacts_summary (675861979475628708) -->
-    <skip />
-    <!-- no translation found for permission_calendar_summary (6460000922511766226) -->
-    <skip />
+    <string name="permission_phone_summary" msgid="6684396967861278044">"Có thể thực hiện và quản lý các cuộc gọi điện thoại"</string>
+    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Có thể đọc và ghi nhật ký cuộc gọi điện thoại"</string>
+    <string name="permission_sms_summary" msgid="3508442683678912017">"Có thể gửi và xem tin nhắn SMS"</string>
+    <string name="permission_contacts_summary" msgid="675861979475628708">"Có thể truy cập danh bạ"</string>
+    <string name="permission_calendar_summary" msgid="6460000922511766226">"Có thể truy cập lịch"</string>
     <string name="permission_microphone_summary" msgid="4241354865859396558">"Có thể ghi âm bằng micrô"</string>
-    <!-- no translation found for permission_nearby_devices_summary (931940524460876655) -->
-    <skip />
+    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Có thể tìm, kết nối và xác định vị trí tương đối của các thiết bị ở gần"</string>
     <string name="permission_notification_summary" msgid="884075314530071011">"Có thể đọc tất cả các thông báo, kể cả những thông tin như danh bạ, tin nhắn và ảnh"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Truyền các ứng dụng trên điện thoại của bạn"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
