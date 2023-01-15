@@ -91,6 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Limite inferiore, <xliff:g id="PERCENT">%1$d</xliff:g> percento"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Limite sinistro, <xliff:g id="PERCENT">%1$d</xliff:g> percento"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Limite destro, <xliff:g id="PERCENT">%1$d</xliff:g> percento"</string>
+    <!-- no translation found for screenshot_work_profile_notification (2812417845875653929) -->
+    <skip />
+    <!-- no translation found for screenshot_default_files_app_name (8721579578575161912) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"Registrazione dello schermo"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Elaboraz. registraz. schermo"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notifica costante per una sessione di registrazione dello schermo"</string>
@@ -382,7 +386,7 @@
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Il servizio che offre questa funzione avrà accesso a tutte le informazioni visibili sul tuo schermo o riprodotte dal tuo dispositivo durante la registrazione o la trasmissione. Sono incluse informazioni quali password, dettagli sui pagamenti, foto, messaggi e audio riprodotto."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Vuoi avviare la registrazione o la trasmissione?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Vuoi avviare la registrazione o la trasmissione con <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"Consenti a <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> di condividere o registrare?"</string>
+    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"Consentire a <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> di condividere o registrare?"</string>
     <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Schermo intero"</string>
     <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Una sola app"</string>
     <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Quando condividi, registri o trasmetti, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ha accesso a qualsiasi elemento visibile sul tuo schermo o in riproduzione sul tuo dispositivo. Presta quindi attenzione a password, dati di pagamento, messaggi o altre informazioni sensibili."</string>
@@ -810,16 +814,15 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Medio"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Piccolo"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"Grande"</string>
-    <string name="accessibility_magnification_close" msgid="1099965835844673375">"Chiudi"</string>
+    <!-- no translation found for accessibility_magnification_done (263349129937348512) -->
+    <skip />
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Modifica"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Impostazioni della finestra di ingrandimento"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Tocca per aprire funzioni di accessibilità. Personalizza o sostituisci il pulsante in Impostazioni.\n\n"<annotation id="link">"Vedi impostazioni"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Sposta il pulsante fino al bordo per nasconderlo temporaneamente"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Elimina"</string>
-    <!-- no translation found for accessibility_floating_button_undo_message_label_text (9017658016426242640) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_undo_message_number_text (4909270290725226075) -->
-    <skip />
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Scorciatoia <xliff:g id="FEATURE_NAME">%s</xliff:g> rimossa"</string>
+    <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# scorciatoia rimossa}many{# scorciatoie rimosse}other{# scorciatoie rimosse}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Sposta in alto a sinistra"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Sposta in alto a destra"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Sposta in basso a sinistra"</string>
@@ -884,10 +887,12 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Riproduci <xliff:g id="SONG_NAME">%1$s</xliff:g> da <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Annulla"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Avvicinati per riprodurre su <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Avvicinati a <xliff:g id="DEVICENAME">%1$s</xliff:g> per riprodurre i contenuti qui"</string>
+    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
+    <skip />
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"In riproduzione su <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Si è verificato un errore. Riprova."</string>
-    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <string name="media_transfer_loading" msgid="5544017127027152422">"Caricamento in corso…"</string>
+    <!-- no translation found for media_ttt_default_device_type (4457646436153370169) -->
     <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Inattivo, controlla l\'app"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Controllo non trovato"</string>
@@ -912,6 +917,8 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Speaker e display"</string>
+    <!-- no translation found for media_output_group_title_suggested_device (4157186235837903826) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Come funziona la trasmissione"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Annuncio"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Le persone vicine a te che hanno dispositivi Bluetooth compatibili possono ascoltare i contenuti multimediali che stai trasmettendo"</string>
@@ -1053,5 +1060,8 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Questo schermo verrà disattivato"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Dispositivo pieghevole che viene aperto"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Dispositivo pieghevole che viene capovolto"</string>
-    <string name="stylus_battery_low" msgid="7134370101603167096">"Batteria stilo in esaurimento"</string>
+    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
+    <skip />
+    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
+    <skip />
 </resources>

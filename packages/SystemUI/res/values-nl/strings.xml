@@ -91,6 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Ondergrens <xliff:g id="PERCENT">%1$d</xliff:g> procent"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Linkergrens <xliff:g id="PERCENT">%1$d</xliff:g> procent"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Rechtergrens <xliff:g id="PERCENT">%1$d</xliff:g> procent"</string>
+    <!-- no translation found for screenshot_work_profile_notification (2812417845875653929) -->
+    <skip />
+    <!-- no translation found for screenshot_default_files_app_name (8721579578575161912) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"Schermopname"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Schermopname verwerken"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Doorlopende melding voor een schermopname-sessie"</string>
@@ -810,16 +814,15 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Normaal"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Klein"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"Groot"</string>
-    <string name="accessibility_magnification_close" msgid="1099965835844673375">"Sluiten"</string>
+    <!-- no translation found for accessibility_magnification_done (263349129937348512) -->
+    <skip />
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Bewerken"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Instellingen voor vergrotingsvenster"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Tik voor toegankelijkheidsfuncties. Wijzig of vervang deze knop via Instellingen.\n\n"<annotation id="link">"Naar Instellingen"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Knop naar de rand verplaatsen om deze tijdelijk te verbergen"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Ongedaan maken"</string>
-    <!-- no translation found for accessibility_floating_button_undo_message_label_text (9017658016426242640) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_undo_message_number_text (4909270290725226075) -->
-    <skip />
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Snelkoppeling voor <xliff:g id="FEATURE_NAME">%s</xliff:g> verwijderd"</string>
+    <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# snelkoppeling verwijderd}other{# snelkoppelingen verwijderd}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Naar linksboven verplaatsen"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Naar rechtsboven verplaatsen"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Naar linksonder verplaatsen"</string>
@@ -883,11 +886,13 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="SONG_NAME">%1$s</xliff:g> van <xliff:g id="ARTIST_NAME">%2$s</xliff:g> afspelen via <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="SONG_NAME">%1$s</xliff:g> afspelen via <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Ongedaan maken"</string>
-    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Ga dichter naar <xliff:g id="DEVICENAME">%1$s</xliff:g> toe om af te spelen"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Ga dichter bij <xliff:g id="DEVICENAME">%1$s</xliff:g> staan om hier af te spelen"</string>
+    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Houd dichter bij <xliff:g id="DEVICENAME">%1$s</xliff:g> om af te spelen"</string>
+    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
+    <skip />
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Afspelen op <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Er is iets misgegaan. Probeer het opnieuw."</string>
-    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <string name="media_transfer_loading" msgid="5544017127027152422">"Laden"</string>
+    <!-- no translation found for media_ttt_default_device_type (4457646436153370169) -->
     <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactief, check de app"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Niet gevonden"</string>
@@ -912,6 +917,8 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Speakers en schermen"</string>
+    <!-- no translation found for media_output_group_title_suggested_device (4157186235837903826) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Hoe uitzenden werkt"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Uitzending"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Mensen bij jou in de buurt met geschikte bluetooth-apparaten kunnen luisteren naar de media die je uitzendt"</string>
@@ -1053,5 +1060,8 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Dit scherm gaat uit"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Opvouwbaar apparaat wordt uitgevouwen"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Opvouwbaar apparaat wordt gedraaid"</string>
-    <string name="stylus_battery_low" msgid="7134370101603167096">"Batterij van stylus bijna leeg"</string>
+    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
+    <skip />
+    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
+    <skip />
 </resources>

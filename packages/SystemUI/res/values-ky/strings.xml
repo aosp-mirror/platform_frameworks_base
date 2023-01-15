@@ -91,6 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Ылдый жагы <xliff:g id="PERCENT">%1$d</xliff:g> пайызга"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Сол жагы <xliff:g id="PERCENT">%1$d</xliff:g> пайызга"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Оң жагы <xliff:g id="PERCENT">%1$d</xliff:g> пайызга"</string>
+    <!-- no translation found for screenshot_work_profile_notification (2812417845875653929) -->
+    <skip />
+    <!-- no translation found for screenshot_default_files_app_name (8721579578575161912) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"экрандан видео жаздырып алуу"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Экрандан жаздырылып алынган видео иштетилүүдө"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Экранды жаздыруу сеансы боюнча учурдагы билдирме"</string>
@@ -382,16 +386,16 @@
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Жаздырып же тышкы экранга чыгарып жатканда, бул колдонмо экраныңыздагы бардык маалыматты же түзмөктө ойнолуп жаткан бардык нерселерди (сырсөздөрдү, төлөмдүн чоо-жайын, сүрөттөрдү, билдирүүлөрдү жана угуп жаткан аудиофайлдарды) көрө алат."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Жаздырып же тышкы экранга чыгарып баштайсызбы?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> колдонмосу аркылуу жаздырып же тышкы экранга чыгарып баштайсызбы?"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> колдонмосуна бөлүшүүгө же жаздырууга уруксат бересизби?"</string>
+    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> колдонмосуна экранды бөлүшүүгө же андан видео тартууга уруксат бересизби?"</string>
     <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Бүтүндөй экран"</string>
     <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Жалгыз колдонмо"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Бөлүшүп, жаздырып же тышкы экранда бөлүшкөндө <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> экраныңызда көрүнүп жана түзмөктө ойнотулуп жаткан нерселерге мүмкүнчүлүк алат. Андыктан сырсөздөрдү, төлөм маалыматын, билдирүүлөрдү жана башка купуя маалыматты көрсөтүп албаңыз."</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Бөлүшүп, жаздырып же тышкы экранда бөлүшкөндө <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ал колдонмодо көрүнүп жана ойнотулуп жаткан нерселерге мүмкүнчүлүк алат. Андыктан сырсөздөрдү, төлөм маалыматын, билдирүүлөрдү жана башка купуя маалыматты көрсөтүп албаңыз."</string>
+    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Экранды көрсөтүп, тышка чыгарып же андан видео тартып жатканда, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> түзмөктүн экранындагы нерселердин баарын көрө алат. Андыктан сырсөздөр, төлөм маалыматы, билдирүүлөр сыяктуу купуя маалыматты киргизүүдө же көрүүдө этият болуңуз."</string>
+    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Экранды көрсөтүп, тышка чыгарып же андан видео тартып жатканда, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> түзмөктүн экранындагы нерселердин баарын көрө алат. Андыктан сырсөздөр, төлөм маалыматы, билдирүүлөр сыяктуу купуя маалыматты киргизүүдө же көрүүдө этият болуңуз."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Улантуу"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Колдонмону бөлүшүү же жаздыруу"</string>
     <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Бул колдонмого бөлүшүп же жаздырууга уруксат бересизби?"</string>
-    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Бөлүшүп, жаздырып же тышкы экранга чыгарганда бул колдонмо экраныңызда көрүнүп жана түзмөктө ойнотулуп жаткан нерселерге мүмкүнчүлүк алат. Андыктан сырсөздөрдү, төлөмдүн чоо-жайын, билдирүүлөрдү жана башка купуя маалыматты көрсөтүп албаңыз."</string>
-    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Бөлүшүп, жаздырып же тышкы экранга чыгарганда бул колдонмо ал колдонмодо көрсөтүлүп жана ойнотулуп жаткан нерселерге мүмкүнчүлүк алат. Андыктан сырсөздөрдү, төлөмдүн чоо-жайын, билдирүүлөрдү жана башка купуя маалыматты көрсөтүп албаңыз."</string>
+    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Экранды көрсөтүп, тышка чыгарып же андан видео тартып жатканда, бул колдонмо түзмөктүн экранындагы нерселердин баарын көрө алат. Андыктан сырсөздөр, төлөм маалыматы, билдирүүлөр сыяктуу купуя маалыматты киргизүүдө же көрүүдө этият болуңуз."</string>
+    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Экранды көрсөтүп, тышка чыгарып же андан видео тартып жатканда, бул колдонмо түзмөктүн экранындагы нерселердин баарын көрө алат. Андыктан сырсөздөр, төлөм маалыматы, билдирүүлөр сыяктуу купуя маалыматты киргизүүдө же көрүүдө этият болуңуз."</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"IT администраторуңуз бөгөттөп койгон"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Түзмөк саясаты экрандагыны тартып алууну өчүрүп койгон"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Баарын тазалап салуу"</string>
@@ -756,7 +760,7 @@
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Жеткиликтүү болгондо мобилдик Интернет автоматтык түрдө которулбайт"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Жок, рахмат"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Ооба, которулуу"</string>
-    <string name="touch_filtered_warning" msgid="8119511393338714836">"Уруксат берүү сурамыңыз көрүнбөй калгандыктан, Жөндөөлөр жообуңузду ырастай албай жатат."</string>
+    <string name="touch_filtered_warning" msgid="8119511393338714836">"Уруксат берүү сурамыңыз көрүнбөй калгандыктан, Параметрлер жообуңузду ырастай албай жатат."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_0">%1$s</xliff:g> колдонмосуна <xliff:g id="APP_2">%2$s</xliff:g> үлгүлөрүн көрсөтүүгө уруксат берилсинби?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- <xliff:g id="APP">%1$s</xliff:g> колдонмосунун маалыматын окуйт"</string>
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- <xliff:g id="APP">%1$s</xliff:g> колдонмосунда аракеттерди аткарат"</string>
@@ -810,16 +814,15 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Орто"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Кичине"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"Чоң"</string>
-    <string name="accessibility_magnification_close" msgid="1099965835844673375">"Жабуу"</string>
+    <!-- no translation found for accessibility_magnification_done (263349129937348512) -->
+    <skip />
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Түзөтүү"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Чоңойткуч терезесинин параметрлери"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Атайын мүмкүнчүлүктөрдү ачуу үчүн басыңыз. Бул баскычты Жөндөөлөрдөн өзгөртүңүз.\n\n"<annotation id="link">"Жөндөөлөрдү көрүү"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Баскычты убактылуу жашыра туруу үчүн экрандын четине жылдырыңыз"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Кайтаруу"</string>
-    <!-- no translation found for accessibility_floating_button_undo_message_label_text (9017658016426242640) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_undo_message_number_text (4909270290725226075) -->
-    <skip />
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> ыкчам баскычы өчүрүлдү"</string>
+    <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# ыкчам баскыч өчүрүлдү}other{# ыкчам баскыч өчүрүлдү}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Жогорку сол жакка жылдыруу"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Жогорку оң жакка жылдыруу"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Төмөнкү сол жакка жылдыруу"</string>
@@ -870,7 +873,7 @@
     <string name="controls_media_active_session" msgid="3146882316024153337">"Учурдагы медиа сеансын жашыруу мүмкүн эмес."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Жашыруу"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Улантуу"</string>
-    <string name="controls_media_settings_button" msgid="5815790345117172504">"Жөндөөлөр"</string>
+    <string name="controls_media_settings_button" msgid="5815790345117172504">"Параметрлер"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> ыры (аткаруучу: <xliff:g id="ARTIST_NAME">%2$s</xliff:g>) <xliff:g id="APP_LABEL">%3$s</xliff:g> колдонмосунан ойнотулуп жатат"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="TOTAL_TIME">%2$s</xliff:g> ичинен <xliff:g id="ELAPSED_TIME">%1$s</xliff:g>"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Ойнотуу"</string>
@@ -883,11 +886,13 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="SONG_NAME">%1$s</xliff:g> ырын (аткаруучу: <xliff:g id="ARTIST_NAME">%2$s</xliff:g>) <xliff:g id="APP_LABEL">%3$s</xliff:g> колдонмосунан ойнотуу"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="SONG_NAME">%1$s</xliff:g> ырын <xliff:g id="APP_LABEL">%2$s</xliff:g> колдонмосунан ойнотуу"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Кайтаруу"</string>
-    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> түзмөгүндө ойнотуу үчүн жакыныраак жылдырыңыз"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Бул жерде ойнотуу үчүн <xliff:g id="DEVICENAME">%1$s</xliff:g> түзмөгүнө жакындатыңыз"</string>
+    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> түзмөгүндө ойнотуу үчүн жакындатыңыз"</string>
+    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
+    <skip />
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> аркылуу ойнотулууда"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Бир жерден ката кетти. Кайра аракет кылыңыз."</string>
-    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <string name="media_transfer_loading" msgid="5544017127027152422">"Жүктөлүүдө"</string>
+    <!-- no translation found for media_ttt_default_device_type (4457646436153370169) -->
     <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Жигерсиз. Колдонмону текшериңиз"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Табылган жок"</string>
@@ -912,6 +917,8 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Үндүн катуулугу"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Динамиктер жана дисплейлер"</string>
+    <!-- no translation found for media_output_group_title_suggested_device (4157186235837903826) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Кабарлоо кантип иштейт"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Кабарлоо"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Шайкеш Bluetooth түзмөктөрү болгон жакын жердеги кишилер кабарлап жаткан медиаңызды уга алышат"</string>
@@ -1053,5 +1060,8 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Бул экран өчөт"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Ачылып турган бүктөлмө түзмөк"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Оодарылып жаткан бүктөлмө түзмөк"</string>
-    <string name="stylus_battery_low" msgid="7134370101603167096">"Стилустун батареясы отурайын деп калды"</string>
+    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
+    <skip />
+    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
+    <skip />
 </resources>
