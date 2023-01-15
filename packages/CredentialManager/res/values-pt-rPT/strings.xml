@@ -5,31 +5,25 @@
     <string name="string_cancel" msgid="6369133483981306063">"Cancelar"</string>
     <string name="string_continue" msgid="1346732695941131882">"Continuar"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Mais opções"</string>
-    <string name="string_create_in_another_place" msgid="1033635365843437603">"Criar noutro lugar"</string>
-    <string name="string_save_to_another_place" msgid="7590325934591079193">"Guardar noutro lugar"</string>
-    <string name="string_use_another_device" msgid="8754514926121520445">"Usar outro dispositivo"</string>
-    <string name="string_save_to_another_device" msgid="1959562542075194458">"Guardar noutro dispositivo"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Mais segurança com chaves de acesso"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Com as chaves de acesso, não precisa de criar nem memorizar palavras-passe complexas"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"As chaves de acesso são chaves digitais encriptadas que cria através da sua impressão digital, rosto ou bloqueio de ecrã"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"São guardadas num gestor de palavras-passe para que possa iniciar sessão noutros dispositivos"</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"Escolha onde quer guardar <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
-    <string name="create_your_passkeys" msgid="8901224153607590596">"criar as suas chaves de acesso"</string>
-    <string name="save_your_password" msgid="6597736507991704307">"guardar a sua palavra-passe"</string>
-    <string name="save_your_sign_in_info" msgid="7213978049817076882">"guardar as suas informações de início de sessão"</string>
-    <string name="choose_provider_body" msgid="4384188171872005547">"Selecione um gestor de palavras-passe para guardar as suas informações e iniciar sessão mais rapidamente da próxima vez."</string>
+    <string name="choose_provider_title" msgid="8870795677024868108">"Escolha onde guardar as suas <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
+    <string name="choose_provider_body" msgid="4967074531845147434">"Selecione um gestor de palavras-passe para guardar as suas informações e iniciar sessão mais rapidamente da próxima vez"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Criar uma chave de acesso para a app <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"Guardar a palavra-passe da app <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Guardar as informações de início de sessão da app <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_description" msgid="5531335144879100664">"Pode usar <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> de <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> em qualquer dispositivo. É guardada no <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> de <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>."</string>
     <string name="passkey" msgid="632353688396759522">"chave de acesso"</string>
     <string name="password" msgid="6738570945182936667">"palavra-passe"</string>
+    <string name="passkeys" msgid="5733880786866559847">"chaves de acesso"</string>
+    <string name="passwords" msgid="5419394230391253816">"palavras-passe"</string>
     <string name="sign_ins" msgid="4710739369149469208">"inícios de sessão"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"informações de início de sessão"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"Guarde <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> em"</string>
-    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"Criar uma chave de acesso noutro dispositivo?"</string>
+    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Criar chave de acesso noutro dispositivo?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Usar <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> para todos os seus inícios de sessão?"</string>
-    <string name="use_provider_for_all_description" msgid="6560593199974037820">"Este gestor de palavras-passe armazena as suas palavras-passe e chaves de acesso para ajudar a iniciar sessão facilmente."</string>
+    <string name="use_provider_for_all_description" msgid="8466427781848268490">"Este gestor de palavras-passe armazena as suas palavras-passe e chaves de acesso para ajudar a iniciar sessão facilmente"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Definir como predefinição"</string>
     <string name="use_once" msgid="9027366575315399714">"Usar uma vez"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> palavras-passe • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> chaves de acesso"</string>

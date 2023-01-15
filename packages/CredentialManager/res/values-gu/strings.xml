@@ -5,31 +5,31 @@
     <string name="string_cancel" msgid="6369133483981306063">"રદ કરો"</string>
     <string name="string_continue" msgid="1346732695941131882">"ચાલુ રાખો"</string>
     <string name="string_more_options" msgid="7990658711962795124">"વધુ વિકલ્પો"</string>
-    <string name="string_create_in_another_place" msgid="1033635365843437603">"કોઈ અન્ય સ્થાન પર બનાવો"</string>
-    <string name="string_save_to_another_place" msgid="7590325934591079193">"કોઈ અન્ય સ્થાન પર સાચવો"</string>
-    <string name="string_use_another_device" msgid="8754514926121520445">"કોઈ અન્ય ડિવાઇસનો ઉપયોગ કરો"</string>
-    <string name="string_save_to_another_device" msgid="1959562542075194458">"અન્ય ડિવાઇસ પર સાચવો"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"પાસકી સાથે વધુ સલામત"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"પાસકી હોવાથી, તમારે જટિલ પાસવર્ડ બનાવવાની કે યાદ રાખવાની જરૂર રહેતી નથી"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"પાસકી એ એન્ક્રિપ્ટેડ ડિજિટલ કી છે, જેને તમે તમારી ફિંગરપ્રિન્ટ, ચહેરા અથવા સ્ક્રીન લૉકનો ઉપયોગ કરીને બનાવો છો"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"તેને પાસવર્ડ મેનેજરમાં સાચવવામાં આવે છે, જેથી તમે અન્ય ડિવાઇસમાં સાઇન ઇન ન કરી શકો"</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"<xliff:g id="CREATETYPES">%1$s</xliff:g> ક્યાં સાચવવી છે, તે પસંદ કરો"</string>
-    <string name="create_your_passkeys" msgid="8901224153607590596">"તમારી પાસકી બનાવો"</string>
-    <string name="save_your_password" msgid="6597736507991704307">"તમારો પાસવર્ડ સાચવો"</string>
-    <string name="save_your_sign_in_info" msgid="7213978049817076882">"તમારી સાઇન-ઇનની માહિતી સાચવો"</string>
-    <string name="choose_provider_body" msgid="4384188171872005547">"તમારી માહિતી સાચવવા માટે પાસવર્ડ મેનેજર પસંદ કરો અને આગલી વખતે વધુ ઝડપથી સાઇન ઇન કરો."</string>
+    <!-- no translation found for choose_provider_title (8870795677024868108) -->
+    <skip />
+    <!-- no translation found for choose_provider_body (4967074531845147434) -->
+    <skip />
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> માટે પાસકી બનાવીએ?"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"<xliff:g id="APPNAME">%1$s</xliff:g> માટે પાસવર્ડ સાચવીએ?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> માટે સાઇન-ઇન કરવાની માહિતી સાચવીએ?"</string>
-    <string name="choose_create_option_description" msgid="5531335144879100664">"તમે કોઈપણ ડિવાઇસ પર તમારા <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g>નો ઉપયોગ કરી શકો છો. <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g> માટે <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g>માં તેને સાચવવામાં આવે છે."</string>
     <string name="passkey" msgid="632353688396759522">"પાસકી"</string>
     <string name="password" msgid="6738570945182936667">"પાસવર્ડ"</string>
+    <!-- no translation found for passkeys (5733880786866559847) -->
+    <skip />
+    <!-- no translation found for passwords (5419394230391253816) -->
+    <skip />
     <string name="sign_ins" msgid="4710739369149469208">"સાઇન-ઇન"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"સાઇન-ઇન કરવાની માહિતી"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>ને આમાં સાચવો"</string>
-    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"શું અન્ય ડિવાઇસમાં પાસકી બનાવવા માગો છો?"</string>
+    <!-- no translation found for create_passkey_in_other_device_title (9195411122362461390) -->
+    <skip />
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"શું તમારા બધા સાઇન-ઇન માટે <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>નો ઉપયોગ કરીએ?"</string>
-    <string name="use_provider_for_all_description" msgid="6560593199974037820">"આ પાસવર્ડ મેનેજર તમને સરળતાથી સાઇન ઇન કરવામાં સહાય કરવા માટે, તમારા પાસવર્ડ અને પાસકીને સ્ટોર કરશે."</string>
+    <!-- no translation found for use_provider_for_all_description (8466427781848268490) -->
+    <skip />
     <string name="set_as_default" msgid="4415328591568654603">"ડિફૉલ્ટ તરીકે સેટ કરો"</string>
     <string name="use_once" msgid="9027366575315399714">"એકવાર ઉપયોગ કરો"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> પાસવર્ડ • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> પાસકી"</string>

@@ -5,31 +5,31 @@
     <string name="string_cancel" msgid="6369133483981306063">"Отмена"</string>
     <string name="string_continue" msgid="1346732695941131882">"Продолжить"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Ещё"</string>
-    <string name="string_create_in_another_place" msgid="1033635365843437603">"Создать в другом месте"</string>
-    <string name="string_save_to_another_place" msgid="7590325934591079193">"Сохранить в другом месте"</string>
-    <string name="string_use_another_device" msgid="8754514926121520445">"Использовать другое устройство"</string>
-    <string name="string_save_to_another_device" msgid="1959562542075194458">"Сохранить на другом устройстве"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Ключи доступа безопаснее"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Благодаря ключам доступа вам не придется создавать или запоминать сложные пароли."</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Ключ доступа – это зашифрованное цифровое удостоверение, которое создается с использованием отпечатка пальца, функции фейсконтроля или блокировки экрана."</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Данные хранятся в менеджере паролей, чтобы вы могли входить в аккаунт на других устройствах."</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"Выберите, где <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
-    <string name="create_your_passkeys" msgid="8901224153607590596">"создать ключи доступа"</string>
-    <string name="save_your_password" msgid="6597736507991704307">"сохранить пароль"</string>
-    <string name="save_your_sign_in_info" msgid="7213978049817076882">"сохранить данные для входа"</string>
-    <string name="choose_provider_body" msgid="4384188171872005547">"Выберите менеджер паролей, чтобы сохранять учетные данные и быстро выполнять вход."</string>
+    <!-- no translation found for choose_provider_title (8870795677024868108) -->
+    <skip />
+    <!-- no translation found for choose_provider_body (4967074531845147434) -->
+    <skip />
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Создать ключ доступа для приложения \"<xliff:g id="APPNAME">%1$s</xliff:g>\"?"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"Сохранить пароль для приложения \"<xliff:g id="APPNAME">%1$s</xliff:g>\"?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Сохранить учетные данные для приложения \"<xliff:g id="APPNAME">%1$s</xliff:g>\"?"</string>
-    <string name="choose_create_option_description" msgid="5531335144879100664">"Вы можете использовать <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> для приложения \"<xliff:g id="APPDOMAINNAME">%1$s</xliff:g>\" на любом устройстве. Данные <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g> сохраняются в приложении \"<xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g>\"."</string>
     <string name="passkey" msgid="632353688396759522">"ключ доступа"</string>
     <string name="password" msgid="6738570945182936667">"пароль"</string>
+    <!-- no translation found for passkeys (5733880786866559847) -->
+    <skip />
+    <!-- no translation found for passwords (5419394230391253816) -->
+    <skip />
     <string name="sign_ins" msgid="4710739369149469208">"входы"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"учетные данные"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"Сохранить <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> в"</string>
-    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"Создать ключ доступа на другом устройстве?"</string>
+    <!-- no translation found for create_passkey_in_other_device_title (9195411122362461390) -->
+    <skip />
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Всегда входить с помощью приложения \"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>\"?"</string>
-    <string name="use_provider_for_all_description" msgid="6560593199974037820">"В этом менеджере паролей можно сохранять учетные данные, например ключи доступа, чтобы потом использовать их."</string>
+    <!-- no translation found for use_provider_for_all_description (8466427781848268490) -->
+    <skip />
     <string name="set_as_default" msgid="4415328591568654603">"Использовать по умолчанию"</string>
     <string name="use_once" msgid="9027366575315399714">"Использовать один раз"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"Пароли (<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>) и ключи доступа (<xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>)"</string>
