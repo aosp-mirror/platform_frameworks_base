@@ -91,6 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Meja spodaj <xliff:g id="PERCENT">%1$d</xliff:g> odstotkov"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Meja levo <xliff:g id="PERCENT">%1$d</xliff:g> odstotkov"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Meja desno <xliff:g id="PERCENT">%1$d</xliff:g> odstotkov"</string>
+    <!-- no translation found for screenshot_work_profile_notification (2812417845875653929) -->
+    <skip />
+    <!-- no translation found for screenshot_default_files_app_name (8721579578575161912) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"Snemalnik zaslona"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Obdelava videoposnetka zaslona"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Nenehno obveščanje o seji snemanja zaslona"</string>
@@ -849,11 +853,13 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Predvajaj skladbo <xliff:g id="SONG_NAME">%1$s</xliff:g> izvajalca <xliff:g id="ARTIST_NAME">%2$s</xliff:g> iz aplikacije <xliff:g id="APP_LABEL">%3$s</xliff:g>."</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Predvajaj skladbo <xliff:g id="SONG_NAME">%1$s</xliff:g> iz aplikacije <xliff:g id="APP_LABEL">%2$s</xliff:g>."</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Razveljavi"</string>
-    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Za predvajanje v napravi <xliff:g id="DEVICENAME">%1$s</xliff:g> bolj približajte telefon."</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Približajte napravi <xliff:g id="DEVICENAME">%1$s</xliff:g> za predvajanje v tej napravi"</string>
+    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Za predvajanje v napravi <xliff:g id="DEVICENAME">%1$s</xliff:g> bolj približajte telefon"</string>
+    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
+    <skip />
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Predvajanje v napravi <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Prišlo je do napake. Poskusite znova."</string>
-    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <string name="media_transfer_loading" msgid="5544017127027152422">"Nalaganje"</string>
+    <!-- no translation found for media_ttt_default_device_type (4457646436153370169) -->
     <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivno, poglejte aplikacijo"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Ni mogoče najti"</string>
@@ -878,6 +884,8 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Glasnost"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Zvočniki in zasloni"</string>
+    <!-- no translation found for media_output_group_title_suggested_device (4157186235837903826) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Kako deluje oddajanje"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Oddajanje"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Osebe v bližini z združljivo napravo Bluetooth lahko poslušajo predstavnost, ki jo oddajate."</string>
@@ -1015,5 +1023,8 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Ta zaslon se bo izklopil."</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Razpiranje zložljive naprave"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Obračanje zložljive naprave"</string>
-    <string name="stylus_battery_low" msgid="7134370101603167096">"Skoraj prazna baterija pisala"</string>
+    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
+    <skip />
+    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
+    <skip />
 </resources>

@@ -91,6 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Iphesenti elingu-<xliff:g id="PERCENT">%1$d</xliff:g> lomngcele ophansi"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Iphesenti elingu-<xliff:g id="PERCENT">%1$d</xliff:g> lomngcele ongakwesobunxele"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Iphesenti elingu-<xliff:g id="PERCENT">%1$d</xliff:g> lomngcele ongakwesokudla"</string>
+    <!-- no translation found for screenshot_work_profile_notification (2812417845875653929) -->
+    <skip />
+    <!-- no translation found for screenshot_default_files_app_name (8721579578575161912) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"Irekhoda yesikrini"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Icubungula okokuqopha iskrini"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Isaziso esiqhubekayo seseshini yokurekhoda isikrini"</string>
@@ -850,10 +854,12 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Dlala i-<xliff:g id="SONG_NAME">%1$s</xliff:g> kusuka ku-<xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Hlehlisa"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Sondeza eduze ukudlala ku-<xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Sondela eduze ne-<xliff:g id="DEVICENAME">%1$s</xliff:g> ukuze udlale lapha"</string>
+    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
+    <skip />
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Idlala ku-<xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Kukhona okungahambanga kahle. Zama futhi."</string>
-    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <string name="media_transfer_loading" msgid="5544017127027152422">"Iyalayisha"</string>
+    <!-- no translation found for media_ttt_default_device_type (4457646436153370169) -->
     <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Akusebenzi, hlola uhlelo lokusebenza"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Ayitholakali"</string>
@@ -878,6 +884,8 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Ivolumu"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Izipikha Neziboniso"</string>
+    <!-- no translation found for media_output_group_title_suggested_device (4157186235837903826) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Indlela ukusakaza okusebenza ngayo"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Sakaza"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Abantu abaseduze nawe abanamadivayisi e-Bluetooth ahambisanayo bangalalela imidiya oyisakazayo"</string>
@@ -1015,5 +1023,8 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Lesi sikrini sizovala"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Idivayisi egoqekayo iyembulwa"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Idivayisi egoqekayo iphendulwa nxazonke"</string>
-    <string name="stylus_battery_low" msgid="7134370101603167096">"Ibhethri le-stylus liphansi"</string>
+    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
+    <skip />
+    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
+    <skip />
 </resources>

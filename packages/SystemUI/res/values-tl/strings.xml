@@ -91,6 +91,8 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"<xliff:g id="PERCENT">%1$d</xliff:g> (na) porsyento sa hangganan sa ibaba"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"<xliff:g id="PERCENT">%1$d</xliff:g> (na) porsyento sa hangganan sa kaliwa"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"<xliff:g id="PERCENT">%1$d</xliff:g> (na) porsyento sa hangganan sa kanan"</string>
+    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"Naka-save ang mga screenshot sa trabaho sa <xliff:g id="APP">%1$s</xliff:g> app"</string>
+    <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Mga File"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Recorder ng Screen"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Pinoproseso screen recording"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Kasalukuyang notification para sa session ng pag-record ng screen"</string>
@@ -850,11 +852,12 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"I-play ang <xliff:g id="SONG_NAME">%1$s</xliff:g> mula sa <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"I-undo"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Lumapit pa para mag-play sa <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Lumapit sa <xliff:g id="DEVICENAME">%1$s</xliff:g> para mag-play rito"</string>
+    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
+    <skip />
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Nagpe-play sa <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Nagkaproblema. Subukan ulit."</string>
-    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
-    <skip />
+    <string name="media_transfer_loading" msgid="5544017127027152422">"Naglo-load"</string>
+    <string name="media_ttt_default_device_type" msgid="4457646436153370169">"tablet"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Hindi aktibo, tingnan ang app"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Hindi nahanap"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Hindi available ang kontrol"</string>
@@ -878,6 +881,7 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Mga Speaker at Display"</string>
+    <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Mga Iminumungkahing Device"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Paano gumagana ang pag-broadcast"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Broadcast"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Makakapakinig ang mga taong malapit sa iyo na may mga compatible na Bluetooth device sa media na bino-broadcast mo"</string>
@@ -1015,5 +1019,8 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Mag-o-off ang screen na ito"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Ina-unfold na foldable na device"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Fini-flip na foldable na device"</string>
-    <string name="stylus_battery_low" msgid="7134370101603167096">"Paubos na ang baterya ng stylus"</string>
+    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
+    <skip />
+    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
+    <skip />
 </resources>
