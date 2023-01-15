@@ -43,6 +43,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UiThread;
@@ -1595,6 +1597,37 @@ public final class InputMethodManager {
     public List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId,
             @DirectBootAwareness int directBootAwareness) {
         return IInputMethodManagerGlobalInvoker.getInputMethodList(userId, directBootAwareness);
+    }
+
+    /**
+     * Returns the {@link InputMethodInfo} of the currently selected input method (for the process's
+     * user).
+     *
+     * <p>On multi user environment, this API returns a result for the calling process user.</p>
+     */
+    @Nullable
+    public InputMethodInfo getCurrentInputMethodInfo() {
+        // We intentionally do not use UserHandle.getCallingUserId() here because for system
+        // services InputMethodManagerInternal.getCurrentInputMethodInfoForUser() should be used
+        // instead.
+        return IInputMethodManagerGlobalInvoker.getCurrentInputMethodInfoAsUser(
+                UserHandle.myUserId());
+    }
+
+    /**
+     * Returns the {@link InputMethodInfo} for currently selected input method for the given user.
+     *
+     * @param user user to query.
+     * @hide
+     */
+    @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    @Nullable
+    @SystemApi
+    @SuppressLint("UserHandle")
+    public InputMethodInfo getCurrentInputMethodInfoAsUser(@NonNull UserHandle user) {
+        Objects.requireNonNull(user);
+        return IInputMethodManagerGlobalInvoker.getCurrentInputMethodInfoAsUser(
+                user.getIdentifier());
     }
 
     /**

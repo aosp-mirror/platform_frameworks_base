@@ -159,7 +159,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
         setUpState()
 
         assertThat(underTest.getPickerScreenState())
-            .isEqualTo(KeyguardQuickAffordanceConfig.PickerScreenState.Default)
+            .isEqualTo(KeyguardQuickAffordanceConfig.PickerScreenState.Default())
     }
 
     @Test

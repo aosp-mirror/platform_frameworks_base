@@ -175,9 +175,7 @@
     <color name="accessibility_magnifier_bg">#FCFCFC</color>
     <color name="accessibility_magnifier_bg_stroke">#E0E0E0</color>
     <color name="accessibility_magnifier_icon_color">#252525</color>
-    <color name="accessibility_window_magnifier_button_bg">#0680FD</color>
     <color name="accessibility_window_magnifier_icon_color">#FAFAFA</color>
-    <color name="accessibility_window_magnifier_button_bg_stroke">#252525</color>
     <color name="accessibility_window_magnifier_corner_view_color">#0680FD</color>
 
     <!-- Volume dialog colors -->

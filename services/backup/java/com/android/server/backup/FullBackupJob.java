@@ -45,12 +45,9 @@ public class FullBackupJob extends JobService {
     private final SparseArray<JobParameters> mParamsForUser = new SparseArray<>();
 
     public static void schedule(int userId, Context ctx, long minDelay,
-            UserBackupManagerService userBackupManagerService) {
-        if (!userBackupManagerService.isFrameworkSchedulingEnabled()) return;
-
+            BackupManagerConstants constants) {
         JobScheduler js = (JobScheduler) ctx.getSystemService(Context.JOB_SCHEDULER_SERVICE);
         JobInfo.Builder builder = new JobInfo.Builder(getJobIdForUserId(userId), sIdleService);
-        final BackupManagerConstants constants = userBackupManagerService.getConstants();
         synchronized (constants) {
             builder.setRequiresDeviceIdle(true)
                     .setRequiredNetworkType(constants.getFullBackupRequiredNetworkType())

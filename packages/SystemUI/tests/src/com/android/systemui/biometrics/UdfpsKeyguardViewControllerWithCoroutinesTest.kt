@@ -31,9 +31,9 @@ import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
+import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.StatusBarState
-import com.android.systemui.statusbar.phone.KeyguardBouncer
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.util.time.SystemClock
@@ -133,7 +133,7 @@ class UdfpsKeyguardViewControllerWithCoroutinesTest : UdfpsKeyguardViewControlle
             // WHEN the bouncer expansion is VISIBLE
             val job = mController.listenForBouncerExpansion(this)
             keyguardBouncerRepository.setPrimaryVisible(true)
-            keyguardBouncerRepository.setPanelExpansion(KeyguardBouncer.EXPANSION_VISIBLE)
+            keyguardBouncerRepository.setPanelExpansion(KeyguardBouncerConstants.EXPANSION_VISIBLE)
             yield()
 
             // THEN UDFPS shouldPauseAuth == true

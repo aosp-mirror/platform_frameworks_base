@@ -36,6 +36,7 @@ import android.speech.IRecognitionServiceManager;
 import android.util.Log;
 import android.view.contentcapture.IContentCaptureManager;
 
+import java.util.Objects;
 import java.util.function.IntConsumer;
 
 /**
@@ -78,6 +79,19 @@ public abstract class VisualQueryDetectionService extends Service
 
 
     private final ISandboxedDetectionService mInterface = new ISandboxedDetectionService.Stub() {
+
+        @Override
+        public void detectWithVisualSignals(
+                IDetectorSessionVisualQueryDetectionCallback callback) {
+            Log.v(TAG, "#detectWithVisualSignals");
+            VisualQueryDetectionService.this.onStartDetection(new Callback(callback));
+        }
+
+        @Override
+        public void stopDetection() {
+            Log.v(TAG, "#stopDetection");
+            VisualQueryDetectionService.this.onStopDetection();
+        }
 
         @Override
         public void updateState(PersistableBundle options, SharedMemory sharedMemory,
@@ -127,11 +141,6 @@ public abstract class VisualQueryDetectionService extends Service
         @Override
         public void updateRecognitionServiceManager(IRecognitionServiceManager manager) {
             Log.v(TAG, "Ignore #updateRecognitionServiceManager");
-        }
-
-        @Override
-        public void stopDetection() {
-            throw new UnsupportedOperationException("Not supported by VisualQueryDetectionService");
         }
     };
 
@@ -216,18 +225,37 @@ public abstract class VisualQueryDetectionService extends Service
      */
     public static final class Callback {
 
+        // TODO: consider making the constructor a test api for testing purpose
+        public Callback() {
+            mRemoteCallback = null;
+        }
+
+        private final IDetectorSessionVisualQueryDetectionCallback mRemoteCallback;
+
+        private Callback(IDetectorSessionVisualQueryDetectionCallback remoteCallback) {
+            mRemoteCallback = remoteCallback;
+        }
+
         /**
          * Informs attention listener that the user attention is gained.
          */
         public void onAttentionGained() {
-            //TODO(b/265345361): call internal callbacks to send signal to the interactor
+            try {
+                mRemoteCallback.onAttentionGained();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
 
         /**
          * Informs attention listener that the user attention is lost.
          */
         public void onAttentionLost() {
-            //TODO(b/265345361): call internal callbacks to send signal to the interactor
+            try {
+                mRemoteCallback.onAttentionLost();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
 
         /**
@@ -241,8 +269,13 @@ public abstract class VisualQueryDetectionService extends Service
          * @throws IllegalStateException if method called without attention gained.
          */
         public void onQueryDetected(@NonNull String partialQuery) throws IllegalStateException {
-            //TODO(b/265345361): call internal callbacks to send signal to the interactor
-            //TODO(b/265381651): convert callback exceptions and throw IllegalStateException.
+            Objects.requireNonNull(partialQuery);
+            try {
+                mRemoteCallback.onQueryDetected(partialQuery);
+            } catch (RemoteException e) {
+                throw new IllegalStateException("#onQueryDetected must be only be triggered after "
+                        + "calling #onAttentionGained to be in the attention gained state.");
+            }
         }
 
         /**
@@ -254,8 +287,12 @@ public abstract class VisualQueryDetectionService extends Service
          * @throws IllegalStateException if method called without query streamed.
          */
         public void onQueryRejected() throws IllegalStateException {
-            //TODO(b/265345361): call internal callbacks to send signal to the interactor
-            //TODO(b/265381651): convert callback exceptions and throw IllegalStateException.
+            try {
+                mRemoteCallback.onQueryRejected();
+            } catch (RemoteException e) {
+                throw new IllegalStateException("#onQueryRejected must be only be triggered after "
+                        + "calling #onQueryDetected to be in the query streaming state.");
+            }
         }
 
         /**
@@ -267,8 +304,12 @@ public abstract class VisualQueryDetectionService extends Service
          * @throws IllegalStateException if method called without query streamed.
          */
         public void onQueryFinished() throws IllegalStateException {
-            //TODO(b/265345361): call internal callbacks to send signal to the interactor
-            //TODO(b/265381651): convert callback exceptions and throw IllegalStateException.
+            try {
+                mRemoteCallback.onQueryFinished();
+            } catch (RemoteException e) {
+                throw new IllegalStateException("#onQueryFinished must be only be triggered after "
+                        + "calling #onQueryDetected to be in the query streaming state.");
+            }
         }
     }
 

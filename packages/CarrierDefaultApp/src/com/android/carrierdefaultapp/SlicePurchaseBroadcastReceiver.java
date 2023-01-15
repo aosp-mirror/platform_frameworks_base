@@ -178,9 +178,9 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
             return false;
         }
 
-        String appName = intent.getStringExtra(SlicePurchaseController.EXTRA_REQUESTING_APP_NAME);
-        if (TextUtils.isEmpty(appName)) {
-            loge("isIntentValid: empty requesting application name: " + appName);
+        String carrier = intent.getStringExtra(SlicePurchaseController.EXTRA_CARRIER);
+        if (TextUtils.isEmpty(carrier)) {
+            loge("isIntentValid: empty carrier: " + carrier);
             return false;
         }
 
@@ -310,14 +310,14 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
         channel.setBlockable(true);
         context.getSystemService(NotificationManager.class).createNotificationChannel(channel);
 
+        String carrier = intent.getStringExtra(SlicePurchaseController.EXTRA_CARRIER);
+
         Notification notification =
                 new Notification.Builder(context, PERFORMANCE_BOOST_NOTIFICATION_CHANNEL_ID)
-                        .setContentTitle(String.format(res.getString(
-                                R.string.performance_boost_notification_title),
-                                intent.getStringExtra(
-                                        SlicePurchaseController.EXTRA_REQUESTING_APP_NAME)))
-                        .setContentText(res.getString(
-                                R.string.performance_boost_notification_detail))
+                        .setContentTitle(res.getString(
+                                R.string.performance_boost_notification_title))
+                        .setContentText(String.format(res.getString(
+                                R.string.performance_boost_notification_detail), carrier, carrier))
                         .setSmallIcon(R.drawable.ic_performance_boost)
                         .setContentIntent(createContentIntent(context, intent, 1))
                         .setDeleteIntent(intent.getParcelableExtra(

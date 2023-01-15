@@ -53,8 +53,8 @@ public final class BluetoothBroadcastUtils {
     static final String PREFIX_BT_SYNC_INTERVAL = "SI:";
     static final String PREFIX_BT_IS_ENCRYPTED = "E:";
     static final String PREFIX_BT_BROADCAST_CODE = "C:";
-    static final String PREFIX_BT_PRESENTATION_DELAY = "D:";
-    static final String PREFIX_BT_SUBGROUPS = "G:";
+    static final String PREFIX_BT_PRESENTATION_DELAY = "PD:";
+    static final String PREFIX_BT_SUBGROUPS = "SG:";
     static final String PREFIX_BT_ANDROID_VERSION = "V:";
 
     // BluetoothLeBroadcastSubgroup

@@ -25,6 +25,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.backup.BackupManager;
+import android.app.backup.BackupRestoreEventLogger;
 import android.app.backup.BackupRestoreEventLogger.DataTypeResult;
 import android.app.backup.IBackupManager;
 import android.app.backup.IBackupManagerMonitor;
@@ -718,17 +719,6 @@ public class BackupManagerService extends IBackupManager.Stub {
 
         if (userBackupManagerService != null) {
             userBackupManagerService.restoreAtInstall(packageName, token);
-        }
-    }
-
-    @Override
-    public void setFrameworkSchedulingEnabledForUser(int userId, boolean isEnabled) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId,
-                        "setFrameworkSchedulingEnabledForUser()");
-
-        if (userBackupManagerService != null) {
-            userBackupManagerService.setFrameworkSchedulingEnabled(isEnabled);
         }
     }
 

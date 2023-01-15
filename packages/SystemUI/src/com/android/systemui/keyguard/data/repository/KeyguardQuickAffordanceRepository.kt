@@ -187,6 +187,8 @@ constructor(
                 pickerState is KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice
             }
             .map { (config, pickerState) ->
+                val defaultPickerState =
+                    pickerState as? KeyguardQuickAffordanceConfig.PickerScreenState.Default
                 val disabledPickerState =
                     pickerState as? KeyguardQuickAffordanceConfig.PickerScreenState.Disabled
                 KeyguardQuickAffordancePickerRepresentation(
@@ -198,6 +200,7 @@ constructor(
                     instructions = disabledPickerState?.instructions,
                     actionText = disabledPickerState?.actionText,
                     actionComponentName = disabledPickerState?.actionComponentName,
+                    configureIntent = defaultPickerState?.configureIntent,
                 )
             }
     }

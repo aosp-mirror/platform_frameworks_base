@@ -60,6 +60,9 @@ java_test_host {
     java_resources: [":ImmutabilityAnnotationJavaSource"],
 
     test_suites: ["general-tests"],
+    test_options: {
+        unit_test: true,
+    },
     javacflags: [
         "--add-modules=jdk.compiler",
         "--add-exports jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",

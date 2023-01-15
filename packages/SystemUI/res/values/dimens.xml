@@ -1110,13 +1110,24 @@
     <!-- The extra padding to show the whole outer border -->
     <dimen name="magnifier_drag_handle_padding">3dp</dimen>
     <dimen name="magnification_max_frame_size">300dp</dimen>
+    <!-- Magnification settings panel -->
+    <dimen name="magnification_setting_view_margin">24dp</dimen>
+    <dimen name="magnification_setting_text_size">18sp</dimen>
+    <dimen name="magnification_setting_background_padding">24dp</dimen>
+    <dimen name="magnification_setting_background_corner_radius">28dp</dimen>
+    <dimen name="magnification_setting_seekbar_margin">16dp</dimen>
+    <dimen name="magnification_setting_button_line_height">20sp</dimen>
+    <dimen name="magnification_setting_button_done_width">312dp</dimen>
+    <dimen name="magnification_setting_button_done_height">48dp</dimen>
+    <dimen name="magnification_setting_button_done_corner_radius">100dp</dimen>
+    <dimen name="magnification_setting_button_done_padding_vertical">10dp</dimen>
+    <dimen name="magnification_setting_button_done_padding_horizontal">24dp</dimen>
 
     <!-- How far from the right edge of the screen you need to drag the window before the button
          repositions to the other side. -->
     <dimen name="magnification_button_reposition_threshold_from_edge">32dp</dimen>
 
     <dimen name="magnification_drag_size">15dp</dimen>
-    <dimen name="magnification_max_size">360dp</dimen>
     <dimen name="magnifier_panel_size">265dp</dimen>
 
     <!-- Home Controls -->

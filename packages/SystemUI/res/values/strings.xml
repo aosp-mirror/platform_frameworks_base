@@ -2289,9 +2289,9 @@
     <string name="accessibility_magnification_small">Small</string>
     <!-- Click action label for magnification panel large size [CHAR LIMIT=NONE]-->
     <string name="accessibility_magnification_large">Large</string>
-    <!-- Click action label for magnification panel Close [CHAR LIMIT=NONE]-->
-    <string name="accessibility_magnification_close">Close</string>
-    <!-- Click action label for edit magnification size [CHAR LIMIT=NONE]-->
+    <!-- Click action label for magnification panel Done [CHAR LIMIT=20]-->
+    <string name="accessibility_magnification_done">Done</string>
+    <!-- Click action label for edit magnification size [CHAR LIMIT=20]-->
     <string name="accessibility_magnifier_edit">Edit</string>
     <!-- Click action label for magnification panel settings [CHAR LIMIT=NONE]-->
     <string name="accessibility_magnification_magnifier_window_settings">Magnifier window settings</string>

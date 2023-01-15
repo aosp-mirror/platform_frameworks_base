@@ -18,8 +18,6 @@ package com.android.server.backup;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Mockito.when;
-
 import android.annotation.UserIdInt;
 import android.content.Context;
 import android.os.Handler;
@@ -32,8 +30,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -45,20 +41,14 @@ public class KeyValueBackupJobTest {
     private Context mContext;
     private BackupManagerConstants mConstants;
 
-    @Mock
-    private UserBackupManagerService mUserBackupManagerService;
-
     @UserIdInt private int mUserOneId;
     @UserIdInt private int mUserTwoId;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         mContext = RuntimeEnvironment.application;
         mConstants = new BackupManagerConstants(Handler.getMain(), mContext.getContentResolver());
         mConstants.start();
-        when(mUserBackupManagerService.getConstants()).thenReturn(mConstants);
-        when(mUserBackupManagerService.isFrameworkSchedulingEnabled()).thenReturn(true);
 
         mUserOneId = UserHandle.USER_SYSTEM;
         mUserTwoId = mUserOneId + 1;
@@ -72,22 +62,6 @@ public class KeyValueBackupJobTest {
     }
 
     @Test
-    public void testSchedule_isNoopIfDisabled() {
-        when(mUserBackupManagerService.isFrameworkSchedulingEnabled()).thenReturn(false);
-        KeyValueBackupJob.schedule(mUserOneId, mContext, mUserBackupManagerService);
-
-        assertThat(KeyValueBackupJob.isScheduled(mUserOneId)).isFalse();
-    }
-
-    @Test
-    public void testSchedule_schedulesJobIfEnabled() {
-        when(mUserBackupManagerService.isFrameworkSchedulingEnabled()).thenReturn(true);
-        KeyValueBackupJob.schedule(mUserOneId, mContext, mUserBackupManagerService);
-
-        assertThat(KeyValueBackupJob.isScheduled(mUserOneId)).isTrue();
-    }
-
-    @Test
     public void testIsScheduled_beforeScheduling_returnsFalse() {
         assertThat(KeyValueBackupJob.isScheduled(mUserOneId)).isFalse();
         assertThat(KeyValueBackupJob.isScheduled(mUserTwoId)).isFalse();
@@ -95,8 +69,8 @@ public class KeyValueBackupJobTest {
 
     @Test
     public void testIsScheduled_afterScheduling_returnsTrue() {
-        KeyValueBackupJob.schedule(mUserOneId, mContext, mUserBackupManagerService);
-        KeyValueBackupJob.schedule(mUserTwoId, mContext, mUserBackupManagerService);
+        KeyValueBackupJob.schedule(mUserOneId, mContext, mConstants);
+        KeyValueBackupJob.schedule(mUserTwoId, mContext, mConstants);
 
         assertThat(KeyValueBackupJob.isScheduled(mUserOneId)).isTrue();
         assertThat(KeyValueBackupJob.isScheduled(mUserTwoId)).isTrue();
@@ -104,8 +78,8 @@ public class KeyValueBackupJobTest {
 
     @Test
     public void testIsScheduled_afterCancelling_returnsFalse() {
-        KeyValueBackupJob.schedule(mUserOneId, mContext, mUserBackupManagerService);
-        KeyValueBackupJob.schedule(mUserTwoId, mContext, mUserBackupManagerService);
+        KeyValueBackupJob.schedule(mUserOneId, mContext, mConstants);
+        KeyValueBackupJob.schedule(mUserTwoId, mContext, mConstants);
         KeyValueBackupJob.cancel(mUserOneId, mContext);
         KeyValueBackupJob.cancel(mUserTwoId, mContext);
 
@@ -115,7 +89,7 @@ public class KeyValueBackupJobTest {
 
     @Test
     public void testIsScheduled_afterScheduling_returnsTrueOnlyForScheduledUser() {
-        KeyValueBackupJob.schedule(mUserOneId, mContext, mUserBackupManagerService);
+        KeyValueBackupJob.schedule(mUserOneId, mContext, mConstants);
 
         assertThat(KeyValueBackupJob.isScheduled(mUserOneId)).isTrue();
         assertThat(KeyValueBackupJob.isScheduled(mUserTwoId)).isFalse();
@@ -123,8 +97,8 @@ public class KeyValueBackupJobTest {
 
     @Test
     public void testIsScheduled_afterCancelling_returnsFalseOnlyForCancelledUser() {
-        KeyValueBackupJob.schedule(mUserOneId, mContext, mUserBackupManagerService);
-        KeyValueBackupJob.schedule(mUserTwoId, mContext, mUserBackupManagerService);
+        KeyValueBackupJob.schedule(mUserOneId, mContext, mConstants);
+        KeyValueBackupJob.schedule(mUserTwoId, mContext, mConstants);
         KeyValueBackupJob.cancel(mUserOneId, mContext);
 
         assertThat(KeyValueBackupJob.isScheduled(mUserOneId)).isFalse();

@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.data.quickaffordance
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
@@ -39,6 +40,7 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.ZenModeController
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -48,10 +50,10 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
-import javax.inject.Inject
 
 @SysUISingleton
-class DoNotDisturbQuickAffordanceConfig constructor(
+class DoNotDisturbQuickAffordanceConfig
+constructor(
     private val context: Context,
     private val controller: ZenModeController,
     private val secureSettings: SecureSettings,
@@ -59,7 +61,7 @@ class DoNotDisturbQuickAffordanceConfig constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val testConditionId: Uri?,
     testDialog: EnableZenModeDialog?,
-): KeyguardQuickAffordanceConfig {
+) : KeyguardQuickAffordanceConfig {
 
     @Inject
     constructor(
@@ -76,20 +78,23 @@ class DoNotDisturbQuickAffordanceConfig constructor(
 
     private val conditionUri: Uri
         get() =
-            testConditionId ?: ZenModeConfig.toTimeCondition(
-                context,
-                settingsValue,
-                userTracker.userId,
-                true, /* shortVersion */
-            ).id
+            testConditionId
+                ?: ZenModeConfig.toTimeCondition(
+                        context,
+                        settingsValue,
+                        userTracker.userId,
+                        true, /* shortVersion */
+                    )
+                    .id
 
     private val dialog: EnableZenModeDialog by lazy {
-        testDialog ?: EnableZenModeDialog(
-            context,
-            R.style.Theme_SystemUI_Dialog,
-            true, /* cancelIsNeutral */
-            ZenModeDialogMetricsLogger(context),
-        )
+        testDialog
+            ?: EnableZenModeDialog(
+                context,
+                R.style.Theme_SystemUI_Dialog,
+                true, /* cancelIsNeutral */
+                ZenModeDialogMetricsLogger(context),
+            )
     }
 
     override val key: String = BuiltInKeyguardQuickAffordanceKeys.DO_NOT_DISTURB
@@ -98,58 +103,62 @@ class DoNotDisturbQuickAffordanceConfig constructor(
 
     override val pickerIconResourceId: Int = R.drawable.ic_do_not_disturb
 
-    override val lockScreenState: Flow<KeyguardQuickAffordanceConfig.LockScreenState> = combine(
-        conflatedCallbackFlow {
-            val callback = object: ZenModeController.Callback {
-                override fun onZenChanged(zen: Int) {
-                    dndMode = zen
-                    trySendWithFailureLogging(updateState(), TAG)
-                }
+    override val lockScreenState: Flow<KeyguardQuickAffordanceConfig.LockScreenState> =
+        combine(
+            conflatedCallbackFlow {
+                val callback =
+                    object : ZenModeController.Callback {
+                        override fun onZenChanged(zen: Int) {
+                            dndMode = zen
+                            trySendWithFailureLogging(updateState(), TAG)
+                        }
 
-                override fun onZenAvailableChanged(available: Boolean) {
-                    isAvailable = available
-                    trySendWithFailureLogging(updateState(), TAG)
-                }
-            }
+                        override fun onZenAvailableChanged(available: Boolean) {
+                            isAvailable = available
+                            trySendWithFailureLogging(updateState(), TAG)
+                        }
+                    }
 
-            dndMode = controller.zen
-            isAvailable = controller.isZenAvailable
-            trySendWithFailureLogging(updateState(), TAG)
+                dndMode = controller.zen
+                isAvailable = controller.isZenAvailable
+                trySendWithFailureLogging(updateState(), TAG)
 
-            controller.addCallback(callback)
+                controller.addCallback(callback)
 
-            awaitClose { controller.removeCallback(callback) }
-        },
-        secureSettings
-            .observerFlow(Settings.Secure.ZEN_DURATION)
-            .onStart { emit(Unit) }
-            .map { secureSettings.getInt(Settings.Secure.ZEN_DURATION, ZEN_MODE_OFF) }
-            .flowOn(backgroundDispatcher)
-            .distinctUntilChanged()
-            .onEach { settingsValue = it }
-    ) { callbackFlowValue, _ -> callbackFlowValue }
+                awaitClose { controller.removeCallback(callback) }
+            },
+            secureSettings
+                .observerFlow(Settings.Secure.ZEN_DURATION)
+                .onStart { emit(Unit) }
+                .map { secureSettings.getInt(Settings.Secure.ZEN_DURATION, ZEN_MODE_OFF) }
+                .flowOn(backgroundDispatcher)
+                .distinctUntilChanged()
+                .onEach { settingsValue = it }
+        ) { callbackFlowValue, _ -> callbackFlowValue }
 
     override suspend fun getPickerScreenState(): KeyguardQuickAffordanceConfig.PickerScreenState {
         return if (controller.isZenAvailable) {
-            KeyguardQuickAffordanceConfig.PickerScreenState.Default
+            KeyguardQuickAffordanceConfig.PickerScreenState.Default(
+                configureIntent = Intent(Settings.ACTION_ZEN_MODE_SETTINGS)
+            )
         } else {
             KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice
         }
     }
 
-    override fun onTriggered(expandable: Expandable?):
-            KeyguardQuickAffordanceConfig.OnTriggeredResult {
+    override fun onTriggered(
+        expandable: Expandable?
+    ): KeyguardQuickAffordanceConfig.OnTriggeredResult {
         return when {
-            !isAvailable ->
-                KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
+            !isAvailable -> KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
             dndMode != ZEN_MODE_OFF -> {
                 controller.setZen(ZEN_MODE_OFF, null, TAG)
                 KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
             }
             settingsValue == ZEN_DURATION_PROMPT ->
                 KeyguardQuickAffordanceConfig.OnTriggeredResult.ShowDialog(
-                        dialog.createDialog(),
-                        expandable
+                    dialog.createDialog(),
+                    expandable
                 )
             settingsValue == ZEN_DURATION_FOREVER -> {
                 controller.setZen(ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG)

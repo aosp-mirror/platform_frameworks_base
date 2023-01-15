@@ -27,6 +27,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.SharedMemory;
+import android.service.voice.IVisualQueryDetectionVoiceInteractionCallback;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
@@ -298,6 +299,10 @@ interface IVoiceInteractionManagerService {
      * Requests to shutdown hotword detection service.
      */
     void shutdownHotwordDetectionService();
+
+    void startPerceiving(in IVisualQueryDetectionVoiceInteractionCallback callback);
+
+    void stopPerceiving();
 
     void startListeningFromMic(
         in AudioFormat audioFormat,

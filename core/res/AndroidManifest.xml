@@ -4471,12 +4471,21 @@
     <permission android:name="android.permission.BIND_HOTWORD_DETECTION_SERVICE"
         android:protectionLevel="signature" />
 
-    <!-- @SystemApi Allows an application to manage hotword detection on the device.
+    <!-- @SystemApi Allows an application to manage hotword detection and visual query detection
+         on the device.
          <p>Protection level: internal|preinstalled
          @hide This is not a third-party API (intended for OEMs and system apps).
     -->
     <permission android:name="android.permission.MANAGE_HOTWORD_DETECTION"
                 android:protectionLevel="internal|preinstalled" />
+
+    <!-- @SystemApi Must be required by a {@link android.service.voice.VisualQueryDetectionService},
+         to ensure that only the system can bind to it.
+         <p>Protection level: signature
+         @hide This is not a third-party API (intended for OEMs and system apps).
+    -->
+    <permission android:name="android.permission.BIND_VISUAL_QUERY_DETECTION_SERVICE"
+        android:protectionLevel="signature" />
 
     <!-- Allows an application to subscribe to keyguard locked (i.e., showing) state.
          <p>Protection level: internal|role

@@ -6133,7 +6133,7 @@ package android.app {
   }
 
   public static class Notification.Action implements android.os.Parcelable {
-    ctor @Deprecated public Notification.Action(int, CharSequence, android.app.PendingIntent);
+    ctor @Deprecated public Notification.Action(int, CharSequence, @Nullable android.app.PendingIntent);
     method public android.app.Notification.Action clone();
     method public int describeContents();
     method public boolean getAllowGeneratedReplies();
@@ -6163,8 +6163,8 @@ package android.app {
   }
 
   public static final class Notification.Action.Builder {
-    ctor @Deprecated public Notification.Action.Builder(int, CharSequence, android.app.PendingIntent);
-    ctor public Notification.Action.Builder(android.graphics.drawable.Icon, CharSequence, android.app.PendingIntent);
+    ctor @Deprecated public Notification.Action.Builder(int, CharSequence, @Nullable android.app.PendingIntent);
+    ctor public Notification.Action.Builder(android.graphics.drawable.Icon, CharSequence, @Nullable android.app.PendingIntent);
     ctor public Notification.Action.Builder(android.app.Notification.Action);
     method @NonNull public android.app.Notification.Action.Builder addExtras(android.os.Bundle);
     method @NonNull public android.app.Notification.Action.Builder addRemoteInput(android.app.RemoteInput);
@@ -8065,6 +8065,7 @@ package android.app.admin {
     method public int getNetworkId();
     method public boolean isEnabled();
     method public boolean isFallbackToDefaultConnectionAllowed();
+    method public boolean shouldBlockNonMatchingNetworks();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.PreferentialNetworkServiceConfig> CREATOR;
     field public static final int PREFERENTIAL_NETWORK_ID_1 = 1; // 0x1
@@ -8082,6 +8083,7 @@ package android.app.admin {
     method @NonNull public android.app.admin.PreferentialNetworkServiceConfig.Builder setFallbackToDefaultConnectionAllowed(boolean);
     method @NonNull public android.app.admin.PreferentialNetworkServiceConfig.Builder setIncludedUids(@NonNull int[]);
     method @NonNull public android.app.admin.PreferentialNetworkServiceConfig.Builder setNetworkId(int);
+    method @NonNull public android.app.admin.PreferentialNetworkServiceConfig.Builder setShouldBlockNonMatchingNetworks(boolean);
   }
 
   public class SecurityLog {
@@ -31679,7 +31681,8 @@ package android.opengl {
     method public static void scaleM(float[], int, float, float, float);
     method public static void setIdentityM(float[], int);
     method public static void setLookAtM(float[], int, float, float, float, float, float, float, float, float, float);
-    method public static void setRotateEulerM(float[], int, float, float, float);
+    method @Deprecated public static void setRotateEulerM(float[], int, float, float, float);
+    method public static void setRotateEulerM2(@NonNull float[], int, float, float, float);
     method public static void setRotateM(float[], int, float, float, float, float);
     method public static void translateM(float[], int, float[], int, float, float, float);
     method public static void translateM(float[], int, float, float, float);
@@ -39234,9 +39237,13 @@ package android.service.autofill {
     method @NonNull public android.service.autofill.FillResponse.Builder setFlags(int);
     method @NonNull public android.service.autofill.FillResponse.Builder setFooter(@NonNull android.widget.RemoteViews);
     method @NonNull public android.service.autofill.FillResponse.Builder setHeader(@NonNull android.widget.RemoteViews);
+    method @NonNull public android.service.autofill.FillResponse.Builder setIconResourceId(@DrawableRes int);
     method @NonNull public android.service.autofill.FillResponse.Builder setIgnoredIds(android.view.autofill.AutofillId...);
     method @NonNull public android.service.autofill.FillResponse.Builder setPresentationCancelIds(@Nullable int[]);
     method @NonNull public android.service.autofill.FillResponse.Builder setSaveInfo(@NonNull android.service.autofill.SaveInfo);
+    method @NonNull public android.service.autofill.FillResponse.Builder setServiceDisplayNameResourceId(@StringRes int);
+    method @NonNull public android.service.autofill.FillResponse.Builder setShowFillDialogIcon(boolean);
+    method @NonNull public android.service.autofill.FillResponse.Builder setShowSaveDialogIcon(boolean);
     method @NonNull public android.service.autofill.FillResponse.Builder setUserData(@NonNull android.service.autofill.UserData);
   }
 
@@ -50651,6 +50658,13 @@ package android.view {
     field public int toolType;
   }
 
+  public final class MotionPredictor {
+    ctor public MotionPredictor(@NonNull android.content.Context);
+    method public boolean isPredictionAvailable(int, int);
+    method @NonNull public java.util.List<android.view.MotionEvent> predict(long);
+    method public void record(@NonNull android.view.MotionEvent);
+  }
+
   public interface OnReceiveContentListener {
     method @Nullable public android.view.ContentInfo onReceiveContent(@NonNull android.view.View, @NonNull android.view.ContentInfo);
   }
@@ -54830,6 +54844,7 @@ package android.view.inputmethod {
   public final class InputMethodManager {
     method public void dispatchKeyEventFromInputMethod(@Nullable android.view.View, @NonNull android.view.KeyEvent);
     method public void displayCompletions(android.view.View, android.view.inputmethod.CompletionInfo[]);
+    method @Nullable public android.view.inputmethod.InputMethodInfo getCurrentInputMethodInfo();
     method @Nullable public android.view.inputmethod.InputMethodSubtype getCurrentInputMethodSubtype();
     method @NonNull public java.util.List<android.view.inputmethod.InputMethodInfo> getEnabledInputMethodList();
     method @NonNull public java.util.List<android.view.inputmethod.InputMethodSubtype> getEnabledInputMethodSubtypeList(@Nullable android.view.inputmethod.InputMethodInfo, boolean);

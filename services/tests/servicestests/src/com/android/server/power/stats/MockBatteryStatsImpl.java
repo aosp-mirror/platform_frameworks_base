@@ -213,6 +213,13 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         return this;
     }
 
+    @GuardedBy("this")
+    public MockBatteryStatsImpl setPerUidModemModel(int perUidModemModel) {
+        mConstants.PER_UID_MODEM_MODEL = perUidModemModel;
+        mConstants.onChange();
+        return this;
+    }
+
     public int getAndClearExternalStatsSyncFlags() {
         final int flags = mExternalStatsSync.flags;
         mExternalStatsSync.flags = 0;

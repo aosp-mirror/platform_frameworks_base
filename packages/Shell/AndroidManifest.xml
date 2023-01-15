@@ -620,6 +620,8 @@
     <uses-permission android:name="android.permission.MANAGE_HOTWORD_DETECTION" />
     <uses-permission android:name="android.permission.BIND_HOTWORD_DETECTION_SERVICE" />
 
+    <uses-permission android:name="android.permission.BIND_VISUAL_QUERY_DETECTION_SERVICE" />
+
     <!-- Permission required for CTS test - KeyguardLockedStateApiTest -->
     <uses-permission android:name="android.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE" />
 

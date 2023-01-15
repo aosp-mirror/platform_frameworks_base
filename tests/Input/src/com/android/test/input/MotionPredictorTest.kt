@@ -31,15 +31,14 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when`
-
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
 
 import java.time.Duration
 
@@ -49,7 +48,6 @@ private fun getStylusMotionEvent(
         x: Float,
         y: Float,
         ): MotionEvent{
-    // One-time: send a DOWN event
     val pointerCount = 1
     val properties = arrayOfNulls<MotionEvent.PointerProperties>(pointerCount)
     val coords = arrayOfNulls<MotionEvent.PointerCoords>(pointerCount)

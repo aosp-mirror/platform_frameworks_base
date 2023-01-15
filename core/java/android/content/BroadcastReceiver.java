@@ -82,6 +82,7 @@ public abstract class BroadcastReceiver {
         final boolean mOrderedHint;
         @UnsupportedAppUsage
         final boolean mInitialStickyHint;
+        final boolean mAssumeDeliveredHint;
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         final IBinder mToken;
         @UnsupportedAppUsage
@@ -105,15 +106,36 @@ public abstract class BroadcastReceiver {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public PendingResult(int resultCode, String resultData, Bundle resultExtras, int type,
                 boolean ordered, boolean sticky, IBinder token, int userId, int flags) {
+            this(resultCode, resultData, resultExtras, type, ordered, sticky,
+                    guessAssumeDelivered(type, ordered), token, userId, flags);
+        }
+
+        /** @hide */
+        public PendingResult(int resultCode, String resultData, Bundle resultExtras, int type,
+                boolean ordered, boolean sticky, boolean assumeDelivered, IBinder token,
+                int userId, int flags) {
             mResultCode = resultCode;
             mResultData = resultData;
             mResultExtras = resultExtras;
             mType = type;
             mOrderedHint = ordered;
             mInitialStickyHint = sticky;
+            mAssumeDeliveredHint = assumeDelivered;
             mToken = token;
             mSendingUser = userId;
             mFlags = flags;
+        }
+
+        /** @hide */
+        public static boolean guessAssumeDelivered(int type, boolean ordered) {
+            // When a caller didn't provide a concrete way of knowing if we need
+            // to report delivery, make a best-effort guess
+            if (type == TYPE_COMPONENT) {
+                return false;
+            } else if (ordered && type != TYPE_UNREGISTERED) {
+                return false;
+            }
+            return true;
         }
 
         /**
@@ -252,7 +274,7 @@ public abstract class BroadcastReceiver {
                             "Finishing broadcast to component " + mToken);
                     sendFinished(mgr);
                 }
-            } else if (mOrderedHint && mType != TYPE_UNREGISTERED) {
+            } else {
                 if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
                         "Finishing broadcast to " + mToken);
                 final IActivityManager mgr = ActivityManager.getService();
@@ -279,13 +301,16 @@ public abstract class BroadcastReceiver {
                     if (mResultExtras != null) {
                         mResultExtras.setAllowFds(false);
                     }
-                    if (mOrderedHint) {
-                        am.finishReceiver(mToken, mResultCode, mResultData, mResultExtras,
-                                mAbortBroadcast, mFlags);
-                    } else {
-                        // This broadcast was sent to a component; it is not ordered,
-                        // but we still need to tell the activity manager we are done.
-                        am.finishReceiver(mToken, 0, null, null, false, mFlags);
+
+                    // When the OS didn't assume delivery, we need to inform
+                    // it that we've actually finished the delivery
+                    if (!mAssumeDeliveredHint) {
+                        if (mOrderedHint) {
+                            am.finishReceiver(mToken, mResultCode, mResultData, mResultExtras,
+                                    mAbortBroadcast, mFlags);
+                        } else {
+                            am.finishReceiver(mToken, 0, null, null, false, mFlags);
+                        }
                     }
                 } catch (RemoteException ex) {
                 }

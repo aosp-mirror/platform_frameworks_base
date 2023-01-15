@@ -16,12 +16,17 @@
 
 package android.view.autofill;
 
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.provider.DeviceConfig;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.view.View;
 
 import com.android.internal.util.ArrayUtils;
+
+import java.util.Arrays;
+import java.util.Set;
 
 /**
  * Feature flags associated with autofill.
@@ -119,8 +124,6 @@ public class AutofillFeatureFlags {
     public static final String DEVICE_CONFIG_AUTOFILL_CREDENTIAL_MANAGER_SUPPRESS_FILL_DIALOG =
             "autofill_credential_manager_suppress_fill_dialog";
 
-
-
     /**
      * Indicates whether credential manager tagged views should suppress save dialog.
      * This flag is further gated by {@link #DEVICE_CONFIG_AUTOFILL_CREDENTIAL_MANAGER_ENABLED}
@@ -130,6 +133,50 @@ public class AutofillFeatureFlags {
     public static final String DEVICE_CONFIG_AUTOFILL_CREDENTIAL_MANAGER_SUPPRESS_SAVE_DIALOG =
             "autofill_credential_manager_suppress_save_dialog";
     // END CREDENTIAL MANAGER FLAGS //
+
+    // START AUTOFILL FOR ALL APPS FLAGS //
+    /**
+     * Sets the list of activities and packages denied for autofill
+     *
+     * The list is {@code ";"} colon delimited. Activities under a package is separated by
+     * {@code ","}. Each package name much be followed by a {@code ":"}. Each package entry must be
+     * ends with a {@code ";"}
+     *
+     * <p>For example, a list with only 1 package would be, {@code Package1:;}. A list with one
+     * denied activity {@code Activity1} under {@code Package1} and a full denied package
+     * {@code Package2} would be {@code Package1:Activity1;Package2:;}
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String DEVICE_CONFIG_PACKAGE_DENYLIST_FOR_UNIMPORTANT_VIEW =
+            "package_deny_list_for_unimportant_view";
+
+    /**
+     * Whether the heuristics check for view is enabled
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String DEVICE_CONFIG_TRIGGER_FILL_REQUEST_ON_UNIMPORTANT_VIEW =
+            "trigger_fill_request_on_unimportant_view";
+
+    /**
+     * Continas imeAction ids that is irrelevant for autofill. For example, ime_action_search. We
+     * use this to avoid trigger fill request on unimportant views.
+     *
+     * The list is {@code ","} delimited.
+     *
+     * <p> For example, a imeAction list could be "2,3,4", corresponding to ime_action definition
+     * in {@link android.view.inputmethod.EditorInfo.java}</p>
+     *
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("IntentName")
+    public static final String DEVICE_CONFIG_NON_AUTOFILLABLE_IME_ACTION_IDS =
+            "non_autofillable_ime_action_ids";
+    // END AUTOFILL FOR ALL APPS FLAGS //
 
     /**
      * Sets a value of delay time to show up the inline tooltip view.
@@ -220,5 +267,39 @@ public class AutofillFeatureFlags {
                 DeviceConfig.NAMESPACE_AUTOFILL,
                 DEVICE_CONFIG_AUTOFILL_CREDENTIAL_MANAGER_SUPPRESS_FILL_DIALOG,
                 DEFAULT_CREDENTIAL_MANAGER_SUPPRESS_FILL_DIALOG);
+    }
+
+    /**
+     * Whether triggering fill request on unimportant view is enabled.
+     *
+     * @hide
+     */
+    public static boolean isTriggerFillRequestOnUnimportantViewEnabled() {
+        return DeviceConfig.getBoolean(
+            DeviceConfig.NAMESPACE_AUTOFILL,
+            DEVICE_CONFIG_TRIGGER_FILL_REQUEST_ON_UNIMPORTANT_VIEW, false);
+    }
+
+    /**
+     * Get the non-autofillable ime actions from flag. This will be used in filtering
+     * condition to trigger fill request.
+     *
+     * @hide
+     */
+    public static Set<String> getNonAutofillableImeActionIdSetFromFlag() {
+        final String mNonAutofillableImeActions = DeviceConfig.getString(
+                DeviceConfig.NAMESPACE_AUTOFILL, DEVICE_CONFIG_NON_AUTOFILLABLE_IME_ACTION_IDS, "");
+        return new ArraySet<>(Arrays.asList(mNonAutofillableImeActions.split(",")));
+    }
+
+    /**
+     * Get denylist string from flag
+     *
+     * @hide
+     */
+    public static String getDenylistStringFromFlag() {
+        return DeviceConfig.getString(
+            DeviceConfig.NAMESPACE_AUTOFILL,
+            DEVICE_CONFIG_PACKAGE_DENYLIST_FOR_UNIMPORTANT_VIEW, "");
     }
 }

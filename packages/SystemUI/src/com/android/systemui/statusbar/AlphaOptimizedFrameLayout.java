@@ -36,10 +36,6 @@ public class AlphaOptimizedFrameLayout extends FrameLayout implements Launchable
             visibility -> {
                 super.setVisibility(visibility);
                 return Unit.INSTANCE;
-            },
-            visibility -> {
-                super.setTransitionVisibility(visibility);
-                return Unit.INSTANCE;
             });
 
     public AlphaOptimizedFrameLayout(Context context) {
@@ -72,10 +68,5 @@ public class AlphaOptimizedFrameLayout extends FrameLayout implements Launchable
     @Override
     public void setVisibility(int visibility) {
         mLaunchableViewDelegate.setVisibility(visibility);
-    }
-
-    @Override
-    public void setTransitionVisibility(int visibility) {
-        mLaunchableViewDelegate.setTransitionVisibility(visibility);
     }
 }
