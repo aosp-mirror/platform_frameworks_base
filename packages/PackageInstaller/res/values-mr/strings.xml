@@ -26,6 +26,10 @@
     <string name="install_done" msgid="5987363587661783896">"अ‍ॅप इंस्टॉल झाले."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"तुम्हाला हे ॲप इंस्टॉल करायचे आहे का?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"तुम्हाला हे ॲप अपडेट करायचे आहे का?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"अ‍ॅप इंस्टॉल झाले नाही."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"पॅकेज इंस्टॉल होण्यापासून ब्लॉक केले होते."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"पॅकेजचा विद्यमान पॅकेजशी विरोध असल्याने अ‍ॅप इंस्टॉल झाले नाही."</string>

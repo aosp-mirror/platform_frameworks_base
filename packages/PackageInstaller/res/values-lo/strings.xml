@@ -26,6 +26,10 @@
     <string name="install_done" msgid="5987363587661783896">"ຕິດຕັ້ງແອັບແລ້ວ."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"ທ່ານຕ້ອງການຕິດຕັ້ງແອັບນີ້ບໍ່?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"ທ່ານຕ້ອງການອັບເດດແອັບນີ້ບໍ່?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"ບໍ່ໄດ້ຕິດຕັ້ງແອັບເທື່ອ."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ແພັກ​ເກດ​ຖືກບ​ລັອກ​ບໍ່​ໃຫ້​ໄດ້​ຮັບ​ການ​ຕິດ​ຕັ້ງ."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ບໍ່ໄດ້ຕິດຕັ້ງແອັບເນື່ອງຈາກແພັກເກດຂັດແຍ່ງກັບແພັກເກດທີ່ມີຢູ່ກ່ອນແລ້ວ."</string>

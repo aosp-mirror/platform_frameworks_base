@@ -26,6 +26,10 @@
     <string name="install_done" msgid="5987363587661783896">"앱이 설치되었습니다."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"이 앱을 설치하시겠습니까?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"이 앱을 업데이트하시겠습니까?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"앱이 설치되지 않았습니다."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"패키지 설치가 차단되었습니다."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"패키지가 기존 패키지와 충돌하여 앱이 설치되지 않았습니다."</string>

@@ -26,6 +26,10 @@
     <string name="install_done" msgid="5987363587661783896">"Aplikacija je nameščena."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Ali želite namestiti to aplikacijo?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Ali želite posodobiti to aplikacijo?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"Aplikacija ni nameščena."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Namestitev paketa je bila blokirana."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Aplikacija ni bila nameščena, ker je paket v navzkrižju z obstoječim paketom."</string>

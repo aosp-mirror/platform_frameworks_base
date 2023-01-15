@@ -26,6 +26,8 @@
     <string name="install_done" msgid="5987363587661783896">"App installed."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Do you want to install this app?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Do you want to update this app?"</string>
+    <string name="install_confirm_question_update_owner_changed" msgid="4215696609006069124">"Updates to this app are currently managed by <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g>.\n\nBy updating, you\'ll get future updates from <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g> instead."</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="8778026710268011466">"Updates to this app are currently managed by <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g>.\n\nDo you want to install this update from <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g>."</string>
     <string name="install_failed" msgid="5777824004474125469">"App not installed."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"The package was blocked from being installed."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"App not installed as package conflicts with an existing package."</string>

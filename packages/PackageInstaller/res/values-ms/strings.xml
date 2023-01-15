@@ -26,6 +26,10 @@
     <string name="install_done" msgid="5987363587661783896">"Aplikasi dipasang."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Adakah anda ingin memasang aplikasi ini?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Adakah anda mahu mengemas kini apl ini?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"Aplikasi tidak dipasang."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Pakej ini telah disekat daripada dipasang."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Apl tidak dipasang kerana pakej bercanggah dengan pakej yang sedia ada."</string>

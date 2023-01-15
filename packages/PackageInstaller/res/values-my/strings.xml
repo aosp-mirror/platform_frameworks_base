@@ -26,6 +26,10 @@
     <string name="install_done" msgid="5987363587661783896">"အက်ပ်ထည့်သွင်းပြီးပါပြီ။"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"ဤအက်ပ်ကို ထည့်သွင်းလိုသလား။"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"ဤအက်ပ်ကို အပ်ဒိတ်လုပ်လိုသလား။"</string>
+    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"အက်ပ်မထည့်သွင်းရသေးပါ"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ပက်ကေ့ဂျ်ထည့်သွင်းခြင်းကို ပိတ်ထားသည်။"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ပက်ကေ့ဂျ်အဖြစ် ထည့်သွင်းမထားသော အက်ပ်သည် လက်ရှိပက်ကေ့ဂျ်နှင့် တိုက်နေသည်။"</string>
