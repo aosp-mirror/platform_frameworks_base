@@ -2672,10 +2672,10 @@ public class SubscriptionManager {
      * @param columnName Column name in subscription database.
      *
      * @return Value in string format associated with {@code subscriptionId} and {@code columnName}
-     * from the database.
+     * from the database. Empty string if the {@code subscriptionId} is invalid (for backward
+     * compatible).
      *
-     * @throws IllegalArgumentException if {@code subscriptionId} is invalid, or the field is not
-     * exposed.
+     * @throws IllegalArgumentException if the field is not exposed.
      *
      * @see android.provider.Telephony.SimInfo for all the columns.
      *
