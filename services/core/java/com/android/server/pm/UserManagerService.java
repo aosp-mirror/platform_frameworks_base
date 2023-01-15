@@ -31,7 +31,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.UserIdInt;
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
@@ -44,6 +43,7 @@ import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
@@ -127,11 +127,8 @@ import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.SystemService;
 import com.android.server.am.UserState;
-import com.android.server.pm.UserManagerInternal.UserAssignmentResult;
 import com.android.server.pm.UserManagerInternal.UserLifecycleListener;
 import com.android.server.pm.UserManagerInternal.UserRestrictionsListener;
-import com.android.server.pm.UserManagerInternal.UserStartMode;
-import com.android.server.pm.UserManagerInternal.UserVisibilityListener;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 import com.android.server.utils.Slogf;
 import com.android.server.utils.TimingsTraceAndSlog;
@@ -5598,29 +5595,24 @@ public class UserManagerService extends IUserManager.Stub {
             // Also, add the UserHandle for mainline modules which can't use the @hide
             // EXTRA_USER_HANDLE.
             removedIntent.putExtra(Intent.EXTRA_USER, UserHandle.of(userId));
-            mContext.sendOrderedBroadcastAsUser(removedIntent, UserHandle.ALL,
-                    android.Manifest.permission.MANAGE_USERS,
-
-                    new BroadcastReceiver() {
+            getActivityManagerInternal().broadcastIntentWithCallback(removedIntent,
+                    new IIntentReceiver.Stub() {
                         @Override
-                        public void onReceive(Context context, Intent intent) {
+                        public void performReceive(Intent intent, int resultCode, String data,
+                                Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
                             if (DBG) {
                                 Slog.i(LOG_TAG,
                                         "USER_REMOVED broadcast sent, cleaning up user data "
-                                        + userId);
+                                                + userId);
                             }
-                            new Thread() {
-                                @Override
-                                public void run() {
-                                    LocalServices.getService(ActivityManagerInternal.class)
-                                            .onUserRemoved(userId);
-                                    removeUserState(userId);
-                                }
-                            }.start();
+                            new Thread(() -> {
+                                getActivityManagerInternal().onUserRemoved(userId);
+                                removeUserState(userId);
+                            }).start();
                         }
                     },
-
-                    null, Activity.RESULT_OK, null, null);
+                    new String[] {android.Manifest.permission.MANAGE_USERS},
+                    UserHandle.USER_ALL, null, null, null);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
