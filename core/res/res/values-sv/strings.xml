@@ -1708,6 +1708,7 @@
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Färgkorrigering"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Enhandsläge"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Extradimmat"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Hörapparater"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Volymknapparna har tryckts ned. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> har aktiverats."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Volymknapparna har tryckts ned. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> har inaktiverats."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Tryck och håll båda volymknapparna i tre sekunder för att använda <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1942,6 +1943,10 @@
     <string name="work_mode_off_title" msgid="961171256005852058">"Vill du aktivera jobbappar?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"Få åtkomst till jobbappar och aviseringar"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Aktivera"</string>
+    <!-- no translation found for work_mode_emergency_call_button (6818855962881612322) -->
+    <skip />
+    <!-- no translation found for work_mode_dialer_off_message (2193299184850387465) -->
+    <skip />
     <string name="app_blocked_title" msgid="7353262160455028160">"Appen är inte tillgänglig"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> är inte tillgängligt just nu."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> är inte tillgänglig"</string>

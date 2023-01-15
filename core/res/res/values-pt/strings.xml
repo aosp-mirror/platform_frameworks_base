@@ -1531,7 +1531,7 @@
     <string name="add_account_button_label" msgid="322390749416414097">"Adicionar conta"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Aumentar"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"Diminuir"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> toque e mantenha pressionado."</string>
+    <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> toque e pressione."</string>
     <string name="number_picker_increment_scroll_action" msgid="8310191318914268271">"Deslize para cima para aumentar e para baixo para diminuir."</string>
     <string name="time_picker_increment_minute_button" msgid="7195870222945784300">"Aumentar minuto"</string>
     <string name="time_picker_decrement_minute_button" msgid="230925389943411490">"Diminuir minuto"</string>
@@ -1709,6 +1709,7 @@
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Correção de cor"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modo para uma mão"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Escurecer a tela"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Aparelhos auditivos"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Teclas de volume pressionadas. Serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ativado."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Teclas de volume pressionadas. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> desativado."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Toque nos dois botões de volume e os mantenha pressionados por três segundo para usar o <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1943,6 +1944,10 @@
     <string name="work_mode_off_title" msgid="961171256005852058">"Ativar apps de trabalho?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"Acesse seus apps e notificações de trabalho"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Ativar"</string>
+    <!-- no translation found for work_mode_emergency_call_button (6818855962881612322) -->
+    <skip />
+    <!-- no translation found for work_mode_dialer_off_message (2193299184850387465) -->
+    <skip />
     <string name="app_blocked_title" msgid="7353262160455028160">"O app não está disponível"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"O app <xliff:g id="APP_NAME">%1$s</xliff:g> não está disponível no momento."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> indisponível"</string>
