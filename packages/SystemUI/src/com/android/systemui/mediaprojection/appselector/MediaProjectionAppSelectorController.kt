@@ -17,24 +17,36 @@
 package com.android.systemui.mediaprojection.appselector
 
 import android.content.ComponentName
+import android.os.UserHandle
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.mediaprojection.appselector.data.RecentTask
 import com.android.systemui.mediaprojection.appselector.data.RecentTaskListProvider
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @MediaProjectionAppSelectorScope
-class MediaProjectionAppSelectorController @Inject constructor(
+class MediaProjectionAppSelectorController
+@Inject
+constructor(
     private val recentTaskListProvider: RecentTaskListProvider,
     private val view: MediaProjectionAppSelectorView,
+    private val flags: FeatureFlags,
+    @HostUserHandle private val hostUserHandle: UserHandle,
     @MediaProjectionAppSelector private val scope: CoroutineScope,
     @MediaProjectionAppSelector private val appSelectorComponentName: ComponentName
 ) {
 
     fun init() {
         scope.launch {
-            val tasks = recentTaskListProvider.loadRecentTasks().sortTasks()
+            val recentTasks = recentTaskListProvider.loadRecentTasks()
+
+            val tasks = recentTasks
+                .filterDevicePolicyRestrictedTasks()
+                .sortedTasks()
+
             view.bind(tasks)
         }
     }
@@ -43,9 +55,20 @@ class MediaProjectionAppSelectorController @Inject constructor(
         scope.cancel()
     }
 
-    private fun List<RecentTask>.sortTasks(): List<RecentTask> =
-        sortedBy {
-            // Show normal tasks first and only then tasks with opened app selector
-            it.topActivityComponent == appSelectorComponentName
+    /**
+     * Removes all recent tasks that are different from the profile of the host app to avoid any
+     * cross-profile sharing
+     */
+    private fun List<RecentTask>.filterDevicePolicyRestrictedTasks(): List<RecentTask> =
+        if (flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES)) {
+            // TODO(b/263950746): filter tasks based on the enterprise policies
+            this
+        } else {
+            filter { UserHandle.of(it.userId) == hostUserHandle }
         }
+
+    private fun List<RecentTask>.sortedTasks(): List<RecentTask> = sortedBy {
+        // Show normal tasks first and only then tasks with opened app selector
+        it.topActivityComponent == appSelectorComponentName
+    }
 }
