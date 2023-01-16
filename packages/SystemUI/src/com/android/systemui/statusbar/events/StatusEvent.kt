@@ -19,10 +19,8 @@ package com.android.systemui.statusbar.events
 import android.annotation.IntRange
 import android.annotation.SuppressLint
 import android.content.Context
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
-import com.android.systemui.R
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.privacy.PrivacyItem
 import com.android.systemui.statusbar.BatteryStatusChip
@@ -97,8 +95,7 @@ class PrivacyEvent(override val showAnimation: Boolean = true) : StatusEvent {
     private var privacyChip: OngoingPrivacyChip? = null
 
     override val viewCreator: ViewCreator = { context ->
-        val v = LayoutInflater.from(context)
-                .inflate(R.layout.ongoing_privacy_chip, null) as OngoingPrivacyChip
+        val v = OngoingPrivacyChip(context)
         v.privacyList = privacyItems
         v.contentDescription = contentDescription
         privacyChip = v
