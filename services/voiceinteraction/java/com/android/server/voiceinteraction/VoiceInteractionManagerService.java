@@ -331,6 +331,12 @@ public class VoiceInteractionManagerService extends SystemService {
         @GuardedBy("this")
         private boolean mTemporarilyDisabled;
 
+        /** The start value of showSessionId */
+        private static final int SHOW_SESSION_START_ID = 0;
+
+        @GuardedBy("this")
+        private int mShowSessionId = SHOW_SESSION_START_ID;
+
         private final boolean mEnableService;
         // TODO(b/226201975): remove reference once RoleService supports pre-created users
         private final RoleObserver mRoleObserver;
@@ -347,6 +353,24 @@ public class VoiceInteractionManagerService extends SystemService {
                     Slog.d(TAG, "switchImplementation for user stop.");
                     switchImplementationIfNeededLocked(true);
                 }
+            }
+        }
+
+        int getNextShowSessionId() {
+            synchronized (this) {
+                // Reset the showSessionId to SHOW_SESSION_START_ID to avoid the value exceeds
+                // Integer.MAX_VALUE
+                if (mShowSessionId == Integer.MAX_VALUE - 1) {
+                    mShowSessionId = SHOW_SESSION_START_ID;
+                }
+                mShowSessionId++;
+                return mShowSessionId;
+            }
+        }
+
+        int getShowSessionId() {
+            synchronized (this) {
+                return mShowSessionId;
             }
         }
 

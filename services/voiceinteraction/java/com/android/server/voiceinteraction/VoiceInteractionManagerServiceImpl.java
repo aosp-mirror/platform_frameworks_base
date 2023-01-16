@@ -21,6 +21,7 @@ import static android.app.ActivityManager.START_ASSISTANT_NOT_ACTIVE_SESSION;
 import static android.app.ActivityManager.START_VOICE_HIDDEN_SESSION;
 import static android.app.ActivityManager.START_VOICE_NOT_ACTIVE_SESSION;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
+import static android.service.voice.VoiceInteractionService.KEY_SHOW_SESSION_ID;
 
 import static com.android.server.policy.PhoneWindowManager.SYSTEM_DIALOG_REASON_ASSIST;
 
@@ -255,13 +256,17 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
                 /* direct= */ true);
     }
 
-    public boolean showSessionLocked(@NonNull Bundle args, int flags,
+    public boolean showSessionLocked(@Nullable Bundle args, int flags,
             @Nullable String attributionTag,
             @Nullable IVoiceInteractionSessionShowCallback showCallback,
             @Nullable IBinder activityToken) {
+        final int sessionId = mServiceStub.getNextShowSessionId();
+        final Bundle newArgs = args == null ? new Bundle() : args;
+        newArgs.putInt(KEY_SHOW_SESSION_ID, sessionId);
+
         try {
             if (mService != null) {
-                mService.prepareToShowSession(args, flags);
+                mService.prepareToShowSession(newArgs, flags);
             }
         } catch (RemoteException e) {
             Slog.w(TAG, "RemoteException while calling prepareToShowSession", e);
@@ -275,7 +280,9 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         if (!mActiveSession.mBound) {
             try {
                 if (mService != null) {
-                    mService.showSessionFailed();
+                    Bundle failedArgs = new Bundle();
+                    failedArgs.putInt(KEY_SHOW_SESSION_ID, sessionId);
+                    mService.showSessionFailed(failedArgs);
                 }
             } catch (RemoteException e) {
                 Slog.w(TAG, "RemoteException while calling showSessionFailed", e);
@@ -300,7 +307,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         } else {
             visibleActivities = allVisibleActivities;
         }
-        return mActiveSession.showLocked(args, flags, attributionTag, mDisabledShowContext,
+        return mActiveSession.showLocked(newArgs, flags, attributionTag, mDisabledShowContext,
                 showCallback, visibleActivities);
     }
 

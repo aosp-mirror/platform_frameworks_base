@@ -31,5 +31,5 @@ oneway interface IVoiceInteractionService {
     void getActiveServiceSupportedActions(in List<String> voiceActions,
      in IVoiceActionCheckCallback callback);
     void prepareToShowSession(in Bundle args, int flags);
-    void showSessionFailed();
+    void showSessionFailed(in Bundle args);
 }
