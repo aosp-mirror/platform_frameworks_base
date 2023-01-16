@@ -360,6 +360,17 @@ public final class Display {
     public static final int FLAG_STEAL_TOP_FOCUS_DISABLED = 1 << 12;
 
     /**
+     * Display flag: Indicates that the display is a rear display.
+     * <p>
+     * This flag identifies complementary displays that are facing away from the user.
+     * </p>
+     *
+     * @hide
+     * @see #getFlags()
+     */
+    public static final int FLAG_REAR = 1 << 13;
+
+    /**
      * Display flag: Indicates that the contents of the display should not be scaled
      * to fit the physical screen dimensions.  Used for development only to emulate
      * devices with smaller physicals screens while preserving density.

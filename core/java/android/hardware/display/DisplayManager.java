@@ -115,6 +115,23 @@ public final class DisplayManager {
             "android.hardware.display.category.PRESENTATION";
 
     /**
+     * Display category: Rear displays.
+     * <p>
+     * This category can be used to identify complementary internal displays that are facing away
+     * from the user.
+     * Certain applications may present to this display.
+     * Similar to presentation displays.
+     * </p>
+     *
+     * @see android.app.Presentation
+     * @see Display#FLAG_PRESENTATION
+     * @see #getDisplays(String)
+     * @hide
+     */
+    public static final String DISPLAY_CATEGORY_REAR =
+            "android.hardware.display.category.REAR";
+
+    /**
      * Display category: All displays, including disabled displays.
      * <p>
      * This returns all displays, including currently disabled and inaccessible displays.
@@ -619,11 +636,19 @@ public final class DisplayManager {
         synchronized (mLock) {
             try {
                 if (DISPLAY_CATEGORY_PRESENTATION.equals(category)) {
-                    addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_WIFI);
-                    addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_EXTERNAL);
-                    addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_OVERLAY);
-                    addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_VIRTUAL);
-                    addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_INTERNAL);
+                    addDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_WIFI,
+                            Display.FLAG_PRESENTATION);
+                    addDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_EXTERNAL,
+                            Display.FLAG_PRESENTATION);
+                    addDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_OVERLAY,
+                            Display.FLAG_PRESENTATION);
+                    addDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_VIRTUAL,
+                            Display.FLAG_PRESENTATION);
+                    addDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_INTERNAL,
+                            Display.FLAG_PRESENTATION);
+                } else if (DISPLAY_CATEGORY_REAR.equals(category)) {
+                    addDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_INTERNAL,
+                            Display.FLAG_REAR);
                 } else if (category == null
                         || DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED.equals(category)) {
                     addAllDisplaysLocked(mTempDisplays, displayIds);
@@ -644,15 +669,16 @@ public final class DisplayManager {
         }
     }
 
-    private void addPresentationDisplaysLocked(
-            ArrayList<Display> displays, int[] displayIds, int matchType) {
-        for (int i = 0; i < displayIds.length; i++) {
-            if (displayIds[i] == DEFAULT_DISPLAY) {
+    private void addDisplaysLocked(
+            ArrayList<Display> displays, int[] displayIds, int matchType, int flagMask) {
+        for (int displayId : displayIds) {
+            if (displayId == DEFAULT_DISPLAY) {
                 continue;
             }
-            Display display = getOrCreateDisplayLocked(displayIds[i], true /*assumeValid*/);
+
+            Display display = getOrCreateDisplayLocked(displayId, /* assumeValid= */ true);
             if (display != null
-                    && (display.getFlags() & Display.FLAG_PRESENTATION) != 0
+                    && (display.getFlags() & flagMask) == flagMask
                     && display.getType() == matchType) {
                 displays.add(display);
             }
