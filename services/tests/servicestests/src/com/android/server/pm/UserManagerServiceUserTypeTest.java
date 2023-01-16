@@ -88,7 +88,11 @@ public class UserManagerServiceUserTypeTest {
                 .setCrossProfileIntentFilterAccessControl(10)
                 .setCrossProfileIntentResolutionStrategy(1)
                 .setMediaSharedWithParent(true)
-                .setCredentialShareableWithParent(false);
+                .setCredentialShareableWithParent(false)
+                .setShowInSettings(900)
+                .setInheritDevicePolicy(340)
+                .setDeleteAppWithParent(true);
+
         final UserTypeDetails type = new UserTypeDetails.Builder()
                 .setName("a.name")
                 .setEnabled(1)
@@ -152,6 +156,10 @@ public class UserManagerServiceUserTypeTest {
                 .getCrossProfileIntentResolutionStrategy());
         assertTrue(type.getDefaultUserPropertiesReference().isMediaSharedWithParent());
         assertFalse(type.getDefaultUserPropertiesReference().isCredentialShareableWithParent());
+        assertEquals(900, type.getDefaultUserPropertiesReference().getShowInSettings());
+        assertEquals(340, type.getDefaultUserPropertiesReference()
+                .getInheritDevicePolicy());
+        assertTrue(type.getDefaultUserPropertiesReference().getDeleteAppWithParent());
 
         assertEquals(23, type.getBadgeLabel(0));
         assertEquals(24, type.getBadgeLabel(1));
@@ -287,7 +295,11 @@ public class UserManagerServiceUserTypeTest {
                 .setCrossProfileIntentFilterAccessControl(10)
                 .setCrossProfileIntentResolutionStrategy(1)
                 .setMediaSharedWithParent(false)
-                .setCredentialShareableWithParent(true);
+                .setCredentialShareableWithParent(true)
+                .setShowInSettings(20)
+                .setInheritDevicePolicy(21)
+                .setDeleteAppWithParent(true);
+
         final ArrayMap<String, UserTypeDetails.Builder> builders = new ArrayMap<>();
         builders.put(userTypeAosp1, new UserTypeDetails.Builder()
                 .setName(userTypeAosp1)
@@ -323,6 +335,10 @@ public class UserManagerServiceUserTypeTest {
         assertFalse(aospType.getDefaultUserPropertiesReference().isMediaSharedWithParent());
         assertTrue(aospType.getDefaultUserPropertiesReference()
                 .isCredentialShareableWithParent());
+        assertEquals(20, aospType.getDefaultUserPropertiesReference().getShowInSettings());
+        assertEquals(21, aospType.getDefaultUserPropertiesReference()
+                .getInheritDevicePolicy());
+        assertTrue(aospType.getDefaultUserPropertiesReference().getDeleteAppWithParent());
 
         // userTypeAosp2 should be modified.
         aospType = builders.get(userTypeAosp2).createUserTypeDetails();
@@ -362,6 +378,11 @@ public class UserManagerServiceUserTypeTest {
         assertTrue(aospType.getDefaultUserPropertiesReference().isMediaSharedWithParent());
         assertFalse(aospType.getDefaultUserPropertiesReference()
                 .isCredentialShareableWithParent());
+        assertEquals(23, aospType.getDefaultUserPropertiesReference().getShowInSettings());
+        assertEquals(450, aospType.getDefaultUserPropertiesReference()
+                .getInheritDevicePolicy());
+        assertFalse(aospType.getDefaultUserPropertiesReference()
+                .getDeleteAppWithParent());
 
         // userTypeOem1 should be created.
         UserTypeDetails.Builder customType = builders.get(userTypeOem1);

@@ -192,6 +192,7 @@ public final class UserManagerTest {
                 .isEqualTo(cloneUserProperties.isMediaSharedWithParent());
         assertThat(typeProps.isCredentialShareableWithParent())
                 .isEqualTo(cloneUserProperties.isCredentialShareableWithParent());
+        assertThrows(SecurityException.class, cloneUserProperties::getDeleteAppWithParent);
 
         // Verify clone user parent
         assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
@@ -844,7 +845,9 @@ public final class UserManagerTest {
         assertThrows(SecurityException.class, userProps::getInheritDevicePolicy);
         assertThat(userProps.isMediaSharedWithParent()).isFalse();
         assertThat(userProps.isCredentialShareableWithParent()).isTrue();
+        assertThrows(SecurityException.class, userProps::getDeleteAppWithParent);
     }
+
 
     // Make sure only max managed profiles can be created
     @MediumTest

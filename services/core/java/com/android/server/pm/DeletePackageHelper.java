@@ -43,6 +43,7 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.UserInfo;
+import android.content.pm.UserProperties;
 import android.content.pm.VersionedPackage;
 import android.net.Uri;
 import android.os.Binder;
@@ -776,19 +777,23 @@ final class DeletePackageHelper {
                             userId, deleteFlags, false /*removedBySystem*/);
 
                     // Get a list of child user profiles and delete if package is
-                    // present in clone profile.
+                    // present in that profile.
                     int[] childUserIds = mUserManagerInternal.getProfileIds(userId, true);
+                    int returnCodeOfChild;
                     for (int childId : childUserIds) {
-                        if (childId != userId) {
-                            UserInfo userInfo = mUserManagerInternal.getUserInfo(childId);
-                            if (userInfo != null && userInfo.isCloneProfile()) {
-                                returnCode = deletePackageX(internalPackageName, versionCode,
-                                        childId, deleteFlags, false /*removedBySystem*/);
-                                break;
+                        if (childId == userId) continue;
+                        UserProperties userProperties = mUserManagerInternal
+                                .getUserProperties(childId);
+                        if (userProperties != null && userProperties.getDeleteAppWithParent()) {
+                            returnCodeOfChild = deletePackageX(internalPackageName, versionCode,
+                                    childId, deleteFlags, false /*removedBySystem*/);
+                            if (returnCodeOfChild != PackageManager.DELETE_SUCCEEDED) {
+                                Slog.w(TAG, "Package delete failed for user " + childId
+                                        + ", returnCode " + returnCodeOfChild);
+                                returnCode = PackageManager.DELETE_FAILED_FOR_CHILD_PROFILE;
                             }
                         }
                     }
-
                 } else {
                     int[] blockUninstallUserIds = getBlockUninstallForUsers(innerSnapshot,
                             internalPackageName, users);
