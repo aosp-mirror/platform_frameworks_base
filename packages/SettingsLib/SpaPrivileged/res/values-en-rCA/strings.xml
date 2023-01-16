@@ -23,4 +23,5 @@
     <string name="app_permission_summary_allowed" msgid="6115213465364138103">"Allowed"</string>
     <string name="app_permission_summary_not_allowed" msgid="58396132188553920">"Not allowed"</string>
     <string name="version_text" msgid="4001669804596458577">"version <xliff:g id="VERSION_NUM">%1$s</xliff:g>"</string>
+    <string name="cloned_app_info_label" msgid="1765651167024478391">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> clone"</string>
 </resources>
