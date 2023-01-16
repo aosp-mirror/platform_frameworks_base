@@ -64,7 +64,6 @@ public class VisualQueryDetector {
             IVoiceInteractionManagerService managerService,
             @NonNull @CallbackExecutor Executor executor,
             Callback callback) {
-
         mManagerService = managerService;
         mCallback = callback;
         mExecutor = executor;
@@ -109,8 +108,18 @@ public class VisualQueryDetector {
         if (DEBUG) {
             Slog.i(TAG, "#startRecognition");
         }
-        // TODO(b/261783819): Call StartDetection on VisualQueryDetectionService with the system.
-        return false;
+        // check if the detector is active with the initialization delegate
+        mInitializationDelegate.startRecognition();
+
+        try {
+            mManagerService.startPerceiving(new BinderCallback(mExecutor, mCallback));
+        } catch (SecurityException e) {
+            Slog.e(TAG, "startRecognition failed: " + e);
+            return false;
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return true;
     }
 
     /**
@@ -123,8 +132,15 @@ public class VisualQueryDetector {
         if (DEBUG) {
             Slog.i(TAG, "#stopRecognition");
         }
-        // TODO(b/261783819): Call StopDetection on VisualQueryDetectionService with the system.
-        return false;
+        // check if the detector is active with the initialization delegate
+        mInitializationDelegate.startRecognition();
+
+        try {
+            mManagerService.stopPerceiving();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return true;
     }
 
     /**
@@ -219,14 +235,14 @@ public class VisualQueryDetector {
 
         @Override
         public boolean stopRecognition() throws IllegalDetectorStateException {
-            //No-op, we only reuse the initialization methods.
-            return false;
+            throwIfDetectorIsNoLongerActive();
+            return true;
         }
 
         @Override
         public boolean startRecognition() throws IllegalDetectorStateException {
-            //No-op, we only reuse the initialization methods.
-            return false;
+            throwIfDetectorIsNoLongerActive();
+            return true;
         }
 
         @Override
@@ -243,6 +259,49 @@ public class VisualQueryDetector {
             return true;
         }
     }
+
+    private static class BinderCallback
+            extends IVisualQueryDetectionVoiceInteractionCallback.Stub {
+        private final Executor mExecutor;
+        private final VisualQueryDetector.Callback mCallback;
+
+        BinderCallback(Executor executor, VisualQueryDetector.Callback callback) {
+            this.mExecutor = executor;
+            this.mCallback = callback;
+        }
+
+        /** Called when the detected result is valid. */
+        @Override
+        public void onQueryDetected(@NonNull String partialQuery) {
+            Slog.v(TAG, "BinderCallback#onQueryDetected");
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
+                    () -> mCallback.onQueryDetected(partialQuery)));
+        }
+
+        @Override
+        public void onQueryFinished() {
+            Slog.v(TAG, "BinderCallback#onQueryFinished");
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
+                    () -> mCallback.onQueryFinished()));
+        }
+
+        @Override
+        public void onQueryRejected() {
+            Slog.v(TAG, "BinderCallback#onQueryRejected");
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
+                    () -> mCallback.onQueryRejected()));
+        }
+
+        /** Called when the detection fails due to an error. */
+        @Override
+        public void onError() {
+            Slog.v(TAG, "BinderCallback#onError");
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
+                    () -> mCallback.onError()));
+        }
+
+    }
+
 
     private static class InitializationStateListener
             extends IHotwordRecognitionStatusCallback.Stub {
