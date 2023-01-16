@@ -140,7 +140,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
 
         // Trying to open it does nothing.
         mSbcqCallbacks.animateExpandNotificationsPanel();
-        verify(mNotificationPanelViewController, never()).expandWithoutQs();
+        verify(mNotificationPanelViewController, never()).expandShadeToNotifications();
         mSbcqCallbacks.animateExpandSettingsPanel(null);
         verify(mNotificationPanelViewController, never()).expand(anyBoolean());
     }
@@ -158,7 +158,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
 
         // Can now be opened.
         mSbcqCallbacks.animateExpandNotificationsPanel();
-        verify(mNotificationPanelViewController).expandWithoutQs();
+        verify(mNotificationPanelViewController).expandShadeToNotifications();
         mSbcqCallbacks.animateExpandSettingsPanel(null);
         verify(mNotificationPanelViewController).expandWithQs();
     }

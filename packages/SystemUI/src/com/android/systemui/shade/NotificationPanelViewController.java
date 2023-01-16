@@ -2072,7 +2072,17 @@ public final class NotificationPanelViewController implements Dumpable {
         }
     }
 
-    public void expandWithoutQs() {
+    /**
+     * Expand shade so that notifications are visible.
+     * Non-split shade: just expanding shade or collapsing QS when they're expanded.
+     * Split shade: only expanding shade, notifications are always visible
+     *
+     * Called when `adb shell cmd statusbar expand-notifications` is executed.
+     */
+    public void expandShadeToNotifications() {
+        if (mSplitShadeEnabled && (isShadeFullyOpen() || isExpanding())) {
+            return;
+        }
         if (isQsExpanded()) {
             flingSettings(0 /* velocity */, FLING_COLLAPSE);
         } else {
@@ -5500,7 +5510,7 @@ public final class NotificationPanelViewController implements Dumpable {
 
         @Override
         public void flingTopOverscroll(float velocity, boolean open) {
-            // in split shade mode we want to expand/collapse QS only when touch happens within QS
+            // in split shade touches affect QS only when touch happens within QS
             if (isSplitShadeAndTouchXOutsideQs(mInitialTouchX)) {
                 return;
             }
