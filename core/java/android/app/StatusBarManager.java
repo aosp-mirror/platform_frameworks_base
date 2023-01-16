@@ -30,6 +30,7 @@ import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Icon;
 import android.media.INearbyMediaDevicesProvider;
 import android.media.INearbyMediaDevicesUpdateCallback;
@@ -47,6 +48,7 @@ import android.util.Pair;
 import android.util.Slog;
 import android.view.View;
 
+import com.android.internal.statusbar.AppClipsServiceConnector;
 import com.android.internal.statusbar.IAddTileResultCallback;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.IUndoMediaTransferCallback;
@@ -1188,6 +1190,37 @@ public class StatusBarManager {
             android.Manifest.permission.LOG_COMPAT_CHANGE})
     public static boolean useMediaSessionActionsForApp(String packageName, UserHandle user) {
         return CompatChanges.isChangeEnabled(MEDIA_CONTROL_SESSION_ACTIONS, packageName, user);
+    }
+
+    /**
+     * Checks whether the supplied activity can {@link Activity#startActivityForResult(Intent, int)}
+     * a system activity that captures content on the screen to take a screenshot.
+     *
+     * <p>Note: The result should not be cached.
+     *
+     * <p>The system activity displays an editing tool that allows user to edit the screenshot, save
+     * it on device, and return the edited screenshot as {@link android.net.Uri} to the calling
+     * activity. User interaction is required to return the edited screenshot to the calling
+     * activity.
+     *
+     * <p>When {@code true}, callers can use {@link Activity#startActivityForResult(Intent, int)}
+     * to start start the content capture activity using
+     * {@link Intent#ACTION_LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE}.
+     *
+     * @param activity Calling activity
+     * @return true if the activity supports launching the capture content activity for note.
+     *
+     * @see Intent#ACTION_LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE
+     * @see Manifest.permission#LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE
+     * @see android.app.role.RoleManager#ROLE_NOTES
+     */
+    @RequiresPermission(Manifest.permission.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE)
+    public boolean canLaunchCaptureContentActivityForNote(@NonNull Activity activity) {
+        Objects.requireNonNull(activity);
+        IBinder activityToken = activity.getActivityToken();
+        int taskId = ActivityClient.getInstance().getTaskForActivity(activityToken, false);
+        return new AppClipsServiceConnector(mContext)
+                .canLaunchCaptureContentActivityForNote(taskId);
     }
 
     /** @hide */

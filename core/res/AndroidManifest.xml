@@ -2579,6 +2579,14 @@
     <!-- ==================================================== -->
     <eat-comment />
 
+    <!-- Allows an application to capture screen content to perform a screenshot using the intent
+         action {@link android.content.Intent#ACTION_LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE}.
+         <p>Protection level: internal|role
+         <p>Intended for use by ROLE_NOTES only.
+    -->
+    <permission android:name="android.permission.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE"
+        android:protectionLevel="internal|role" />
+
     <!-- Allows an application to get notified when a screen capture of its windows is attempted.
          <p>Protection level: normal
     -->
