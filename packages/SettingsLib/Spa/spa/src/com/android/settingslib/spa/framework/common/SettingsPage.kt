@@ -94,6 +94,12 @@ data class SettingsPage(
         return !isCreateBy(NULL_PAGE_NAME) &&
             !hasRuntimeParam()
     }
+
+    fun isEnabled(): Boolean {
+        if (!SpaEnvironmentFactory.isReady()) return false
+        val pageProviderRepository by SpaEnvironmentFactory.instance.pageProviderRepository
+        return pageProviderRepository.getProviderOrNull(sppName)?.isEnabled(arguments) ?: false
+    }
 }
 
 fun SettingsPageProvider.createSettingsPage(arguments: Bundle? = null): SettingsPage {

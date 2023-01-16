@@ -49,7 +49,7 @@ import com.android.settingslib.spa.framework.compose.composable
 import com.android.settingslib.spa.framework.compose.localNavController
 import com.android.settingslib.spa.framework.compose.rememberAnimatedNavController
 import com.android.settingslib.spa.framework.theme.SettingsTheme
-import com.android.settingslib.spa.framework.util.PageEvent
+import com.android.settingslib.spa.framework.util.PageWithEvent
 import com.android.settingslib.spa.framework.util.getDestination
 import com.android.settingslib.spa.framework.util.getEntryId
 import com.android.settingslib.spa.framework.util.getSessionName
@@ -118,32 +118,25 @@ private fun NavControllerWrapperImpl.NavContent(allProvider: Collection<Settings
                 arguments = spp.parameter,
                 enterTransition = {
                     slideIntoContainer(
-                        AnimatedContentScope.SlideDirection.Left,
-                        animationSpec = slideEffect
+                        AnimatedContentScope.SlideDirection.Left, animationSpec = slideEffect
                     ) + fadeIn(animationSpec = fadeEffect)
                 },
                 exitTransition = {
                     slideOutOfContainer(
-                        AnimatedContentScope.SlideDirection.Left,
-                        animationSpec = slideEffect
+                        AnimatedContentScope.SlideDirection.Left, animationSpec = slideEffect
                     ) + fadeOut(animationSpec = fadeEffect)
                 },
                 popEnterTransition = {
                     slideIntoContainer(
-                        AnimatedContentScope.SlideDirection.Right,
-                        animationSpec = slideEffect
+                        AnimatedContentScope.SlideDirection.Right, animationSpec = slideEffect
                     ) + fadeIn(animationSpec = fadeEffect)
                 },
                 popExitTransition = {
                     slideOutOfContainer(
-                        AnimatedContentScope.SlideDirection.Right,
-                        animationSpec = slideEffect
+                        AnimatedContentScope.SlideDirection.Right, animationSpec = slideEffect
                     ) + fadeOut(animationSpec = fadeEffect)
                 },
-            ) { navBackStackEntry ->
-                spp.PageEvent(navBackStackEntry.arguments)
-                spp.Page(navBackStackEntry.arguments)
-            }
+            ) { navBackStackEntry -> spp.PageWithEvent(navBackStackEntry.arguments) }
         }
     }
 }
