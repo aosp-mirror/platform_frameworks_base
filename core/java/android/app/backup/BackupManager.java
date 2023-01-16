@@ -16,6 +16,7 @@
 
 package android.app.backup;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -37,6 +38,8 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.util.Pair;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -403,33 +406,6 @@ public class BackupManager {
             } catch (RemoteException e) {
                 Log.e(TAG, "setBackupEnabled() couldn't connect");
             }
-        }
-    }
-
-    /**
-     * Enable/disable the framework backup scheduling entirely for the current user. When disabled,
-     * no Key/Value or Full backup jobs will be scheduled by the Android framework.
-     *
-     * <p>Note: This does not disable backups: only their scheduling is affected and backups can
-     * still be triggered manually.
-     *
-     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
-     *
-     * @hide
-     */
-    @RequiresPermission(allOf = {android.Manifest.permission.BACKUP,
-            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional = true)
-    public void setFrameworkSchedulingEnabled(boolean isEnabled) {
-        checkServiceBinder();
-        if (sService == null) {
-            Log.e(TAG, "setFrameworkSchedulingEnabled() couldn't connect");
-            return;
-        }
-
-        try {
-            sService.setFrameworkSchedulingEnabledForUser(mContext.getUserId(), isEnabled);
-        } catch (RemoteException e) {
-            Log.e(TAG, "setFrameworkSchedulingEnabled() couldn't connect");
         }
     }
 

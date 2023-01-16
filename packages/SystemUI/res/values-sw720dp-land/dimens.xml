@@ -27,7 +27,7 @@
 
     <dimen name="status_view_margin_horizontal">24dp</dimen>
 
-    <dimen name="qs_media_session_height_expanded">251dp</dimen>
+    <dimen name="qs_media_session_height_expanded">184dp</dimen>
     <dimen name="qs_content_horizontal_padding">40dp</dimen>
     <dimen name="qs_horizontal_margin">40dp</dimen>
     <!-- in split shade qs_tiles_page_horizontal_margin should be equal of qs_horizontal_margin/2,
@@ -36,8 +36,8 @@
     <dimen name="qs_tiles_page_horizontal_margin">20dp</dimen>
 
     <!-- Size of Smartspace media recommendations cards in the QSPanel carousel -->
-    <dimen name="qs_media_rec_icon_top_margin">27dp</dimen>
-    <dimen name="qs_media_rec_album_size">152dp</dimen>
+    <dimen name="qs_media_rec_icon_top_margin">16dp</dimen>
+    <dimen name="qs_media_rec_album_size">112dp</dimen>
     <dimen name="qs_media_rec_album_side_margin">16dp</dimen>
 
     <dimen name="lockscreen_shade_max_over_scroll_amount">42dp</dimen>

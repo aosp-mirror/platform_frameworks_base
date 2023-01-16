@@ -194,6 +194,12 @@ public abstract class HotwordDetectionService extends Service
         }
 
         @Override
+        public void detectWithVisualSignals(
+                IDetectorSessionVisualQueryDetectionCallback callback) {
+            throw new UnsupportedOperationException("Not supported by HotwordDetectionService");
+        }
+
+        @Override
         public void updateAudioFlinger(IBinder audioFlinger) {
             AudioSystem.setAudioFlingerBinder(audioFlinger);
         }
@@ -382,7 +388,7 @@ public abstract class HotwordDetectionService extends Service
      */
     @SystemApi
     public static final class Callback {
-        // TODO: need to make sure we don't store remote references, but not a high priority.
+        // TODO: consider making the constructor a test api for testing purpose
         private final IDspHotwordDetectionCallback mRemoteCallback;
 
         private Callback(IDspHotwordDetectionCallback remoteCallback) {

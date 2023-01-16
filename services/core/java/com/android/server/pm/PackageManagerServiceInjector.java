@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.app.backup.IBackupManager;
 import android.content.ComponentName;
@@ -138,7 +139,8 @@ public class PackageManagerServiceInjector {
     private final Singleton<DomainVerificationManagerInternal>
             mDomainVerificationManagerInternalProducer;
     private final Singleton<Handler> mHandlerProducer;
-    private final Singleton<BackgroundDexOptService> mBackgroundDexOptService;
+    private final Singleton<BackgroundDexOptService>
+            mBackgroundDexOptService; // TODO(b/260124949): Remove this.
     private final Singleton<IBackupManager> mIBackupManager;
     private final Singleton<SharedLibrariesImpl> mSharedLibrariesProducer;
     private final Singleton<CrossProfileIntentFilterHelper> mCrossProfileIntentFilterHelperProducer;
@@ -408,6 +410,7 @@ public class PackageManagerServiceInjector {
         return getLocalService(ActivityManagerInternal.class);
     }
 
+    @Nullable
     public BackgroundDexOptService getBackgroundDexOptService() {
         return mBackgroundDexOptService.get(this, mPackageManager);
     }

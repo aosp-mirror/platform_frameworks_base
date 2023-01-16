@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.WindowInsets.Type.navigationBars;
 
+import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN;
 import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING;
@@ -185,8 +186,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                         isVisible && mDreamOverlayStateController.isOverlayActive());
 
                 if (!isVisible) {
-                    mCentralSurfaces.setPrimaryBouncerHiddenFraction(
-                            KeyguardBouncer.EXPANSION_HIDDEN);
+                    mCentralSurfaces.setPrimaryBouncerHiddenFraction(EXPANSION_HIDDEN);
                 }
 
                 /* Register predictive back callback when keyguard becomes visible, and unregister
@@ -521,7 +521,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                         || mNotificationPanelViewController.isExpanding());
 
         final boolean isUserTrackingStarted =
-                event.getFraction() != KeyguardBouncer.EXPANSION_HIDDEN && event.getTracking();
+                event.getFraction() != EXPANSION_HIDDEN && event.getTracking();
 
         return mKeyguardStateController.isShowing()
                 && !primaryBouncerIsOrWillBeShowing()
@@ -571,9 +571,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             }
         } else {
             if (mPrimaryBouncer != null) {
-                mPrimaryBouncer.setExpansion(KeyguardBouncer.EXPANSION_HIDDEN);
+                mPrimaryBouncer.setExpansion(EXPANSION_HIDDEN);
             } else {
-                mPrimaryBouncerInteractor.setPanelExpansion(KeyguardBouncer.EXPANSION_HIDDEN);
+                mPrimaryBouncerInteractor.setPanelExpansion(EXPANSION_HIDDEN);
             }
         }
     }

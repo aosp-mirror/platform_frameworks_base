@@ -339,6 +339,28 @@ public final class InputMethodInfo implements Parcelable {
         mIsVrOnly = isVrOnly;
     }
 
+    /**
+     * @hide
+     */
+    public InputMethodInfo(InputMethodInfo source) {
+        mId = source.mId;
+        mSettingsActivityName = source.mSettingsActivityName;
+        mIsDefaultResId = source.mIsDefaultResId;
+        mIsAuxIme = source.mIsAuxIme;
+        mSupportsSwitchingToNextInputMethod = source.mSupportsSwitchingToNextInputMethod;
+        mInlineSuggestionsEnabled = source.mInlineSuggestionsEnabled;
+        mSupportsInlineSuggestionsWithTouchExploration =
+                source.mSupportsInlineSuggestionsWithTouchExploration;
+        mSuppressesSpellChecker = source.mSuppressesSpellChecker;
+        mShowInInputMethodPicker = source.mShowInInputMethodPicker;
+        mIsVrOnly = source.mIsVrOnly;
+        mService = source.mService;
+        mSubtypes = source.mSubtypes;
+        mHandledConfigChanges = source.mHandledConfigChanges;
+        mSupportsStylusHandwriting = source.mSupportsStylusHandwriting;
+        mForceDefault = source.mForceDefault;
+    }
+
     InputMethodInfo(Parcel source) {
         mId = source.readString();
         mSettingsActivityName = source.readString();

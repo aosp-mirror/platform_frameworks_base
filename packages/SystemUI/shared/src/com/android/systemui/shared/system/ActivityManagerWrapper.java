@@ -283,17 +283,6 @@ public class ActivityManagerWrapper {
     }
 
     /**
-     * @return whether screen pinning is active.
-     */
-    public boolean isScreenPinningActive() {
-        try {
-            return getService().getLockTaskModeState() == LOCK_TASK_MODE_PINNED;
-        } catch (RemoteException e) {
-            return false;
-        }
-    }
-
-    /**
      * @return whether screen pinning is enabled.
      */
     public boolean isScreenPinningEnabled() {

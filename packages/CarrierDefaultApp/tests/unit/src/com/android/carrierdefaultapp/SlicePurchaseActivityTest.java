@@ -48,7 +48,7 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidJUnit4.class)
 public class SlicePurchaseActivityTest extends ActivityUnitTestCase<SlicePurchaseActivity> {
-    private static final String TAG = "SlicePurchaseActivityTest";
+    private static final String CARRIER = "Some Carrier";
     private static final String URL = "file:///android_asset/slice_purchase_test.html";
     private static final int PHONE_ID = 0;
 
@@ -95,7 +95,7 @@ public class SlicePurchaseActivityTest extends ActivityUnitTestCase<SlicePurchas
                 TelephonyManager.PREMIUM_CAPABILITY_PRIORITIZE_LATENCY);
         intent.putExtra(SlicePurchaseController.EXTRA_PURCHASE_URL,
                 SlicePurchaseController.SLICE_PURCHASE_TEST_FILE);
-        intent.putExtra(SlicePurchaseController.EXTRA_REQUESTING_APP_NAME, TAG);
+        intent.putExtra(SlicePurchaseController.EXTRA_CARRIER, CARRIER);
         Intent spiedIntent = spy(intent);
 
         // set up pending intents

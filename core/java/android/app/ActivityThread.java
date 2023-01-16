@@ -784,9 +784,10 @@ public final class ActivityThread extends ClientTransactionHandler
 
     static final class ReceiverData extends BroadcastReceiver.PendingResult {
         public ReceiverData(Intent intent, int resultCode, String resultData, Bundle resultExtras,
-                boolean ordered, boolean sticky, IBinder token, int sendingUser) {
+                boolean ordered, boolean sticky, boolean assumeDelivered, IBinder token,
+                int sendingUser) {
             super(resultCode, resultData, resultExtras, TYPE_COMPONENT, ordered, sticky,
-                    token, sendingUser, intent.getFlags());
+                    assumeDelivered, token, sendingUser, intent.getFlags());
             this.intent = intent;
         }
 
@@ -1040,10 +1041,10 @@ public final class ActivityThread extends ClientTransactionHandler
 
         public final void scheduleReceiver(Intent intent, ActivityInfo info,
                 CompatibilityInfo compatInfo, int resultCode, String data, Bundle extras,
-                boolean sync, int sendingUser, int processState) {
+                boolean ordered, boolean assumeDelivered, int sendingUser, int processState) {
             updateProcessState(processState, false);
             ReceiverData r = new ReceiverData(intent, resultCode, data, extras,
-                    sync, false, mAppThread.asBinder(), sendingUser);
+                    ordered, false, assumeDelivered, mAppThread.asBinder(), sendingUser);
             r.info = info;
             sendMessage(H.RECEIVER, r);
         }
@@ -1054,11 +1055,11 @@ public final class ActivityThread extends ClientTransactionHandler
                 if (r.registered) {
                     scheduleRegisteredReceiver(r.receiver, r.intent,
                             r.resultCode, r.data, r.extras, r.ordered, r.sticky,
-                            r.sendingUser, r.processState);
+                            r.assumeDelivered, r.sendingUser, r.processState);
                 } else {
                     scheduleReceiver(r.intent, r.activityInfo, r.compatInfo,
                             r.resultCode, r.data, r.extras, r.sync,
-                            r.sendingUser, r.processState);
+                            r.assumeDelivered, r.sendingUser, r.processState);
                 }
             }
         }
@@ -1288,10 +1289,25 @@ public final class ActivityThread extends ClientTransactionHandler
         // applies transaction ordering per object for such calls.
         public void scheduleRegisteredReceiver(IIntentReceiver receiver, Intent intent,
                 int resultCode, String dataStr, Bundle extras, boolean ordered,
-                boolean sticky, int sendingUser, int processState) throws RemoteException {
+                boolean sticky, boolean assumeDelivered, int sendingUser, int processState)
+                throws RemoteException {
             updateProcessState(processState, false);
-            receiver.performReceive(intent, resultCode, dataStr, extras, ordered,
-                    sticky, sendingUser);
+
+            // We can't modify IIntentReceiver due to UnsupportedAppUsage, so
+            // try our best to shortcut to known subclasses, and alert if
+            // registered using a custom IIntentReceiver that isn't able to
+            // report an expected delivery event
+            if (receiver instanceof LoadedApk.ReceiverDispatcher.InnerReceiver) {
+                ((LoadedApk.ReceiverDispatcher.InnerReceiver) receiver).performReceive(intent,
+                        resultCode, dataStr, extras, ordered, sticky, assumeDelivered, sendingUser);
+            } else {
+                if (!assumeDelivered) {
+                    Log.wtf(TAG, "scheduleRegisteredReceiver() called for " + receiver
+                            + " and " + intent + " without mechanism to finish delivery");
+                }
+                receiver.performReceive(intent, resultCode, dataStr, extras, ordered, sticky,
+                        sendingUser);
+            }
         }
 
         @Override
@@ -6869,26 +6885,13 @@ public final class ActivityThread extends ClientTransactionHandler
         final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskWrites();
         final StrictMode.ThreadPolicy writesAllowedPolicy = StrictMode.getThreadPolicy();
 
-        // Wait for debugger after we have notified the system to finish attach application
         if (data.debugMode != ApplicationThreadConstants.DEBUG_OFF) {
             if (data.debugMode == ApplicationThreadConstants.DEBUG_WAIT) {
-                Slog.w(TAG, "Application " + data.info.getPackageName()
-                        + " is waiting for the debugger ...");
-
-                try {
-                    mgr.showWaitingForDebugger(mAppThread, true);
-                } catch (RemoteException ex) {
-                    throw ex.rethrowFromSystemServer();
-                }
-
-                Debug.waitForDebugger();
-
-                try {
-                    mgr.showWaitingForDebugger(mAppThread, false);
-                } catch (RemoteException ex) {
-                    throw ex.rethrowFromSystemServer();
-                }
+                waitForDebugger(data);
+            } else if (data.debugMode == ApplicationThreadConstants.DEBUG_SUSPEND) {
+                suspendAllAndSendVmStart(data);
             }
+            // Nothing special to do in case of DEBUG_ON.
         }
 
         try {
@@ -6971,6 +6974,49 @@ public final class ActivityThread extends ClientTransactionHandler
             }
         }
     }
+
+    @UnsupportedAppUsage
+    private void waitForDebugger(AppBindData data) {
+        final IActivityManager mgr = ActivityManager.getService();
+        Slog.w(TAG, "Application " + data.info.getPackageName()
+                         + " is waiting for the debugger ...");
+
+        try {
+            mgr.showWaitingForDebugger(mAppThread, true);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+
+        Debug.waitForDebugger();
+
+        try {
+            mgr.showWaitingForDebugger(mAppThread, false);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    @UnsupportedAppUsage
+    private void suspendAllAndSendVmStart(AppBindData data) {
+        final IActivityManager mgr = ActivityManager.getService();
+        Slog.w(TAG, "Application " + data.info.getPackageName()
+                         + " is suspending. Debugger needs to resume to continue.");
+
+        try {
+            mgr.showWaitingForDebugger(mAppThread, true);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+
+        Debug.suspendAllAndSendVmStart();
+
+        try {
+            mgr.showWaitingForDebugger(mAppThread, false);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
 
     private void handleSetContentCaptureOptionsCallback(String packageName) {
         if (mContentCaptureOptionsCallback != null) {

@@ -90,7 +90,7 @@ constructor(
             )
         }
 
-        return KeyguardQuickAffordanceConfig.PickerScreenState.Default
+        return KeyguardQuickAffordanceConfig.PickerScreenState.Default()
     }
 
     override fun onTriggered(

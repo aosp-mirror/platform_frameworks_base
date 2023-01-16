@@ -508,16 +508,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             mService.updateOomAdjPendingTargetsLocked(OOM_ADJ_REASON_START_RECEIVER);
         }
 
-        if (waitingFor) {
-            mWaitingFor.removeIf((pair) -> {
-                if (pair.first.getAsBoolean()) {
-                    pair.second.countDown();
-                    return true;
-                } else {
-                    return false;
-                }
-            });
-        }
+        checkAndRemoveWaitingFor();
 
         traceEnd(cookie);
     }
@@ -897,21 +888,26 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             return true;
         }
 
+        final boolean assumeDelivered = isAssumedDelivered(r, index);
         if (receiver instanceof BroadcastFilter) {
             batch.schedule(((BroadcastFilter) receiver).receiverList.receiver,
                     receiverIntent, r.resultCode, r.resultData, r.resultExtras,
-                    r.ordered, r.initialSticky, r.userId,
+                    r.ordered, r.initialSticky, assumeDelivered, r.userId,
                     app.mState.getReportedProcState(), r, index);
             // TODO: consider making registered receivers of unordered
             // broadcasts report results to detect ANRs
-            if (!r.ordered) {
+            if (assumeDelivered) {
                 batch.success(r, index, BroadcastRecord.DELIVERY_DELIVERED, "assuming delivered");
                 return true;
             }
         } else {
             batch.schedule(receiverIntent, ((ResolveInfo) receiver).activityInfo,
-                    null, r.resultCode, r.resultData, r.resultExtras, r.ordered, r.userId,
-                    app.mState.getReportedProcState(), r, index);
+                    null, r.resultCode, r.resultData, r.resultExtras, r.ordered, assumeDelivered,
+                    r.userId, app.mState.getReportedProcState(), r, index);
+            if (assumeDelivered) {
+                batch.success(r, index, BroadcastRecord.DELIVERY_DELIVERED, "assuming delivered");
+                return true;
+            }
         }
 
         return false;
@@ -1000,7 +996,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * Return true if this receiver should be assumed to have been delivered.
      */
     private boolean isAssumedDelivered(BroadcastRecord r, int index) {
-        return (r.receivers.get(index) instanceof BroadcastFilter) && !r.ordered;
+        return (r.receivers.get(index) instanceof BroadcastFilter) && !r.ordered
+                && (r.resultTo == null);
     }
 
     /**
@@ -1059,10 +1056,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(
                     app, OOM_ADJ_REASON_FINISH_RECEIVER);
             try {
+                final boolean assumeDelivered = true;
                 thread.scheduleReceiverList(mReceiverBatch.registeredReceiver(
                         r.resultTo, r.intent,
                         r.resultCode, r.resultData, r.resultExtras, false, r.initialSticky,
-                        r.userId, app.mState.getReportedProcState()));
+                        assumeDelivered, r.userId, app.mState.getReportedProcState()));
             } catch (RemoteException e) {
                 final String msg = "Failed to schedule result of " + r + " via " + app + ": " + e;
                 logw(msg);
@@ -1180,6 +1178,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             mLocalHandler.removeMessages(MSG_DELIVERY_TIMEOUT_SOFT, queue);
             mLocalHandler.removeMessages(MSG_DELIVERY_TIMEOUT_HARD, queue);
         }
+
+        // Given that a receiver just finished, check if the "waitingFor" conditions are met.
+        checkAndRemoveWaitingFor();
 
         if (early) {
             // This is an early receiver that was transmitted as part of a group.  The delivery
@@ -1509,7 +1510,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         waitFor(() -> isBeyondBarrierLocked(now, pw));
     }
 
-    public void waitFor(@NonNull BooleanSupplier condition) {
+    private void waitFor(@NonNull BooleanSupplier condition) {
         final CountDownLatch latch = new CountDownLatch(1);
         synchronized (mService) {
             mWaitingFor.add(Pair.create(condition, latch));
@@ -1528,6 +1529,19 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                             (q) -> q.setPrioritizeEarliest(false));
                 }
             }
+        }
+    }
+
+    private void checkAndRemoveWaitingFor() {
+        if (!mWaitingFor.isEmpty()) {
+            mWaitingFor.removeIf((pair) -> {
+                if (pair.first.getAsBoolean()) {
+                    pair.second.countDown();
+                    return true;
+                } else {
+                    return false;
+                }
+            });
         }
     }
 

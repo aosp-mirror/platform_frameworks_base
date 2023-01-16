@@ -17,6 +17,7 @@
 package android.service.voice;
 
 import android.Manifest;
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -58,7 +59,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
-
+import java.util.concurrent.Executor;
 /**
  * Top-level service of the current global voice interactor, which is providing
  * support for hotwording, the back-end of a {@link android.app.VoiceInteractor}, etc.
@@ -177,6 +178,8 @@ public class VoiceInteractionService extends Service {
     };
 
     IVoiceInteractionManagerService mSystemService;
+
+    private VisualQueryDetector mActiveVisualQueryDetector;
 
     private final Object mLock = new Object();
 
@@ -583,6 +586,85 @@ public class VoiceInteractionService extends Service {
     }
 
     /**
+     * Creates a {@link VisualQueryDetector} and initializes the application's
+     * {@link VisualQueryDetectionService} using {@code options} and {@code sharedMemory}.
+     *
+     * <p>To be able to call this, you need to set android:visualQueryDetectionService in the
+     * android.voice_interaction metadata file to a valid visual query detection service, and set
+     * android:isolatedProcess="true" in the service's declaration. Otherwise, this throws an
+     * {@link IllegalStateException}.
+     *
+     * <p>Using this has a noticeable impact on battery, since the microphone is kept open
+     * for the lifetime of the recognition {@link VisualQueryDetector#startRecognition() session}.
+     *
+     * @param options Application configuration data to be provided to the
+     * {@link VisualQueryDetectionService}. PersistableBundle does not allow any remotable objects
+     * or other contents that can be used to communicate with other processes.
+     * @param sharedMemory The unrestricted data blob to be provided to the
+     * {@link VisualQueryDetectionService}. Use this to provide models or other such data to the
+     * sandboxed process.
+     * @param callback The callback to notify of detection events.
+     * @return An instanece of {@link VisualQueryDetector}.
+     * @throws UnsupportedOperationException if only single detector is supported. Multiple detector
+     * is only available for apps targeting {@link Build.VERSION_CODES#TIRAMISU} and above.
+     * @throws IllegalStateException when there is an existing {@link VisualQueryDetector}, or when
+     * there is a non-trusted hotword detector running.
+     *
+     * @hide
+     */
+    // TODO: add MANAGE_HOTWORD_DETECTION permission to protect this API and update java doc.
+    @SystemApi
+    @NonNull
+    public final VisualQueryDetector createVisualQueryDetector(
+            @Nullable PersistableBundle options,
+            @Nullable SharedMemory sharedMemory,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull VisualQueryDetector.Callback callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        if (mSystemService == null) {
+            throw new IllegalStateException("Not available until onReady() is called");
+        }
+        synchronized (mLock) {
+            if (!CompatChanges.isChangeEnabled(MULTIPLE_ACTIVE_HOTWORD_DETECTORS)) {
+                throw new UnsupportedOperationException("VisualQueryDetector is only available if "
+                        + "multiple detectors are allowed");
+            } else {
+                if (mActiveVisualQueryDetector != null) {
+                    throw new IllegalStateException(
+                                "There is already an active VisualQueryDetector. "
+                                        + "It must be destroyed to create a new one.");
+                }
+                for (HotwordDetector detector : mActiveDetectors) {
+                    if (!detector.isUsingSandboxedDetectionService()) {
+                        throw new IllegalStateException(
+                                "It disallows to create trusted and non-trusted detectors "
+                                        + "at the same time.");
+                    }
+                }
+            }
+
+            VisualQueryDetector visualQueryDetector =
+                    new VisualQueryDetector(mSystemService, executor, callback);
+            HotwordDetector visualQueryDetectorInitializationDelegate =
+                    visualQueryDetector.getInitializationDelegate();
+            mActiveDetectors.add(visualQueryDetectorInitializationDelegate);
+
+            try {
+                visualQueryDetector.registerOnDestroyListener(this::onHotwordDetectorDestroyed);
+                visualQueryDetector.initialize(options, sharedMemory);
+            } catch (Exception e) {
+                mActiveDetectors.remove(visualQueryDetectorInitializationDelegate);
+                visualQueryDetector.destroy();
+                throw e;
+            }
+            mActiveVisualQueryDetector = visualQueryDetector;
+            return visualQueryDetector;
+        }
+    }
+
+    /**
      * Creates an {@link KeyphraseModelManager} to use for enrolling voice models outside of the
      * pre-bundled system voice models.
      * @hide
@@ -637,6 +719,10 @@ public class VoiceInteractionService extends Service {
 
     private void onHotwordDetectorDestroyed(@NonNull HotwordDetector detector) {
         synchronized (mLock) {
+            if (mActiveVisualQueryDetector!= null &&
+                    detector == mActiveVisualQueryDetector.getInitializationDelegate()) {
+                mActiveVisualQueryDetector = null;
+            }
             mActiveDetectors.remove(detector);
             shutdownHotwordDetectionServiceIfRequiredLocked();
         }

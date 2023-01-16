@@ -24,6 +24,7 @@ import android.os.IRemoteCallback;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.SharedMemory;
+import android.service.voice.IDetectorSessionVisualQueryDetectionCallback;
 import android.service.voice.IDspHotwordDetectionCallback;
 import android.view.contentcapture.IContentCaptureManager;
 import android.speech.IRecognitionServiceManager;
@@ -46,6 +47,8 @@ oneway interface ISandboxedDetectionService {
         in AudioFormat audioFormat,
         in PersistableBundle options,
         in IDspHotwordDetectionCallback callback);
+
+    void detectWithVisualSignals(in IDetectorSessionVisualQueryDetectionCallback callback);
 
     void updateState(
         in PersistableBundle options,

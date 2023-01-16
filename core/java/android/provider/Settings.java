@@ -8660,12 +8660,6 @@ public final class Settings {
         public static final String BACKUP_AUTO_RESTORE = "backup_auto_restore";
 
         /**
-         * Controls whether framework backup scheduling is enabled.
-         * @hide
-         */
-        public static final String BACKUP_SCHEDULING_ENABLED = "backup_scheduling_enabled";
-
-        /**
          * Indicates whether settings backup has been fully provisioned.
          * Type: int ( 0 = unprovisioned, 1 = fully provisioned )
          * @hide
@@ -9408,12 +9402,28 @@ public final class Settings {
         public static final int DOCK_SETUP_PROMPTED = 3;
 
         /**
+         * Indicates that the user has started dock setup but never finished it.
+         * One of the possible states for {@link #DOCK_SETUP_STATE}.
+         *
+         * @hide
+         */
+        public static final int DOCK_SETUP_INCOMPLETE = 4;
+
+        /**
          * Indicates that the user has completed dock setup.
          * One of the possible states for {@link #DOCK_SETUP_STATE}.
          *
          * @hide
          */
         public static final int DOCK_SETUP_COMPLETED = 10;
+
+        /**
+         * Indicates that dock setup timed out before the user could complete it.
+         * One of the possible states for {@link #DOCK_SETUP_STATE}.
+         *
+         * @hide
+         */
+        public static final int DOCK_SETUP_TIMED_OUT = 11;
 
         /** @hide */
         @Retention(RetentionPolicy.SOURCE)
@@ -9422,7 +9432,9 @@ public final class Settings {
                 DOCK_SETUP_STARTED,
                 DOCK_SETUP_PAUSED,
                 DOCK_SETUP_PROMPTED,
-                DOCK_SETUP_COMPLETED
+                DOCK_SETUP_INCOMPLETE,
+                DOCK_SETUP_COMPLETED,
+                DOCK_SETUP_TIMED_OUT
         })
         public @interface DockSetupState {
         }

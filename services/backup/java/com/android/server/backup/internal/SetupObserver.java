@@ -23,6 +23,7 @@ import static com.android.server.backup.UserBackupManagerService.getSetupComplet
 import android.content.Context;
 import android.database.ContentObserver;
 import android.os.Handler;
+import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.server.backup.KeyValueBackupJob;
@@ -77,7 +78,7 @@ public class SetupObserver extends ContentObserver {
                     Slog.d(TAG, "Setup complete so starting backups");
                 }
                 KeyValueBackupJob.schedule(mUserBackupManagerService.getUserId(), mContext,
-                        mUserBackupManagerService);
+                        mUserBackupManagerService.getConstants());
                 mUserBackupManagerService.scheduleNextFullBackupJob(0);
             }
         }

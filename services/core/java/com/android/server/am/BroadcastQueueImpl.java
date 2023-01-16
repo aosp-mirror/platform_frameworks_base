@@ -397,11 +397,12 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                     + ": " + r);
             mService.notifyPackageUse(r.intent.getComponent().getPackageName(),
                                       PackageManager.NOTIFY_PACKAGE_USE_BROADCAST_RECEIVER);
+            final boolean assumeDelivered = false;
             thread.scheduleReceiverList(mReceiverBatch.manifestReceiver(
                     prepareReceiverIntent(r.intent, r.curFilteredExtras),
                     r.curReceiver, null /* compatInfo (unused but need to keep method signature) */,
-                    r.resultCode, r.resultData, r.resultExtras, r.ordered, r.userId,
-                    app.mState.getReportedProcState()));
+                    r.resultCode, r.resultData, r.resultExtras, r.ordered, assumeDelivered,
+                    r.userId, app.mState.getReportedProcState()));
             if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
                     "Process cur broadcast " + r + " DELIVERED for app " + app);
             started = true;
@@ -735,9 +736,10 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                 // If we have an app thread, do the call through that so it is
                 // correctly ordered with other one-way calls.
                 try {
+                    final boolean assumeDelivered = !ordered;
                     thread.scheduleReceiverList(mReceiverBatch.registeredReceiver(
                             receiver, intent, resultCode,
-                            data, extras, ordered, sticky, sendingUser,
+                            data, extras, ordered, sticky, assumeDelivered, sendingUser,
                             app.mState.getReportedProcState()));
                 } catch (RemoteException ex) {
                     // Failed to call into the process. It's either dying or wedged. Kill it gently.

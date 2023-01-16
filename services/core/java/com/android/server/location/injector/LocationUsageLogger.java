@@ -122,6 +122,13 @@ public class LocationUsageLogger {
         }
     }
 
+    /**
+     * Log a location enabled state change event.
+     */
+    public synchronized void logLocationEnabledStateChanged(boolean enabled) {
+        FrameworkStatsLog.write(FrameworkStatsLog.LOCATION_ENABLED_STATE_CHANGED, enabled);
+    }
+
     private static int bucketizeProvider(String provider) {
         if (LocationManager.NETWORK_PROVIDER.equals(provider)) {
             return LocationStatsEnums.PROVIDER_NETWORK;

@@ -1679,6 +1679,16 @@ public final class LoadedApk {
             @Override
             public void performReceive(Intent intent, int resultCode, String data,
                     Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
+                Log.wtf(TAG, "performReceive() called targeting raw IIntentReceiver for " + intent);
+                performReceive(intent, resultCode, data, extras, ordered, sticky,
+                        BroadcastReceiver.PendingResult.guessAssumeDelivered(
+                                BroadcastReceiver.PendingResult.TYPE_REGISTERED, ordered),
+                        sendingUser);
+            }
+
+            public void performReceive(Intent intent, int resultCode, String data,
+                    Bundle extras, boolean ordered, boolean sticky, boolean assumeDelivered,
+                    int sendingUser) {
                 final LoadedApk.ReceiverDispatcher rd;
                 if (intent == null) {
                     Log.wtf(TAG, "Null intent received");
@@ -1693,8 +1703,8 @@ public final class LoadedApk {
                 }
                 if (rd != null) {
                     rd.performReceive(intent, resultCode, data, extras,
-                            ordered, sticky, sendingUser);
-                } else {
+                            ordered, sticky, assumeDelivered, sendingUser);
+                } else if (!assumeDelivered) {
                     // The activity manager dispatched a broadcast to a registered
                     // receiver in this process, but before it could be delivered the
                     // receiver was unregistered.  Acknowledge the broadcast on its
@@ -1729,30 +1739,26 @@ public final class LoadedApk {
 
         final class Args extends BroadcastReceiver.PendingResult {
             private Intent mCurIntent;
-            private final boolean mOrdered;
             private boolean mDispatched;
             private boolean mRunCalled;
 
             public Args(Intent intent, int resultCode, String resultData, Bundle resultExtras,
-                    boolean ordered, boolean sticky, int sendingUser) {
+                    boolean ordered, boolean sticky, boolean assumeDelivered, int sendingUser) {
                 super(resultCode, resultData, resultExtras,
                         mRegistered ? TYPE_REGISTERED : TYPE_UNREGISTERED, ordered,
-                        sticky, mAppThread.asBinder(), sendingUser, intent.getFlags());
+                        sticky, assumeDelivered, mAppThread.asBinder(), sendingUser,
+                        intent.getFlags());
                 mCurIntent = intent;
-                mOrdered = ordered;
             }
 
             public final Runnable getRunnable() {
                 return () -> {
                     final BroadcastReceiver receiver = mReceiver;
-                    final boolean ordered = mOrdered;
 
                     if (ActivityThread.DEBUG_BROADCAST) {
                         int seq = mCurIntent.getIntExtra("seq", -1);
                         Slog.i(ActivityThread.TAG, "Dispatching broadcast " + mCurIntent.getAction()
                                 + " seq=" + seq + " to " + mReceiver);
-                        Slog.i(ActivityThread.TAG, "  mRegistered=" + mRegistered
-                                + " mOrderedHint=" + ordered);
                     }
 
                     final IActivityManager mgr = ActivityManager.getService();
@@ -1766,11 +1772,9 @@ public final class LoadedApk {
                     mDispatched = true;
                     mRunCalled = true;
                     if (receiver == null || intent == null || mForgotten) {
-                        if (mRegistered && ordered) {
-                            if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
-                                    "Finishing null broadcast to " + mReceiver);
-                            sendFinished(mgr);
-                        }
+                        if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
+                                "Finishing null broadcast to " + mReceiver);
+                        sendFinished(mgr);
                         return;
                     }
 
@@ -1790,11 +1794,9 @@ public final class LoadedApk {
                         receiver.setPendingResult(this);
                         receiver.onReceive(mContext, intent);
                     } catch (Exception e) {
-                        if (mRegistered && ordered) {
-                            if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
-                                    "Finishing failed broadcast to " + mReceiver);
-                            sendFinished(mgr);
-                        }
+                        if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
+                                "Finishing failed broadcast to " + mReceiver);
+                        sendFinished(mgr);
                         if (mInstrumentation == null ||
                                 !mInstrumentation.onException(mReceiver, e)) {
                             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
@@ -1868,9 +1870,10 @@ public final class LoadedApk {
         }
 
         public void performReceive(Intent intent, int resultCode, String data,
-                Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
+                Bundle extras, boolean ordered, boolean sticky, boolean assumeDelivered,
+                int sendingUser) {
             final Args args = new Args(intent, resultCode, data, extras, ordered,
-                    sticky, sendingUser);
+                    sticky, assumeDelivered, sendingUser);
             if (intent == null) {
                 Log.wtf(TAG, "Null intent received");
             } else {
@@ -1881,12 +1884,10 @@ public final class LoadedApk {
                 }
             }
             if (intent == null || !mActivityThread.post(args.getRunnable())) {
-                if (mRegistered && ordered) {
-                    IActivityManager mgr = ActivityManager.getService();
-                    if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
-                            "Finishing sync broadcast to " + mReceiver);
-                    args.sendFinished(mgr);
-                }
+                IActivityManager mgr = ActivityManager.getService();
+                if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
+                        "Finishing sync broadcast to " + mReceiver);
+                args.sendFinished(mgr);
             }
         }
 

@@ -64,6 +64,7 @@ import android.util.apk.ApkSigningBlockUtils;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IBinaryTransparencyService;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.pm.ApexManager;
 
 import libcore.util.HexEncoding;
 
@@ -1266,10 +1267,15 @@ public class BinaryTransparencyService extends SystemService {
     private String getOriginalApexPreinstalledLocation(String packageName,
             String currentInstalledLocation) {
         try {
+            // It appears that only apexd knows the preinstalled location, and it uses module name
+            // as the identifier instead of package name. Given the input is a package name, we
+            // need to covert to module name.
+            final String moduleName = ApexManager.getInstance().getApexModuleNameForPackageName(
+                    packageName);
             IApexService apexService = IApexService.Stub.asInterface(
                     Binder.allowBlocking(ServiceManager.waitForService("apexservice")));
             for (ApexInfo info : apexService.getAllPackages()) {
-                if (packageName.equals(info.moduleName)) {
+                if (moduleName.equals(info.moduleName)) {
                     return info.preinstalledModulePath;
                 }
             }

@@ -1782,7 +1782,7 @@ public class Notification implements Parcelable
          * @deprecated Use {@link android.app.Notification.Action.Builder}.
          */
         @Deprecated
-        public Action(int icon, CharSequence title, PendingIntent intent) {
+        public Action(int icon, CharSequence title, @Nullable PendingIntent intent) {
             this(Icon.createWithResource("", icon), title, intent, new Bundle(), null, true,
                     SEMANTIC_ACTION_NONE, false /* isContextual */, false /* requireAuth */);
         }
@@ -1907,10 +1907,12 @@ public class Notification implements Parcelable
              * which may display them in other contexts, for example on a wearable device.
              * @param icon icon to show for this action
              * @param title the title of the action
-             * @param intent the {@link PendingIntent} to fire when users trigger this action
+             * @param intent the {@link PendingIntent} to fire when users trigger this action. May
+             * be null, in which case the action may be rendered in a disabled presentation by the
+             * system UI.
              */
             @Deprecated
-            public Builder(int icon, CharSequence title, PendingIntent intent) {
+            public Builder(int icon, CharSequence title, @Nullable PendingIntent intent) {
                 this(Icon.createWithResource("", icon), title, intent);
             }
 
@@ -1939,9 +1941,11 @@ public class Notification implements Parcelable
              *
              * @param icon icon to show for this action
              * @param title the title of the action
-             * @param intent the {@link PendingIntent} to fire when users trigger this action
+             * @param intent the {@link PendingIntent} to fire when users trigger this action. May
+             * be null, in which case the action may be rendered in a disabled presentation by the
+             * system UI.
              */
-            public Builder(Icon icon, CharSequence title, PendingIntent intent) {
+            public Builder(Icon icon, CharSequence title, @Nullable PendingIntent intent) {
                 this(icon, title, intent, new Bundle(), null, true, SEMANTIC_ACTION_NONE, false);
             }
 

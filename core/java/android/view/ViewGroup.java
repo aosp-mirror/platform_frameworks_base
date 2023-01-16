@@ -3723,7 +3723,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final View child = (preorderedList == null)
                     ? mChildren[childIndex] : preorderedList.get(childIndex);
             if ((flags & AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0
-                    || child.isImportantForAutofill()) {
+                    || child.isImportantForAutofill()
+                    || (child.isMatchingAutofillableHeuristics()
+                        && !child.isActivityDeniedForAutofillForUnimportantView())) {
                 list.add(child);
             } else if (child instanceof ViewGroup) {
                 ((ViewGroup) child).populateChildrenForAutofill(list, flags);

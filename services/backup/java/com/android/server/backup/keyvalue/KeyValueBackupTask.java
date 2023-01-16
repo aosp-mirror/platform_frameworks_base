@@ -1246,7 +1246,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
             delay = 0;
         }
         KeyValueBackupJob.schedule(mBackupManagerService.getUserId(),
-                mBackupManagerService.getContext(), delay, mBackupManagerService);
+                mBackupManagerService.getContext(), delay, mBackupManagerService.getConstants());
 
         for (String packageName : mOriginalQueue) {
             mBackupManagerService.dataChangedImpl(packageName);

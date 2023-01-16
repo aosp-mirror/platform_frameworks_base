@@ -196,6 +196,8 @@ public class ImsSmsImplBase {
      *
      * @param token unique token generated in {@link ImsSmsDispatcher#onMemoryAvailable(void)} that
      *  should be used when triggering callbacks for this specific message.
+     *
+     * @hide
      */
     public void onMemoryAvailable(int token) {
         // Base Implementation - Should be overridden
@@ -397,6 +399,38 @@ public class ImsSmsImplBase {
         }
         try {
             listener.onSendSmsResult(token, messageRef, status, reason, networkErrorCode);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * This API is used to report the result of sending
+     * RP-SMMA to framework based on received network responses(RP-ACK,
+     * RP-ERROR or SIP error).
+     *
+     * @param token provided in {@link #onMemoryAvailable()}.
+     * @param result based on RP-ACK or RP_ERROR
+     * @param networkErrorCode the error code reported by the carrier
+     * network if sending this SMS has resulted in an error or
+     * {@link #RESULT_NO_NETWORK_ERROR} if no network error was generated. See
+     * 3GPP TS 24.011 Section 7.3.4 for valid error codes and more
+     * information.
+     *
+     * @hide
+     */
+    public final void onMemoryAvailableResult(int token, @SendStatusResult int result,
+            int networkErrorCode) throws RuntimeException {
+        IImsSmsListener listener = null;
+        synchronized (mLock) {
+            listener = mListener;
+        }
+
+        if (listener == null) {
+            throw new RuntimeException("Feature not ready.");
+        }
+        try {
+            listener.onMemoryAvailableResult(token, result, networkErrorCode);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

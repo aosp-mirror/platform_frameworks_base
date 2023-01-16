@@ -25,10 +25,15 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Calculates motion predictions.
+ * Calculate motion predictions.
  *
- * Add motions here to get predicted events!
- * @hide
+ * Feed motion events to this class in order to generate the predicted events. The prediction
+ * functionality may not be available on all devices. Check if a specific source is supported on a
+ * given input device using #isPredictionAvailable.
+ *
+ * Send all of the events that were received from the system here in order to generate complete,
+ * accurate predictions. When processing the returned predictions, make sure to consider all of the
+ * {@link MotionEvent#getHistoricalAxisValue historical samples}.
  */
 // Acts as a pass-through to the native MotionPredictor object.
 // Do not store any state in this Java layer, or add any business logic here. All of the

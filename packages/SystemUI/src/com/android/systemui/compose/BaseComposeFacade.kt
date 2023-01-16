@@ -17,8 +17,12 @@
 
 package com.android.systemui.compose
 
+import android.content.Context
+import android.view.View
 import androidx.activity.ComponentActivity
+import androidx.lifecycle.LifecycleOwner
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
+import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 
 /**
  * A facade to interact with Compose, when it is available.
@@ -35,10 +39,22 @@ interface BaseComposeFacade {
      */
     fun isComposeAvailable(): Boolean
 
+    /**
+     * Return the [ComposeInitializer] to make Compose usable in windows outside normal activities.
+     */
+    fun composeInitializer(): ComposeInitializer
+
     /** Bind the content of [activity] to [viewModel]. */
     fun setPeopleSpaceActivityContent(
         activity: ComponentActivity,
         viewModel: PeopleViewModel,
         onResult: (PeopleViewModel.Result) -> Unit,
     )
+
+    /** Create a [View] to represent [viewModel] on screen. */
+    fun createFooterActionsView(
+        context: Context,
+        viewModel: FooterActionsViewModel,
+        qsVisibilityLifecycleOwner: LifecycleOwner,
+    ): View
 }

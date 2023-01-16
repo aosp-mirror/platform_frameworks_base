@@ -1958,6 +1958,19 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
+    @Nullable
+    @Override
+    public InputMethodInfo getCurrentInputMethodInfoAsUser(@UserIdInt int userId) {
+        if (UserHandle.getCallingUserId() != userId) {
+            mContext.enforceCallingPermission(
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+        }
+        synchronized (ImfLock.class) {
+            return queryDefaultInputMethodForUserIdLocked(userId);
+        }
+    }
+
+    @BinderThread
     @NonNull
     @Override
     public List<InputMethodInfo> getInputMethodList(@UserIdInt int userId,
@@ -5288,6 +5301,53 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         return mCurrentSubtype;
     }
 
+    /**
+     * Returns the default {@link InputMethodInfo} for the specific userId.
+     * @param userId user ID to query.
+     */
+    @GuardedBy("ImfLock.class")
+    private InputMethodInfo queryDefaultInputMethodForUserIdLocked(@UserIdInt int userId) {
+        final String imeId = mSettings.getSelectedInputMethodForUser(userId);
+        if (TextUtils.isEmpty(imeId)) {
+            Slog.e(TAG, "No default input method found for userId " + userId);
+            return null;
+        }
+
+        InputMethodInfo curInputMethodInfo;
+        if (userId == mSettings.getCurrentUserId()
+                && (curInputMethodInfo = mMethodMap.get(imeId)) != null) {
+            // clone the InputMethodInfo before returning.
+            return new InputMethodInfo(curInputMethodInfo);
+        }
+
+        final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap = new ArrayMap<>();
+        AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
+        Context userAwareContext =
+                mContext.createContextAsUser(UserHandle.of(userId), 0 /* flags */);
+
+        final int flags = PackageManager.GET_META_DATA
+                | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
+                | PackageManager.MATCH_DIRECT_BOOT_AUTO;
+        final List<ResolveInfo> services =
+                userAwareContext.getPackageManager().queryIntentServicesAsUser(
+                        new Intent(InputMethod.SERVICE_INTERFACE),
+                        PackageManager.ResolveInfoFlags.of(flags),
+                        userId);
+        for (ResolveInfo ri : services) {
+            final String imeIdResolved = InputMethodInfo.computeId(ri);
+            if (imeId.equals(imeIdResolved)) {
+                try {
+                    return new InputMethodInfo(
+                            userAwareContext, ri, additionalSubtypeMap.get(imeId));
+                } catch (Exception e) {
+                    Slog.wtf(TAG, "Unable to load input method " + imeId, e);
+                }
+            }
+        }
+        // we didn't find the InputMethodInfo for imeId. This shouldn't happen.
+        Slog.e(TAG, "Error while locating input method info for imeId: " + imeId);
+        return null;
+    }
     private ArrayMap<String, InputMethodInfo> queryMethodMapForUser(@UserIdInt int userId) {
         final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
         final ArrayList<InputMethodInfo> methodList = new ArrayList<>();
