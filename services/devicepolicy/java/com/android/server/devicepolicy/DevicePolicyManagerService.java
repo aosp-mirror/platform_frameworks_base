@@ -8642,7 +8642,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // hard-coded default value setting.
             if (isAdb(caller)) {
                 activeAdmin.mAdminCanGrantSensorsPermissions = true;
-                mPolicyCache.setAdminCanGrantSensorsPermissions(userId, true);
+                mPolicyCache.setAdminCanGrantSensorsPermissions(true);
                 saveSettingsLocked(userId);
             }
 
@@ -14667,7 +14667,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     AdminPermissionControlParams permissionParams =
                             new AdminPermissionControlParams(packageName, permission,
                                     grantState,
-                                    canAdminGrantSensorsPermissionsForUser(caller.getUserId()));
+                                    canAdminGrantSensorsPermissions());
                     mInjector.getPermissionControllerManager(caller.getUserHandle())
                             .setRuntimePermissionGrantStateByDeviceAdmin(
                                     caller.getPackageName(),
@@ -19263,7 +19263,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     "May only be set on a the user of a device owner.");
 
             owner.mAdminCanGrantSensorsPermissions = canGrant;
-            mPolicyCache.setAdminCanGrantSensorsPermissions(userId, canGrant);
+            mPolicyCache.setAdminCanGrantSensorsPermissions(canGrant);
             saveSettingsLocked(userId);
         }
     }
@@ -19293,7 +19293,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 owner = getDeviceOrProfileOwnerAdminLocked(userId);
             }
             boolean canGrant = owner != null ? owner.mAdminCanGrantSensorsPermissions : false;
-            mPolicyCache.setAdminCanGrantSensorsPermissions(userId, canGrant);
+            mPolicyCache.setAdminCanGrantSensorsPermissions(canGrant);
         }
     }
 
@@ -19338,12 +19338,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean canAdminGrantSensorsPermissionsForUser(int userId) {
+    public boolean canAdminGrantSensorsPermissions() {
         if (!mHasFeature) {
             return false;
         }
 
-        return mPolicyCache.canAdminGrantSensorsPermissionsForUser(userId);
+        return mPolicyCache.canAdminGrantSensorsPermissions();
     }
 
     @Override

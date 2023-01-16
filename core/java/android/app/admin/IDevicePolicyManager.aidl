@@ -553,7 +553,7 @@ interface IDevicePolicyManager {
     int getDeviceOwnerType(in ComponentName admin);
 
     void resetDefaultCrossProfileIntentFilters(int userId);
-    boolean canAdminGrantSensorsPermissionsForUser(int userId);
+    boolean canAdminGrantSensorsPermissions();
 
     void setUsbDataSignalingEnabled(String callerPackage, boolean enabled);
     boolean isUsbDataSignalingEnabled(String callerPackage);

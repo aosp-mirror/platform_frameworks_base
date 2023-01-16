@@ -56,10 +56,9 @@ public abstract class DevicePolicyCache {
     public abstract int getPermissionPolicy(@UserIdInt int userHandle);
 
     /**
-     * Caches {@link DevicePolicyManager#canAdminGrantSensorsPermissionsForUser(int)} for the
-     * given user.
+     * True if there is an admin on the device who can grant sensor permissions.
      */
-    public abstract boolean canAdminGrantSensorsPermissionsForUser(@UserIdInt int userHandle);
+    public abstract boolean canAdminGrantSensorsPermissions();
 
     /**
      * Empty implementation.
@@ -83,7 +82,7 @@ public abstract class DevicePolicyCache {
         }
 
         @Override
-        public boolean canAdminGrantSensorsPermissionsForUser(int userHandle) {
+        public boolean canAdminGrantSensorsPermissions() {
             return false;
         }
     }

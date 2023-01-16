@@ -15776,7 +15776,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns true if the caller is running on a device where the admin can grant
+     * Returns true if the caller is running on a device where an admin can grant
      * permissions related to device sensors.
      * This is a signal that the device is a fully-managed device where personal usage is
      * discouraged.
@@ -15784,7 +15784,7 @@ public class DevicePolicyManager {
      * {@link #setPermissionGrantState(ComponentName, String, String, int)}.
      *
      * May be called by any app.
-     * @return true if the app can grant device sensors-related permissions, false otherwise.
+     * @return true if an admin can grant device sensors-related permissions, false otherwise.
      */
     public boolean canAdminGrantSensorsPermissions() {
         throwIfParentInstance("canAdminGrantSensorsPermissions");
@@ -15792,7 +15792,7 @@ public class DevicePolicyManager {
             return false;
         }
         try {
-            return mService.canAdminGrantSensorsPermissionsForUser(myUserId());
+            return mService.canAdminGrantSensorsPermissions();
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
