@@ -1625,8 +1625,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return LocalServices.getService(LockSettingsInternal.class);
         }
 
-        CrossProfileApps getCrossProfileApps() {
-            return mContext.getSystemService(CrossProfileApps.class);
+        CrossProfileApps getCrossProfileApps(@UserIdInt int userId) {
+            return mContext.createContextAsUser(UserHandle.of(userId), /* flags= */ 0)
+                    .getSystemService(CrossProfileApps.class);
         }
 
         boolean hasUserSetupCompleted(DevicePolicyData userData) {
@@ -2412,22 +2413,23 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
 
-        final UserHandle doUserHandle = UserHandle.of(doUserId);
-
-        // Based on  CDD : https://source.android.com/compatibility/12/android-12-cdd#95_multi-user_support,
-        // creation of clone profile is not allowed in case device owner is set.
-        // Enforcing this restriction on setting up of device owner.
-        if (!mUserManager.hasUserRestriction(
-                UserManager.DISALLOW_ADD_CLONE_PROFILE, doUserHandle)) {
-            mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE, true,
-                    doUserHandle);
-        }
-        // Creation of managed profile is restricted in case device owner is set, enforcing this
-        // restriction by setting user level restriction at time of device owner setup.
-        if (!mUserManager.hasUserRestriction(
-                UserManager.DISALLOW_ADD_MANAGED_PROFILE, doUserHandle)) {
-            mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, true,
-                    doUserHandle);
+        for (UserInfo userInfo : mUserManager.getUsers()) {
+            UserHandle userHandle = userInfo.getUserHandle();
+            // Based on  CDD : https://source.android.com/compatibility/12/android-12-cdd#95_multi-user_support,
+            // creation of clone profile is not allowed in case device owner is set.
+            // Enforcing this restriction on setting up of device owner.
+            if (!mUserManager.hasUserRestriction(
+                    UserManager.DISALLOW_ADD_CLONE_PROFILE, userHandle)) {
+                mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE, true,
+                        userHandle);
+            }
+            // Creation of managed profile is restricted in case device owner is set, enforcing this
+            // restriction by setting user level restriction at time of device owner setup.
+            if (!mUserManager.hasUserRestriction(
+                    UserManager.DISALLOW_ADD_MANAGED_PROFILE, userHandle)) {
+                mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, true,
+                        userHandle);
+            }
         }
     }
 
@@ -18645,7 +18647,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         "Error creating profile, createProfileForUserEvenWhenDisallowed "
                                 + "returned null.");
             }
-            resetInteractAcrossProfilesAppOps();
+            resetInteractAcrossProfilesAppOps(caller.getUserId());
             logEventDuration(
                     DevicePolicyEnums.PLATFORM_PROVISIONING_CREATE_PROFILE_MS,
                     startTime,
@@ -18797,37 +18799,37 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return caller.getPackageName().equals(devicePolicyManagementRoleHolderPackageName);
     }
 
-    private void resetInteractAcrossProfilesAppOps() {
-        mInjector.getCrossProfileApps().clearInteractAcrossProfilesAppOps();
-        pregrantDefaultInteractAcrossProfilesAppOps();
+    private void resetInteractAcrossProfilesAppOps(@UserIdInt int userId) {
+        mInjector.getCrossProfileApps(userId).clearInteractAcrossProfilesAppOps();
+        pregrantDefaultInteractAcrossProfilesAppOps(userId);
     }
 
-    private void pregrantDefaultInteractAcrossProfilesAppOps() {
+    private void pregrantDefaultInteractAcrossProfilesAppOps(@UserIdInt int userId) {
         final String op =
                 AppOpsManager.permissionToOp(Manifest.permission.INTERACT_ACROSS_PROFILES);
-        for (String packageName : getConfigurableDefaultCrossProfilePackages()) {
-            if (appOpIsChangedFromDefault(op, packageName)) {
+        for (String packageName : getConfigurableDefaultCrossProfilePackages(userId)) {
+            if (!appOpIsDefaultOrAllowed(userId, op, packageName)) {
                 continue;
             }
-            mInjector.getCrossProfileApps().setInteractAcrossProfilesAppOp(
+            mInjector.getCrossProfileApps(userId).setInteractAcrossProfilesAppOp(
                     packageName, MODE_ALLOWED);
         }
     }
 
-    private Set<String> getConfigurableDefaultCrossProfilePackages() {
+    private Set<String> getConfigurableDefaultCrossProfilePackages(@UserIdInt int userId) {
         List<String> defaultPackages = getDefaultCrossProfilePackages();
         return defaultPackages.stream().filter(
-                mInjector.getCrossProfileApps()::canConfigureInteractAcrossProfiles).collect(
+                mInjector.getCrossProfileApps(userId)::canConfigureInteractAcrossProfiles).collect(
                 Collectors.toSet());
     }
 
-    private boolean appOpIsChangedFromDefault(String op, String packageName) {
+    private boolean appOpIsDefaultOrAllowed(@UserIdInt int userId, String op, String packageName) {
         try {
-            final int uid = mContext.getPackageManager().getPackageUid(
-                    packageName, /* flags= */ 0);
-            return mInjector.getAppOpsManager().unsafeCheckOpNoThrow(
-                    op, uid, packageName)
-                    != AppOpsManager.MODE_DEFAULT;
+            final int uid = mContext.createContextAsUser(UserHandle.of(userId), /* flags= */ 0).
+                    getPackageManager().getPackageUid(packageName, /* flags= */ 0);
+            int mode = mInjector.getAppOpsManager().unsafeCheckOpNoThrow(
+                    op, uid, packageName);
+            return mode == MODE_ALLOWED || mode == MODE_DEFAULT;
         } catch (NameNotFoundException e) {
             return false;
         }
