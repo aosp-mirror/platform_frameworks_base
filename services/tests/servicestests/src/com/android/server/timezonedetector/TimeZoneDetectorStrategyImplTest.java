@@ -67,18 +67,17 @@ import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion.MatchType;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion.Quality;
-import android.os.HandlerThread;
 import android.service.timezone.TimeZoneProviderStatus;
 
 import com.android.server.SystemTimeZone.TimeZoneConfidence;
 import com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.QualifiedTelephonyTimeZoneSuggestion;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -208,8 +207,6 @@ public class TimeZoneDetectorStrategyImplTest {
 
     private FakeServiceConfigAccessor mFakeServiceConfigAccessorSpy;
     private FakeEnvironment mFakeEnvironment;
-    private HandlerThread mHandlerThread;
-    private TestHandler mTestHandler;
 
     private TimeZoneDetectorStrategyImpl mTimeZoneDetectorStrategy;
 
@@ -220,18 +217,8 @@ public class TimeZoneDetectorStrategyImplTest {
         mFakeServiceConfigAccessorSpy.initializeCurrentUserConfiguration(
                 CONFIG_AUTO_DISABLED_GEO_DISABLED);
 
-        // Create a thread + handler for processing the work that the strategy posts.
-        mHandlerThread = new HandlerThread("TimeZoneDetectorStrategyImplTest");
-        mHandlerThread.start();
-        mTestHandler = new TestHandler(mHandlerThread.getLooper());
         mTimeZoneDetectorStrategy = new TimeZoneDetectorStrategyImpl(
-                mFakeServiceConfigAccessorSpy, mTestHandler, mFakeEnvironment);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        mHandlerThread.quit();
-        mHandlerThread.join();
+                mFakeServiceConfigAccessorSpy, mFakeEnvironment);
     }
 
     @Test
@@ -1723,6 +1710,7 @@ public class TimeZoneDetectorStrategyImplTest {
 
         private final TestState<String> mTimeZoneId = new TestState<>();
         private final TestState<Integer> mTimeZoneConfidence = new TestState<>();
+        private final List<Runnable> mAsyncRunnables = new ArrayList<>();
         private @ElapsedRealtimeLong long mElapsedRealtimeMillis;
 
         FakeEnvironment() {
@@ -1795,12 +1783,24 @@ public class TimeZoneDetectorStrategyImplTest {
         public void dumpDebugLog(PrintWriter printWriter) {
             // No-op for tests
         }
+
+        @Override
+        public void runAsync(Runnable runnable) {
+            mAsyncRunnables.add(runnable);
+        }
+
+        public void runAsyncRunnables() {
+            for (Runnable runnable : mAsyncRunnables) {
+                runnable.run();
+            }
+            mAsyncRunnables.clear();
+        }
     }
 
     private void assertStateChangeNotificationsSent(
             TestStateChangeListener stateChangeListener, int expectedCount) {
-        // State change notifications are asynchronous, so we have to wait.
-        mTestHandler.waitForMessagesToBeProcessed();
+        // The fake environment needs to be told to run posted work.
+        mFakeEnvironment.runAsyncRunnables();
 
         stateChangeListener.assertNotificationsReceivedAndReset(expectedCount);
     }
