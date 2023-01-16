@@ -71,6 +71,8 @@ import org.mockito.quality.Strictness;
 
 /** Base class for testing {@link InputMethodManagerService}. */
 public class InputMethodManagerServiceTestBase {
+    private static final int NO_VERIFY_SHOW_FLAGS = -1;
+
     protected static final String TEST_SELECTED_IME_ID = "test.ime";
     protected static final String TEST_EDITOR_PKG_NAME = "test.editor";
     protected static final String TEST_FOCUSED_WINDOW_NAME = "test.editor/activity";
@@ -239,7 +241,7 @@ public class InputMethodManagerServiceTestBase {
 
     protected void verifyShowSoftInput(boolean setVisible, boolean showSoftInput)
             throws RemoteException {
-        verifyShowSoftInput(setVisible, showSoftInput, anyInt());
+        verifyShowSoftInput(setVisible, showSoftInput, NO_VERIFY_SHOW_FLAGS);
     }
 
     protected void verifyShowSoftInput(boolean setVisible, boolean showSoftInput, int showFlags)
@@ -249,7 +251,8 @@ public class InputMethodManagerServiceTestBase {
                     .setCurrentMethodVisible();
         }
         verify(mMockInputMethod, times(showSoftInput ? 1 : 0))
-                .showSoftInput(any(), any(), eq(showFlags), any());
+                .showSoftInput(any(), any(),
+                        showFlags != NO_VERIFY_SHOW_FLAGS ? eq(showFlags) : anyInt(), any());
     }
 
     protected void verifyHideSoftInput(boolean setNotVisible, boolean hideSoftInput)
