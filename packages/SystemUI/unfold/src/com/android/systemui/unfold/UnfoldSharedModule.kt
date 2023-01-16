@@ -16,9 +16,7 @@
 
 package com.android.systemui.unfold
 
-import android.hardware.SensorManager
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
-import com.android.systemui.unfold.dagger.UnfoldBackground
 import com.android.systemui.unfold.progress.FixedTimingTransitionProgressProvider
 import com.android.systemui.unfold.progress.PhysicsBasedUnfoldTransitionProgressProvider
 import com.android.systemui.unfold.updates.DeviceFoldStateProvider
@@ -34,53 +32,16 @@ import com.android.systemui.unfold.util.UnfoldKeyguardVisibilityProvider
 import dagger.Module
 import dagger.Provides
 import java.util.Optional
-import java.util.concurrent.Executor
+import javax.inject.Provider
 import javax.inject.Singleton
 
-@Module
+@Module(includes = [UnfoldSharedInternalModule::class])
 class UnfoldSharedModule {
-    @Provides
-    @Singleton
-    fun unfoldTransitionProgressProvider(
-        config: UnfoldTransitionConfig,
-        scaleAwareProviderFactory: ScaleAwareTransitionProgressProvider.Factory,
-        tracingListener: ATraceLoggerTransitionProgressListener,
-        foldStateProvider: FoldStateProvider
-    ): Optional<UnfoldTransitionProgressProvider> =
-        if (!config.isEnabled) {
-            Optional.empty()
-        } else {
-            val baseProgressProvider =
-                if (config.isHingeAngleEnabled) {
-                    PhysicsBasedUnfoldTransitionProgressProvider(foldStateProvider)
-                } else {
-                    FixedTimingTransitionProgressProvider(foldStateProvider)
-                }
-            Optional.of(
-                scaleAwareProviderFactory.wrap(baseProgressProvider).apply {
-                    // Always present callback that logs animation beginning and end.
-                    addCallback(tracingListener)
-                }
-            )
-        }
-
     @Provides
     @Singleton
     fun provideFoldStateProvider(
         deviceFoldStateProvider: DeviceFoldStateProvider
     ): FoldStateProvider = deviceFoldStateProvider
-
-    @Provides
-    fun hingeAngleProvider(
-        config: UnfoldTransitionConfig,
-        sensorManager: SensorManager,
-        @UnfoldBackground executor: Executor
-    ): HingeAngleProvider =
-        if (config.isHingeAngleEnabled) {
-            HingeSensorAngleProvider(sensorManager, executor)
-        } else {
-            EmptyHingeAngleProvider
-        }
 
     @Provides
     @Singleton
@@ -93,4 +54,52 @@ class UnfoldSharedModule {
     fun unfoldKeyguardVisibilityManager(
         impl: UnfoldKeyguardVisibilityManagerImpl
     ): UnfoldKeyguardVisibilityManager = impl
+}
+
+/**
+ * Needed as methods inside must be public, but their parameters can be internal (and, a public
+ * method can't have internal parameters). Making the module internal and included in a public one
+ * fixes the issue.
+ */
+@Module
+internal class UnfoldSharedInternalModule {
+    @Provides
+    @Singleton
+    fun unfoldTransitionProgressProvider(
+        config: UnfoldTransitionConfig,
+        scaleAwareProviderFactory: ScaleAwareTransitionProgressProvider.Factory,
+        tracingListener: ATraceLoggerTransitionProgressListener,
+        physicsBasedUnfoldTransitionProgressProvider:
+            Provider<PhysicsBasedUnfoldTransitionProgressProvider>,
+        fixedTimingTransitionProgressProvider: Provider<FixedTimingTransitionProgressProvider>,
+    ): Optional<UnfoldTransitionProgressProvider> {
+        if (!config.isEnabled) {
+            return Optional.empty()
+        }
+        val baseProgressProvider =
+            if (config.isHingeAngleEnabled) {
+                physicsBasedUnfoldTransitionProgressProvider.get()
+            } else {
+                fixedTimingTransitionProgressProvider.get()
+            }
+
+        return Optional.of(
+            scaleAwareProviderFactory.wrap(baseProgressProvider).apply {
+                // Always present callback that logs animation beginning and end.
+                addCallback(tracingListener)
+            }
+        )
+    }
+
+    @Provides
+    fun hingeAngleProvider(
+        config: UnfoldTransitionConfig,
+        hingeAngleSensorProvider: Provider<HingeSensorAngleProvider>
+    ): HingeAngleProvider {
+        return if (config.isHingeAngleEnabled) {
+            hingeAngleSensorProvider.get()
+        } else {
+            EmptyHingeAngleProvider
+        }
+    }
 }

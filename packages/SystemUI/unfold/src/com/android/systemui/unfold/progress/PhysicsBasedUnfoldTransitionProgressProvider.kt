@@ -33,9 +33,10 @@ import com.android.systemui.unfold.updates.FoldStateProvider
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdate
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdatesListener
 import com.android.systemui.unfold.updates.name
+import javax.inject.Inject
 
 /** Maps fold updates to unfold transition progress using DynamicAnimation. */
-class PhysicsBasedUnfoldTransitionProgressProvider(
+class PhysicsBasedUnfoldTransitionProgressProvider @Inject constructor(
     private val foldStateProvider: FoldStateProvider
 ) : UnfoldTransitionProgressProvider, FoldUpdatesListener, DynamicAnimation.OnAnimationEndListener {
 
