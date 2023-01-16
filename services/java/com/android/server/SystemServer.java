@@ -2714,10 +2714,12 @@ public final class SystemServer implements Dumpable {
             Slog.d(TAG, "TranslationService not defined by OEM");
         }
 
-        // Selection toolbar service
-        t.traceBegin("StartSelectionToolbarManagerService");
-        mSystemServiceManager.startService(SELECTION_TOOLBAR_MANAGER_SERVICE_CLASS);
-        t.traceEnd();
+        if (!isTv) {
+            // Selection toolbar service
+            t.traceBegin("StartSelectionToolbarManagerService");
+            mSystemServiceManager.startService(SELECTION_TOOLBAR_MANAGER_SERVICE_CLASS);
+            t.traceEnd();
+        }
 
         // NOTE: ClipboardService depends on ContentCapture and Autofill
         t.traceBegin("StartClipboardService");

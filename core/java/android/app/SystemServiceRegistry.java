@@ -382,8 +382,10 @@ public final class SystemServiceRegistry {
         registerService(Context.SELECTION_TOOLBAR_SERVICE, SelectionToolbarManager.class,
                 new CachedServiceFetcher<SelectionToolbarManager>() {
                     @Override
-                    public SelectionToolbarManager createService(ContextImpl ctx) {
-                        IBinder b = ServiceManager.getService(Context.SELECTION_TOOLBAR_SERVICE);
+                    public SelectionToolbarManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(
+                                Context.SELECTION_TOOLBAR_SERVICE);
                         return new SelectionToolbarManager(ctx.getOuterContext(),
                                 ISelectionToolbarManager.Stub.asInterface(b));
                     }});
