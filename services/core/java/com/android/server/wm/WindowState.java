@@ -1392,15 +1392,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     void updateSourceFrame(Rect winFrame) {
+        if (!hasInsetsSourceProvider()) {
+            // This window doesn't provide any insets.
+            return;
+        }
         if (mGivenInsetsPending) {
             // The given insets are pending, and they are not reliable for now. The source frame
             // should be updated after the new given insets are sent to window manager.
             return;
         }
-        final SparseArray<InsetsSource> providedSources = getProvidedInsetsSources();
-        final InsetsStateController controller = getDisplayContent().getInsetsStateController();
-        for (int i = providedSources.size() - 1; i >= 0; i--) {
-            controller.getSourceProvider(providedSources.keyAt(i)).updateSourceFrame(winFrame);
+        final SparseArray<InsetsSourceProvider> providers = getInsetsSourceProviders();
+        for (int i = providers.size() - 1; i >= 0; i--) {
+            providers.valueAt(i).updateSourceFrame(winFrame);
         }
     }
 
@@ -1875,11 +1878,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     boolean providesNonDecorInsets() {
-        if (mProvidedInsetsSources == null) {
+        if (mInsetsSourceProviders == null) {
             return false;
         }
-        for (int i = mProvidedInsetsSources.size() - 1; i >= 0; i--) {
-            final InsetsSource source = mProvidedInsetsSources.valueAt(i);
+        for (int i = mInsetsSourceProviders.size() - 1; i >= 0; i--) {
+            final InsetsSource source = mInsetsSourceProviders.valueAt(i).getSource();
             if (source.getType() == WindowInsets.Type.navigationBars()) {
                 return true;
             }
@@ -4821,10 +4824,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 insetsChangedWindows.add(w);
             }
 
-            final SparseArray<InsetsSource> providedSources = w.mProvidedInsetsSources;
-            if (providedSources != null) {
-                for (int i = providedSources.size() - 1; i >= 0; i--) {
-                    aboveInsetsState.addSource(providedSources.valueAt(i));
+            final SparseArray<InsetsSourceProvider> providers = w.mInsetsSourceProviders;
+            if (providers != null) {
+                for (int i = providers.size() - 1; i >= 0; i--) {
+                    aboveInsetsState.addSource(providers.valueAt(i).getSource());
                 }
             }
         }, true /* traverseTopToBottom */);

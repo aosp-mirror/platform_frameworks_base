@@ -164,7 +164,7 @@ abstract class InsetsSourceProvider {
             // TODO: Ideally, we should wait for the animation to finish so previous window can
             // animate-out as new one animates-in.
             mWindowContainer.cancelAnimation();
-            mWindowContainer.getProvidedInsetsSources().remove(mSource.getId());
+            mWindowContainer.getInsetsSourceProviders().remove(mSource.getId());
             mSeamlessRotating = false;
         }
         ProtoLog.d(WM_DEBUG_WINDOW_INSETS, "InsetsSource setWin %s for type %s",
@@ -180,7 +180,7 @@ abstract class InsetsSourceProvider {
             mSource.setInsetsRoundedCornerFrame(false);
             mSourceFrame.setEmpty();
         } else {
-            mWindowContainer.getProvidedInsetsSources().put(mSource.getId(), mSource);
+            mWindowContainer.getInsetsSourceProviders().put(mSource.getId(), this);
             if (mControllable) {
                 mWindowContainer.setControllableInsetProvider(this);
                 if (mPendingControlTarget != null) {

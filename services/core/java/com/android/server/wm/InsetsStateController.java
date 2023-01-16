@@ -34,9 +34,9 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
+import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 
@@ -46,7 +46,6 @@ import com.android.server.inputmethod.InputMethodManagerInternal;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Manages global window inset state in the system represented by {@link InsetsState}.
@@ -57,8 +56,7 @@ class InsetsStateController {
     private final InsetsState mState = new InsetsState();
     private final DisplayContent mDisplayContent;
 
-    private final ArrayMap<Integer, WindowContainerInsetsSourceProvider> mProviders =
-            new ArrayMap<>();
+    private final SparseArray<WindowContainerInsetsSourceProvider> mProviders = new SparseArray<>();
     private final ArrayMap<InsetsControlTarget, ArrayList<InsetsSourceProvider>>
             mControlTargetProvidersMap = new ArrayMap<>();
     private final SparseArray<InsetsControlTarget> mIdControlTargetMap = new SparseArray<>();
@@ -87,15 +85,8 @@ class InsetsStateController {
         }
     };
 
-    private final Function<Integer, WindowContainerInsetsSourceProvider> mSourceProviderFunc;
-
     InsetsStateController(DisplayContent displayContent) {
         mDisplayContent = displayContent;
-        mSourceProviderFunc = id -> (id == ID_IME)
-                ? new ImeInsetsSourceProvider(mState.getOrCreateSource(
-                        id, ime()), this, mDisplayContent)
-                : new WindowContainerInsetsSourceProvider(mState.getOrCreateSource(
-                        id, InsetsState.toPublicType(id)), this, mDisplayContent);
     }
 
     InsetsState getRawInsetsState() {
@@ -115,27 +106,43 @@ class InsetsStateController {
         return result;
     }
 
-    ArrayMap<Integer, WindowContainerInsetsSourceProvider> getSourceProviders() {
+    SparseArray<WindowContainerInsetsSourceProvider> getSourceProviders() {
         return mProviders;
     }
 
     /**
      * @return The provider of a specific source ID.
      */
-    WindowContainerInsetsSourceProvider getSourceProvider(int id) {
-        return mProviders.computeIfAbsent(id, mSourceProviderFunc);
+    WindowContainerInsetsSourceProvider getOrCreateSourceProvider(int id, @InsetsType int type) {
+        WindowContainerInsetsSourceProvider provider = mProviders.get(id);
+        if (provider != null) {
+            return provider;
+        }
+        final InsetsSource source = mState.getOrCreateSource(id, type);
+        provider = id == ID_IME
+                ? new ImeInsetsSourceProvider(source, this, mDisplayContent)
+                : new WindowContainerInsetsSourceProvider(source, this, mDisplayContent);
+        mProviders.put(id, provider);
+        return provider;
     }
 
     ImeInsetsSourceProvider getImeSourceProvider() {
-        return (ImeInsetsSourceProvider) getSourceProvider(ID_IME);
+        return (ImeInsetsSourceProvider) getOrCreateSourceProvider(ID_IME, ime());
+    }
+
+    void removeSourceProvider(int id) {
+        if (id != ID_IME) {
+            mState.removeSource(id);
+            mProviders.remove(id);
+        }
     }
 
     /**
-     * @return The provider of a specific type or null if we don't have it.
+     * @return The provider of a source ID or null if we don't have it.
      */
     @Nullable
-    WindowContainerInsetsSourceProvider peekSourceProvider(@InternalInsetsType int type) {
-        return mProviders.get(type);
+    WindowContainerInsetsSourceProvider peekSourceProvider(int id) {
+        return mProviders.get(id);
     }
 
     /**

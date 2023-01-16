@@ -170,9 +170,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     protected InsetsSourceProvider mControllableInsetProvider;
 
     /**
-     * The insets sources provided by this windowContainer.
+     * The {@link InsetsSourceProvider}s provided by this window container.
      */
-    protected SparseArray<InsetsSource> mProvidedInsetsSources = null;
+    protected SparseArray<InsetsSourceProvider> mInsetsSourceProviders = null;
 
     // List of children for this window container. List is in z-order as the children appear on
     // screen with the top-most window container at the tail of the list.
@@ -366,7 +366,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * {@link WindowState#mMergedLocalInsetsSources} by visiting the entire hierarchy.
      *
      * {@link WindowState#mAboveInsetsState} is updated by visiting all the windows in z-order
-     * top-to-bottom manner and considering the {@link WindowContainer#mProvidedInsetsSources}
+     * top-to-bottom manner and considering the {@link WindowContainer#mInsetsSourceProviders}
      * provided by the {@link WindowState}s at the top.
      * {@link WindowState#updateAboveInsetsState(InsetsState, SparseArray, ArraySet)} visits the
      * IME container in the correct order to make sure the IME insets are passed correctly to the
@@ -1035,11 +1035,21 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
-    public SparseArray<InsetsSource> getProvidedInsetsSources() {
-        if (mProvidedInsetsSources == null) {
-            mProvidedInsetsSources = new SparseArray<>();
+    /**
+     * Returns {@code true} if this node provides insets.
+     */
+    public boolean hasInsetsSourceProvider() {
+        return mInsetsSourceProviders != null;
+    }
+
+    /**
+     * Returns {@link InsetsSourceProvider}s provided by this node.
+     */
+    public SparseArray<InsetsSourceProvider> getInsetsSourceProviders() {
+        if (mInsetsSourceProviders == null) {
+            mInsetsSourceProviders = new SparseArray<>();
         }
-        return mProvidedInsetsSources;
+        return mInsetsSourceProviders;
     }
 
     public DisplayContent getDisplayContent() {
@@ -4102,13 +4112,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
         }
 
-        private void hideInsetSourceViewOverflows(Set<Integer> insetTypes) {
-            final ArrayList<SurfaceControl> surfaceControls =
-                    new ArrayList<>(insetTypes.size());
-
-            for (int insetType : insetTypes) {
-                WindowContainerInsetsSourceProvider insetProvider = getDisplayContent()
-                        .getInsetsStateController().getSourceProvider(insetType);
+        private void hideInsetSourceViewOverflows(Set<Integer> sourceIds) {
+            final InsetsStateController controller = getDisplayContent().getInsetsStateController();
+            for (int id : sourceIds) {
+                final InsetsSourceProvider insetProvider = controller.peekSourceProvider(id);
+                if (insetProvider == null) {
+                    return;
+                }
 
                 // Will apply it immediately to current leash and to all future inset animations
                 // until we disable it.

@@ -1076,8 +1076,16 @@ public class DisplayPolicy {
                 } else {
                     overrideProviders = null;
                 }
-                mDisplayContent.setInsetProvider(provider.type, win, frameProvider,
-                        overrideProviders);
+                // TODO (b/234093736): Let InsetsFrameProvider have the following fields:
+                //                     - IBinder owner.
+                //                     - int index.
+                //                     - @InsetsType int type.
+                //                     So we can create the id by using InsetsSource#createId.
+                //                     And we won't need toPublicType anymore.
+                final int id = provider.type;
+                final @InsetsType int type = InsetsState.toPublicType(id);
+                mDisplayContent.getInsetsStateController().getOrCreateSourceProvider(id, type)
+                        .setWindowContainer(win, frameProvider, overrideProviders);
                 mInsetsSourceWindowsExceptIme.add(win);
             }
         }
@@ -1170,10 +1178,17 @@ public class DisplayPolicy {
             mLastFocusedWindow = null;
         }
 
-        final SparseArray<InsetsSource> sources = win.getProvidedInsetsSources();
-        for (int index = sources.size() - 1; index >= 0; index--) {
-            final @InternalInsetsType int type = sources.keyAt(index);
-            mDisplayContent.setInsetProvider(type, null /* win */, null /* frameProvider */);
+        if (win.hasInsetsSourceProvider()) {
+            final SparseArray<InsetsSourceProvider> providers = win.getInsetsSourceProviders();
+            final InsetsStateController controller = mDisplayContent.getInsetsStateController();
+            for (int index = providers.size() - 1; index >= 0; index--) {
+                final InsetsSourceProvider provider = providers.valueAt(index);
+                provider.setWindowContainer(
+                        null /* windowContainer */,
+                        null /* frameProvider */,
+                        null /* overrideFrameProviders */);
+                controller.removeSourceProvider(provider.getSource().getId());
+            }
         }
         mInsetsSourceWindowsExceptIme.remove(win);
     }
@@ -1242,7 +1257,6 @@ public class DisplayPolicy {
      * some temporal states, but doesn't change the window frames used to show on screen.
      */
     void simulateLayoutDisplay(DisplayFrames displayFrames) {
-        final InsetsStateController controller = mDisplayContent.getInsetsStateController();
         sTmpClientFrames.attachedFrame = null;
         for (int i = mInsetsSourceWindowsExceptIme.size() - 1; i >= 0; i--) {
             final WindowState win = mInsetsSourceWindowsExceptIme.valueAt(i);
@@ -1251,11 +1265,10 @@ public class DisplayPolicy {
                     displayFrames.mUnrestricted, win.getWindowingMode(), UNSPECIFIED_LENGTH,
                     UNSPECIFIED_LENGTH, win.getRequestedVisibleTypes(), win.mGlobalScale,
                     sTmpClientFrames);
-            final SparseArray<InsetsSource> sources = win.getProvidedInsetsSources();
+            final SparseArray<InsetsSourceProvider> providers = win.getInsetsSourceProviders();
             final InsetsState state = displayFrames.mInsetsState;
-            for (int index = sources.size() - 1; index >= 0; index--) {
-                final int type = sources.keyAt(index);
-                state.addSource(controller.getSourceProvider(type).createSimulatedSource(
+            for (int index = providers.size() - 1; index >= 0; index--) {
+                state.addSource(providers.valueAt(index).createSimulatedSource(
                         displayFrames, sTmpClientFrames.frame));
             }
         }
@@ -1358,30 +1371,33 @@ public class DisplayPolicy {
             mIsFreeformWindowOverlappingWithNavBar = true;
         }
 
-        final SparseArray<InsetsSource> sources = win.getProvidedInsetsSources();
-        final Rect bounds = win.getBounds();
-        for (int index = sources.size() - 1; index >= 0; index--) {
-            final InsetsSource source = sources.valueAt(index);
-            if ((source.getType()
-                    & (Type.systemGestures() | Type.mandatorySystemGestures())) == 0) {
-                continue;
-            }
-            if (mLeftGestureHost != null && mTopGestureHost != null
-                    && mRightGestureHost != null && mBottomGestureHost != null) {
-                continue;
-            }
-            final Insets insets = source.calculateInsets(bounds, false /* ignoreVisibility */);
-            if (mLeftGestureHost == null && insets.left > 0) {
-                mLeftGestureHost = win;
-            }
-            if (mTopGestureHost == null && insets.top > 0) {
-                mTopGestureHost = win;
-            }
-            if (mRightGestureHost == null && insets.right > 0) {
-                mRightGestureHost = win;
-            }
-            if (mBottomGestureHost == null && insets.bottom > 0) {
-                mBottomGestureHost = win;
+        if (win.hasInsetsSourceProvider()) {
+            final SparseArray<InsetsSourceProvider> providers = win.getInsetsSourceProviders();
+            final Rect bounds = win.getBounds();
+            for (int index = providers.size() - 1; index >= 0; index--) {
+                final InsetsSourceProvider provider = providers.valueAt(index);
+                final InsetsSource source = provider.getSource();
+                if ((source.getType()
+                        & (Type.systemGestures() | Type.mandatorySystemGestures())) == 0) {
+                    continue;
+                }
+                if (mLeftGestureHost != null && mTopGestureHost != null
+                        && mRightGestureHost != null && mBottomGestureHost != null) {
+                    continue;
+                }
+                final Insets insets = source.calculateInsets(bounds, false /* ignoreVisibility */);
+                if (mLeftGestureHost == null && insets.left > 0) {
+                    mLeftGestureHost = win;
+                }
+                if (mTopGestureHost == null && insets.top > 0) {
+                    mTopGestureHost = win;
+                }
+                if (mRightGestureHost == null && insets.right > 0) {
+                    mRightGestureHost = win;
+                }
+                if (mBottomGestureHost == null && insets.bottom > 0) {
+                    mBottomGestureHost = win;
+                }
             }
         }
 

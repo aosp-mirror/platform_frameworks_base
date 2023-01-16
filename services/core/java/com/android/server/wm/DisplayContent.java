@@ -47,8 +47,6 @@ import static android.view.Display.REMOVE_MODE_DESTROY_CONTENT;
 import static android.view.Display.STATE_UNKNOWN;
 import static android.view.Display.isSuspendedState;
 import static android.view.InsetsSource.ID_IME;
-import static android.view.InsetsState.ITYPE_LEFT_GESTURES;
-import static android.view.InsetsState.ITYPE_RIGHT_GESTURES;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
@@ -57,6 +55,7 @@ import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.systemBars;
+import static android.view.WindowInsets.Type.systemGestures;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
@@ -174,6 +173,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.ColorSpace;
+import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -221,7 +221,6 @@ import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InsetsSource;
 import android.view.InsetsState;
-import android.view.InsetsState.InternalInsetsType;
 import android.view.MagnificationSpec;
 import android.view.PrivacyIndicatorBounds;
 import android.view.RemoteAnimationDefinition;
@@ -248,7 +247,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
-import com.android.internal.util.function.TriConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
 import com.android.server.inputmethod.InputMethodManagerInternal;
@@ -466,6 +464,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private boolean mSystemGestureExclusionWasRestricted = false;
     private final Region mSystemGestureExclusionUnrestricted = new Region();
     private int mSystemGestureExclusionLimit;
+    private final Rect mSystemGestureFrameLeft = new Rect();
+    private final Rect mSystemGestureFrameRight = new Rect();
 
     private Set<Rect> mRestrictedKeepClearAreas = new ArraySet<>();
     private Set<Rect> mUnrestrictedKeepClearAreas = new ArraySet<>();
@@ -1515,31 +1515,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @Override
     public DisplayRotation getDisplayRotation() {
         return mDisplayRotation;
-    }
-
-    void setInsetProvider(@InternalInsetsType int type, WindowContainer win,
-            @Nullable TriConsumer<DisplayFrames, WindowContainer, Rect> frameProvider) {
-        setInsetProvider(type, win, frameProvider, null /* overrideFrameProviders */);
-    }
-
-    /**
-     * Marks a window as providing insets for the rest of the windows in the system.
-     *
-     * @param type The type of inset this window provides.
-     * @param win The window.
-     * @param frameProvider Function to compute the frame, or {@code null} if the just the frame of
-     *                      the window should be taken. Only for non-WindowState providers, nav bar
-     *                      and status bar.
-     * @param overrideFrameProviders Functions to compute the frame when dispatching insets to the
-     *                               given window types, or {@code null} if the normal frame should
-     *                               be taken.
-     */
-    void setInsetProvider(@InternalInsetsType int type, WindowContainer win,
-            @Nullable TriConsumer<DisplayFrames, WindowContainer, Rect> frameProvider,
-            @Nullable SparseArray<TriConsumer<DisplayFrames, WindowContainer, Rect>>
-                    overrideFrameProviders) {
-        mInsetsStateController.getSourceProvider(type).setWindowContainer(win, frameProvider,
-                overrideFrameProviders);
     }
 
     InsetsStateController getInsetsStateController() {
@@ -4034,7 +4009,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             final int imePid = mInputMethodWindow.mSession.mPid;
             mAtmService.onImeWindowSetOnDisplayArea(imePid, mImeWindowsContainer);
         }
-        mInsetsStateController.getSourceProvider(ID_IME).setWindowContainer(win,
+        mInsetsStateController.getImeSourceProvider().setWindowContainer(win,
                 mDisplayPolicy.getImeSourceFrameProvider(), null);
         computeImeTarget(true /* updateImeTarget */);
         updateImeControlTarget();
@@ -5705,10 +5680,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final Region unhandled = Region.obtain();
         unhandled.set(0, 0, mDisplayFrames.mWidth, mDisplayFrames.mHeight);
 
-        final Rect leftEdge = mInsetsStateController.getSourceProvider(ITYPE_LEFT_GESTURES)
-                .getSource().getFrame();
-        final Rect rightEdge = mInsetsStateController.getSourceProvider(ITYPE_RIGHT_GESTURES)
-                .getSource().getFrame();
+        final InsetsState state = mInsetsStateController.getRawInsetsState();
+        final Rect df = state.getDisplayFrame();
+        final Insets gestureInsets = state.calculateInsets(df, systemGestures(),
+                false /* ignoreVisibility */);
+        mSystemGestureFrameLeft.set(df.left, df.top, gestureInsets.left, df.bottom);
+        mSystemGestureFrameRight.set(gestureInsets.right, df.top, df.right, df.bottom);
 
         final Region touchableRegion = Region.obtain();
         final Region local = Region.obtain();
@@ -5752,25 +5729,25 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             if (needsGestureExclusionRestrictions(w, false /* ignoreRequest */)) {
 
                 // Processes the region along the left edge.
-                remainingLeftRight[0] = addToGlobalAndConsumeLimit(local, outExclusion, leftEdge,
-                        remainingLeftRight[0], w, EXCLUSION_LEFT);
+                remainingLeftRight[0] = addToGlobalAndConsumeLimit(local, outExclusion,
+                        mSystemGestureFrameLeft, remainingLeftRight[0], w, EXCLUSION_LEFT);
 
                 // Processes the region along the right edge.
-                remainingLeftRight[1] = addToGlobalAndConsumeLimit(local, outExclusion, rightEdge,
-                        remainingLeftRight[1], w, EXCLUSION_RIGHT);
+                remainingLeftRight[1] = addToGlobalAndConsumeLimit(local, outExclusion,
+                        mSystemGestureFrameRight, remainingLeftRight[1], w, EXCLUSION_RIGHT);
 
                 // Adds the middle (unrestricted area)
                 final Region middle = Region.obtain(local);
-                middle.op(leftEdge, Op.DIFFERENCE);
-                middle.op(rightEdge, Op.DIFFERENCE);
+                middle.op(mSystemGestureFrameLeft, Op.DIFFERENCE);
+                middle.op(mSystemGestureFrameRight, Op.DIFFERENCE);
                 outExclusion.op(middle, Op.UNION);
                 middle.recycle();
             } else {
                 boolean loggable = needsGestureExclusionRestrictions(w, true /* ignoreRequest */);
                 if (loggable) {
-                    addToGlobalAndConsumeLimit(local, outExclusion, leftEdge,
+                    addToGlobalAndConsumeLimit(local, outExclusion, mSystemGestureFrameLeft,
                             Integer.MAX_VALUE, w, EXCLUSION_LEFT);
-                    addToGlobalAndConsumeLimit(local, outExclusion, rightEdge,
+                    addToGlobalAndConsumeLimit(local, outExclusion, mSystemGestureFrameRight,
                             Integer.MAX_VALUE, w, EXCLUSION_RIGHT);
                 }
                 outExclusion.op(local, Op.UNION);
