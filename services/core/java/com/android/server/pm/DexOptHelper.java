@@ -23,6 +23,7 @@ import static com.android.server.pm.ApexManager.ActiveApexInfo;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.PackageManagerService.DEBUG_DEXOPT;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+import static com.android.server.pm.PackageManagerService.REASON_BOOT_AFTER_MAINLINE_UPDATE;
 import static com.android.server.pm.PackageManagerService.REASON_BOOT_AFTER_OTA;
 import static com.android.server.pm.PackageManagerService.REASON_CMDLINE;
 import static com.android.server.pm.PackageManagerService.REASON_FIRST_BOOT;
@@ -36,10 +37,8 @@ import static com.android.server.pm.PackageManagerServiceUtils.getPackageManager
 
 import static dalvik.system.DexFile.isProfileGuidedCompilerFilter;
 
-import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RequiresPermission;
 import android.app.AppGlobals;
 import android.content.Context;
 import android.content.Intent;
@@ -52,7 +51,6 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.provider.DeviceConfig;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
@@ -262,7 +260,7 @@ public final class DexOptHelper {
      * Checks if system UI package (typically "com.android.systemui") needs to be re-compiled, and
      * compiles it if needed.
      */
-    private void checkAndDexOptSystemUi() throws LegacyDexoptDisabledException {
+    private void checkAndDexOptSystemUi(int reason) throws LegacyDexoptDisabledException {
         Installer.checkLegacyDexoptDisabled();
         Computer snapshot = mPm.snapshotComputer();
         String sysUiPackageName =
@@ -272,10 +270,6 @@ public final class DexOptHelper {
             Log.w(TAG, "System UI package " + sysUiPackageName + " is not found for dexopting");
             return;
         }
-
-        // It could also be after mainline update, but we're not introducing a new reason just for
-        // this special case.
-        int reason = REASON_BOOT_AFTER_OTA;
 
         String defaultCompilerFilter = getCompilerFilterForReason(reason);
         String targetCompilerFilter =
@@ -319,27 +313,30 @@ public final class DexOptHelper {
                 compilerFilter, null /* splitName */, dexoptFlags));
     }
 
-    @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
+    /**
+     * Called during startup to do any boot time dexopting. This can occasionally be time consuming
+     * (30+ seconds) and the function will block until it is complete.
+     */
     public void performPackageDexOptUpgradeIfNeeded() throws LegacyDexoptDisabledException {
         PackageManagerServiceUtils.enforceSystemOrRoot(
                 "Only the system can request package update");
 
-        // The default is "true".
-        if (!"false".equals(DeviceConfig.getProperty("runtime", "dexopt_system_ui_on_boot"))) {
-            // System UI is important to user experience, so we check it after a mainline update or
-            // an OTA. It may need to be re-compiled in these cases.
-            if (hasBcpApexesChanged() || mPm.isDeviceUpgrading()) {
-                checkAndDexOptSystemUi();
-            }
+        int reason;
+        if (mPm.isFirstBoot()) {
+            reason = REASON_FIRST_BOOT; // First boot or factory reset.
+        } else if (mPm.isDeviceUpgrading()) {
+            reason = REASON_BOOT_AFTER_OTA;
+        } else if (hasBcpApexesChanged()) {
+            reason = REASON_BOOT_AFTER_MAINLINE_UPDATE;
+        } else {
+            return;
         }
 
-        // We need to re-extract after an OTA.
-        boolean causeUpgrade = mPm.isDeviceUpgrading();
+        // System UI is important to user experience, so we check it after a mainline update
+        // or an OTA. It may need to be re-compiled in these cases.
+        checkAndDexOptSystemUi(reason);
 
-        // First boot or factory reset.
-        boolean causeFirstBoot = mPm.isFirstBoot();
-
-        if (!causeUpgrade && !causeFirstBoot) {
+        if (reason != REASON_BOOT_AFTER_OTA && reason != REASON_FIRST_BOOT) {
             return;
         }
 
@@ -348,9 +345,7 @@ public final class DexOptHelper {
                 getPackagesForDexopt(snapshot.getPackageStates().values(), mPm);
 
         final long startTime = System.nanoTime();
-        final int[] stats = performDexOptUpgrade(pkgSettings,
-                causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT_AFTER_OTA,
-                false /* bootComplete */);
+        final int[] stats = performDexOptUpgrade(pkgSettings, reason, false /* bootComplete */);
 
         final int elapsedTimeSeconds =
                 (int) TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - startTime);

@@ -552,6 +552,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     private static final int REQUIRED_VERIFIERS_MAX_COUNT = 2;
 
     // Compilation reasons.
+    // TODO(b/260124949): Clean this up with the legacy dexopt code.
     public static final int REASON_FIRST_BOOT = 0;
     public static final int REASON_BOOT_AFTER_OTA = 1;
     public static final int REASON_POST_BOOT = 2;
@@ -565,7 +566,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     public static final int REASON_AB_OTA = 10;
     public static final int REASON_INACTIVE_PACKAGE_DOWNGRADE = 11;
     public static final int REASON_CMDLINE = 12;
-    public static final int REASON_SHARED = 13;
+    public static final int REASON_BOOT_AFTER_MAINLINE_UPDATE = 13;
+    public static final int REASON_SHARED = 14;
 
     public static final int REASON_LAST = REASON_SHARED;
 
