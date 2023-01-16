@@ -306,6 +306,26 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Resizes a container by providing a bounds in its parent coordinate.
+     * This is only used by {@link TaskFragmentOrganizer}.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction setRelativeBounds(
+            @NonNull WindowContainerToken container, @NonNull Rect relBounds) {
+        Change chg = getOrCreateChange(container.asBinder());
+        if (chg.mRelativeBounds == null) {
+            chg.mRelativeBounds = new Rect();
+        }
+        chg.mRelativeBounds.set(relBounds);
+        chg.mChangeMask |= Change.CHANGE_RELATIVE_BOUNDS;
+        // Bounds will be overridden.
+        chg.mConfigSetMask |= ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
+        chg.mWindowSetMask |= WindowConfiguration.WINDOW_CONFIG_BOUNDS;
+        return this;
+    }
+
+    /**
      * Reparents a container into another one. The effect of a {@code null} parent can vary. For
      * example, reparenting a stack to {@code null} will reparent it to its display.
      *
@@ -979,6 +999,7 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int CHANGE_FORCE_NO_PIP = 1 << 6;
         public static final int CHANGE_FORCE_TRANSLUCENT = 1 << 7;
         public static final int CHANGE_DRAG_RESIZING = 1 << 8;
+        public static final int CHANGE_RELATIVE_BOUNDS = 1 << 9;
 
         private final Configuration mConfiguration = new Configuration();
         private boolean mFocusable = true;
@@ -994,6 +1015,8 @@ public final class WindowContainerTransaction implements Parcelable {
         private Rect mPinnedBounds = null;
         private SurfaceControl.Transaction mBoundsChangeTransaction = null;
         private Rect mBoundsChangeSurfaceBounds = null;
+        @Nullable
+        private Rect mRelativeBounds = null;
 
         private int mActivityWindowingMode = -1;
         private int mWindowingMode = -1;
@@ -1021,6 +1044,10 @@ public final class WindowContainerTransaction implements Parcelable {
             if ((mChangeMask & Change.CHANGE_BOUNDS_TRANSACTION_RECT) != 0) {
                 mBoundsChangeSurfaceBounds = new Rect();
                 mBoundsChangeSurfaceBounds.readFromParcel(in);
+            }
+            if ((mChangeMask & Change.CHANGE_RELATIVE_BOUNDS) != 0) {
+                mRelativeBounds = new Rect();
+                mRelativeBounds.readFromParcel(in);
             }
 
             mWindowingMode = in.readInt();
@@ -1068,6 +1095,11 @@ public final class WindowContainerTransaction implements Parcelable {
             if (other.mBoundsChangeSurfaceBounds != null) {
                 mBoundsChangeSurfaceBounds = transfer ? other.mBoundsChangeSurfaceBounds
                         : new Rect(other.mBoundsChangeSurfaceBounds);
+            }
+            if (other.mRelativeBounds != null) {
+                mRelativeBounds = transfer
+                        ? other.mRelativeBounds
+                        : new Rect(other.mRelativeBounds);
             }
         }
 
@@ -1156,6 +1188,11 @@ public final class WindowContainerTransaction implements Parcelable {
             return mBoundsChangeSurfaceBounds;
         }
 
+        @Nullable
+        public Rect getRelativeBounds() {
+            return mRelativeBounds;
+        }
+
         @Override
         public String toString() {
             final boolean changesBounds =
@@ -1196,6 +1233,9 @@ public final class WindowContainerTransaction implements Parcelable {
             if ((mChangeMask & CHANGE_IGNORE_ORIENTATION_REQUEST) != 0) {
                 sb.append("ignoreOrientationRequest:" + mIgnoreOrientationRequest + ",");
             }
+            if ((mChangeMask & CHANGE_RELATIVE_BOUNDS) != 0) {
+                sb.append("relativeBounds:").append(mRelativeBounds).append(",");
+            }
             sb.append("}");
             return sb.toString();
         }
@@ -1220,6 +1260,9 @@ public final class WindowContainerTransaction implements Parcelable {
             }
             if (mBoundsChangeSurfaceBounds != null) {
                 mBoundsChangeSurfaceBounds.writeToParcel(dest, flags);
+            }
+            if (mRelativeBounds != null) {
+                mRelativeBounds.writeToParcel(dest, flags);
             }
 
             dest.writeInt(mWindowingMode);

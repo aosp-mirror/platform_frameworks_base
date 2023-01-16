@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_CHANGE;
@@ -513,7 +514,6 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         assertApplyTransactionAllowed(mTransaction);
     }
 
-
     @Test
     public void testApplyTransaction_enforceHierarchyChange_deleteTaskFragment() {
         doReturn(true).when(mTaskFragment).isAttached();
@@ -836,7 +836,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         final TaskFragmentCreationParams params = new TaskFragmentCreationParams.Builder(
                 mOrganizerToken, fragmentToken1, activityAtBottom.token)
                 .setPairedActivityToken(activityAtBottom.token)
-                .setInitialBounds(bounds)
+                .setInitialRelativeBounds(bounds)
                 .build();
         mTransaction.setTaskFragmentOrganizer(mIOrganizer);
         mTransaction.createTaskFragment(params);
@@ -1526,6 +1526,79 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         assertEquals(TRANSIT_OPEN, TASK_FRAGMENT_TRANSIT_OPEN);
         assertEquals(TRANSIT_CLOSE, TASK_FRAGMENT_TRANSIT_CLOSE);
         assertEquals(TRANSIT_CHANGE, TASK_FRAGMENT_TRANSIT_CHANGE);
+    }
+
+    @Test
+    public void testApplyTransaction_setRelativeBounds() {
+        final Task task = createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW,
+                ACTIVITY_TYPE_STANDARD);
+        mTaskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setFragmentToken(mFragmentToken)
+                .build();
+        final WindowContainerToken token = mTaskFragment.mRemoteToken.toWindowContainerToken();
+        final Rect relBounds = new Rect(0, 0, 100, 1000);
+        mTransaction.setRelativeBounds(token, relBounds);
+
+        // Not allowed because TaskFragment is not organized by the caller organizer.
+        assertApplyTransactionDisallowed(mTransaction);
+
+        mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* uid */,
+                "Test:TaskFragmentOrganizer" /* processName */);
+
+        assertApplyTransactionAllowed(mTransaction);
+        assertEquals(relBounds, mTaskFragment.getRelativeEmbeddedBounds());
+        assertEquals(relBounds, mTaskFragment.getBounds());
+
+        // TaskFragment bounds should be updated to the same relative bounds.
+        final Rect taskBounds = new Rect(200, 200, 700, 1500);
+        task.setBoundsUnchecked(taskBounds);
+        assertEquals(taskBounds, task.getBounds());
+        assertEquals(relBounds, mTaskFragment.getRelativeEmbeddedBounds());
+        assertEquals(mTaskFragment.translateRelativeBoundsToAbsoluteBounds(relBounds, taskBounds),
+                mTaskFragment.getBounds());
+        assertEquals(new Rect(200, 200, 300, 1200), mTaskFragment.getBounds());
+
+        // Set TaskFragment to fill Task
+        mTransaction.setRelativeBounds(token, new Rect());
+
+        assertApplyTransactionAllowed(mTransaction);
+        assertEquals(new Rect(), mTaskFragment.getRelativeEmbeddedBounds());
+        assertEquals(taskBounds, mTaskFragment.getBounds());
+    }
+
+    @Test
+    public void testUntrustedEmbedding_setRelativeBounds_adjustToTaskBounds() {
+        final Task task = createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW,
+                ACTIVITY_TYPE_STANDARD);
+        mTaskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setFragmentToken(mFragmentToken)
+                .build();
+        final WindowContainerToken token = mTaskFragment.mRemoteToken.toWindowContainerToken();
+        mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* uid */,
+                "Test:TaskFragmentOrganizer" /* processName */);
+        // Untrusted embedded
+        doReturn(false).when(mTaskFragment).isAllowedToBeEmbeddedInTrustedMode();
+
+        final Rect taskBounds = new Rect(0, 0, 500, 1000);
+        task.setBoundsUnchecked(taskBounds);
+
+        final Rect taskFragmentBounds = new Rect(250, 0, 750, 1000);
+        mTransaction.setRelativeBounds(token, taskFragmentBounds);
+
+        // Allow operation in case the Task is also resizing.
+        // Adjust the relBounds to the intersection.
+        assertApplyTransactionAllowed(mTransaction);
+        // Relative bounds is correctly set.
+        assertEquals(taskFragmentBounds, mTaskFragment.getRelativeEmbeddedBounds());
+        // The actual window bounds is adjusted to fit the Task bounds.
+        assertEquals(new Rect(250, 0, 500, 1000), mTaskFragment.getBounds());
+
+        // Adjust to the full requested bounds when the Task is resized.
+        taskBounds.set(0, 0, 750, 1000);
+        task.setBoundsUnchecked(taskBounds);
+        assertEquals(taskFragmentBounds, mTaskFragment.getBounds());
     }
 
     /**

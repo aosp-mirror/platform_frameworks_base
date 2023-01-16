@@ -312,9 +312,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     private TaskFragmentAnimationParams mAnimationParams = TaskFragmentAnimationParams.DEFAULT;
 
     /**
-     * The bounds of the embedded TaskFragment relative to the parent Task.
+     * The organizer requested bounds of the embedded TaskFragment relative to the parent Task.
      * {@code null} if it is not {@link #mIsEmbedded}
-     * TODO(b/261785978) cleanup with legacy app transition
      */
     @Nullable
     private final Rect mRelativeEmbeddedBounds;
@@ -335,6 +334,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     final Point mLastSurfaceSize = new Point();
 
     private final Rect mTmpBounds = new Rect();
+    private final Rect mTmpAbsBounds = new Rect();
     private final Rect mTmpFullBounds = new Rect();
     /** For calculating screenWidthDp and screenWidthDp, i.e. the area without the system bars. */
     private final Rect mTmpStableBounds = new Rect();
@@ -1966,16 +1966,21 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     void resolveOverrideConfiguration(Configuration newParentConfig) {
         mTmpBounds.set(getResolvedOverrideConfiguration().windowConfiguration.getBounds());
         super.resolveOverrideConfiguration(newParentConfig);
+        final Configuration resolvedConfig = getResolvedOverrideConfiguration();
 
-        int windowingMode =
-                getResolvedOverrideConfiguration().windowConfiguration.getWindowingMode();
+        if (mRelativeEmbeddedBounds != null && !mRelativeEmbeddedBounds.isEmpty()) {
+            // For embedded TaskFragment, make sure the bounds is set based on the relative bounds.
+            resolvedConfig.windowConfiguration.setBounds(translateRelativeBoundsToAbsoluteBounds(
+                    mRelativeEmbeddedBounds, newParentConfig.windowConfiguration.getBounds()));
+        }
+        int windowingMode = resolvedConfig.windowConfiguration.getWindowingMode();
         final int parentWindowingMode = newParentConfig.windowConfiguration.getWindowingMode();
 
         // Resolve override windowing mode to fullscreen for home task (even on freeform
         // display), or split-screen if in split-screen mode.
         if (getActivityType() == ACTIVITY_TYPE_HOME && windowingMode == WINDOWING_MODE_UNDEFINED) {
             windowingMode = WINDOWING_MODE_FULLSCREEN;
-            getResolvedOverrideConfiguration().windowConfiguration.setWindowingMode(windowingMode);
+            resolvedConfig.windowConfiguration.setWindowingMode(windowingMode);
         }
 
         // Do not allow tasks not support multi window to be in a multi-window mode, unless it is in
@@ -1985,8 +1990,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                     windowingMode != WINDOWING_MODE_UNDEFINED ? windowingMode : parentWindowingMode;
             if (WindowConfiguration.inMultiWindowMode(candidateWindowingMode)
                     && candidateWindowingMode != WINDOWING_MODE_PINNED) {
-                getResolvedOverrideConfiguration().windowConfiguration.setWindowingMode(
-                        WINDOWING_MODE_FULLSCREEN);
+                resolvedConfig.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
             }
         }
 
@@ -1995,7 +1999,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             thisTask.resolveLeafTaskOnlyOverrideConfigs(newParentConfig,
                     mTmpBounds /* previousBounds */);
         }
-        computeConfigResourceOverrides(getResolvedOverrideConfiguration(), newParentConfig);
+        computeConfigResourceOverrides(resolvedConfig, newParentConfig);
     }
 
     boolean supportsMultiWindow() {
@@ -2422,17 +2426,55 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     }
 
     /**
-     * Updates the record of the relative bounds of this embedded TaskFragment. This should only be
-     * called when the embedded TaskFragment's override bounds are changed.
-     * Returns {@code true} if the bounds is changed.
+     * Translates the given relative bounds to screen space based on the given parent bounds.
+     * When the relative bounds is outside of the parent bounds, it will be adjusted to fit the Task
+     * bounds.
      */
-    void updateRelativeEmbeddedBounds() {
-        // We only record the override bounds, which means it will not be changed when it is filling
-        // Task, and resize with the parent.
-        getRequestedOverrideBounds(mTmpBounds);
-        getRelativePosition(mTmpPoint);
-        mTmpBounds.offsetTo(mTmpPoint.x, mTmpPoint.y);
-        mRelativeEmbeddedBounds.set(mTmpBounds);
+    Rect translateRelativeBoundsToAbsoluteBounds(@NonNull Rect relativeBounds,
+            @NonNull Rect parentBounds) {
+        if (relativeBounds.isEmpty()) {
+            mTmpAbsBounds.setEmpty();
+            return mTmpAbsBounds;
+        }
+        // Translate the relative bounds to absolute bounds.
+        mTmpAbsBounds.set(relativeBounds);
+        mTmpAbsBounds.offset(parentBounds.left, parentBounds.top);
+
+        if (!isAllowedToBeEmbeddedInTrustedMode() && !parentBounds.contains(mTmpAbsBounds)) {
+            // For untrusted embedding, we want to make sure the embedded bounds will never go
+            // outside of the Task bounds.
+            // We expect the organizer to update the bounds after receiving the Task bounds changed,
+            // so skip trusted embedding to avoid unnecessary configuration change before organizer
+            // requests a new bounds.
+            // When the requested TaskFragment bounds is outside of Task bounds, try use the
+            // intersection.
+            // This can happen when the Task resized before the TaskFragmentOrganizer request.
+            if (!mTmpAbsBounds.intersect(parentBounds)) {
+                // Use empty bounds to fill Task if there is no intersection.
+                mTmpAbsBounds.setEmpty();
+            }
+        }
+        return mTmpAbsBounds;
+    }
+
+    void recomputeConfiguration() {
+        onRequestedOverrideConfigurationChanged(getRequestedOverrideConfiguration());
+    }
+
+    /**
+     * Sets the relative bounds in parent coordinate for this embedded TaskFragment.
+     * This will not override the requested bounds, and the actual bounds will be calculated in
+     * {@link #resolveOverrideConfiguration}, so that it makes sure to record and use the relative
+     * bounds that is set by the organizer until the organizer requests a new relative bounds.
+     */
+    void setRelativeEmbeddedBounds(@NonNull Rect relativeEmbeddedBounds) {
+        if (mRelativeEmbeddedBounds == null) {
+            throw new IllegalStateException("The TaskFragment is not embedded");
+        }
+        if (mRelativeEmbeddedBounds.equals(relativeEmbeddedBounds)) {
+            return;
+        }
+        mRelativeEmbeddedBounds.set(relativeEmbeddedBounds);
     }
 
     /**
@@ -2456,6 +2498,13 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             // is changed, even if it is not resized.
             return !relStartBounds.equals(mRelativeEmbeddedBounds);
         }
+    }
+
+    @Override
+    boolean canStartChangeTransition() {
+        final Task task = getTask();
+        // Skip change transition when the Task is drag resizing.
+        return task != null && !task.isDragResizing() && super.canStartChangeTransition();
     }
 
     /** Records the starting bounds of the closing organized TaskFragment. */

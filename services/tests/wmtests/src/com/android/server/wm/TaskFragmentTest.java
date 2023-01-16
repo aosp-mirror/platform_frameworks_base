@@ -122,18 +122,22 @@ public class TaskFragmentTest extends WindowTestsBase {
 
     @Test
     public void testShouldStartChangeTransition_relativePositionChange() {
+        final Task task = createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW,
+                ACTIVITY_TYPE_STANDARD);
+        task.setBoundsUnchecked(new Rect(0, 0, 1000, 1000));
+        mTaskFragment = createTaskFragmentWithEmbeddedActivity(task, mOrganizer);
         mockSurfaceFreezerSnapshot(mTaskFragment.mSurfaceFreezer);
         final Rect startBounds = new Rect(0, 0, 500, 1000);
         final Rect endBounds = new Rect(500, 0, 1000, 1000);
-        mTaskFragment.setBounds(startBounds);
-        mTaskFragment.updateRelativeEmbeddedBounds();
+        mTaskFragment.setRelativeEmbeddedBounds(startBounds);
+        mTaskFragment.recomputeConfiguration();
         doReturn(true).when(mTaskFragment).isVisible();
         doReturn(true).when(mTaskFragment).isVisibleRequested();
 
         // Do not resize, just change the relative position.
         final Rect relStartBounds = new Rect(mTaskFragment.getRelativeEmbeddedBounds());
-        mTaskFragment.setBounds(endBounds);
-        mTaskFragment.updateRelativeEmbeddedBounds();
+        mTaskFragment.setRelativeEmbeddedBounds(endBounds);
+        mTaskFragment.recomputeConfiguration();
         spyOn(mDisplayContent.mTransitionController);
 
         // For Shell transition, we don't want to take snapshot when the bounds are not resized
@@ -150,19 +154,26 @@ public class TaskFragmentTest extends WindowTestsBase {
 
     @Test
     public void testStartChangeTransition_resetSurface() {
+        final Task task = createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW,
+                ACTIVITY_TYPE_STANDARD);
+        task.setBoundsUnchecked(new Rect(0, 0, 1000, 1000));
+        mTaskFragment = createTaskFragmentWithEmbeddedActivity(task, mOrganizer);
+        doReturn(mTransaction).when(mTaskFragment).getSyncTransaction();
+        doReturn(mTransaction).when(mTaskFragment).getPendingTransaction();
+        mLeash = mTaskFragment.getSurfaceControl();
         mockSurfaceFreezerSnapshot(mTaskFragment.mSurfaceFreezer);
         final Rect startBounds = new Rect(0, 0, 1000, 1000);
         final Rect endBounds = new Rect(500, 500, 1000, 1000);
-        mTaskFragment.setBounds(startBounds);
-        mTaskFragment.updateRelativeEmbeddedBounds();
+        mTaskFragment.setRelativeEmbeddedBounds(startBounds);
+        mTaskFragment.recomputeConfiguration();
         doReturn(true).when(mTaskFragment).isVisible();
         doReturn(true).when(mTaskFragment).isVisibleRequested();
 
         clearInvocations(mTransaction);
         final Rect relStartBounds = new Rect(mTaskFragment.getRelativeEmbeddedBounds());
         mTaskFragment.deferOrganizedTaskFragmentSurfaceUpdate();
-        mTaskFragment.setBounds(endBounds);
-        mTaskFragment.updateRelativeEmbeddedBounds();
+        mTaskFragment.setRelativeEmbeddedBounds(endBounds);
+        mTaskFragment.recomputeConfiguration();
         assertTrue(mTaskFragment.shouldStartChangeTransition(startBounds, relStartBounds));
         mTaskFragment.initializeChangeTransition(startBounds);
         mTaskFragment.continueOrganizedTaskFragmentSurfaceUpdate();
@@ -201,8 +212,8 @@ public class TaskFragmentTest extends WindowTestsBase {
         mockSurfaceFreezerSnapshot(mTaskFragment.mSurfaceFreezer);
         final Rect startBounds = new Rect(0, 0, 1000, 1000);
         final Rect endBounds = new Rect(500, 500, 1000, 1000);
-        mTaskFragment.setBounds(startBounds);
-        mTaskFragment.updateRelativeEmbeddedBounds();
+        mTaskFragment.setRelativeEmbeddedBounds(startBounds);
+        mTaskFragment.recomputeConfiguration();
         doReturn(true).when(mTaskFragment).isVisible();
         doReturn(true).when(mTaskFragment).isVisibleRequested();
 
@@ -212,8 +223,8 @@ public class TaskFragmentTest extends WindowTestsBase {
 
         assertFalse(mTaskFragment.okToAnimate());
 
-        mTaskFragment.setBounds(endBounds);
-        mTaskFragment.updateRelativeEmbeddedBounds();
+        mTaskFragment.setRelativeEmbeddedBounds(endBounds);
+        mTaskFragment.recomputeConfiguration();
 
         assertFalse(mTaskFragment.shouldStartChangeTransition(startBounds, relStartBounds));
     }
