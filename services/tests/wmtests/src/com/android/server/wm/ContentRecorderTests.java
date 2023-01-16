@@ -280,9 +280,21 @@ public class ContentRecorderTests extends WindowTestsBase {
     }
 
     @Test
-    public void testStartRecording_notifiesCallback() {
+    public void testStartRecording_notifiesCallback_taskSession() {
         // WHEN a recording is ongoing.
         mContentRecorder.setContentRecordingSession(mTaskSession);
+        mContentRecorder.updateRecording();
+        assertThat(mContentRecorder.isCurrentlyRecording()).isTrue();
+
+        // THEN the visibility change callback is notified.
+        verify(mMediaProjectionManagerWrapper)
+                .notifyActiveProjectionCapturedContentVisibilityChanged(true);
+    }
+
+    @Test
+    public void testStartRecording_notifiesCallback_displaySession() {
+        // WHEN a recording is ongoing.
+        mContentRecorder.setContentRecordingSession(mDisplaySession);
         mContentRecorder.updateRecording();
         assertThat(mContentRecorder.isCurrentlyRecording()).isTrue();
 
