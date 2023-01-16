@@ -525,6 +525,15 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     }
 
     private void updateIsEnabled() {
+        try {
+            Trace.beginSection("EdgeBackGestureHandler#updateIsEnabled");
+            updateIsEnabledTraced();
+        } finally {
+            Trace.endSection();
+        }
+    }
+
+    private void updateIsEnabledTraced() {
         boolean isEnabled = mIsAttached && mIsGesturalModeEnabled;
         if (isEnabled == mIsEnabled) {
             return;
@@ -611,14 +620,16 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     }
 
     private void setEdgeBackPlugin(NavigationEdgeBackPlugin edgeBackPlugin) {
-        if (mEdgeBackPlugin != null) {
-            mEdgeBackPlugin.onDestroy();
+        try {
+            Trace.beginSection("setEdgeBackPlugin");
+            mEdgeBackPlugin = edgeBackPlugin;
+            mEdgeBackPlugin.setBackCallback(mBackCallback);
+            mEdgeBackPlugin.setMotionEventsHandler(mMotionEventsHandler);
+            mEdgeBackPlugin.setLayoutParams(createLayoutParams());
+            updateDisplaySize();
+        } finally {
+            Trace.endSection();
         }
-        mEdgeBackPlugin = edgeBackPlugin;
-        mEdgeBackPlugin.setBackCallback(mBackCallback);
-        mEdgeBackPlugin.setMotionEventsHandler(mMotionEventsHandler);
-        mEdgeBackPlugin.setLayoutParams(createLayoutParams());
-        updateDisplaySize();
     }
 
     public boolean isHandlingGestures() {
