@@ -392,6 +392,23 @@ public final class CameraManager {
      * except that it uses {@link java.util.concurrent.Executor} as an argument
      * instead of {@link android.os.Handler}.</p>
      *
+     * <p>Note: If the order between some availability callbacks matters, the implementation of the
+     * executor should handle those callbacks in the same thread to maintain the callbacks' order.
+     * Some examples are:</p>
+     *
+     * <ul>
+     *
+     * <li>{@link AvailabilityCallback#onCameraAvailable} and
+     * {@link AvailabilityCallback#onCameraUnavailable} of the same camera ID.</li>
+     *
+     * <li>{@link AvailabilityCallback#onCameraAvailable} or
+     * {@link AvailabilityCallback#onCameraUnavailable} of a logical multi-camera, and {@link
+     * AvailabilityCallback#onPhysicalCameraUnavailable} or
+     * {@link AvailabilityCallback#onPhysicalCameraAvailable} of its physical
+     * cameras.</li>
+     *
+     * </ul>
+     *
      * @param executor The executor which will be used to invoke the callback.
      * @param callback the new callback to send camera availability notices to
      *
