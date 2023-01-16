@@ -16,6 +16,7 @@
 package android.multiuser;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 import android.annotation.NonNull;
@@ -241,24 +242,27 @@ public class UserLifecycleTests {
 
     /**
      * Tests starting an uninitialized user, with wait times in between iterations.
-     * Measures the time until ACTION_USER_STARTED is received.
+     * Measures the time until the ProgressListener callback.
      */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void startUser_realistic() throws RemoteException {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int userId = createUserNoFlags();
+            final ProgressWaiter waiter = new ProgressWaiter();
 
             waitForBroadcastIdle();
-            runThenWaitForBroadcasts(userId, () -> {
-                mRunner.resumeTiming();
-                Log.i(TAG, "Starting timer");
+            mRunner.resumeTiming();
+            Log.i(TAG, "Starting timer");
 
-                mIam.startUserInBackground(userId);
-            }, Intent.ACTION_USER_STARTED);
+            final boolean success = mIam.startUserInBackgroundWithListener(userId, waiter)
+                    && waiter.waitForFinish(TIMEOUT_IN_SECOND * 1000);
 
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
+
+            assertTrue("Error: could not start user " + userId, success);
+
             removeUser(userId);
             waitCoolDownPeriod();
             mRunner.resumeTimingForNextIteration();
