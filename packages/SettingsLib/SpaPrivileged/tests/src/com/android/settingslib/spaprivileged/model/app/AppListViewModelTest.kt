@@ -56,7 +56,7 @@ class AppListViewModelTest {
         viewModel.appListConfig.setIfAbsent(CONFIG)
         viewModel.listModel.setIfAbsent(listModel)
         viewModel.showSystem.setIfAbsent(false)
-        viewModel.option.setIfAbsent(0)
+        viewModel.optionFlow.value = 0
         viewModel.searchQuery.setIfAbsent("")
         viewModel.reloadApps()
         return viewModel
