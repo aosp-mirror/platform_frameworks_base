@@ -2876,9 +2876,11 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(SAFETY_CENTER_SERVICE_CLASS);
         t.traceEnd();
 
-        t.traceBegin("AppSearchModule");
-        mSystemServiceManager.startService(APPSEARCH_MODULE_LIFECYCLE_CLASS);
-        t.traceEnd();
+        if (!isTv) {
+            t.traceBegin("AppSearchModule");
+            mSystemServiceManager.startService(APPSEARCH_MODULE_LIFECYCLE_CLASS);
+            t.traceEnd();
+        }
 
         if (SystemProperties.getBoolean("ro.config.isolated_compilation_enabled", false)) {
             t.traceBegin("IsolatedCompilationService");
