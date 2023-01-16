@@ -380,7 +380,12 @@ public final class ImeVisibilityStateComputer {
                 }
                 break;
             case WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED:
-                // Do nothing.
+                // Do nothing but preserving the last IME requested visibility state.
+                final ImeTargetWindowState lastState =
+                        getWindowStateOrNull(mService.mLastImeTargetWindow);
+                if (lastState != null) {
+                    state.setRequestedImeVisible(lastState.mRequestedImeVisible);
+                }
                 break;
             case WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN:
                 if (isForwardNavigation) {
