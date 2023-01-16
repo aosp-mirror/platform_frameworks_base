@@ -134,6 +134,7 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.security.KeyChain;
 import android.security.keystore.AttestationUtils;
@@ -259,6 +260,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     private static final String PROFILE_OFF_SUSPENSION_TITLE = "suspension_title";
     private static final String PROFILE_OFF_SUSPENSION_TEXT = "suspension_text";
     private static final String PROFILE_OFF_SUSPENSION_SOON_TEXT = "suspension_tomorrow_text";
+    private static final String FLAG_ENABLE_WORK_PROFILE_TELEPHONY =
+            "enable_work_profile_telephony";
 
     @Before
     public void setUp() throws Exception {
@@ -4982,7 +4985,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testWipeDataManagedProfileOnOrganizationOwnedDevice() throws Exception {
         setupProfileOwner();
         configureProfileOwnerOfOrgOwnedDevice(admin1, CALLER_USER_HANDLE);
-
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER,
+                FLAG_ENABLE_WORK_PROFILE_TELEPHONY, "true", false);
         // Even if the caller is the managed profile, the current user is the user 0
         when(getServices().iactivityManager.getCurrentUser())
                 .thenReturn(new UserInfo(UserHandle.USER_SYSTEM, "user system", 0));
@@ -5043,6 +5047,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verify(getServices().packageManagerInternal)
                 .unsuspendForSuspendingPackage(PLATFORM_PACKAGE_NAME, UserHandle.USER_SYSTEM);
         verify(getServices().subscriptionManager).setSubscriptionUserHandle(0, null);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER,
+                FLAG_ENABLE_WORK_PROFILE_TELEPHONY, "false", false);
     }
 
     @Test
