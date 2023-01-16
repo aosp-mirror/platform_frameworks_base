@@ -40,7 +40,6 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.content.Context;
 import android.content.Intent;
@@ -59,8 +58,6 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 
-import com.android.internal.R;
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.art.ArtManagerLocal;
@@ -99,18 +96,6 @@ public final class DexOptHelper {
 
     private final PackageManagerService mPm;
 
-    public boolean isDexOptDialogShown() {
-        synchronized (mLock) {
-            return mDexOptDialogShown;
-        }
-    }
-
-    // TODO: Is this lock really necessary?
-    private final Object mLock = new Object();
-
-    @GuardedBy("mLock")
-    private boolean mDexOptDialogShown;
-
     DexOptHelper(PackageManagerService pm) {
         mPm = pm;
     }
@@ -128,7 +113,7 @@ public final class DexOptHelper {
      * which are (in order) {@code numberOfPackagesOptimized}, {@code numberOfPackagesSkipped}
      * and {@code numberOfPackagesFailed}.
      */
-    public int[] performDexOptUpgrade(List<PackageStateInternal> packageStates, boolean showDialog,
+    public int[] performDexOptUpgrade(List<PackageStateInternal> packageStates,
             final int compilationReason, boolean bootComplete)
             throws LegacyDexoptDisabledException {
         Installer.checkLegacyDexoptDisabled();
@@ -218,18 +203,6 @@ public final class DexOptHelper {
             if (DEBUG_DEXOPT) {
                 Log.i(TAG, "Updating app " + numberOfPackagesVisited + " of "
                         + numberOfPackagesToDexopt + ": " + pkg.getPackageName());
-            }
-
-            if (showDialog) {
-                try {
-                    ActivityManager.getService().showBootMessage(
-                            mPm.mContext.getResources().getString(R.string.android_upgrading_apk,
-                                    numberOfPackagesVisited, numberOfPackagesToDexopt), true);
-                } catch (RemoteException e) {
-                }
-                synchronized (mLock) {
-                    mDexOptDialogShown = true;
-                }
             }
 
             int pkgCompilationReason = compilationReason;
@@ -364,9 +337,7 @@ public final class DexOptHelper {
         boolean causeUpgrade = mPm.isDeviceUpgrading();
 
         // First boot or factory reset.
-        // Note: we also handle devices that are upgrading to N right now as if it is their
-        //       first boot, as they do not have profile data.
-        boolean causeFirstBoot = mPm.isFirstBoot() || mPm.isPreNUpgrade();
+        boolean causeFirstBoot = mPm.isFirstBoot();
 
         if (!causeUpgrade && !causeFirstBoot) {
             return;
@@ -377,7 +348,7 @@ public final class DexOptHelper {
                 getPackagesForDexopt(snapshot.getPackageStates().values(), mPm);
 
         final long startTime = System.nanoTime();
-        final int[] stats = performDexOptUpgrade(pkgSettings, mPm.isPreNUpgrade() /* showDialog */,
+        final int[] stats = performDexOptUpgrade(pkgSettings,
                 causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT_AFTER_OTA,
                 false /* bootComplete */);
 

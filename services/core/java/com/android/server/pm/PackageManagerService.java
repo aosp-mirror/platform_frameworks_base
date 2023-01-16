@@ -588,7 +588,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     private final int mDefParseFlags;
     private final String[] mSeparateProcesses;
     private final boolean mIsUpgrade;
-    private final boolean mIsPreNUpgrade;
     private final boolean mIsPreNMR1Upgrade;
     private final boolean mIsPreQUpgrade;
 
@@ -1734,7 +1733,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mInstantAppResolverConnection = testParams.instantAppResolverConnection;
         mInstantAppResolverSettingsComponent = testParams.instantAppResolverSettingsComponent;
         mIsPreNMR1Upgrade = testParams.isPreNmr1Upgrade;
-        mIsPreNUpgrade = testParams.isPreNupgrade;
         mIsPreQUpgrade = testParams.isPreQupgrade;
         mIsUpgrade = testParams.isUpgrade;
         mMetrics = testParams.Metrics;
@@ -2068,10 +2066,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             // when upgrading from pre-M, promote system app permissions from install to runtime
             mPromoteSystemApps =
                     mIsUpgrade && ver.sdkVersion <= Build.VERSION_CODES.LOLLIPOP_MR1;
-
-            // When upgrading from pre-N, we need to handle package extraction like first boot,
-            // as there is no profiling data available.
-            mIsPreNUpgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.N;
 
             mIsPreNMR1Upgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.N_MR1;
             mIsPreQUpgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.Q;
@@ -2954,13 +2948,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 }
                 if (doTrim) {
                     if (!isFirstBoot()) {
-                        if (mDexOptHelper.isDexOptDialogShown()) {
-                            try {
-                                ActivityManager.getService().showBootMessage(
-                                        mContext.getResources().getString(
-                                                R.string.android_upgrading_fstrim), true);
-                            } catch (RemoteException e) {
-                            }
+                        try {
+                            ActivityManager.getService().showBootMessage(
+                                    mContext.getResources().getString(
+                                            R.string.android_upgrading_fstrim),
+                                    true);
+                        } catch (RemoteException e) {
                         }
                     }
                     sm.runMaintenance();
@@ -7493,10 +7486,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     AndroidPackage getPlatformPackage() {
         return mPlatformPackage;
-    }
-
-    boolean isPreNUpgrade() {
-        return mIsPreNUpgrade;
     }
 
     boolean isPreNMR1Upgrade() {
