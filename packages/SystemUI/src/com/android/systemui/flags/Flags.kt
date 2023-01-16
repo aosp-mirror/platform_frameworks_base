@@ -413,6 +413,17 @@ object Flags {
     val WM_DESKTOP_WINDOWING_2 =
         sysPropBooleanFlag(1112, "persist.wm.debug.desktop_mode_2", default = false)
 
+    // TODO(b/254513207): Tracking Bug to delete
+    @Keep
+    @JvmField
+    val WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES =
+        unreleasedFlag(
+            1113,
+            name = "screen_record_enterprise_policies",
+            namespace = DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+            teamfood = false
+        )
+
     // 1200 - predictive back
     @Keep
     @JvmField
