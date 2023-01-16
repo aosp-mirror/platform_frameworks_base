@@ -26,6 +26,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.runBlocking
 
 /**
  * The config used to load the App List.
@@ -47,8 +48,21 @@ internal interface AppListRepository {
         userIdFlow: Flow<Int>,
         showSystemFlow: Flow<Boolean>,
     ): Flow<(app: ApplicationInfo) -> Boolean>
+
+    /** Gets the system app package names. */
+    fun getSystemPackageNamesBlocking(config: AppListConfig): Set<String>
 }
 
+/**
+ * Util for app list repository.
+ */
+object AppListRepositoryUtil {
+    /** Gets the system app package names. */
+    @JvmStatic
+    fun getSystemPackageNames(context: Context, config: AppListConfig): Set<String> {
+        return AppListRepositoryImpl(context).getSystemPackageNamesBlocking(config)
+    }
+}
 
 internal class AppListRepositoryImpl(private val context: Context) : AppListRepository {
     private val packageManager = context.packageManager
@@ -83,15 +97,26 @@ internal class AppListRepositoryImpl(private val context: Context) : AppListRepo
     ): Flow<(app: ApplicationInfo) -> Boolean> =
         userIdFlow.combine(showSystemFlow, ::showSystemPredicate)
 
+    override fun getSystemPackageNamesBlocking(config: AppListConfig) = runBlocking {
+        getSystemPackageNames(config)
+    }
+
+    private suspend fun getSystemPackageNames(config: AppListConfig): Set<String> =
+            coroutineScope {
+                val loadAppsDeferred = async { loadApps(config) }
+                val homeOrLauncherPackages = loadHomeOrLauncherPackages(config.userId)
+                val showSystemPredicate =
+                        { app: ApplicationInfo -> isSystemApp(app, homeOrLauncherPackages) }
+                loadAppsDeferred.await().filter(showSystemPredicate).map { it.packageName }.toSet()
+            }
+
     private suspend fun showSystemPredicate(
         userId: Int,
         showSystem: Boolean,
     ): (app: ApplicationInfo) -> Boolean {
         if (showSystem) return { true }
         val homeOrLauncherPackages = loadHomeOrLauncherPackages(userId)
-        return { app ->
-            app.isUpdatedSystemApp || !app.isSystemApp || app.packageName in homeOrLauncherPackages
-        }
+        return { app -> !isSystemApp(app, homeOrLauncherPackages) }
     }
 
     private suspend fun loadHomeOrLauncherPackages(userId: Int): Set<String> {
@@ -115,6 +140,11 @@ internal class AppListRepositoryImpl(private val context: Context) : AppListRepo
                 .map { it.activityInfo.packageName }
                 .toSet()
         }
+    }
+
+    private fun isSystemApp(app: ApplicationInfo, homeOrLauncherPackages: Set<String>): Boolean {
+        return !app.isUpdatedSystemApp && app.isSystemApp &&
+            !(app.packageName in homeOrLauncherPackages)
     }
 
     companion object {
