@@ -707,7 +707,8 @@ class InsetsPolicy {
 
         InsetsPolicyAnimationControlListener(boolean show, Runnable finishCallback, int types) {
             super(show, false /* hasCallbacks */, types, BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE,
-                    false /* disable */, 0 /* floatingImeBottomInsets */, null);
+                    false /* disable */, 0 /* floatingImeBottomInsets */,
+                    null /* loggingListener */, null /* jankContext */);
             mFinishCallback = finishCallback;
             mControlCallbacks = new InsetsPolicyAnimationControlCallbacks(this);
         }
