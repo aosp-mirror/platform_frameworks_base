@@ -171,6 +171,16 @@ public class UserInfo implements Parcelable {
     public static final int FLAG_MAIN = 0x00004000;
 
     /**
+     * Indicates that this user was created for the purposes of testing.
+     *
+     * <p>These users are subject to removal during tests and should not be used on actual devices
+     * used by humans.
+     *
+     * @hide
+     */
+    public static final int FLAG_FOR_TESTING = 0x00008000;
+
+    /**
      * @hide
      */
     @IntDef(flag = true, prefix = "FLAG_", value = {
@@ -188,7 +198,8 @@ public class UserInfo implements Parcelable {
             FLAG_SYSTEM,
             FLAG_PROFILE,
             FLAG_EPHEMERAL_ON_CREATE,
-            FLAG_MAIN
+            FLAG_MAIN,
+            FLAG_FOR_TESTING
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserInfoFlag {
@@ -367,6 +378,12 @@ public class UserInfo implements Parcelable {
 
     public boolean isEphemeral() {
         return (flags & FLAG_EPHEMERAL) == FLAG_EPHEMERAL;
+    }
+
+    /** @hide */
+    @TestApi
+    public boolean isForTesting() {
+        return (flags & FLAG_FOR_TESTING) == FLAG_FOR_TESTING;
     }
 
     public boolean isInitialized() {

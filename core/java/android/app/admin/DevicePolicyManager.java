@@ -19,6 +19,7 @@ package android.app.admin;
 import static android.Manifest.permission.QUERY_ADMIN_POLICY;
 import static android.Manifest.permission.SET_TIME;
 import static android.Manifest.permission.SET_TIME_ZONE;
+import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
 import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
 
@@ -4186,7 +4187,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    @RequiresPermission(INTERACT_ACROSS_USERS_FULL)
     public boolean packageHasActiveAdmins(String packageName) {
         return packageHasActiveAdmins(packageName, myUserId());
     }
@@ -8743,7 +8744,7 @@ public class DevicePolicyManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @RequiresPermission(allOf = {
             android.Manifest.permission.MANAGE_DEVICE_ADMINS,
-            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL
+            INTERACT_ACROSS_USERS_FULL
     })
     public void setActiveAdmin(@NonNull ComponentName policyReceiver, boolean refreshing,
             int userHandle) {
@@ -10654,7 +10655,7 @@ public class DevicePolicyManager {
      */
     @UserHandleAware
     @RequiresPermission(allOf = {
-            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            INTERACT_ACROSS_USERS_FULL,
             android.Manifest.permission.MANAGE_USERS
             }, conditional = true)
     public @Nullable List<String> getPermittedInputMethods() {
@@ -14845,7 +14846,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @RequiresPermission(anyOf = {
-            permission.INTERACT_ACROSS_USERS_FULL,
+            INTERACT_ACROSS_USERS_FULL,
             permission.INTERACT_ACROSS_USERS
     }, conditional = true)
     public boolean isPackageAllowedToAccessCalendar(@NonNull  String packageName) {
@@ -14877,7 +14878,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @RequiresPermission(anyOf = {
-            permission.INTERACT_ACROSS_USERS_FULL,
+            INTERACT_ACROSS_USERS_FULL,
             permission.INTERACT_ACROSS_USERS
     })
     public @Nullable Set<String> getCrossProfileCalendarPackages() {
@@ -14970,7 +14971,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @RequiresPermission(anyOf = {
-            permission.INTERACT_ACROSS_USERS_FULL,
+            INTERACT_ACROSS_USERS_FULL,
             permission.INTERACT_ACROSS_USERS,
             permission.INTERACT_ACROSS_PROFILES
     })
@@ -16151,6 +16152,23 @@ public class DevicePolicyManager {
             return deviceManagerConfig.split(":")[0];
         }
         return deviceManagerConfig;
+    }
+
+    /**
+     * Reset cache for {@link #shouldAllowBypassingDevicePolicyManagementRoleQualification}.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS)
+    public void resetShouldAllowBypassingDevicePolicyManagementRoleQualificationState() {
+        if (mService != null) {
+            try {
+                mService.resetShouldAllowBypassingDevicePolicyManagementRoleQualificationState();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
