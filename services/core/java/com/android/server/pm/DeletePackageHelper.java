@@ -774,6 +774,21 @@ final class DeletePackageHelper {
                 if (!deleteAllUsers) {
                     returnCode = deletePackageX(internalPackageName, versionCode,
                             userId, deleteFlags, false /*removedBySystem*/);
+
+                    // Get a list of child user profiles and delete if package is
+                    // present in clone profile.
+                    int[] childUserIds = mUserManagerInternal.getProfileIds(userId, true);
+                    for (int childId : childUserIds) {
+                        if (childId != userId) {
+                            UserInfo userInfo = mUserManagerInternal.getUserInfo(childId);
+                            if (userInfo != null && userInfo.isCloneProfile()) {
+                                returnCode = deletePackageX(internalPackageName, versionCode,
+                                        childId, deleteFlags, false /*removedBySystem*/);
+                                break;
+                            }
+                        }
+                    }
+
                 } else {
                     int[] blockUninstallUserIds = getBlockUninstallForUsers(innerSnapshot,
                             internalPackageName, users);

@@ -143,6 +143,8 @@
     <!-- [CHAR LIMIT=100] -->
     <string name="uninstall_done_app">Uninstalled <xliff:g id="package_label">%1$s</xliff:g></string>
     <!-- [CHAR LIMIT=100] -->
+    <string name="uninstall_done_clone_app">Deleted <xliff:g id="package_label">%1$s</xliff:g> clone</string>
+    <!-- [CHAR LIMIT=100] -->
     <string name="uninstall_failed">Uninstall unsuccessful.</string>
     <!-- [CHAR LIMIT=100] -->
     <string name="uninstall_failed_app">Uninstalling <xliff:g id="package_label">%1$s</xliff:g> unsuccessful.</string>
