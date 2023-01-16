@@ -2342,15 +2342,6 @@ public final class CameraManager {
                 final AvailabilityCallback callback = mCallbackMap.keyAt(i);
 
                 postSingleUpdate(callback, executor, id, null /*physicalId*/, status);
-
-                // Send the NOT_PRESENT state for unavailable physical cameras
-                if (isAvailable(status) && mUnavailablePhysicalDevices.containsKey(id)) {
-                    ArrayList<String> unavailableIds = mUnavailablePhysicalDevices.get(id);
-                    for (String unavailableId : unavailableIds) {
-                        postSingleUpdate(callback, executor, id, unavailableId,
-                                ICameraServiceListener.STATUS_NOT_PRESENT);
-                    }
-                }
             }
         } // onStatusChangedLocked
 
