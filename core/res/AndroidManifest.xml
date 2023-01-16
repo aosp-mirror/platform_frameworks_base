@@ -6864,8 +6864,8 @@
 
     <!-- Allows an assistive application to perform actions on behalf of users inside of
          applications.
-         <p>For now, this permission is only granted to system applications fulfilling the
-         ASSISTANT role.
+         <p>For now, this permission is only granted to the Assistant application selected by
+         the user.
          <p>Protection level: internal|role
     -->
     <permission android:name="android.permission.EXECUTE_APP_ACTION"
