@@ -4979,6 +4979,26 @@
       -->
     </integer-array>
 
+    <!-- The properties for handling UDFPS touch detection
+    <string-array name="config_udfps_touch_detection_options">
+        <item>[detector_type],[sensor_shape],[target_size],[min_ellipse_overlap_percentage]</item>
+    </string-array>
+
+        [detector_type]: 0 for bounding box detector, 1 for ellipse detector
+        [sensor_shape]: 0 for square, 1 for circle
+        [target_size]: percentage (defined as a float of 0-1) of sensor that is considered the target, expands outward from center
+        [min_ellipse_overlap_percentage]: minimum percentage (float from 0-1) needed to be considered a valid overlap
+        [step_size]: size of each step when iterating over sensor pixel grid
+    -->
+    <string-array name="config_udfps_touch_detection_options">
+        <item>0,0,1.0,0,1</item>
+        <item>1,1,1.0,0,1</item>
+        <item>1,1,1.0,.4,1</item>
+    </string-array>
+
+    <!-- The integer index of the selected option in config_udfps_touch_detection_options -->
+    <integer name="config_selected_udfps_touch_detection">2</integer>
+
     <!-- An array of arrays of side fingerprint sensor properties relative to each display.
          Note: this value is temporary and is expected to be queried directly
          from the HAL in the future. -->
