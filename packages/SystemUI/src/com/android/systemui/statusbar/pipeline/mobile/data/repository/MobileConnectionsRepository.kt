@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
 import android.provider.Settings
 import android.telephony.CarrierConfigManager
+import android.telephony.SubscriptionManager
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.MobileMappings
 import com.android.settingslib.mobile.MobileMappings.Config
@@ -36,6 +37,15 @@ interface MobileConnectionsRepository {
 
     /** Observable for the subscriptionId of the current mobile data connection */
     val activeMobileDataSubscriptionId: StateFlow<Int>
+
+    /**
+     * Observable event for when the active data sim switches but the group stays the same. E.g.,
+     * CBRS switching would trigger this
+     */
+    val activeSubChangedInGroupEvent: Flow<Unit>
+
+    /** Tracks [SubscriptionManager.getDefaultDataSubscriptionId] */
+    val defaultDataSubId: StateFlow<Int>
 
     /** The current connectivity status for the default mobile network connection */
     val defaultMobileNetworkConnectivity: StateFlow<MobileConnectivityModel>
