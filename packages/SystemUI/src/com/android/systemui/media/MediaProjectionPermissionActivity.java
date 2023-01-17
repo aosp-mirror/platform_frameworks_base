@@ -22,6 +22,7 @@ import static com.android.systemui.screenrecord.ScreenShareOptionKt.ENTIRE_SCREE
 import static com.android.systemui.screenrecord.ScreenShareOptionKt.SINGLE_APP;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -35,6 +36,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.text.BidiFormatter;
 import android.text.SpannableString;
 import android.text.TextPaint;
@@ -208,8 +210,14 @@ public class MediaProjectionPermissionActivity extends Activity
                 final Intent intent = new Intent(this, MediaProjectionAppSelectorActivity.class);
                 intent.putExtra(MediaProjectionManager.EXTRA_MEDIA_PROJECTION,
                         projection.asBinder());
+                intent.putExtra(MediaProjectionAppSelectorActivity.EXTRA_HOST_APP_USER_HANDLE,
+                        UserHandle.getUserHandleForUid(getLaunchedFromUid()));
                 intent.setFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
-                startActivity(intent);
+
+                // Start activity from the current foreground user to avoid creating a separate
+                // SystemUI process without access to recent tasks because it won't have
+                // WM Shell running inside.
+                startActivityAsUser(intent, UserHandle.of(ActivityManager.getCurrentUser()));
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error granting projection permission", e);
