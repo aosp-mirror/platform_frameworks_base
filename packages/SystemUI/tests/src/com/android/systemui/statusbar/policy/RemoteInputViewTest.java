@@ -140,7 +140,8 @@ public class RemoteInputViewTest extends SysuiTestCase {
 
     private void setTestPendingIntent(RemoteInputViewController controller) {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0,
-                new Intent(TEST_ACTION), PendingIntent.FLAG_MUTABLE);
+                new Intent(TEST_ACTION).setPackage(mContext.getPackageName()),
+                PendingIntent.FLAG_MUTABLE);
         RemoteInput input = new RemoteInput.Builder(TEST_RESULT_KEY).build();
         RemoteInput[] inputs = {input};
 
