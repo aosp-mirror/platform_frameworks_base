@@ -48,7 +48,7 @@ import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
-import com.android.systemui.statusbar.gesture.SwipeUpGestureHandler;
+import com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureHandler;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -230,7 +230,7 @@ public interface CentralSurfacesDependenciesModule {
             OngoingCallLogger logger,
             DumpManager dumpManager,
             StatusBarWindowController statusBarWindowController,
-            SwipeUpGestureHandler swipeStatusBarAwayGestureHandler,
+            SwipeStatusBarAwayGestureHandler swipeStatusBarAwayGestureHandler,
             StatusBarStateController statusBarStateController,
             OngoingCallFlags ongoingCallFlags) {
 
@@ -239,7 +239,7 @@ public interface CentralSurfacesDependenciesModule {
                 ongoingCallInImmersiveEnabled
                         ? Optional.of(statusBarWindowController)
                         : Optional.empty();
-        Optional<SwipeUpGestureHandler> gestureHandler =
+        Optional<SwipeStatusBarAwayGestureHandler> gestureHandler =
                 ongoingCallInImmersiveEnabled
                         ? Optional.of(swipeStatusBarAwayGestureHandler)
                         : Optional.empty();
