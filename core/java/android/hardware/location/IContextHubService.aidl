@@ -113,4 +113,8 @@ interface IContextHubService {
     // Queries for a list of preloaded nanoapps
     @EnforcePermission("ACCESS_CONTEXT_HUB")
     long[] getPreloadedNanoAppIds(in ContextHubInfo hubInfo);
+
+    // Enables or disables test mode
+    @EnforcePermission("ACCESS_CONTEXT_HUB")
+    boolean setTestMode(in boolean enable);
 }
