@@ -4827,35 +4827,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
-        public void dumpProfiles(String packageName, boolean dumpClassesAndMethods) {
-            /* Only the shell, root, or the app user should be able to dump profiles. */
-            final int callingUid = Binder.getCallingUid();
-            final Computer snapshot = snapshotComputer();
-            final String[] callerPackageNames = snapshot.getPackagesForUid(callingUid);
-            if (callingUid != Process.SHELL_UID
-                    && callingUid != Process.ROOT_UID
-                    && !ArrayUtils.contains(callerPackageNames, packageName)) {
-                throw new SecurityException("dumpProfiles");
-            }
-
-            AndroidPackage pkg = snapshot.getPackage(packageName);
-            if (pkg == null) {
-                throw new IllegalArgumentException("Unknown package: " + packageName);
-            }
-
-            // TODO(b/251903639): Call into ART Service.
-            synchronized (mInstallLock) {
-                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dump profiles");
-                try {
-                    mArtManagerService.dumpProfiles(pkg, dumpClassesAndMethods);
-                } catch (LegacyDexoptDisabledException e) {
-                    throw new RuntimeException(e);
-                }
-                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-            }
-        }
-
-        @Override
         public void enterSafeMode() {
             PackageManagerServiceUtils.enforceSystemOrRoot(
                     "Only the system can request entering safe mode");
@@ -5539,33 +5510,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 return ParceledListSlice.emptyList();
             }
             return new ParceledListSlice<>(result);
-        }
-
-        /**
-         * Reconcile the information we have about the secondary dex files belonging to
-         * {@code packageName} and the actual dex files. For all dex files that were
-         * deleted, update the internal records and delete the generated oat files.
-         */
-        @Override
-        public void reconcileSecondaryDexFiles(String packageName) {
-            if (useArtService()) {
-                // ART Service currently relies on a GC to find stale oat files, including secondary
-                // dex files. Hence it doesn't use this call for anything.
-                return;
-            }
-
-            final Computer snapshot = snapshotComputer();
-            if (snapshot.getInstantAppPackageName(Binder.getCallingUid()) != null) {
-                return;
-            } else if (snapshot.isInstantAppInternal(
-                               packageName, UserHandle.getCallingUserId(), Process.SYSTEM_UID)) {
-                return;
-            }
-            try {
-                mDexManager.reconcileSecondaryDexFiles(packageName);
-            } catch (LegacyDexoptDisabledException e) {
-                throw new RuntimeException(e);
-            }
         }
 
         @Override
@@ -6661,6 +6605,47 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 adapter.onPackageDeleted(packageName, PackageManager.DELETE_SUCCEEDED,
                         null);
             }
+        }
+
+        /** @deprecated For legacy shell command only. */
+        @Override
+        @Deprecated
+        public void legacyDumpProfiles(String packageName, boolean dumpClassesAndMethods)
+                throws LegacyDexoptDisabledException {
+            /* Only the shell, root, or the app user should be able to dump profiles. */
+            final int callingUid = Binder.getCallingUid();
+            final Computer snapshot = snapshotComputer();
+            final String[] callerPackageNames = snapshot.getPackagesForUid(callingUid);
+            if (callingUid != Process.SHELL_UID && callingUid != Process.ROOT_UID
+                    && !ArrayUtils.contains(callerPackageNames, packageName)) {
+                throw new SecurityException("dumpProfiles");
+            }
+
+            AndroidPackage pkg = snapshot.getPackage(packageName);
+            if (pkg == null) {
+                throw new IllegalArgumentException("Unknown package: " + packageName);
+            }
+
+            synchronized (mInstallLock) {
+                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dump profiles");
+                mArtManagerService.dumpProfiles(pkg, dumpClassesAndMethods);
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+            }
+        }
+
+        /** @deprecated For legacy shell command only. */
+        @Override
+        @Deprecated
+        public void legacyReconcileSecondaryDexFiles(String packageName)
+                throws LegacyDexoptDisabledException {
+            final Computer snapshot = snapshotComputer();
+            if (snapshot.getInstantAppPackageName(Binder.getCallingUid()) != null) {
+                return;
+            } else if (snapshot.isInstantAppInternal(
+                               packageName, UserHandle.getCallingUserId(), Process.SYSTEM_UID)) {
+                return;
+            }
+            mDexManager.reconcileSecondaryDexFiles(packageName);
         }
 
         @Override

@@ -570,25 +570,7 @@ interface IPackageManager {
     boolean performDexOptSecondary(String packageName,
             String targetCompilerFilter, boolean force);
 
-    /**
-     * Ask the package manager to dump profiles associated with a package.
-     *
-     * @param packageName The name of the package to dump.
-     * @param dumpClassesAndMethods If false, pass {@code --dump-only} to profman to dump the
-     *   profile in a human readable form intended for debugging. If true, pass
-     *   {@code --dump-classes-and-methods} to profman to dump a sorted list of classes and methods
-     *   in a human readable form that is valid input for {@code profman --create-profile-from}.
-     */
-    void dumpProfiles(String packageName, boolean dumpClassesAndMethods);
-
     void forceDexOpt(String packageName);
-
-    /**
-     * Reconcile the information we have about the secondary dex files belonging to
-     * {@code packagName} and the actual dex files. For all dex files that were
-     * deleted, update the internal records and delete the generated oat files.
-     */
-    void reconcileSecondaryDexFiles(String packageName);
 
     int getMoveStatus(int moveId);
 

@@ -179,6 +179,7 @@ class PackageManagerShellCommand extends ShellCommand {
             "cancel-bg-dexopt-job", "delete-dexopt", "dump-profiles", "snapshot-profile", "art");
 
     final IPackageManager mInterface;
+    private final PackageManagerInternal mPm;
     final LegacyPermissionManagerInternal mLegacyPermissionManager;
     final PermissionManager mPermissionManager;
     final Context mContext;
@@ -195,6 +196,7 @@ class PackageManagerShellCommand extends ShellCommand {
     PackageManagerShellCommand(@NonNull IPackageManager packageManager,
             @NonNull Context context, @NonNull DomainVerificationShell domainVerificationShell) {
         mInterface = packageManager;
+        mPm = LocalServices.getService(PackageManagerInternal.class);
         mLegacyPermissionManager = LocalServices.getService(LegacyPermissionManagerInternal.class);
         mPermissionManager = context.getSystemService(PermissionManager.class);
         mContext = context;
@@ -1968,9 +1970,10 @@ class PackageManagerShellCommand extends ShellCommand {
         }
     }
 
-    private int runreconcileSecondaryDexFiles() throws RemoteException {
+    private int runreconcileSecondaryDexFiles()
+            throws RemoteException, LegacyDexoptDisabledException {
         String packageName = getNextArg();
-        mInterface.reconcileSecondaryDexFiles(packageName);
+        mPm.legacyReconcileSecondaryDexFiles(packageName);
         return 0;
     }
 
@@ -2035,8 +2038,7 @@ class PackageManagerShellCommand extends ShellCommand {
             pw.println("Error: no package name");
             return 1;
         }
-        long freedBytes = LocalServices.getService(PackageManagerInternal.class)
-                                  .deleteOatArtifactsOfPackage(packageName);
+        long freedBytes = mPm.deleteOatArtifactsOfPackage(packageName);
         if (freedBytes < 0) {
             pw.println("Error: delete failed");
             return 1;
@@ -2046,7 +2048,7 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int runDumpProfiles() throws RemoteException {
+    private int runDumpProfiles() throws RemoteException, LegacyDexoptDisabledException {
         final PrintWriter pw = getOutPrintWriter();
         boolean dumpClassesAndMethods = false;
 
@@ -2063,7 +2065,7 @@ class PackageManagerShellCommand extends ShellCommand {
         }
 
         String packageName = getNextArg();
-        mInterface.dumpProfiles(packageName, dumpClassesAndMethods);
+        mPm.legacyDumpProfiles(packageName, dumpClassesAndMethods);
         return 0;
     }
 
