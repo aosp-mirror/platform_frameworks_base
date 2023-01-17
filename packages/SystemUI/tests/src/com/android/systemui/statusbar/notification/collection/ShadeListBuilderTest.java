@@ -39,7 +39,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -137,7 +136,6 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         allowTestableLooperAsMainThread();
-        when(mNotifPipelineFlags.isStabilityIndexFixEnabled()).thenReturn(true);
 
         mListBuilder = new ShadeListBuilder(
                 mDumpManager,
@@ -1998,29 +1996,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     @Test
-    public void testActiveOrdering_withLegacyStability() {
-        when(mNotifPipelineFlags.isSemiStableSortEnabled()).thenReturn(false);
-        assertOrder("ABCDEFG", "ABCDEFG", "ABCDEFG", true); // no change
-        assertOrder("ABCDEFG", "ACDEFXBG", "ACDEFXBG", true); // X
-        assertOrder("ABCDEFG", "ACDEFBG", "ACDEFBG", true); // no change
-        assertOrder("ABCDEFG", "ACDEFBXZG", "ACDEFBXZG", true); // Z and X
-        assertOrder("ABCDEFG", "AXCDEZFBG", "AXCDEZFBG", true); // Z and X + gap
-    }
-
-    @Test
-    public void testStableOrdering_withLegacyStability() {
-        when(mNotifPipelineFlags.isSemiStableSortEnabled()).thenReturn(false);
-        mStabilityManager.setAllowEntryReordering(false);
-        assertOrder("ABCDEFG", "ABCDEFG", "ABCDEFG", true); // no change
-        assertOrder("ABCDEFG", "ACDEFXBG", "XABCDEFG", false); // X
-        assertOrder("ABCDEFG", "ACDEFBG", "ABCDEFG", false); // no change
-        assertOrder("ABCDEFG", "ACDEFBXZG", "XZABCDEFG", false); // Z and X
-        assertOrder("ABCDEFG", "AXCDEZFBG", "XZABCDEFG", false); // Z and X + gap
-    }
-
-    @Test
     public void testStableOrdering() {
-        when(mNotifPipelineFlags.isSemiStableSortEnabled()).thenReturn(true);
         mStabilityManager.setAllowEntryReordering(false);
         // No input or output
         assertOrder("", "", "", true);
@@ -2076,7 +2052,6 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
     @Test
     public void testActiveOrdering() {
-        when(mNotifPipelineFlags.isSemiStableSortEnabled()).thenReturn(true);
         assertOrder("ABCDEFG", "ACDEFXBG", "ACDEFXBG", true); // X
         assertOrder("ABCDEFG", "ACDEFBG", "ACDEFBG", true); // no change
         assertOrder("ABCDEFG", "ACDEFBXZG", "ACDEFBXZG", true); // Z and X
@@ -2133,7 +2108,6 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
     @Test
     public void stableOrderingDisregardedWithSectionChange() {
-        when(mNotifPipelineFlags.isSemiStableSortEnabled()).thenReturn(true);
         // GIVEN the first sectioner's packages can be changed from run-to-run
         List<String> mutableSectionerPackages = new ArrayList<>();
         mutableSectionerPackages.add(PACKAGE_1);
@@ -2229,49 +2203,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     @Test
-    public void groupRevertingToSummaryDoesNotRetainStablePositionWithLegacyIndexLogic() {
-        when(mNotifPipelineFlags.isStabilityIndexFixEnabled()).thenReturn(false);
-
-        // GIVEN a notification group is on screen
-        mStabilityManager.setAllowEntryReordering(false);
-
-        // WHEN the list is originally built with reordering disabled (and section changes allowed)
-        addNotif(0, PACKAGE_1).setRank(2);
-        addNotif(1, PACKAGE_1).setRank(3);
-        addGroupSummary(2, PACKAGE_1, "group").setRank(4);
-        addGroupChild(3, PACKAGE_1, "group").setRank(5);
-        addGroupChild(4, PACKAGE_1, "group").setRank(6);
-        dispatchBuild();
-
-        verifyBuiltList(
-                notif(0),
-                notif(1),
-                group(
-                        summary(2),
-                        child(3),
-                        child(4)
-                )
-        );
-
-        // WHEN the notification summary rank increases and children removed
-        setNewRank(notif(2).entry, 1);
-        mEntrySet.remove(4);
-        mEntrySet.remove(3);
-        dispatchBuild();
-
-        // VERIFY the summary (incorrectly) moves to the top of the section where it is ranked,
-        // despite visual stability being active
-        verifyBuiltList(
-                notif(2),
-                notif(0),
-                notif(1)
-        );
-    }
-
-    @Test
     public void groupRevertingToSummaryRetainsStablePosition() {
-        when(mNotifPipelineFlags.isStabilityIndexFixEnabled()).thenReturn(true);
-
         // GIVEN a notification group is on screen
         mStabilityManager.setAllowEntryReordering(false);
 
