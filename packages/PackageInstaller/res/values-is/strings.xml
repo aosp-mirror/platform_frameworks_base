@@ -26,6 +26,10 @@
     <string name="install_done" msgid="5987363587661783896">"Forritið er uppsett."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Viltu setja upp þetta forrit?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Viltu uppfæra þetta forrit?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"Forritið er ekki uppsett."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Lokað var á uppsetningu pakkans."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Forritið var ekki sett upp vegna árekstra á milli pakkans og annars pakka."</string>

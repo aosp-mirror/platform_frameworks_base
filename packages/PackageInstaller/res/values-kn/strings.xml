@@ -26,6 +26,10 @@
     <string name="install_done" msgid="5987363587661783896">"ಆ್ಯಪ್‌ ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"ನೀವು ಈ ಆ್ಯಪ್‌ ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಬಯಸುವಿರಾ?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"ನೀವು ಈ ಆ್ಯಪ್‌ ಅನ್ನು ಅಪ್‌ಡೇಟ್‌ ಮಾಡಲು ಬಯಸುವಿರಾ?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"ಆ್ಯಪ್‌ ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗಿಲ್ಲ."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡುವ ಪ್ಯಾಕೇಜ್‌ ಅನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ಪ್ಯಾಕೇಜ್‌ನಂತೆ ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗಿರುವ ಆ್ಯಪ್‌ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಪ್ಯಾಕೇಜ್ ಜೊತೆಗೆ ಸಂಘರ್ಷವಾಗುತ್ತದೆ."</string>

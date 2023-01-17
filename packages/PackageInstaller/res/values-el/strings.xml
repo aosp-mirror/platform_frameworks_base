@@ -26,6 +26,10 @@
     <string name="install_done" msgid="5987363587661783896">"Η εφαρμογή εγκαταστάθηκε."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Θέλετε να εγκαταστήσετε αυτήν την εφαρμογή;"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Θέλετε να ενημερώσετε αυτήν την εφαρμογή;"</string>
+    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"Η εφαρμογή δεν εγκαταστάθηκε."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Η εγκατάσταση του πακέτου αποκλείστηκε."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Η εφαρμογή δεν εγκαταστάθηκε, επειδή το πακέτο είναι σε διένεξη με κάποιο υπάρχον πακέτο."</string>

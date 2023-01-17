@@ -26,6 +26,10 @@
     <string name="install_done" msgid="5987363587661783896">"Instalatu da aplikazioa."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Aplikazioa instalatu nahi duzu?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Aplikazioa eguneratu nahi duzu?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"Ez da instalatu aplikazioa."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Paketea instalatzeko aukera blokeatu egin da."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Ez da instalatu aplikazioa, gatazka bat sortu delako lehendik dagoen pakete batekin."</string>
