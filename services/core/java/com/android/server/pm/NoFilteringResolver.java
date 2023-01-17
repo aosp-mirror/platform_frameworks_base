@@ -16,7 +16,10 @@
 
 package com.android.server.pm;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.provider.DeviceConfig;
@@ -47,13 +50,19 @@ public class NoFilteringResolver extends CrossProfileResolver {
 
     /**
      * Returns true if intent redirection for clone profile feature flag is set
-     * @return value of flag allow_intent_redirection_for_clone_profile
+     * and if its query, then check if calling user have necessary permission
+     * (android.permission.QUERY_CLONED_APPS) as well as required flag
+     * (PackageManager.MATCH_CLONE_PROFILE) bit set.
+     * @return true if resolver would be used for cross profile resolution.
      */
-    public static boolean isIntentRedirectionAllowed() {
+    public static boolean isIntentRedirectionAllowed(Context context,
+            boolean resolveForStart, long flags) {
         final long token = Binder.clearCallingIdentity();
         try {
             return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_APP_CLONING,
-                    FLAG_ALLOW_INTENT_REDIRECTION_FOR_CLONE_PROFILE, false /* defaultValue */);
+                    FLAG_ALLOW_INTENT_REDIRECTION_FOR_CLONE_PROFILE, false /* defaultValue */)
+                    && (resolveForStart || (((flags & PackageManager.MATCH_CLONE_PROFILE) != 0)
+                    && hasPermission(context, Manifest.permission.QUERY_CLONED_APPS)));
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -122,5 +131,16 @@ public class NoFilteringResolver extends CrossProfileResolver {
             int targetUserId, int highestApprovalLevel) {
         // no filtering
         return crossProfileDomainInfos;
+    }
+
+    /**
+     * Checks if calling uid have the mentioned permission
+     * @param context calling context
+     * @param permission permission name
+     * @return true if uid have the permission
+     */
+    private static boolean hasPermission(Context context, String permission) {
+        return context.checkCallingOrSelfPermission(permission)
+                == PackageManager.PERMISSION_GRANTED;
     }
 }
