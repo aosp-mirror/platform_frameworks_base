@@ -16,14 +16,10 @@
 
 package com.android.server.devicepolicy;
 
-import static android.app.admin.PolicyUpdateReason.REASON_CONFLICTING_ADMIN_POLICY;
-import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_BUNDLE_KEY;
-import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_KEY;
-import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_SET_RESULT_KEY;
+import static android.app.admin.PolicyUpdateResult.RESULT_FAILURE_CONFLICTING_ADMIN_POLICY;
+import static android.app.admin.PolicyUpdateResult.RESULT_SUCCESS;
 import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_TARGET_USER_ID;
-import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_UPDATE_REASON_KEY;
-import static android.app.admin.PolicyUpdatesReceiver.POLICY_SET_RESULT_FAILURE;
-import static android.app.admin.PolicyUpdatesReceiver.POLICY_SET_RESULT_SUCCESS;
+import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_UPDATE_RESULT_KEY;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -82,12 +78,12 @@ final class DevicePolicyEngine {
     /**
      * Map of <userId, Map<policyKey, policyState>>
      */
-    private final SparseArray<Map<String, PolicyState<?>>> mLocalPolicies;
+    private final SparseArray<Map<PolicyKey, PolicyState<?>>> mLocalPolicies;
 
     /**
      * Map of <policyKey, policyState>
      */
-    private final Map<String, PolicyState<?>> mGlobalPolicies;
+    private final Map<PolicyKey, PolicyState<?>> mGlobalPolicies;
 
     /**
      * Map containing the current set of admins in each user with active policies.
@@ -146,9 +142,8 @@ final class DevicePolicyEngine {
             sendPolicyResultToAdmin(
                     enforcingAdmin,
                     policyDefinition,
-                    policyEnforced,
                     // TODO: we're always sending this for now, should properly handle errors.
-                    REASON_CONFLICTING_ADMIN_POLICY,
+                    policyEnforced ? RESULT_SUCCESS : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
                     userId);
 
             updateDeviceAdminServiceOnPolicyAddLocked(enforcingAdmin);
@@ -194,9 +189,8 @@ final class DevicePolicyEngine {
             sendPolicyResultToAdmin(
                     enforcingAdmin,
                     policyDefinition,
-                    policyEnforced,
                     // TODO: we're always sending this for now, should properly handle errors.
-                    REASON_CONFLICTING_ADMIN_POLICY,
+                    policyEnforced ? RESULT_SUCCESS : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
                     userId);
 
             if (localPolicyState.getPoliciesSetByAdmins().isEmpty()) {
@@ -223,7 +217,7 @@ final class DevicePolicyEngine {
 
         // Send policy updates to admins who've set it locally
         sendPolicyChangedToAdmins(
-                localPolicyState.getPoliciesSetByAdmins().keySet(),
+                localPolicyState,
                 enforcingAdmin,
                 policyDefinition,
                 // This policy change is only relevant to a single user, not the global
@@ -234,7 +228,7 @@ final class DevicePolicyEngine {
         if (hasGlobalPolicyLocked(policyDefinition)) {
             PolicyState<V> globalPolicyState = getGlobalPolicyStateLocked(policyDefinition);
             sendPolicyChangedToAdmins(
-                    globalPolicyState.getPoliciesSetByAdmins().keySet(),
+                    globalPolicyState,
                     enforcingAdmin,
                     policyDefinition,
                     userId);
@@ -266,13 +260,13 @@ final class DevicePolicyEngine {
                     policyDefinition, enforcingAdmin, value);
             boolean policyEnforcedGlobally = Objects.equals(
                     globalPolicyState.getCurrentResolvedPolicy(), value);
+            boolean policyEnforced = policyEnforcedGlobally && policyEnforcedOnAllUsers;
 
             sendPolicyResultToAdmin(
                     enforcingAdmin,
                     policyDefinition,
-                    policyEnforcedGlobally && policyEnforcedOnAllUsers,
                     // TODO: we're always sending this for now, should properly handle errors.
-                    REASON_CONFLICTING_ADMIN_POLICY,
+                    policyEnforced ? RESULT_SUCCESS : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
                     UserHandle.USER_ALL);
 
             updateDeviceAdminServiceOnPolicyAddLocked(enforcingAdmin);
@@ -305,13 +299,13 @@ final class DevicePolicyEngine {
                     policyDefinition, enforcingAdmin, /* value= */ null);
             // For a removePolicy to be enforced, it means no current policy exists
             boolean policyEnforcedGlobally = policyState.getCurrentResolvedPolicy() == null;
+            boolean policyEnforced = policyEnforcedGlobally && policyEnforcedOnAllUsers;
 
             sendPolicyResultToAdmin(
                     enforcingAdmin,
                     policyDefinition,
-                    policyEnforcedGlobally && policyEnforcedOnAllUsers,
                     // TODO: we're always sending this for now, should properly handle errors.
-                    REASON_CONFLICTING_ADMIN_POLICY,
+                    policyEnforced ? RESULT_SUCCESS : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
                     UserHandle.USER_ALL);
 
             if (policyState.getPoliciesSetByAdmins().isEmpty()) {
@@ -336,7 +330,7 @@ final class DevicePolicyEngine {
                 UserHandle.USER_ALL);
 
         sendPolicyChangedToAdmins(
-                policyState.getPoliciesSetByAdmins().keySet(),
+                policyState,
                 enforcingAdmin,
                 policyDefinition,
                 UserHandle.USER_ALL);
@@ -376,7 +370,7 @@ final class DevicePolicyEngine {
                 enforcePolicy(
                         policyDefinition, localPolicyState.getCurrentResolvedPolicy(), userId);
                 sendPolicyChangedToAdmins(
-                        localPolicyState.getPoliciesSetByAdmins().keySet(),
+                        localPolicyState,
                         enforcingAdmin,
                         policyDefinition,
                         // Even though this is caused by a global policy change, admins who've set
@@ -427,6 +421,42 @@ final class DevicePolicyEngine {
             }
             return getLocalPolicyStateLocked(policyDefinition, userId)
                     .getPoliciesSetByAdmins().get(enforcingAdmin);
+        }
+    }
+
+    /**
+     * Returns the policies set by the given admin that share the same {@link PolicyKey#getKey()} as
+     * the provided {@code policyDefinition}.
+     *
+     * <p>For example, getLocalPolicyKeysSetByAdmin(PERMISSION_GRANT, admin) returns all permission
+     * grants set by the given admin.
+     *
+     * <p>Note that this will always return at most one item for policies that do not require
+     * additional params (e.g. {@link PolicyDefinition#LOCK_TASK} vs
+     * {@link PolicyDefinition#PERMISSION_GRANT(String, String)}).
+     *
+     */
+    @NonNull
+    <V> Set<PolicyKey> getLocalPolicyKeysSetByAdmin(
+            @NonNull PolicyDefinition<V> policyDefinition,
+            @NonNull EnforcingAdmin enforcingAdmin,
+            int userId) {
+        Objects.requireNonNull(policyDefinition);
+        Objects.requireNonNull(enforcingAdmin);
+
+        synchronized (mLock) {
+            if (policyDefinition.isGlobalOnlyPolicy() || !mLocalPolicies.contains(userId)) {
+                return Set.of();
+            }
+            Set<PolicyKey> keys = new HashSet<>();
+            for (PolicyKey key : mLocalPolicies.get(userId).keySet()) {
+                if (key.hasSameKeyAs(policyDefinition.getPolicyKey())
+                        && mLocalPolicies.get(userId).get(key).getPoliciesSetByAdmins()
+                        .containsKey(enforcingAdmin)) {
+                    keys.add(key);
+                }
+            }
+            return keys;
         }
     }
 
@@ -501,7 +531,7 @@ final class DevicePolicyEngine {
     }
 
     private static <V> PolicyState<V> getPolicyState(
-            Map<String, PolicyState<?>> policies, PolicyDefinition<V> policyDefinition) {
+            Map<PolicyKey, PolicyState<?>> policies, PolicyDefinition<V> policyDefinition) {
         try {
             // This will not throw an exception because policyDefinition is of type V, so unless
             // we've created two policies with the same key but different types - we can only have
@@ -523,8 +553,7 @@ final class DevicePolicyEngine {
     }
 
     private <V> void sendPolicyResultToAdmin(
-            EnforcingAdmin admin, PolicyDefinition<V> policyDefinition, boolean success,
-            int reason, int userId) {
+            EnforcingAdmin admin, PolicyDefinition<V> policyDefinition, int result, int userId) {
         Intent intent = new Intent(PolicyUpdatesReceiver.ACTION_DEVICE_POLICY_SET_RESULT);
         intent.setPackage(admin.getPackageName());
 
@@ -539,21 +568,14 @@ final class DevicePolicyEngine {
         }
 
         Bundle extras = new Bundle();
-        extras.putString(EXTRA_POLICY_KEY, policyDefinition.getPolicyDefinitionKey());
-        if (policyDefinition.getCallbackArgs() != null
-                && !policyDefinition.getCallbackArgs().isEmpty()) {
-            extras.putBundle(EXTRA_POLICY_BUNDLE_KEY, policyDefinition.getCallbackArgs());
-        }
+        policyDefinition.getPolicyKey().writeToBundle(extras);
         extras.putInt(
                 EXTRA_POLICY_TARGET_USER_ID,
                 getTargetUser(admin.getUserId(), userId));
         extras.putInt(
-                EXTRA_POLICY_SET_RESULT_KEY,
-                success ? POLICY_SET_RESULT_SUCCESS : POLICY_SET_RESULT_FAILURE);
+                EXTRA_POLICY_UPDATE_RESULT_KEY,
+                result);
 
-        if (!success) {
-            extras.putInt(EXTRA_POLICY_UPDATE_REASON_KEY, reason);
-        }
         intent.putExtras(extras);
 
         maybeSendIntentToAdminReceivers(intent, UserHandle.of(admin.getUserId()), receivers);
@@ -561,17 +583,21 @@ final class DevicePolicyEngine {
 
     // TODO(b/261430877): Finalise the decision on which admins to send the updates to.
     private <V> void sendPolicyChangedToAdmins(
-            Set<EnforcingAdmin> admins,
+            PolicyState<V> policyState,
             EnforcingAdmin callingAdmin,
             PolicyDefinition<V> policyDefinition,
             int userId) {
-        for (EnforcingAdmin admin: admins) {
+        for (EnforcingAdmin admin: policyState.getPoliciesSetByAdmins().keySet()) {
             // We're sending a separate broadcast for the calling admin with the result.
             if (admin.equals(callingAdmin)) {
                 continue;
             }
+            int result = Objects.equals(
+                    policyState.getPoliciesSetByAdmins().get(admin),
+                    policyState.getCurrentResolvedPolicy())
+                    ? RESULT_SUCCESS : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY;
             maybeSendOnPolicyChanged(
-                    admin, policyDefinition, REASON_CONFLICTING_ADMIN_POLICY, userId);
+                    admin, policyDefinition, result, userId);
         }
     }
 
@@ -592,15 +618,11 @@ final class DevicePolicyEngine {
         }
 
         Bundle extras = new Bundle();
-        extras.putString(EXTRA_POLICY_KEY, policyDefinition.getPolicyDefinitionKey());
-        if (policyDefinition.getCallbackArgs() != null
-                && !policyDefinition.getCallbackArgs().isEmpty()) {
-            extras.putBundle(EXTRA_POLICY_BUNDLE_KEY, policyDefinition.getCallbackArgs());
-        }
+        policyDefinition.getPolicyKey().writeToBundle(extras);
         extras.putInt(
                 EXTRA_POLICY_TARGET_USER_ID,
                 getTargetUser(admin.getUserId(), userId));
-        extras.putInt(EXTRA_POLICY_UPDATE_REASON_KEY, reason);
+        extras.putInt(EXTRA_POLICY_UPDATE_RESULT_KEY, reason);
         intent.putExtras(extras);
         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
@@ -779,14 +801,14 @@ final class DevicePolicyEngine {
     }
 
     private boolean doesAdminHavePolicies(@NonNull EnforcingAdmin enforcingAdmin) {
-        for (String policy : mGlobalPolicies.keySet()) {
+        for (PolicyKey policy : mGlobalPolicies.keySet()) {
             PolicyState<?> policyState = mGlobalPolicies.get(policy);
             if (policyState.getPoliciesSetByAdmins().containsKey(enforcingAdmin)) {
                 return true;
             }
         }
         for (int i = 0; i < mLocalPolicies.size(); i++) {
-            for (String policy : mLocalPolicies.get(mLocalPolicies.keyAt(i)).keySet()) {
+            for (PolicyKey policy : mLocalPolicies.get(mLocalPolicies.keyAt(i)).keySet()) {
                 PolicyState<?> policyState = mLocalPolicies.get(
                         mLocalPolicies.keyAt(i)).get(policy);
                 if (policyState.getPoliciesSetByAdmins().containsKey(enforcingAdmin)) {
@@ -880,13 +902,12 @@ final class DevicePolicyEngine {
             if (mLocalPolicies != null) {
                 for (int i = 0; i < mLocalPolicies.size(); i++) {
                     int userId = mLocalPolicies.keyAt(i);
-                    for (Map.Entry<String, PolicyState<?>> policy : mLocalPolicies.get(
+                    for (Map.Entry<PolicyKey, PolicyState<?>> policy : mLocalPolicies.get(
                             userId).entrySet()) {
                         serializer.startTag(/* namespace= */ null, TAG_LOCAL_POLICY_ENTRY);
 
                         serializer.attributeInt(/* namespace= */ null, ATTR_USER_ID, userId);
-                        serializer.attribute(
-                                /* namespace= */ null, ATTR_POLICY_ID, policy.getKey());
+                        policy.getKey().saveToXml(serializer);
 
                         serializer.startTag(/* namespace= */ null, TAG_ADMINS_POLICY_ENTRY);
                         policy.getValue().saveToXml(serializer);
@@ -900,10 +921,10 @@ final class DevicePolicyEngine {
 
         private void writeGlobalPoliciesInner(TypedXmlSerializer serializer) throws IOException {
             if (mGlobalPolicies != null) {
-                for (Map.Entry<String, PolicyState<?>> policy : mGlobalPolicies.entrySet()) {
+                for (Map.Entry<PolicyKey, PolicyState<?>> policy : mGlobalPolicies.entrySet()) {
                     serializer.startTag(/* namespace= */ null, TAG_GLOBAL_POLICY_ENTRY);
 
-                    serializer.attribute(/* namespace= */ null, ATTR_POLICY_ID, policy.getKey());
+                    policy.getKey().saveToXml(serializer);
 
                     serializer.startTag(/* namespace= */ null, TAG_ADMINS_POLICY_ENTRY);
                     policy.getValue().saveToXml(serializer);
@@ -973,8 +994,7 @@ final class DevicePolicyEngine {
         private void readLocalPoliciesInner(TypedXmlPullParser parser)
                 throws XmlPullParserException, IOException {
             int userId = parser.getAttributeInt(/* namespace= */ null, ATTR_USER_ID);
-            String policyKey = parser.getAttributeValue(
-                    /* namespace= */ null, ATTR_POLICY_ID);
+            PolicyKey policyKey = PolicyDefinition.readPolicyKeyFromXml(parser);
             if (!mLocalPolicies.contains(userId)) {
                 mLocalPolicies.put(userId, new HashMap<>());
             }
@@ -989,7 +1009,7 @@ final class DevicePolicyEngine {
 
         private void readGlobalPoliciesInner(TypedXmlPullParser parser)
                 throws IOException, XmlPullParserException {
-            String policyKey = parser.getAttributeValue(/* namespace= */ null, ATTR_POLICY_ID);
+            PolicyKey policyKey = PolicyDefinition.readPolicyKeyFromXml(parser);
             PolicyState<?> adminsPolicy = parseAdminsPolicy(parser);
             if (adminsPolicy != null) {
                 mGlobalPolicies.put(policyKey, adminsPolicy);
