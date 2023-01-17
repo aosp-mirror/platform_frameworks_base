@@ -243,6 +243,12 @@ public final class DevicePolicyResources {
                     PREFIX + "ACCESSIBILITY_CATEGORY_PERSONAL";
 
             /**
+             * Content description for clone profile accounts group
+             */
+            public static final String ACCESSIBILITY_CATEGORY_CLONE =
+                    PREFIX + "ACCESSIBILITY_CATEGORY_CLONE";
+
+            /**
              * Content description for work profile details page title
              */
             public static final String ACCESSIBILITY_WORK_ACCOUNT_TITLE =
@@ -1170,6 +1176,13 @@ public final class DevicePolicyResources {
              */
             public static final String PERSONAL_CATEGORY_HEADER =
                     PREFIX + "PERSONAL_CATEGORY_HEADER";
+
+            /**
+             * Header for items under the clone user
+             */
+            public static final String CLONE_CATEGORY_HEADER =
+                    PREFIX + "CLONE_CATEGORY_HEADER";
+
 
             /**
              * Text to indicate work notification content will be shown on the lockscreen.
