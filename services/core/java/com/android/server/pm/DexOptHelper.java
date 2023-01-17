@@ -57,8 +57,11 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalManagerRegistry;
+import com.android.server.LocalServices;
+import com.android.server.PinnerService;
 import com.android.server.art.ArtManagerLocal;
 import com.android.server.art.DexUseManagerLocal;
 import com.android.server.art.ReasonMapping;
@@ -969,6 +972,35 @@ public final class DexOptHelper {
             synchronized (mPm.mLock) {
                 mPm.getPackageUsage().maybeWriteAsync(mPm.mSettings.getPackagesLocked());
                 mPm.mCompilerStats.maybeWriteAsync();
+            }
+
+            if (result.getReason().equals(ReasonMapping.REASON_INACTIVE)) {
+                for (DexoptResult.PackageDexoptResult pkgRes : result.getPackageDexoptResults()) {
+                    if (pkgRes.getStatus() == DexoptResult.DEXOPT_PERFORMED) {
+                        long pkgSizeBytes = 0;
+                        long pkgSizeBeforeBytes = 0;
+                        for (DexoptResult.DexContainerFileDexoptResult dexRes :
+                                pkgRes.getDexContainerFileDexoptResults()) {
+                            long dexContainerSize = new File(dexRes.getDexContainerFile()).length();
+                            pkgSizeBytes += dexRes.getSizeBytes() + dexContainerSize;
+                            pkgSizeBeforeBytes += dexRes.getSizeBeforeBytes() + dexContainerSize;
+                        }
+                        FrameworkStatsLog.write(FrameworkStatsLog.APP_DOWNGRADED,
+                                pkgRes.getPackageName(), pkgSizeBeforeBytes, pkgSizeBytes,
+                                false /* aggressive */);
+                    }
+                }
+            }
+
+            var updatedPackages = new ArraySet<String>();
+            for (DexoptResult.PackageDexoptResult pkgRes : result.getPackageDexoptResults()) {
+                if (pkgRes.hasUpdatedArtifacts()) {
+                    updatedPackages.add(pkgRes.getPackageName());
+                }
+            }
+            if (!updatedPackages.isEmpty()) {
+                LocalServices.getService(PinnerService.class)
+                        .update(updatedPackages, false /* force */);
             }
         }
     }
