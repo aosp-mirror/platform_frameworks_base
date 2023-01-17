@@ -2154,6 +2154,8 @@
     <bool name="config_enableDefaultNotes">false</bool>
     <!-- Whether the default notes role for work profile should be enabled. -->
     <bool name="config_enableDefaultNotesForWorkProfile">false</bool>
+    <!-- The name of the package that will hold the system financed device controller role. -->
+    <string name="config_systemFinancedDeviceController" translatable="false">com.android.devicelockcontroller</string>
 
     <!-- The name of the package that will handle updating the device management role. -->
     <string name="config_devicePolicyManagementUpdater" translatable="false"></string>
