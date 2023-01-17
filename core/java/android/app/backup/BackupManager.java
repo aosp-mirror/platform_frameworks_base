@@ -407,16 +407,19 @@ public class BackupManager {
     }
 
     /**
-     * Enable/disable the framework backup scheduling entirely for the current user. When disabled,
+     * Enable/disable the framework backup scheduling entirely for the context user. When disabled,
      * no Key/Value or Full backup jobs will be scheduled by the Android framework.
      *
      * <p>Note: This does not disable backups: only their scheduling is affected and backups can
      * still be triggered manually.
      *
-     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method. If the
+     * context user is different from the calling user, then the caller must additionally hold the
+     * android.permission.INTERACT_ACROSS_USERS_FULL permission.
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(allOf = {android.Manifest.permission.BACKUP,
             android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional = true)
     public void setFrameworkSchedulingEnabled(boolean isEnabled) {
