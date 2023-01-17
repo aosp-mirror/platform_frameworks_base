@@ -479,6 +479,35 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    fun testDefaultDataSubId_updatesOnBroadcast() =
+        runBlocking(IMMEDIATE) {
+            var latest: Int? = null
+            val job = underTest.defaultDataSubId.onEach { latest = it }.launchIn(this)
+
+            fakeBroadcastDispatcher.registeredReceivers.forEach { receiver ->
+                receiver.onReceive(
+                    context,
+                    Intent(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)
+                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, SUB_2_ID)
+                )
+            }
+
+            assertThat(latest).isEqualTo(SUB_2_ID)
+
+            fakeBroadcastDispatcher.registeredReceivers.forEach { receiver ->
+                receiver.onReceive(
+                    context,
+                    Intent(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)
+                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, SUB_1_ID)
+                )
+            }
+
+            assertThat(latest).isEqualTo(SUB_1_ID)
+
+            job.cancel()
+        }
+
+    @Test
     fun mobileConnectivity_default() {
         assertThat(underTest.defaultMobileNetworkConnectivity.value)
             .isEqualTo(MobileConnectivityModel(isConnected = false, isValidated = false))
