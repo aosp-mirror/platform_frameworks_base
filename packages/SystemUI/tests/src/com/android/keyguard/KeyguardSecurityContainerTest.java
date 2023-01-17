@@ -49,6 +49,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
+import android.window.BackEvent;
+import android.window.OnBackAnimationCallback;
 
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.test.filters.SmallTest;
@@ -355,6 +357,27 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         ConstraintSet.Constraint viewFlipperConstraint = getViewConstraint(
                 mSecurityViewFlipper.getId());
         assertThat(viewFlipperConstraint.layout.leftToLeft).isEqualTo(PARENT_ID);
+    }
+
+    @Test
+    public void testPlayBackAnimation() {
+        OnBackAnimationCallback backCallback = mKeyguardSecurityContainer.getBackCallback();
+        backCallback.onBackStarted(createBackEvent(0, 0));
+        mKeyguardSecurityContainer.getBackCallback().onBackProgressed(
+                createBackEvent(0, 1));
+        assertThat(mKeyguardSecurityContainer.getScaleX()).isEqualTo(
+                KeyguardSecurityContainer.MIN_BACK_SCALE);
+        assertThat(mKeyguardSecurityContainer.getScaleY()).isEqualTo(
+                KeyguardSecurityContainer.MIN_BACK_SCALE);
+
+        // reset scale
+        mKeyguardSecurityContainer.resetScale();
+        assertThat(mKeyguardSecurityContainer.getScaleX()).isEqualTo(1);
+        assertThat(mKeyguardSecurityContainer.getScaleY()).isEqualTo(1);
+    }
+
+    private BackEvent createBackEvent(float touchX, float progress) {
+        return new BackEvent(0, 0, progress, BackEvent.EDGE_LEFT);
     }
 
     private Configuration configuration(@Configuration.Orientation int orientation) {
