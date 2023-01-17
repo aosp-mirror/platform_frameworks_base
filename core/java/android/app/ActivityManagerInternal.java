@@ -311,6 +311,12 @@ public abstract class ActivityManagerInternal {
     @PermissionMethod
     public abstract void enforceCallingPermission(@PermissionName String permission, String func);
 
+    /**
+     * Returns the current and target user ids as a {@link Pair}. Target user id will be
+     * {@link android.os.UserHandle#USER_NULL} if there is not an ongoing user switch.
+     */
+    public abstract Pair<Integer, Integer> getCurrentAndTargetUserIds();
+
     /** Returns the current user id. */
     public abstract int getCurrentUserId();
 

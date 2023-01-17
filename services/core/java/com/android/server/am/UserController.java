@@ -2742,6 +2742,12 @@ class UserController implements Handler.Callback {
         return mTargetUserId != UserHandle.USER_NULL ? mTargetUserId : mCurrentUserId;
     }
 
+    Pair<Integer, Integer> getCurrentAndTargetUserIds() {
+        synchronized (mLock) {
+            return new Pair<>(mCurrentUserId, mTargetUserId);
+        }
+    }
+
     @GuardedBy("mLock")
     private int getCurrentUserIdLU() {
         return mCurrentUserId;
