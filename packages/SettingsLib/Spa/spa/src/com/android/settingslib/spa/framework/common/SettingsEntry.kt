@@ -185,6 +185,8 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
     private var sliceDataFn: SliceDataGetter = { _: Uri, _: Bundle? -> null }
 
     fun build(): SettingsEntry {
+        val page = fromPage ?: owner
+        val isEnabled = page.isEnabled()
         return SettingsEntry(
             id = id(),
             name = name,
@@ -196,10 +198,10 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
             toPage = toPage,
 
             // attributes
-            isAllowSearch = isAllowSearch,
+            isAllowSearch = isEnabled && isAllowSearch,
             isSearchDataDynamic = isSearchDataDynamic,
             hasMutableStatus = hasMutableStatus,
-            hasSliceSupport = hasSliceSupport,
+            hasSliceSupport = isEnabled && hasSliceSupport,
 
             // functions
             statusDataImpl = statusDataFn,
