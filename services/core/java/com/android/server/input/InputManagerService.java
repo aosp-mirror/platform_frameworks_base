@@ -2974,6 +2974,13 @@ public class InputManagerService extends IInputManager.Stub
         return null;
     }
 
+    // Native callback.
+    @SuppressWarnings("unused")
+    private boolean isStylusPointerIconEnabled() {
+        return Objects.requireNonNull(mContext.getSystemService(InputManager.class))
+                .isStylusPointerIconEnabled();
+    }
+
     private static class PointerDisplayIdChangedArgs {
         final int mPointerDisplayId;
         final float mXPosition;

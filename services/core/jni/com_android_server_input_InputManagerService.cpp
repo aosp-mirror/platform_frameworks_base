@@ -137,6 +137,7 @@ static struct {
     jmethodID notifyDropWindow;
     jmethodID getParentSurfaceForPointers;
     jmethodID isPerDisplayTouchModeEnabled;
+    jmethodID isStylusPointerIconEnabled;
 } gServiceClassInfo;
 
 static struct {
@@ -658,6 +659,12 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
             gServiceClassInfo.getHoverTapSlop);
     if (!checkAndClearExceptionFromCallback(env, "getHoverTapSlop")) {
         outConfig->pointerGestureTapSlop = hoverTapSlop;
+    }
+
+    jboolean stylusPointerIconEnabled =
+            env->CallBooleanMethod(mServiceObj, gServiceClassInfo.isStylusPointerIconEnabled);
+    if (!checkAndClearExceptionFromCallback(env, "isStylusPointerIconEnabled")) {
+        outConfig->stylusPointerIconEnabled = stylusPointerIconEnabled;
     }
 
     { // acquire lock
@@ -2792,6 +2799,9 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.isPerDisplayTouchModeEnabled, clazz,
                   "isPerDisplayTouchModeEnabled", "()Z");
+
+    GET_METHOD_ID(gServiceClassInfo.isStylusPointerIconEnabled, clazz, "isStylusPointerIconEnabled",
+                  "()Z");
 
     // InputDevice
 
