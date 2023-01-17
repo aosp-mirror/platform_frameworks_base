@@ -39,7 +39,7 @@ public abstract class VoiceInteractionManagerInternal {
      * @param options A Bundle of private arguments to the current voice interaction service
      */
     public abstract void startLocalVoiceInteraction(@NonNull IBinder callingActivity,
-            @Nullable String attributionTag, @NonNull Bundle options);
+            @Nullable String attributionTag, @Nullable Bundle options);
 
     /**
      * Returns whether the currently selected voice interaction service supports local voice

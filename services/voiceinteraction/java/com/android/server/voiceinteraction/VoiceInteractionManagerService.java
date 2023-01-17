@@ -229,7 +229,7 @@ public class VoiceInteractionManagerService extends SystemService {
     class LocalService extends VoiceInteractionManagerInternal {
         @Override
         public void startLocalVoiceInteraction(@NonNull IBinder callingActivity,
-                @Nullable String attributionTag, @NonNull Bundle options) {
+                @Nullable String attributionTag, @Nullable Bundle options) {
             if (DEBUG) {
                 Slog.i(TAG, "startLocalVoiceInteraction " + callingActivity);
             }
@@ -425,7 +425,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
         // TODO: VI Make sure the caller is the current user or profile
         void startLocalVoiceInteraction(@NonNull final IBinder token,
-                @Nullable String attributionTag, @NonNull Bundle options) {
+                @Nullable String attributionTag, @Nullable Bundle options) {
             if (mImpl == null) return;
 
             final int callingUid = Binder.getCallingUid();
@@ -944,7 +944,7 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public void showSession(@NonNull Bundle args, int flags, @Nullable String attributionTag) {
+        public void showSession(@Nullable Bundle args, int flags, @Nullable String attributionTag) {
             synchronized (this) {
                 enforceIsCurrentVoiceInteractionService();
 
@@ -975,7 +975,7 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public boolean showSessionFromSession(@NonNull IBinder token, @NonNull Bundle sessionArgs,
+        public boolean showSessionFromSession(@NonNull IBinder token, @Nullable Bundle sessionArgs,
                 int flags, @Nullable String attributionTag) {
             synchronized (this) {
                 if (mImpl == null) {
@@ -1794,7 +1794,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
         @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
         @Override
-        public boolean showSessionForActiveService(@NonNull Bundle args, int sourceFlags,
+        public boolean showSessionForActiveService(@Nullable Bundle args, int sourceFlags,
                 @Nullable String attributionTag,
                 @Nullable IVoiceInteractionSessionShowCallback showCallback,
                 @Nullable IBinder activityToken) {
