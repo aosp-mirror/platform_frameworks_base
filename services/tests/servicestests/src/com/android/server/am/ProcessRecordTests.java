@@ -202,6 +202,7 @@ public class ProcessRecordTests {
         TimeoutRecord timeoutRecord = TimeoutRecord.forInputDispatchNoFocusedWindow(annotation);
         processErrorState.appNotResponding(null /* activityShortComponentName */, null /* aInfo */,
                 null /* parentShortComponentName */, null /* parentProcess */,
-                false /* aboveSystem */, timeoutRecord, mExecutorService, false /* onlyDumpSelf */);
+                false /* aboveSystem */, timeoutRecord, mExecutorService, false /* onlyDumpSelf */,
+                false /*isContinuousAnr*/);
     }
 }
