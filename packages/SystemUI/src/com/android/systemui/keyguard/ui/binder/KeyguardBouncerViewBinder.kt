@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.ui.binder
 import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
+import android.window.OnBackAnimationCallback
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.internal.policy.SystemBarUtils
@@ -53,6 +54,10 @@ object KeyguardBouncerViewBinder {
                     val mode = hostViewController.currentSecurityMode
                     return mode == KeyguardSecurityModel.SecurityMode.SimPin ||
                         mode == KeyguardSecurityModel.SecurityMode.SimPuk
+                }
+
+                override fun getBackCallback(): OnBackAnimationCallback {
+                    return hostViewController.backCallback
                 }
 
                 override fun shouldDismissOnMenuPressed(): Boolean {
