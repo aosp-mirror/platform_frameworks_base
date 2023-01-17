@@ -43,7 +43,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class CloseImeWindowToAppTest(flicker: FlickerTest) : BaseTest(flicker) {
+open class CloseImeWindowToAppTest(flicker: FlickerTest) : BaseTest(flicker) {
     private val testApp = ImeAppHelper(instrumentation)
 
     /** {@inheritDoc} */
