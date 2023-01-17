@@ -224,7 +224,6 @@ public class AppsFilterImplTest {
 
         MockitoAnnotations.initMocks(this);
         when(mSnapshot.getPackageStates()).thenAnswer(x -> mExisting);
-        when(mSnapshot.getAllSharedUsers()).thenReturn(mSharedUserSettings);
         when(mSnapshot.getUserInfos()).thenReturn(USER_INFO_LIST);
         when(mSnapshot.getSharedUser(anyInt())).thenAnswer(invocation -> {
             final int sharedUserAppId = invocation.getArgument(0);

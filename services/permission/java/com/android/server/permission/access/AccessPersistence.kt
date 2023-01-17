@@ -53,6 +53,9 @@ class AccessPersistence(
         writeHandler = WriteHandler(BackgroundThread.getHandler().looper)
     }
 
+    /**
+     * Reads the state either from the disk or migrate legacy data when the data files are missing.
+     */
     fun read(state: AccessState) {
         readSystemState(state)
         state.systemState.userIds.forEachIndexed { _, userId ->
@@ -61,28 +64,50 @@ class AccessPersistence(
     }
 
     private fun readSystemState(state: AccessState) {
-        systemFile.parse {
+        val fileExists = systemFile.parse {
             // This is the canonical way to call an extension function in a different class.
             // TODO(b/259469752): Use context receiver for this when it becomes stable.
             with(policy) { parseSystemState(state) }
         }
-    }
 
-    private fun readUserState(state: AccessState, userId: Int) {
-        getUserFile(userId).parse {
-            with(policy) { parseUserState(state, userId) }
+        if (!fileExists) {
+            policy.migrateSystemState(state)
+            state.systemState.apply {
+                requestWrite()
+                write(state, UserHandle.USER_ALL)
+            }
         }
     }
 
-    private inline fun File.parse(block: BinaryXmlPullParser.() -> Unit) {
+
+    private fun readUserState(state: AccessState, userId: Int) {
+        val fileExists = getUserFile(userId).parse {
+            with(policy) { parseUserState(state, userId) }
+        }
+
+        if (!fileExists) {
+            policy.migrateUserState(state, userId)
+            state.userStates[userId].apply {
+                requestWrite()
+                write(state, userId)
+            }
+        }
+    }
+
+    /**
+     * @return {@code true} if the file is successfully read from the disk; {@code false} if
+     * the file doesn't exist yet.
+     */
+    private inline fun File.parse(block: BinaryXmlPullParser.() -> Unit): Boolean =
         try {
             AtomicFile(this).read { it.parseBinaryXml(block) }
+            true
         } catch (e: FileNotFoundException) {
             Log.i(LOG_TAG, "$this not found")
+            false
         } catch (e: Exception) {
             throw IllegalStateException("Failed to read $this", e)
         }
-    }
 
     fun write(state: AccessState) {
         state.systemState.write(state, UserHandle.USER_ALL)

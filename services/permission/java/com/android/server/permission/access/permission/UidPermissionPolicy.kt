@@ -48,6 +48,8 @@ import com.android.server.pm.pkg.PackageState
 class UidPermissionPolicy : SchemePolicy() {
     private val persistence = UidPermissionPersistence()
 
+    private val migration = UidPermissionMigration()
+
     @Volatile
     private var onPermissionFlagsChangedListeners =
         IndexedListSet<OnPermissionFlagsChangedListener>()
@@ -446,7 +448,7 @@ class UidPermissionPolicy : SchemePolicy() {
                     return@forEachIndexed
                 }
             } else {
-                if (oldPermission != null) {
+                if (oldPermission != null && oldPermission.isReconciled) {
                     val isPermissionGroupChanged = newPermissionInfo.isRuntime &&
                         newPermissionInfo.group != null &&
                         newPermissionInfo.group != oldPermission.groupName
@@ -628,6 +630,8 @@ class UidPermissionPolicy : SchemePolicy() {
                     !oldIsRequestLegacyExternalStorage && newIsRequestLegacyExternalStorage
                 if ((isNewlyRequestingLegacyExternalStorage || isTargetSdkVersionDowngraded) &&
                     oldFlags.hasBits(PermissionFlags.RUNTIME_GRANTED)) {
+                    Log.v(LOG_TAG, "Revoking storage permission: $permissionName for appId: " +
+                            " $appId and user: $userId")
                     val newFlags = oldFlags andInv (
                         PermissionFlags.RUNTIME_GRANTED or USER_SETTABLE_MASK
                     )
@@ -1383,6 +1387,14 @@ class UidPermissionPolicy : SchemePolicy() {
         synchronized(onPermissionFlagsChangedListenersLock) {
             onPermissionFlagsChangedListeners = onPermissionFlagsChangedListeners - listener
         }
+    }
+
+    override fun migrateSystemState(state: AccessState) {
+        migration.migrateSystemState(state)
+    }
+
+    override fun migrateUserState(state: AccessState, userId: Int) {
+        migration.migrateUserState(state, userId)
     }
 
     companion object {

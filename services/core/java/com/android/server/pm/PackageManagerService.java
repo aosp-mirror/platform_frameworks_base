@@ -218,6 +218,7 @@ import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 import com.android.server.pm.permission.LegacyPermissionManagerService;
+import com.android.server.pm.permission.LegacyPermissionSettings;
 import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -6750,6 +6751,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 for (int userId : userIds) {
                     mSettings.writePermissionStateForUserLPr(userId, !async);
                 }
+            }
+        }
+
+        @Override
+        public LegacyPermissionSettings getLegacyPermissions() {
+            synchronized (mLock) {
+                return mSettings.mPermissions;
             }
         }
 

@@ -49,6 +49,7 @@ import com.android.server.pm.KnownPackages;
 import com.android.server.pm.PackageList;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.dex.DynamicCodeLogger;
+import com.android.server.pm.permission.LegacyPermissionSettings;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.SharedUserApi;
@@ -1073,6 +1074,11 @@ public abstract class PackageManagerInternal {
      * the call blocks until the settings have been written.
      */
     public abstract void writePermissionSettings(@NonNull @UserIdInt int[] userIds, boolean async);
+
+    /**
+     * Read legacy permission definitions for permissions migration to new permission subsystem.
+     */
+    public abstract LegacyPermissionSettings getLegacyPermissions();
 
     /**
      * Returns {@code true} if the caller is the installer of record for the given package.

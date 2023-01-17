@@ -110,6 +110,7 @@ import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.pm.pkg.PackageUserStateInternal;
+import com.android.server.pm.pkg.SharedUserApi;
 import com.android.server.pm.pkg.SuspendParams;
 import com.android.server.pm.pkg.component.ParsedComponent;
 import com.android.server.pm.pkg.component.ParsedIntentInfo;
@@ -866,6 +867,10 @@ public final class Settings implements Watchable, Snappable {
             mSharedUsers.put(name, s);
         }
         return s;
+    }
+
+    WatchedArrayMap<String, ? extends SharedUserApi> getSharedUsersLocked() {
+        return mSharedUsers;
     }
 
     Collection<SharedUserSetting> getAllSharedUsersLPw() {

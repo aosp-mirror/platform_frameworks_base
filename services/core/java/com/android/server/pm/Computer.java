@@ -59,7 +59,6 @@ import com.android.server.utils.WatchedLongSparseArray;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -676,10 +675,10 @@ public interface Computer extends PackageDataSnapshot {
     @NonNull
     UserInfo[] getUserInfos();
 
-    @NonNull
-    Collection<SharedUserSetting> getAllSharedUsers();
-
     boolean isChangeEnabled(long changeId, int uid);
 
     boolean isChangeEnabled(long changeId, ApplicationInfo info);
+
+    @NonNull
+    ArrayMap<String, ? extends SharedUserApi> getSharedUsers();
 }
