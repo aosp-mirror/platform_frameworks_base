@@ -209,6 +209,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
     private boolean mIsSeamlessRotation = false;
     private IContainerFreezer mContainerFreezer = null;
+    private final SurfaceControl.Transaction mTmpTransaction = new SurfaceControl.Transaction();
 
     Transition(@TransitionType int type, @TransitionFlags int flags,
             TransitionController controller, BLASTSyncEngine syncEngine) {
@@ -362,6 +363,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         return mState == STATE_COLLECTING || mState == STATE_STARTED;
     }
 
+    boolean isStarted() {
+        return mState == STATE_STARTED;
+    }
+
     @VisibleForTesting
     void startCollecting(long timeoutMs) {
         startCollecting(timeoutMs, TransitionController.SYNC_METHOD);
@@ -395,6 +400,12 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         applyReady();
 
         mController.mTransitionTracer.logState(this);
+
+        mController.updateAnimatingState(mTmpTransaction);
+        // merge into the next-time the global transaction is applied. This is too-early to set
+        // early-wake anyways, so we don't need to apply immediately (in fact applying right now
+        // can preempt more-important work).
+        SurfaceControl.mergeToGlobalTransaction(mTmpTransaction);
     }
 
     /**
@@ -895,6 +906,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     false /* forceRelayout */);
         }
         cleanUpInternal();
+        mController.updateAnimatingState(mTmpTransaction);
+        mTmpTransaction.apply();
     }
 
     void abort() {
@@ -1071,8 +1084,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         "Calling onTransitionReady: %s", info);
                 mController.getTransitionPlayer().onTransitionReady(
                         mToken, info, transaction, mFinishTransaction);
-                // Since we created root-leash but no longer reference it from core, release it now
-                info.releaseAnimSurfaces();
                 if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
                     Trace.asyncTraceBegin(TRACE_TAG_WINDOW_MANAGER, TRACE_NAME_PLAY_TRANSITION,
                             System.identityHashCode(this));
@@ -1089,6 +1100,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mOverrideOptions = null;
 
         reportStartReasonsToLogger();
+
+        // Since we created root-leash but no longer reference it from core, release it now
+        info.releaseAnimSurfaces();
     }
 
     /**
