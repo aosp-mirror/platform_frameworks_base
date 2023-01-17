@@ -71,6 +71,8 @@ final class DspTrustedHotwordDetectorSession extends DetectorSession {
 
     @GuardedBy("mLock")
     private boolean mValidatingDspTrigger = false;
+    @GuardedBy("mLock")
+    private HotwordRejectedResult mLastHotwordRejectedResult = null;
 
     DspTrustedHotwordDetectorSession(
             @NonNull HotwordDetectionConnection.ServiceConnection remoteHotwordDetectionService,
@@ -110,7 +112,8 @@ final class DspTrustedHotwordDetectorSession extends DetectorSession {
                             HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECTED,
                             mVoiceInteractionServiceUid);
                     if (!mValidatingDspTrigger) {
-                        Slog.i(TAG, "Ignoring #onDetected due to a process restart");
+                        Slog.i(TAG, "Ignoring #onDetected due to a process restart or previous"
+                                + " #onRejected result = " + mLastHotwordRejectedResult);
                         HotwordMetricsLogger.writeKeyphraseTriggerEvent(
                                 HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_DSP,
                                 METRICS_KEYPHRASE_TRIGGERED_DETECT_UNEXPECTED_CALLBACK,
@@ -173,6 +176,7 @@ final class DspTrustedHotwordDetectorSession extends DetectorSession {
                     }
                     mValidatingDspTrigger = false;
                     externalCallback.onRejected(result);
+                    mLastHotwordRejectedResult = result;
                     if (mDebugHotwordLogging && result != null) {
                         Slog.i(TAG, "Egressed rejected result: " + result);
                     }
@@ -181,6 +185,7 @@ final class DspTrustedHotwordDetectorSession extends DetectorSession {
         };
 
         mValidatingDspTrigger = true;
+        mLastHotwordRejectedResult = null;
         mRemoteDetectionService.run(service -> {
             // We use the VALIDATION_TIMEOUT_MILLIS to inform that the client needs to invoke
             // the callback before timeout value. In order to reduce the latency impact between
