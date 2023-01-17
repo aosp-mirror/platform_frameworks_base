@@ -2402,6 +2402,32 @@ public class ActivityOptions extends ComponentOptions {
 
     }
 
+    /**
+     * Sets the mode for allowing or denying the senders privileges to start background activities
+     * to the PendingIntent.
+     *
+     * This is typically used in when executing {@link PendingIntent#send(Context, int, Intent,
+     * PendingIntent.OnFinished, Handler, String, Bundle)} or similar
+     * methods. A privileged sender of a PendingIntent should only grant
+     * {@link #MODE_BACKGROUND_ACTIVITY_START_ALLOWED} if the PendingIntent is from a trusted source
+     * and/or executed on behalf the user.
+     */
+    public @NonNull ActivityOptions setPendingIntentBackgroundActivityStartMode(
+            @BackgroundActivityStartMode int state) {
+        super.setPendingIntentBackgroundActivityStartMode(state);
+        return this;
+    }
+
+    /**
+     * Get the mode for allowing or denying the senders privileges to start background activities
+     * to the PendingIntent.
+     *
+     * @see #setPendingIntentBackgroundActivityStartMode(int)
+     */
+    public @BackgroundActivityStartMode int getPendingIntentBackgroundActivityStartMode() {
+        return super.getPendingIntentBackgroundActivityStartMode();
+    }
+
     /** @hide */
     @Override
     public String toString() {

@@ -25,6 +25,7 @@ import android.app.ActivityManager;
 import android.app.ApplicationExitInfo;
 import android.app.ApplicationExitInfo.Reason;
 import android.app.ApplicationExitInfo.SubReason;
+import android.app.BackgroundStartPrivileges;
 import android.app.IApplicationThread;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManagerInternal;
@@ -1290,16 +1291,16 @@ class ProcessRecord implements WindowProcessListener {
      * {@param originatingToken} if you have one such originating token, this is useful for tracing
      * back the grant in the case of the notification token.
      */
-    void addOrUpdateAllowBackgroundActivityStartsToken(Binder entity,
-            @Nullable IBinder originatingToken) {
+    void addOrUpdateBackgroundStartPrivileges(Binder entity,
+            BackgroundStartPrivileges backgroundStartPrivileges) {
         Objects.requireNonNull(entity);
-        mWindowProcessController.addOrUpdateAllowBackgroundActivityStartsToken(entity,
-                originatingToken);
+        mWindowProcessController.addOrUpdateBackgroundStartPrivileges(entity,
+                backgroundStartPrivileges);
     }
 
-    void removeAllowBackgroundActivityStartsToken(Binder entity) {
+    void removeBackgroundStartPrivileges(Binder entity) {
         Objects.requireNonNull(entity);
-        mWindowProcessController.removeAllowBackgroundActivityStartsToken(entity);
+        mWindowProcessController.removeBackgroundStartPrivileges(entity);
     }
 
     @Override

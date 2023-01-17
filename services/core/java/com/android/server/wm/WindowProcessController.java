@@ -50,6 +50,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
+import android.app.BackgroundStartPrivileges;
 import android.app.IApplicationThread;
 import android.app.ProfilerInfo;
 import android.app.servertransaction.ConfigurationChangeItem;
@@ -64,7 +65,6 @@ import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Build;
 import android.os.FactoryTest;
-import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.Message;
 import android.os.Process;
@@ -547,17 +547,18 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     /**
-     * @see BackgroundLaunchProcessController#addOrUpdateAllowBackgroundActivityStartsToken(Binder,
-     * IBinder)
+     * @see BackgroundLaunchProcessController#addOrUpdateAllowBackgroundStartPrivileges(Binder,
+     * BackgroundStartPrivileges)
      */
-    public void addOrUpdateAllowBackgroundActivityStartsToken(Binder entity,
-            @Nullable IBinder originatingToken) {
-        mBgLaunchController.addOrUpdateAllowBackgroundActivityStartsToken(entity, originatingToken);
+    public void addOrUpdateBackgroundStartPrivileges(Binder entity,
+            BackgroundStartPrivileges backgroundStartPrivileges) {
+        mBgLaunchController.addOrUpdateAllowBackgroundStartPrivileges(entity,
+                backgroundStartPrivileges);
     }
 
-    /** @see BackgroundLaunchProcessController#removeAllowBackgroundActivityStartsToken(Binder) */
-    public void removeAllowBackgroundActivityStartsToken(Binder entity) {
-        mBgLaunchController.removeAllowBackgroundActivityStartsToken(entity);
+    /** @see BackgroundLaunchProcessController#removeAllowBackgroundStartPrivileges(Binder) */
+    public void removeBackgroundStartPrivileges(Binder entity) {
+        mBgLaunchController.removeAllowBackgroundStartPrivileges(entity);
     }
 
     /**

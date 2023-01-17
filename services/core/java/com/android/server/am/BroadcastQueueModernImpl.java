@@ -281,7 +281,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     final ProcessRecord app = (ProcessRecord) args.arg1;
                     final BroadcastRecord r = (BroadcastRecord) args.arg2;
                     args.recycle();
-                    app.removeAllowBackgroundActivityStartsToken(r);
+                    app.removeBackgroundStartPrivileges(r);
                 }
                 return true;
             }
@@ -1020,8 +1020,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     MSG_DELIVERY_TIMEOUT_SOFT, softTimeoutMillis, 0, queue), softTimeoutMillis);
         }
 
-        if (r.allowBackgroundActivityStarts) {
-            app.addOrUpdateAllowBackgroundActivityStartsToken(r, r.mBackgroundActivityStartsToken);
+        if (r.mBackgroundStartPrivileges.allowsAny()) {
+            app.addOrUpdateBackgroundStartPrivileges(r, r.mBackgroundStartPrivileges);
 
             final long timeout = r.isForeground() ? mFgConstants.ALLOW_BG_ACTIVITY_START_TIMEOUT
                     : mBgConstants.ALLOW_BG_ACTIVITY_START_TIMEOUT;
