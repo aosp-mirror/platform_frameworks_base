@@ -1708,6 +1708,7 @@
     <string name="color_correction_feature_name" msgid="7975133554160979214">"கலர் கரெக்‌ஷன்"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"ஒற்றைக் கைப் பயன்முறை"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"மிகக் குறைவான வெளிச்சம்"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"செவித்துணைக் கருவிகள்"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ஒலியளவுக்கான விசைகளைப் பிடித்திருந்தீர்கள். <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ஆன் செய்யப்பட்டது."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ஒலியளவுக்கான விசைகளைப் பிடித்திருந்தீர்கள். <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ஆஃப் செய்யப்பட்டது."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>ஐப் பயன்படுத்த 3 விநாடிகளுக்கு இரண்டு ஒலியளவு பட்டன்களையும் அழுத்திப் பிடிக்கவும்"</string>
@@ -1942,6 +1943,10 @@
     <string name="work_mode_off_title" msgid="961171256005852058">"பணி ஆப்ஸை இயக்கவா?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"உங்கள் பணி ஆப்ஸுக்கும் அறிவிப்புகளுக்குமான அணுகலைப் பெறுங்கள்"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"இயக்கு"</string>
+    <!-- no translation found for work_mode_emergency_call_button (6818855962881612322) -->
+    <skip />
+    <!-- no translation found for work_mode_dialer_off_message (2193299184850387465) -->
+    <skip />
     <string name="app_blocked_title" msgid="7353262160455028160">"இந்த ஆப்ஸ் இப்போது கிடைப்பதில்லை"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸ் இப்போது கிடைப்பதில்லை."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> இல்லை"</string>

@@ -1709,6 +1709,7 @@
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Correction des couleurs"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Mode une main"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Encore moins lumineux"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Prothèses auditives"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Touches de volume appuyées de manière prolongée. Service <xliff:g id="SERVICE_NAME">%1$s</xliff:g> activé."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Touches de volume appuyées de manière prolongée. Service <xliff:g id="SERVICE_NAME">%1$s</xliff:g> désactivé."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Appuyez de manière prolongée sur les deux touches de volume pendant trois secondes pour utiliser <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1943,6 +1944,10 @@
     <string name="work_mode_off_title" msgid="961171256005852058">"Activer les applis pro ?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"Accéder à vos applis et notifications professionnelles"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Activer"</string>
+    <!-- no translation found for work_mode_emergency_call_button (6818855962881612322) -->
+    <skip />
+    <!-- no translation found for work_mode_dialer_off_message (2193299184850387465) -->
+    <skip />
     <string name="app_blocked_title" msgid="7353262160455028160">"Application non disponible"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> n\'est pas disponible pour le moment."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> indisponible"</string>

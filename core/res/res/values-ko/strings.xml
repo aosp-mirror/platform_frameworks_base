@@ -1708,6 +1708,7 @@
     <string name="color_correction_feature_name" msgid="7975133554160979214">"색상 보정"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"한 손 모드"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"더 어둡게"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"보청기"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"볼륨 키를 길게 눌렀습니다. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>이(가) 사용 설정되었습니다."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"볼륨 키를 길게 눌렀습니다. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>이(가) 사용 중지되었습니다."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> 서비스를 사용하려면 두 볼륨 키를 3초 동안 길게 누르세요"</string>
@@ -1942,6 +1943,10 @@
     <string name="work_mode_off_title" msgid="961171256005852058">"직장 앱을 사용 설정하시겠습니까?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"직장 앱 및 알림에 액세스하세요."</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"사용 설정"</string>
+    <!-- no translation found for work_mode_emergency_call_button (6818855962881612322) -->
+    <skip />
+    <!-- no translation found for work_mode_dialer_off_message (2193299184850387465) -->
+    <skip />
     <string name="app_blocked_title" msgid="7353262160455028160">"앱을 사용할 수 없습니다"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"현재 <xliff:g id="APP_NAME">%1$s</xliff:g> 앱을 사용할 수 없습니다."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> 사용할 수 없음"</string>

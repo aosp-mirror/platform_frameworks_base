@@ -1708,6 +1708,7 @@
     <string name="color_correction_feature_name" msgid="7975133554160979214">"色彩校正"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"单手模式"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"极暗"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"助听设备"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"已按住音量键。<xliff:g id="SERVICE_NAME">%1$s</xliff:g>已开启。"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"已按住音量键。<xliff:g id="SERVICE_NAME">%1$s</xliff:g>已关闭。"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"同时按住两个音量键 3 秒钟即可使用 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1942,6 +1943,10 @@
     <string name="work_mode_off_title" msgid="961171256005852058">"要开启工作应用访问权限吗？"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"获取工作应用和通知的访问权限"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"开启"</string>
+    <!-- no translation found for work_mode_emergency_call_button (6818855962881612322) -->
+    <skip />
+    <!-- no translation found for work_mode_dialer_off_message (2193299184850387465) -->
+    <skip />
     <string name="app_blocked_title" msgid="7353262160455028160">"应用无法使用"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g>目前无法使用。"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g>不可用"</string>
