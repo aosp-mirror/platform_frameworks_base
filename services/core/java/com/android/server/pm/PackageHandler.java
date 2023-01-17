@@ -291,8 +291,8 @@ final class PackageHandler extends Handler {
                     rollbackTimeoutIntent.putExtra(
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_SESSION_ID,
                             sessionId);
-                    rollbackTimeoutIntent.addFlags(
-                            Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                    rollbackTimeoutIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
+                            | Intent.FLAG_RECEIVER_FOREGROUND);
                     mPm.mContext.sendBroadcastAsUser(rollbackTimeoutIntent, UserHandle.SYSTEM,
                             android.Manifest.permission.PACKAGE_ROLLBACK_AGENT);
                 }
