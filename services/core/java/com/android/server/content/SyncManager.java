@@ -104,6 +104,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.config.appcloning.AppCloningDeviceConfigHelper;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BackgroundThread;
@@ -263,6 +264,8 @@ public class SyncManager {
     protected final SyncAdaptersCache mSyncAdapters;
 
     private final SyncLogger mLogger;
+
+    private final AppCloningDeviceConfigHelper mAppCloningDeviceConfigHelper;
 
     private boolean isJobIdInUseLockedH(int jobId, List<JobInfo> pendingJobs) {
         for (int i = 0, size = pendingJobs.size(); i < size; i++) {
@@ -627,6 +630,7 @@ public class SyncManager {
         }, mSyncHandler);
 
         mConstants = new SyncManagerConstants(context);
+        mAppCloningDeviceConfigHelper = AppCloningDeviceConfigHelper.getInstance(context);
 
         IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         context.registerReceiver(mConnectivityIntentReceiver, intentFilter);
@@ -828,6 +832,18 @@ public class SyncManager {
     }
 
     /**
+     * Check whether the feature flag controlling contacts sharing for clone profile is set. If
+     * true, the contact syncs for clone profile should be disabled.
+     *
+     * @return true/false if contact sharing is enabled/disabled
+     */
+    protected boolean isContactSharingAllowedForCloneProfile() {
+        // TODO(b/253449368): This method should also check for the config controlling
+        // all app-cloning features.
+        return mAppCloningDeviceConfigHelper.getEnableAppCloningBuildingBlocks();
+    }
+
+    /**
      * Check if account sync should be disabled for the given user and provider.
      * @param userInfo
      * @param providerName
@@ -836,7 +852,9 @@ public class SyncManager {
      */
     @VisibleForTesting
     protected boolean shouldDisableSyncForUser(UserInfo userInfo, String providerName) {
-        if (userInfo == null || providerName == null) return false;
+        if (userInfo == null || providerName == null || !isContactSharingAllowedForCloneProfile()) {
+            return false;
+        }
         return providerName.equals(ContactsContract.AUTHORITY)
                 && !areContactWritesEnabledForUser(userInfo);
     }
