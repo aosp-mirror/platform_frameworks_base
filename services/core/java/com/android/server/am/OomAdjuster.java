@@ -2457,7 +2457,7 @@ public class OomAdjuster {
         }
 
         state.setCurRawAdj(adj);
-
+        adj = psr.modifyRawOomAdj(adj);
         if (adj > state.getMaxAdj()) {
             adj = state.getMaxAdj();
             if (adj <= ProcessList.PERCEPTIBLE_LOW_APP_ADJ) {
@@ -2487,7 +2487,7 @@ public class OomAdjuster {
         // it when computing the final cached adj later.  Note that we don't need to
         // worry about this for max adj above, since max adj will always be used to
         // keep it out of the cached vaues.
-        state.setCurAdj(psr.modifyRawOomAdj(adj));
+        state.setCurAdj(adj);
         state.setCurCapability(capability);
         state.setCurrentSchedulingGroup(schedGroup);
         state.setCurProcState(procState);
