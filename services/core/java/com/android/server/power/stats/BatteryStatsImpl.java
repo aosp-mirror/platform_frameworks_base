@@ -178,7 +178,7 @@ public class BatteryStatsImpl extends BatteryStats {
     // TODO: remove "tcp" from network methods, since we measure total stats.
 
     // Current on-disk Parcel version. Must be updated when the format of the parcelable changes
-    public static final int VERSION = 211;
+    public static final int VERSION = 212;
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
@@ -5740,6 +5740,9 @@ public class BatteryStatsImpl extends BatteryStats {
                     HistoryItem.STATE2_PHONE_IN_CALL_FLAG);
             mPhoneOn = true;
             mPhoneOnTimer.startRunningLocked(elapsedRealtimeMs);
+            if (mConstants.PHONE_ON_EXTERNAL_STATS_COLLECTION) {
+                scheduleSyncExternalStatsLocked("phone-on", ExternalStatsSync.UPDATE_RADIO);
+            }
         }
     }
 
@@ -5750,6 +5753,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     HistoryItem.STATE2_PHONE_IN_CALL_FLAG);
             mPhoneOn = false;
             mPhoneOnTimer.stopRunningLocked(elapsedRealtimeMs);
+            scheduleSyncExternalStatsLocked("phone-off", ExternalStatsSync.UPDATE_RADIO);
         }
     }
 
@@ -7421,6 +7425,12 @@ public class BatteryStatsImpl extends BatteryStats {
     @Override
     public long getMobileRadioEnergyConsumptionUC() {
         return getPowerBucketConsumptionUC(EnergyConsumerStats.POWER_BUCKET_MOBILE_RADIO);
+    }
+
+    @GuardedBy("this")
+    @Override
+    public long getPhoneEnergyConsumptionUC() {
+        return getPowerBucketConsumptionUC(EnergyConsumerStats.POWER_BUCKET_PHONE);
     }
 
     @GuardedBy("this")
@@ -12051,17 +12061,36 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         synchronized (this) {
+            final long totalRadioDurationMs =
+                    mMobileRadioActiveTimer.getTimeSinceMarkLocked(
+                            elapsedRealtimeMs * 1000) / 1000;
+            mMobileRadioActiveTimer.setMark(elapsedRealtimeMs);
+            final long phoneOnDurationMs = Math.min(totalRadioDurationMs,
+                    mPhoneOnTimer.getTimeSinceMarkLocked(elapsedRealtimeMs * 1000) / 1000);
+            mPhoneOnTimer.setMark(elapsedRealtimeMs);
+
             if (!mOnBatteryInternal || mIgnoreNextExternalStats) {
                 return;
             }
 
             final SparseDoubleArray uidEstimatedConsumptionMah;
+            final long dataConsumedChargeUC;
             if (consumedChargeUC > 0 && isMobileRadioEnergyConsumerSupportedLocked()) {
+                // Crudely attribute power consumption. Added (totalRadioDurationMs / 2) to the
+                // numerator for long rounding.
+                final long phoneConsumedChargeUC =
+                        (consumedChargeUC * phoneOnDurationMs + totalRadioDurationMs / 2)
+                                / totalRadioDurationMs;
+                dataConsumedChargeUC = consumedChargeUC - phoneConsumedChargeUC;
+
                 mGlobalEnergyConsumerStats.updateStandardBucket(
-                        EnergyConsumerStats.POWER_BUCKET_MOBILE_RADIO, consumedChargeUC);
+                        EnergyConsumerStats.POWER_BUCKET_PHONE, phoneConsumedChargeUC);
+                mGlobalEnergyConsumerStats.updateStandardBucket(
+                        EnergyConsumerStats.POWER_BUCKET_MOBILE_RADIO, dataConsumedChargeUC);
                 uidEstimatedConsumptionMah = new SparseDoubleArray();
             } else {
                 uidEstimatedConsumptionMah = null;
+                dataConsumedChargeUC = POWER_DATA_UNAVAILABLE;
             }
 
             RxTxConsumption rxTxConsumption = null;
@@ -12250,13 +12279,9 @@ public class BatteryStatsImpl extends BatteryStats {
                         totalEstimatedConsumptionMah += rxTxConsumption.txConsumptionMah;
                     } else {
                         // Estimate total active radio power consumption since last mark.
-                        final long totalRadioTimeMs =
-                                mMobileRadioActiveTimer.getTimeSinceMarkLocked(
-                                        elapsedRealtimeMs * 1000) / 1000;
-                        mMobileRadioActiveTimer.setMark(elapsedRealtimeMs);
                         totalEstimatedConsumptionMah +=
                                 mMobileRadioPowerCalculator.calcPowerFromRadioActiveDurationMah(
-                                        totalRadioTimeMs);
+                                        totalRadioDurationMs);
 
                         // Estimate idle power consumption at each signal strength level
                         final int numSignalStrengthLevels = mPhoneSignalStrengthsTimer.length;
@@ -12279,7 +12304,7 @@ public class BatteryStatsImpl extends BatteryStats {
                                 mMobileRadioPowerCalculator.calcScanTimePowerMah(scanTimeMs);
                     }
                     distributeEnergyToUidsLocked(EnergyConsumerStats.POWER_BUCKET_MOBILE_RADIO,
-                            consumedChargeUC, uidEstimatedConsumptionMah,
+                            dataConsumedChargeUC, uidEstimatedConsumptionMah,
                             totalEstimatedConsumptionMah, elapsedRealtimeMs);
                 }
             }
@@ -15041,6 +15066,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 "record_usage_history";
         public static final String KEY_PER_UID_MODEM_POWER_MODEL =
                 "per_uid_modem_power_model";
+        public static final String KEY_PHONE_ON_EXTERNAL_STATS_COLLECTION =
+                "phone_on_external_stats_collection";
 
         public static final String PER_UID_MODEM_POWER_MODEL_MOBILE_RADIO_ACTIVE_TIME_NAME =
                 "mobile_radio_active_time";
@@ -15089,6 +15116,7 @@ public class BatteryStatsImpl extends BatteryStats {
         @PerUidModemPowerModel
         private static final int DEFAULT_PER_UID_MODEM_MODEL =
                 PER_UID_MODEM_POWER_MODEL_MODEM_ACTIVITY_INFO_RX_TX;
+        private static final boolean DEFAULT_PHONE_ON_EXTERNAL_STATS_COLLECTION = true;
 
         public boolean TRACK_CPU_ACTIVE_CLUSTER_TIME = DEFAULT_TRACK_CPU_ACTIVE_CLUSTER_TIME;
         /* Do not set default value for KERNEL_UID_READERS_THROTTLE_TIME. Need to trigger an
@@ -15106,6 +15134,8 @@ public class BatteryStatsImpl extends BatteryStats {
         public int BATTERY_CHARGED_DELAY_MS = DEFAULT_BATTERY_CHARGED_DELAY_MS;
         public boolean RECORD_USAGE_HISTORY = DEFAULT_RECORD_USAGE_HISTORY;
         public int PER_UID_MODEM_MODEL = DEFAULT_PER_UID_MODEM_MODEL;
+        public boolean PHONE_ON_EXTERNAL_STATS_COLLECTION =
+                DEFAULT_PHONE_ON_EXTERNAL_STATS_COLLECTION;
 
         private ContentResolver mResolver;
         private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -15187,6 +15217,10 @@ public class BatteryStatsImpl extends BatteryStats {
                         "");
                 PER_UID_MODEM_MODEL = getPerUidModemModel(perUidModemModel);
 
+                PHONE_ON_EXTERNAL_STATS_COLLECTION = mParser.getBoolean(
+                        KEY_PHONE_ON_EXTERNAL_STATS_COLLECTION,
+                        DEFAULT_PHONE_ON_EXTERNAL_STATS_COLLECTION);
+
                 updateBatteryChargedDelayMsLocked();
 
                 onChange();
@@ -15256,6 +15290,8 @@ public class BatteryStatsImpl extends BatteryStats {
             pw.println(RECORD_USAGE_HISTORY);
             pw.print(KEY_PER_UID_MODEM_POWER_MODEL); pw.print("=");
             pw.println(getPerUidModemModelName(PER_UID_MODEM_MODEL));
+            pw.print(KEY_PHONE_ON_EXTERNAL_STATS_COLLECTION); pw.print("=");
+            pw.println(PHONE_ON_EXTERNAL_STATS_COLLECTION);
         }
     }
 
