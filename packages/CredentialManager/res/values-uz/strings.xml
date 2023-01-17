@@ -5,31 +5,25 @@
     <string name="string_cancel" msgid="6369133483981306063">"Bekor qilish"</string>
     <string name="string_continue" msgid="1346732695941131882">"Davom etish"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Boshqa parametrlar"</string>
-    <string name="string_create_in_another_place" msgid="1033635365843437603">"Boshqa joyda yaratish"</string>
-    <string name="string_save_to_another_place" msgid="7590325934591079193">"Boshqa joyga saqlash"</string>
-    <string name="string_use_another_device" msgid="8754514926121520445">"Boshqa qurilmadan foydalaning"</string>
-    <string name="string_save_to_another_device" msgid="1959562542075194458">"Boshqa qurilmaga saqlash"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Kalitlar orqali qulay"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Kodlar yordami tufayli murakkab parollarni yaratish va eslab qolish shart emas"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Kodlar – bu barmoq izi, yuz yoki ekran qulfi yordamida yaratilgan shifrlangan raqamli identifikator."</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Ular parollar menejerida saqlanadi va ulardan boshqa qurilmalarda hisobga kirib foydalanish mumkin"</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"<xliff:g id="CREATETYPES">%1$s</xliff:g> joyini tanlang"</string>
-    <string name="create_your_passkeys" msgid="8901224153607590596">"kodlar yaratish"</string>
-    <string name="save_your_password" msgid="6597736507991704307">"Parolni saqlash"</string>
-    <string name="save_your_sign_in_info" msgid="7213978049817076882">"kirish axborotini saqlang"</string>
-    <string name="choose_provider_body" msgid="4384188171872005547">"Maʼlumotlaringizni saqlash va keyingi safar tez kirish uchun parollar menejerini tanlang"</string>
+    <string name="choose_provider_title" msgid="8870795677024868108">"<xliff:g id="CREATETYPES">%1$s</xliff:g> qayerga saqlanishini tanlang"</string>
+    <string name="choose_provider_body" msgid="4967074531845147434">"Maʼlumotlaringizni saqlash va keyingi safar tez kirish uchun parollar menejerini tanlang"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> uchun kod yaratilsinmi?"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"<xliff:g id="APPNAME">%1$s</xliff:g> uchun parol saqlansinmi?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> uchun kirish maʼlumoti saqlansinmi?"</string>
-    <string name="choose_create_option_description" msgid="5531335144879100664">"<xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> istalgan qurilmada ishlatilishi mumkin. U <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g> uchun <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> xizmatiga saqlandi"</string>
     <string name="passkey" msgid="632353688396759522">"kalit"</string>
     <string name="password" msgid="6738570945182936667">"parol"</string>
+    <string name="passkeys" msgid="5733880786866559847">"kodlar"</string>
+    <string name="passwords" msgid="5419394230391253816">"parollar"</string>
     <string name="sign_ins" msgid="4710739369149469208">"kirishlar"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"kirish maʼlumoti"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>ni saqlash"</string>
-    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"Boshqa qurilmada kod yaratilsinmi?"</string>
+    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Boshqa qurilmada kod yaratilsinmi?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Hamma kirishlarda <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ishlatilsinmi?"</string>
-    <string name="use_provider_for_all_description" msgid="6560593199974037820">"Bu parollar menejerida hisobga oson kirishga yordam beruvchi parol va kalitlar saqlanadi."</string>
+    <string name="use_provider_for_all_description" msgid="8466427781848268490">"Bu parollar menejerida hisobga oson kirishga yordam beruvchi parol va kalitlar saqlanadi"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Birlamchi deb belgilash"</string>
     <string name="use_once" msgid="9027366575315399714">"Bir marta ishlatish"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> ta parol • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> ta kod"</string>

@@ -5,31 +5,25 @@
     <string name="string_cancel" msgid="6369133483981306063">"Avbryt"</string>
     <string name="string_continue" msgid="1346732695941131882">"Fortsätt"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Fler alternativ"</string>
-    <string name="string_create_in_another_place" msgid="1033635365843437603">"Skapa på en annan plats"</string>
-    <string name="string_save_to_another_place" msgid="7590325934591079193">"Spara på en annan plats"</string>
-    <string name="string_use_another_device" msgid="8754514926121520445">"Använd en annan enhet"</string>
-    <string name="string_save_to_another_device" msgid="1959562542075194458">"Spara på en annan enhet"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Säkrare med nycklar"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Med nycklar behöver du inte skapa eller komma ihop invecklade lösenord"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Nycklar är krypterade digitala nycklar som du skapar med ditt fingeravtryck, ansikte eller skärmlås"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"De sparas i lösenordshanteraren så att du kan logga in på andra enheter"</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"Välj var du <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
-    <string name="create_your_passkeys" msgid="8901224153607590596">"skapa nycklar"</string>
-    <string name="save_your_password" msgid="6597736507991704307">"spara lösenordet"</string>
-    <string name="save_your_sign_in_info" msgid="7213978049817076882">"spara inloggningsuppgifterna"</string>
-    <string name="choose_provider_body" msgid="4384188171872005547">"Välj en lösenordshanterare för att spara dina uppgifter och logga in snabbare nästa gång."</string>
+    <string name="choose_provider_title" msgid="8870795677024868108">"Välj var du vill spara <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
+    <string name="choose_provider_body" msgid="4967074531845147434">"Välj en lösenordshanterare för att spara dina uppgifter och logga in snabbare nästa gång"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Vill du skapa en nyckel för <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"Vill du spara lösenordet för <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Vill du spara inloggningsuppgifterna för <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_description" msgid="5531335144879100664">"Du kan använda <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> för <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> på alla enheter. Du kan spara uppgifterna i <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> för <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>"</string>
     <string name="passkey" msgid="632353688396759522">"nyckel"</string>
     <string name="password" msgid="6738570945182936667">"lösenord"</string>
+    <string name="passkeys" msgid="5733880786866559847">"nycklar"</string>
+    <string name="passwords" msgid="5419394230391253816">"lösenord"</string>
     <string name="sign_ins" msgid="4710739369149469208">"inloggningar"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"inloggningsuppgifter"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"Spara <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> i"</string>
-    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"Vill du skapa en nyckel på en annan enhet?"</string>
+    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Vill du skapa en nyckel på en annan enhet?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Vill du använda <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> för alla dina inloggningar?"</string>
-    <string name="use_provider_for_all_description" msgid="6560593199974037820">"Den här lösenordshanteraren sparar dina lösenord och nycklar för att underlätta inloggning."</string>
+    <string name="use_provider_for_all_description" msgid="8466427781848268490">"Den här lösenordshanteraren sparar dina lösenord och nycklar för att underlätta inloggning"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Ange som standard"</string>
     <string name="use_once" msgid="9027366575315399714">"Använd en gång"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> lösenord • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> nycklar"</string>

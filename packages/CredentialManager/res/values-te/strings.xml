@@ -5,31 +5,25 @@
     <string name="string_cancel" msgid="6369133483981306063">"రద్దు చేయండి"</string>
     <string name="string_continue" msgid="1346732695941131882">"కొనసాగించండి"</string>
     <string name="string_more_options" msgid="7990658711962795124">"మరిన్ని ఆప్షన్‌లు"</string>
-    <string name="string_create_in_another_place" msgid="1033635365843437603">"మరొక స్థలంలో క్రియేట్ చేయండి"</string>
-    <string name="string_save_to_another_place" msgid="7590325934591079193">"మరొక స్థలంలో సేవ్ చేయండి"</string>
-    <string name="string_use_another_device" msgid="8754514926121520445">"మరొక పరికరాన్ని ఉపయోగించండి"</string>
-    <string name="string_save_to_another_device" msgid="1959562542075194458">"మరొక పరికరంలో సేవ్ చేయండి"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"పాస్-కీలతో సురక్షితంగా చెల్లించవచ్చు"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"పాస్-కీలతో, మీరు క్లిష్టమైన పాస్‌వర్డ్‌లను క్రియేట్ చేయనవసరం లేదు లేదా గుర్తుంచుకోనవసరం లేదు"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"పాస్-కీలు అనేవి మీ వేలిముద్రను, ముఖాన్ని లేదా స్క్రీన్ లాక్‌ను ఉపయోగించి మీరు క్రియేట్ చేసే ఎన్‌క్రిప్ట్ చేసిన డిజిటల్ కీలు"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"అవి Password Managerకు సేవ్ చేయబడతాయి, తద్వారా మీరు ఇతర పరికరాలలో సైన్ ఇన్ చేయవచ్చు"</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"ఎక్కడ <xliff:g id="CREATETYPES">%1$s</xliff:g> చేయాలో ఎంచుకోండి"</string>
-    <string name="create_your_passkeys" msgid="8901224153607590596">"మీ పాస్-కీలను క్రియేట్ చేయండి"</string>
-    <string name="save_your_password" msgid="6597736507991704307">"మీ పాస్‌వర్డ్‌ను సేవ్ చేయండి"</string>
-    <string name="save_your_sign_in_info" msgid="7213978049817076882">"మీ సైన్ ఇన్ సమాచారాన్ని సేవ్ చేయండి"</string>
-    <string name="choose_provider_body" msgid="4384188171872005547">"మీ సమాచారాన్ని సేవ్ చేయడం కోసం ఒక Password Managerను ఎంచుకొని, తర్వాతసారి వేగంగా సైన్ ఇన్ చేయండి."</string>
+    <string name="choose_provider_title" msgid="8870795677024868108">"మీ <xliff:g id="CREATETYPES">%1$s</xliff:g>ని ఎక్కడ సేవ్ చేయాలో ఎంచుకోండి"</string>
+    <string name="choose_provider_body" msgid="4967074531845147434">"మీ సమాచారాన్ని సేవ్ చేయడం కోసం ఒక Password Managerను ఎంచుకొని, తర్వాతసారి వేగంగా సైన్ ఇన్ చేయండి"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> కోసం పాస్‌కీని క్రియేట్ చేయాలా?"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"<xliff:g id="APPNAME">%1$s</xliff:g> కోసం పాస్‌వర్డ్‌ను సేవ్ చేయాలా?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> కోసం సైన్ ఇన్ సమాచారాన్ని సేవ్ చేయాలా?"</string>
-    <string name="choose_create_option_description" msgid="5531335144879100664">"మీరు మీ <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g>‌ను ఏ పరికరంలోనైనా ఉపయోగించవచ్చు. ఇది <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g> కోసం <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g>‌లో సేవ్ చేయబడింది."</string>
     <string name="passkey" msgid="632353688396759522">"పాస్-కీ"</string>
     <string name="password" msgid="6738570945182936667">"పాస్‌వర్డ్"</string>
+    <string name="passkeys" msgid="5733880786866559847">"పాస్-కీలు"</string>
+    <string name="passwords" msgid="5419394230391253816">"పాస్‌వర్డ్‌లు"</string>
     <string name="sign_ins" msgid="4710739369149469208">"సైన్‌ ఇన్‌లు"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"సైన్ ఇన్ సమాచారం"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>‌లో సేవ్ చేయండి"</string>
-    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"మరొక పరికరంలో పాస్-కీని క్రియేట్ చేయాలా?"</string>
+    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"మరొక పరికరంలో పాస్‌కీని క్రియేట్ చేయాలా?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"మీ అన్ని సైన్-ఇన్ వివరాల కోసం <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>ను ఉపయోగించాలా?"</string>
-    <string name="use_provider_for_all_description" msgid="6560593199974037820">"మీరు సులభంగా సైన్ ఇన్ చేయడంలో సహాయపడటానికి ఈ పాస్‌వర్డ్ మేనేజర్ మీ పాస్‌వర్డ్‌లు, పాస్-కీలను స్టోర్ చేస్తుంది."</string>
+    <string name="use_provider_for_all_description" msgid="8466427781848268490">"మీరు సులభంగా సైన్ ఇన్ చేయడంలో సహాయపడటానికి ఈ పాస్‌వర్డ్ మేనేజర్ మీ పాస్‌వర్డ్‌లు, పాస్-కీలను స్టోర్ చేస్తుంది"</string>
     <string name="set_as_default" msgid="4415328591568654603">"ఆటోమేటిక్ సెట్టింగ్‌గా సెట్ చేయండి"</string>
     <string name="use_once" msgid="9027366575315399714">"ఒకసారి ఉపయోగించండి"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> పాస్‌వర్డ్‌లు • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> పాస్-కీలు"</string>

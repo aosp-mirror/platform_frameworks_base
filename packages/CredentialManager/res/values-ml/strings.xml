@@ -5,31 +5,25 @@
     <string name="string_cancel" msgid="6369133483981306063">"റദ്ദാക്കുക"</string>
     <string name="string_continue" msgid="1346732695941131882">"തുടരുക"</string>
     <string name="string_more_options" msgid="7990658711962795124">"കൂടുതൽ ഓപ്‌ഷനുകൾ"</string>
-    <string name="string_create_in_another_place" msgid="1033635365843437603">"മറ്റൊരു സ്ഥലത്ത് സൃഷ്‌ടിക്കുക"</string>
-    <string name="string_save_to_another_place" msgid="7590325934591079193">"മറ്റൊരു സ്ഥലത്തേക്ക് സംരക്ഷിക്കുക"</string>
-    <string name="string_use_another_device" msgid="8754514926121520445">"മറ്റൊരു ഉപകരണം ഉപയോഗിക്കുക"</string>
-    <string name="string_save_to_another_device" msgid="1959562542075194458">"മറ്റൊരു ഉപകരണത്തിലേക്ക് സംരക്ഷിക്കുക"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"പാസ്‌കീകൾ ഉപയോഗിച്ച് സുരക്ഷിതരാകൂ"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"പാസ്‌കീകൾ ഉപയോഗിക്കുമ്പോൾ നിങ്ങൾ സങ്കീർണ്ണമായ പാസ്‌വേഡുകൾ സൃഷ്ടിക്കുകയോ ഓർമ്മിക്കുകയോ ചെയ്യേണ്ടതില്ല"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"ഫിംഗർപ്രിന്റ്, മുഖം അല്ലെങ്കിൽ സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിച്ച് നിങ്ങൾ സൃഷ്‌ടിക്കുന്ന എൻ‌ക്രിപ്റ്റ് ചെയ്ത ഡിജിറ്റൽ കീകളാണ് പാസ്‌കീകൾ"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"അവ ഒരു പാസ്‌വേഡ് മാനേജറിൽ സംരക്ഷിക്കുന്നതിനാൽ നിങ്ങൾക്ക് മറ്റ് ഉപകരണങ്ങളിലും സൈൻ ഇൻ ചെയ്യാം"</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"എവിടെ <xliff:g id="CREATETYPES">%1$s</xliff:g> എന്ന് തിരഞ്ഞെടുക്കുക"</string>
-    <string name="create_your_passkeys" msgid="8901224153607590596">"നിങ്ങളുടെ പാസ്‌കീകൾ സൃഷ്‌ടിക്കുക"</string>
-    <string name="save_your_password" msgid="6597736507991704307">"നിങ്ങളുടെ പാസ്‌വേഡ് സംരക്ഷിക്കുക"</string>
-    <string name="save_your_sign_in_info" msgid="7213978049817076882">"നിങ്ങളുടെ സൈൻ ഇൻ വിവരങ്ങൾ സംരക്ഷിക്കുക"</string>
-    <string name="choose_provider_body" msgid="4384188171872005547">"നിങ്ങളുടെ വിവരങ്ങൾ സംരക്ഷിക്കാനും അടുത്ത തവണ വേഗത്തിൽ സൈൻ ഇൻ ചെയ്യാനും ഒരു പാസ്‌വേഡ് മാനേജർ തിരഞ്ഞെടുക്കുക."</string>
+    <string name="choose_provider_title" msgid="8870795677024868108">"നിങ്ങളുടെ <xliff:g id="CREATETYPES">%1$s</xliff:g> എവിടെയാണ് സംരക്ഷിക്കേണ്ടതെന്ന് തിരഞ്ഞെടുക്കുക"</string>
+    <string name="choose_provider_body" msgid="4967074531845147434">"നിങ്ങളുടെ വിവരങ്ങൾ സംരക്ഷിക്കാനും അടുത്ത തവണ വേഗത്തിൽ സൈൻ ഇൻ ചെയ്യാനും ഒരു പാസ്‌വേഡ് മാനേജർ തിരഞ്ഞെടുക്കുക"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> എന്നതിനായി പാസ്‌കീ സൃഷ്ടിക്കണോ?"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"<xliff:g id="APPNAME">%1$s</xliff:g> എന്നതിനായി പാസ്‌വേഡ് സംരക്ഷിക്കണോ?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> എന്നതിനായി സൈൻ ഇൻ വിവരങ്ങൾ സംരക്ഷിക്കണോ?"</string>
-    <string name="choose_create_option_description" msgid="5531335144879100664">"നിങ്ങളുടെ <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> ഏത് ഉപകരണത്തിലും നിങ്ങൾക്ക് ഉപയോഗിക്കാം. ഇത് <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g> എന്ന വിലാസത്തിനായി <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> എന്നതിലേക്ക് സംരക്ഷിച്ചു."</string>
     <string name="passkey" msgid="632353688396759522">"പാസ്‌കീ"</string>
     <string name="password" msgid="6738570945182936667">"പാസ്‌വേഡ്"</string>
+    <string name="passkeys" msgid="5733880786866559847">"പാസ്‌കീകൾ"</string>
+    <string name="passwords" msgid="5419394230391253816">"പാസ്‌വേഡുകൾ"</string>
     <string name="sign_ins" msgid="4710739369149469208">"സൈൻ ഇന്നുകൾ"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"സൈൻ ഇൻ വിവരങ്ങൾ"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> ഇനിപ്പറയുന്നതിലേക്ക് സംരക്ഷിക്കുക"</string>
-    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"മറ്റൊരു ഉപകരണത്തിൽ പാസ്‌കീ സൃഷ്ടിക്കണോ?"</string>
+    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"മറ്റൊരു ഉപകരണത്തിൽ പാസ്‌കീ സൃഷ്ടിക്കണോ?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"നിങ്ങളുടെ എല്ലാ സൈൻ ഇന്നുകൾക്കും <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ഉപയോഗിക്കണോ?"</string>
-    <string name="use_provider_for_all_description" msgid="6560593199974037820">"എളുപ്പത്തിൽ സൈൻ ഇൻ ചെയ്യാൻ സഹായിക്കുന്നതിന് ഈ പാസ്‌വേഡ് മാനേജർ നിങ്ങളുടെ പാസ്‌വേഡുകളും പാസ്‌കീകളും സംഭരിക്കും."</string>
+    <string name="use_provider_for_all_description" msgid="8466427781848268490">"എളുപ്പത്തിൽ സൈൻ ഇൻ ചെയ്യാൻ സഹായിക്കുന്നതിന് ഈ Password Manager നിങ്ങളുടെ പാസ്‌വേഡുകളും പാസ്‌കീകളും സംഭരിക്കും"</string>
     <string name="set_as_default" msgid="4415328591568654603">"ഡിഫോൾട്ടായി സജ്ജീകരിക്കുക"</string>
     <string name="use_once" msgid="9027366575315399714">"ഒരു തവണ ഉപയോഗിക്കുക"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> പാസ്‌വേഡുകൾ • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> പാസ്‌കീകൾ"</string>

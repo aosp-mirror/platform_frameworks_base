@@ -5,31 +5,31 @@
     <string name="string_cancel" msgid="6369133483981306063">"අවලංගු කරන්න"</string>
     <string name="string_continue" msgid="1346732695941131882">"ඉදිරියට යන්න"</string>
     <string name="string_more_options" msgid="7990658711962795124">"තවත් විකල්ප"</string>
-    <string name="string_create_in_another_place" msgid="1033635365843437603">"වෙනත් ස්ථානයක තනන්න"</string>
-    <string name="string_save_to_another_place" msgid="7590325934591079193">"වෙනත් ස්ථානයකට සුරකින්න"</string>
-    <string name="string_use_another_device" msgid="8754514926121520445">"වෙනත් උපාංගයක් භාවිතා කරන්න"</string>
-    <string name="string_save_to_another_device" msgid="1959562542075194458">"වෙනත් උපාංගයකට සුරකින්න"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"මුරයතුරු සමග සුරක්ෂිතයි"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"මුරයතුරු සමග, ඔබට සංකීර්ණ මුරපද තැනීමට හෝ මතක තබා ගැනීමට අවශ්‍ය නොවේ"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"මුරයතුරු යනු ඔබේ ඇඟිලි සලකුණ, මුහුණ, හෝ තිර අගුල භාවිතයෙන් ඔබ තනන සංකේතාත්මක ඩිජිටල් යතුරු වේ"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"ඒවා මුරපද කළමනාකරුවෙකු වෙත සුරකින බැවින්, ඔබට වෙනත් උපාංග මත පුරනය විය හැක"</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"<xliff:g id="CREATETYPES">%1$s</xliff:g> කොතැනක ද යන්න තෝරා ගන්න"</string>
-    <string name="create_your_passkeys" msgid="8901224153607590596">"ඔබේ මුරයතුරු තනන්න"</string>
-    <string name="save_your_password" msgid="6597736507991704307">"ඔබේ මුරපදය සුරකින්න"</string>
-    <string name="save_your_sign_in_info" msgid="7213978049817076882">"ඔබේ පුරනය වීමේ තතු සුරකින්න"</string>
-    <string name="choose_provider_body" msgid="4384188171872005547">"ඔබේ තතු සුරැකීමට සහ මීළඟ වතාවේ වේගයෙන් පුරනය වීමට මුරපද කළමනාකරුවෙකු තෝරන්න."</string>
+    <!-- no translation found for choose_provider_title (8870795677024868108) -->
+    <skip />
+    <!-- no translation found for choose_provider_body (4967074531845147434) -->
+    <skip />
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> සඳහා මුරයතුර තනන්න ද?"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"<xliff:g id="APPNAME">%1$s</xliff:g> සඳහා මුරපදය සුරකින්න ද?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> සඳහා පුරනය වීමේ තතු සුරකින්න ද?"</string>
-    <string name="choose_create_option_description" msgid="5531335144879100664">"ඔබට ඕනෑම උපාංගයක ඔබේ <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> භාවිතා කළ හැක. එය <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g> සඳහා <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> වෙත සුරැකෙයි."</string>
     <string name="passkey" msgid="632353688396759522">"මුරයතුර"</string>
     <string name="password" msgid="6738570945182936667">"මුරපදය"</string>
+    <!-- no translation found for passkeys (5733880786866559847) -->
+    <skip />
+    <!-- no translation found for passwords (5419394230391253816) -->
+    <skip />
     <string name="sign_ins" msgid="4710739369149469208">"පුරනය වීම්"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"පුරනය වීමේ තතු"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"වෙත <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> සුරකින්න"</string>
-    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"වෙනත් උපාංගයක මුරයතුරක් තනන්න ද?"</string>
+    <!-- no translation found for create_passkey_in_other_device_title (9195411122362461390) -->
+    <skip />
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"ඔබේ සියලු පුරනය වීම් සඳහා <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> භාවිතා කරන්න ද?"</string>
-    <string name="use_provider_for_all_description" msgid="6560593199974037820">"මෙම මුරපද කළමනාකරු ඔබට පහසුවෙන් පුරනය වීමට උදවු කිරීම සඳහා ඔබේ මුරපද සහ මුරයතුරු ගබඩා කරනු ඇත."</string>
+    <!-- no translation found for use_provider_for_all_description (8466427781848268490) -->
+    <skip />
     <string name="set_as_default" msgid="4415328591568654603">"පෙරනිමි ලෙස සකසන්න"</string>
     <string name="use_once" msgid="9027366575315399714">"වරක් භාවිතා කරන්න"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"මුරපද <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>ක් • මුරයතුරු <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>ක්"</string>
