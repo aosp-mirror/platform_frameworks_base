@@ -124,6 +124,9 @@ constructor(
                 realRepository.activeMobileDataSubscriptionId.value
             )
 
+    override val activeSubChangedInGroupEvent: Flow<Unit> =
+        activeRepo.flatMapLatest { it.activeSubChangedInGroupEvent }
+
     override val defaultDataSubRatConfig: StateFlow<MobileMappings.Config> =
         activeRepo
             .flatMapLatest { it.defaultDataSubRatConfig }
@@ -138,6 +141,11 @@ constructor(
 
     override val defaultMobileIconGroup: Flow<SignalIcon.MobileIconGroup> =
         activeRepo.flatMapLatest { it.defaultMobileIconGroup }
+
+    override val defaultDataSubId: StateFlow<Int> =
+        activeRepo
+            .flatMapLatest { it.defaultDataSubId }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), realRepository.defaultDataSubId.value)
 
     override val defaultMobileNetworkConnectivity: StateFlow<MobileConnectivityModel> =
         activeRepo

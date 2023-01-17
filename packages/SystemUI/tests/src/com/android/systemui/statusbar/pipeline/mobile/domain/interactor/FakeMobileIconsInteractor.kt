@@ -23,6 +23,7 @@ import android.telephony.TelephonyManager.NETWORK_TYPE_UMTS
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -59,6 +60,9 @@ class FakeMobileIconsInteractor(
     override val alwaysShowDataRatIcon = MutableStateFlow(false)
 
     override val alwaysUseCdmaLevel = MutableStateFlow(false)
+    override val defaultDataSubId = MutableStateFlow(DEFAULT_DATA_SUB_ID)
+
+    override val defaultMobileNetworkConnectivity = MutableStateFlow(MobileConnectivityModel())
 
     private val _defaultMobileIconMapping = MutableStateFlow(TEST_MAPPING)
     override val defaultMobileIconMapping = _defaultMobileIconMapping
@@ -76,6 +80,8 @@ class FakeMobileIconsInteractor(
 
     companion object {
         val DEFAULT_ICON = TelephonyIcons.G
+
+        const val DEFAULT_DATA_SUB_ID = 1
 
         // Use [MobileMappings] to define some simple definitions
         const val THREE_G = NETWORK_TYPE_GSM
