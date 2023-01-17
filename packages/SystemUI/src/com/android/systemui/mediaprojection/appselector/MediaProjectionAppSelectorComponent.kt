@@ -19,9 +19,11 @@ package com.android.systemui.mediaprojection.appselector
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
+import android.os.UserHandle
 import com.android.launcher3.icons.IconFactory
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.media.MediaProjectionAppSelectorActivity
+import com.android.systemui.media.MediaProjectionAppSelectorActivity.Companion.EXTRA_HOST_APP_USER_HANDLE
 import com.android.systemui.mediaprojection.appselector.data.ActivityTaskManagerThumbnailLoader
 import com.android.systemui.mediaprojection.appselector.data.AppIconLoader
 import com.android.systemui.mediaprojection.appselector.data.IconLoaderLibAppIconLoader
@@ -30,6 +32,8 @@ import com.android.systemui.mediaprojection.appselector.data.RecentTaskThumbnail
 import com.android.systemui.mediaprojection.appselector.data.ShellRecentTaskListProvider
 import com.android.systemui.mediaprojection.appselector.view.MediaProjectionRecentsViewController
 import com.android.systemui.mediaprojection.appselector.view.TaskPreviewSizeProvider
+import com.android.systemui.settings.UserTracker
+import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl
 import com.android.systemui.statusbar.policy.ConfigurationController
 import dagger.Binds
@@ -39,12 +43,19 @@ import dagger.Provides
 import dagger.Subcomponent
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
+import java.lang.IllegalArgumentException
 import javax.inject.Qualifier
 import javax.inject.Scope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 
 @Qualifier @Retention(AnnotationRetention.BINARY) annotation class MediaProjectionAppSelector
+
+@Qualifier @Retention(AnnotationRetention.BINARY) annotation class HostUserHandle
+
+@Qualifier @Retention(AnnotationRetention.BINARY) annotation class PersonalProfile
+
+@Qualifier @Retention(AnnotationRetention.BINARY) annotation class WorkProfile
 
 @Retention(AnnotationRetention.RUNTIME) @Scope annotation class MediaProjectionAppSelectorScope
 
@@ -83,7 +94,7 @@ interface MediaProjectionAppSelectorModule {
         @MediaProjectionAppSelector
         @MediaProjectionAppSelectorScope
         fun provideAppSelectorComponentName(context: Context): ComponentName =
-                ComponentName(context, MediaProjectionAppSelectorActivity::class.java)
+            ComponentName(context, MediaProjectionAppSelectorActivity::class.java)
 
         @Provides
         @MediaProjectionAppSelector
@@ -93,9 +104,32 @@ interface MediaProjectionAppSelectorModule {
         ): ConfigurationController = ConfigurationControllerImpl(activity)
 
         @Provides
-        fun bindIconFactory(
-            context: Context
-        ): IconFactory = IconFactory.obtain(context)
+        @PersonalProfile
+        @MediaProjectionAppSelectorScope
+        fun personalUserHandle(activityManagerWrapper: ActivityManagerWrapper): UserHandle {
+            // Current foreground user is the 'personal' profile
+            return UserHandle.of(activityManagerWrapper.currentUserId)
+        }
+
+        @Provides
+        @WorkProfile
+        @MediaProjectionAppSelectorScope
+        fun workProfileUserHandle(userTracker: UserTracker): UserHandle? =
+            userTracker.userProfiles.find { it.isManagedProfile }?.userHandle
+
+        @Provides
+        @HostUserHandle
+        @MediaProjectionAppSelectorScope
+        fun hostUserHandle(activity: MediaProjectionAppSelectorActivity): UserHandle {
+            val extras =
+                activity.intent.extras
+                    ?: error("MediaProjectionAppSelectorActivity should be launched with extras")
+            return extras.getParcelable(EXTRA_HOST_APP_USER_HANDLE)
+                ?: error("MediaProjectionAppSelectorActivity should be provided with " +
+                        "$EXTRA_HOST_APP_USER_HANDLE extra")
+        }
+
+        @Provides fun bindIconFactory(context: Context): IconFactory = IconFactory.obtain(context)
 
         @Provides
         @MediaProjectionAppSelector
@@ -124,6 +158,8 @@ interface MediaProjectionAppSelectorComponent {
 
     val controller: MediaProjectionAppSelectorController
     val recentsViewController: MediaProjectionRecentsViewController
+    @get:HostUserHandle val hostUserHandle: UserHandle
+    @get:PersonalProfile val personalProfileUserHandle: UserHandle
 
     @MediaProjectionAppSelector val configurationController: ConfigurationController
 }

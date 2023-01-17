@@ -78,6 +78,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
     private final Rect mResizingBounds = new Rect();
     private final Rect mTempRect = new Rect();
     private ValueAnimator mFadeAnimator;
+    private ValueAnimator mScreenshotAnimator;
 
     private int mIconSize;
     private int mOffsetX;
@@ -135,8 +136,17 @@ public class SplitDecorManager extends WindowlessWindowManager {
 
     /** Releases the surfaces for split decor. */
     public void release(SurfaceControl.Transaction t) {
-        if (mFadeAnimator != null && mFadeAnimator.isRunning()) {
-            mFadeAnimator.cancel();
+        if (mFadeAnimator != null) {
+            if (mFadeAnimator.isRunning()) {
+                mFadeAnimator.cancel();
+            }
+            mFadeAnimator = null;
+        }
+        if (mScreenshotAnimator != null) {
+            if (mScreenshotAnimator.isRunning()) {
+                mScreenshotAnimator.cancel();
+            }
+            mScreenshotAnimator = null;
         }
         if (mViewHost != null) {
             mViewHost.release();
@@ -238,16 +248,20 @@ public class SplitDecorManager extends WindowlessWindowManager {
     /** Stops showing resizing hint. */
     public void onResized(SurfaceControl.Transaction t, Runnable animFinishedCallback) {
         if (mScreenshot != null) {
+            if (mScreenshotAnimator != null && mScreenshotAnimator.isRunning()) {
+                mScreenshotAnimator.cancel();
+            }
+
             t.setPosition(mScreenshot, mOffsetX, mOffsetY);
 
             final SurfaceControl.Transaction animT = new SurfaceControl.Transaction();
-            final ValueAnimator va = ValueAnimator.ofFloat(1, 0);
-            va.addUpdateListener(valueAnimator -> {
+            mScreenshotAnimator = ValueAnimator.ofFloat(1, 0);
+            mScreenshotAnimator.addUpdateListener(valueAnimator -> {
                 final float progress = (float) valueAnimator.getAnimatedValue();
                 animT.setAlpha(mScreenshot, progress);
                 animT.apply();
             });
-            va.addListener(new AnimatorListenerAdapter() {
+            mScreenshotAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationStart(Animator animation) {
                     mRunningAnimationCount++;
@@ -266,7 +280,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
                     }
                 }
             });
-            va.start();
+            mScreenshotAnimator.start();
         }
 
         if (mResizingIconView == null) {
@@ -292,9 +306,6 @@ public class SplitDecorManager extends WindowlessWindowManager {
                 });
                 return;
             }
-
-            // If fade-in animation is running, cancel it and re-run fade-out one.
-            mFadeAnimator.cancel();
         }
         if (mShown) {
             fadeOutDecor(animFinishedCallback);
@@ -332,6 +343,11 @@ public class SplitDecorManager extends WindowlessWindowManager {
      * directly. */
     public void fadeOutDecor(Runnable finishedCallback) {
         if (mShown) {
+            // If previous animation is running, just cancel it.
+            if (mFadeAnimator != null && mFadeAnimator.isRunning()) {
+                mFadeAnimator.cancel();
+            }
+
             startFadeAnimation(false /* show */, true, finishedCallback);
             mShown = false;
         } else {
