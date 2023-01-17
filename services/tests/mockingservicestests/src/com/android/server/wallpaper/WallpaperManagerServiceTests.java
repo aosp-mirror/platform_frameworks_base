@@ -306,12 +306,13 @@ public class WallpaperManagerServiceTests {
         verifyLastWallpaperData(testUserId, sDefaultWallpaperComponent);
         verifyCurrentSystemData(testUserId);
 
-        spyOn(mService.mLastWallpaper.connection);
-        doReturn(true).when(mService.mLastWallpaper.connection).isUsableDisplay(any());
+        spyOn(mService.mWallpaperDisplayHelper);
+        doReturn(true).when(mService.mWallpaperDisplayHelper)
+                .isUsableDisplay(any(Display.class), mService.mLastWallpaper.connection.mClientUid);
         mService.mLastWallpaper.connection.attachEngine(mock(IWallpaperEngine.class),
                 DEFAULT_DISPLAY);
 
-        WallpaperManagerService.WallpaperConnection.DisplayConnector connector =
+        WallpaperManagerService.DisplayConnector connector =
                 mService.mLastWallpaper.connection.getDisplayConnectorOrCreate(DEFAULT_DISPLAY);
         mService.setWallpaperComponent(sDefaultWallpaperComponent, FLAG_SYSTEM, testUserId);
 
@@ -521,7 +522,7 @@ public class WallpaperManagerServiceTests {
     }
 
     private void verifyDisplayData() {
-        mService.forEachDisplayData(data -> {
+        mService.mWallpaperDisplayHelper.forEachDisplayData(data -> {
             assertTrue("Display width must larger than maximum screen size",
                     data.mWidth >= DISPLAY_SIZE_DIMENSION);
             assertTrue("Display height must larger than maximum screen size",

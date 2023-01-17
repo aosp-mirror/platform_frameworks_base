@@ -125,7 +125,9 @@ public class TvPipBoundsController {
             cancelScheduledPlacement();
             applyPlacement(placement, shouldStash, animationDuration);
         } else {
-            applyPlacementBounds(mCurrentPlacementBounds, animationDuration);
+            if (mCurrentPlacementBounds != null) {
+                applyPlacementBounds(mCurrentPlacementBounds, animationDuration);
+            }
             schedulePinnedStackPlacement(placement, animationDuration);
         }
     }
@@ -188,7 +190,7 @@ public class TvPipBoundsController {
         applyPlacementBounds(bounds, animationDuration);
     }
 
-    void onPipDismissed() {
+    void reset() {
         mCurrentPlacementBounds = null;
         mPipTargetBounds = null;
         cancelScheduledPlacement();

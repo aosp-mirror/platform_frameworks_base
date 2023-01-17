@@ -123,7 +123,7 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
 
         // TODO: ResultReceiver for IME.
         // TODO: Set mShowOnNextImeRender to automatically show IME and guard it with a flag.
-        ImeTracker.get().onProgress(statsToken,
+        ImeTracker.forLogging().onProgress(statsToken,
                 ImeTracker.PHASE_CLIENT_INSETS_CONSUMER_REQUEST_SHOW);
 
         if (getControl() == null) {
@@ -164,12 +164,13 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         //  - we do already have one, but we have control and use the passed in token
         //      for the insets animation already.
         if (statsToken == null || getControl() != null) {
-            statsToken = ImeTracker.get().onRequestHide(null /* component */, Process.myUid(),
+            statsToken = ImeTracker.forLogging().onRequestHide(null /* component */,
+                    Process.myUid(),
                     ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
                     SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API);
         }
 
-        ImeTracker.get().onProgress(statsToken,
+        ImeTracker.forLogging().onProgress(statsToken,
                 ImeTracker.PHASE_CLIENT_INSETS_CONSUMER_NOTIFY_HIDDEN);
 
         getImm().notifyImeHidden(mController.getHost().getWindowToken(), statsToken);

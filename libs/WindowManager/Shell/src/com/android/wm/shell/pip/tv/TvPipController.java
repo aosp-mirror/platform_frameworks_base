@@ -450,18 +450,6 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         mPipMediaController.registerSessionListenerForCurrentUser();
     }
 
-    private void checkIfPinnedTaskAppeared() {
-        final TaskInfo pinnedTask = getPinnedTaskInfo();
-        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "%s: checkIfPinnedTaskAppeared(), task=%s", TAG, pinnedTask);
-        if (pinnedTask == null || pinnedTask.topActivity == null) return;
-        mPinnedTaskId = pinnedTask.taskId;
-
-        mPipMediaController.onActivityPinned();
-        mActionBroadcastReceiver.register();
-        mPipNotificationController.show(pinnedTask.topActivity.getPackageName());
-    }
-
     private void checkIfPinnedTaskIsGone() {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "%s: onTaskStackChanged()", TAG);
@@ -482,7 +470,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
 
         mTvPipMenuController.closeMenu();
         mTvPipBoundsState.resetTvPipState();
-        mTvPipBoundsController.onPipDismissed();
+        mTvPipBoundsController.reset();
         setState(STATE_NO_PIP);
         mPinnedTaskId = NONEXISTENT_TASK_ID;
     }
@@ -537,7 +525,16 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         taskStackListener.addListener(new TaskStackListenerCallback() {
             @Override
             public void onActivityPinned(String packageName, int userId, int taskId, int stackId) {
-                checkIfPinnedTaskAppeared();
+                final TaskInfo pinnedTask = getPinnedTaskInfo();
+                ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "%s: onActivityPinned(), task=%s", TAG, pinnedTask);
+                if (pinnedTask == null || pinnedTask.topActivity == null) return;
+                mPinnedTaskId = pinnedTask.taskId;
+
+                mPipMediaController.onActivityPinned();
+                mActionBroadcastReceiver.register();
+                mPipNotificationController.show(pinnedTask.topActivity.getPackageName());
+                mTvPipBoundsController.reset();
                 mAppOpsListener.onActivityPinned(packageName);
             }
 

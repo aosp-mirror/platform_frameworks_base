@@ -7396,7 +7396,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verify(getServices().alarmManager, times(1)).set(anyInt(), eq(PROFILE_OFF_DEADLINE), any());
         // Now the user should see a warning notification.
         verify(getServices().notificationManager, times(1))
-                .notify(anyInt(), any());
+                .notifyAsUser(any(), anyInt(), any(), any());
         // Apps shouldn't be suspended yet.
         verifyZeroInteractions(getServices().ipackageManager);
         clearInvocations(getServices().alarmManager);
@@ -7410,7 +7410,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verifyZeroInteractions(getServices().alarmManager);
         // Now the user should see a notification about suspended apps.
         verify(getServices().notificationManager, times(1))
-                .notify(anyInt(), any());
+                .notifyAsUser(any(), anyInt(), any(), any());
         // Verify that the apps are suspended.
         verify(getServices().ipackageManager, times(1)).setPackagesSuspendedAsUser(
                 any(), eq(true), any(), any(), any(), any(), anyInt());

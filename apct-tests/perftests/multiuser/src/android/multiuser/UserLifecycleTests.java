@@ -15,7 +15,11 @@
  */
 package android.multiuser;
 
+import static android.app.WallpaperManager.FLAG_LOCK;
+import static android.app.WallpaperManager.FLAG_SYSTEM;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 import android.annotation.NonNull;
@@ -25,6 +29,7 @@ import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
 import android.app.WaitResult;
+import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IIntentReceiver;
@@ -34,6 +39,7 @@ import android.content.IntentSender;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IProgressListener;
@@ -59,6 +65,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -114,6 +121,7 @@ public class UserLifecycleTests {
     private ActivityManager mAm;
     private IActivityManager mIam;
     private PackageManager mPm;
+    private WallpaperManager mWm;
     private ArrayList<Integer> mUsersToRemove;
     private boolean mHasManagedUserFeature;
     private BroadcastWaiter mBroadcastWaiter;
@@ -132,6 +140,7 @@ public class UserLifecycleTests {
         mIam = ActivityManager.getService();
         mUsersToRemove = new ArrayList<>();
         mPm = context.getPackageManager();
+        mWm = WallpaperManager.getInstance(context);
         mHasManagedUserFeature = mPm.hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS);
         mBroadcastWaiter = new BroadcastWaiter(context, TAG, TIMEOUT_IN_SECOND,
                 Intent.ACTION_USER_STARTED,
@@ -241,24 +250,27 @@ public class UserLifecycleTests {
 
     /**
      * Tests starting an uninitialized user, with wait times in between iterations.
-     * Measures the time until ACTION_USER_STARTED is received.
+     * Measures the time until the ProgressListener callback.
      */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void startUser_realistic() throws RemoteException {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int userId = createUserNoFlags();
+            final ProgressWaiter waiter = new ProgressWaiter();
 
             waitForBroadcastIdle();
-            runThenWaitForBroadcasts(userId, () -> {
-                mRunner.resumeTiming();
-                Log.i(TAG, "Starting timer");
+            mRunner.resumeTiming();
+            Log.i(TAG, "Starting timer");
 
-                mIam.startUserInBackground(userId);
-            }, Intent.ACTION_USER_STARTED);
+            final boolean success = mIam.startUserInBackgroundWithListener(userId, waiter)
+                    && waiter.waitForFinish(TIMEOUT_IN_SECOND * 1000);
 
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
+
+            assertTrue("Error: could not start user " + userId, success);
+
             removeUser(userId);
             waitCoolDownPeriod();
             mRunner.resumeTimingForNextIteration();
@@ -372,6 +384,32 @@ public class UserLifecycleTests {
         removeUser(testUser);
     }
 
+    /** Tests switching to a previously-started, but no-longer-running, user with wait
+     * times between iterations and using a static wallpaper */
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
+    public void switchUser_stopped_staticWallpaper() throws RemoteException {
+        assumeTrue(mWm.isWallpaperSupported() && mWm.isSetWallpaperAllowed());
+        final int startUser = ActivityManager.getCurrentUser();
+        final int testUser = initializeNewUserAndSwitchBack(/* stopNewUser */ true,
+                /* useStaticWallpaper */true);
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            waitCoolDownPeriod();
+            Log.d(TAG, "Starting timer");
+            mRunner.resumeTiming();
+
+            switchUser(testUser);
+
+            mRunner.pauseTiming();
+            Log.d(TAG, "Stopping timer");
+            switchUserNoCheck(startUser);
+            stopUserAfterWaitingForBroadcastIdle(testUser, true);
+            attestFalse("Failed to stop user " + testUser, mAm.isUserRunning(testUser));
+            mRunner.resumeTimingForNextIteration();
+        }
+        removeUser(testUser);
+    }
+
     /** Tests switching to an already-created already-running non-owner background user. */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void switchUser_running() throws RemoteException {
@@ -398,6 +436,31 @@ public class UserLifecycleTests {
     public void switchUser_running_realistic() throws RemoteException {
         final int startUser = ActivityManager.getCurrentUser();
         final int testUser = initializeNewUserAndSwitchBack(/* stopNewUser */ false);
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            waitCoolDownPeriod();
+            Log.d(TAG, "Starting timer");
+            mRunner.resumeTiming();
+
+            switchUser(testUser);
+
+            mRunner.pauseTiming();
+            Log.d(TAG, "Stopping timer");
+            waitForBroadcastIdle();
+            switchUserNoCheck(startUser);
+            mRunner.resumeTimingForNextIteration();
+        }
+        removeUser(testUser);
+    }
+
+    /** Tests switching to an already-created already-running non-owner background user, with wait
+     * times between iterations and using a default static wallpaper */
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
+    public void switchUser_running_staticWallpaper() throws RemoteException {
+        assumeTrue(mWm.isWallpaperSupported() && mWm.isSetWallpaperAllowed());
+        final int startUser = ActivityManager.getCurrentUser();
+        final int testUser = initializeNewUserAndSwitchBack(/* stopNewUser */ false,
+                /* useStaticWallpaper */ true);
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             waitCoolDownPeriod();
@@ -843,20 +906,37 @@ public class UserLifecycleTests {
         waitForLatch("Failed to properly stop user " + userId, latch);
     }
 
+    private int initializeNewUserAndSwitchBack(boolean stopNewUser) throws RemoteException {
+        return initializeNewUserAndSwitchBack(stopNewUser, /* useStaticWallpaper */ false);
+    }
+
     /**
      * Creates a user and waits for its ACTION_USER_UNLOCKED.
      * Then switches to back to the original user and waits for its switchUser() to finish.
      *
      * @param stopNewUser whether to stop the new user after switching to otherUser.
+     * @param useStaticWallpaper whether to switch the wallpaper of the default user to a static.
      * @return userId of the newly created user.
      */
-    private int initializeNewUserAndSwitchBack(boolean stopNewUser) throws RemoteException {
+    private int initializeNewUserAndSwitchBack(boolean stopNewUser, boolean useStaticWallpaper)
+            throws RemoteException {
         final int origUser = mAm.getCurrentUser();
         // First, create and switch to testUser, waiting for its ACTION_USER_UNLOCKED
         final int testUser = createUserNoFlags();
         runThenWaitForBroadcasts(testUser, () -> {
             mAm.switchUser(testUser);
         }, Intent.ACTION_USER_UNLOCKED, Intent.ACTION_MEDIA_MOUNTED);
+
+        if (useStaticWallpaper) {
+            assertTrue(mWm.isWallpaperSupported() && mWm.isSetWallpaperAllowed());
+            try {
+                Bitmap blank = Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8);
+                mWm.setBitmap(blank, /* visibleCropHint */ null, /* allowBackup */ true,
+                        /* which */ FLAG_SYSTEM | FLAG_LOCK, testUser);
+            } catch (IOException exception) {
+                fail("Unable to set static wallpaper.");
+            }
+        }
 
         // Second, switch back to origUser, waiting merely for switchUser() to finish
         switchUser(origUser);

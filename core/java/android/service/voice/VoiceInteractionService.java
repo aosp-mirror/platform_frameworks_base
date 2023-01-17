@@ -95,6 +95,20 @@ public class VoiceInteractionService extends Service {
     public static final String SERVICE_META_DATA = "android.voice_interaction";
 
     /**
+     * Bundle key used to specify the id when the system prepares to show session. It increases for
+     * each request.
+     * <p>
+     * Type: int
+     * </p>
+     * @see #showSession(Bundle, int)
+     * @see #onPrepareToShowSession(Bundle, int)
+     * @see #onShowSessionFailed(Bundle)
+     * @see VoiceInteractionSession#onShow(Bundle, int)
+     * @see VoiceInteractionSession#show(Bundle, int)
+     */
+    public static final String KEY_SHOW_SESSION_ID = "android.service.voice.SHOW_SESSION_ID";
+
+    /**
      * For apps targeting Build.VERSION_CODES.TRAMISU and above, implementors of this
      * service can create multiple AlwaysOnHotwordDetector instances in parallel. They will
      * also e ale to create a single SoftwareHotwordDetector in parallel with any other
@@ -170,10 +184,10 @@ public class VoiceInteractionService extends Service {
         }
 
         @Override
-        public void showSessionFailed() {
+        public void showSessionFailed(@NonNull Bundle args) {
             Handler.getMain().executeOrSendMessage(PooledLambda.obtainMessage(
                     VoiceInteractionService::onShowSessionFailed,
-                    VoiceInteractionService.this));
+                    VoiceInteractionService.this, args));
         }
     };
 
@@ -205,9 +219,10 @@ public class VoiceInteractionService extends Service {
      * bind the session service.
      *
      * @param args  The arguments that were supplied to {@link #showSession(Bundle, int)}.
+     *              It always includes {@link #KEY_SHOW_SESSION_ID}.
      * @param flags The show flags originally provided to {@link #showSession(Bundle, int)}.
      * @see #showSession(Bundle, int)
-     * @see #onShowSessionFailed()
+     * @see #onShowSessionFailed(Bundle)
      * @see VoiceInteractionSession#onShow(Bundle, int)
      * @see VoiceInteractionSession#show(Bundle, int)
      */
@@ -217,12 +232,14 @@ public class VoiceInteractionService extends Service {
     /**
      * Called when the show session failed. E.g. When the system bound the session service failed.
      *
+     * @param args Additional info about the show session attempt that failed. For now, includes
+     *             {@link #KEY_SHOW_SESSION_ID}.
      * @see #showSession(Bundle, int)
      * @see #onPrepareToShowSession(Bundle, int)
      * @see VoiceInteractionSession#onShow(Bundle, int)
      * @see VoiceInteractionSession#show(Bundle, int)
      */
-    public void onShowSessionFailed() {
+    public void onShowSessionFailed(@NonNull Bundle args) {
     }
 
     /**
@@ -719,8 +736,8 @@ public class VoiceInteractionService extends Service {
 
     private void onHotwordDetectorDestroyed(@NonNull HotwordDetector detector) {
         synchronized (mLock) {
-            if (mActiveVisualQueryDetector!= null &&
-                    detector == mActiveVisualQueryDetector.getInitializationDelegate()) {
+            if (mActiveVisualQueryDetector != null
+                    && detector == mActiveVisualQueryDetector.getInitializationDelegate()) {
                 mActiveVisualQueryDetector = null;
             }
             mActiveDetectors.remove(detector);

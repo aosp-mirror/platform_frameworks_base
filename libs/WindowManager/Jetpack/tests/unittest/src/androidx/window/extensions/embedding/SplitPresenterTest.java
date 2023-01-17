@@ -79,6 +79,7 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
+import androidx.window.extensions.core.util.function.Function;
 import androidx.window.extensions.layout.WindowLayoutComponentImpl;
 import androidx.window.extensions.layout.WindowLayoutInfo;
 
@@ -563,10 +564,10 @@ public class SplitPresenterTest {
                                 SplitAttributes.SplitType.RatioSplitType.splitEqually()
                         )
                 ).build();
+        final Function<SplitAttributesCalculatorParams, SplitAttributes> calculator =
+                params -> splitAttributes;
 
-        mController.setSplitAttributesCalculator(params -> {
-            return splitAttributes;
-        });
+        mController.setSplitAttributesCalculator(calculator);
 
         assertEquals(splitAttributes, mPresenter.computeSplitAttributes(taskProperties,
                 splitPairRule, null /* minDimensionsPair */));

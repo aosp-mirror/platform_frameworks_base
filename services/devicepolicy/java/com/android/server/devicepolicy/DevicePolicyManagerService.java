@@ -1092,13 +1092,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // (ACTION_DATE_CHANGED), or when manual clock adjustment is made
                 // (ACTION_TIME_CHANGED)
                 updateSystemUpdateFreezePeriodsRecord(/* saveIfChanged */ true);
-                final int userId = getManagedUserId(UserHandle.USER_SYSTEM);
+                final int userId = getManagedUserId(mUserManager.getMainUser().getIdentifier());
                 if (userId >= 0) {
                     updatePersonalAppsSuspension(userId, mUserManager.isUserUnlocked(userId));
                 }
             } else if (ACTION_PROFILE_OFF_DEADLINE.equals(action)) {
                 Slogf.i(LOG_TAG, "Profile off deadline alarm was triggered");
-                final int userId = getManagedUserId(UserHandle.USER_SYSTEM);
+                final int userId = getManagedUserId(mUserManager.getMainUser().getIdentifier());
                 if (userId >= 0) {
                     updatePersonalAppsSuspension(userId, mUserManager.isUserUnlocked(userId));
                 } else {
@@ -8598,9 +8598,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkArgument(admin != null);
 
         final CallerIdentity caller = getCallerIdentity();
-        // Cannot be called while holding the lock:
-        final boolean hasIncompatibleAccountsOrNonAdb =
-                hasIncompatibleAccountsOrNonAdbNoLock(caller, userId, admin);
+
+        boolean hasIncompatibleAccountsOrNonAdb =
+                !isAdb(caller) || hasIncompatibleAccountsOnAnyUser();
+
+        if (!hasIncompatibleAccountsOrNonAdb) {
+            synchronized (getLockObject()) {
+                if (!isAdminTestOnlyLocked(admin, userId) && hasAccountsOnAnyUser()) {
+                    Slogf.w(LOG_TAG,
+                            "Non test-only owner can't be installed with existing accounts.");
+                    return false;
+                }
+            }
+        }
+
         synchronized (getLockObject()) {
             enforceCanSetDeviceOwnerLocked(caller, admin, userId, hasIncompatibleAccountsOrNonAdb);
             Preconditions.checkArgument(isPackageInstalledForUser(admin.getPackageName(), userId),
@@ -14746,14 +14757,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (isAdb) {
             // If shell command runs after user setup completed check device status. Otherwise, OK.
             if (mIsWatch || hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
-                // In non-headless system user mode, DO can be setup only if
-                // there's no non-system user.
-                // In headless system user mode, DO can be setup only if there are
-                // two users: the headless system user and the foreground user.
-                // If there could be multiple foreground users, this constraint should be modified.
+                // DO can be setup only if there are no users which are neither created by default
+                // nor marked as FOR_TESTING
 
-                int maxNumberOfExistingUsers = isHeadlessSystemUserMode ? 2 : 1;
-                if (mUserManager.getUserCount() > maxNumberOfExistingUsers) {
+                if (nonTestNonPrecreatedUsersExist()) {
                     return STATUS_NONSYSTEM_USER_EXISTS;
                 }
 
@@ -14781,6 +14788,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             return STATUS_OK;
         }
+    }
+
+    /**
+     * True if there are any users on the device which were not setup by default (1 usually, 2 for
+     * devices with a headless system user) and also are not marked as FOR_TESTING.
+     */
+    private boolean nonTestNonPrecreatedUsersExist() {
+        int allowedUsers = UserManager.isHeadlessSystemUserMode() ? 2 : 1;
+        return mUserManagerInternal.getUsers(/* excludeDying= */ true).stream()
+                .filter(u -> !u.isForTesting())
+                .count() > allowedUsers;
     }
 
     private int checkDeviceOwnerProvisioningPreCondition(@UserIdInt int callingUserId) {
@@ -16054,8 +16072,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         wtfIfInLock();
 
         return mInjector.binderWithCleanCallingIdentity(() -> {
-            final AccountManager am = AccountManager.get(mContext);
-            final Account accounts[] = am.getAccountsAsUser(userId);
+            AccountManager am =
+                    mContext.createContextAsUser(UserHandle.of(userId), /* flags= */ 0)
+                            .getSystemService(AccountManager.class);
+            Account[] accounts = am.getAccounts();
             if (accounts.length == 0) {
                 return false;
             }
@@ -18169,8 +18189,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         .addAction(turnProfileOnButton)
                         .addExtras(extras)
                         .build();
-        mInjector.getNotificationManager().notify(
-                SystemMessage.NOTE_PERSONAL_APPS_SUSPENDED, notification);
+
+        mInjector.getNotificationManager().notifyAsUser(
+                null, SystemMessage.NOTE_PERSONAL_APPS_SUSPENDED, notification,
+                UserHandle.of(getProfileParentId(profileUserId)));
     }
 
     private String getPersonalAppSuspensionButtonText() {
@@ -19537,6 +19559,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
+    public void resetShouldAllowBypassingDevicePolicyManagementRoleQualificationState() {
+        Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_ROLE_HOLDERS));
+        setBypassDevicePolicyManagementRoleQualificationStateInternal(
+                /* currentRoleHolder= */ null, /* allowBypass= */ false);
+    }
+
+    @Override
     public boolean shouldAllowBypassingDevicePolicyManagementRoleQualification() {
         Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(
                 android.Manifest.permission.MANAGE_ROLE_HOLDERS));
@@ -19550,15 +19580,51 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private boolean shouldAllowBypassingDevicePolicyManagementRoleQualificationInternal() {
-        if (mUserManager.getUserCount() > 1) {
+        if (nonTestNonPrecreatedUsersExist()) {
             return false;
         }
-        AccountManager am = AccountManager.get(mContext);
-        Account[] accounts = am.getAccounts();
-        if (accounts.length == 0) {
-            return true;
+
+
+        return !hasIncompatibleAccountsOnAnyUser();
+    }
+
+    private boolean hasAccountsOnAnyUser() {
+        long callingIdentity = Binder.clearCallingIdentity();
+        try {
+            for (UserInfo user : mUserManagerInternal.getUsers(/* excludeDying= */ true)) {
+                AccountManager am = mContext.createContextAsUser(
+                                UserHandle.of(user.id), /* flags= */ 0)
+                        .getSystemService(AccountManager.class);
+                Account[] accounts = am.getAccounts();
+                if (accounts.length != 0) {
+                    return true;
+                }
+            }
+
+            return false;
+        } finally {
+            Binder.restoreCallingIdentity(callingIdentity);
         }
-        return !hasIncompatibleAccounts(am, accounts);
+    }
+
+    private boolean hasIncompatibleAccountsOnAnyUser() {
+        long callingIdentity = Binder.clearCallingIdentity();
+        try {
+            for (UserInfo user : mUserManagerInternal.getUsers(/* excludeDying= */ true)) {
+                AccountManager am = mContext.createContextAsUser(
+                        UserHandle.of(user.id), /* flags= */ 0)
+                        .getSystemService(AccountManager.class);
+                Account[] accounts = am.getAccounts();
+
+                if (hasIncompatibleAccounts(am, accounts)) {
+                    return true;
+                }
+            }
+
+            return false;
+        } finally {
+            Binder.restoreCallingIdentity(callingIdentity);
+        }
     }
 
     private void setBypassDevicePolicyManagementRoleQualificationStateInternal(

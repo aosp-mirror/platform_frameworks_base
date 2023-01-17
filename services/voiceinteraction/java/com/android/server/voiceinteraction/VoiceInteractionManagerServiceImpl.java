@@ -21,6 +21,7 @@ import static android.app.ActivityManager.START_ASSISTANT_NOT_ACTIVE_SESSION;
 import static android.app.ActivityManager.START_VOICE_HIDDEN_SESSION;
 import static android.app.ActivityManager.START_VOICE_NOT_ACTIVE_SESSION;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
+import static android.service.voice.VoiceInteractionService.KEY_SHOW_SESSION_ID;
 
 import static com.android.server.policy.PhoneWindowManager.SYSTEM_DIALOG_REASON_ASSIST;
 
@@ -255,13 +256,17 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
                 /* direct= */ true);
     }
 
-    public boolean showSessionLocked(@NonNull Bundle args, int flags,
+    public boolean showSessionLocked(@Nullable Bundle args, int flags,
             @Nullable String attributionTag,
             @Nullable IVoiceInteractionSessionShowCallback showCallback,
             @Nullable IBinder activityToken) {
+        final int sessionId = mServiceStub.getNextShowSessionId();
+        final Bundle newArgs = args == null ? new Bundle() : args;
+        newArgs.putInt(KEY_SHOW_SESSION_ID, sessionId);
+
         try {
             if (mService != null) {
-                mService.prepareToShowSession(args, flags);
+                mService.prepareToShowSession(newArgs, flags);
             }
         } catch (RemoteException e) {
             Slog.w(TAG, "RemoteException while calling prepareToShowSession", e);
@@ -275,7 +280,9 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         if (!mActiveSession.mBound) {
             try {
                 if (mService != null) {
-                    mService.showSessionFailed();
+                    Bundle failedArgs = new Bundle();
+                    failedArgs.putInt(KEY_SHOW_SESSION_ID, sessionId);
+                    mService.showSessionFailed(failedArgs);
                 }
             } catch (RemoteException e) {
                 Slog.w(TAG, "RemoteException while calling showSessionFailed", e);
@@ -300,7 +307,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         } else {
             visibleActivities = allVisibleActivities;
         }
-        return mActiveSession.showLocked(args, flags, attributionTag, mDisabledShowContext,
+        return mActiveSession.showLocked(newArgs, flags, attributionTag, mDisabledShowContext,
                 showCallback, visibleActivities);
     }
 
@@ -672,6 +679,21 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         if (!isIsolatedProcessLocked(visualQueryDetectionServiceInfo)) {
             Slog.w(TAG, "Visual query detection service not in isolated process");
             throw new IllegalStateException("Visual query detection not in isolated process");
+        }
+        if (!Manifest.permission.BIND_VISUAL_QUERY_DETECTION_SERVICE.equals(
+                visualQueryDetectionServiceInfo.permission)) {
+            Slog.w(TAG, "Visual query detection does not require permission "
+                    + Manifest.permission.BIND_VISUAL_QUERY_DETECTION_SERVICE);
+            throw new SecurityException("Visual query detection does not require permission "
+                    + Manifest.permission.BIND_VISUAL_QUERY_DETECTION_SERVICE);
+        }
+        if (mContext.getPackageManager().checkPermission(
+                Manifest.permission.BIND_VISUAL_QUERY_DETECTION_SERVICE,
+                mInfo.getServiceInfo().packageName) == PackageManager.PERMISSION_GRANTED) {
+            Slog.w(TAG, "Voice interaction service should not hold permission "
+                    + Manifest.permission.BIND_VISUAL_QUERY_DETECTION_SERVICE);
+            throw new SecurityException("Voice interaction service should not hold permission "
+                    + Manifest.permission.BIND_VISUAL_QUERY_DETECTION_SERVICE);
         }
         if (sharedMemory != null && !sharedMemory.setProtect(OsConstants.PROT_READ)) {
             Slog.w(TAG, "Can't set sharedMemory to be read-only");

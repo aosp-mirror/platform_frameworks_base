@@ -16,24 +16,36 @@
 
 package android.view.inputmethod;
 
+import static com.android.internal.inputmethod.InputMethodDebug.softInputDisplayReasonToString;
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_IME_INSETS_ANIMATION;
+import static com.android.internal.util.LatencyTracker.ACTION_REQUEST_IME_HIDDEN;
+import static com.android.internal.util.LatencyTracker.ACTION_REQUEST_IME_SHOWN;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
+import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemProperties;
 import android.util.Log;
+import android.view.InsetsController.AnimationType;
+import android.view.SurfaceControl;
 
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
+import com.android.internal.jank.InteractionJankMonitor;
+import com.android.internal.jank.InteractionJankMonitor.Configuration;
+import com.android.internal.util.LatencyTracker;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -385,13 +397,33 @@ public interface ImeTracker {
     void onHidden(@Nullable Token token);
 
     /**
-     * Get the singleton instance of this class.
+     * Get the singleton request tracker instance.
      *
-     * @return the singleton instance of this class
+     * @return the singleton request tracker instance
      */
     @NonNull
-    static ImeTracker get() {
+    static ImeTracker forLogging() {
         return LOGGER;
+    }
+
+    /**
+     * Get the singleton jank tracker instance.
+     *
+     * @return the singleton jank tracker instance
+     */
+    @NonNull
+    static ImeJankTracker forJank() {
+        return JANK_TRACKER;
+    }
+
+    /**
+     * Get the singleton latency tracker instance.
+     *
+     * @return the singleton latency tracker instance
+     */
+    @NonNull
+    static ImeLatencyTracker forLatency() {
+        return LATENCY_TRACKER;
     }
 
     /** The singleton IME tracker instance. */
@@ -488,6 +520,12 @@ public interface ImeTracker {
             Log.i(TAG, token.mTag + ": onHidden");
         }
     };
+
+    /** The singleton IME tracker instance for instrumenting jank metrics. */
+    ImeJankTracker JANK_TRACKER = new ImeJankTracker();
+
+    /** The singleton IME tracker instance for instrumenting latency metrics. */
+    ImeLatencyTracker LATENCY_TRACKER = new ImeLatencyTracker();
 
     /** A token that tracks the progress of an IME request. */
     class Token implements Parcelable {
@@ -590,6 +628,155 @@ public interface ImeTracker {
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+    /**
+     * Context related to {@link InteractionJankMonitor}.
+     */
+    interface InputMethodJankContext {
+        /**
+         * @return a context associated with a display
+         */
+        Context getDisplayContext();
+
+        /**
+         * @return a SurfaceControl is going to be monitored
+         */
+        SurfaceControl getTargetSurfaceControl();
+
+        /**
+         * @return the package name of the host
+         */
+        String getHostPackageName();
+    }
+
+    /**
+     * Context related to {@link LatencyTracker}.
+     */
+    interface InputMethodLatencyContext {
+        /**
+         * @return a context associated with current application
+         */
+        Context getAppContext();
+    }
+
+    /**
+     * A tracker instance which is in charge of communicating with {@link InteractionJankMonitor}.
+     */
+    final class ImeJankTracker {
+
+        private ImeJankTracker() {
+        }
+
+        /**
+         * Called when the animation, which is going to be monitored, starts.
+         *
+         * @param jankContext context which is needed by {@link InteractionJankMonitor}
+         * @param animType {@link AnimationType}
+         * @param useSeparatedThread {@code true} if the animation is handled by the app,
+         *                           {@code false} if the animation will be scheduled on the
+         *                           {@link android.view.InsetsAnimationThread}
+         */
+        public void onRequestAnimation(@NonNull InputMethodJankContext jankContext,
+                @AnimationType int animType, boolean useSeparatedThread) {
+            if (jankContext.getDisplayContext() == null
+                    || jankContext.getTargetSurfaceControl() == null) {
+                return;
+            }
+            final Configuration.Builder builder = Configuration.Builder.withSurface(
+                            CUJ_IME_INSETS_ANIMATION,
+                            jankContext.getDisplayContext(),
+                            jankContext.getTargetSurfaceControl())
+                    .setTag(String.format(Locale.US, "%d@%d@%s", animType,
+                            useSeparatedThread ? 0 : 1, jankContext.getHostPackageName()));
+            InteractionJankMonitor.getInstance().begin(builder);
+        }
+
+        /**
+         * Called when the animation, which is going to be monitored, cancels.
+         */
+        public void onCancelAnimation() {
+            InteractionJankMonitor.getInstance().cancel(CUJ_IME_INSETS_ANIMATION);
+        }
+
+        /**
+         * Called when the animation, which is going to be monitored, ends.
+         */
+        public void onFinishAnimation() {
+            InteractionJankMonitor.getInstance().end(CUJ_IME_INSETS_ANIMATION);
+        }
+    }
+
+    /**
+     * A tracker instance which is in charge of communicating with {@link LatencyTracker}.
+     */
+    final class ImeLatencyTracker {
+
+        private ImeLatencyTracker() {
+        }
+
+        private boolean shouldMonitorLatency(@SoftInputShowHideReason int reason) {
+            return reason == SoftInputShowHideReason.SHOW_SOFT_INPUT
+                    || reason == SoftInputShowHideReason.HIDE_SOFT_INPUT
+                    || reason == SoftInputShowHideReason.SHOW_SOFT_INPUT_BY_INSETS_API
+                    || reason == SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API
+                    || reason == SoftInputShowHideReason.SHOW_SOFT_INPUT_FROM_IME
+                    || reason == SoftInputShowHideReason.HIDE_SOFT_INPUT_FROM_IME;
+        }
+
+        public void onRequestShow(@Nullable Token token, @Origin int origin,
+                @SoftInputShowHideReason int reason,
+                @NonNull InputMethodLatencyContext latencyContext) {
+            if (!shouldMonitorLatency(reason)) return;
+            LatencyTracker.getInstance(latencyContext.getAppContext())
+                    .onActionStart(
+                            ACTION_REQUEST_IME_SHOWN,
+                            softInputDisplayReasonToString(reason));
+        }
+
+        public void onRequestHide(@Nullable Token token, @Origin int origin,
+                @SoftInputShowHideReason int reason,
+                @NonNull InputMethodLatencyContext latencyContext) {
+            if (!shouldMonitorLatency(reason)) return;
+            LatencyTracker.getInstance(latencyContext.getAppContext())
+                    .onActionStart(
+                            ACTION_REQUEST_IME_HIDDEN,
+                            softInputDisplayReasonToString(reason));
+        }
+
+        public void onShowFailed(@Nullable Token token, @Phase int phase,
+                @NonNull InputMethodLatencyContext latencyContext) {
+            onShowCancelled(token, phase, latencyContext);
+        }
+
+        public void onHideFailed(@Nullable Token token, @Phase int phase,
+                @NonNull InputMethodLatencyContext latencyContext) {
+            onHideCancelled(token, phase, latencyContext);
+        }
+
+        public void onShowCancelled(@Nullable Token token, @Phase int phase,
+                @NonNull InputMethodLatencyContext latencyContext) {
+            LatencyTracker.getInstance(latencyContext.getAppContext())
+                    .onActionCancel(ACTION_REQUEST_IME_SHOWN);
+        }
+
+        public void onHideCancelled(@Nullable Token token, @Phase int phase,
+                @NonNull InputMethodLatencyContext latencyContext) {
+            LatencyTracker.getInstance(latencyContext.getAppContext())
+                    .onActionCancel(ACTION_REQUEST_IME_HIDDEN);
+        }
+
+        public void onShown(@Nullable Token token,
+                @NonNull InputMethodLatencyContext latencyContext) {
+            LatencyTracker.getInstance(latencyContext.getAppContext())
+                    .onActionEnd(ACTION_REQUEST_IME_SHOWN);
+        }
+
+        public void onHidden(@Nullable Token token,
+                @NonNull InputMethodLatencyContext latencyContext) {
+            LatencyTracker.getInstance(latencyContext.getAppContext())
+                    .onActionEnd(ACTION_REQUEST_IME_HIDDEN);
         }
     }
 }
