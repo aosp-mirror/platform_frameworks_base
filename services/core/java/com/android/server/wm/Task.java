@@ -610,7 +610,7 @@ class Task extends TaskFragment {
      */
     ActivityRecord mChildPipActivity;
 
-    boolean mLastSurfaceShowing = true;
+    boolean mLastSurfaceShowing;
 
     boolean mAlignActivityLocaleWithTask = false;
 
@@ -4131,13 +4131,7 @@ class Task extends TaskFragment {
 
     @Override
     boolean showSurfaceOnCreation() {
-        if (mCreatedByOrganizer) {
-            // Tasks created by the organizer are default visible because they can synchronously
-            // update the leash before new children are added to the task.
-            return true;
-        }
-        // Organized tasks handle their own surface visibility
-        return !canBeOrganized();
+        return false;
     }
 
     @Override
