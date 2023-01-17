@@ -91,6 +91,7 @@ data class ActiveEntry (
 /** The name of the current screen. */
 enum class CreateScreenState {
   PASSKEY_INTRO,
+  MORE_ABOUT_PASSKEYS_INTRO,
   PROVIDER_SELECTION,
   CREATION_OPTION_SELECTION,
   MORE_OPTIONS_SELECTION,
