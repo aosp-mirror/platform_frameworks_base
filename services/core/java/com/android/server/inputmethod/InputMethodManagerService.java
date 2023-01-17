@@ -3350,15 +3350,16 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @BinderThread
     @Override
     public void reportPerceptibleAsync(IBinder windowToken, boolean perceptible) {
-        Objects.requireNonNull(windowToken, "windowToken must not be null");
-        synchronized (ImfLock.class) {
-            if (mCurFocusedWindow != windowToken || mCurPerceptible == perceptible) {
-                return;
+        Binder.withCleanCallingIdentity(() -> {
+            Objects.requireNonNull(windowToken, "windowToken must not be null");
+            synchronized (ImfLock.class) {
+                if (mCurFocusedWindow != windowToken || mCurPerceptible == perceptible) {
+                    return;
+                }
+                mCurPerceptible = perceptible;
+                updateSystemUiLocked();
             }
-            mCurPerceptible = perceptible;
-            Binder.withCleanCallingIdentity(() ->
-                    updateSystemUiLocked(mImeWindowVis, mBackDisposition));
-        }
+        });
     }
 
     @GuardedBy("ImfLock.class")
