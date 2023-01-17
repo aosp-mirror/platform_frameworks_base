@@ -24038,6 +24038,7 @@ package android.media {
     method @Nullable public android.os.Bundle getControlHints();
     method @NonNull public java.util.List<android.media.MediaRoute2Info> getDeselectableRoutes();
     method @NonNull public String getId();
+    method @NonNull public android.media.RoutingSessionInfo getRoutingSessionInfo();
     method @NonNull public java.util.List<android.media.MediaRoute2Info> getSelectableRoutes();
     method @NonNull public java.util.List<android.media.MediaRoute2Info> getSelectedRoutes();
     method public int getVolume();
