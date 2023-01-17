@@ -91,6 +91,8 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"താഴെയുള്ള അതിർത്തി <xliff:g id="PERCENT">%1$d</xliff:g> ശതമാനം"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"ഇടത് വശത്തെ അതിർത്തി <xliff:g id="PERCENT">%1$d</xliff:g> ശതമാനം"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"വലത് വശത്തെ അതിർത്തി <xliff:g id="PERCENT">%1$d</xliff:g> ശതമാനം"</string>
+    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"ഔദ്യോഗിക പ്രൊഫൈലിന്റെ സ്ക്രീന്‍ഷോട്ടുകൾ <xliff:g id="APP">%1$s</xliff:g> ആപ്പിൽ സംരക്ഷിച്ചു"</string>
+    <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"ഫയലുകൾ"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"സ്ക്രീൻ റെക്കോർഡർ"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"സ്ക്രീൻ റെക്കോർഡിംഗ് പ്രോസസുചെയ്യുന്നു"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ഒരു സ്ക്രീൻ റെക്കോർഡിംഗ് സെഷനായി നിലവിലുള്ള അറിയിപ്പ്"</string>
@@ -850,11 +852,12 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="SONG_NAME">%1$s</xliff:g> എന്ന ഗാനം <xliff:g id="APP_LABEL">%2$s</xliff:g> ആപ്പിൽ പ്ലേ ചെയ്യുക"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"പഴയപടിയാക്കുക"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> എന്നതിൽ പ്ലേ ചെയ്യാൻ അടുത്തേക്ക് നീക്കുക"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"ഇവിടെ പ്ലേ ചെയ്യാൻ <xliff:g id="DEVICENAME">%1$s</xliff:g> എന്നതിന് അടുത്തേക്ക് നീക്കുക"</string>
+    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
+    <skip />
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> എന്നതിൽ പ്ലേ ചെയ്യുന്നു"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"എന്തോ കുഴപ്പമുണ്ടായി. വീണ്ടും ശ്രമിക്കുക."</string>
-    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
-    <skip />
+    <string name="media_transfer_loading" msgid="5544017127027152422">"ലോഡ് ചെയ്യുന്നു"</string>
+    <string name="media_ttt_default_device_type" msgid="4457646436153370169">"ടാബ്‌ലെറ്റ്"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"നിഷ്‌ക്രിയം, ആപ്പ് പരിശോധിക്കൂ"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"കണ്ടെത്തിയില്ല"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"നിയന്ത്രണം ലഭ്യമല്ല"</string>
@@ -878,6 +881,7 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"വോളിയം"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"സ്‌പീക്കറുകളും ഡിസ്പ്ലേകളും"</string>
+    <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"നിർദ്ദേശിച്ച ഉപകരണങ്ങൾ"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ബ്രോഡ്‌കാസ്‌റ്റ് എങ്ങനെയാണ് പ്രവർത്തിക്കുന്നത്"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ബ്രോഡ്‌കാസ്റ്റ്"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"അനുയോജ്യമായ Bluetooth ഉപകരണങ്ങളോടെ സമീപമുള്ള ആളുകൾക്ക് നിങ്ങൾ ബ്രോഡ്‌കാസ്‌റ്റ് ചെയ്യുന്ന മീഡിയ കേൾക്കാനാകും"</string>
@@ -1015,5 +1019,8 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ഈ സ്ക്രീൻ ഓഫാകും"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ഫോൾഡ് ചെയ്യാവുന്ന ഉപകരണം അൺഫോൾഡ് ആകുന്നു"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ഫോൾഡ് ചെയ്യാവുന്ന ഉപകരണം, കറങ്ങുന്ന വിധത്തിൽ ഫ്ലിപ്പ് ആകുന്നു"</string>
-    <string name="stylus_battery_low" msgid="7134370101603167096">"സ്റ്റൈലസിന്റെ ബാറ്ററി ചാർജ് കുറവാണ്"</string>
+    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
+    <skip />
+    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
+    <skip />
 </resources>
