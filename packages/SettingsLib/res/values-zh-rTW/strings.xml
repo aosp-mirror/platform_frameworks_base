@@ -341,7 +341,7 @@
     <string name="debug_app_set" msgid="6599535090477753651">"偵錯應用程式：<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"選取應用程式"</string>
     <string name="no_application" msgid="9038334538870247690">"無"</string>
-    <string name="wait_for_debugger" msgid="7461199843335409809">"等待偵錯程式"</string>
+    <string name="wait_for_debugger" msgid="7461199843335409809">"等待偵錯工具"</string>
     <string name="wait_for_debugger_summary" msgid="6846330006113363286">"執行受偵錯的應用程式之前，先等待偵錯程序附加完成"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"輸入"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"繪圖"</string>
