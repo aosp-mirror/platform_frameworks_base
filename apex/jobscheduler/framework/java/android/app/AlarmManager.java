@@ -800,22 +800,12 @@ public class AlarmManager {
      * if {@code null} is passed as the {@code targetHandler} parameter.
      *
      * <p class="note"><strong>Note:</strong>
-     * Starting with {@link Build.VERSION_CODES#S}, apps targeting SDK level 31 or higher
-     * need to request the
-     * {@link Manifest.permission#SCHEDULE_EXACT_ALARM SCHEDULE_EXACT_ALARM} permission to use this
-     * API, unless the app is exempt from battery restrictions.
-     * The user and the system can revoke this permission via the special app access screen in
-     * Settings.
+     * On previous android versions {@link Build.VERSION_CODES#S} and
+     * {@link Build.VERSION_CODES#TIRAMISU}, apps targeting SDK level 31 or higher needed to hold
+     * the {@link Manifest.permission#SCHEDULE_EXACT_ALARM SCHEDULE_EXACT_ALARM} permission to use
+     * this API, unless the app was exempt from battery restrictions.
      *
-     * <p class="note"><strong>Note:</strong>
-     * Exact alarms should only be used for user-facing features.
-     * For more details, see <a
-     * href="{@docRoot}about/versions/12/behavior-changes-12#exact-alarm-permission">
-     * Exact alarm permission</a>.
-     *
-     * @see Manifest.permission#SCHEDULE_EXACT_ALARM SCHEDULE_EXACT_ALARM
      */
-    @RequiresPermission(value = Manifest.permission.SCHEDULE_EXACT_ALARM, conditional = true)
     public void setExact(@AlarmType int type, long triggerAtMillis, @Nullable String tag,
             @NonNull OnAlarmListener listener, @Nullable Handler targetHandler) {
         setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, 0, null, listener, tag,
@@ -949,7 +939,8 @@ public class AlarmManager {
      * {@link #setExact(int, long, String, OnAlarmListener, Handler)} instead.
      *
      * <p>
-     * Note that using this API requires you to hold
+     * Note that on previous Android versions {@link Build.VERSION_CODES#S} and
+     * {@link Build.VERSION_CODES#TIRAMISU}, using this API required you to hold
      * {@link Manifest.permission#SCHEDULE_EXACT_ALARM}, unless you are on the system's power
      * allowlist. This can be set, for example, by marking the app as {@code <allow-in-power-save>}
      * within the system config.
@@ -970,9 +961,7 @@ public class AlarmManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(allOf = {
-            Manifest.permission.UPDATE_DEVICE_STATS,
-            Manifest.permission.SCHEDULE_EXACT_ALARM}, conditional = true)
+    @RequiresPermission(Manifest.permission.UPDATE_DEVICE_STATS)
     public void setExact(@AlarmType int type, long triggerAtMillis, @Nullable String tag,
             @NonNull Executor executor, @NonNull WorkSource workSource,
             @NonNull OnAlarmListener listener) {
@@ -1283,9 +1272,7 @@ public class AlarmManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(allOf = {
-            Manifest.permission.UPDATE_DEVICE_STATS,
-            Manifest.permission.SCHEDULE_EXACT_ALARM}, conditional = true)
+    @RequiresPermission(Manifest.permission.UPDATE_DEVICE_STATS)
     public void setExactAndAllowWhileIdle(@AlarmType int type, long triggerAtMillis,
             @Nullable String tag, @NonNull Executor executor, @Nullable WorkSource workSource,
             @NonNull OnAlarmListener listener) {
