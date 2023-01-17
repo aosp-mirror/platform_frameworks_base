@@ -908,14 +908,6 @@
     <!-- Message shown when non-bypass face authentication succeeds. [CHAR LIMIT=60] -->
     <string name="keyguard_face_successful_unlock_alt1">Face recognized</string>
 
-    <!-- Messages shown when users press outside of udfps region during -->
-    <string-array name="udfps_accessibility_touch_hints">
-        <item>Move left</item>
-        <item>Move down</item>
-        <item>Move right</item>
-        <item>Move up</item>
-    </string-array>
-
     <!-- Message shown when face authentication fails and the pin pad is visible. [CHAR LIMIT=60] -->
     <string name="keyguard_retry">Swipe up to try again</string>
 

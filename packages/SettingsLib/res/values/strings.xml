@@ -1626,4 +1626,12 @@
     <string name="back_navigation_animation_summary">Enable system animations for predictive back.</string>
     <!-- Developer setting: enable animations when a back gesture is executed, full explanation[CHAR LIMIT=NONE] -->
     <string name="back_navigation_animation_dialog">This setting enables system animations for predictive gesture animation. It requires setting per-app "enableOnBackInvokedCallback" to true in the manifest file.</string>
+
+    <!-- [CHAR LIMIT=NONE] Messages shown when users press outside of udfps region during -->
+    <string-array name="udfps_accessibility_touch_hints">
+        <item>Move left</item>
+        <item>Move down</item>
+        <item>Move right</item>
+        <item>Move up</item>
+    </string-array>
 </resources>
