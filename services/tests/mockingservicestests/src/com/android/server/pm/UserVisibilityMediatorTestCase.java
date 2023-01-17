@@ -44,7 +44,6 @@ import android.text.TextUtils;
 import android.util.IntArray;
 import android.util.Log;
 
-import com.android.internal.util.Preconditions;
 import com.android.server.ExtendedMockitoTestCase;
 
 import org.junit.Before;
@@ -146,6 +145,12 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
                 .assignUserToDisplayOnStart(USER_CURRENT, USER_ID, FG, DEFAULT_DISPLAY));
         assertThrows(IllegalArgumentException.class, () -> mMediator
                 .assignUserToDisplayOnStart(USER_CURRENT_OR_SELF, USER_ID, FG, DEFAULT_DISPLAY));
+    }
+
+    @Test
+    public final void testAssignUserToDisplayOnStart_invalidUserStartMode() {
+        assertThrows(IllegalArgumentException.class, () -> mMediator
+                .assignUserToDisplayOnStart(USER_ID, USER_ID, 666, DEFAULT_DISPLAY));
     }
 
     @Test
@@ -283,7 +288,7 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
 
         int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID,
                 BG_VISIBLE, DEFAULT_DISPLAY);
-        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE);
+        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
         expectUserIsNotVisibleAtAll(PROFILE_USER_ID);
         expectNoDisplayAssignedToUser(PROFILE_USER_ID);
@@ -299,14 +304,14 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
 
         int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID,
                 BG_VISIBLE, DEFAULT_DISPLAY);
-        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE);
+        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
         expectUserIsNotVisibleAtAll(PROFILE_USER_ID);
 
         expectNoDisplayAssignedToUser(PROFILE_USER_ID);
         expectInitialCurrentUserAssignedToDisplay(DEFAULT_DISPLAY);
 
-        assertUserCannotBeAssignedExtraDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID);
+        assertInvisibleUserCannotBeAssignedExtraDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID);
 
         listener.verify();
     }
@@ -327,6 +332,41 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
         assertInvisibleUserCannotBeAssignedExtraDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID);
         assertInvisibleUserCannotBeAssignedExtraDisplay(PROFILE_USER_ID,
                 OTHER_SECONDARY_DISPLAY_ID);
+
+        listener.verify();
+    }
+
+    @Test
+    public final void testStartBgProfile_onDefaultDisplay_whenParentIsNotStarted()
+            throws Exception {
+        AsyncUserVisibilityListener listener = addListenerForNoEvents();
+
+        int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID, BG,
+                DEFAULT_DISPLAY);
+        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE);
+
+        expectUserIsNotVisibleAtAll(PROFILE_USER_ID);
+        expectNoDisplayAssignedToUser(PROFILE_USER_ID);
+
+        listener.verify();
+    }
+
+    @Test
+    public final void testStartBgProfile_onDefaultDisplay_whenParentIsStartedOnBg()
+            throws Exception {
+        AsyncUserVisibilityListener listener = addListenerForNoEvents();
+        startBackgroundUser(PARENT_USER_ID);
+
+        int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID, BG,
+                DEFAULT_DISPLAY);
+        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE);
+
+        expectUserIsNotVisibleAtAll(PROFILE_USER_ID);
+
+        expectNoDisplayAssignedToUser(PROFILE_USER_ID);
+        expectInitialCurrentUserAssignedToDisplay(DEFAULT_DISPLAY);
+
+        assertUserCannotBeAssignedExtraDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID);
 
         listener.verify();
     }
@@ -485,8 +525,6 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
      * se.
      */
     protected final void startUserInSecondaryDisplay(@UserIdInt int userId, int displayId) {
-        Preconditions.checkArgument(displayId != INVALID_DISPLAY && displayId != DEFAULT_DISPLAY,
-                "must pass a secondary display, not %d", displayId);
         Log.d(TAG, "startUserInSecondaryDisplay(" + userId + ", " + displayId + ")");
         int result = mMediator.assignUserToDisplayOnStart(userId, userId, BG_VISIBLE, displayId);
         if (result != USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE) {
