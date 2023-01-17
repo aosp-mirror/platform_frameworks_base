@@ -24,11 +24,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
@@ -37,7 +36,6 @@ import com.android.settingslib.spa.framework.compose.LogCompositions
 import com.android.settingslib.spa.framework.compose.TimeMeasurer.Companion.rememberTimeMeasurer
 import com.android.settingslib.spa.framework.compose.rememberLazyListStateAndHideKeyboardWhenStartScroll
 import com.android.settingslib.spa.framework.compose.toState
-import com.android.settingslib.spa.framework.util.StateFlowBridge
 import com.android.settingslib.spa.widget.ui.CategoryTitle
 import com.android.settingslib.spa.widget.ui.PlaceholderTitle
 import com.android.settingslib.spa.widget.ui.Spinner
@@ -52,6 +50,7 @@ import com.android.settingslib.spaprivileged.model.app.AppListViewModel
 import com.android.settingslib.spaprivileged.model.app.AppRecord
 import com.android.settingslib.spaprivileged.model.app.IAppListViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 
 private const val TAG = "AppList"
 private const val CONTENT_TYPE_HEADER = "header"
@@ -88,7 +87,7 @@ internal fun <T : AppRecord> AppListInput<T>.AppListImpl(
     val viewModel = viewModelSupplier()
     Column(Modifier.fillMaxSize()) {
         val optionsState = viewModel.spinnerOptionsFlow.collectAsState(null, Dispatchers.IO)
-        SpinnerOptions(optionsState, viewModel.option)
+        SpinnerOptions(optionsState, viewModel.optionFlow)
         val appListData = viewModel.appListDataFlow.collectAsState(null, Dispatchers.IO)
         listModel.AppListWidget(appListData, header, bottomPadding, noItemMessage)
     }
@@ -97,15 +96,18 @@ internal fun <T : AppRecord> AppListInput<T>.AppListImpl(
 @Composable
 private fun SpinnerOptions(
     optionsState: State<List<SpinnerOption>?>,
-    optionBridge: StateFlowBridge<Int?>,
+    optionFlow: MutableStateFlow<Int?>,
 ) {
     val options = optionsState.value
-    val selectedOption = rememberSaveable(options) {
-        mutableStateOf(options?.let { it.firstOrNull()?.id ?: -1 })
+    LaunchedEffect(options) {
+        if (options != null && !options.any { it.id == optionFlow.value }) {
+            // Reset to first option if the available options changed, and the current selected one
+            // does not in the new options.
+            optionFlow.value = options.let { it.firstOrNull()?.id ?: -1 }
+        }
     }
-    optionBridge.Sync(selectedOption)
     if (options != null) {
-        Spinner(options, selectedOption.value) { selectedOption.value = it }
+        Spinner(options, optionFlow.collectAsState().value) { optionFlow.value = it }
     }
 }
 
