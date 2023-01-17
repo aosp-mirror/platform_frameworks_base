@@ -77,12 +77,6 @@ object Flags {
     // TODO(b/254512731): Tracking Bug
     @JvmField val NOTIFICATION_DISMISSAL_FADE = releasedFlag(113, "notification_dismissal_fade")
 
-    // TODO(b/259558771): Tracking Bug
-    val STABILITY_INDEX_FIX = releasedFlag(114, "stability_index_fix")
-
-    // TODO(b/259559750): Tracking Bug
-    val SEMI_STABLE_SORT = releasedFlag(115, "semi_stable_sort")
-
     @JvmField val USE_ROUNDNESS_SOURCETYPES = releasedFlag(116, "use_roundness_sourcetype")
 
     // TODO(b/259217907)
