@@ -20,6 +20,7 @@ import android.media.tv.tunerresourcemanager.CasSessionRequest;
 import android.media.tv.tunerresourcemanager.IResourcesReclaimListener;
 import android.media.tv.tunerresourcemanager.ResourceClientProfile;
 import android.media.tv.tunerresourcemanager.TunerCiCamRequest;
+import android.media.tv.tunerresourcemanager.TunerDemuxInfo;
 import android.media.tv.tunerresourcemanager.TunerDemuxRequest;
 import android.media.tv.tunerresourcemanager.TunerDescramblerRequest;
 import android.media.tv.tunerresourcemanager.TunerFrontendInfo;
@@ -128,6 +129,17 @@ interface ITunerResourceManager {
      * @param maxSessionNum the max session number of the CAS system that is updated.
      */
     void updateCasInfo(in int casSystemId, in int maxSessionNum);
+
+    /*
+     * Updates the available Demux resources information on the current device.
+     *
+     * <p><strong>Note:</strong> This update must happen before the first
+     * {@link #requestDemux(TunerDemux,int[])} and {@link #releaseDemux(int, int)}
+     * call.
+     *
+     * @param infos an array of the available {@link TunerDemux} information.
+     */
+    void setDemuxInfoList(in TunerDemuxInfo[] infos);
 
     /*
      * Updates the available Lnb resource information on the current device.

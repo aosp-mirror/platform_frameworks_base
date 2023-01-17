@@ -281,6 +281,7 @@ public class Tuner implements AutoCloseable  {
     private final TunerResourceManager mTunerResourceManager;
     private final int mClientId;
     private static int sTunerVersion = TunerVersionChecker.TUNER_VERSION_UNKNOWN;
+    private DemuxInfo mDesiredDemuxInfo = new DemuxInfo(Filter.TYPE_UNDEFINED);
 
     private Frontend mFrontend;
     private EventHandler mHandler;
@@ -895,12 +896,7 @@ public class Tuner implements AutoCloseable  {
         }
     }
 
-    private void releaseAll() {
-        // release CiCam before frontend because frontend handle is needed to unlink CiCam
-        releaseCiCam();
-
-        releaseFrontend();
-
+    private void closeLnb() {
         mLnbLock.lock();
         try {
             // mLnb will be non-null only for owner tuner
@@ -917,8 +913,23 @@ public class Tuner implements AutoCloseable  {
         } finally {
             mLnbLock.unlock();
         }
+    }
 
+    private void releaseFilters() {
+        synchronized (mFilters) {
+            if (!mFilters.isEmpty()) {
+                for (WeakReference<Filter> weakFilter : mFilters) {
+                    Filter filter = weakFilter.get();
+                    if (filter != null) {
+                        filter.close();
+                    }
+                }
+                mFilters.clear();
+            }
+        }
+    }
 
+    private void releaseDescramblers() {
         synchronized (mDescramblers) {
             if (!mDescramblers.isEmpty()) {
                 for (Map.Entry<Integer, WeakReference<Descrambler>> d : mDescramblers.entrySet()) {
@@ -931,19 +942,9 @@ public class Tuner implements AutoCloseable  {
                 mDescramblers.clear();
             }
         }
+    }
 
-        synchronized (mFilters) {
-            if (!mFilters.isEmpty()) {
-                for (WeakReference<Filter> weakFilter : mFilters) {
-                    Filter filter = weakFilter.get();
-                    if (filter != null) {
-                        filter.close();
-                    }
-                }
-                mFilters.clear();
-            }
-        }
-
+    private void releaseDemux() {
         mDemuxLock.lock();
         try {
             if (mDemuxHandle != null) {
@@ -957,9 +958,17 @@ public class Tuner implements AutoCloseable  {
         } finally {
             mDemuxLock.unlock();
         }
+    }
 
+    private void releaseAll() {
+        // release CiCam before frontend because frontend handle is needed to unlink CiCam
+        releaseCiCam();
+        releaseFrontend();
+        closeLnb();
+        releaseDescramblers();
+        releaseFilters();
+        releaseDemux();
         mTunerResourceManager.unregisterClientProfile(mClientId);
-
     }
 
     /**
@@ -1025,6 +1034,7 @@ public class Tuner implements AutoCloseable  {
     private native DvrPlayback nativeOpenDvrPlayback(long bufferSize);
 
     private native DemuxCapabilities nativeGetDemuxCapabilities();
+    private native DemuxInfo nativeGetDemuxInfo(int demuxHandle);
 
     private native int nativeCloseDemux(int handle);
     private native int nativeCloseFrontend(int handle);
@@ -1865,6 +1875,30 @@ public class Tuner implements AutoCloseable  {
         }
     }
 
+    /**
+     * Gets DemuxInfo of the currently held demux
+     *
+     * @return A {@link DemuxInfo} of currently held demux resource.
+     *         Returns null if no demux resource is held.
+     */
+    @Nullable
+    public DemuxInfo getCurrentDemuxInfo() {
+        mDemuxLock.lock();
+        try {
+            if (mDemuxHandle == null) {
+                return null;
+            }
+            return nativeGetDemuxInfo(mDemuxHandle);
+        } finally {
+            mDemuxLock.unlock();
+        }
+    }
+
+    /** @hide */
+    public DemuxInfo getDesiredDemuxInfo() {
+        return mDesiredDemuxInfo;
+    }
+
     private void onFrontendEvent(int eventType) {
         Log.d(TAG, "Got event from tuning. Event type: " + eventType + " for " + this);
         synchronized (mOnTuneEventLock) {
@@ -2173,6 +2207,11 @@ public class Tuner implements AutoCloseable  {
     /**
      * Opens a filter object based on the given types and buffer size.
      *
+     * <p>For TUNER_VERSION_3_0 and above, configureDemuxInternal() will be called with mainType.
+     * However, unlike when configureDemux() is called directly, the desired filter types will not
+     * be changed when previously set desired filter types are the superset of the newly desired
+     * ones.
+     *
      * @param mainType the main type of the filter.
      * @param subType the subtype of the filter.
      * @param bufferSize the buffer size of the filter to be opened in bytes. The buffer holds the
@@ -2188,6 +2227,15 @@ public class Tuner implements AutoCloseable  {
             @Nullable FilterCallback cb) {
         mDemuxLock.lock();
         try {
+            int tunerMajorVersion = TunerVersionChecker.getMajorVersion(sTunerVersion);
+            if (sTunerVersion >= TunerVersionChecker.TUNER_VERSION_3_0) {
+                DemuxInfo demuxInfo = new DemuxInfo(mainType);
+                int res = configureDemuxInternal(demuxInfo, false /* reduceDesiredFilterTypes */);
+                if (res != RESULT_SUCCESS) {
+                    Log.e(TAG, "openFilter called for unsupported mainType: " + mainType);
+                    return null;
+                }
+            }
             if (!checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX, mDemuxLock)) {
                 return null;
             }
@@ -2470,10 +2518,109 @@ public class Tuner implements AutoCloseable  {
         return filter;
     }
 
+    /**
+     * Configures the desired {@link DemuxInfo}
+     *
+     * <p>The already held demux and filters will be released when desiredDemuxInfo is null or the
+     * desireDemuxInfo.getFilterTypes() is not supported by the already held demux.
+     *
+     * @param desiredDemuxInfo the desired {@link DemuxInfo}, which includes information such as
+     *                         filterTypes ({@link DemuxFilterMainType}).
+     * @return result status of configure demux operation. {@link #RESULT_UNAVAILABLE} is returned
+     *                when a) the desired capabilities are not supported by the system,
+     *                b) this API is called on unsupported version, or
+     *                c) either getDemuxCapabilities or getFilterTypeCapabilityList()
+     *                returns an empty array
+     */
+    @Result
+    public int configureDemux(@Nullable DemuxInfo desiredDemuxInfo) {
+        int tunerMajorVersion = TunerVersionChecker.getMajorVersion(sTunerVersion);
+        if (sTunerVersion < TunerVersionChecker.TUNER_VERSION_3_0) {
+            Log.e(TAG, "configureDemux() is not supported for tuner version:"
+                    + TunerVersionChecker.getMajorVersion(sTunerVersion) + "."
+                    + TunerVersionChecker.getMinorVersion(sTunerVersion) + ".");
+            return RESULT_UNAVAILABLE;
+        }
+
+        synchronized (mDemuxLock) {
+            return configureDemuxInternal(desiredDemuxInfo, true /* reduceDesiredFilterTypes */);
+        }
+    }
+
+    private int configureDemuxInternal(@Nullable DemuxInfo desiredDemuxInfo,
+            boolean reduceDesiredFilterTypes) {
+        // release the currently held demux if the desired demux info is null
+        if (desiredDemuxInfo == null) {
+            if (mDemuxHandle != null) {
+                releaseFilters();
+                releaseDemux();
+            }
+            return RESULT_SUCCESS;
+        }
+
+        int desiredFilterTypes = desiredDemuxInfo.getFilterTypes();
+
+        // just update and return success if the desiredFilterTypes is equal to or a subset of
+        // a previously configured value
+        if ((mDesiredDemuxInfo.getFilterTypes() & desiredFilterTypes)
+                == desiredFilterTypes) {
+            if (reduceDesiredFilterTypes) {
+                mDesiredDemuxInfo.setFilterTypes(desiredFilterTypes);
+            }
+            return RESULT_SUCCESS;
+        }
+
+        // check if the desire capability is supported
+        DemuxCapabilities caps = nativeGetDemuxCapabilities();
+        if (caps == null) {
+            Log.e(TAG, "configureDemuxInternal:failed to get DemuxCapabilities");
+            return RESULT_UNAVAILABLE;
+        }
+
+        int[] filterCapsList = caps.getFilterTypeCapabilityList();
+        if (filterCapsList.length <= 0) {
+            Log.e(TAG, "configureDemuxInternal: getFilterTypeCapabilityList()"
+                    + " returned an empty array");
+            return RESULT_UNAVAILABLE;
+        }
+
+        boolean supported = false;
+        for (int filterCaps : filterCapsList) {
+            if ((desiredFilterTypes & filterCaps) == desiredFilterTypes) {
+                supported = true;
+                break;
+            }
+        }
+        if (!supported) {
+            Log.e(TAG, "configureDemuxInternal: requested caps:" + desiredFilterTypes
+                    + " is not supported by the system");
+            return RESULT_UNAVAILABLE;
+        }
+
+        // close demux if not compatible
+        if (mDemuxHandle != null) {
+            if (desiredFilterTypes != Filter.TYPE_UNDEFINED) {
+                // Release the existing demux only if
+                // the desired caps is not supported
+                DemuxInfo currentDemuxInfo = nativeGetDemuxInfo(mDemuxHandle);
+                if (currentDemuxInfo != null) {
+                    if ((desiredFilterTypes & currentDemuxInfo.getFilterTypes())
+                            != desiredFilterTypes) {
+                        releaseFilters();
+                        releaseDemux();
+                    }
+                }
+            }
+        }
+        mDesiredDemuxInfo.setFilterTypes(desiredFilterTypes);
+        return RESULT_SUCCESS;
+    }
+
     private boolean requestDemux() {
         int[] demuxHandle = new int[1];
         TunerDemuxRequest request = new TunerDemuxRequest();
         request.clientId = mClientId;
+        request.desiredFilterTypes = mDesiredDemuxInfo.getFilterTypes();
         boolean granted = mTunerResourceManager.requestDemux(request, demuxHandle);
         if (granted) {
             mDemuxHandle = demuxHandle[0];
