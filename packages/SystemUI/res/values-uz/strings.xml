@@ -91,6 +91,8 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Quyi chegara <xliff:g id="PERCENT">%1$d</xliff:g> foiz"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Chap chegara <xliff:g id="PERCENT">%1$d</xliff:g> foiz"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Oʻng chegara <xliff:g id="PERCENT">%1$d</xliff:g> foiz"</string>
+    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"Ish skrinshotlari <xliff:g id="APP">%1$s</xliff:g> ilovasida saqlanadi"</string>
+    <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Fayllar"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Ekrandan yozib olish"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Ekran yozib olinmoqda"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ekrandan yozib olish seansi uchun joriy bildirishnoma"</string>
@@ -810,16 +812,15 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Oʻrtacha"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Kichik"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"Yirik"</string>
-    <string name="accessibility_magnification_close" msgid="1099965835844673375">"Yopish"</string>
+    <!-- no translation found for accessibility_magnification_done (263349129937348512) -->
+    <skip />
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Tahrirlash"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Lupa oynasi sozlamalari"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Maxsus imkoniyatlarni ochish uchun bosing Sozlamalardan moslay yoki almashtira olasiz.\n\n"<annotation id="link">"Sozlamalar"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Vaqtinchalik berkitish uchun tugmani qirra tomon suring"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Bekor qilish"</string>
-    <!-- no translation found for accessibility_floating_button_undo_message_label_text (9017658016426242640) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_undo_message_number_text (4909270290725226075) -->
-    <skip />
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> ta yorliq olindi"</string>
+    <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# ta yorliq olindi}other{# ta yorliq olindi}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Yuqori chapga surish"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Yuqori oʻngga surish"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Quyi chapga surish"</string>
@@ -883,12 +884,12 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g> ilovasida ijro etish: <xliff:g id="SONG_NAME">%1$s</xliff:g> – <xliff:g id="ARTIST_NAME">%2$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="APP_LABEL">%2$s</xliff:g> ilovasida ijro etilmoqda: <xliff:g id="SONG_NAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Qaytarish"</string>
-    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g>da ijro etish uchun yaqinroq keling"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Bu yerda ijro qilish uchun <xliff:g id="DEVICENAME">%1$s</xliff:g>qurilmasiga yaqinlashtiring"</string>
+    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> qurilmasida ijro qilish uchun unga yaqinlashing"</string>
+    <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"Shu yerda ijro qilish uchun <xliff:g id="DEVICENAME">%1$s</xliff:g>ga yaqinroq suring"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> qurilmasida ijro qilinmoqda"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Xatolik yuz berdi. Qayta urining."</string>
-    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
-    <skip />
+    <string name="media_transfer_loading" msgid="5544017127027152422">"Yuklanmoqda"</string>
+    <string name="media_ttt_default_device_type" msgid="4457646436153370169">"planshet"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Nofaol. Ilovani tekshiring"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Topilmadi"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Boshqarish imkonsiz"</string>
@@ -912,6 +913,7 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Tovush balandligi"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Karnaylar va displeylar"</string>
+    <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Taklif qilingan qurilmalar"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Translatsiya qanday ishlaydi"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Translatsiya"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Atrofingizdagi mos Bluetooth qurilmasiga ega foydalanuvchilar siz translatsiya qilayotgan mediani tinglay olishadi"</string>
@@ -1053,5 +1055,6 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Bu ekran oʻchiriladi"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Buklanadigan qurilma ochilmoqda"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Buklanadigan qurilma aylantirilmoqda"</string>
-    <string name="stylus_battery_low" msgid="7134370101603167096">"Stilus batareyasi kam"</string>
+    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Batareya quvvati: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Stilusni quvvat manbaiga ulang"</string>
 </resources>

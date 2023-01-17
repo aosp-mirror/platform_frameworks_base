@@ -91,6 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"الحد السفلى <xliff:g id="PERCENT">%1$d</xliff:g> في المئة"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"الحد الأيسر <xliff:g id="PERCENT">%1$d</xliff:g> في المئة"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"الحد الأيمن <xliff:g id="PERCENT">%1$d</xliff:g> في المئة"</string>
+    <!-- no translation found for screenshot_work_profile_notification (2812417845875653929) -->
+    <skip />
+    <!-- no translation found for screenshot_default_files_app_name (8721579578575161912) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"مسجّل الشاشة"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"جارٍ معالجة تسجيل الشاشة"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"إشعار مستمر لجلسة تسجيل شاشة"</string>
@@ -382,7 +386,7 @@
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"ستتمكن الخدمة التي تقدّم هذه الوظيفة من الوصول إلى كل المعلومات المرئية لك على الشاشة أو التي يتم تشغيلها على جهازك أثناء التسجيل أو البث. ويشمل ذلك معلومات مثل كلمات المرور وتفاصيل الدفع والصور والرسائل والمقاطع الصوتية التي تشغِّلها."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"هل تريد بدء التسجيل أو البث؟"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"هل تريد بدء التسجيل أو الإرسال باستخدام <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>؟"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"هل تريد السماح لتطبيق <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>بالمشاركة أو التسجيل؟"</string>
+    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"هل تريد السماح لتطبيق <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> بالمشاركة أو التسجيل؟"</string>
     <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"الشاشة بالكامل"</string>
     <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"تطبيق واحد"</string>
     <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"أثناء المشاركة أو التسجيل أو البث، يمكن لتطبيق <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> الوصول إلى كل العناصر المرئية على شاشتك أو التي يتم تشغيلها على جهازك، لذا يُرجى توخي الحذر بشأن كلمات المرور أو تفاصيل الدفع أو الرسائل أو المعلومات الحساسة الأخرى."</string>
@@ -810,16 +814,15 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"متوسط"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"صغير"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"كبير"</string>
-    <string name="accessibility_magnification_close" msgid="1099965835844673375">"إغلاق"</string>
+    <!-- no translation found for accessibility_magnification_done (263349129937348512) -->
+    <skip />
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"تعديل"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"إعدادات نافذة مكبّر الشاشة"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"انقر لفتح ميزات تسهيل الاستخدام. يمكنك تخصيص هذا الزر أو استبداله من الإعدادات.\n\n"<annotation id="link">"عرض الإعدادات"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"يمكنك نقل الزر إلى الحافة لإخفائه مؤقتًا."</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"تراجع"</string>
-    <!-- no translation found for accessibility_floating_button_undo_message_label_text (9017658016426242640) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_undo_message_number_text (4909270290725226075) -->
-    <skip />
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"تمت إزالة اختصار <xliff:g id="FEATURE_NAME">%s</xliff:g>."</string>
+    <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{تمت إزالة اختصار واحد.}zero{تمت إزالة # اختصار.}two{تمت إزالة اختصارَين.}few{تمت إزالة # اختصارات.}many{تمت إزالة # اختصارًا.}other{تمت إزالة # اختصار.}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"نقل إلى أعلى يمين الشاشة"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"نقل إلى أعلى يسار الشاشة"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"نقل إلى أسفل يمين الشاشة"</string>
@@ -884,10 +887,12 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"تشغيل <xliff:g id="SONG_NAME">%1$s</xliff:g> من تطبيق <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"تراجع"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"عليك الاقتراب لتشغيل الوسائط على <xliff:g id="DEVICENAME">%1$s</xliff:g>."</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"يُرجى الاقتراب من <xliff:g id="DEVICENAME">%1$s</xliff:g> لتشغيل الوسائط هنا."</string>
+    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
+    <skip />
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"جارٍ تشغيل الوسائط على <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"حدث خطأ. يُرجى إعادة المحاولة."</string>
-    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <string name="media_transfer_loading" msgid="5544017127027152422">"جارٍ التحميل"</string>
+    <!-- no translation found for media_ttt_default_device_type (4457646436153370169) -->
     <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"غير نشط، تحقّق من التطبيق."</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"لم يتم العثور عليه."</string>
@@ -912,6 +917,8 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"مستوى الصوت"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"%%<xliff:g id="PERCENTAGE">%1$d</xliff:g>"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"مكبّرات الصوت والشاشات"</string>
+    <!-- no translation found for media_output_group_title_suggested_device (4157186235837903826) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"كيفية عمل البث"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"البث"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"يمكن للأشخاص القريبين منك الذين لديهم أجهزة متوافقة تتضمّن بلوتوث الاستماع إلى الوسائط التي تبثها."</string>
@@ -1053,5 +1060,8 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"* سيتم إطفاء هذه الشاشة."</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"جهاز قابل للطي يجري فتحه"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"جهاز قابل للطي يجري قلبه"</string>
-    <string name="stylus_battery_low" msgid="7134370101603167096">"بطارية قلم الشاشة منخفضة"</string>
+    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
+    <skip />
+    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
+    <skip />
 </resources>
