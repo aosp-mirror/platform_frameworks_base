@@ -8285,9 +8285,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private final class ImeTargetVisibilityPolicyImpl extends ImeTargetVisibilityPolicy {
 
-        // TODO(b/258048231): Track IME visibility change in bugreport when invocations.
         @Override
-        public boolean showImeScreenShot(@NonNull IBinder imeTarget, int displayId) {
+        public boolean showImeScreenshot(@NonNull IBinder imeTarget, int displayId) {
             synchronized (mGlobalLock) {
                 final WindowState imeTargetWindow = mWindowMap.get(imeTarget);
                 if (imeTargetWindow == null) {
@@ -8303,24 +8302,18 @@ public class WindowManagerService extends IWindowManager.Stub
                 return true;
             }
         }
-
-        // TODO(b/258048231): Track IME visibility change in bugreport when invocations.
         @Override
-        public boolean updateImeParent(@NonNull IBinder imeTarget, int displayId) {
+        public boolean removeImeScreenshot(int displayId) {
             synchronized (mGlobalLock) {
-                final WindowState imeTargetWindow = mWindowMap.get(imeTarget);
-                if (imeTargetWindow == null) {
-                    return false;
-                }
                 final DisplayContent dc = mRoot.getDisplayContent(displayId);
                 if (dc == null) {
-                    Slog.w(TAG, "Invalid displayId:" + displayId + ", fail to update ime parent");
+                    Slog.w(TAG, "Invalid displayId:" + displayId
+                            + ", fail to remove ime screenshot");
                     return false;
                 }
-
-                dc.updateImeParent();
-                return true;
+                dc.removeImeSurfaceImmediately();
             }
+            return true;
         }
     }
 

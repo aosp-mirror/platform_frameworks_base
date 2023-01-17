@@ -4453,6 +4453,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     private void attachImeScreenshotOnTarget(WindowState imeTarget) {
+        attachImeScreenshotOnTarget(imeTarget, false);
+    }
+
+    private void attachImeScreenshotOnTarget(WindowState imeTarget, boolean hideImeWindow) {
         final SurfaceControl.Transaction t = getPendingTransaction();
         // Remove the obsoleted IME snapshot first in case the new snapshot happens to
         // override the current one before the transition finish and the surface never be
@@ -4461,6 +4465,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mImeScreenshot = new ImeScreenshot(
                 mWmService.mSurfaceControlFactory.apply(null), imeTarget);
         mImeScreenshot.attachAndShow(t);
+        if (mInputMethodWindow != null && hideImeWindow) {
+            // Hide the IME window when deciding to show IME snapshot on demand.
+            // InsetsController will make IME visible again before animating it.
+            mInputMethodWindow.hide(false, false);
+        }
     }
 
     /**
@@ -4478,7 +4487,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     @VisibleForTesting
     void showImeScreenshot(WindowState imeTarget) {
-        attachImeScreenshotOnTarget(imeTarget);
+        attachImeScreenshotOnTarget(imeTarget, true /* hideImeWindow */);
     }
 
     /**

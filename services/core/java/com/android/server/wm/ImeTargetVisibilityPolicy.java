@@ -19,6 +19,7 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.IBinder;
 import android.view.WindowManager;
@@ -36,16 +37,15 @@ public abstract class ImeTargetVisibilityPolicy {
      * @param displayId A unique id to identify the display.
      * @return {@code true} if success, {@code false} otherwise.
      */
-    public abstract boolean showImeScreenShot(IBinder imeTarget, int displayId);
+    public abstract boolean showImeScreenshot(@NonNull IBinder imeTarget, int displayId);
 
     /**
-     * Updates the IME parent for target window.
+     * Removes the IME screenshot on the given display.
      *
-     * @param imeTarget The target window to update the IME parent.
-     * @param displayId A unique id to identify the display.
+     * @param displayId The target display of showing IME screenshot.
      * @return {@code true} if success, {@code false} otherwise.
      */
-    public abstract boolean updateImeParent(IBinder imeTarget, int displayId);
+    public abstract boolean removeImeScreenshot(int displayId);
 
     /**
      * Called when {@link DisplayContent#computeImeParent()} to check if it's valid to keep

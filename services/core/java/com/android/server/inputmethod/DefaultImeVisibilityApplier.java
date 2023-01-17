@@ -18,6 +18,8 @@ package com.android.server.inputmethod;
 
 import static android.view.inputmethod.ImeTracker.DEBUG_IME_VISIBILITY;
 
+import static com.android.internal.inputmethod.SoftInputShowHideReason.REMOVE_IME_SCREENSHOT_FROM_IMMS;
+import static com.android.internal.inputmethod.SoftInputShowHideReason.SHOW_IME_SCREENSHOT_FROM_IMMS;
 import static com.android.server.EventLogTags.IMF_HIDE_IME;
 import static com.android.server.EventLogTags.IMF_SHOW_IME;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_HIDE_IME;
@@ -26,6 +28,7 @@ import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_HI
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_SHOW_IME;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_SHOW_IME_IMPLICIT;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.IBinder;
 import android.os.ResultReceiver;
@@ -38,6 +41,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.server.LocalServices;
+import com.android.server.wm.ImeTargetVisibilityPolicy;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.util.Objects;
@@ -56,10 +60,14 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
 
     private final WindowManagerInternal mWindowManagerInternal;
 
+    @NonNull
+    private final ImeTargetVisibilityPolicy mImeTargetVisibilityPolicy;
+
 
     DefaultImeVisibilityApplier(InputMethodManagerService service) {
         mService = service;
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
+        mImeTargetVisibilityPolicy = LocalServices.getService(ImeTargetVisibilityPolicy.class);
     }
 
     @GuardedBy("ImfLock.class")
@@ -165,5 +173,28 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
             default:
                 throw new IllegalArgumentException("Invalid IME visibility state: " + state);
         }
+    }
+
+    @GuardedBy("ImfLock.class")
+    @Override
+    public boolean showImeScreenshot(@NonNull IBinder imeTarget, int displayId,
+            @Nullable ImeTracker.Token statsToken) {
+        if (mImeTargetVisibilityPolicy.showImeScreenshot(imeTarget, displayId)) {
+            mService.onShowHideSoftInputRequested(false /* show */, imeTarget,
+                    SHOW_IME_SCREENSHOT_FROM_IMMS, statsToken);
+            return true;
+        }
+        return false;
+    }
+
+    @GuardedBy("ImfLock.class")
+    @Override
+    public boolean removeImeScreenshot(int displayId) {
+        if (mImeTargetVisibilityPolicy.removeImeScreenshot(displayId)) {
+            mService.onShowHideSoftInputRequested(false /* show */, mService.mCurFocusedWindow,
+                    REMOVE_IME_SCREENSHOT_FROM_IMMS, null);
+            return true;
+        }
+        return false;
     }
 }

@@ -255,6 +255,10 @@ public final class InputMethodDebug {
                 return "HIDE_SOFT_INPUT_IMM_DEPRECATION";
             case SoftInputShowHideReason.HIDE_WINDOW_GAINED_FOCUS_WITHOUT_EDITOR:
                 return "HIDE_WINDOW_GAINED_FOCUS_WITHOUT_EDITOR";
+            case SoftInputShowHideReason.SHOW_IME_SCREENSHOT_FROM_IMMS:
+                return "SHOW_IME_SCREENSHOT_FROM_IMMS";
+            case SoftInputShowHideReason.REMOVE_IME_SCREENSHOT_FROM_IMMS:
+                return "REMOVE_IME_SCREENSHOT_FROM_IMMS";
             default:
                 return "Unknown=" + reason;
         }

@@ -65,7 +65,9 @@ import java.lang.annotation.Retention;
         SoftInputShowHideReason.HIDE_SOFT_INPUT_IME_TOGGLE_SOFT_INPUT,
         SoftInputShowHideReason.HIDE_SOFT_INPUT_EXTRACT_INPUT_CHANGED,
         SoftInputShowHideReason.HIDE_SOFT_INPUT_IMM_DEPRECATION,
-        SoftInputShowHideReason.HIDE_WINDOW_GAINED_FOCUS_WITHOUT_EDITOR
+        SoftInputShowHideReason.HIDE_WINDOW_GAINED_FOCUS_WITHOUT_EDITOR,
+        SoftInputShowHideReason.SHOW_IME_SCREENSHOT_FROM_IMMS,
+        SoftInputShowHideReason.REMOVE_IME_SCREENSHOT_FROM_IMMS,
 })
 public @interface SoftInputShowHideReason {
     /** Show soft input by {@link android.view.inputmethod.InputMethodManager#showSoftInput}. */
@@ -259,4 +261,14 @@ public @interface SoftInputShowHideReason {
      */
     int HIDE_WINDOW_GAINED_FOCUS_WITHOUT_EDITOR =
             ImeProtoEnums.REASON_HIDE_WINDOW_GAINED_FOCUS_WITHOUT_EDITOR;
+
+    /**
+     * Shows ime screenshot by {@link com.android.server.inputmethod.InputMethodManagerService}.
+     */
+    int SHOW_IME_SCREENSHOT_FROM_IMMS = ImeProtoEnums.REASON_SHOW_IME_SCREENSHOT_FROM_IMMS;
+
+    /**
+     * Removes ime screenshot by {@link com.android.server.inputmethod.InputMethodManagerService}.
+     */
+    int REMOVE_IME_SCREENSHOT_FROM_IMMS = ImeProtoEnums.REASON_REMOVE_IME_SCREENSHOT_FROM_IMMS;
 }
