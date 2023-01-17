@@ -101,17 +101,19 @@ public final class SuspendPackageHelper {
      * @param callingPackage The caller's package name.
      * @param userId The user where packages reside.
      * @param callingUid The caller's uid.
+     * @param forQuietMode Whether suspension is for quiet mode, in which case no apps are exempt.
      * @return The names of failed packages.
      */
     @Nullable
     String[] setPackagesSuspended(@NonNull Computer snapshot, @Nullable String[] packageNames,
             boolean suspended, @Nullable PersistableBundle appExtras,
             @Nullable PersistableBundle launcherExtras, @Nullable SuspendDialogInfo dialogInfo,
-            @NonNull String callingPackage, @UserIdInt int userId, int callingUid) {
+            @NonNull String callingPackage, @UserIdInt int userId, int callingUid,
+            boolean forQuietMode) {
         if (ArrayUtils.isEmpty(packageNames)) {
             return packageNames;
         }
-        if (suspended && !isSuspendAllowedForUser(snapshot, userId, callingUid)) {
+        if (suspended && !forQuietMode && !isSuspendAllowedForUser(snapshot, userId, callingUid)) {
             Slog.w(TAG, "Cannot suspend due to restrictions on user " + userId);
             return packageNames;
         }
@@ -126,8 +128,9 @@ public final class SuspendPackageHelper {
         final ArraySet<String> changedPackagesList = new ArraySet<>(packageNames.length);
         final IntArray changedUids = new IntArray(packageNames.length);
 
-        final boolean[] canSuspend = suspended
-                ? canSuspendPackageForUser(snapshot, packageNames, userId, callingUid) : null;
+        final boolean[] canSuspend = suspended && !forQuietMode
+                ? canSuspendPackageForUser(snapshot, packageNames, userId, callingUid)
+                : null;
         for (int i = 0; i < packageNames.length; i++) {
             final String packageName = packageNames[i];
             if (callingPackage.equals(packageName)) {
@@ -642,8 +645,8 @@ public final class SuspendPackageHelper {
                     setPackagesSuspended(
                             snapshot, toSuspend.toArray(new String[0]), suspend,
                             null /* appExtras */, null /* launcherExtras */, null /* dialogInfo */,
-                            PackageManagerService.PLATFORM_PACKAGE_NAME, userId, Process.SYSTEM_UID
-                    )));
+                            PackageManagerService.PLATFORM_PACKAGE_NAME, userId, Process.SYSTEM_UID,
+                            false /* forQuietMode */)));
         }
         return unsuspendable.toArray(String[]::new);
     }
@@ -688,7 +691,8 @@ public final class SuspendPackageHelper {
 
         setPackagesSuspended(snapshot, toSuspend.toArray(new String[0]),
                 suspend, null /* appExtras */, null /* launcherExtras */, null /* dialogInfo */,
-                PackageManagerService.PLATFORM_PACKAGE_NAME, userId, Process.SYSTEM_UID);
+                PackageManagerService.PLATFORM_PACKAGE_NAME, userId, Process.SYSTEM_UID,
+                true /* forQuietMode */);
     }
 
     private Set<String> packagesToSuspendInQuietMode(Computer snapshot, int userId) {

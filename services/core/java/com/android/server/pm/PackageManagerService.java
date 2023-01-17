@@ -6141,7 +6141,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             enforceCanSetPackagesSuspendedAsUser(snapshot, callingPackage, callingUid, userId,
                     "setPackagesSuspendedAsUser");
             return mSuspendPackageHelper.setPackagesSuspended(snapshot, packageNames, suspended,
-                    appExtras, launcherExtras, dialogInfo, callingPackage, userId, callingUid);
+                    appExtras, launcherExtras, dialogInfo, callingPackage, userId, callingUid,
+                    false /* forQuietMode */);
         }
 
         @Override
