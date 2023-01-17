@@ -59,7 +59,7 @@ import com.android.systemui.SysuiTestableContext
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags.MODERN_ALTERNATE_BOUNCER
-import com.android.systemui.keyguard.data.repository.FakeBiometricRepository
+import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
@@ -145,7 +145,7 @@ class SideFpsControllerTest : SysuiTestCase() {
         alternateBouncerInteractor =
             AlternateBouncerInteractor(
                 keyguardBouncerRepository,
-                FakeBiometricRepository(),
+                FakeBiometricSettingsRepository(),
                 FakeDeviceEntryFingerprintAuthRepository(),
                 FakeSystemClock(),
                 mock(KeyguardUpdateMonitor::class.java),
