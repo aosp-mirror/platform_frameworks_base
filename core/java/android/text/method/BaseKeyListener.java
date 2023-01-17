@@ -440,8 +440,9 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
 
     private boolean deleteLine(View view, Editable content) {
         if (view instanceof TextView) {
-            final Layout layout = ((TextView) view).getLayout();
-            if (layout != null) {
+            final TextView textView = (TextView) view;
+            final Layout layout = textView.getLayout();
+            if (layout != null && !textView.isOffsetMappingAvailable()) {
                 final int line = layout.getLineForOffset(Selection.getSelectionStart(content));
                 final int start = layout.getLineStart(line);
                 final int end = layout.getLineEnd(line);
