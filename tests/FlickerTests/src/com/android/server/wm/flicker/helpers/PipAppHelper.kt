@@ -103,6 +103,54 @@ open class PipAppHelper(instrumentation: Instrumentation) :
     }
 
     /**
+     * Minimizes the PIP window my using the pinch in gesture.
+     *
+     * @param percent The percentage by which to decrease the pip window size.
+     * @throws IllegalArgumentException if percentage isn't between 0.0f and 1.0f
+     */
+    fun pinchInPipWindow(wmHelper: WindowManagerStateHelper, percent: Float, steps: Int) {
+        // the percentage must be between 0.0f and 1.0f
+        if (percent <= 0.0f || percent > 1.0f) {
+            throw IllegalArgumentException("Percent must be between 0.0f and 1.0f")
+        }
+
+        val windowRect = getWindowRect(wmHelper)
+
+        // first pointer's initial x coordinate is halfway between the left edge and the center
+        val initLeftX = (windowRect.centerX() - windowRect.width / 4).toFloat()
+        // second pointer's initial x coordinate is halfway between the right edge and the center
+        val initRightX = (windowRect.centerX() + windowRect.width / 4).toFloat()
+
+        // decrease by the distance specified through the percentage
+        val distDecrease = windowRect.width * percent
+
+        // get the final x-coordinates and make sure they are not passing the center of the window
+        val finalLeftX = Math.min(initLeftX + (distDecrease / 2), windowRect.centerX().toFloat())
+        val finalRightX = Math.max(initRightX - (distDecrease / 2), windowRect.centerX().toFloat())
+
+        // y-coordinate is the same throughout this animation
+        val yCoord = windowRect.centerY().toFloat()
+
+        var adjustedSteps = MIN_STEPS_TO_ANIMATE
+
+        // if distance per step is at least 1, then we can use the number of steps requested
+        if (distDecrease.toInt() / (steps * 2) >= 1) {
+            adjustedSteps = steps
+        }
+
+        // if the distance per step is less than 1, carry out the animation in two steps
+        gestureHelper.pinch(
+            Tuple(initLeftX, yCoord),
+            Tuple(initRightX, yCoord),
+            Tuple(finalLeftX, yCoord),
+            Tuple(finalRightX, yCoord),
+            adjustedSteps
+        )
+
+        waitForPipWindowToMinimizeFrom(wmHelper, Region.from(windowRect))
+    }
+
+    /**
      * Launches the app through an intent instead of interacting with the launcher and waits until
      * the app window is in PIP mode
      */
@@ -234,6 +282,24 @@ open class PipAppHelper(instrumentation: Instrumentation) :
                         ?: return@add false
                 val pipRegion = pipAppWindow.frameRegion
                 return@add pipRegion.coversMoreThan(windowRect)
+            }
+            .waitForAndVerify()
+    }
+
+    private fun waitForPipWindowToMinimizeFrom(
+        wmHelper: WindowManagerStateHelper,
+        windowRect: Region
+    ) {
+        wmHelper
+            .StateSyncBuilder()
+            .add("pipWindowMinimized") {
+                val pipAppWindow =
+                        it.wmState.visibleWindows.firstOrNull { window ->
+                            this.windowMatchesAnyOf(window)
+                        }
+                                ?: return@add false
+                val pipRegion = pipAppWindow.frameRegion
+                return@add windowRect.coversMoreThan(pipRegion)
             }
             .waitForAndVerify()
     }
