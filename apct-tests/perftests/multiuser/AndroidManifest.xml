@@ -15,8 +15,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.perftests.multiuser">
-
+    package="com.android.perftests.multiuser">
 
     <uses-permission android:name="android.permission.CONTROL_KEYGUARD" />
     <uses-permission android:name="android.permission.DEVICE_POWER" />
@@ -27,6 +26,7 @@
     <uses-permission android:name="android.permission.REAL_GET_TASKS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
 
     <application>
         <uses-library android:name="android.test.runner" />
@@ -38,5 +38,4 @@
     <queries>
         <package android:name="perftests.multiuser.apps.dummyapp" />
     </queries>
-
 </manifest>

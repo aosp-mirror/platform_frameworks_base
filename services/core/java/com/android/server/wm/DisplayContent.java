@@ -6841,12 +6841,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         public void showInsets(@WindowInsets.Type.InsetsType int types, boolean fromIme,
                 @Nullable ImeTracker.Token statsToken) {
             try {
-                ImeTracker.get().onProgress(statsToken,
+                ImeTracker.forLogging().onProgress(statsToken,
                         ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROL_TARGET_SHOW_INSETS);
                 mRemoteInsetsController.showInsets(types, fromIme, statsToken);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to deliver showInsets", e);
-                ImeTracker.get().onFailed(statsToken,
+                ImeTracker.forLogging().onFailed(statsToken,
                         ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROL_TARGET_SHOW_INSETS);
             }
         }
@@ -6855,12 +6855,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         public void hideInsets(@InsetsType int types, boolean fromIme,
                 @Nullable ImeTracker.Token statsToken) {
             try {
-                ImeTracker.get().onProgress(statsToken,
+                ImeTracker.forLogging().onProgress(statsToken,
                         ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROL_TARGET_HIDE_INSETS);
                 mRemoteInsetsController.hideInsets(types, fromIme, statsToken);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to deliver hideInsets", e);
-                ImeTracker.get().onFailed(statsToken,
+                ImeTracker.forLogging().onFailed(statsToken,
                         ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROL_TARGET_HIDE_INSETS);
             }
         }

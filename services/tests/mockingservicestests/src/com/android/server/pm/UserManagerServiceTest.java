@@ -20,25 +20,31 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.content.Context;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
 
 import androidx.test.annotation.UiThreadTest;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
+import com.android.internal.widget.LockSettingsInternal;
 import com.android.server.ExtendedMockitoTestCase;
 import com.android.server.LocalServices;
 import com.android.server.am.UserState;
 import com.android.server.pm.UserManagerService.UserData;
+import com.android.server.storage.DeviceStorageMonitorInternal;
 
 import org.junit.After;
 import org.junit.Before;
@@ -86,6 +92,10 @@ public final class UserManagerServiceTest extends ExtendedMockitoTestCase {
     private @Mock PackageManagerService mMockPms;
     private @Mock UserDataPreparer mMockUserDataPreparer;
     private @Mock ActivityManagerInternal mActivityManagerInternal;
+    private @Mock DeviceStorageMonitorInternal mDeviceStorageMonitorInternal;
+    private @Mock StorageManager mStorageManager;
+    private @Mock LockSettingsInternal mLockSettingsInternal;
+    private @Mock PackageManagerInternal mPackageManagerInternal;
 
     /**
      * Reference to the {@link UserManagerService} being tested.
@@ -101,7 +111,8 @@ public final class UserManagerServiceTest extends ExtendedMockitoTestCase {
     protected void initializeSession(StaticMockitoSessionBuilder builder) {
         builder
                 .spyStatic(UserManager.class)
-                .spyStatic(LocalServices.class);
+                .spyStatic(LocalServices.class)
+                .mockStatic(Settings.Global.class);
     }
 
     @Before
@@ -111,6 +122,14 @@ public final class UserManagerServiceTest extends ExtendedMockitoTestCase {
 
         // Called when WatchedUserStates is constructed
         doNothing().when(() -> UserManager.invalidateIsUserUnlockedCache());
+
+        // Called when creating new users
+        when(mDeviceStorageMonitorInternal.isMemoryLow()).thenReturn(false);
+        mockGetLocalService(DeviceStorageMonitorInternal.class, mDeviceStorageMonitorInternal);
+        when(mSpiedContext.getSystemService(StorageManager.class)).thenReturn(mStorageManager);
+        mockGetLocalService(LockSettingsInternal.class, mLockSettingsInternal);
+        mockGetLocalService(PackageManagerInternal.class, mPackageManagerInternal);
+        doNothing().when(mSpiedContext).sendBroadcastAsUser(any(), any(), any());
 
         // Must construct UserManagerService in the UiThread
         mUms = new UserManagerService(mSpiedContext, mMockPms, mMockUserDataPreparer,
@@ -223,6 +242,87 @@ public final class UserManagerServiceTest extends ExtendedMockitoTestCase {
                 .that(mUms.isUserRunning(PROFILE_USER_ID)).isFalse();
     }
 
+    @Test
+    public void testSetBootUser_SuppliedUserIsSwitchable() throws Exception {
+        addUser(USER_ID);
+        addUser(OTHER_USER_ID);
+
+        mUms.setBootUser(OTHER_USER_ID);
+
+        assertWithMessage("getBootUser")
+                .that(mUmi.getBootUser()).isEqualTo(OTHER_USER_ID);
+    }
+
+    @Test
+    public void testSetBootUser_NotHeadless_SuppliedUserIsNotSwitchable() throws Exception {
+        setSystemUserHeadless(false);
+        addUser(USER_ID);
+        addUser(OTHER_USER_ID);
+        addDefaultProfileAndParent();
+
+        mUms.setBootUser(PROFILE_USER_ID);
+
+        assertWithMessage("getBootUser")
+                .that(mUmi.getBootUser()).isEqualTo(UserHandle.USER_SYSTEM);
+    }
+
+    @Test
+    public void testSetBootUser_Headless_SuppliedUserIsNotSwitchable() throws Exception {
+        setSystemUserHeadless(true);
+        addUser(USER_ID);
+        setLastForegroundTime(USER_ID, 1_000_000L);
+        addUser(OTHER_USER_ID);
+        setLastForegroundTime(OTHER_USER_ID, 2_000_000L);
+        addDefaultProfileAndParent();
+
+        mUms.setBootUser(PROFILE_USER_ID);
+
+        // Boot user not switchable so return most recently in foreground.
+        assertWithMessage("getBootUser")
+                .that(mUmi.getBootUser()).isEqualTo(OTHER_USER_ID);
+    }
+
+    @Test
+    public void testGetBootUser_NotHeadless_ReturnsSystemUser() throws Exception {
+        setSystemUserHeadless(false);
+        addUser(USER_ID);
+        addUser(OTHER_USER_ID);
+
+        assertWithMessage("getBootUser")
+                .that(mUmi.getBootUser()).isEqualTo(UserHandle.USER_SYSTEM);
+    }
+
+    @Test
+    public void testGetBootUser_Headless_ReturnsMostRecentlyInForeground() throws Exception {
+        setSystemUserHeadless(true);
+        addUser(USER_ID);
+        setLastForegroundTime(USER_ID, 1_000_000L);
+
+        addUser(OTHER_USER_ID);
+        setLastForegroundTime(OTHER_USER_ID, 2_000_000L);
+
+        assertWithMessage("getBootUser")
+                .that(mUmi.getBootUser()).isEqualTo(OTHER_USER_ID);
+    }
+
+    @Test
+    public void testGetBootUser_Headless_UserCreatedIfOnlySystemUserExists() throws Exception {
+        setSystemUserHeadless(true);
+
+        int bootUser = mUmi.getBootUser();
+
+        assertWithMessage("getStartingUser")
+                .that(bootUser).isNotEqualTo(UserHandle.USER_SYSTEM);
+
+        UserData newUser = mUsers.get(bootUser);
+        assertWithMessage("New boot user is a full user")
+                .that(newUser.info.isFull()).isTrue();
+        assertWithMessage("New boot user is an admin user")
+                .that(newUser.info.isAdmin()).isTrue();
+        assertWithMessage("New boot user is the main user")
+                .that(newUser.info.isMain()).isTrue();
+    }
+
     private void mockCurrentUser(@UserIdInt int userId) {
         mockGetLocalService(ActivityManagerInternal.class, mActivityManagerInternal);
 
@@ -248,7 +348,7 @@ public final class UserManagerServiceTest extends ExtendedMockitoTestCase {
 
     private void addUser(@UserIdInt int userId) {
         TestUserData userData = new TestUserData(userId);
-
+        userData.info.flags = UserInfo.FLAG_FULL;
         addUserData(userData);
     }
 
@@ -275,6 +375,23 @@ public final class UserManagerServiceTest extends ExtendedMockitoTestCase {
     private void addUserData(TestUserData userData) {
         Log.d(TAG, "Adding " + userData);
         mUsers.put(userData.info.id, userData);
+    }
+
+    private void setSystemUserHeadless(boolean headless) {
+        UserData systemUser = mUsers.get(UserHandle.USER_SYSTEM);
+        if (headless) {
+            systemUser.info.flags &= ~UserInfo.FLAG_FULL;
+            systemUser.info.userType = UserManager.USER_TYPE_SYSTEM_HEADLESS;
+        } else {
+            systemUser.info.flags |= UserInfo.FLAG_FULL;
+            systemUser.info.userType = UserManager.USER_TYPE_FULL_SYSTEM;
+        }
+        doReturn(headless).when(() -> UserManager.isHeadlessSystemUserMode());
+    }
+
+    private void setLastForegroundTime(@UserIdInt int userId, long timeMillis) {
+        UserData userData = mUsers.get(userId);
+        userData.mLastEnteredForegroundTimeMillis = timeMillis;
     }
 
     private static final class TestUserData extends UserData {

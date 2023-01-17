@@ -16,6 +16,8 @@
 
 package android.accounts;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+
 import android.annotation.BroadcastBehavior;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -891,15 +893,24 @@ public class AccountManager {
      * @return An {@link AccountManagerFuture} which resolves to a Boolean, true if the account
      *         exists and has all of the specified features.
      */
+    @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
+            requiresPermissionIfNotCaller = INTERACT_ACROSS_USERS_FULL)
     public AccountManagerFuture<Boolean> hasFeatures(final Account account,
             final String[] features,
             AccountManagerCallback<Boolean> callback, Handler handler) {
+        return hasFeaturesAsUser(account, features, callback, handler, mContext.getUserId());
+    }
+
+    private AccountManagerFuture<Boolean> hasFeaturesAsUser(
+            final Account account, final String[] features,
+            AccountManagerCallback<Boolean> callback, Handler handler, int userId) {
         if (account == null) throw new IllegalArgumentException("account is null");
         if (features == null) throw new IllegalArgumentException("features is null");
         return new Future2Task<Boolean>(handler, callback) {
             @Override
             public void doWork() throws RemoteException {
-                mService.hasFeatures(mResponse, account, features, mContext.getOpPackageName());
+                mService.hasFeatures(
+                        mResponse, account, features, userId, mContext.getOpPackageName());
             }
             @Override
             public Boolean bundleToResult(Bundle bundle) throws AuthenticatorException {
@@ -3319,7 +3330,7 @@ public class AccountManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    @RequiresPermission(INTERACT_ACROSS_USERS_FULL)
     public AccountManagerFuture<Bundle> finishSessionAsUser(
             final Bundle sessionBundle,
             final Activity activity,

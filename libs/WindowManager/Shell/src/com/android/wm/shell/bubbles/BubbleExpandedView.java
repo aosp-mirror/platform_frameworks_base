@@ -232,10 +232,13 @@ public class BubbleExpandedView extends LinearLayout {
 
                     if (mBubble.isAppBubble()) {
                         PendingIntent pi = PendingIntent.getActivity(mContext, 0,
-                                mBubble.getAppBubbleIntent(),
-                                PendingIntent.FLAG_MUTABLE,
+                                mBubble.getAppBubbleIntent()
+                                        .addFlags(FLAG_ACTIVITY_NEW_DOCUMENT)
+                                        .addFlags(FLAG_ACTIVITY_MULTIPLE_TASK),
+                                PendingIntent.FLAG_IMMUTABLE,
                                 null);
-                        mTaskView.startActivity(pi, fillInIntent, options, launchBounds);
+                        mTaskView.startActivity(pi, /* fillInIntent= */ null, options,
+                                launchBounds);
                     } else if (!mIsOverflow && mBubble.hasMetadataShortcutId()) {
                         options.setApplyActivityFlagsForBubbles(true);
                         mTaskView.startShortcutActivity(mBubble.getShortcutInfo(),

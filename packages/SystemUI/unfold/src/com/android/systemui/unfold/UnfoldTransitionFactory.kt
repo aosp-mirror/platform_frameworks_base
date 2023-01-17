@@ -37,29 +37,29 @@ import java.util.concurrent.Executor
  * This should **never** be called from sysui, as the object is already provided in that process.
  */
 fun createUnfoldSharedComponent(
-    context: Context,
-    config: UnfoldTransitionConfig,
-    screenStatusProvider: ScreenStatusProvider,
-    foldProvider: FoldProvider,
-    activityTypeProvider: CurrentActivityTypeProvider,
-    sensorManager: SensorManager,
-    mainHandler: Handler,
-    mainExecutor: Executor,
-    backgroundExecutor: Executor,
-    tracingTagPrefix: String,
-    windowManager: IWindowManager,
+        context: Context,
+        config: UnfoldTransitionConfig,
+        screenStatusProvider: ScreenStatusProvider,
+        foldProvider: FoldProvider,
+        activityTypeProvider: CurrentActivityTypeProvider,
+        sensorManager: SensorManager,
+        mainHandler: Handler,
+        mainExecutor: Executor,
+        singleThreadBgExecutor: Executor,
+        tracingTagPrefix: String,
+        windowManager: IWindowManager,
 ): UnfoldSharedComponent =
-    DaggerUnfoldSharedComponent.factory()
-        .create(
-            context,
-            config,
-            screenStatusProvider,
-            foldProvider,
-            activityTypeProvider,
-            sensorManager,
-            mainHandler,
-            mainExecutor,
-            backgroundExecutor,
-            tracingTagPrefix,
-            windowManager,
-        )
+        DaggerUnfoldSharedComponent.factory()
+                .create(
+                        context,
+                        config,
+                        screenStatusProvider,
+                        foldProvider,
+                        activityTypeProvider,
+                        sensorManager,
+                        mainHandler,
+                        mainExecutor,
+                        singleThreadBgExecutor,
+                        tracingTagPrefix,
+                        windowManager,
+                )

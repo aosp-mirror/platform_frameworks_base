@@ -40530,11 +40530,12 @@ package android.service.voice {
     method public void onLaunchVoiceAssistFromKeyguard();
     method public void onPrepareToShowSession(@NonNull android.os.Bundle, int);
     method public void onReady();
-    method public void onShowSessionFailed();
+    method public void onShowSessionFailed(@NonNull android.os.Bundle);
     method public void onShutdown();
     method public void setDisabledShowContext(int);
     method public final void setUiHints(@NonNull android.os.Bundle);
     method public void showSession(android.os.Bundle, int);
+    field public static final String KEY_SHOW_SESSION_ID = "android.service.voice.SHOW_SESSION_ID";
     field public static final String SERVICE_INTERFACE = "android.service.voice.VoiceInteractionService";
     field public static final String SERVICE_META_DATA = "android.voice_interaction";
   }

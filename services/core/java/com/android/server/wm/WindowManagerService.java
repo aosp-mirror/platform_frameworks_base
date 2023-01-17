@@ -8071,14 +8071,14 @@ public class WindowManagerService extends IWindowManager.Stub
                     dc.getInsetsStateController().getImeSourceProvider().abortShowImePostLayout();
                 }
                 if (dc != null && dc.getImeTarget(IME_TARGET_CONTROL) != null) {
-                    ImeTracker.get().onProgress(statsToken,
+                    ImeTracker.forLogging().onProgress(statsToken,
                             ImeTracker.PHASE_WM_HAS_IME_INSETS_CONTROL_TARGET);
                     ProtoLog.d(WM_DEBUG_IME, "hideIme Control target: %s ",
                             dc.getImeTarget(IME_TARGET_CONTROL));
                     dc.getImeTarget(IME_TARGET_CONTROL).hideInsets(WindowInsets.Type.ime(),
                             true /* fromIme */, statsToken);
                 } else {
-                    ImeTracker.get().onFailed(statsToken,
+                    ImeTracker.forLogging().onFailed(statsToken,
                             ImeTracker.PHASE_WM_HAS_IME_INSETS_CONTROL_TARGET);
                 }
                 if (dc != null) {

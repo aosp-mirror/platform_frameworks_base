@@ -1763,7 +1763,8 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * @param args The arguments that were supplied to
      * {@link VoiceInteractionService#showSession VoiceInteractionService.showSession}.
      * Some example keys include : "invocation_type", "invocation_phone_state",
-     * "invocation_time_ms", Intent.EXTRA_TIME ("android.intent.extra.TIME") indicating timing
+     * {@link VoiceInteractionService#KEY_SHOW_SESSION_ID}, "invocation_time_ms",
+     * Intent.EXTRA_TIME ("android.intent.extra.TIME") indicating timing
      * in milliseconds of the KeyEvent that triggered Assistant and
      * Intent.EXTRA_ASSIST_INPUT_DEVICE_ID (android.intent.extra.ASSIST_INPUT_DEVICE_ID)
      *  referring to the device that sent the request.

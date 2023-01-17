@@ -23,6 +23,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.ResultReceiver
+import android.os.UserHandle
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -77,6 +78,14 @@ class ScreenRecordPermissionDialog(
                     MediaProjectionAppSelectorActivity.EXTRA_CAPTURE_REGION_RESULT_RECEIVER,
                     CaptureTargetResultReceiver()
                 )
+
+                // Send SystemUI's user handle as the host app user handle because SystemUI
+                // is the 'host app' (the app that receives screen capture data)
+                intent.putExtra(
+                    MediaProjectionAppSelectorActivity.EXTRA_HOST_APP_USER_HANDLE,
+                    UserHandle.of(UserHandle.myUserId())
+                )
+
                 val animationController = dialogLaunchAnimator.createActivityLaunchController(v!!)
                 if (animationController == null) {
                     dismiss()

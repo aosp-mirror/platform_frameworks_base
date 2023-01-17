@@ -21,6 +21,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_APPEARANCE_CO
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
 
 import android.annotation.NonNull;
+import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.os.Handler;
 import android.os.IBinder;
@@ -243,6 +244,11 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
             return null;
         }
         return mViewRoot.getTitle().toString();
+    }
+
+    @Override
+    public Context getRootViewContext() {
+        return mViewRoot != null ? mViewRoot.getView().getContext() : null;
     }
 
     @Override
