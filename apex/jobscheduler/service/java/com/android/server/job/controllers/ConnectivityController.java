@@ -98,6 +98,13 @@ public final class ConnectivityController extends RestrictingController implemen
             ~(ConnectivityManager.BLOCKED_REASON_APP_STANDBY
                     | ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER
                     | ConnectivityManager.BLOCKED_REASON_DOZE);
+    // TODO(261999509): allow bypassing data saver & user-restricted. However, when we allow a UI
+    //     job to run while data saver restricts the app, we must ensure that we don't run regular
+    //     jobs when we put a hole in the data saver wall for the UI job
+    private static final int UNBYPASSABLE_UI_BLOCKED_REASONS =
+            ~(ConnectivityManager.BLOCKED_REASON_APP_STANDBY
+                    | ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER
+                    | ConnectivityManager.BLOCKED_REASON_DOZE);
     private static final int UNBYPASSABLE_FOREGROUND_BLOCKED_REASONS =
             ~(ConnectivityManager.BLOCKED_REASON_APP_STANDBY
                     | ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER
@@ -1080,6 +1087,11 @@ public final class ConnectivityController extends RestrictingController implemen
                 Slog.d(TAG, "Using FG bypass for " + jobStatus.getSourceUid());
             }
             unbypassableBlockedReasons = UNBYPASSABLE_FOREGROUND_BLOCKED_REASONS;
+        } else if (jobStatus.shouldTreatAsUserInitiatedJob()) {
+            if (DEBUG) {
+                Slog.d(TAG, "Using UI bypass for " + jobStatus.getSourceUid());
+            }
+            unbypassableBlockedReasons = UNBYPASSABLE_UI_BLOCKED_REASONS;
         } else if (jobStatus.shouldTreatAsExpeditedJob() || jobStatus.startedAsExpeditedJob) {
             if (DEBUG) {
                 Slog.d(TAG, "Using EJ bypass for " + jobStatus.getSourceUid());
