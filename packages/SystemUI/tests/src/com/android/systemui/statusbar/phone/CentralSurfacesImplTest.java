@@ -321,6 +321,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        // CentralSurfacesImpl's runtime flag check fails if the flag is absent.
+        // This value is unused, because test manifest is opted in.
+        mFeatureFlags.set(Flags.WM_ENABLE_PREDICTIVE_BACK_SYSUI, false);
+
         IThermalService thermalService = mock(IThermalService.class);
         mPowerManager = new PowerManager(mContext, mPowerManagerService, thermalService,
                 Handler.createAsync(Looper.myLooper()));
