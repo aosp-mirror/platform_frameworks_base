@@ -166,6 +166,19 @@ public final class CompanionDeviceManager {
      */
     public static final String REASON_CANCELED = "canceled";
 
+    /** @hide */
+    @IntDef(flag = true, prefix = { "FLAG_" }, value = {
+            FLAG_CALL_METADATA,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DataSyncTypes {}
+
+    /**
+     * Used by {@link #enableSystemDataSync(int, int)}}.
+     * Sync call metadata like muting, ending and silencing a call.
+     *
+     */
+    public static final int FLAG_CALL_METADATA = 1;
 
     /**
      * A device, returned in the activity result of the {@link IntentSender} received in
@@ -468,6 +481,49 @@ public final class CompanionDeviceManager {
         }
     }
 
+    /**
+     * <p>Enable system data sync (it only supports call metadata sync for now).
+     * By default all supported system data types are enabled.</p>
+     *
+     * <p>Calling this API requires a uses-feature
+     * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} declaration in the manifest</p>
+     *
+     * @param associationId id of the device association.
+     * @param flags system data types to be enabled.
+     */
+    public void enableSystemDataSync(int associationId, @DataSyncTypes int flags) {
+        if (!checkFeaturePresent()) {
+            return;
+        }
+
+        try {
+            mService.enableSystemDataSync(associationId, flags);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * <p>Disable system data sync (it only supports call metadata sync for now).
+     * By default all supported system data types are enabled.</p>
+     *
+     * <p>Calling this API requires a uses-feature
+     * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} declaration in the manifest</p>
+     *
+     * @param associationId id of the device association.
+     * @param flags system data types to be disabled.
+     */
+    public void disableSystemDataSync(int associationId, @DataSyncTypes int flags) {
+        if (!checkFeaturePresent()) {
+            return;
+        }
+
+        try {
+            mService.disableSystemDataSync(associationId, flags);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 
     /**
      * <p>Calling this API requires a uses-feature
