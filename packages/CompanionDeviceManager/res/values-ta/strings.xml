@@ -43,7 +43,7 @@
     <string name="consent_no" msgid="2640796915611404382">"அனுமதிக்க வேண்டாம்"</string>
     <string name="consent_back" msgid="2560683030046918882">"பின்செல்"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"&lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; சாதனத்தில் இருக்கும் அதே அனுமதிகளை &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; சாதனத்தில் உள்ள ஆப்ஸுக்கும் வழங்கவா?"</string>
-    <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;&lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt; &lt;p&gt; சாதனத்தில் உள்ள மைக்ரோஃபோன், கேமரா, இருப்பிட அணுகல், பாதுகாக்கவேண்டிய பிற தகவல்கள் ஆகியவற்றுக்கான அனுமதிகள் இதிலடங்கும்.&lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt; சாதனத்தில் உள்ள அமைப்புகளில் இந்த அனுமதிகளை எப்போது வேண்டுமானாலும் நீங்கள் மாற்றிக்கொள்ளலாம்."</string>
+    <string name="permission_sync_summary" msgid="765497944331294275">"&lt;strong&gt;மைக்ரோஃபோன்&lt;/strong&gt;, &lt;strong&gt;கேமரா&lt;/strong&gt;, &lt;strong&gt;இருப்பிட அணுகல்&lt;/strong&gt;, ஆகியவற்றுக்கான அனுமதிகளும் &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; சாதனத்தில் உள்ள பிற பாதுகாக்கவேண்டிய தகவல்களுக்கான அனுமதிகளும் இதில் அடங்கக்கூடும். &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt; &lt;br/&gt;&lt;br/&gt;சாதனத்தில் உள்ள அமைப்புகளில் இந்த அனுமதிகளை எப்போது வேண்டுமானாலும் மாற்றிக்கொள்ளலாம்."</string>
     <string name="vendor_icon_description" msgid="4445875290032225965">"ஆப்ஸ் ஐகான்"</string>
     <string name="vendor_header_button_description" msgid="6566660389500630608">"கூடுதல் தகவல்கள் பட்டன்"</string>
     <string name="permission_phone" msgid="2661081078692784919">"மொபைல்"</string>
@@ -51,26 +51,19 @@
     <string name="permission_contacts" msgid="3858319347208004438">"தொடர்புகள்"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"கேலெண்டர்"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"மைக்ரோஃபோன்"</string>
-    <!-- no translation found for permission_call_logs (5546761417694586041) -->
-    <skip />
+    <string name="permission_call_logs" msgid="5546761417694586041">"அழைப்புப் பதிவுகள்"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"அருகிலுள்ள சாதனங்கள்"</string>
     <string name="permission_storage" msgid="6831099350839392343">"படங்கள் மற்றும் மீடியா"</string>
     <string name="permission_notification" msgid="693762568127741203">"அறிவிப்புகள்"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"ஆப்ஸ்"</string>
     <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"அருகிலுள்ள சாதன ஸ்ட்ரீமிங்"</string>
-    <!-- no translation found for permission_phone_summary (6684396967861278044) -->
-    <skip />
-    <!-- no translation found for permission_call_logs_summary (6186103394658755022) -->
-    <skip />
-    <!-- no translation found for permission_sms_summary (3508442683678912017) -->
-    <skip />
-    <!-- no translation found for permission_contacts_summary (675861979475628708) -->
-    <skip />
-    <!-- no translation found for permission_calendar_summary (6460000922511766226) -->
-    <skip />
+    <string name="permission_phone_summary" msgid="6684396967861278044">"மொபைல் அழைப்புகளைச் செய்யலாம் நிர்வகிக்கலாம்"</string>
+    <string name="permission_call_logs_summary" msgid="6186103394658755022">"மொபைல் அழைப்புப் பதிவைப் படிக்கலாம் எழுதலாம்"</string>
+    <string name="permission_sms_summary" msgid="3508442683678912017">"மெசேஜ்களை அனுப்பலாம் பார்க்கலாம்"</string>
+    <string name="permission_contacts_summary" msgid="675861979475628708">"உங்கள் தொடர்புகளை அணுகலாம்"</string>
+    <string name="permission_calendar_summary" msgid="6460000922511766226">"உங்கள் கேலெண்டரை அணுகலாம்"</string>
     <string name="permission_microphone_summary" msgid="4241354865859396558">"மைக்ரோஃபோனைப் பயன்படுத்தி ஆடியோவை ரெக்கார்டு செய்யலாம்"</string>
-    <!-- no translation found for permission_nearby_devices_summary (931940524460876655) -->
-    <skip />
+    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"அருகிலுள்ள சாதனங்களைக் கண்டறியலாம் அவற்றுடன் இணையலாம் அவற்றின் தூரத்தைத் தீர்மானிக்கலாம்"</string>
     <string name="permission_notification_summary" msgid="884075314530071011">"தொடர்புகள், மெசேஜ்கள், படங்கள் போன்ற தகவல்கள் உட்பட அனைத்து அறிவிப்புகளையும் படிக்க முடியும்"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"உங்கள் மொபைல் ஆப்ஸை ஸ்ட்ரீம் செய்யலாம்"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
