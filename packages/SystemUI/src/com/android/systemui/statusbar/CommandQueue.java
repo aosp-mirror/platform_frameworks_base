@@ -45,12 +45,14 @@ import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.inputmethodservice.InputMethodService.BackDispositionMode;
 import android.media.INearbyMediaDevicesProvider;
 import android.media.MediaRoute2Info;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.RemoteException;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -168,6 +170,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_SHOW_REAR_DISPLAY_DIALOG = 69 << MSG_SHIFT;
     private static final int MSG_GO_TO_FULLSCREEN_FROM_SPLIT = 70 << MSG_SHIFT;
     private static final int MSG_ENTER_STAGE_SPLIT_FROM_RUNNING_APP = 71 << MSG_SHIFT;
+    private static final int MSG_SHOW_MEDIA_OUTPUT_SWITCHER = 72 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -492,6 +495,11 @@ public class CommandQueue extends IStatusBar.Stub implements
          * @see IStatusBar#enterStageSplitFromRunningApp
          */
         default void enterStageSplitFromRunningApp(boolean leftOrTop) {}
+
+        /**
+         * @see IStatusBar#showMediaOutputSwitcher
+         */
+        default void showMediaOutputSwitcher(String packageName) {}
     }
 
     public CommandQueue(Context context) {
@@ -1262,6 +1270,19 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
+    public void showMediaOutputSwitcher(String packageName) {
+        int callingUid = Binder.getCallingUid();
+        if (callingUid != 0 && callingUid != Process.SYSTEM_UID) {
+            throw new SecurityException("Call only allowed from system server.");
+        }
+        synchronized (mLock) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = packageName;
+            mHandler.obtainMessage(MSG_SHOW_MEDIA_OUTPUT_SWITCHER, args).sendToTarget();
+        }
+    }
+
+    @Override
     public void requestAddTile(
             @NonNull ComponentName componentName,
             @NonNull CharSequence appName,
@@ -1775,6 +1796,13 @@ public class CommandQueue extends IStatusBar.Stub implements
                 case MSG_ENTER_STAGE_SPLIT_FROM_RUNNING_APP:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).enterStageSplitFromRunningApp((Boolean) msg.obj);
+                    }
+                    break;
+                case MSG_SHOW_MEDIA_OUTPUT_SWITCHER:
+                    args = (SomeArgs) msg.obj;
+                    String clientPackageName = (String) args.arg1;
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).showMediaOutputSwitcher(clientPackageName);
                     }
                     break;
             }
