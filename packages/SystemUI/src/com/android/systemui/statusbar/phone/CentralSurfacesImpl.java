@@ -312,6 +312,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     private final Context mContext;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
+    private final DeviceStateManager mDeviceStateManager;
     private CentralSurfacesCommandQueueCallbacks mCommandQueueCallbacks;
     private float mTransitionToFullShadeProgress = 0f;
     private NotificationListContainer mNotifListContainer;
@@ -879,8 +880,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mMessageRouter.subscribeTo(MSG_LAUNCH_TRANSITION_TIMEOUT,
                 id -> onLaunchTransitionTimeout());
 
-        deviceStateManager.registerCallback(mMainExecutor,
-                new FoldStateListener(mContext, this::onFoldedStateChanged));
+        mDeviceStateManager = deviceStateManager;
         wiredChargingRippleController.registerCallbacks();
 
         mLightRevealScrimViewModelLazy = lightRevealScrimViewModelLazy;
@@ -1069,6 +1069,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             }
         });
 
+        registerCallbacks();
+
         mFalsingManager.addFalsingBeliefListener(mFalsingBeliefListener);
 
         mPluginManager.addPluginListener(
@@ -1121,6 +1123,14 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 (requestTopUi, componentTag) -> mMainExecutor.execute(() ->
                         mNotificationShadeWindowController.setRequestTopUi(
                                 requestTopUi, componentTag))));
+    }
+
+    @VisibleForTesting
+    /** Registers listeners/callbacks with external dependencies. */
+    void registerCallbacks() {
+        //TODO(b/264502026) move the rest of the listeners here.
+        mDeviceStateManager.registerCallback(mMainExecutor,
+                new FoldStateListener(mContext, this::onFoldedStateChanged));
     }
 
     @VisibleForTesting
