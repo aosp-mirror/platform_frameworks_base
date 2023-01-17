@@ -271,22 +271,22 @@ public class DataManager {
     private ConversationChannel getConversationChannel(String packageName, int userId,
             String shortcutId, ConversationInfo conversationInfo) {
         ShortcutInfo shortcutInfo = getShortcut(packageName, userId, shortcutId);
-        return getConversationChannel(shortcutInfo, conversationInfo);
+        return getConversationChannel(
+                shortcutInfo, conversationInfo, packageName, userId, shortcutId);
     }
 
     @Nullable
     private ConversationChannel getConversationChannel(ShortcutInfo shortcutInfo,
-            ConversationInfo conversationInfo) {
+            ConversationInfo conversationInfo, String packageName, int userId, String shortcutId) {
         if (conversationInfo == null || conversationInfo.isDemoted()) {
             return null;
         }
         if (shortcutInfo == null) {
-            Slog.e(TAG, " Shortcut no longer found");
+            Slog.e(TAG, "Shortcut no longer found");
+            mInjector.getBackgroundExecutor().execute(
+                    () -> removeConversations(packageName, userId, Set.of(shortcutId)));
             return null;
         }
-        String packageName = shortcutInfo.getPackage();
-        String shortcutId = shortcutInfo.getId();
-        int userId = shortcutInfo.getUserId();
         int uid = mPackageManagerInternal.getPackageUid(packageName, 0, userId);
         NotificationChannel parentChannel =
                 mNotificationManagerInternal.getNotificationChannel(packageName, uid,
@@ -1130,27 +1130,30 @@ public class DataManager {
         public void onShortcutsRemoved(@NonNull String packageName,
                 @NonNull List<ShortcutInfo> shortcuts, @NonNull UserHandle user) {
             mInjector.getBackgroundExecutor().execute(() -> {
-                int uid = Process.INVALID_UID;
-                try {
-                    uid = mContext.getPackageManager().getPackageUidAsUser(
-                            packageName, user.getIdentifier());
-                } catch (PackageManager.NameNotFoundException e) {
-                    Slog.e(TAG, "Package not found: " + packageName, e);
-                }
-                PackageData packageData = getPackage(packageName, user.getIdentifier());
-                Set<String> shortcutIds = new HashSet<>();
+                HashSet<String> shortcutIds = new HashSet<>();
                 for (ShortcutInfo shortcutInfo : shortcuts) {
-                    if (packageData != null) {
-                        if (DEBUG) Log.d(TAG, "Deleting shortcut: " + shortcutInfo.getId());
-                        packageData.deleteDataForConversation(shortcutInfo.getId());
-                    }
                     shortcutIds.add(shortcutInfo.getId());
                 }
-                if (uid != Process.INVALID_UID) {
-                    mNotificationManagerInternal.onConversationRemoved(
-                            packageName, uid, shortcutIds);
-                }
+                removeConversations(packageName, user.getIdentifier(), shortcutIds);
             });
+        }
+    }
+
+    private void removeConversations(
+            @NonNull String packageName, @NonNull int userId, @NonNull Set<String> shortcutIds) {
+        PackageData packageData = getPackage(packageName, userId);
+        if (packageData != null) {
+            for (String shortcutId : shortcutIds) {
+                if (DEBUG) Log.d(TAG, "Deleting shortcut: " + shortcutId);
+                packageData.deleteDataForConversation(shortcutId);
+            }
+        }
+        try {
+            int uid = mContext.getPackageManager().getPackageUidAsUser(
+                    packageName, userId);
+            mNotificationManagerInternal.onConversationRemoved(packageName, uid, shortcutIds);
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.e(TAG, "Package not found when removing conversation: " + packageName, e);
         }
     }
 
@@ -1349,9 +1352,11 @@ public class DataManager {
     }
 
     private void updateConversationStoreThenNotifyListeners(ConversationStore cs,
-            ConversationInfo modifiedConv, ShortcutInfo shortcutInfo) {
+            ConversationInfo modifiedConv, @NonNull ShortcutInfo shortcutInfo) {
         cs.addOrUpdate(modifiedConv);
-        ConversationChannel channel = getConversationChannel(shortcutInfo, modifiedConv);
+        ConversationChannel channel = getConversationChannel(
+                shortcutInfo, modifiedConv, shortcutInfo.getPackage(), shortcutInfo.getUserId(),
+                shortcutInfo.getId());
         if (channel != null) {
             notifyConversationsListeners(Arrays.asList(channel));
         }
