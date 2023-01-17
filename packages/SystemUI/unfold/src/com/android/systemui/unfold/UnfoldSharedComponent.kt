@@ -22,8 +22,8 @@ import android.hardware.SensorManager
 import android.os.Handler
 import android.view.IWindowManager
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
-import com.android.systemui.unfold.dagger.UnfoldBackground
 import com.android.systemui.unfold.dagger.UnfoldMain
+import com.android.systemui.unfold.dagger.UnfoldSingleThreadBg
 import com.android.systemui.unfold.updates.FoldProvider
 import com.android.systemui.unfold.updates.RotationChangeProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
@@ -58,7 +58,7 @@ interface UnfoldSharedComponent {
             @BindsInstance sensorManager: SensorManager,
             @BindsInstance @UnfoldMain handler: Handler,
             @BindsInstance @UnfoldMain executor: Executor,
-            @BindsInstance @UnfoldBackground backgroundExecutor: Executor,
+            @BindsInstance @UnfoldSingleThreadBg singleThreadBgExecutor: Executor,
             @BindsInstance @UnfoldTransitionATracePrefix tracingTagPrefix: String,
             @BindsInstance windowManager: IWindowManager,
             @BindsInstance contentResolver: ContentResolver = context.contentResolver

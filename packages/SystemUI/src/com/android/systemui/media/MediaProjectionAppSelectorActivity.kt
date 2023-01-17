@@ -18,6 +18,7 @@ package com.android.systemui.media
 import android.app.ActivityOptions
 import android.content.Intent
 import android.content.res.Configuration
+import android.content.res.Resources
 import android.media.projection.IMediaProjection
 import android.media.projection.MediaProjectionManager.EXTRA_MEDIA_PROJECTION
 import android.os.Binder
@@ -27,6 +28,7 @@ import android.os.ResultReceiver
 import android.os.UserHandle
 import android.view.ViewGroup
 import com.android.internal.annotations.VisibleForTesting
+import com.android.internal.app.AbstractMultiProfilePagerAdapter.MyUserIdProvider
 import com.android.internal.app.ChooserActivity
 import com.android.internal.app.ResolverListController
 import com.android.internal.app.chooser.NotSelectableTargetInfo
@@ -59,16 +61,12 @@ class MediaProjectionAppSelectorActivity(
     private lateinit var configurationController: ConfigurationController
     private lateinit var controller: MediaProjectionAppSelectorController
     private lateinit var recentsViewController: MediaProjectionRecentsViewController
+    private lateinit var component: MediaProjectionAppSelectorComponent
 
     override fun getLayoutResource() = R.layout.media_projection_app_selector
 
     public override fun onCreate(bundle: Bundle?) {
-        val component =
-            componentFactory.create(
-                activity = this,
-                view = this,
-                resultHandler = this
-            )
+        component = componentFactory.create(activity = this, view = this, resultHandler = this)
 
         // Create a separate configuration controller for this activity as the configuration
         // might be different from the global one
@@ -76,11 +74,12 @@ class MediaProjectionAppSelectorActivity(
         controller = component.controller
         recentsViewController = component.recentsViewController
 
-        val queryIntent = Intent(Intent.ACTION_MAIN).apply { addCategory(Intent.CATEGORY_LAUNCHER) }
-        intent.putExtra(Intent.EXTRA_INTENT, queryIntent)
+        intent.configureChooserIntent(
+            resources,
+            component.hostUserHandle,
+            component.personalProfileUserHandle
+        )
 
-        val title = getString(R.string.media_projection_permission_app_selector_title)
-        intent.putExtra(Intent.EXTRA_TITLE, title)
         super.onCreate(bundle)
         controller.init()
     }
@@ -183,6 +182,13 @@ class MediaProjectionAppSelectorActivity(
 
     override fun shouldShowContentPreview() = true
 
+    override fun shouldShowContentPreviewWhenEmpty(): Boolean = true
+
+    override fun createMyUserIdProvider(): MyUserIdProvider =
+        object : MyUserIdProvider() {
+            override fun getMyUserId(): Int = component.hostUserHandle.identifier
+        }
+
     override fun createContentPreviewView(parent: ViewGroup): ViewGroup =
         recentsViewController.createView(parent)
 
@@ -193,6 +199,34 @@ class MediaProjectionAppSelectorActivity(
          * instance through activity result.
          */
         const val EXTRA_CAPTURE_REGION_RESULT_RECEIVER = "capture_region_result_receiver"
+
+        /** UID of the app that originally launched the media projection flow (host app user) */
+        const val EXTRA_HOST_APP_USER_HANDLE = "launched_from_user_handle"
         const val KEY_CAPTURE_TARGET = "capture_region"
+
+        /** Set up intent for the [ChooserActivity] */
+        private fun Intent.configureChooserIntent(
+            resources: Resources,
+            hostUserHandle: UserHandle,
+            personalProfileUserHandle: UserHandle
+        ) {
+            // Specify the query intent to show icons for all apps on the chooser screen
+            val queryIntent =
+                Intent(Intent.ACTION_MAIN).apply { addCategory(Intent.CATEGORY_LAUNCHER) }
+            putExtra(Intent.EXTRA_INTENT, queryIntent)
+
+            // Update the title of the chooser
+            val title = resources.getString(R.string.media_projection_permission_app_selector_title)
+            putExtra(Intent.EXTRA_TITLE, title)
+
+            // Select host app's profile tab by default
+            val selectedProfile =
+                if (hostUserHandle == personalProfileUserHandle) {
+                    PROFILE_PERSONAL
+                } else {
+                    PROFILE_WORK
+                }
+            putExtra(EXTRA_SELECTED_PROFILE, selectedProfile)
+        }
     }
 }
