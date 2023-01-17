@@ -150,12 +150,17 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         featureFlags =
             FakeFeatureFlags().apply {
                 set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, false)
+                set(Flags.FACE_AUTH_REFACTOR, true)
             }
 
         underTest =
             KeyguardQuickAffordanceInteractor(
                 keyguardInteractor =
-                    KeyguardInteractor(repository = repository, commandQueue = commandQueue),
+                    KeyguardInteractor(
+                        repository = repository,
+                        commandQueue = commandQueue,
+                        featureFlags = featureFlags
+                    ),
                 registry =
                     FakeKeyguardQuickAffordanceRegistry(
                         mapOf(
