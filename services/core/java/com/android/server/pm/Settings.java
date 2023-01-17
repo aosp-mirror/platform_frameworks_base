@@ -2693,10 +2693,15 @@ public final class Settings implements Watchable, Snappable {
                     FileUtils.S_IRUSR | FileUtils.S_IWUSR | FileUtils.S_IRGRP | FileUtils.S_IWGRP,
                     -1, -1);
 
-            try {
-                FileUtils.copy(mSettingsFilename, mSettingsReserveCopyFilename);
+            try (FileInputStream in = new FileInputStream(mSettingsFilename);
+                 FileOutputStream out = new FileOutputStream(mSettingsReserveCopyFilename)) {
+                FileUtils.copy(in, out);
+                out.flush();
+                FileUtils.sync(out);
             } catch (IOException e) {
-                Slog.e(TAG, "Failed to backup settings", e);
+                Slog.e(TAG,
+                        "Failed to write reserve copy of settings: " + mSettingsReserveCopyFilename,
+                        e);
             }
 
             try {
