@@ -23,6 +23,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.framework.util.mapItem
 import com.android.settingslib.spa.testutils.waitUntil
+import com.android.settingslib.spaprivileged.template.app.AppListConfig
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -84,14 +85,17 @@ class AppListViewModelTest {
     }
 
     private object FakeAppListRepository : AppListRepository {
-        override suspend fun loadApps(config: AppListConfig) = listOf(APP)
+        override suspend fun loadApps(userId: Int, showInstantApps: Boolean) = listOf(APP)
 
         override fun showSystemPredicate(
             userIdFlow: Flow<Int>,
             showSystemFlow: Flow<Boolean>,
         ): Flow<(app: ApplicationInfo) -> Boolean> = flowOf { true }
 
-        override fun getSystemPackageNamesBlocking(config: AppListConfig): Set<String> = setOf()
+        override fun getSystemPackageNamesBlocking(
+            userId: Int,
+            showInstantApps: Boolean,
+        ): Set<String> = emptySet()
     }
 
     private object FakeAppRepository : AppRepository {
@@ -105,7 +109,7 @@ class AppListViewModelTest {
         const val USER_ID = 0
         const val PACKAGE_NAME = "package.name"
         const val LABEL = "Label"
-        val CONFIG = AppListConfig(userId = USER_ID, showInstantApps = false)
+        val CONFIG = AppListConfig(userIds = listOf(USER_ID), showInstantApps = false)
         val APP = ApplicationInfo().apply {
             packageName = PACKAGE_NAME
         }
