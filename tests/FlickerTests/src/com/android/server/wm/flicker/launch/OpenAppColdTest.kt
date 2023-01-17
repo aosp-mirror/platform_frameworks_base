@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerBuilder
@@ -69,11 +68,6 @@ open class OpenAppColdTest(flicker: FlickerTest) : OpenAppFromLauncherTransition
             teardown { testApp.exit(wmHelper) }
             transitions { testApp.launchViaIntent(wmHelper) }
         }
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
     @Presubmit @Test override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()

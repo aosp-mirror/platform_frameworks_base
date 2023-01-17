@@ -87,9 +87,6 @@ open class OpenAppFromOverviewTest(flicker: FlickerTest) : OpenAppFromLauncherTr
         }
 
     /** {@inheritDoc} */
-    @Presubmit @Test override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()
-
-    /** {@inheritDoc} */
     @FlakyTest
     @Test
     override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()

@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
@@ -73,11 +72,6 @@ open class ActivitiesTransitionTest(flicker: FlickerTest) : BaseTest(flicker) {
             wmHelper.StateSyncBuilder().withFullScreenApp(testApp).waitForAndVerify()
         }
     }
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     /**
      * Checks that the [ActivityOptions.LaunchNewActivity] activity is visible at the start of the
