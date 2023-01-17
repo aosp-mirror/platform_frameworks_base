@@ -73,16 +73,12 @@ public abstract class JobService extends Service {
      * Detach the notification supplied to
      * {@link #setNotification(JobParameters, int, Notification, int)} when the job ends.
      * The notification will remain shown even after JobScheduler stops the job.
-     *
-     * @hide
      */
     public static final int JOB_END_NOTIFICATION_POLICY_DETACH = 0;
     /**
      * Cancel and remove the notification supplied to
      * {@link #setNotification(JobParameters, int, Notification, int)} when the job ends.
      * The notification will be removed from the notification shade.
-     *
-     * @hide
      */
     public static final int JOB_END_NOTIFICATION_POLICY_REMOVE = 1;
 
