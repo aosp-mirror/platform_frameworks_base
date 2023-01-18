@@ -1162,9 +1162,9 @@ public class DataManager {
 
         private final int mUserId;
 
-        // Conversation package name + shortcut ID -> Number of active notifications
+        // Conversation package name + shortcut ID -> Keys of active notifications
         @GuardedBy("this")
-        private final Map<Pair<String, String>, Integer> mActiveNotifCounts = new ArrayMap<>();
+        private final Map<Pair<String, String>, Set<String>> mActiveNotifKeys = new ArrayMap<>();
 
         private NotificationListener(int userId) {
             mUserId = userId;
@@ -1178,8 +1178,10 @@ public class DataManager {
             String shortcutId = sbn.getNotification().getShortcutId();
             PackageData packageData = getPackageIfConversationExists(sbn, conversationInfo -> {
                 synchronized (this) {
-                    mActiveNotifCounts.merge(
-                            Pair.create(sbn.getPackageName(), shortcutId), 1, Integer::sum);
+                    Set<String> notificationKeys = mActiveNotifKeys.computeIfAbsent(
+                            Pair.create(sbn.getPackageName(), shortcutId),
+                            (unusedKey) -> new HashSet<>());
+                    notificationKeys.add(sbn.getKey());
                 }
             });
 
@@ -1218,12 +1220,12 @@ public class DataManager {
                 Pair<String, String> conversationKey =
                         Pair.create(sbn.getPackageName(), shortcutId);
                 synchronized (this) {
-                    int count = mActiveNotifCounts.getOrDefault(conversationKey, 0) - 1;
-                    if (count <= 0) {
-                        mActiveNotifCounts.remove(conversationKey);
+                    Set<String> notificationKeys = mActiveNotifKeys.computeIfAbsent(
+                            conversationKey, (unusedKey) -> new HashSet<>());
+                    notificationKeys.remove(sbn.getKey());
+                    if (notificationKeys.isEmpty()) {
+                        mActiveNotifKeys.remove(conversationKey);
                         cleanupCachedShortcuts(mUserId, MAX_CACHED_RECENT_SHORTCUTS);
-                    } else {
-                        mActiveNotifCounts.put(conversationKey, count);
                     }
                 }
             });
@@ -1289,7 +1291,7 @@ public class DataManager {
         }
 
         synchronized boolean hasActiveNotifications(String packageName, String shortcutId) {
-            return mActiveNotifCounts.containsKey(Pair.create(packageName, shortcutId));
+            return mActiveNotifKeys.containsKey(Pair.create(packageName, shortcutId));
         }
     }
 
