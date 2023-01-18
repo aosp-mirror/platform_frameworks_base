@@ -237,13 +237,17 @@ constructor(
             openedDialogs.firstOrNull {
                 it.dialog.window.decorView.viewRootImpl == controller.viewRoot
             }
-        val animateFrom =
+        val controller =
             animatedParent?.dialogContentWithBackground?.let {
                 Controller.fromView(it, controller.cuj)
             }
                 ?: controller
 
-        if (animatedParent == null && animateFrom !is LaunchableView) {
+        if (
+            animatedParent == null &&
+                controller is ViewDialogLaunchAnimatorController &&
+                controller.source !is LaunchableView
+        ) {
             // Make sure the View we launch from implements LaunchableView to avoid visibility
             // issues. Given that we don't own dialog decorViews so we can't enforce it for launches
             // from a dialog.
@@ -272,7 +276,7 @@ constructor(
                 launchAnimator,
                 callback,
                 interactionJankMonitor,
-                animateFrom,
+                controller,
                 onDialogDismissed = { openedDialogs.remove(it) },
                 dialog = dialog,
                 animateBackgroundBoundsChange,
