@@ -297,6 +297,12 @@ fun AllSignInOptionCard(
                             )
                         }
                     }
+                    item {
+                        Divider(
+                            thickness = 8.dp,
+                            color = Color.Transparent,
+                        )
+                    }
                     // From another device
                     val remoteEntry = providerDisplayInfo.remoteEntry
                     if (remoteEntry != null) {
@@ -306,6 +312,13 @@ fun AllSignInOptionCard(
                                 onEntrySelected = onEntrySelected,
                             )
                         }
+                    }
+                    item {
+                        Divider(
+                            thickness = 1.dp,
+                            color = Color.LightGray,
+                            modifier = Modifier.padding(top = 16.dp)
+                        )
                     }
                     // Manage sign-ins (action chips)
                     item {
@@ -335,7 +348,7 @@ fun ActionChips(
 
     TextSecondary(
         text = stringResource(R.string.get_dialog_heading_manage_sign_ins),
-        style = MaterialTheme.typography.labelLarge,
+        style = MaterialTheme.typography.titleLarge,
         modifier = Modifier.padding(vertical = 8.dp)
     )
     // TODO: tweak padding.
@@ -343,7 +356,7 @@ fun ActionChips(
         modifier = Modifier.fillMaxWidth().wrapContentHeight(),
         shape = MaterialTheme.shapes.medium,
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             actionChips.forEach {
                 ActionEntryRow(it, onEntrySelected)
             }
@@ -358,7 +371,7 @@ fun RemoteEntryCard(
 ) {
     TextSecondary(
         text = stringResource(R.string.get_dialog_heading_from_another_device),
-        style = MaterialTheme.typography.labelLarge,
+        style = MaterialTheme.typography.titleLarge,
         modifier = Modifier.padding(vertical = 8.dp)
     )
     ContainerCard(
@@ -376,7 +389,7 @@ fun RemoteEntryCard(
                         painter = painterResource(R.drawable.ic_other_devices),
                         contentDescription = null,
                         tint = Color.Unspecified,
-                        modifier = Modifier.padding(start = 18.dp)
+                        modifier = Modifier.padding(start = 16.dp)
                     )
                 },
                 label = {
@@ -427,7 +440,7 @@ fun PerUserNameCredentials(
         text = stringResource(
             R.string.get_dialog_heading_for_username, perUserNameCredentialEntryList.userName
         ),
-        style = MaterialTheme.typography.labelLarge,
+        style = MaterialTheme.typography.titleLarge,
         modifier = Modifier.padding(vertical = 8.dp)
     )
     ContainerCard(
@@ -554,7 +567,7 @@ fun ActionEntryRow(
     TransparentBackgroundEntry(
         icon = {
             Image(
-                modifier = Modifier.padding(start = 10.dp).size(32.dp),
+                modifier = Modifier.padding(start = 10.dp).size(24.dp),
                 bitmap = actionEntryInfo.icon.toBitmap().asImageBitmap(),
                 // TODO: add description.
                 contentDescription = ""
@@ -565,13 +578,13 @@ fun ActionEntryRow(
                 TextOnSurfaceVariant(
                     text = actionEntryInfo.title,
                     style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(start = 5.dp),
+                    modifier = Modifier.padding(start = 8.dp),
                 )
                 if (actionEntryInfo.subTitle != null) {
                     TextSecondary(
                         text = actionEntryInfo.subTitle,
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(start = 5.dp),
+                        modifier = Modifier.padding(start = 8.dp),
                     )
                 }
             }
