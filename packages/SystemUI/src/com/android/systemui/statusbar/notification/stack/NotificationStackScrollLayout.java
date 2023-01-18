@@ -3132,7 +3132,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private void updateAnimationState(boolean running, View child) {
         if (child instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-            row.setIconAnimationRunning(running);
+            row.setAnimationRunning(running);
         }
     }
 

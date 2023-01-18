@@ -53,6 +53,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.TestableDependency;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.controls.util.MediaFeatureFlag;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -130,6 +131,7 @@ public class NotificationTestHelper {
     public final OnUserInteractionCallback mOnUserInteractionCallback;
     public final Runnable mFutureDismissalRunnable;
     private @InflationFlag int mDefaultInflationFlags;
+    private FeatureFlags mFeatureFlags;
 
     public NotificationTestHelper(
             Context context,
@@ -191,10 +193,15 @@ public class NotificationTestHelper {
         mFutureDismissalRunnable = mock(Runnable.class);
         when(mOnUserInteractionCallback.registerFutureDismissal(any(), anyInt()))
                 .thenReturn(mFutureDismissalRunnable);
+        mFeatureFlags = mock(FeatureFlags.class);
     }
 
     public void setDefaultInflationFlags(@InflationFlag int defaultInflationFlags) {
         mDefaultInflationFlags = defaultInflationFlags;
+    }
+
+    public void setFeatureFlags(FeatureFlags featureFlags) {
+        mFeatureFlags = featureFlags;
     }
 
     public ExpandableNotificationRowLogger getMockLogger() {
@@ -559,7 +566,8 @@ public class NotificationTestHelper {
                 mock(NotificationGutsManager.class),
                 mock(MetricsLogger.class),
                 mock(SmartReplyConstants.class),
-                mock(SmartReplyController.class));
+                mock(SmartReplyController.class),
+                mFeatureFlags);
 
         row.setAboveShelfChangedListener(aboveShelf -> { });
         mBindStage.getStageParams(entry).requireContentViews(extraInflationFlags);
