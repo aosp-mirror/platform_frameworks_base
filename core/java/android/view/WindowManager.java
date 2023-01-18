@@ -2580,6 +2580,15 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_SYSTEM_ERROR = 0x00000100;
 
         /**
+         * Flag to indicate that the view hierarchy of the window can only be measured when
+         * necessary. If a window size can be known by the LayoutParams, we can use the size to
+         * relayout window, and we don't have to measure the view hierarchy before laying out the
+         * views. This reduces the chances to perform measure.
+         * {@hide}
+         */
+        public static final int PRIVATE_FLAG_OPTIMIZE_MEASURE = 0x00000200;
+
+        /**
          * Flag that prevents the wallpaper behind the current window from receiving touch events.
          *
          * {@hide}
@@ -2781,6 +2790,7 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_NO_MOVE_ANIMATION,
                 PRIVATE_FLAG_COMPATIBLE_WINDOW,
                 PRIVATE_FLAG_SYSTEM_ERROR,
+                PRIVATE_FLAG_OPTIMIZE_MEASURE,
                 PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
                 PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR,
                 PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT,
@@ -2840,6 +2850,10 @@ public interface WindowManager extends ViewManager {
                         mask = PRIVATE_FLAG_SYSTEM_ERROR,
                         equals = PRIVATE_FLAG_SYSTEM_ERROR,
                         name = "SYSTEM_ERROR"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_OPTIMIZE_MEASURE,
+                        equals = PRIVATE_FLAG_OPTIMIZE_MEASURE,
+                        name = "OPTIMIZE_MEASURE"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
                         equals = PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
