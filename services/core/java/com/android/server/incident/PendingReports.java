@@ -16,15 +16,20 @@
 
 package com.android.server.incident;
 
+import static android.permission.PermissionManager.PERMISSION_GRANTED;
+
+import android.Manifest;
 import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
+import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IIncidentAuthListener;
 import android.os.IncidentManager;
@@ -32,6 +37,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.permission.PermissionManager;
 import android.util.Log;
 
 import java.io.FileDescriptor;
@@ -55,6 +61,7 @@ class PendingReports {
     private final Context mContext;
     private final PackageManager mPackageManager;
     private final AppOpsManager mAppOpsManager;
+    private final PermissionManager mPermissionManager;
 
     //
     // All fields below must be protected by mLock
@@ -126,6 +133,7 @@ class PendingReports {
         mContext = context;
         mPackageManager = context.getPackageManager();
         mAppOpsManager = context.getSystemService(AppOpsManager.class);
+        mPermissionManager = context.getSystemService(PermissionManager.class);
     }
 
     /**
@@ -295,6 +303,35 @@ class PendingReports {
             // do anything else.
             denyReportBeforeAddingRec(listener, callingPackage);
             return;
+        }
+
+        // Only with userdebug/eng build: it could check capture consentless bugreport permission
+        // and approve the report when it's granted.
+        boolean captureConsentlessBugreportOnUserdebugBuildGranted = false;
+        if ((Build.IS_USERDEBUG || Build.IS_ENG)
+                && (flags & IncidentManager.FLAG_ALLOW_CONSENTLESS_BUGREPORT) != 0) {
+            AttributionSource attributionSource =
+                    new AttributionSource.Builder(callingUid)
+                            .setPackageName(callingPackage)
+                            .build();
+            captureConsentlessBugreportOnUserdebugBuildGranted =
+                    mPermissionManager.checkPermissionForDataDelivery(
+                            Manifest.permission.CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
+                            attributionSource,
+                            /* message= */ null)
+                            == PERMISSION_GRANTED;
+        }
+        if (captureConsentlessBugreportOnUserdebugBuildGranted) {
+            try {
+                PendingReportRec rec =
+                        new PendingReportRec(
+                                callingPackage, receiverClass, reportId, flags, listener);
+                Log.d(TAG, "approving consentless report: " + rec.getUri());
+                listener.onReportApproved();
+                return;
+            } catch (RemoteException e) {
+                Log.e(TAG, "authorizeReportImpl listener.onReportApproved RemoteException: ", e);
+            }
         }
 
         // Save the record for when the PermissionController comes back to authorize it.

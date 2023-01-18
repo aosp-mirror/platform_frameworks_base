@@ -20,6 +20,7 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.ui.text.AnnotatedString
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.rememberContext
@@ -36,7 +37,10 @@ interface TogglePermissionAppListModel<T : AppRecord> {
     val footerResId: Int
     val switchRestrictionKeys: List<String>
         get() = emptyList()
-
+    @Composable
+    fun footerContent(): (@Composable () -> Unit)? {
+        return null
+    }
     /**
      * Loads the extra info for the App List, and generates the [AppRecord] List.
      *

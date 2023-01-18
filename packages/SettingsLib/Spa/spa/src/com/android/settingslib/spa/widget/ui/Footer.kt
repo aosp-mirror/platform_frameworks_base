@@ -34,15 +34,22 @@ import com.android.settingslib.spa.framework.theme.SettingsTheme
 @Composable
 fun Footer(footerText: String) {
     if (footerText.isEmpty()) return
+    Footer {
+        SettingsBody(footerText)
+    }
+}
+
+@Composable
+fun Footer(content: @Composable () -> Unit) {
     Column(Modifier.padding(SettingsDimension.itemPadding)) {
         Icon(
-            imageVector = Icons.Outlined.Info,
-            contentDescription = null,
-            modifier = Modifier.size(SettingsDimension.itemIconSize),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                imageVector = Icons.Outlined.Info,
+                contentDescription = null,
+                modifier = Modifier.size(SettingsDimension.itemIconSize),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(modifier = Modifier.height(SettingsDimension.itemPaddingVertical))
-        SettingsBody(footerText)
+        content()
     }
 }
 
