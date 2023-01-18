@@ -576,6 +576,10 @@
          rotations as the default behavior. -->
     <bool name="config_allowAllRotations">false</bool>
 
+    <!-- If false and config_allowAllRotations is false, the screen will rotate to the natural
+         orientation of the device when the auto-rotate policy is toggled. -->
+    <bool name="config_useCurrentRotationOnRotationLockChange">false</bool>
+
     <!-- If true, the direction rotation is applied to get to an application's requested
          orientation is reversed.  Normally, the model is that landscape is
          clockwise from portrait; thus on a portrait device an app requesting
