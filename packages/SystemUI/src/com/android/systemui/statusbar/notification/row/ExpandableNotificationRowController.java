@@ -219,7 +219,8 @@ public class ExpandableNotificationRowController implements NotifViewController 
                 mNotificationGutsManager,
                 mMetricsLogger,
                 mSmartReplyConstants,
-                mSmartReplyController
+                mSmartReplyController,
+                mFeatureFlags
         );
         mView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         if (mAllowLongPress) {

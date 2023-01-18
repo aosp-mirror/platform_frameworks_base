@@ -102,6 +102,10 @@ object Flags {
     val FILTER_UNSEEN_NOTIFS_ON_KEYGUARD =
         unreleasedFlag(254647461, "filter_unseen_notifs_on_keyguard", teamfood = true)
 
+    // TODO(b/263414400): Tracking Bug
+    @JvmField
+    val NOTIFICATION_ANIMATE_BIG_PICTURE = unreleasedFlag(120, "notification_animate_big_picture")
+
     // 200 - keyguard/lockscreen
     // ** Flag retired **
     // public static final BooleanFlag KEYGUARD_LAYOUT =
