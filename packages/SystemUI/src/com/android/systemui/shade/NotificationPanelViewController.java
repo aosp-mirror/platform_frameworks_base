@@ -450,6 +450,7 @@ public final class NotificationPanelViewController implements Dumpable {
     private float mDownY;
     private int mDisplayTopInset = 0; // in pixels
     private int mDisplayRightInset = 0; // in pixels
+    private int mDisplayLeftInset = 0; // in pixels
     private int mLargeScreenShadeHeaderHeight;
     private int mSplitShadeNotificationsScrimMarginBottom;
 
@@ -3011,7 +3012,7 @@ public final class NotificationPanelViewController implements Dumpable {
             // left bounds can ignore insets, it should always reach the edge of the screen
             return 0;
         } else {
-            return mNotificationStackScrollLayoutController.getLeft();
+            return mNotificationStackScrollLayoutController.getLeft() + mDisplayLeftInset;
         }
     }
 
@@ -3019,7 +3020,7 @@ public final class NotificationPanelViewController implements Dumpable {
         if (mIsFullWidth) {
             return mView.getRight() + mDisplayRightInset;
         } else {
-            return mNotificationStackScrollLayoutController.getRight();
+            return mNotificationStackScrollLayoutController.getRight() + mDisplayLeftInset;
         }
     }
 
@@ -3143,14 +3144,30 @@ public final class NotificationPanelViewController implements Dumpable {
 
         // Convert global clipping coordinates to local ones,
         // relative to NotificationStackScrollLayout
-        int nsslLeft = left - mNotificationStackScrollLayoutController.getLeft();
-        int nsslRight = right - mNotificationStackScrollLayoutController.getLeft();
+        int nsslLeft = calculateNsslLeft(left);
+        int nsslRight = calculateNsslRight(right);
         int nsslTop = getNotificationsClippingTopBounds(top);
         int nsslBottom = bottom - mNotificationStackScrollLayoutController.getTop();
         int bottomRadius = mSplitShadeEnabled ? radius : 0;
         int topRadius = mSplitShadeEnabled && mExpandingFromHeadsUp ? 0 : radius;
         mNotificationStackScrollLayoutController.setRoundedClippingBounds(
                 nsslLeft, nsslTop, nsslRight, nsslBottom, topRadius, bottomRadius);
+    }
+
+    private int calculateNsslLeft(int nsslLeftAbsolute) {
+        int left = nsslLeftAbsolute - mNotificationStackScrollLayoutController.getLeft();
+        if (mIsFullWidth) {
+            return left;
+        }
+        return left - mDisplayLeftInset;
+    }
+
+    private int calculateNsslRight(int nsslRightAbsolute) {
+        int right = nsslRightAbsolute - mNotificationStackScrollLayoutController.getLeft();
+        if (mIsFullWidth) {
+            return right;
+        }
+        return right - mDisplayLeftInset;
     }
 
     private int getNotificationsClippingTopBounds(int qsTop) {
@@ -4550,6 +4567,7 @@ public final class NotificationPanelViewController implements Dumpable {
         ipw.print("mDownY="); ipw.println(mDownY);
         ipw.print("mDisplayTopInset="); ipw.println(mDisplayTopInset);
         ipw.print("mDisplayRightInset="); ipw.println(mDisplayRightInset);
+        ipw.print("mDisplayLeftInset="); ipw.println(mDisplayLeftInset);
         ipw.print("mLargeScreenShadeHeaderHeight="); ipw.println(mLargeScreenShadeHeaderHeight);
         ipw.print("mSplitShadeNotificationsScrimMarginBottom=");
         ipw.println(mSplitShadeNotificationsScrimMarginBottom);
@@ -5927,6 +5945,7 @@ public final class NotificationPanelViewController implements Dumpable {
         Insets combinedInsets = insets.getInsetsIgnoringVisibility(insetTypes);
         mDisplayTopInset = combinedInsets.top;
         mDisplayRightInset = combinedInsets.right;
+        mDisplayLeftInset = combinedInsets.left;
 
         mNavigationBarBottomHeight = insets.getStableInsetBottom();
         updateMaxHeadsUpTranslation();
