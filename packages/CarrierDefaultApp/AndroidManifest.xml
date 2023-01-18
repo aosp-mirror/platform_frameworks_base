@@ -34,8 +34,7 @@
         android:label="@string/app_name"
         android:directBootAware="true"
         android:usesCleartextTraffic="true"
-        android:icon="@mipmap/ic_launcher_android"
-        android:debuggable="true">
+        android:icon="@mipmap/ic_launcher_android">
         <receiver android:name="com.android.carrierdefaultapp.CarrierDefaultBroadcastReceiver"
             android:exported="true">
             <intent-filter>
