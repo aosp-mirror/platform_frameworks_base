@@ -47,10 +47,13 @@ final class DeviceStateController implements DeviceStateManager.DeviceStateCallb
     @NonNull
     private final int[] mRearDisplayDeviceStates;
     @NonNull
+    private final int[] mReverseRotationAroundZAxisStates;
+    @NonNull
     private final List<Consumer<DeviceState>> mDeviceStateCallbacks = new ArrayList<>();
 
     @Nullable
     private DeviceState mLastDeviceState;
+    private int mCurrentState;
 
     public enum DeviceState {
         UNKNOWN, OPEN, FOLDED, HALF_FOLDED, REAR,
@@ -58,6 +61,7 @@ final class DeviceStateController implements DeviceStateManager.DeviceStateCallb
 
     DeviceStateController(@NonNull Context context, @NonNull Handler handler) {
         mDeviceStateManager = context.getSystemService(DeviceStateManager.class);
+
         mOpenDeviceStates = context.getResources()
                 .getIntArray(R.array.config_openDeviceStates);
         mHalfFoldedDeviceStates = context.getResources()
@@ -66,6 +70,8 @@ final class DeviceStateController implements DeviceStateManager.DeviceStateCallb
                 .getIntArray(R.array.config_foldedDeviceStates);
         mRearDisplayDeviceStates = context.getResources()
                 .getIntArray(R.array.config_rearDisplayDeviceStates);
+        mReverseRotationAroundZAxisStates = context.getResources()
+                .getIntArray(R.array.config_deviceStatesToReverseDefaultDisplayRotationAroundZAxis);
 
         if (mDeviceStateManager != null) {
             mDeviceStateManager.registerCallback(new HandlerExecutor(handler), this);
@@ -82,8 +88,17 @@ final class DeviceStateController implements DeviceStateManager.DeviceStateCallb
         mDeviceStateCallbacks.add(callback);
     }
 
+    /**
+     * @return true if the rotation direction on the Z axis should be reversed.
+     */
+    boolean shouldReverseRotationDirectionAroundZAxis() {
+        return ArrayUtils.contains(mReverseRotationAroundZAxisStates, mCurrentState);
+    }
+
     @Override
     public void onStateChanged(int state) {
+        mCurrentState = state;
+
         final DeviceState deviceState;
         if (ArrayUtils.contains(mHalfFoldedDeviceStates, state)) {
             deviceState = DeviceState.HALF_FOLDED;
