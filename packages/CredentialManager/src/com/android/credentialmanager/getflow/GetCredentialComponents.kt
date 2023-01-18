@@ -63,6 +63,7 @@ import com.android.credentialmanager.common.material.ModalBottomSheetLayout
 import com.android.credentialmanager.common.material.ModalBottomSheetValue
 import com.android.credentialmanager.common.material.rememberModalBottomSheetState
 import com.android.credentialmanager.common.ui.ActionButton
+import com.android.credentialmanager.common.ui.ConfirmButton
 import com.android.credentialmanager.common.ui.Entry
 import com.android.credentialmanager.common.ui.TextOnSurface
 import com.android.credentialmanager.common.ui.TextSecondary
@@ -95,7 +96,10 @@ fun GetCredentialScreen(
                         PrimarySelectionCard(
                             requestDisplayInfo = uiState.requestDisplayInfo,
                             providerDisplayInfo = uiState.providerDisplayInfo,
+                            providerInfoList = uiState.providerInfoList,
+                            activeEntry = uiState.activeEntry,
                             onEntrySelected = viewModel::onEntrySelected,
+                            onConfirm = viewModel::onConfirmEntrySelected,
                             onMoreOptionSelected = viewModel::onMoreOptionSelected,
                         )
                     } else {
@@ -133,7 +137,10 @@ fun GetCredentialScreen(
 fun PrimarySelectionCard(
     requestDisplayInfo: RequestDisplayInfo,
     providerDisplayInfo: ProviderDisplayInfo,
+    providerInfoList: List<ProviderInfo>,
+    activeEntry: EntryInfo?,
     onEntrySelected: (EntryInfo) -> Unit,
+    onConfirm: () -> Unit,
     onMoreOptionSelected: () -> Unit,
 ) {
     val sortedUserNameToCredentialEntryList =
@@ -217,13 +224,33 @@ fun PrimarySelectionCard(
                 thickness = 24.dp,
                 color = Color.Transparent
             )
+            var totalEntriesCount = sortedUserNameToCredentialEntryList
+                .flatMap{ it.sortedCredentialEntryList}.size + authenticationEntryList
+                .size + providerInfoList.flatMap { it.actionEntryList }.size
+            if (providerDisplayInfo.remoteEntry != null) totalEntriesCount += 1
+            // Row horizontalArrangement differs on only one actionButton(should place on most
+            // left)/only one confirmButton(should place on most right)/two buttons exist the same
+            // time(should be one on the left, one on the right)
             Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement =
+                if (totalEntriesCount <= 1 && activeEntry != null) Arrangement.End
+                else if (totalEntriesCount > 1 && activeEntry == null) Arrangement.Start
+                else Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
             ) {
-                ActionButton(
-                    stringResource(R.string.get_dialog_use_saved_passkey_for),
-                    onMoreOptionSelected)
+                if (totalEntriesCount > 1) {
+                    ActionButton(
+                        stringResource(R.string.get_dialog_use_saved_passkey_for),
+                        onMoreOptionSelected
+                    )
+                }
+                // Only one sign-in options exist
+                if (activeEntry != null) {
+                    ConfirmButton(
+                        stringResource(R.string.string_continue),
+                        onClick = onConfirm
+                    )
+                }
             }
             Divider(
                 thickness = 18.dp,
