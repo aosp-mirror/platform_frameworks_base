@@ -16,10 +16,12 @@
 
 package com.android.systemui.accessibility.accessibilitymenu;
 
+import android.accessibilityservice.AccessibilityButtonController;
 import android.accessibilityservice.AccessibilityService;
 import android.content.res.Configuration;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
@@ -28,10 +30,16 @@ import android.view.accessibility.AccessibilityEvent;
 import com.android.systemui.accessibility.accessibilitymenu.view.A11yMenuOverlayLayout;
 
 /** @hide */
-public class AccessibilityMenuService extends AccessibilityService implements View.OnTouchListener {
+public class AccessibilityMenuService extends AccessibilityService
+        implements View.OnTouchListener {
     private static final String TAG = "A11yMenuService";
 
     private static final long BUFFER_MILLISECONDS_TO_PREVENT_UPDATE_FAILURE = 100L;
+
+    private long mLastTimeTouchedOutside = 0L;
+    // Timeout used to ignore the A11y button onClick() when ACTION_OUTSIDE is also received on
+    // clicking on the A11y button.
+    public static final long BUTTON_CLICK_TIMEOUT = 200;
 
     private A11yMenuOverlayLayout mA11yMenuLayout;
 
@@ -80,6 +88,44 @@ public class AccessibilityMenuService extends AccessibilityService implements Vi
     @Override
     public void onCreate() {
         super.onCreate();
+
+        getAccessibilityButtonController().registerAccessibilityButtonCallback(
+                new AccessibilityButtonController.AccessibilityButtonCallback() {
+                    /**
+                     * Called when the accessibility button in the system's navigation
+                     * area is clicked.
+                     *
+                     * @param controller the controller used to register for this
+                     *                   callback
+                     */
+                    @Override
+                    public void onClicked(AccessibilityButtonController controller) {
+                        if (SystemClock.uptimeMillis() - mLastTimeTouchedOutside
+                                > BUTTON_CLICK_TIMEOUT) {
+                            mA11yMenuLayout.toggleVisibility();
+                        }
+                    }
+
+                    /**
+                     * Called when the availability of the accessibility button in the
+                     * system's
+                     * navigation area has changed. The accessibility button may become
+                     * unavailable
+                     * because the device shopped showing the button, the button was
+                     * assigned to another
+                     * service, or for other reasons.
+                     *
+                     * @param controller the controller used to register for this
+                     *                   callback
+                     * @param available  {@code true} if the accessibility button is
+                     *                   available to this
+                     *                   service, {@code false} otherwise
+                     */
+                    @Override
+                    public void onAvailabilityChanged(AccessibilityButtonController controller,
+                            boolean available) {}
+                }
+        );
     }
 
     @Override
@@ -124,12 +170,26 @@ public class AccessibilityMenuService extends AccessibilityService implements Vi
                 mOnConfigChangedRunnable, BUFFER_MILLISECONDS_TO_PREVENT_UPDATE_FAILURE);
     }
 
+    /**
+     * Handles click events of shortcuts.
+     *
+     * @param view the shortcut button being clicked.
+     */
+    public void handleClick(View view) {
+        mA11yMenuLayout.hideMenu();
+    }
+
     @Override
     public void onInterrupt() {
     }
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
+            if (mA11yMenuLayout.hideMenu()) {
+                mLastTimeTouchedOutside = SystemClock.uptimeMillis();
+            }
+        }
         return false;
     }
 }
