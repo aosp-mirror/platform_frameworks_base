@@ -1688,7 +1688,8 @@ public class ProvisioningManager {
 
     /**
      * Notify the framework that an RCS autoconfiguration XML file has been received for
-     * provisioning.
+     * provisioning. This API is only valid if the device supports IMS, which can be checked using
+     * {@link PackageManager#hasSystemFeature}.
      *
      * <p>Requires Permission:
      * <ul>
@@ -1926,7 +1927,8 @@ public class ProvisioningManager {
 
     /**
      * Reconfiguration triggered by the RCS application. Most likely cause
-     * is the 403 forbidden to a HTTP request.
+     * is the 403 forbidden to a HTTP request. This API is only valid if the device supports IMS,
+     * which can be checked using {@link PackageManager#hasSystemFeature}
      *
      * <p>When this api is called, the RCS configuration for the associated
      * subscription will be removed, and the application which has registered
