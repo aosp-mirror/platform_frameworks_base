@@ -342,14 +342,12 @@ object KeyguardBottomAreaViewBinder {
 
         private val longPressDurationMs = ViewConfiguration.getLongPressTimeout().toLong()
         private var longPressAnimator: ViewPropertyAnimator? = null
-        private var downTimestamp = 0L
 
         @SuppressLint("ClickableViewAccessibility")
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
             return when (event?.actionMasked) {
                 MotionEvent.ACTION_DOWN ->
                     if (viewModel.configKey != null) {
-                        downTimestamp = System.currentTimeMillis()
                         longPressAnimator =
                             view
                                 .animate()
@@ -396,7 +394,7 @@ object KeyguardBottomAreaViewBinder {
                 MotionEvent.ACTION_UP -> {
                     cancel(
                         onAnimationEnd =
-                            if (System.currentTimeMillis() - downTimestamp < longPressDurationMs) {
+                            if (event.eventTime - event.downTime < longPressDurationMs) {
                                 Runnable {
                                     messageDisplayer.invoke(
                                         R.string.keyguard_affordance_press_too_short
@@ -437,7 +435,6 @@ object KeyguardBottomAreaViewBinder {
         }
 
         private fun cancel(onAnimationEnd: Runnable? = null) {
-            downTimestamp = 0L
             longPressAnimator?.cancel()
             longPressAnimator = null
             view.animate().scaleX(1f).scaleY(1f).withEndAction(onAnimationEnd)
