@@ -17,12 +17,14 @@
 package android.nfc;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.OnActivityPausedListener;
@@ -46,9 +48,14 @@ import android.os.ServiceManager;
 import android.util.Log;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -370,6 +377,45 @@ public final class NfcAdapter {
      */
     public static final String ACTION_REQUIRE_UNLOCK_FOR_NFC =
             "android.nfc.action.REQUIRE_UNLOCK_FOR_NFC";
+
+    /**
+     * The requested app is correctly added to the Tag intent app preference.
+     *
+     * @see #setTagIntentAppPreferenceForUser(int userId, String pkg, boolean allow)
+     * @hide
+     */
+    @SystemApi
+    public static final int TAG_INTENT_APP_PREF_RESULT_SUCCESS = 0;
+
+    /**
+     * The requested app is not installed on the device.
+     *
+     * @see #setTagIntentAppPreferenceForUser(int userId, String pkg, boolean allow)
+     * @hide
+     */
+    @SystemApi
+    public static final int TAG_INTENT_APP_PREF_RESULT_PACKAGE_NOT_FOUND = -1;
+
+    /**
+     * The NfcService is not available.
+     *
+     * @see #setTagIntentAppPreferenceForUser(int userId, String pkg, boolean allow)
+     * @hide
+     */
+    @SystemApi
+    public static final int TAG_INTENT_APP_PREF_RESULT_UNAVAILABLE = -2;
+
+    /**
+     * Possible response codes from {@link #setTagIntentAppPreferenceForUser}.
+     *
+     * @hide
+     */
+    @IntDef(prefix = { "TAG_INTENT_APP_PREF_RESULT" }, value = {
+            TAG_INTENT_APP_PREF_RESULT_SUCCESS,
+            TAG_INTENT_APP_PREF_RESULT_PACKAGE_NOT_FOUND,
+            TAG_INTENT_APP_PREF_RESULT_UNAVAILABLE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TagIntentAppPreferenceResult {}
 
     // Guarded by NfcAdapter.class
     static boolean sIsInitialized = false;
@@ -2407,5 +2453,134 @@ public final class NfcAdapter {
     public void unregisterControllerAlwaysOnListener(
             @NonNull ControllerAlwaysOnListener listener) {
         mControllerAlwaysOnListener.unregister(listener);
+    }
+
+
+    /**
+     * Sets whether we dispatch NFC Tag intents to the package.
+     *
+     * <p>{@link #ACTION_NDEF_DISCOVERED}, {@link #ACTION_TECH_DISCOVERED} or
+     * {@link #ACTION_TAG_DISCOVERED} will not be dispatched to an Activity if its package is
+     * disallowed.
+     * <p>An app is added to the preference list with the allowed flag set to {@code true}
+     * when a Tag intent is dispatched to the package for the first time. This API is called
+     * by settings to note that the user wants to change this default preference.
+     *
+     * @param userId the user to whom this package name will belong to
+     * @param pkg the full name (i.e. com.google.android.tag) of the package that will be added to
+     * the preference list
+     * @param allow {@code true} to allow dispatching Tag intents to the package's activity,
+     * {@code false} otherwise
+     * @return the {@link #TagIntentAppPreferenceResult} value
+     * @throws UnsupportedOperationException if {@link isTagIntentAppPreferenceSupported} returns
+     * {@code false}
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    @TagIntentAppPreferenceResult
+    public int setTagIntentAppPreferenceForUser(@UserIdInt int userId,
+                @NonNull String pkg, boolean allow) {
+        Objects.requireNonNull(pkg, "pkg cannot be null");
+        if (!isTagIntentAppPreferenceSupported()) {
+            Log.e(TAG, "TagIntentAppPreference is not supported");
+            throw new UnsupportedOperationException();
+        }
+        try {
+            return sService.setTagIntentAppPreferenceForUser(userId, pkg, allow);
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
+            try {
+                return sService.setTagIntentAppPreferenceForUser(userId, pkg, allow);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
+            return TAG_INTENT_APP_PREF_RESULT_UNAVAILABLE;
+        }
+    }
+
+
+    /**
+     * Get the Tag dispatch preference list of the UserId.
+     *
+     * <p>This returns a mapping of package names for this user id to whether we dispatch Tag
+     * intents to the package. {@link #ACTION_NDEF_DISCOVERED}, {@link #ACTION_TECH_DISCOVERED} or
+    *  {@link #ACTION_TAG_DISCOVERED} will not be dispatched to an Activity if its package is
+    *  disallowed.
+     *
+     * @param userId the user to whom this preference list will belong to
+     * @return a map of the UserId which indicates the mapping from package name to
+     * boolean(allow status), otherwise return an empty map
+     * @throws UnsupportedOperationException if {@link isTagIntentAppPreferenceSupported} returns
+     * {@code false}
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    @NonNull
+    public Map<String, Boolean> getTagIntentAppPreferenceForUser(@UserIdInt int userId) {
+        if (!isTagIntentAppPreferenceSupported()) {
+            Log.e(TAG, "TagIntentAppPreference is not supported");
+            throw new UnsupportedOperationException();
+        }
+        try {
+            Map<String, Boolean> result = (Map<String, Boolean>) sService
+                     .getTagIntentAppPreferenceForUser(userId);
+            return result;
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return Collections.emptyMap();
+            }
+            try {
+                Map<String, Boolean> result = (Map<String, Boolean>) sService
+                        .getTagIntentAppPreferenceForUser(userId);
+                return result;
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
+            return Collections.emptyMap();
+        }
+    }
+
+    /**
+     * Checks if the device supports Tag application preference.
+     *
+     * @return {@code true} if the device supports Tag application preference, {@code false}
+     * otherwise
+     * @throws UnsupportedOperationException if FEATURE_NFC is unavailable
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    public boolean isTagIntentAppPreferenceSupported() {
+        if (!sHasNfcFeature) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            return sService.isTagIntentAppPreferenceSupported();
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return false;
+            }
+            try {
+                return sService.isTagIntentAppPreferenceSupported();
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
+            return false;
+        }
     }
 }
