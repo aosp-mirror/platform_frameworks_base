@@ -388,7 +388,8 @@ final class InstallPackageHelper {
         }
 
         if (reconciledPkg.mCollectedSharedLibraryInfos != null
-                || (oldPkgSetting != null && oldPkgSetting.getUsesLibraries() != null)) {
+                || (oldPkgSetting != null
+                && !oldPkgSetting.getSharedLibraryDependencies().isEmpty())) {
             // Reconcile if the new package or the old package uses shared libraries.
             // It is possible that the old package uses shared libraries but the new one doesn't.
             mSharedLibraries.executeSharedLibrariesUpdate(pkg, pkgSetting, null, null,

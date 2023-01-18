@@ -180,8 +180,8 @@ package com.android.server.pm.pkg {
     method @Nullable public String getPrimaryCpuAbi();
     method @Nullable public String getSeInfo();
     method @Nullable public String getSecondaryCpuAbi();
+    method @NonNull public java.util.List<com.android.server.pm.pkg.SharedLibrary> getSharedLibraryDependencies();
     method @NonNull public com.android.server.pm.pkg.PackageUserState getStateForUser(@NonNull android.os.UserHandle);
-    method @NonNull public java.util.List<com.android.server.pm.pkg.SharedLibrary> getUsesLibraries();
     method public boolean isApex();
     method public boolean isPrivileged();
     method public boolean isSystem();
