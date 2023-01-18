@@ -108,7 +108,6 @@ import android.view.InsetsFlags;
 import android.view.InsetsFrameProvider;
 import android.view.InsetsSource;
 import android.view.InsetsState;
-import android.view.InsetsState.InternalInsetsType;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewDebug;
@@ -2228,23 +2227,40 @@ public class DisplayPolicy {
         return intersectsAnyInsets(win.getFrame(), win.getInsetsState(), type);
     }
 
-    private Rect getBarContentFrameForWindow(WindowState win, @InternalInsetsType int type) {
+    private Rect getBarContentFrameForWindow(WindowState win, @InsetsType int type) {
         final DisplayFrames displayFrames = win.getDisplayFrames(mDisplayContent.mDisplayFrames);
         final InsetsState state = displayFrames.mInsetsState;
-        final Rect tmpRect = new Rect();
-        sTmpDisplayCutoutSafe.set(displayFrames.mDisplayCutoutSafe);
-        if (type == ITYPE_STATUS_BAR) {
-            // The status bar content can extend into regular display cutout insets but not
-            // waterfall insets.
-            sTmpDisplayCutoutSafe.top =
-                    Math.max(state.getDisplayCutout().getWaterfallInsets().top, 0);
+        final Rect df = displayFrames.mUnrestricted;
+        final Rect safe = sTmpDisplayCutoutSafe;
+        final Insets waterfallInsets = state.getDisplayCutout().getWaterfallInsets();
+        final Rect outRect = new Rect();
+        final Rect sourceContent = sTmpRect;
+        safe.set(displayFrames.mDisplayCutoutSafe);
+        for (int i = state.sourceSize() - 1; i >= 0; i--) {
+            final InsetsSource source = state.sourceAt(i);
+            if (source.getType() != type) {
+                continue;
+            }
+            if (type == Type.statusBars()) {
+                safe.set(displayFrames.mDisplayCutoutSafe);
+                final Insets insets = source.calculateInsets(df, true /* ignoreVisibility */);
+                // The status bar content can extend into regular display cutout insets if they are
+                // at the same side, but the content cannot extend into waterfall insets.
+                if (insets.left > 0) {
+                    safe.left = Math.max(df.left + waterfallInsets.left, df.left);
+                } else if (insets.top > 0) {
+                    safe.top = Math.max(df.top + waterfallInsets.top, df.top);
+                } else if (insets.right > 0) {
+                    safe.right = Math.max(df.right - waterfallInsets.right, df.right);
+                } else if (insets.bottom > 0) {
+                    safe.bottom = Math.max(df.bottom - waterfallInsets.bottom, df.bottom);
+                }
+            }
+            sourceContent.set(source.getFrame());
+            sourceContent.intersect(safe);
+            outRect.union(sourceContent);
         }
-        final InsetsSource source = state.peekSource(type);
-        if (source != null) {
-            tmpRect.set(source.getFrame());
-            tmpRect.intersect(sTmpDisplayCutoutSafe);
-        }
-        return tmpRect;
+        return outRect;
     }
 
     /**
@@ -2257,7 +2273,7 @@ public class DisplayPolicy {
      * be drawn over letterboxed activity.
      */
     @VisibleForTesting
-    boolean isFullyTransparentAllowed(WindowState win, @InternalInsetsType int type) {
+    boolean isFullyTransparentAllowed(WindowState win, @InsetsType int type) {
         if (win == null) {
             return true;
         }
@@ -2284,7 +2300,7 @@ public class DisplayPolicy {
         for (int i = mStatusBarBackgroundWindows.size() - 1; i >= 0; i--) {
             final WindowState window = mStatusBarBackgroundWindows.get(i);
             drawBackground &= drawsBarBackground(window);
-            isFullyTransparentAllowed &= isFullyTransparentAllowed(window, ITYPE_STATUS_BAR);
+            isFullyTransparentAllowed &= isFullyTransparentAllowed(window, Type.statusBars());
         }
 
         if (drawBackground) {
@@ -2324,7 +2340,7 @@ public class DisplayPolicy {
             }
         }
 
-        if (!isFullyTransparentAllowed(mNavBarBackgroundWindow, ITYPE_NAVIGATION_BAR)) {
+        if (!isFullyTransparentAllowed(mNavBarBackgroundWindow, Type.navigationBars())) {
             appearance |= APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS;
         }
 
