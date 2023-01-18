@@ -66,7 +66,7 @@ class GetCredentialRequest constructor(
                         it.type,
                         it.credentialRetrievalData,
                         it.candidateQueryData,
-                        it.requireSystemProvider()
+                        it.isSystemProviderRequired()
                     )
                 }
             )
