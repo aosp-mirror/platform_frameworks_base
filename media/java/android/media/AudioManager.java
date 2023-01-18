@@ -106,7 +106,6 @@ public class AudioManager {
     private Context mOriginalContext;
     private Context mApplicationContext;
     private @Nullable VirtualDeviceManager mVirtualDeviceManager; // Lazy initialized.
-    private long mVolumeKeyUpTime;
     private static final String TAG = "AudioManager";
     private static final boolean DEBUG = false;
     private static final AudioPortEventHandler sAudioPortEventHandler = new AudioPortEventHandler();
@@ -911,7 +910,7 @@ public class AudioManager {
         int keyCode = event.getKeyCode();
         if (keyCode != KeyEvent.KEYCODE_VOLUME_DOWN && keyCode != KeyEvent.KEYCODE_VOLUME_UP
                 && keyCode != KeyEvent.KEYCODE_VOLUME_MUTE
-                && mVolumeKeyUpTime + AudioSystem.PLAY_SOUND_DELAY > SystemClock.uptimeMillis()) {
+                && AudioSystem.PLAY_SOUND_DELAY > SystemClock.uptimeMillis()) {
             /*
              * The user has hit another key during the delay (e.g., 300ms)
              * since the last volume key up, so cancel any sounds.
