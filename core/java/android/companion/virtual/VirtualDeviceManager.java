@@ -69,6 +69,8 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.view.Surface;
 
+import com.android.internal.annotations.GuardedBy;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -333,10 +335,15 @@ public final class VirtualDeviceManager {
      * @hide
      */
     public void playSoundEffect(int deviceId, @AudioManager.SystemSoundEffect int effectType) {
-        //TODO - handle requests to play sound effects by custom callbacks or SoundPool asociated
-        // with device session id.
-        // For now, this is intentionally left empty and effectively disables sound effects for
-        // virtual devices with custom device audio policy.
+        if (mService == null) {
+            Log.w(TAG, "Failed to dispatch sound effect; no virtual device manager service.");
+            return;
+        }
+        try {
+            mService.playSoundEffect(deviceId, effectType);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -359,6 +366,10 @@ public final class VirtualDeviceManager {
         private final ArrayMap<IntentInterceptorCallback,
                      VirtualIntentInterceptorDelegate> mIntentInterceptorListeners =
                 new ArrayMap<>();
+        private final Object mSoundEffectListenersLock = new Object();
+        @GuardedBy("mSoundEffectListenersLock")
+        private final ArrayMap<SoundEffectListener, SoundEffectListenerDelegate>
+                mSoundEffectListeners = new ArrayMap<>();
         private final IVirtualDeviceActivityListener mActivityListenerBinder =
                 new IVirtualDeviceActivityListener.Stub() {
 
@@ -387,6 +398,22 @@ public final class VirtualDeviceManager {
                         }
                     }
                 };
+        private final IVirtualDeviceSoundEffectListener mSoundEffectListener =
+                new IVirtualDeviceSoundEffectListener.Stub() {
+                    @Override
+                    public void onPlaySoundEffect(int soundEffect) {
+                        final long token = Binder.clearCallingIdentity();
+                        try {
+                            synchronized (mSoundEffectListenersLock) {
+                                for (int i = 0; i < mSoundEffectListeners.size(); i++) {
+                                    mSoundEffectListeners.valueAt(i).onPlaySoundEffect(soundEffect);
+                                }
+                            }
+                        } finally {
+                            Binder.restoreCallingIdentity(token);
+                        }
+                    }
+                };
         @Nullable
         private VirtualCameraDevice mVirtualCameraDevice;
         @NonNull
@@ -407,7 +434,8 @@ public final class VirtualDeviceManager {
                     mContext.getPackageName(),
                     associationId,
                     params,
-                    mActivityListenerBinder);
+                    mActivityListenerBinder,
+                    mSoundEffectListener);
             final List<VirtualSensorConfig> virtualSensorConfigs = params.getVirtualSensorConfigs();
             for (int i = 0; i < virtualSensorConfigs.size(); ++i) {
                 mVirtualSensors.add(createVirtualSensor(virtualSensorConfigs.get(i)));
@@ -947,6 +975,35 @@ public final class VirtualDeviceManager {
         }
 
         /**
+         * Adds a sound effect listener.
+         *
+         * @param executor The executor where the listener is executed on.
+         * @param soundEffectListener The listener to add.
+         * @see #removeActivityListener(ActivityListener)
+         */
+        public void addSoundEffectListener(@CallbackExecutor @NonNull Executor executor,
+                @NonNull SoundEffectListener soundEffectListener) {
+            final SoundEffectListenerDelegate delegate =
+                    new SoundEffectListenerDelegate(Objects.requireNonNull(executor),
+                            Objects.requireNonNull(soundEffectListener));
+            synchronized (mSoundEffectListenersLock) {
+                mSoundEffectListeners.put(soundEffectListener, delegate);
+            }
+        }
+
+        /**
+         * Removes a sound effect listener previously added with {@link #addActivityListener}.
+         *
+         * @param soundEffectListener The listener to remove.
+         * @see #addActivityListener(Executor, ActivityListener)
+         */
+        public void removeSoundEffectListener(@NonNull SoundEffectListener soundEffectListener) {
+            synchronized (mSoundEffectListenersLock) {
+                mSoundEffectListeners.remove(soundEffectListener);
+            }
+        }
+
+        /**
          * Registers an intent interceptor that will intercept an intent attempting to launch
          * when matching the provided IntentFilter and calls the callback with the intercepted
          * intent.
@@ -1088,6 +1145,40 @@ public final class VirtualDeviceManager {
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
+        }
+    }
+
+    /**
+     * Listener for system sound effect playback on virtual device.
+     * @hide
+     */
+    @SystemApi
+    public interface SoundEffectListener {
+
+        /**
+         * Called when there's a system sound effect to be played on virtual device.
+         *
+         * @param effectType - system sound effect type, see
+         *     {@code android.media.AudioManager.SystemSoundEffect}
+         */
+        void onPlaySoundEffect(@AudioManager.SystemSoundEffect int effectType);
+    }
+
+    /**
+     * A wrapper for {@link SoundEffectListener} that executes callbacks on the given executor.
+     */
+    private static class SoundEffectListenerDelegate {
+        @NonNull private final SoundEffectListener mSoundEffectListener;
+        @NonNull private final Executor mExecutor;
+
+        private SoundEffectListenerDelegate(Executor executor,
+                SoundEffectListener soundEffectCallback) {
+            mSoundEffectListener = soundEffectCallback;
+            mExecutor = executor;
+        }
+
+        public void onPlaySoundEffect(@AudioManager.SystemSoundEffect int effectType) {
+            mExecutor.execute(() -> mSoundEffectListener.onPlaySoundEffect(effectType));
         }
     }
 }

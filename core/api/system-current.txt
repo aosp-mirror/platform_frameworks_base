@@ -3003,8 +3003,13 @@ package android.companion.virtual {
     method public void onIntentIntercepted(@NonNull android.content.Intent);
   }
 
+  public static interface VirtualDeviceManager.SoundEffectListener {
+    method public void onPlaySoundEffect(int);
+  }
+
   public static class VirtualDeviceManager.VirtualDevice implements java.lang.AutoCloseable {
     method public void addActivityListener(@NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.VirtualDeviceManager.ActivityListener);
+    method public void addSoundEffectListener(@NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.VirtualDeviceManager.SoundEffectListener);
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void close();
     method @NonNull public android.content.Context createContext();
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.companion.virtual.audio.VirtualAudioDevice createVirtualAudioDevice(@NonNull android.hardware.display.VirtualDisplay, @Nullable java.util.concurrent.Executor, @Nullable android.companion.virtual.audio.VirtualAudioDevice.AudioConfigurationChangeCallback);
@@ -3023,6 +3028,7 @@ package android.companion.virtual {
     method public void launchPendingIntent(int, @NonNull android.app.PendingIntent, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.IntConsumer);
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void registerIntentInterceptor(@NonNull android.content.IntentFilter, @NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.VirtualDeviceManager.IntentInterceptorCallback);
     method public void removeActivityListener(@NonNull android.companion.virtual.VirtualDeviceManager.ActivityListener);
+    method public void removeSoundEffectListener(@NonNull android.companion.virtual.VirtualDeviceManager.SoundEffectListener);
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setShowPointerIcon(boolean);
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void unregisterIntentInterceptor(@NonNull android.companion.virtual.VirtualDeviceManager.IntentInterceptorCallback);
   }

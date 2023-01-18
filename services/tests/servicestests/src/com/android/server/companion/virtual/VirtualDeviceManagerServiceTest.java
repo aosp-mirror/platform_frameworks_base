@@ -51,6 +51,7 @@ import android.app.admin.DevicePolicyManager;
 import android.companion.AssociationInfo;
 import android.companion.virtual.IVirtualDeviceActivityListener;
 import android.companion.virtual.IVirtualDeviceIntentInterceptor;
+import android.companion.virtual.IVirtualDeviceSoundEffectListener;
 import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.audio.IAudioConfigChangedCallback;
 import android.companion.virtual.audio.IAudioRoutingCallback;
@@ -75,6 +76,7 @@ import android.hardware.input.VirtualMouseScrollEvent;
 import android.hardware.input.VirtualNavigationTouchpadConfig;
 import android.hardware.input.VirtualTouchEvent;
 import android.hardware.input.VirtualTouchscreenConfig;
+import android.media.AudioManager;
 import android.net.MacAddress;
 import android.net.Uri;
 import android.os.Binder;
@@ -222,6 +224,8 @@ public class VirtualDeviceManagerServiceTest {
     private SensorManagerInternal mSensorManagerInternalMock;
     @Mock
     private IVirtualDeviceActivityListener mActivityListener;
+    @Mock
+    private IVirtualDeviceSoundEffectListener mSoundEffectListener;
     @Mock
     private Consumer<ArraySet<Integer>> mRunningAppsChangedCallback;
     @Mock
@@ -1572,6 +1576,13 @@ public class VirtualDeviceManagerServiceTest {
                 intent.filterEquals(blockedAppIntent)), any(), any());
     }
 
+    @Test
+    public void playSoundEffect_callsSoundEffectListener() throws Exception {
+        mVdm.playSoundEffect(mDeviceImpl.getDeviceId(), AudioManager.FX_KEY_CLICK);
+
+        verify(mSoundEffectListener).onPlaySoundEffect(AudioManager.FX_KEY_CLICK);
+    }
+
     private VirtualDeviceImpl createVirtualDevice(int virtualDeviceId, int ownerUid) {
         VirtualDeviceParams params = new VirtualDeviceParams.Builder()
                 .setBlockedActivities(getBlockedActivities())
@@ -1585,7 +1596,8 @@ public class VirtualDeviceManagerServiceTest {
                 mAssociationInfo, new Binder(), ownerUid, virtualDeviceId,
                 mInputController, mSensorController, mCameraAccessController,
                 /* onDeviceCloseListener= */ deviceId -> mVdms.removeVirtualDevice(deviceId),
-                mPendingTrampolineCallback, mActivityListener, mRunningAppsChangedCallback, params);
+                mPendingTrampolineCallback, mActivityListener, mSoundEffectListener,
+                mRunningAppsChangedCallback, params);
         mVdms.addVirtualDevice(virtualDeviceImpl);
         return virtualDeviceImpl;
     }
