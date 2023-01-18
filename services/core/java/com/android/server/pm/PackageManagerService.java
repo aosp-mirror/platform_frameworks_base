@@ -552,6 +552,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     private static final int REQUIRED_VERIFIERS_MAX_COUNT = 2;
 
     // Compilation reasons.
+    // TODO(b/260124949): Clean this up with the legacy dexopt code.
     public static final int REASON_FIRST_BOOT = 0;
     public static final int REASON_BOOT_AFTER_OTA = 1;
     public static final int REASON_POST_BOOT = 2;
@@ -565,7 +566,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     public static final int REASON_AB_OTA = 10;
     public static final int REASON_INACTIVE_PACKAGE_DOWNGRADE = 11;
     public static final int REASON_CMDLINE = 12;
-    public static final int REASON_SHARED = 13;
+    public static final int REASON_BOOT_AFTER_MAINLINE_UPDATE = 13;
+    public static final int REASON_SHARED = 14;
 
     public static final int REASON_LAST = REASON_SHARED;
 
@@ -588,7 +590,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     private final int mDefParseFlags;
     private final String[] mSeparateProcesses;
     private final boolean mIsUpgrade;
-    private final boolean mIsPreNUpgrade;
     private final boolean mIsPreNMR1Upgrade;
     private final boolean mIsPreQUpgrade;
 
@@ -1734,7 +1735,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mInstantAppResolverConnection = testParams.instantAppResolverConnection;
         mInstantAppResolverSettingsComponent = testParams.instantAppResolverSettingsComponent;
         mIsPreNMR1Upgrade = testParams.isPreNmr1Upgrade;
-        mIsPreNUpgrade = testParams.isPreNupgrade;
         mIsPreQUpgrade = testParams.isPreQupgrade;
         mIsUpgrade = testParams.isUpgrade;
         mMetrics = testParams.Metrics;
@@ -2068,10 +2068,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             // when upgrading from pre-M, promote system app permissions from install to runtime
             mPromoteSystemApps =
                     mIsUpgrade && ver.sdkVersion <= Build.VERSION_CODES.LOLLIPOP_MR1;
-
-            // When upgrading from pre-N, we need to handle package extraction like first boot,
-            // as there is no profiling data available.
-            mIsPreNUpgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.N;
 
             mIsPreNMR1Upgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.N_MR1;
             mIsPreQUpgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.Q;
@@ -2954,13 +2950,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 }
                 if (doTrim) {
                     if (!isFirstBoot()) {
-                        if (mDexOptHelper.isDexOptDialogShown()) {
-                            try {
-                                ActivityManager.getService().showBootMessage(
-                                        mContext.getResources().getString(
-                                                R.string.android_upgrading_fstrim), true);
-                            } catch (RemoteException e) {
-                            }
+                        try {
+                            ActivityManager.getService().showBootMessage(
+                                    mContext.getResources().getString(
+                                            R.string.android_upgrading_fstrim),
+                                    true);
+                        } catch (RemoteException e) {
                         }
                     }
                     sm.runMaintenance();
@@ -2995,6 +2990,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     /*package*/ DexManager getDexManager() {
         return mDexManager;
+    }
+
+    /*package*/ DexOptHelper getDexOptHelper() {
+        return mDexOptHelper;
     }
 
     /*package*/ DynamicCodeLogger getDynamicCodeLogger() {
@@ -7474,10 +7473,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     AndroidPackage getPlatformPackage() {
         return mPlatformPackage;
-    }
-
-    boolean isPreNUpgrade() {
-        return mIsPreNUpgrade;
     }
 
     boolean isPreNMR1Upgrade() {

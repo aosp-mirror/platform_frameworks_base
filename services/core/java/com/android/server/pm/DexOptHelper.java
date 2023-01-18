@@ -23,6 +23,7 @@ import static com.android.server.pm.ApexManager.ActiveApexInfo;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.PackageManagerService.DEBUG_DEXOPT;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+import static com.android.server.pm.PackageManagerService.REASON_BOOT_AFTER_MAINLINE_UPDATE;
 import static com.android.server.pm.PackageManagerService.REASON_BOOT_AFTER_OTA;
 import static com.android.server.pm.PackageManagerService.REASON_CMDLINE;
 import static com.android.server.pm.PackageManagerService.REASON_FIRST_BOOT;
@@ -36,11 +37,8 @@ import static com.android.server.pm.PackageManagerServiceUtils.getPackageManager
 
 import static dalvik.system.DexFile.isProfileGuidedCompilerFilter;
 
-import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RequiresPermission;
-import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.content.Context;
 import android.content.Intent;
@@ -53,14 +51,11 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.provider.DeviceConfig;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 
-import com.android.internal.R;
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.art.ArtManagerLocal;
@@ -86,7 +81,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -99,18 +93,6 @@ public final class DexOptHelper {
     private static final long SEVEN_DAYS_IN_MILLISECONDS = 7 * 24 * 60 * 60 * 1000;
 
     private final PackageManagerService mPm;
-
-    public boolean isDexOptDialogShown() {
-        synchronized (mLock) {
-            return mDexOptDialogShown;
-        }
-    }
-
-    // TODO: Is this lock really necessary?
-    private final Object mLock = new Object();
-
-    @GuardedBy("mLock")
-    private boolean mDexOptDialogShown;
 
     DexOptHelper(PackageManagerService pm) {
         mPm = pm;
@@ -129,7 +111,7 @@ public final class DexOptHelper {
      * which are (in order) {@code numberOfPackagesOptimized}, {@code numberOfPackagesSkipped}
      * and {@code numberOfPackagesFailed}.
      */
-    public int[] performDexOptUpgrade(List<PackageStateInternal> packageStates, boolean showDialog,
+    public int[] performDexOptUpgrade(List<PackageStateInternal> packageStates,
             final int compilationReason, boolean bootComplete)
             throws LegacyDexoptDisabledException {
         Installer.checkLegacyDexoptDisabled();
@@ -221,18 +203,6 @@ public final class DexOptHelper {
                         + numberOfPackagesToDexopt + ": " + pkg.getPackageName());
             }
 
-            if (showDialog) {
-                try {
-                    ActivityManager.getService().showBootMessage(
-                            mPm.mContext.getResources().getString(R.string.android_upgrading_apk,
-                                    numberOfPackagesVisited, numberOfPackagesToDexopt), true);
-                } catch (RemoteException e) {
-                }
-                synchronized (mLock) {
-                    mDexOptDialogShown = true;
-                }
-            }
-
             int pkgCompilationReason = compilationReason;
             if (useProfileForDexopt) {
                 // Use background dexopt mode to try and use the profile. Note that this does not
@@ -290,7 +260,7 @@ public final class DexOptHelper {
      * Checks if system UI package (typically "com.android.systemui") needs to be re-compiled, and
      * compiles it if needed.
      */
-    private void checkAndDexOptSystemUi() throws LegacyDexoptDisabledException {
+    private void checkAndDexOptSystemUi(int reason) throws LegacyDexoptDisabledException {
         Installer.checkLegacyDexoptDisabled();
         Computer snapshot = mPm.snapshotComputer();
         String sysUiPackageName =
@@ -300,10 +270,6 @@ public final class DexOptHelper {
             Log.w(TAG, "System UI package " + sysUiPackageName + " is not found for dexopting");
             return;
         }
-
-        // It could also be after mainline update, but we're not introducing a new reason just for
-        // this special case.
-        int reason = REASON_BOOT_AFTER_OTA;
 
         String defaultCompilerFilter = getCompilerFilterForReason(reason);
         String targetCompilerFilter =
@@ -347,29 +313,30 @@ public final class DexOptHelper {
                 compilerFilter, null /* splitName */, dexoptFlags));
     }
 
-    @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
+    /**
+     * Called during startup to do any boot time dexopting. This can occasionally be time consuming
+     * (30+ seconds) and the function will block until it is complete.
+     */
     public void performPackageDexOptUpgradeIfNeeded() throws LegacyDexoptDisabledException {
         PackageManagerServiceUtils.enforceSystemOrRoot(
                 "Only the system can request package update");
 
-        // The default is "true".
-        if (!"false".equals(DeviceConfig.getProperty("runtime", "dexopt_system_ui_on_boot"))) {
-            // System UI is important to user experience, so we check it after a mainline update or
-            // an OTA. It may need to be re-compiled in these cases.
-            if (hasBcpApexesChanged() || mPm.isDeviceUpgrading()) {
-                checkAndDexOptSystemUi();
-            }
+        int reason;
+        if (mPm.isFirstBoot()) {
+            reason = REASON_FIRST_BOOT; // First boot or factory reset.
+        } else if (mPm.isDeviceUpgrading()) {
+            reason = REASON_BOOT_AFTER_OTA;
+        } else if (hasBcpApexesChanged()) {
+            reason = REASON_BOOT_AFTER_MAINLINE_UPDATE;
+        } else {
+            return;
         }
 
-        // We need to re-extract after an OTA.
-        boolean causeUpgrade = mPm.isDeviceUpgrading();
+        // System UI is important to user experience, so we check it after a mainline update
+        // or an OTA. It may need to be re-compiled in these cases.
+        checkAndDexOptSystemUi(reason);
 
-        // First boot or factory reset.
-        // Note: we also handle devices that are upgrading to N right now as if it is their
-        //       first boot, as they do not have profile data.
-        boolean causeFirstBoot = mPm.isFirstBoot() || mPm.isPreNUpgrade();
-
-        if (!causeUpgrade && !causeFirstBoot) {
+        if (reason != REASON_BOOT_AFTER_OTA && reason != REASON_FIRST_BOOT) {
             return;
         }
 
@@ -378,9 +345,7 @@ public final class DexOptHelper {
                 getPackagesForDexopt(snapshot.getPackageStates().values(), mPm);
 
         final long startTime = System.nanoTime();
-        final int[] stats = performDexOptUpgrade(pkgSettings, mPm.isPreNUpgrade() /* showDialog */,
-                causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT_AFTER_OTA,
-                false /* bootComplete */);
+        final int[] stats = performDexOptUpgrade(pkgSettings, reason, false /* bootComplete */);
 
         final int elapsedTimeSeconds =
                 (int) TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - startTime);
@@ -946,13 +911,10 @@ public final class DexOptHelper {
         }
     }
 
-    private static class DexoptDoneHandler implements ArtManagerLocal.DexoptDoneCallback {
-        @NonNull private final PackageManagerService mPm;
-
-        DexoptDoneHandler(@NonNull PackageManagerService pm) { mPm = pm; }
-
+    private class DexoptDoneHandler implements ArtManagerLocal.DexoptDoneCallback {
         /**
-         * Called after every package dexopt operation done by {@link ArtManagerLocal}.
+         * Called after every package dexopt operation done by {@link ArtManagerLocal} (when ART
+         * Service is in use).
          */
         @Override
         public void onDexoptDone(@NonNull DexoptResult result) {
@@ -983,10 +945,8 @@ public final class DexOptHelper {
         }
 
         ArtManagerLocal artManager = new ArtManagerLocal(systemContext);
-        // There doesn't appear to be any checks that @NonNull is heeded, so use requireNonNull
-        // below to ensure we don't store away a null that we'll fail on later.
-        artManager.addDexoptDoneCallback(false /* onlyIncludeUpdates */,
-                Runnable::run, new DexoptDoneHandler(Objects.requireNonNull(pm)));
+        artManager.addDexoptDoneCallback(false /* onlyIncludeUpdates */, Runnable::run,
+                pm.getDexOptHelper().new DexoptDoneHandler());
         LocalManagerRegistry.addManager(ArtManagerLocal.class, artManager);
 
         artManager.scheduleBackgroundDexoptJob();
