@@ -15009,7 +15009,7 @@ package android.graphics {
     method public void drawLine(float, float, float, float, @NonNull android.graphics.Paint);
     method public void drawLines(@NonNull @Size(multiple=4) float[], int, int, @NonNull android.graphics.Paint);
     method public void drawLines(@NonNull @Size(multiple=4) float[], @NonNull android.graphics.Paint);
-    method public void drawMesh(@NonNull android.graphics.Mesh, android.graphics.BlendMode, @NonNull android.graphics.Paint);
+    method public void drawMesh(@NonNull android.graphics.Mesh, @Nullable android.graphics.BlendMode, @NonNull android.graphics.Paint);
     method public void drawOval(@NonNull android.graphics.RectF, @NonNull android.graphics.Paint);
     method public void drawOval(float, float, float, float, @NonNull android.graphics.Paint);
     method public void drawPaint(@NonNull android.graphics.Paint);
@@ -15611,10 +15611,10 @@ package android.graphics {
   }
 
   public class Mesh {
-    method @NonNull public static android.graphics.Mesh make(@NonNull android.graphics.MeshSpecification, int, @NonNull java.nio.Buffer, int, @NonNull android.graphics.Rect);
-    method @NonNull public static android.graphics.Mesh makeIndexed(@NonNull android.graphics.MeshSpecification, int, @NonNull java.nio.Buffer, int, @NonNull java.nio.ShortBuffer, @NonNull android.graphics.Rect);
-    method public void setColorUniform(@NonNull String, int);
-    method public void setColorUniform(@NonNull String, long);
+    ctor public Mesh(@NonNull android.graphics.MeshSpecification, int, @NonNull java.nio.Buffer, int, @NonNull android.graphics.Rect);
+    ctor public Mesh(@NonNull android.graphics.MeshSpecification, int, @NonNull java.nio.Buffer, int, @NonNull java.nio.ShortBuffer, @NonNull android.graphics.Rect);
+    method public void setColorUniform(@NonNull String, @ColorInt int);
+    method public void setColorUniform(@NonNull String, @ColorLong long);
     method public void setColorUniform(@NonNull String, @NonNull android.graphics.Color);
     method public void setFloatUniform(@NonNull String, float);
     method public void setFloatUniform(@NonNull String, float, float);

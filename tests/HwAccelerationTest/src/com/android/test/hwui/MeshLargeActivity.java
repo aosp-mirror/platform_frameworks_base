@@ -109,7 +109,7 @@ public class MeshLargeActivity extends Activity {
             }
             vertexBuffer.rewind();
             indexBuffer.rewind();
-            Mesh mesh = Mesh.makeIndexed(
+            Mesh mesh = new Mesh(
                     meshSpec, Mesh.TRIANGLES, vertexBuffer, numTriangles + 2, indexBuffer,
                     new Rect(0, 0, 1000, 1000)
             );

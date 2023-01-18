@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import android.annotation.ColorInt;
+import android.annotation.ColorLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 
@@ -27,10 +29,8 @@ import java.nio.ShortBuffer;
 /**
  * Class representing a mesh object.
  *
- * This class generates Mesh objects via the
- * {@link #make(MeshSpecification, int, Buffer, int, Rect)} and
- * {@link #makeIndexed(MeshSpecification, int, Buffer, int, ShortBuffer, Rect)} methods,
- * where a {@link MeshSpecification} is required along with various attributes for
+ * This class represents a Mesh object that can optionally be indexed.
+ * A {@link MeshSpecification} is required along with various attributes for
  * detailing the mesh object, including a mode, vertex buffer, optional index buffer, and bounds
  * for the mesh. Once generated, a mesh object can be drawn through
  * {@link Canvas#drawMesh(Mesh, BlendMode, Paint)}
@@ -62,7 +62,7 @@ public class Mesh {
     }
 
     /**
-     * Generates a {@link Mesh} object.
+     * Constructor for a non-indexed Mesh.
      *
      * @param meshSpec     {@link MeshSpecification} used when generating the mesh.
      * @param mode         Determines what mode to draw the mesh in. Must be one of
@@ -74,10 +74,8 @@ public class Mesh {
      *                     backed buffer generated.
      * @param vertexCount  the number of vertices represented in the vertexBuffer and mesh.
      * @param bounds       bounds of the mesh object.
-     * @return a new Mesh object.
      */
-    @NonNull
-    public static Mesh make(@NonNull MeshSpecification meshSpec, @Mode int mode,
+    public Mesh(@NonNull MeshSpecification meshSpec, @Mode int mode,
             @NonNull Buffer vertexBuffer, int vertexCount, @NonNull Rect bounds) {
         if (mode != TRIANGLES && mode != TRIANGLE_STRIP) {
             throw new IllegalArgumentException("Invalid value passed in for mode parameter");
@@ -88,11 +86,12 @@ public class Mesh {
         if (nativeMesh == 0) {
             throw new IllegalArgumentException("Mesh construction failed.");
         }
-        return new Mesh(nativeMesh, false);
+
+        meshSetup(nativeMesh, false);
     }
 
     /**
-     * Generates a {@link Mesh} object.
+     * Constructor for an indexed Mesh.
      *
      * @param meshSpec     {@link MeshSpecification} used when generating the mesh.
      * @param mode         Determines what mode to draw the mesh in. Must be one of
@@ -108,10 +107,8 @@ public class Mesh {
      *                     currently implementation will have a CPU
      *                     backed buffer generated.
      * @param bounds       bounds of the mesh object.
-     * @return a new Mesh object.
      */
-    @NonNull
-    public static Mesh makeIndexed(@NonNull MeshSpecification meshSpec, @Mode int mode,
+    public Mesh(@NonNull MeshSpecification meshSpec, @Mode int mode,
             @NonNull Buffer vertexBuffer, int vertexCount, @NonNull ShortBuffer indexBuffer,
             @NonNull Rect bounds) {
         if (mode != TRIANGLES && mode != TRIANGLE_STRIP) {
@@ -124,7 +121,8 @@ public class Mesh {
         if (nativeMesh == 0) {
             throw new IllegalArgumentException("Mesh construction failed.");
         }
-        return new Mesh(nativeMesh, true);
+
+        meshSetup(nativeMesh, true);
     }
 
     /**
@@ -137,7 +135,7 @@ public class Mesh {
      * @param color       the provided sRGB color will be converted into the shader program's output
      *                    colorspace and be available as a vec4 uniform in the program.
      */
-    public void setColorUniform(@NonNull String uniformName, int color) {
+    public void setColorUniform(@NonNull String uniformName, @ColorInt int color) {
         setUniform(uniformName, Color.valueOf(color).getComponents(), true);
     }
 
@@ -151,7 +149,7 @@ public class Mesh {
      * @param color       the provided sRGB color will be converted into the shader program's output
      *                    colorspace and be available as a vec4 uniform in the program.
      */
-    public void setColorUniform(@NonNull String uniformName, long color) {
+    public void setColorUniform(@NonNull String uniformName, @ColorLong long color) {
         Color exSRGB = Color.valueOf(color).convert(ColorSpace.get(ColorSpace.Named.EXTENDED_SRGB));
         setUniform(uniformName, exSRGB.getComponents(), true);
     }
@@ -357,7 +355,7 @@ public class Mesh {
                 mNativeMeshWrapper, uniformName, value1, value2, value3, value4, count);
     }
 
-    private Mesh(long nativeMeshWrapper, boolean isIndexed) {
+    private void meshSetup(long nativeMeshWrapper, boolean isIndexed) {
         mNativeMeshWrapper = nativeMeshWrapper;
         this.mIsIndexed = isIndexed;
         MeshHolder.MESH_SPECIFICATION_REGISTRY.registerNativeAllocation(this, mNativeMeshWrapper);

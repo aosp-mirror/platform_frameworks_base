@@ -64,7 +64,7 @@ public class MeshActivity extends Activity {
             vertexBuffer.put(4, 0.0f);
             vertexBuffer.put(5, 400.0f);
             vertexBuffer.rewind();
-            Mesh mesh = Mesh.make(
+            Mesh mesh = new Mesh(
                     meshSpec, Mesh.TRIANGLES, vertexBuffer, 3, new Rect(0, 0, 1000, 1000));
 
             canvas.drawMesh(mesh, BlendMode.COLOR, new Paint());
@@ -98,7 +98,7 @@ public class MeshActivity extends Activity {
             }
             iVertexBuffer.rewind();
             indexBuffer.rewind();
-            Mesh mesh2 = Mesh.makeIndexed(meshSpec, Mesh.TRIANGLES, iVertexBuffer, 102, indexBuffer,
+            Mesh mesh2 = new Mesh(meshSpec, Mesh.TRIANGLES, iVertexBuffer, 102, indexBuffer,
                     new Rect(0, 0, 1000, 1000));
             Paint paint = new Paint();
             paint.setColor(Color.RED);
