@@ -54248,6 +54248,7 @@ package android.view.autofill {
     method public void notifyViewExited(@NonNull android.view.View, int);
     method public void notifyViewVisibilityChanged(@NonNull android.view.View, boolean);
     method public void notifyViewVisibilityChanged(@NonNull android.view.View, int, boolean);
+    method public void notifyVirtualViewsReady(@NonNull android.view.View, @NonNull android.util.SparseArray<android.view.autofill.VirtualViewFillInfo>);
     method public void registerCallback(@Nullable android.view.autofill.AutofillManager.AutofillCallback);
     method public void requestAutofill(@NonNull android.view.View);
     method public void requestAutofill(@NonNull android.view.View, int, @NonNull android.graphics.Rect);
@@ -54292,6 +54293,16 @@ package android.view.autofill {
     method public boolean isToggle();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.autofill.AutofillValue> CREATOR;
+  }
+
+  public final class VirtualViewFillInfo {
+    method @Nullable public String[] getAutofillHints();
+  }
+
+  public static final class VirtualViewFillInfo.Builder {
+    ctor public VirtualViewFillInfo.Builder();
+    method @NonNull public android.view.autofill.VirtualViewFillInfo build();
+    method @NonNull public android.view.autofill.VirtualViewFillInfo.Builder setAutofillHints(@NonNull java.lang.String...);
   }
 
 }
