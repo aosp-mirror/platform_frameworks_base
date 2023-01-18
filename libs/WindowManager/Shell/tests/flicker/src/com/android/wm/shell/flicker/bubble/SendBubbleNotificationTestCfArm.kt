@@ -23,4 +23,5 @@ import org.junit.runners.Parameterized
 
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-class ExpandBubbleScreenCfArm(flicker: FlickerTest) : ExpandBubbleScreen(flicker)
+open class SendBubbleNotificationTestCfArm(flicker: FlickerTest) :
+    SendBubbleNotificationTest(flicker)

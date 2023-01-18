@@ -46,7 +46,7 @@ import org.junit.runners.Parameterized
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-class LaunchBubbleFromLockScreen(flicker: FlickerTest) : BaseBubbleScreen(flicker) {
+class OpenActivityFromBubbleOnLockreenTest(flicker: FlickerTest) : BaseBubbleScreen(flicker) {
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
