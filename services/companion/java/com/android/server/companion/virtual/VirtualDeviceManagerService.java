@@ -30,6 +30,7 @@ import android.companion.CompanionDeviceManager;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.IVirtualDeviceActivityListener;
 import android.companion.virtual.IVirtualDeviceManager;
+import android.companion.virtual.IVirtualDeviceSoundEffectListener;
 import android.companion.virtual.VirtualDevice;
 import android.companion.virtual.VirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceParams;
@@ -222,7 +223,8 @@ public class VirtualDeviceManagerService extends SystemService {
                 String packageName,
                 int associationId,
                 @NonNull VirtualDeviceParams params,
-                @NonNull IVirtualDeviceActivityListener activityListener) {
+                @NonNull IVirtualDeviceActivityListener activityListener,
+                @NonNull IVirtualDeviceSoundEffectListener soundEffectListener) {
             getContext().enforceCallingOrSelfPermission(
                     android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
                     "createVirtualDevice");
@@ -246,7 +248,7 @@ public class VirtualDeviceManagerService extends SystemService {
                 VirtualDeviceImpl virtualDevice = new VirtualDeviceImpl(getContext(),
                         associationInfo, token, callingUid, deviceId, cameraAccessController,
                         this::onDeviceClosed, mPendingTrampolineCallback, activityListener,
-                        runningAppsChangedCallback, params);
+                        soundEffectListener, runningAppsChangedCallback, params);
                 mVirtualDevices.put(deviceId, virtualDevice);
                 return virtualDevice;
             }
@@ -361,6 +363,18 @@ public class VirtualDeviceManagerService extends SystemService {
                 VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
                 return virtualDevice != null
                         ? virtualDevice.getAudioRecordingSessionId() : AUDIO_SESSION_ID_GENERATE;
+            }
+        }
+
+        @Override // Binder call
+        public void playSoundEffect(int deviceId, int effectType) {
+            VirtualDeviceImpl virtualDevice;
+            synchronized (mVirtualDeviceManagerLock) {
+                virtualDevice = mVirtualDevices.get(deviceId);
+            }
+
+            if (virtualDevice != null) {
+                virtualDevice.playSoundEffect(effectType);
             }
         }
 
