@@ -16336,7 +16336,10 @@ package android.graphics {
 
   public class YuvImage {
     ctor public YuvImage(byte[], int, int, int, int[]);
+    ctor public YuvImage(@NonNull byte[], int, int, int, @Nullable int[], @NonNull android.graphics.ColorSpace);
     method public boolean compressToJpeg(android.graphics.Rect, int, java.io.OutputStream);
+    method public boolean compressToJpegR(@NonNull android.graphics.YuvImage, int, @NonNull java.io.OutputStream);
+    method @NonNull public android.graphics.ColorSpace getColorSpace();
     method public int getHeight();
     method public int[] getStrides();
     method public int getWidth();
