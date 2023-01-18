@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.Postsubmit
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerTest
 import android.tools.device.flicker.legacy.FlickerTestFactory
@@ -28,9 +27,8 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Postsubmit
-class OpenAppFromNotificationColdCfArm(flicker: FlickerTest) :
-    OpenAppFromNotificationCold(flicker) {
+class OpenAppFromNotificationWarmTestCfArm(flicker: FlickerTest) :
+    OpenAppFromNotificationWarmTest(flicker) {
     companion object {
         /**
          * Creates the test configurations.

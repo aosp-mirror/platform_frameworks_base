@@ -63,7 +63,8 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class OpenAppNonResizeableTest(flicker: FlickerTest) : OpenAppFromLockTransition(flicker) {
+open class OpenAppFromLockscreenViaIntentTest(flicker: FlickerTest) :
+    OpenAppFromLockscreenTransition(flicker) {
     override val testApp = NonResizeableAppHelper(instrumentation)
 
     /**

@@ -28,7 +28,7 @@ import org.junit.Ignore
 import org.junit.Test
 
 /** Base class for app launch tests from lock screen */
-abstract class OpenAppFromLockTransition(flicker: FlickerTest) : OpenAppTransition(flicker) {
+abstract class OpenAppFromLockscreenTransition(flicker: FlickerTest) : OpenAppTransition(flicker) {
 
     /** Defines the transition used to run the test */
     override val transition: FlickerBuilder.() -> Unit = {

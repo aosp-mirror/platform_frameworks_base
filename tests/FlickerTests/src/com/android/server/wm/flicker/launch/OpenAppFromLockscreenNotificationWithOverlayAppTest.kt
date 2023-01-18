@@ -37,6 +37,8 @@ import org.junit.runners.Parameterized
  * Test cold launching an app from a notification from the lock screen when there is an app overlaid
  * on the lock screen.
  *
+ * This test assumes the device doesn't have AOD enabled
+ *
  * To run this test: `atest FlickerTests:OpenAppFromLockNotificationWithLockOverlayApp`
  */
 @RequiresDevice
@@ -44,8 +46,8 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Postsubmit
-class OpenAppFromLockNotificationWithLockOverlayApp(flicker: FlickerTest) :
-    OpenAppFromLockNotificationCold(flicker) {
+class OpenAppFromLockscreenNotificationWithOverlayAppTest(flicker: FlickerTest) :
+    OpenAppFromLockscreenNotificationColdTest(flicker) {
     private val showWhenLockedApp = ShowWhenLockedAppHelper(instrumentation)
 
     // Although we are technically still locked here, the overlay app means we should open the

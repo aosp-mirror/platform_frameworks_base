@@ -60,7 +60,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class OpenCameraOnDoubleClickPowerButton(flicker: FlickerTest) :
+class OpenCameraFromHomeOnDoubleClickPowerButtonTest(flicker: FlickerTest) :
     OpenAppFromLauncherTransition(flicker) {
     private val cameraApp = CameraAppHelper(instrumentation)
     override val testApp: StandardAppHelper
