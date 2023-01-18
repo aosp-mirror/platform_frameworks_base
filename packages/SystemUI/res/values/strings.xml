@@ -2777,4 +2777,19 @@
     <string name="stylus_battery_low_percentage"><xliff:g id="percentage" example="16%">%s</xliff:g> battery remaining</string>
     <!-- Subtitle for the notification sent when a stylus battery is low. [CHAR LIMIT=none]-->
     <string name="stylus_battery_low_subtitle">Connect your stylus to a charger</string>
+
+    <!-- Switch to work profile dialer app for placing a call dialog. -->
+    <!-- Text for Switch to work profile dialog's Title. Switch to work profile dialog guide users to make call from work
+    profile dialer app as it's not possible to make call from current profile due to an admin policy. [CHAR LIMIT=60] -->
+    <string name="call_from_work_profile_title">Can\'t call from this profile</string>
+    <!-- Text for switch to work profile for call dialog to guide users to make call from work
+    profile dialer app as it's not possible to make call from current profile due to an admin policy. [CHAR LIMIT=NONE]
+    -->
+    <string name="call_from_work_profile_text">Your work policy allows you to make phone calls only from the work profile</string>
+    <!-- Label for the button to switch to work profile for placing call. Switch to work profile dialog guide users to make call from work
+    profile dialer app as it's not possible to make call from current profile due to an admin policy.[CHAR LIMIT=60] -->
+    <string name="call_from_work_profile_action">Switch to work profile</string>
+    <!-- Label for the close button on switch to work profile dialog. Switch to work profile dialog guide users to make call from work
+    profile dialer app as it's not possible to make call from current profile due to an admin policy.[CHAR LIMIT=60] -->
+    <string name="call_from_work_profile_close">Close</string>
 </resources>
