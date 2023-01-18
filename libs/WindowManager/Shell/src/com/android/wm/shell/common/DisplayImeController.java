@@ -384,7 +384,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 @Nullable ImeTracker.Token statsToken) {
             final InsetsSource imeSource = mInsetsState.getSource(InsetsState.ITYPE_IME);
             if (imeSource == null || mImeSourceControl == null) {
-                ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_WM_ANIMATION_CREATE);
+                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_WM_ANIMATION_CREATE);
                 return;
             }
             final Rect newFrame = imeSource.getFrame();
@@ -407,8 +407,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             }
             if ((!forceRestart && (mAnimationDirection == DIRECTION_SHOW && show))
                     || (mAnimationDirection == DIRECTION_HIDE && !show)) {
-                ImeTracker.forLogging().onCancelled(
-                        statsToken, ImeTracker.PHASE_WM_ANIMATION_CREATE);
+                ImeTracker.get().onCancelled(statsToken, ImeTracker.PHASE_WM_ANIMATION_CREATE);
                 return;
             }
             boolean seek = false;
@@ -452,7 +451,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 mTransactionPool.release(t);
             });
             mAnimation.setInterpolator(INTERPOLATOR);
-            ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_WM_ANIMATION_CREATE);
+            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_WM_ANIMATION_CREATE);
             mAnimation.addListener(new AnimatorListenerAdapter() {
                 private boolean mCancelled = false;
                 @Nullable
@@ -475,7 +474,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                             : 1.f;
                     t.setAlpha(mImeSourceControl.getLeash(), alpha);
                     if (mAnimationDirection == DIRECTION_SHOW) {
-                        ImeTracker.forLogging().onProgress(mStatsToken,
+                        ImeTracker.get().onProgress(mStatsToken,
                                 ImeTracker.PHASE_WM_ANIMATION_RUNNING);
                         t.show(mImeSourceControl.getLeash());
                     }
@@ -512,15 +511,15 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     }
                     dispatchEndPositioning(mDisplayId, mCancelled, t);
                     if (mAnimationDirection == DIRECTION_HIDE && !mCancelled) {
-                        ImeTracker.forLogging().onProgress(mStatsToken,
+                        ImeTracker.get().onProgress(mStatsToken,
                                 ImeTracker.PHASE_WM_ANIMATION_RUNNING);
                         t.hide(mImeSourceControl.getLeash());
                         removeImeSurface();
-                        ImeTracker.forLogging().onHidden(mStatsToken);
+                        ImeTracker.get().onHidden(mStatsToken);
                     } else if (mAnimationDirection == DIRECTION_SHOW && !mCancelled) {
-                        ImeTracker.forLogging().onShown(mStatsToken);
+                        ImeTracker.get().onShown(mStatsToken);
                     } else if (mCancelled) {
-                        ImeTracker.forLogging().onCancelled(mStatsToken,
+                        ImeTracker.get().onCancelled(mStatsToken,
                                 ImeTracker.PHASE_WM_ANIMATION_RUNNING);
                     }
                     if (DEBUG_IME_VISIBILITY) {
