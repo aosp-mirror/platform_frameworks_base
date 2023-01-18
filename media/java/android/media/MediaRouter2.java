@@ -1515,6 +1515,16 @@ public final class MediaRouter2 {
         }
 
         /**
+         * Returns the current {@link RoutingSessionInfo} associated to this controller.
+         */
+        @NonNull
+        public RoutingSessionInfo getRoutingSessionInfo() {
+            synchronized (mControllerLock) {
+                return mSessionInfo;
+            }
+        }
+
+        /**
          * Gets the information about how volume is handled on the session.
          *
          * <p>Please note that you may not control the volume of the session even when you can
@@ -1871,13 +1881,6 @@ public final class MediaRouter2 {
                             .append("}")
                             .append(" }");
             return result.toString();
-        }
-
-        @NonNull
-        RoutingSessionInfo getRoutingSessionInfo() {
-            synchronized (mControllerLock) {
-                return mSessionInfo;
-            }
         }
 
         void setRoutingSessionInfo(@NonNull RoutingSessionInfo info) {
