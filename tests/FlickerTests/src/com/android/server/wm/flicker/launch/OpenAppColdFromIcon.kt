@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
@@ -25,7 +24,6 @@ import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule
 import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -76,103 +74,6 @@ class OpenAppColdFromIcon(flicker: FlickerTest) : OpenAppFromLauncherTransition(
             }
             teardown { testApp.exit(wmHelper) }
         }
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 240916028)
-    @Test
-    override fun appWindowAsTopWindowAtEnd() = super.appWindowAsTopWindowAtEnd()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 240916028)
-    @Test
-    override fun appWindowReplacesLauncherAsTopWindow() =
-        super.appWindowReplacesLauncherAsTopWindow()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 240916028)
-    @Test
-    override fun appLayerBecomesVisible() = super.appLayerBecomesVisible()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 240916028)
-    @Test
-    override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 240916028)
-    @Test
-    override fun appWindowBecomesTopWindow() = super.appWindowBecomesTopWindow()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 240916028)
-    @Test
-    override fun appWindowBecomesVisible() = super.appWindowBecomesVisible()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 240916028)
-    @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 240916028) @Test override fun focusChanges() = super.focusChanges()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 240916028)
-    @Test
-    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 240916028)
-    @Test
-    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 240916028)
-    @Test
-    override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 240916028)
-    @Test
-    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 240916028)
-    @Test
-    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 240916028)
-    @Test
-    override fun statusBarLayerPositionAtStartAndEnd() = super.statusBarLayerPositionAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 240916028)
-    @Test
-    override fun statusBarLayerIsVisibleAtStartAndEnd() =
-        super.statusBarLayerIsVisibleAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 240916028)
-    @Test
-    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 240916028)
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 240916028)
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 240916028)
-    @Test
-    override fun appWindowIsTopWindowAtEnd() = super.appWindowIsTopWindowAtEnd()
 
     companion object {
         /**

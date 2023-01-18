@@ -106,9 +106,11 @@ interface IAudioService {
     void setStreamVolumeWithAttribution(int streamType, int index, int flags,
             in String callingPackage, in String attributionTag);
 
+    @EnforcePermission(anyOf = {"MODIFY_AUDIO_ROUTING", "MODIFY_AUDIO_SYSTEM_SETTINGS"})
     void setDeviceVolume(in VolumeInfo vi, in AudioDeviceAttributes ada,
             in String callingPackage);
 
+    @EnforcePermission(anyOf = {"MODIFY_AUDIO_ROUTING", "MODIFY_AUDIO_SYSTEM_SETTINGS"})
     VolumeInfo getDeviceVolume(in VolumeInfo vi, in AudioDeviceAttributes ada,
             in String callingPackage);
 

@@ -156,14 +156,14 @@ public interface AttachedSurfaceControl {
      * AttachedSurfaceControl. This includes SurfaceView, and an example usage may
      * be to ensure that SurfaceView with {@link android.view.SurfaceView#setZOrderOnTop}
      * are cropped to a region not including the app bar.
-     *
+     * <p>
      * This cropped is expressed in terms of insets in window-space. Negative insets
      * are considered invalid and will produce an exception. Insets of zero will produce
      * the same result as if this function had never been called.
      *
      * @param insets The insets in each direction by which to bound the children
      *               expressed in window-space.
-     * @hide
+     * @throws IllegalArgumentException If negative insets are provided.
      */
     default void setChildBoundingInsets(@NonNull Rect insets) {
     }

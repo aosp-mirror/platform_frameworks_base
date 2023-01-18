@@ -255,6 +255,12 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
 
     @Override
     @Deprecated
+    public final void clearPersistentPreferredActivity(IntentFilter filter, int userId) {
+        mPreferredActivityHelper.clearPersistentPreferredActivity(filter, userId);
+    }
+
+    @Override
+    @Deprecated
     public final void clearPackagePreferredActivities(String packageName) {
         mPreferredActivityHelper.clearPackagePreferredActivities(snapshot(),
                 packageName);

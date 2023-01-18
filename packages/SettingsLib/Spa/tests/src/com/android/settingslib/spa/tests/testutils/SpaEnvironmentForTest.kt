@@ -92,6 +92,23 @@ object SppHome : SettingsPageProvider {
     }
 }
 
+object SppDisabled : SettingsPageProvider {
+    override val name = "SppDisabled"
+
+    override fun isEnabled(arguments: Bundle?): Boolean = false
+
+    override fun getTitle(arguments: Bundle?): String {
+        return "TitleDisabled"
+    }
+
+    override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
+        val owner = this.createSettingsPage()
+        return listOf(
+            SppLayer1.buildInject().setLink(fromPage = owner).build(),
+        )
+    }
+}
+
 object SppLayer1 : SettingsPageProvider {
     override val name = "SppLayer1"
 
@@ -190,7 +207,7 @@ class SpaEnvironmentForTest(
         SettingsPageProviderRepository(
             listOf(
                 SppHome, SppLayer1, SppLayer2,
-                SppForSearch,
+                SppForSearch, SppDisabled,
                 object : SettingsPageProvider {
                     override val name = "SppWithParam"
                     override val parameter = listOf(

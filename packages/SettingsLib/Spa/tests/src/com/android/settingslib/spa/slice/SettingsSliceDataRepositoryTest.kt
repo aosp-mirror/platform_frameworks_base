@@ -23,6 +23,7 @@ import androidx.lifecycle.Observer
 import androidx.slice.Slice
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.tests.testutils.SpaEnvironmentForTest
 import com.android.settingslib.spa.tests.testutils.SppHome
@@ -44,6 +45,8 @@ class SettingsSliceDataRepositoryTest {
 
     @Test
     fun getOrBuildSliceDataTest() {
+        SpaEnvironmentFactory.reset(spaEnvironment)
+
         // Slice empty
         assertThat(sliceDataRepository.getOrBuildSliceData(Uri.EMPTY)).isNull()
 
@@ -67,6 +70,8 @@ class SettingsSliceDataRepositoryTest {
 
     @Test
     fun getActiveSliceDataTest() {
+        SpaEnvironmentFactory.reset(spaEnvironment)
+
         val page = SppLayer2.createSettingsPage()
         val entryId = getUniqueEntryId("Layer2Entry1", page)
         val sliceUri = Uri.Builder().appendSpaParams(page.buildRoute(), entryId).build()

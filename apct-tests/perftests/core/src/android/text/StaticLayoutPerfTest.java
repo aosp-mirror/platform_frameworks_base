@@ -19,6 +19,8 @@ package android.text;
 import android.graphics.Canvas;
 import android.graphics.RecordingCanvas;
 import android.graphics.RenderNode;
+import android.graphics.text.LineBreakConfig;
+import android.os.LocaleList;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 
@@ -42,6 +44,19 @@ public class StaticLayoutPerfTest {
     private static final int TEXT_WIDTH = WORDS_IN_LINE * WORD_LENGTH * (int) PAINT.getTextSize();
 
     public StaticLayoutPerfTest() {}
+
+    public static final String JP_TEXT_SHORT = "日本語でのパフォーマンス計測のための例文です。";
+    // About 350 chars
+    public static final String JP_TEXT_LONG = "日本語でのパフォーマンス計測のための文章ですが、長いです。"
+            + "長い文章が必要なのですが、特に書くことが思いつかないので、コロッケの作り方でも書こうと思います。"
+            + "じゃがいもを茹でて潰しておきます。私は少し形が残っているほうが好きなので、ある程度のところで潰すのを"
+            + "やめます。別のフライパンで軽く塩をして玉ねぎのみじん切りを炒め、透き通ったら、一度取り出します。"
+            + "きれいにしたフライパンに、豚ひき肉を入れてあまりイジらずに豚肉を炒めます。"
+            + "しっかり火が通ったら炒めた玉ねぎを戻し入れ、塩コショウで味を決めます。"
+            + "炒めた肉玉ねぎとじゃがいもをよく混ぜて、1個あたり100gになるように整形します。"
+            + "整形したタネに小麦粉、卵、パン粉をつけて揚げます。"
+            + "180℃で揚げ、衣がきつね色になったら引き上げて、油を切る。"
+            + "盛り付けて出来上がり。";
 
     @Rule
     public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
@@ -432,4 +447,117 @@ public class StaticLayoutPerfTest {
         }
     }
 
+    @Test
+    public void testCreate_JPText_Phrase_Short() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final String text = JP_TEXT_SHORT;
+        final LineBreakConfig config = new LineBreakConfig.Builder()
+                .setLineBreakWordStyle(LineBreakConfig.LINE_BREAK_WORD_STYLE_PHRASE)
+                .build();
+        final TextPaint paint = new TextPaint(PAINT);
+        paint.setTextLocales(LocaleList.forLanguageTags("ja-JP"));
+        while (state.keepRunning()) {
+            state.pauseTiming();
+            Canvas.freeTextLayoutCaches();
+            state.resumeTiming();
+            StaticLayout.Builder.obtain(text, 0, text.length(), paint, TEXT_WIDTH)
+                    .setLineBreakConfig(config)
+                    .build();
+        }
+    }
+
+    @Test
+    public void testCreate_JPText_Phrase_Long() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final String text = JP_TEXT_LONG;
+        final LineBreakConfig config = new LineBreakConfig.Builder()
+                .setLineBreakWordStyle(LineBreakConfig.LINE_BREAK_WORD_STYLE_PHRASE)
+                .build();
+        final TextPaint paint = new TextPaint(PAINT);
+        paint.setTextLocales(LocaleList.forLanguageTags("ja-JP"));
+        while (state.keepRunning()) {
+            state.pauseTiming();
+            Canvas.freeTextLayoutCaches();
+            state.resumeTiming();
+            StaticLayout.Builder.obtain(text, 0, text.length(), paint, TEXT_WIDTH)
+                    .setLineBreakConfig(config)
+                    .build();
+        }
+    }
+
+    @Test
+    public void testCreate_JPText_Phrase_LongLong() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final String text = JP_TEXT_LONG.repeat(20);  // 250 * 20 = 7000 chars
+        final LineBreakConfig config = new LineBreakConfig.Builder()
+                .setLineBreakWordStyle(LineBreakConfig.LINE_BREAK_WORD_STYLE_PHRASE)
+                .build();
+        final TextPaint paint = new TextPaint(PAINT);
+        paint.setTextLocales(LocaleList.forLanguageTags("ja-JP"));
+        while (state.keepRunning()) {
+            state.pauseTiming();
+            Canvas.freeTextLayoutCaches();
+            state.resumeTiming();
+            StaticLayout.Builder.obtain(text, 0, text.length(), paint, TEXT_WIDTH)
+                    .setLineBreakConfig(config)
+                    .build();
+        }
+    }
+
+    @Test
+    public void testCreate_JPText_NoPhrase_Short() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final String text = JP_TEXT_SHORT;
+        final LineBreakConfig config = new LineBreakConfig.Builder()
+                .setLineBreakWordStyle(LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE)
+                .build();
+        final TextPaint paint = new TextPaint(PAINT);
+        paint.setTextLocales(LocaleList.forLanguageTags("ja-JP"));
+        while (state.keepRunning()) {
+            state.pauseTiming();
+            Canvas.freeTextLayoutCaches();
+            state.resumeTiming();
+            StaticLayout.Builder.obtain(text, 0, text.length(), paint, TEXT_WIDTH)
+                    .setLineBreakConfig(config)
+                    .build();
+        }
+    }
+
+    @Test
+    public void testCreate_JPText_NoPhrase_Long() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final String text = JP_TEXT_LONG;
+        final LineBreakConfig config = new LineBreakConfig.Builder()
+                .setLineBreakWordStyle(LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE)
+                .build();
+        final TextPaint paint = new TextPaint(PAINT);
+        paint.setTextLocales(LocaleList.forLanguageTags("ja-JP"));
+        while (state.keepRunning()) {
+            state.pauseTiming();
+            Canvas.freeTextLayoutCaches();
+            state.resumeTiming();
+            StaticLayout.Builder.obtain(text, 0, text.length(), paint, TEXT_WIDTH)
+                    .setLineBreakConfig(config)
+                    .build();
+        }
+    }
+
+    @Test
+    public void testCreate_JPText_NoPhrase_LongLong() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final String text = JP_TEXT_LONG.repeat(20);  // 250 * 20 = 7000 chars
+        final LineBreakConfig config = new LineBreakConfig.Builder()
+                .setLineBreakWordStyle(LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE)
+                .build();
+        final TextPaint paint = new TextPaint(PAINT);
+        paint.setTextLocales(LocaleList.forLanguageTags("ja-JP"));
+        while (state.keepRunning()) {
+            state.pauseTiming();
+            Canvas.freeTextLayoutCaches();
+            state.resumeTiming();
+            StaticLayout.Builder.obtain(text, 0, text.length(), paint, TEXT_WIDTH)
+                    .setLineBreakConfig(config)
+                    .build();
+        }
+    }
 }

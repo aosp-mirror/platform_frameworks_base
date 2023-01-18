@@ -389,26 +389,6 @@ public class BroadcastOptions extends ComponentOptions {
     }
 
     /**
-     * Set PendingIntent activity is allowed to be started in the background if the caller
-     * can start background activities.
-     * @hide
-     */
-    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
-    public void setPendingIntentBackgroundActivityLaunchAllowed(boolean allowed) {
-        super.setPendingIntentBackgroundActivityLaunchAllowed(allowed);
-    }
-
-    /**
-     * Get PendingIntent activity is allowed to be started in the background if the caller
-     * can start background activities.
-     * @hide
-     */
-    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
-    public boolean isPendingIntentBackgroundActivityLaunchAllowed() {
-        return super.isPendingIntentBackgroundActivityLaunchAllowed();
-    }
-
-    /**
      * Return {@link #setTemporaryAppAllowlist}.
      * @hide
      */
@@ -934,6 +914,25 @@ public class BroadcastOptions extends ComponentOptions {
      */
     public void clearDeliveryGroupExtrasMerger() {
         mDeliveryGroupExtrasMerger = null;
+    }
+
+    /**
+     * Sets the mode for allowing or denying the senders privileges to start background activities
+     * to the PendingIntent.
+     *
+     * This is typically used when executing {@link PendingIntent#send(Bundle)} or similar
+     * methods. A privileged sender of a PendingIntent should only grant
+     * MODE_BACKGROUND_ACTIVITY_START_ALLOWED if the PendingIntent is from a trusted source and/or
+     * executed on behalf the user.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @Override // to narrow down the return type
+    public BroadcastOptions setPendingIntentBackgroundActivityStartMode(int state) {
+        super.setPendingIntentBackgroundActivityStartMode(state);
+        return this;
     }
 
     /**

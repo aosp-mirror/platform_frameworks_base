@@ -96,6 +96,11 @@ class DesktopTasksController(
         }
     }
 
+    /** Get number of tasks that are marked as visible */
+    fun getVisibleTaskCount(): Int {
+        return desktopModeTaskRepository.getVisibleTaskCount()
+    }
+
     /** Move a task with given `taskId` to desktop */
     fun moveToDesktop(taskId: Int) {
         shellTaskOrganizer.getRunningTaskInfo(taskId)?.let { task -> moveToDesktop(task) }
@@ -308,6 +313,17 @@ class DesktopTasksController(
                 "showDesktopApps",
                 Consumer(DesktopTasksController::showDesktopApps)
             )
+        }
+
+        override fun getVisibleTaskCount(): Int {
+            val result = IntArray(1)
+            ExecutorUtils.executeRemoteCallWithTaskPermission(
+                controller,
+                "getVisibleTaskCount",
+                { controller -> result[0] = controller.getVisibleTaskCount() },
+                true /* blocking */
+            )
+            return result[0]
         }
     }
 }

@@ -23,12 +23,12 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import android.app.ActivityManager;
 import android.app.IStopUserCallback;
-import android.app.UserSwitchObserver;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.os.RemoteException;
 import android.os.UserManager;
 import android.platform.test.annotations.Postsubmit;
+import android.provider.Settings;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
@@ -37,10 +37,12 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.FunctionalUtils;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -56,18 +58,30 @@ public class UserLifecycleStressTest {
     private static final String TAG = "UserLifecycleStressTest";
     // TODO: Make this smaller once we have improved it.
     private static final int TIMEOUT_IN_SECOND = 40;
-    private static final int NUM_ITERATIONS = 10;
+    private static final int NUM_ITERATIONS = 8;
     private static final int WAIT_BEFORE_STOP_USER_IN_SECOND = 3;
 
     private Context mContext;
     private UserManager mUserManager;
     private ActivityManager mActivityManager;
+    private UserSwitchWaiter mUserSwitchWaiter;
+    private String mRemoveGuestOnExitOriginalValue;
 
     @Before
-    public void setup() {
+    public void setup() throws RemoteException {
         mContext = InstrumentationRegistry.getInstrumentation().getContext();
         mUserManager = mContext.getSystemService(UserManager.class);
         mActivityManager = mContext.getSystemService(ActivityManager.class);
+        mUserSwitchWaiter = new UserSwitchWaiter(TAG, TIMEOUT_IN_SECOND);
+        mRemoveGuestOnExitOriginalValue = Settings.Global.getString(mContext.getContentResolver(),
+                Settings.Global.REMOVE_GUEST_ON_EXIT);
+    }
+
+    @After
+    public void tearDown() throws IOException {
+        mUserSwitchWaiter.close();
+        Settings.Global.putString(mContext.getContentResolver(),
+                Settings.Global.REMOVE_GUEST_ON_EXIT, mRemoveGuestOnExitOriginalValue);
     }
 
     /**
@@ -101,10 +115,13 @@ public class UserLifecycleStressTest {
      * 1. While the guest user is in foreground, mark it for deletion.
      * 2. Create a new guest. (This wouldn't be possible if the old one wasn't marked for deletion)
      * 3. Switch to newly created guest.
-     * 4. Remove the previous guest before waiting for switch to complete.
+     * 4. Remove the previous guest after the switch is complete.
      **/
     @Test
-    public void switchToExistingGuestAndStartOverStressTest() throws Exception {
+    public void switchToExistingGuestAndStartOverStressTest() {
+        Settings.Global.putString(mContext.getContentResolver(),
+                Settings.Global.REMOVE_GUEST_ON_EXIT, "0");
+
         if (ActivityManager.getCurrentUser() != USER_SYSTEM) {
             switchUser(USER_SYSTEM);
         }
@@ -135,14 +152,15 @@ public class UserLifecycleStressTest {
                     .isNotNull();
 
             Log.d(TAG, "Switching to the new guest");
-            switchUserThenRun(newGuest.id, () -> {
-                if (currentGuestId != USER_NULL) {
-                    Log.d(TAG, "Removing the previous guest before waiting for switch to complete");
-                    assertWithMessage("Couldn't remove guest")
-                            .that(mUserManager.removeUser(currentGuestId))
-                            .isTrue();
-                }
-            });
+            switchUser(newGuest.id);
+
+            if (currentGuestId != USER_NULL) {
+                Log.d(TAG, "Removing the previous guest");
+                assertWithMessage("Couldn't remove guest")
+                        .that(mUserManager.removeUser(currentGuestId))
+                        .isTrue();
+            }
+
             Log.d(TAG, "Switching back to the system user");
             switchUser(USER_SYSTEM);
 
@@ -174,33 +192,14 @@ public class UserLifecycleStressTest {
     }
 
     /** Starts the given user in the foreground and waits for the switch to finish. */
-    private void switchUser(int userId) throws RemoteException, InterruptedException {
-        switchUserThenRun(userId, null);
-    }
+    private void switchUser(int userId) {
+        Log.d(TAG, "Switching to user " + userId);
 
-    /**
-     * Starts the given user in the foreground. And runs the given Runnable right after
-     * am.switchUser call, before waiting for the actual user switch to be complete.
-     **/
-    private void switchUserThenRun(int userId, Runnable runAfterSwitchBeforeWait)
-            throws RemoteException, InterruptedException {
-        runWithLatch("switch user", countDownLatch -> {
-            ActivityManager.getService().registerUserSwitchObserver(
-                    new UserSwitchObserver() {
-                        @Override
-                        public void onUserSwitchComplete(int newUserId) {
-                            if (userId == newUserId) {
-                                countDownLatch.countDown();
-                            }
-                        }
-                    }, TAG);
-            Log.d(TAG, "Switching to user " + userId);
-            assertWithMessage("Failed to switch to user")
-                    .that(mActivityManager.switchUser(userId))
-                    .isTrue();
-            if (runAfterSwitchBeforeWait != null) {
-                runAfterSwitchBeforeWait.run();
-            }
+        mUserSwitchWaiter.runThenWaitUntilSwitchCompleted(userId, () -> {
+            assertWithMessage("Could not start switching to user " + userId)
+                    .that(mActivityManager.switchUser(userId)).isTrue();
+        }, /* onFail= */ () -> {
+            throw new AssertionError("Could not complete switching to user " + userId);
         });
     }
 

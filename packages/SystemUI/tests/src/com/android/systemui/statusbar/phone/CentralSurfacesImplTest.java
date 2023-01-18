@@ -544,6 +544,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mCentralSurfaces.startKeyguard();
         mInitController.executePostInitTasks();
         notificationLogger.setUpWithContainer(mNotificationListContainer);
+        mCentralSurfaces.registerCallbacks();
     }
 
     @Test

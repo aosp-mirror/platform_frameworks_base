@@ -20,7 +20,6 @@ import android.app.Instrumentation
 import android.app.WallpaperManager
 import android.content.res.Resources
 import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
@@ -92,7 +91,7 @@ class TaskTransitionTest(flicker: FlickerTest) : BaseTest(flicker) {
      * Checks that the [wallpaper] layer is never visible when performing task transitions. A solid
      * color background should be shown instead.
      */
-    @FlakyTest(bugId = 253617416)
+    @Presubmit
     @Test
     fun wallpaperLayerIsNeverVisible() {
         flicker.assertLayers {
@@ -192,7 +191,7 @@ class TaskTransitionTest(flicker: FlickerTest) : BaseTest(flicker) {
      * Checks that we start with the LaunchNewTask activity on top and then open up the
      * SimpleActivity and then go back to the LaunchNewTask activity.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun newTaskOpensOnTopAndThenCloses() {
         flicker.assertWm {
@@ -207,11 +206,6 @@ class TaskTransitionTest(flicker: FlickerTest) : BaseTest(flicker) {
                 .isAppWindowOnTop(launchNewTaskApp.componentMatcher)
         }
     }
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     companion object {
         private fun getWallpaperPackage(instrumentation: Instrumentation): IComponentMatcher {

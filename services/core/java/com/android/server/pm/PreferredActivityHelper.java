@@ -431,6 +431,23 @@ final class PreferredActivityHelper {
         }
     }
 
+    public void clearPersistentPreferredActivity(IntentFilter filter, int userId) {
+        int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.SYSTEM_UID) {
+            throw new SecurityException(
+                    "clearPersistentPreferredActivity can only be run by the system");
+        }
+        boolean changed = false;
+        synchronized (mPm.mLock) {
+            changed = mPm.mSettings.clearPersistentPreferredActivity(filter, userId);
+        }
+        if (changed) {
+            updateDefaultHomeNotLocked(mPm.snapshotComputer(), userId);
+            mPm.postPreferredActivityChangedBroadcast(userId);
+            mPm.scheduleWritePackageRestrictions(userId);
+        }
+    }
+
     private boolean isHomeFilter(@NonNull WatchedIntentFilter filter) {
         return filter.hasAction(Intent.ACTION_MAIN) && filter.hasCategory(Intent.CATEGORY_HOME)
                 && filter.hasCategory(CATEGORY_DEFAULT);

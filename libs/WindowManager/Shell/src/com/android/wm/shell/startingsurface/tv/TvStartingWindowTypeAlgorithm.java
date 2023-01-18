@@ -24,12 +24,12 @@ import com.android.wm.shell.startingsurface.StartingWindowTypeAlgorithm;
 
 /**
  * Algorithm for determining the type of a new starting window on Android TV.
- * For now we always show empty splash screens on Android TV.
+ * For now we do not want to show any splash screens on Android TV.
  */
 public class TvStartingWindowTypeAlgorithm implements StartingWindowTypeAlgorithm {
     @Override
     public int getSuggestedWindowType(StartingWindowInfo windowInfo) {
-        // For now we want to always show empty splash screens on TV.
+        // For now we do not want to show any splash screens on TV.
         return STARTING_WINDOW_TYPE_NONE;
     }
 }

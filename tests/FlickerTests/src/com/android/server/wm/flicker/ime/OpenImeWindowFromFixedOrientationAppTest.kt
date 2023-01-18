@@ -45,7 +45,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class OpenImeWindowFromFixedOrientationAppTest(flicker: FlickerTest) : BaseTest(flicker) {
+open class OpenImeWindowFromFixedOrientationAppTest(flicker: FlickerTest) : BaseTest(flicker) {
     private val imeTestApp = ImeAppAutoFocusHelper(instrumentation, flicker.scenario.startRotation)
 
     /** {@inheritDoc} */

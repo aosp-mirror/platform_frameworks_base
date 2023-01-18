@@ -36,6 +36,8 @@ import android.service.voice.HotwordAudioStream;
 import android.service.voice.HotwordDetectedResult;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -60,10 +62,12 @@ final class HotwordAudioStreamCopier {
     private static final String OP_MESSAGE = "Streaming hotword audio to VoiceInteractionService";
     private static final String TASK_ID_PREFIX = "HotwordDetectedResult@";
     private static final String THREAD_NAME_PREFIX = "Copy-";
+    @VisibleForTesting
+    static final int DEFAULT_COPY_BUFFER_LENGTH_BYTES = 32_768;
 
     // Corresponds to the OS pipe capacity in bytes
-    private static final int MAX_COPY_BUFFER_LENGTH_BYTES = 65_536;
-    private static final int DEFAULT_COPY_BUFFER_LENGTH_BYTES = 32_768;
+    @VisibleForTesting
+    static final int MAX_COPY_BUFFER_LENGTH_BYTES = 65_536;
 
     private final AppOpsManager mAppOpsManager;
     private final int mDetectorType;

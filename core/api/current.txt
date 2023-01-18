@@ -4635,8 +4635,9 @@ package android.app {
     method @Nullable public android.graphics.Rect getLaunchBounds();
     method public int getLaunchDisplayId();
     method public boolean getLockTaskMode();
+    method public int getPendingIntentBackgroundActivityStartMode();
     method public int getSplashScreenStyle();
-    method public boolean isPendingIntentBackgroundActivityLaunchAllowed();
+    method @Deprecated public boolean isPendingIntentBackgroundActivityLaunchAllowed();
     method public boolean isShareIdentityEnabled();
     method public static android.app.ActivityOptions makeBasic();
     method public static android.app.ActivityOptions makeClipRevealAnimation(android.view.View, int, int, int, int);
@@ -4653,13 +4654,17 @@ package android.app {
     method public android.app.ActivityOptions setLaunchBounds(@Nullable android.graphics.Rect);
     method public android.app.ActivityOptions setLaunchDisplayId(int);
     method public android.app.ActivityOptions setLockTaskEnabled(boolean);
-    method public void setPendingIntentBackgroundActivityLaunchAllowed(boolean);
+    method @Deprecated public void setPendingIntentBackgroundActivityLaunchAllowed(boolean);
+    method @NonNull public android.app.ActivityOptions setPendingIntentBackgroundActivityStartMode(int);
     method @NonNull public android.app.ActivityOptions setShareIdentityEnabled(boolean);
     method @NonNull public android.app.ActivityOptions setSplashScreenStyle(int);
     method public android.os.Bundle toBundle();
     method public void update(android.app.ActivityOptions);
     field public static final String EXTRA_USAGE_TIME_REPORT = "android.activity.usage_time";
     field public static final String EXTRA_USAGE_TIME_REPORT_PACKAGES = "android.usage_time_packages";
+    field public static final int MODE_BACKGROUND_ACTIVITY_START_ALLOWED = 1; // 0x1
+    field public static final int MODE_BACKGROUND_ACTIVITY_START_DENIED = 2; // 0x2
+    field public static final int MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED = 0; // 0x0
   }
 
   public class AlarmManager {
@@ -4673,7 +4678,7 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.SCHEDULE_EXACT_ALARM) public void setAlarmClock(@NonNull android.app.AlarmManager.AlarmClockInfo, @NonNull android.app.PendingIntent);
     method public void setAndAllowWhileIdle(int, long, @NonNull android.app.PendingIntent);
     method @RequiresPermission(value=android.Manifest.permission.SCHEDULE_EXACT_ALARM, conditional=true) public void setExact(int, long, @NonNull android.app.PendingIntent);
-    method @RequiresPermission(value=android.Manifest.permission.SCHEDULE_EXACT_ALARM, conditional=true) public void setExact(int, long, @Nullable String, @NonNull android.app.AlarmManager.OnAlarmListener, @Nullable android.os.Handler);
+    method public void setExact(int, long, @Nullable String, @NonNull android.app.AlarmManager.OnAlarmListener, @Nullable android.os.Handler);
     method @RequiresPermission(value=android.Manifest.permission.SCHEDULE_EXACT_ALARM, conditional=true) public void setExactAndAllowWhileIdle(int, long, @NonNull android.app.PendingIntent);
     method public void setInexactRepeating(int, long, long, @NonNull android.app.PendingIntent);
     method public void setRepeating(int, long, long, @NonNull android.app.PendingIntent);
@@ -8038,24 +8043,24 @@ package android.app.admin {
     field public static final int PACKAGE_POLICY_BLOCKLIST = 1; // 0x1
   }
 
-  public final class PolicyUpdateReason {
-    ctor public PolicyUpdateReason(int);
-    method public int getReasonCode();
-    field public static final int REASON_CONFLICTING_ADMIN_POLICY = 0; // 0x0
-    field public static final int REASON_UNKNOWN = -1; // 0xffffffff
+  public final class PolicyUpdateResult {
+    ctor public PolicyUpdateResult(int);
+    method public int getResultCode();
+    field public static final int RESULT_FAILURE_CONFLICTING_ADMIN_POLICY = 1; // 0x1
+    field public static final int RESULT_FAILURE_UNKNOWN = -1; // 0xffffffff
+    field public static final int RESULT_SUCCESS = 0; // 0x0
   }
 
   public abstract class PolicyUpdatesReceiver extends android.content.BroadcastReceiver {
     ctor public PolicyUpdatesReceiver();
-    method public void onPolicyChanged(@NonNull android.content.Context, @NonNull String, @NonNull android.os.Bundle, @NonNull android.app.admin.TargetUser, @NonNull android.app.admin.PolicyUpdateReason);
-    method public void onPolicySetResult(@NonNull android.content.Context, @NonNull String, @NonNull android.os.Bundle, @NonNull android.app.admin.TargetUser, int, @Nullable android.app.admin.PolicyUpdateReason);
+    method public void onPolicyChanged(@NonNull android.content.Context, @NonNull String, @NonNull android.os.Bundle, @NonNull android.app.admin.TargetUser, @NonNull android.app.admin.PolicyUpdateResult);
+    method public void onPolicySetResult(@NonNull android.content.Context, @NonNull String, @NonNull android.os.Bundle, @NonNull android.app.admin.TargetUser, @NonNull android.app.admin.PolicyUpdateResult);
     method public final void onReceive(android.content.Context, android.content.Intent);
     field public static final String ACTION_DEVICE_POLICY_CHANGED = "android.app.admin.action.DEVICE_POLICY_CHANGED";
     field public static final String ACTION_DEVICE_POLICY_SET_RESULT = "android.app.admin.action.DEVICE_POLICY_SET_RESULT";
+    field public static final String EXTRA_INTENT_FILTER = "android.app.admin.extra.INTENT_FILTER";
     field public static final String EXTRA_PACKAGE_NAME = "android.app.admin.extra.PACKAGE_NAME";
     field public static final String EXTRA_PERMISSION_NAME = "android.app.admin.extra.PERMISSION_NAME";
-    field public static final int POLICY_SET_RESULT_FAILURE = -1; // 0xffffffff
-    field public static final int POLICY_SET_RESULT_SUCCESS = 0; // 0x0
   }
 
   public final class PreferentialNetworkServiceConfig implements android.os.Parcelable {
@@ -8645,6 +8650,8 @@ package android.app.job {
     method public final void updateEstimatedNetworkBytes(@NonNull android.app.job.JobParameters, @NonNull android.app.job.JobWorkItem, long, long);
     method public final void updateTransferredNetworkBytes(@NonNull android.app.job.JobParameters, long, long);
     method public final void updateTransferredNetworkBytes(@NonNull android.app.job.JobParameters, @NonNull android.app.job.JobWorkItem, long, long);
+    field public static final int JOB_END_NOTIFICATION_POLICY_DETACH = 0; // 0x0
+    field public static final int JOB_END_NOTIFICATION_POLICY_REMOVE = 1; // 0x1
     field public static final String PERMISSION_BIND = "android.permission.BIND_JOB_SERVICE";
   }
 
@@ -9180,6 +9187,7 @@ package android.companion {
     method @Nullable public String getDeviceProfile();
     method @Nullable public CharSequence getDisplayName();
     method public int getId();
+    method public int getSystemDataSyncFlags();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.companion.AssociationInfo> CREATOR;
   }
@@ -9249,8 +9257,10 @@ package android.companion {
     method @RequiresPermission(anyOf={android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH, android.Manifest.permission.REQUEST_COMPANION_PROFILE_COMPUTER, android.Manifest.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING, android.Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION}, conditional=true) public void associate(@NonNull android.companion.AssociationRequest, @NonNull java.util.concurrent.Executor, @NonNull android.companion.CompanionDeviceManager.Callback);
     method @Nullable public android.content.IntentSender buildAssociationCancellationIntent();
     method @Nullable public android.content.IntentSender buildPermissionTransferUserConsentIntent(int) throws android.companion.DeviceNotAssociatedException;
+    method public void disableSystemDataSync(int, int);
     method @Deprecated public void disassociate(@NonNull String);
     method public void disassociate(int);
+    method public void enableSystemDataSync(int, int);
     method @NonNull @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public java.util.List<android.companion.AssociationInfo> getAllAssociations();
     method @Deprecated @NonNull public java.util.List<java.lang.String> getAssociations();
     method @NonNull public java.util.List<android.companion.AssociationInfo> getMyAssociations();
@@ -9261,6 +9271,7 @@ package android.companion {
     method @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE) public void stopObservingDevicePresence(@NonNull String) throws android.companion.DeviceNotAssociatedException;
     field public static final String EXTRA_ASSOCIATION = "android.companion.extra.ASSOCIATION";
     field @Deprecated public static final String EXTRA_DEVICE = "android.companion.extra.DEVICE";
+    field public static final int FLAG_CALL_METADATA = 1; // 0x1
     field public static final int RESULT_CANCELED = 0; // 0x0
     field public static final int RESULT_DISCOVERY_TIMEOUT = 2; // 0x2
     field public static final int RESULT_INTERNAL_ERROR = 3; // 0x3
@@ -10064,6 +10075,7 @@ package android.content {
     field public static final String BATTERY_SERVICE = "batterymanager";
     field public static final int BIND_ABOVE_CLIENT = 8; // 0x8
     field public static final int BIND_ADJUST_WITH_ACTIVITY = 128; // 0x80
+    field public static final int BIND_ALLOW_ACTIVITY_STARTS = 512; // 0x200
     field public static final int BIND_ALLOW_OOM_MANAGEMENT = 16; // 0x10
     field public static final int BIND_AUTO_CREATE = 1; // 0x1
     field public static final int BIND_DEBUG_UNBIND = 2; // 0x2
@@ -10705,6 +10717,7 @@ package android.content {
     field public static final String EXTRA_CHANGED_COMPONENT_NAME_LIST = "android.intent.extra.changed_component_name_list";
     field public static final String EXTRA_CHANGED_PACKAGE_LIST = "android.intent.extra.changed_package_list";
     field public static final String EXTRA_CHANGED_UID_LIST = "android.intent.extra.changed_uid_list";
+    field public static final String EXTRA_CHOOSER_CUSTOM_ACTIONS = "android.intent.extra.CHOOSER_CUSTOM_ACTIONS";
     field public static final String EXTRA_CHOOSER_REFINEMENT_INTENT_SENDER = "android.intent.extra.CHOOSER_REFINEMENT_INTENT_SENDER";
     field public static final String EXTRA_CHOOSER_TARGETS = "android.intent.extra.CHOOSER_TARGETS";
     field public static final String EXTRA_CHOSEN_COMPONENT = "android.intent.extra.CHOSEN_COMPONENT";
@@ -12386,7 +12399,6 @@ package android.content.pm {
     field public static final String FEATURE_RAM_NORMAL = "android.hardware.ram.normal";
     field public static final String FEATURE_SCREEN_LANDSCAPE = "android.hardware.screen.landscape";
     field public static final String FEATURE_SCREEN_PORTRAIT = "android.hardware.screen.portrait";
-    field public static final String FEATURE_SEAMLESS_REFRESH_RATE_SWITCHING = "android.software.seamless_refresh_rate_switching";
     field public static final String FEATURE_SECURELY_REMOVES_USERS = "android.software.securely_removes_users";
     field public static final String FEATURE_SECURE_LOCK_SCREEN = "android.software.secure_lock_screen";
     field public static final String FEATURE_SECURITY_MODEL_COMPATIBLE = "android.hardware.security.model.compatible";
@@ -33235,6 +33247,7 @@ package android.os {
     field public static final String DISALLOW_DEBUGGING_FEATURES = "no_debugging_features";
     field public static final String DISALLOW_FACTORY_RESET = "no_factory_reset";
     field public static final String DISALLOW_FUN = "no_fun";
+    field public static final String DISALLOW_GRANT_ADMIN = "no_grant_admin";
     field public static final String DISALLOW_INSTALL_APPS = "no_install_apps";
     field public static final String DISALLOW_INSTALL_UNKNOWN_SOURCES = "no_install_unknown_sources";
     field public static final String DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY = "no_install_unknown_sources_globally";
@@ -39526,6 +39539,20 @@ package android.service.carrier {
 
 package android.service.chooser {
 
+  public final class ChooserAction implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.app.PendingIntent getAction();
+    method @NonNull public android.graphics.drawable.Icon getIcon();
+    method @NonNull public CharSequence getLabel();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.chooser.ChooserAction> CREATOR;
+  }
+
+  public static final class ChooserAction.Builder {
+    ctor public ChooserAction.Builder(@NonNull android.graphics.drawable.Icon, @NonNull CharSequence, @NonNull android.app.PendingIntent);
+    method @NonNull public android.service.chooser.ChooserAction build();
+  }
+
   @Deprecated public final class ChooserTarget implements android.os.Parcelable {
     ctor @Deprecated public ChooserTarget(CharSequence, android.graphics.drawable.Icon, float, android.content.ComponentName, @Nullable android.os.Bundle);
     method @Deprecated public int describeContents();
@@ -42966,7 +42993,7 @@ package android.telephony {
     field public static final String KEY_SMS_MAX_RETRY_COUNT_INT = "imssms.sms_max_retry_count_int";
     field public static final String KEY_SMS_MAX_RETRY_COUNT_OVER_IMS_INT = "imssms.sms_max_retry_count_over_ims_int";
     field public static final String KEY_SMS_OVER_IMS_FORMAT_INT = "imssms.sms_over_ims_format_int";
-    field public static final String KEY_SMS_OVER_IMS_SEND_RETRY_DELAY_MILLIS_INT = "imssms.sms_rover_ims_send_retry_delay_millis_int";
+    field public static final String KEY_SMS_OVER_IMS_SEND_RETRY_DELAY_MILLIS_INT = "imssms.sms_over_ims_send_retry_delay_millis_int";
     field public static final String KEY_SMS_OVER_IMS_SUPPORTED_BOOL = "imssms.sms_over_ims_supported_bool";
     field public static final String KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY = "imssms.sms_over_ims_supported_rats_int_array";
     field public static final String KEY_SMS_RP_CAUSE_VALUES_TO_FALLBACK_INT_ARRAY = "imssms.sms_rp_cause_values_to_fallback_int_array";
@@ -49304,6 +49331,7 @@ package android.view {
     method @Nullable public android.view.SurfaceControl.Transaction buildReparentTransaction(@NonNull android.view.SurfaceControl);
     method public default int getBufferTransformHint();
     method public default void removeOnBufferTransformHintChangedListener(@NonNull android.view.AttachedSurfaceControl.OnBufferTransformHintChangedListener);
+    method public default void setChildBoundingInsets(@NonNull android.graphics.Rect);
     method public default void setTouchableRegion(@Nullable android.graphics.Region);
   }
 

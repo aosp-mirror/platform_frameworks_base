@@ -2066,7 +2066,8 @@ public class DisplayContentTests extends WindowTestsBase {
         // Update the forced size and density in settings and the unique id to simualate a display
         // remap.
         dc.mWmService.mDisplayWindowSettings.setForcedSize(dc, forcedWidth, forcedHeight);
-        dc.mWmService.mDisplayWindowSettings.setForcedDensity(dc, forcedDensity, 0 /* userId */);
+        dc.mWmService.mDisplayWindowSettings.setForcedDensity(displayInfo, forcedDensity,
+                0 /* userId */);
         dc.mCurrentUniqueDisplayId = mDisplayInfo.uniqueId + "-test";
         // Trigger display changed.
         dc.onDisplayChanged();

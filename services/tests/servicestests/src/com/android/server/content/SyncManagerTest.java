@@ -24,6 +24,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -95,7 +96,7 @@ public class SyncManagerTest extends TestCase {
         when(mContext.getSystemService(Context.USER_SERVICE)).thenReturn(mUserManager);
         doNothing().when(mAccountManagerInternal).addOnAppPermissionChangeListener(any());
         when(mJobSchedulerInternal.getSystemScheduledPendingJobs()).thenReturn(new ArrayList<>());
-        mSyncManager = new SyncManagerWithMockedServices(mContext, true);
+        mSyncManager = spy(new SyncManagerWithMockedServices(mContext, true));
     }
 
     public void testSyncExtrasEquals_WithNull() throws Exception {
@@ -233,6 +234,7 @@ public class SyncManagerTest extends TestCase {
     }
 
     public void testShouldDisableSync() {
+        doReturn(true).when(mSyncManager).isContactSharingAllowedForCloneProfile();
         UserInfo primaryUserInfo = createUserInfo("primary", 0 /* id */, 0 /* groupId */,
                 UserInfo.FLAG_PRIMARY | UserInfo.FLAG_ADMIN);
         UserInfo cloneUserInfo = createUserInfo("clone", 10 /* id */, 0 /* groupId */,

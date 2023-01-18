@@ -56,7 +56,7 @@ class AppListViewModelTest {
         viewModel.appListConfig.setIfAbsent(CONFIG)
         viewModel.listModel.setIfAbsent(listModel)
         viewModel.showSystem.setIfAbsent(false)
-        viewModel.option.setIfAbsent(0)
+        viewModel.optionFlow.value = 0
         viewModel.searchQuery.setIfAbsent("")
         viewModel.reloadApps()
         return viewModel
@@ -90,6 +90,8 @@ class AppListViewModelTest {
             userIdFlow: Flow<Int>,
             showSystemFlow: Flow<Boolean>,
         ): Flow<(app: ApplicationInfo) -> Boolean> = flowOf { true }
+
+        override fun getSystemPackageNamesBlocking(config: AppListConfig): Set<String> = setOf()
     }
 
     private object FakeAppRepository : AppRepository {

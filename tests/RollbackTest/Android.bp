@@ -74,6 +74,7 @@ java_test_host {
     ],
     test_suites: ["general-tests"],
     test_config: "MultiUserRollbackTest.xml",
+    data : [":RollbackTest"],
 }
 
 java_library_host {

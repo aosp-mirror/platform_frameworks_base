@@ -16,19 +16,20 @@
 
 package android.app;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.os.Bundle;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
+ * Base class for {@link ActivityOptions} and {@link BroadcastOptions}.
  * @hide
  */
 public class ComponentOptions {
-
-    /**
-     * Default value for KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED.
-     * @hide
-     **/
-    public static final boolean PENDING_INTENT_BAL_ALLOWED_DEFAULT = true;
 
     /**
      * PendingIntent caller allows activity start even if PendingIntent creator is in background.
@@ -52,9 +53,22 @@ public class ComponentOptions {
      */
     public static final String KEY_INTERACTIVE = "android:component.isInteractive";
 
-    private boolean mPendingIntentBalAllowed = PENDING_INTENT_BAL_ALLOWED_DEFAULT;
+    private @Nullable Boolean mPendingIntentBalAllowed = null;
     private boolean mPendingIntentBalAllowedByPermission = false;
     private boolean mIsInteractive = false;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"MODE_BACKGROUND_ACTIVITY_START_"}, value = {
+            MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED,
+            MODE_BACKGROUND_ACTIVITY_START_ALLOWED,
+            MODE_BACKGROUND_ACTIVITY_START_DENIED})
+    public @interface BackgroundActivityStartMode {}
+    /** No explicit value chosen. The system will decide whether to grant privileges. */
+    public static final int MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED = 0;
+    /** Allow the {@link PendingIntent} to use the background activity start privileges. */
+    public static final int MODE_BACKGROUND_ACTIVITY_START_ALLOWED = 1;
+    /** Deny the {@link PendingIntent} to use the background activity start privileges. */
+    public static final int MODE_BACKGROUND_ACTIVITY_START_DENIED = 2;
 
     ComponentOptions() {
     }
@@ -63,12 +77,16 @@ public class ComponentOptions {
         // If the remote side sent us bad parcelables, they won't get the
         // results they want, which is their loss.
         opts.setDefusable(true);
-        setPendingIntentBackgroundActivityLaunchAllowed(
-                opts.getBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED,
-                        PENDING_INTENT_BAL_ALLOWED_DEFAULT));
+
+        boolean pendingIntentBalAllowedIsSetExplicitly =
+                opts.containsKey(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED);
+        if (pendingIntentBalAllowedIsSetExplicitly) {
+            mPendingIntentBalAllowed =
+                    opts.getBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED);
+        }
         setPendingIntentBackgroundActivityLaunchAllowedByPermission(
-                opts.getBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION,
-                        false));
+                opts.getBoolean(
+                        KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION, false));
         mIsInteractive = opts.getBoolean(KEY_INTERACTIVE, false);
     }
 
@@ -97,17 +115,71 @@ public class ComponentOptions {
     /**
      * Set PendingIntent activity is allowed to be started in the background if the caller
      * can start background activities.
+     *
+     * @deprecated use #setPendingIntentBackgroundActivityStartMode(int) to set the full range
+     * of states
      */
-    public void setPendingIntentBackgroundActivityLaunchAllowed(boolean allowed) {
+    @Deprecated public void setPendingIntentBackgroundActivityLaunchAllowed(boolean allowed) {
         mPendingIntentBalAllowed = allowed;
     }
 
     /**
-     * Get PendingIntent activity is allowed to be started in the background if the caller
-     * can start background activities.
+     * Get PendingIntent activity is allowed to be started in the background if the caller can start
+     * background activities.
+     *
+     * @deprecated use {@link #getPendingIntentBackgroundActivityStartMode()} since for apps
+     * targeting {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or higher this value might
+     * not match the actual behavior if the value was not explicitly set.
      */
-    public boolean isPendingIntentBackgroundActivityLaunchAllowed() {
+    @Deprecated public boolean isPendingIntentBackgroundActivityLaunchAllowed() {
+        if (mPendingIntentBalAllowed == null) {
+            // cannot return null, so return the value used up to API level 33 for compatibility
+            return true;
+        }
         return mPendingIntentBalAllowed;
+    }
+
+    /**
+     * Sets the mode for allowing or denying the senders privileges to start background activities
+     * to the PendingIntent.
+     *
+     * This is typically used in when executing {@link PendingIntent#send(Bundle)} or similar
+     * methods. A privileged sender of a PendingIntent should only grant
+     * {@link #MODE_BACKGROUND_ACTIVITY_START_ALLOWED} if the PendingIntent is from a trusted source
+     * and/or executed on behalf the user.
+     */
+    public @NonNull ComponentOptions setPendingIntentBackgroundActivityStartMode(
+            @BackgroundActivityStartMode int state) {
+        switch (state) {
+            case MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED:
+                mPendingIntentBalAllowed = null;
+                break;
+            case MODE_BACKGROUND_ACTIVITY_START_ALLOWED:
+                mPendingIntentBalAllowed = true;
+                break;
+            case MODE_BACKGROUND_ACTIVITY_START_DENIED:
+                mPendingIntentBalAllowed = false;
+                break;
+            default:
+                throw new IllegalArgumentException(state + " is not valid");
+        }
+        return this;
+    }
+
+    /**
+     * Gets the mode for allowing or denying the senders privileges to start background activities
+     * to the PendingIntent.
+     *
+     * @see #setPendingIntentBackgroundActivityStartMode(int)
+     */
+    public @BackgroundActivityStartMode int getPendingIntentBackgroundActivityStartMode() {
+        if (mPendingIntentBalAllowed == null) {
+            return MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
+        } else if (mPendingIntentBalAllowed) {
+            return MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
+        } else {
+            return MODE_BACKGROUND_ACTIVITY_START_DENIED;
+        }
     }
 
     /**
@@ -129,7 +201,9 @@ public class ComponentOptions {
 
     public Bundle toBundle() {
         Bundle b = new Bundle();
-        b.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED, mPendingIntentBalAllowed);
+        if (mPendingIntentBalAllowed != null) {
+            b.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED, mPendingIntentBalAllowed);
+        }
         if (mPendingIntentBalAllowedByPermission) {
             b.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION,
                     mPendingIntentBalAllowedByPermission);

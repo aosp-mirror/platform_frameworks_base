@@ -278,6 +278,7 @@ public abstract class Context {
             BIND_IMPORTANT,
             BIND_ADJUST_WITH_ACTIVITY,
             BIND_NOT_PERCEPTIBLE,
+            BIND_ALLOW_ACTIVITY_STARTS,
             BIND_INCLUDE_CAPABILITIES,
             BIND_SHARED_ISOLATED_PROCESS
     })
@@ -380,6 +381,15 @@ public abstract class Context {
      * important user-perceptible processes.
      */
     public static final int BIND_NOT_PERCEPTIBLE = 0x00000100;
+
+    /**
+     * Flag for {@link #bindService}: If binding from an app that is visible, the bound service is
+     * allowed to start an activity from background. This was the default behavior before SDK
+     * version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}. Since then, the default
+     * behavior changed to disallow the bound service to start a background activity even if the app
+     * bound to it is in foreground, unless this flag is specified when binding.
+     */
+    public static final int BIND_ALLOW_ACTIVITY_STARTS = 0X000000200;
 
     /**
      * Flag for {@link #bindService}: If binding from an app that has specific capabilities

@@ -1638,7 +1638,7 @@ public final class AccessibilityInteractionClient
                 }
                 connection.attachAccessibilityOverlayToWindow(accessibilityWindowId, sc);
             } catch (RemoteException re) {
-                Log.e(LOG_TAG, "Error while calling remote attachAccessibilityOverlayToWindow", re);
+                re.rethrowFromSystemServer();
             }
         }
     }

@@ -36,6 +36,7 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArraySet;
@@ -261,6 +262,11 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
         }
     }
 
+    /** Get number of tasks that are marked as visible */
+    int getVisibleTaskCount() {
+        return mDesktopModeTaskRepository.getVisibleTaskCount();
+    }
+
     @NonNull
     private WindowContainerTransaction bringDesktopAppsToFront(boolean force) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
@@ -437,6 +443,16 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
         public void showDesktopApps() {
             executeRemoteCallWithTaskPermission(mController, "showDesktopApps",
                     DesktopModeController::showDesktopApps);
+        }
+
+        @Override
+        public int getVisibleTaskCount() throws RemoteException {
+            int[] result = new int[1];
+            executeRemoteCallWithTaskPermission(mController, "getVisibleTaskCount",
+                    controller -> result[0] = controller.getVisibleTaskCount(),
+                    true /* blocking */
+            );
+            return result[0];
         }
     }
 }
