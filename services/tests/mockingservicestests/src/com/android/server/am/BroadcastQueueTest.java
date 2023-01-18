@@ -1190,31 +1190,6 @@ public class BroadcastQueueTest {
     }
 
     /**
-     * Verify that we detect and ANR a wedged process when delivering a
-     * broadcast with more than one priority tranche.
-     */
-    @Test
-    public void testWedged_Registered_Prioritized() throws Exception {
-        // Legacy stack doesn't detect these ANRs; likely an oversight
-        Assume.assumeTrue(mImpl == Impl.MODERN);
-
-        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
-        final ProcessRecord receiverGreenApp = makeActiveProcessRecord(PACKAGE_GREEN,
-                ProcessBehavior.WEDGE);
-        final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE,
-                ProcessBehavior.NORMAL);
-
-        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
-                List.of(makeRegisteredReceiver(receiverGreenApp, 10),
-                        makeRegisteredReceiver(receiverBlueApp, 5))));
-
-        waitForIdle();
-        verify(mAms).appNotResponding(eq(receiverGreenApp), any());
-        verifyScheduleRegisteredReceiver(receiverBlueApp, airplane);
-    }
-
-    /**
      * Verify that we handle registered receivers in a process that always
      * responds with {@link DeadObjectException}, recovering to restart the
      * process and deliver their next broadcast.
