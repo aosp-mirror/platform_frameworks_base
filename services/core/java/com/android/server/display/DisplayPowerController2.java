@@ -135,6 +135,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     private static final int MSG_UPDATE_RBC = 9;
     private static final int MSG_BRIGHTNESS_RAMP_DONE = 10;
     private static final int MSG_STATSD_HBM_BRIGHTNESS = 11;
+    private static final int MSG_SWITCH_USER = 12;
 
     private static final int BRIGHTNESS_CHANGE_STATSD_REPORT_INTERVAL_MS = 500;
 
@@ -605,6 +606,11 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
     @Override
     public void onSwitchUser(@UserIdInt int newUserId) {
+        Message msg = mHandler.obtainMessage(MSG_SWITCH_USER, newUserId);
+        mHandler.sendMessage(msg);
+    }
+
+    private void handleOnSwitchUser(@UserIdInt int newUserId) {
         handleSettingsChange(true /* userSwitch */);
         handleBrightnessModeChange();
         if (mBrightnessTracker != null) {
@@ -2572,6 +2578,10 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
                 case MSG_STATSD_HBM_BRIGHTNESS:
                     logHbmBrightnessStats(Float.intBitsToFloat(msg.arg1), msg.arg2);
+                    break;
+
+                case MSG_SWITCH_USER:
+                    handleOnSwitchUser(msg.arg1);
                     break;
             }
         }
