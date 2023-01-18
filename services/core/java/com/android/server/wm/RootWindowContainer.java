@@ -380,9 +380,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
 
             ProtoLog.d(WM_DEBUG_TASKS, "Comparing existing cls=%s /aff=%s to new cls=%s /aff=%s",
-                    r.getTask().rootAffinity, mIntent.getComponent().flattenToShortString(),
-                    mInfo.taskAffinity, (task.realActivity != null
-                            ? task.realActivity.flattenToShortString() : ""));
+                    (task.realActivity != null ? task.realActivity.flattenToShortString() : ""),
+                    task.rootAffinity, mIntent.getComponent().flattenToShortString(),
+                    mTaskAffinity);
             // TODO Refactor to remove duplications. Check if logic can be simplified.
             if (task.realActivity != null && task.realActivity.compareTo(cls) == 0
                     && Objects.equals(documentData, taskDocumentData)) {
