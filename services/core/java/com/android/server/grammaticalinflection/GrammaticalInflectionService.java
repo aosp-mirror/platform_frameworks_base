@@ -18,9 +18,12 @@ package com.android.server.grammaticalinflection;
 
 import static android.content.res.Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED;
 
+import android.annotation.Nullable;
 import android.app.IGrammaticalInflectionManager;
 import android.content.Context;
+import android.os.Binder;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.SystemProperties;
 
 import com.android.server.LocalServices;
@@ -34,6 +37,7 @@ import com.android.server.wm.ActivityTaskManagerInternal;
  */
 public class GrammaticalInflectionService extends SystemService {
 
+    private final GrammaticalInflectionBackupHelper mBackupHelper;
     private final ActivityTaskManagerInternal mActivityTaskManagerInternal;
     private static final String GRAMMATICAL_INFLECTION_ENABLED =
             "i18n.grammatical_Inflection.enabled";
@@ -46,17 +50,20 @@ public class GrammaticalInflectionService extends SystemService {
      * </p>
      *
      * @param context The system server context.
-     *
      * @hide
      */
     public GrammaticalInflectionService(Context context) {
         super(context);
         mActivityTaskManagerInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
+        mBackupHelper = new GrammaticalInflectionBackupHelper(
+                this, context.getPackageManager());
     }
 
     @Override
     public void onStart() {
         publishBinderService(Context.GRAMMATICAL_INFLECTION_SERVICE, mService);
+        LocalServices.addService(GrammaticalInflectionManagerInternal.class,
+                new GrammaticalInflectionManagerInternalImpl());
     }
 
     private final IBinder mService = new IGrammaticalInflectionManager.Stub() {
@@ -68,7 +75,40 @@ public class GrammaticalInflectionService extends SystemService {
         }
     };
 
-    private void setRequestedApplicationGrammaticalGender(
+    private final class GrammaticalInflectionManagerInternalImpl
+            extends GrammaticalInflectionManagerInternal {
+
+        @Override
+        @Nullable
+        public byte[] getBackupPayload(int userId) {
+            checkCallerIsSystem();
+            return mBackupHelper.getBackupPayload(userId);
+        }
+
+        @Override
+        public void stageAndApplyRestoredPayload(byte[] payload, int userId) {
+            mBackupHelper.stageAndApplyRestoredPayload(payload, userId);
+        }
+
+        private void checkCallerIsSystem() {
+            if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+                throw new SecurityException("Caller is not system.");
+            }
+        }
+    }
+
+    protected int getApplicationGrammaticalGender(String appPackageName, int userId) {
+        final ActivityTaskManagerInternal.PackageConfig appConfig =
+                mActivityTaskManagerInternal.getApplicationConfig(appPackageName, userId);
+
+        if (appConfig == null || appConfig.mGrammaticalGender == null) {
+            return GRAMMATICAL_GENDER_NOT_SPECIFIED;
+        } else {
+            return appConfig.mGrammaticalGender;
+        }
+    }
+
+    protected void setRequestedApplicationGrammaticalGender(
             String appPackageName, int userId, int gender) {
         if (!SystemProperties.getBoolean(GRAMMATICAL_INFLECTION_ENABLED, true)) {
             return;

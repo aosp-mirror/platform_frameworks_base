@@ -47,6 +47,7 @@
 #include <aidl/android/hardware/tv/tuner/DemuxFilterSubType.h>
 #include <aidl/android/hardware/tv/tuner/DemuxFilterTemiEvent.h>
 #include <aidl/android/hardware/tv/tuner/DemuxFilterTsRecordEvent.h>
+#include <aidl/android/hardware/tv/tuner/DemuxInfo.h>
 #include <aidl/android/hardware/tv/tuner/DemuxIpAddress.h>
 #include <aidl/android/hardware/tv/tuner/DemuxIpFilterSettings.h>
 #include <aidl/android/hardware/tv/tuner/DemuxIpFilterType.h>
@@ -192,6 +193,7 @@ using ::aidl::android::hardware::tv::tuner::DemuxFilterSettings;
 using ::aidl::android::hardware::tv::tuner::DemuxFilterSubType;
 using ::aidl::android::hardware::tv::tuner::DemuxFilterTemiEvent;
 using ::aidl::android::hardware::tv::tuner::DemuxFilterTsRecordEvent;
+using ::aidl::android::hardware::tv::tuner::DemuxInfo;
 using ::aidl::android::hardware::tv::tuner::DemuxIpAddress;
 using ::aidl::android::hardware::tv::tuner::DemuxIpAddressIpAddress;
 using ::aidl::android::hardware::tv::tuner::DemuxIpFilterSettings;
@@ -2083,7 +2085,7 @@ jobject JTuner::getDemuxCaps() {
 
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     jclass clazz = env->FindClass("android/media/tv/tuner/DemuxCapabilities");
-    jmethodID capsInit = env->GetMethodID(clazz, "<init>", "(IIIIIIIIIJI[IZ)V");
+    jmethodID capsInit = env->GetMethodID(clazz, "<init>", "(IIIIIIIIIJI[I[IZ)V");
 
     jint numDemux = caps->numDemux;
     jint numRecord = caps->numRecord;
@@ -2095,16 +2097,49 @@ jobject JTuner::getDemuxCaps() {
     jint numPesFilter = caps->numPesFilter;
     jint numPcrFilter = caps->numPcrFilter;
     jlong numBytesInSectionFilter = caps->numBytesInSectionFilter;
-    jint filterCaps = caps->filterCaps;
     jboolean bTimeFilter = caps->bTimeFilter;
 
+    jint filterCaps = caps->filterCaps;
+    jintArray filterCapsList = nullptr;
+    vector<DemuxInfo> demuxInfoList;
+    sTunerClient->getDemuxInfoList(&demuxInfoList);
+    if (demuxInfoList.size() > 0) {
+        vector<int32_t> demuxFilterTypesList;
+        for (int i = 0; i < demuxInfoList.size(); i++) {
+            demuxFilterTypesList.push_back(demuxInfoList[i].filterTypes);
+        }
+        filterCapsList = env->NewIntArray(demuxFilterTypesList.size());
+        env->SetIntArrayRegion(filterCapsList, 0, demuxFilterTypesList.size(),
+                               reinterpret_cast<jint *>(&demuxFilterTypesList[0]));
+    } else {
+        filterCapsList = env->NewIntArray(0);
+    }
     jintArray linkCaps = env->NewIntArray(caps->linkCaps.size());
     env->SetIntArrayRegion(linkCaps, 0, caps->linkCaps.size(),
                            reinterpret_cast<jint *>(&caps->linkCaps[0]));
 
     return env->NewObject(clazz, capsInit, numDemux, numRecord, numPlayback, numTsFilter,
             numSectionFilter, numAudioFilter, numVideoFilter, numPesFilter, numPcrFilter,
-            numBytesInSectionFilter, filterCaps, linkCaps, bTimeFilter);
+            numBytesInSectionFilter, filterCaps, filterCapsList, linkCaps, bTimeFilter);
+}
+
+jobject JTuner::getDemuxInfo(int handle) {
+    if (sTunerClient == nullptr) {
+        ALOGE("tuner is not initialized");
+        return nullptr;
+    }
+    shared_ptr<DemuxInfo> demuxInfo = sTunerClient->getDemuxInfo(handle);
+    if (demuxInfo == nullptr) {
+        return nullptr;
+    }
+
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    jclass clazz = env->FindClass("android/media/tv/tuner/DemuxInfo");
+    jmethodID infoInit = env->GetMethodID(clazz, "<init>", "(I)V");
+
+    jint filterTypes = demuxInfo->filterTypes;
+
+    return env->NewObject(clazz, infoInit, filterTypes);
 }
 
 jobject JTuner::getFrontendStatus(jintArray types) {
@@ -4487,6 +4522,11 @@ static jobject android_media_tv_Tuner_get_demux_caps(JNIEnv* env, jobject thiz) 
     return tuner->getDemuxCaps();
 }
 
+static jobject android_media_tv_Tuner_get_demux_info(JNIEnv* env, jobject thiz, jint handle) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->getDemuxInfo(handle);
+}
+
 static jint android_media_tv_Tuner_open_demux(JNIEnv* env, jobject thiz, jint handle) {
     sp<JTuner> tuner = getTuner(env, thiz);
     return (jint)tuner->openDemux(handle);
@@ -4878,6 +4918,8 @@ static const JNINativeMethod gTunerMethods[] = {
             (void *)android_media_tv_Tuner_open_dvr_playback },
     { "nativeGetDemuxCapabilities", "()Landroid/media/tv/tuner/DemuxCapabilities;",
             (void *)android_media_tv_Tuner_get_demux_caps },
+    { "nativeGetDemuxInfo", "(I)Landroid/media/tv/tuner/DemuxInfo;",
+            (void *)android_media_tv_Tuner_get_demux_info },
     { "nativeOpenDemuxByhandle", "(I)I", (void *)android_media_tv_Tuner_open_demux },
     { "nativeClose", "()I", (void *)android_media_tv_Tuner_close_tuner },
     { "nativeCloseFrontend", "(I)I", (void *)android_media_tv_Tuner_close_frontend },

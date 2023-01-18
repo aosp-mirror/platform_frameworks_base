@@ -22,6 +22,10 @@
         <!-- Ensure output directory is empty at the start -->
         <option name="run-command" value="rm -rf /sdcard/flicker" />
     </target_preparer>
+    <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
+        <option name="run-command" value="settings put secure show_ime_with_hard_keyboard 1" />
+        <option name="teardown-command" value="settings delete secure show_ime_with_hard_keyboard" />
+    </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
         <option name="cleanup-apks" value="true"/>
         <option name="test-file-name" value="WMShellFlickerTests.apk"/>

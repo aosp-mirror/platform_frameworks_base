@@ -51,7 +51,7 @@ internal data class AppListData<T : AppRecord>(
 }
 
 internal interface IAppListViewModel<T : AppRecord> {
-    val option: StateFlowBridge<Int?>
+    val optionFlow: MutableStateFlow<Int?>
     val spinnerOptionsFlow: Flow<List<SpinnerOption>>
     val appListDataFlow: Flow<AppListData<T>>
 }
@@ -69,7 +69,7 @@ internal open class AppListViewModelImpl<T : AppRecord>(
     val appListConfig = StateFlowBridge<AppListConfig>()
     val listModel = StateFlowBridge<AppListModel<T>>()
     val showSystem = StateFlowBridge<Boolean>()
-    final override val option = StateFlowBridge<Int?>()
+    final override val optionFlow = MutableStateFlow<Int?>(null)
     val searchQuery = StateFlowBridge<String>()
 
     private val appListRepository = appListRepositoryFactory(application)
@@ -97,7 +97,7 @@ internal open class AppListViewModelImpl<T : AppRecord>(
             listModel.getSpinnerOptions(recordList)
         }
 
-    override val appListDataFlow = option.flow.flatMapLatest(::filterAndSort)
+    override val appListDataFlow = optionFlow.filterNotNull().flatMapLatest(::filterAndSort)
         .combine(searchQuery.flow) { appListData, searchQuery ->
             appListData.filter {
                 it.label.contains(other = searchQuery, ignoreCase = true)

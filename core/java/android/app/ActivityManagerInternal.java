@@ -311,6 +311,12 @@ public abstract class ActivityManagerInternal {
     @PermissionMethod
     public abstract void enforceCallingPermission(@PermissionName String permission, String func);
 
+    /**
+     * Returns the current and target user ids as a {@link Pair}. Target user id will be
+     * {@link android.os.UserHandle#USER_NULL} if there is not an ongoing user switch.
+     */
+    public abstract Pair<Integer, Integer> getCurrentAndTargetUserIds();
+
     /** Returns the current user id. */
     public abstract int getCurrentUserId();
 
@@ -440,14 +446,14 @@ public abstract class ActivityManagerInternal {
             IApplicationThread resultToThread, IIntentReceiver resultTo, int resultCode,
             String resultData, Bundle resultExtras, String requiredPermission, Bundle bOptions,
             boolean serialized, boolean sticky, @UserIdInt int userId,
-            boolean allowBackgroundActivityStarts, @Nullable IBinder backgroundActivityStartsToken,
+            BackgroundStartPrivileges backgroundStartPrivileges,
             @Nullable int[] broadcastAllowList);
 
     public abstract ComponentName startServiceInPackage(int uid, Intent service,
             String resolvedType, boolean fgRequired, String callingPackage,
             @Nullable String callingFeatureId, @UserIdInt int userId,
-            boolean allowBackgroundActivityStarts,
-            @Nullable IBinder backgroundActivityStartsToken) throws TransactionTooLargeException;
+            BackgroundStartPrivileges backgroundStartPrivileges)
+            throws TransactionTooLargeException;
 
     public abstract void disconnectActivityFromServices(Object connectionHolder);
     public abstract void cleanUpServices(@UserIdInt int userId, ComponentName component,

@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -318,8 +319,10 @@ public class AudioDeviceVolumeManager {
      * @param ada the device for which volume is to be modified
      */
     @SystemApi
-    // TODO alternatively require MODIFY_AUDIO_SYSTEM_SETTINGS when defined
-    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MODIFY_AUDIO_ROUTING,
+            Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS
+    })
     public void setDeviceVolume(@NonNull VolumeInfo vi, @NonNull AudioDeviceAttributes ada) {
         try {
             getService().setDeviceVolume(vi, ada, mPackageName);
@@ -340,8 +343,10 @@ public class AudioDeviceVolumeManager {
      * @param ada the device for which volume is to be retrieved
      */
     @SystemApi
-    // TODO alternatively require MODIFY_AUDIO_SYSTEM_SETTINGS when defined
-    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MODIFY_AUDIO_ROUTING,
+            Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS
+    })
     public @NonNull VolumeInfo getDeviceVolume(@NonNull VolumeInfo vi,
             @NonNull AudioDeviceAttributes ada) {
         try {

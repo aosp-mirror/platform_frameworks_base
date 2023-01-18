@@ -99,6 +99,7 @@ import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.permission.persistence.RuntimePermissionsState;
+import com.android.server.IntentResolver;
 import com.android.server.LocalServices;
 import com.android.server.backup.PreferredActivityBackupHelper;
 import com.android.server.pm.Installer.InstallerException;
@@ -2693,10 +2694,15 @@ public final class Settings implements Watchable, Snappable {
                     FileUtils.S_IRUSR | FileUtils.S_IWUSR | FileUtils.S_IRGRP | FileUtils.S_IWGRP,
                     -1, -1);
 
-            try {
-                FileUtils.copy(mSettingsFilename, mSettingsReserveCopyFilename);
+            try (FileInputStream in = new FileInputStream(mSettingsFilename);
+                 FileOutputStream out = new FileOutputStream(mSettingsReserveCopyFilename)) {
+                FileUtils.copy(in, out);
+                out.flush();
+                FileUtils.sync(out);
             } catch (IOException e) {
-                Slog.e(TAG, "Failed to backup settings", e);
+                Slog.e(TAG,
+                        "Failed to write reserve copy of settings: " + mSettingsReserveCopyFilename,
+                        e);
             }
 
             try {
@@ -6270,6 +6276,24 @@ public final class Settings implements Watchable, Snappable {
                     ppir.removeFilter(ppa);
                 }
                 changed = true;
+            }
+        }
+        if (changed) {
+            onChanged();
+        }
+        return changed;
+    }
+
+    boolean clearPersistentPreferredActivity(IntentFilter filter, int userId) {
+        PersistentPreferredIntentResolver ppir = mPersistentPreferredActivities.get(userId);
+        Iterator<PersistentPreferredActivity> it = ppir.filterIterator();
+        boolean changed = false;
+        while (it.hasNext()) {
+            PersistentPreferredActivity ppa = it.next();
+            if (IntentResolver.filterEquals(ppa.getIntentFilter(), filter)) {
+                ppir.removeFilter(ppa);
+                changed = true;
+                break;
             }
         }
         if (changed) {

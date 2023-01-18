@@ -209,6 +209,7 @@ package android {
     field public static final String MIGRATE_HEALTH_CONNECT_DATA = "android.permission.MIGRATE_HEALTH_CONNECT_DATA";
     field public static final String MODIFY_APPWIDGET_BIND_PERMISSIONS = "android.permission.MODIFY_APPWIDGET_BIND_PERMISSIONS";
     field public static final String MODIFY_AUDIO_ROUTING = "android.permission.MODIFY_AUDIO_ROUTING";
+    field public static final String MODIFY_AUDIO_SYSTEM_SETTINGS = "android.permission.MODIFY_AUDIO_SYSTEM_SETTINGS";
     field public static final String MODIFY_CELL_BROADCASTS = "android.permission.MODIFY_CELL_BROADCASTS";
     field public static final String MODIFY_DAY_NIGHT_MODE = "android.permission.MODIFY_DAY_NIGHT_MODE";
     field @Deprecated public static final String MODIFY_NETWORK_ACCOUNTING = "android.permission.MODIFY_NETWORK_ACCOUNTING";
@@ -247,6 +248,7 @@ package android {
     field public static final String PROVIDE_TRUST_AGENT = "android.permission.PROVIDE_TRUST_AGENT";
     field public static final String PROVISION_DEMO_DEVICE = "android.permission.PROVISION_DEMO_DEVICE";
     field public static final String QUERY_ADMIN_POLICY = "android.permission.QUERY_ADMIN_POLICY";
+    field public static final String QUERY_CLONED_APPS = "android.permission.QUERY_CLONED_APPS";
     field @Deprecated public static final String QUERY_TIME_ZONE_RULES = "android.permission.QUERY_TIME_ZONE_RULES";
     field public static final String QUERY_USERS = "android.permission.QUERY_USERS";
     field public static final String RADIO_SCAN_WITHOUT_LOCATION = "android.permission.RADIO_SCAN_WITHOUT_LOCATION";
@@ -541,8 +543,8 @@ package android.app {
   public class AlarmManager {
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void set(int, long, long, long, @NonNull android.app.PendingIntent, @Nullable android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void set(int, long, long, long, @NonNull android.app.AlarmManager.OnAlarmListener, @Nullable android.os.Handler, @Nullable android.os.WorkSource);
-    method @RequiresPermission(allOf={android.Manifest.permission.UPDATE_DEVICE_STATS, android.Manifest.permission.SCHEDULE_EXACT_ALARM}, conditional=true) public void setExact(int, long, @Nullable String, @NonNull java.util.concurrent.Executor, @NonNull android.os.WorkSource, @NonNull android.app.AlarmManager.OnAlarmListener);
-    method @RequiresPermission(allOf={android.Manifest.permission.UPDATE_DEVICE_STATS, android.Manifest.permission.SCHEDULE_EXACT_ALARM}, conditional=true) public void setExactAndAllowWhileIdle(int, long, @Nullable String, @NonNull java.util.concurrent.Executor, @Nullable android.os.WorkSource, @NonNull android.app.AlarmManager.OnAlarmListener);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void setExact(int, long, @Nullable String, @NonNull java.util.concurrent.Executor, @NonNull android.os.WorkSource, @NonNull android.app.AlarmManager.OnAlarmListener);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void setExactAndAllowWhileIdle(int, long, @Nullable String, @NonNull java.util.concurrent.Executor, @Nullable android.os.WorkSource, @NonNull android.app.AlarmManager.OnAlarmListener);
     method @RequiresPermission(android.Manifest.permission.SCHEDULE_PRIORITIZED_ALARM) public void setPrioritized(int, long, long, @Nullable String, @NonNull java.util.concurrent.Executor, @NonNull android.app.AlarmManager.OnAlarmListener);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void setWindow(int, long, long, @Nullable String, @NonNull java.util.concurrent.Executor, @Nullable android.os.WorkSource, @NonNull android.app.AlarmManager.OnAlarmListener);
   }
@@ -807,8 +809,9 @@ package android.app {
     method @Nullable public android.content.IntentFilter getDeliveryGroupMatchingFilter();
     method @Nullable public String getDeliveryGroupMatchingKey();
     method public int getDeliveryGroupPolicy();
+    method public int getPendingIntentBackgroundActivityStartMode();
     method public boolean isDeferUntilActive();
-    method public boolean isPendingIntentBackgroundActivityLaunchAllowed();
+    method @Deprecated public boolean isPendingIntentBackgroundActivityLaunchAllowed();
     method public static android.app.BroadcastOptions makeBasic();
     method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS) public void recordResponseEventWhileInBackground(@IntRange(from=0) long);
     method @RequiresPermission(android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND) public void setBackgroundActivityStartsAllowed(boolean);
@@ -817,7 +820,8 @@ package android.app {
     method @NonNull public android.app.BroadcastOptions setDeliveryGroupMatchingKey(@NonNull String, @NonNull String);
     method @NonNull public android.app.BroadcastOptions setDeliveryGroupPolicy(int);
     method public void setDontSendToRestrictedApps(boolean);
-    method public void setPendingIntentBackgroundActivityLaunchAllowed(boolean);
+    method @Deprecated public void setPendingIntentBackgroundActivityLaunchAllowed(boolean);
+    method @NonNull public android.app.BroadcastOptions setPendingIntentBackgroundActivityStartMode(int);
     method public void setRequireAllOfPermissions(@Nullable String[]);
     method public void setRequireCompatChange(long, boolean);
     method public void setRequireNoneOfPermissions(@Nullable String[]);
@@ -1519,6 +1523,7 @@ package android.app.backup {
     method @RequiresPermission(android.Manifest.permission.BACKUP) public void setAncestralSerialNumber(long);
     method @RequiresPermission(android.Manifest.permission.BACKUP) public void setAutoRestore(boolean);
     method @RequiresPermission(android.Manifest.permission.BACKUP) public void setBackupEnabled(boolean);
+    method @RequiresPermission(allOf={android.Manifest.permission.BACKUP, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional=true) public void setFrameworkSchedulingEnabled(boolean);
     method @Deprecated @RequiresPermission(android.Manifest.permission.BACKUP) public void updateTransportAttributes(@NonNull android.content.ComponentName, @NonNull String, @Nullable android.content.Intent, @NonNull String, @Nullable android.content.Intent, @Nullable String);
     method @RequiresPermission(android.Manifest.permission.BACKUP) public void updateTransportAttributes(@NonNull android.content.ComponentName, @NonNull String, @Nullable android.content.Intent, @NonNull String, @Nullable android.content.Intent, @Nullable CharSequence);
     field public static final int ERROR_AGENT_FAILURE = -1003; // 0xfffffc15
@@ -3789,6 +3794,7 @@ package android.content.pm {
     field @Deprecated public static final int INTENT_FILTER_VERIFICATION_SUCCESS = 1; // 0x1
     field @Deprecated public static final int MASK_PERMISSION_FLAGS = 255; // 0xff
     field public static final int MATCH_ANY_USER = 4194304; // 0x400000
+    field public static final int MATCH_CLONE_PROFILE = 536870912; // 0x20000000
     field public static final int MATCH_FACTORY_ONLY = 2097152; // 0x200000
     field public static final int MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS = 536870912; // 0x20000000
     field public static final int MATCH_INSTANT = 8388608; // 0x800000
@@ -6609,8 +6615,8 @@ package android.media {
   }
 
   public class AudioDeviceVolumeManager {
-    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.VolumeInfo getDeviceVolume(@NonNull android.media.VolumeInfo, @NonNull android.media.AudioDeviceAttributes);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setDeviceVolume(@NonNull android.media.VolumeInfo, @NonNull android.media.AudioDeviceAttributes);
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS}) public android.media.VolumeInfo getDeviceVolume(@NonNull android.media.VolumeInfo, @NonNull android.media.AudioDeviceAttributes);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS}) public void setDeviceVolume(@NonNull android.media.VolumeInfo, @NonNull android.media.AudioDeviceAttributes);
   }
 
   public final class AudioFocusInfo implements android.os.Parcelable {
@@ -7500,6 +7506,7 @@ package android.media.tv.tuner {
     method public int getAudioFilterCount();
     method public int getDemuxCount();
     method public int getFilterCapabilities();
+    method @NonNull public int[] getFilterTypeCapabilityList();
     method @NonNull @Size(5) public int[] getLinkCapabilities();
     method public int getPcrFilterCount();
     method public int getPesFilterCount();
@@ -7510,6 +7517,12 @@ package android.media.tv.tuner {
     method public int getTsFilterCount();
     method public int getVideoFilterCount();
     method public boolean isTimeFilterSupported();
+  }
+
+  public class DemuxInfo {
+    ctor public DemuxInfo(int);
+    method public int getFilterTypes();
+    method public void setFilterTypes(int);
   }
 
   public class Descrambler implements java.lang.AutoCloseable {
@@ -7564,6 +7577,7 @@ package android.media.tv.tuner {
     method public void clearResourceLostListener();
     method public void close();
     method public void closeFrontend();
+    method public int configureDemux(@Nullable android.media.tv.tuner.DemuxInfo);
     method public int connectCiCam(int);
     method public int connectFrontendToCiCam(int);
     method public int disconnectCiCam();
@@ -7571,6 +7585,7 @@ package android.media.tv.tuner {
     method public int getAvSyncHwId(@NonNull android.media.tv.tuner.filter.Filter);
     method public long getAvSyncTime(int);
     method @Nullable public java.util.List<android.media.tv.tuner.frontend.FrontendInfo> getAvailableFrontendInfos();
+    method @Nullable public android.media.tv.tuner.DemuxInfo getCurrentDemuxInfo();
     method @Nullable public String getCurrentFrontendHardwareInfo();
     method @Nullable public android.media.tv.tuner.DemuxCapabilities getDemuxCapabilities();
     method @Nullable public android.media.tv.tuner.frontend.FrontendInfo getFrontendInfo();

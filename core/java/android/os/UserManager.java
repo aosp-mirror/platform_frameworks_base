@@ -323,6 +323,24 @@ public class UserManager {
     public static final String DISALLOW_WIFI_TETHERING = "no_wifi_tethering";
 
     /**
+     * Specifies if a user is disallowed from being granted admin privileges.
+     *
+     * <p>This restriction limits ability of other admin users to grant admin
+     * privileges to selected user.
+     *
+     * <p>This restriction has no effect in a mode that does not allow multiple admins.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_GRANT_ADMIN = "no_grant_admin";
+
+    /**
      * Specifies if users are disallowed from sharing Wi-Fi for admin configured networks.
      *
      * <p>Device owner and profile owner can set this restriction.

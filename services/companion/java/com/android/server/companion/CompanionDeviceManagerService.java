@@ -714,6 +714,18 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
+        public void enableSystemDataSync(int associationId, int flags) {
+            getAssociationWithCallerChecks(associationId);
+            mAssociationRequestsProcessor.enableSystemDataSync(associationId, flags);
+        }
+
+        @Override
+        public void disableSystemDataSync(int associationId, int flags) {
+            getAssociationWithCallerChecks(associationId);
+            mAssociationRequestsProcessor.disableSystemDataSync(associationId, flags);
+        }
+
+        @Override
         public void notifyDeviceAppeared(int associationId) {
             if (DEBUG) Log.i(TAG, "notifyDevice_Appeared() id=" + associationId);
 
@@ -1160,16 +1172,20 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         NetworkPolicyManager networkPolicyManager = NetworkPolicyManager.from(getContext());
-        if (containsEither(packageInfo.requestedPermissions,
-                android.Manifest.permission.USE_DATA_IN_BACKGROUND,
-                android.Manifest.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND)) {
-            networkPolicyManager.addUidPolicy(
-                    packageInfo.applicationInfo.uid,
-                    NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND);
-        } else {
-            networkPolicyManager.removeUidPolicy(
-                    packageInfo.applicationInfo.uid,
-                    NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND);
+        try {
+            if (containsEither(packageInfo.requestedPermissions,
+                    android.Manifest.permission.USE_DATA_IN_BACKGROUND,
+                    android.Manifest.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND)) {
+                networkPolicyManager.addUidPolicy(
+                        packageInfo.applicationInfo.uid,
+                        NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND);
+            } else {
+                networkPolicyManager.removeUidPolicy(
+                        packageInfo.applicationInfo.uid,
+                        NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND);
+            }
+        } catch (IllegalArgumentException e) {
+            Slog.e(TAG, e.getMessage());
         }
 
         exemptFromAutoRevoke(packageInfo.packageName, packageInfo.applicationInfo.uid);

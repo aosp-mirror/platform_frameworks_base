@@ -31,6 +31,7 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.BackgroundStartPrivileges;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -135,12 +136,12 @@ public class BackgroundActivityStartController {
             int realCallingPid,
             WindowProcessController callerApp,
             PendingIntentRecord originatingPendingIntent,
-            boolean allowBackgroundActivityStart,
+            BackgroundStartPrivileges backgroundStartPrivileges,
             Intent intent,
             ActivityOptions checkedOptions) {
         return checkBackgroundActivityStart(callingUid, callingPid, callingPackage,
                 realCallingUid, realCallingPid, callerApp, originatingPendingIntent,
-                allowBackgroundActivityStart, intent, checkedOptions) == BAL_BLOCK;
+                backgroundStartPrivileges, intent, checkedOptions) == BAL_BLOCK;
     }
 
     /**
@@ -156,7 +157,7 @@ public class BackgroundActivityStartController {
             int realCallingPid,
             WindowProcessController callerApp,
             PendingIntentRecord originatingPendingIntent,
-            boolean allowBackgroundActivityStart,
+            BackgroundStartPrivileges backgroundStartPrivileges,
             Intent intent,
             ActivityOptions checkedOptions) {
         // don't abort for the most important UIDs
@@ -254,10 +255,12 @@ public class BackgroundActivityStartController {
         }
 
         // Legacy behavior allows to use caller foreground state to bypass BAL restriction.
-        final boolean balAllowedByPiSender =
-                PendingIntentRecord.isPendingIntentBalAllowedByCaller(checkedOptions);
-
-        if (balAllowedByPiSender && realCallingUid != callingUid) {
+        // The options here are the options passed by the sender and not those on the intent.
+        final BackgroundStartPrivileges balAllowedByPiSender =
+                PendingIntentRecord.getBackgroundStartPrivilegesAllowedByCaller(
+                        checkedOptions, realCallingUid);
+        if (balAllowedByPiSender.allowsBackgroundActivityStarts()
+                && realCallingUid != callingUid) {
             final boolean useCallerPermission =
                     PendingIntentRecord.isPendingIntentBalAllowedByPermission(checkedOptions);
             if (useCallerPermission
@@ -282,7 +285,8 @@ public class BackgroundActivityStartController {
             }
             // if the realCallingUid is a persistent system process, abort if the IntentSender
             // wasn't allowed to start an activity
-            if (isRealCallingUidPersistentSystemProcess && allowBackgroundActivityStart) {
+            if (isRealCallingUidPersistentSystemProcess
+                    && backgroundStartPrivileges.allowsBackgroundActivityStarts()) {
                 return logStartAllowedAndReturnCode(/*background*/ false,
                         callingUid,
                         BAL_ALLOW_PENDING_INTENT,
@@ -338,7 +342,7 @@ public class BackgroundActivityStartController {
         // up and alive. If that's the case, we retrieve the WindowProcessController for the send()
         // caller if caller allows, so that we can make the decision based on its state.
         int callerAppUid = callingUid;
-        if (callerApp == null && balAllowedByPiSender) {
+        if (callerApp == null && balAllowedByPiSender.allowsBackgroundActivityStarts()) {
             callerApp = mService.getProcessController(realCallingPid, realCallingUid);
             callerAppUid = realCallingUid;
         }
@@ -399,8 +403,8 @@ public class BackgroundActivityStartController {
                         + isRealCallingUidPersistentSystemProcess
                         + "; originatingPendingIntent: "
                         + originatingPendingIntent
-                        + "; allowBackgroundActivityStart: "
-                        + allowBackgroundActivityStart
+                        + "; backgroundStartPrivileges: "
+                        + backgroundStartPrivileges
                         + "; intent: "
                         + intent
                         + "; callerApp: "

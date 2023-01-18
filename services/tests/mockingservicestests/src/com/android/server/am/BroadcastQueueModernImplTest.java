@@ -50,6 +50,7 @@ import static org.mockito.Mockito.mock;
 import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.AppOpsManager;
+import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
 import android.appwidget.AppWidgetManager;
 import android.content.IIntentReceiver;
@@ -215,7 +216,7 @@ public class BroadcastQueueModernImplTest {
         return new BroadcastRecord(mImpl, intent, mProcess, PACKAGE_RED, null, 21, 42, false, null,
                 null, null, null, AppOpsManager.OP_NONE, options, receivers, null, resultTo,
                 Activity.RESULT_OK, null, null, ordered, false, false, UserHandle.USER_SYSTEM,
-                false, null, false, null);
+                BackgroundStartPrivileges.NONE, false, null);
     }
 
     private void enqueueOrReplaceBroadcast(BroadcastProcessQueue queue,

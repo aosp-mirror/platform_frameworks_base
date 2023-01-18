@@ -135,6 +135,7 @@ import android.text.method.KeyListener;
 import android.text.method.LinkMovementMethod;
 import android.text.method.MetaKeyKeyListener;
 import android.text.method.MovementMethod;
+import android.text.method.OffsetMapping;
 import android.text.method.PasswordTransformationMethod;
 import android.text.method.SingleLineTransformationMethod;
 import android.text.method.TextKeyListener;
@@ -455,6 +456,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private static final Spanned EMPTY_SPANNED = new SpannedString("");
 
     private static final int CHANGE_WATCHER_PRIORITY = 100;
+
+    /**
+     * The span priority of the {@link TransformationMethod} that is set on the text. It must be
+     * higher than the {@link DynamicLayout}'s {@link TextWatcher}, so that the transformed text is
+     * updated before {@link DynamicLayout#reflow(CharSequence, int, int, int)} being triggered
+     * by {@link TextWatcher#onTextChanged(CharSequence, int, int, int)}.
+     */
+    private static final int TRANSFORMATION_SPAN_PRIORITY = 200;
 
     // New state used to change background based on whether this TextView is multiline.
     private static final int[] MULTILINE_STATE_SET = { R.attr.state_multiline };
@@ -7009,7 +7018,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         final int textLength = text.length();
 
-        if (text instanceof Spannable && !mAllowTransformationLengthChange) {
+        if (text instanceof Spannable && (!mAllowTransformationLengthChange
+                || text instanceof OffsetMapping)) {
             Spannable sp = (Spannable) text;
 
             // Remove any ChangeWatchers that might have come from other TextViews.
@@ -7027,7 +7037,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (mEditor != null) mEditor.addSpanWatchers(sp);
 
             if (mTransformation != null) {
-                sp.setSpan(mTransformation, 0, textLength, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                sp.setSpan(mTransformation, 0, textLength, Spanned.SPAN_INCLUSIVE_INCLUSIVE
+                        | (TRANSFORMATION_SPAN_PRIORITY << Spanned.SPAN_PRIORITY_SHIFT));
             }
 
             if (mMovement != null) {
@@ -8226,6 +8237,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mLayout == null) {
             invalidate();
         } else {
+            start = originalToTransformed(start, OffsetMapping.MAP_STRATEGY_CURSOR);
+            end = originalToTransformed(end, OffsetMapping.MAP_STRATEGY_CURSOR);
             int lineStart = mLayout.getLineForOffset(start);
             int top = mLayout.getLineTop(lineStart);
 
@@ -8715,8 +8728,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         Path highlight = null;
         Paint highlightPaint = mHighlightPaint;
 
-        final int selStart = getSelectionStart();
-        final int selEnd = getSelectionEnd();
+        final int selStart = getSelectionStartTransformed();
+        final int selEnd = getSelectionEndTransformed();
         if (mMovement != null && (isFocused() || isPressed()) && selStart >= 0) {
             if (selStart == selEnd) {
                 if (mEditor != null && mEditor.shouldRenderCursor()) {
@@ -8937,13 +8950,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return;
         }
 
-        int selEnd = getSelectionEnd();
+        int selEnd = getSelectionEndTransformed();
         if (selEnd < 0) {
             super.getFocusedRect(r);
             return;
         }
 
-        int selStart = getSelectionStart();
+        int selStart = getSelectionStartTransformed();
         if (selStart < 0 || selStart >= selEnd) {
             int line = mLayout.getLineForOffset(selEnd);
             r.top = mLayout.getLineTop(line);
@@ -9826,6 +9839,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return false;
     }
 
+    /**
+     * Return whether the text is transformed and has {@link OffsetMapping}.
+     * @hide
+     */
+    public boolean isOffsetMappingAvailable() {
+        return mTransformation != null && mTransformed instanceof OffsetMapping;
+    }
+
     /** @hide */
     public boolean previewHandwritingGesture(
             @NonNull PreviewableHandwritingGesture gesture,
@@ -9855,6 +9876,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private int performHandwritingSelectGesture(@NonNull SelectGesture gesture, boolean isPreview) {
+        if (isOffsetMappingAvailable()) {
+            return InputConnection.HANDWRITING_GESTURE_RESULT_FAILED;
+        }
         int[] range = getRangeForRect(
                 convertFromScreenToContentCoordinates(gesture.getSelectionArea()),
                 gesture.getGranularity());
@@ -9881,6 +9905,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private int performHandwritingSelectRangeGesture(
             @NonNull SelectRangeGesture gesture, boolean isPreview) {
+        if (isOffsetMappingAvailable()) {
+            return InputConnection.HANDWRITING_GESTURE_RESULT_FAILED;
+        }
         int[] startRange = getRangeForRect(
                 convertFromScreenToContentCoordinates(gesture.getSelectionStartArea()),
                 gesture.getGranularity());
@@ -9905,6 +9932,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private int performHandwritingDeleteGesture(@NonNull DeleteGesture gesture, boolean isPreview) {
+        if (isOffsetMappingAvailable()) {
+            return InputConnection.HANDWRITING_GESTURE_RESULT_FAILED;
+        }
         int[] range = getRangeForRect(
                 convertFromScreenToContentCoordinates(gesture.getDeletionArea()),
                 gesture.getGranularity());
@@ -9935,6 +9965,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private int performHandwritingDeleteRangeGesture(
             @NonNull DeleteRangeGesture gesture, boolean isPreview) {
+        if (isOffsetMappingAvailable()) {
+            return InputConnection.HANDWRITING_GESTURE_RESULT_FAILED;
+        }
         int[] startRange = getRangeForRect(
                 convertFromScreenToContentCoordinates(gesture.getDeletionStartArea()),
                 gesture.getGranularity());
@@ -10015,6 +10048,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /** @hide */
     public int performHandwritingInsertGesture(@NonNull InsertGesture gesture) {
+        if (isOffsetMappingAvailable()) {
+            return InputConnection.HANDWRITING_GESTURE_RESULT_FAILED;
+        }
         PointF point = convertFromScreenToContentCoordinates(gesture.getInsertionPoint());
         int line = getLineForHandwritingGesture(point);
         if (line == -1) {
@@ -10030,6 +10066,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /** @hide */
     public int performHandwritingRemoveSpaceGesture(@NonNull RemoveSpaceGesture gesture) {
+        if (isOffsetMappingAvailable()) {
+            return InputConnection.HANDWRITING_GESTURE_RESULT_FAILED;
+        }
         PointF startPoint = convertFromScreenToContentCoordinates(gesture.getStartPoint());
         PointF endPoint = convertFromScreenToContentCoordinates(gesture.getEndPoint());
 
@@ -10088,6 +10127,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /** @hide */
     public int performHandwritingJoinOrSplitGesture(@NonNull JoinOrSplitGesture gesture) {
+        if (isOffsetMappingAvailable()) {
+            return InputConnection.HANDWRITING_GESTURE_RESULT_FAILED;
+        }
         PointF point = convertFromScreenToContentCoordinates(gesture.getJoinOrSplitPoint());
 
         int line = getLineForHandwritingGesture(point);
@@ -11179,13 +11221,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mDeferScroll = offset;
             return false;
         }
+        final int offsetTransformed =
+                originalToTransformed(offset, OffsetMapping.MAP_STRATEGY_CURSOR);
         boolean changed = false;
 
         Layout layout = isShowingHint() ? mHintLayout : mLayout;
 
         if (layout == null) return changed;
 
-        int line = layout.getLineForOffset(offset);
+        int line = layout.getLineForOffset(offsetTransformed);
 
         int grav;
 
@@ -11220,7 +11264,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // right where it is most likely to be annoying.
         final boolean clamped = grav > 0;
         // FIXME: Is it okay to truncate this, or should we round?
-        final int x = (int) layout.getPrimaryHorizontal(offset, clamped);
+        final int x = (int) layout.getPrimaryHorizontal(offsetTransformed, clamped);
         final int top = layout.getLineTop(line);
         final int bottom = layout.getLineTop(line + 1);
 
@@ -11384,8 +11428,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (!(mText instanceof Spannable)) {
             return false;
         }
-        int start = getSelectionStart();
-        int end = getSelectionEnd();
+        int start = getSelectionStartTransformed();
+        int end = getSelectionEndTransformed();
         if (start != end) {
             return false;
         }
@@ -11428,7 +11472,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (newStart != start) {
-            Selection.setSelection(mSpannable, newStart);
+            Selection.setSelection(mSpannable,
+                    transformedToOriginal(newStart, OffsetMapping.MAP_STRATEGY_CURSOR));
             return true;
         }
 
@@ -11534,6 +11579,35 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @ViewDebug.ExportedProperty(category = "text")
     public int getSelectionEnd() {
         return Selection.getSelectionEnd(getText());
+    }
+
+    /**
+     * Calculates the rectangles which should be highlighted to indicate a selection between start
+     * and end and feeds them into the given {@link Layout.SelectionRectangleConsumer}.
+     *
+     * @param start    the starting index of the selection
+     * @param end      the ending index of the selection
+     * @param consumer the {@link Layout.SelectionRectangleConsumer} which will receive the
+     *                 generated rectangles. It will be called every time a rectangle is generated.
+     * @hide
+     */
+    public void getSelection(int start, int end, final Layout.SelectionRectangleConsumer consumer) {
+        final int transformedStart =
+                originalToTransformed(start, OffsetMapping.MAP_STRATEGY_CURSOR);
+        final int transformedEnd = originalToTransformed(end, OffsetMapping.MAP_STRATEGY_CURSOR);
+        mLayout.getSelection(transformedStart, transformedEnd, consumer);
+    }
+
+    int getSelectionStartTransformed() {
+        final int start = getSelectionStart();
+        if (start < 0) return start;
+        return originalToTransformed(start, OffsetMapping.MAP_STRATEGY_CURSOR);
+    }
+
+    int getSelectionEndTransformed() {
+        final int end = getSelectionEnd();
+        if (end < 0) return end;
+        return originalToTransformed(end, OffsetMapping.MAP_STRATEGY_CURSOR);
     }
 
     /**
@@ -13186,8 +13260,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
 
                 // Convert lines into character offsets.
-                int expandedTopChar = layout.getLineStart(expandedTopLine);
-                int expandedBottomChar = layout.getLineEnd(expandedBottomLine);
+                int expandedTopChar = transformedToOriginal(
+                        layout.getLineStart(expandedTopLine),
+                        OffsetMapping.MAP_STRATEGY_CHARACTER);
+                int expandedBottomChar = transformedToOriginal(
+                        layout.getLineEnd(expandedBottomLine),
+                        OffsetMapping.MAP_STRATEGY_CHARACTER);
 
                 // Take into account selection -- if there is a selection, we need to expand
                 // the text we are returning to include that selection.
@@ -13230,8 +13308,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         final int[] lineBaselines = new int[bottomLine - topLine + 1];
                         final int baselineOffset = getBaselineOffset();
                         for (int i = topLine; i <= bottomLine; i++) {
-                            lineOffsets[i - topLine] = layout.getLineStart(i);
-                            lineBaselines[i - topLine] = layout.getLineBaseline(i) + baselineOffset;
+                            lineOffsets[i - topLine] = transformedToOriginal(layout.getLineStart(i),
+                                    OffsetMapping.MAP_STRATEGY_CHARACTER);
+                            lineBaselines[i - topLine] =
+                                    layout.getLineBaseline(i) + baselineOffset;
                         }
                         structure.setTextLines(lineOffsets, lineBaselines);
                     }
@@ -13537,6 +13617,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void populateCharacterBounds(CursorAnchorInfo.Builder builder,
             int startIndex, int endIndex, float viewportToContentHorizontalOffset,
             float viewportToContentVerticalOffset) {
+        if (isOffsetMappingAvailable()) {
+            // The text is transformed, and has different length, we don't support
+            // character bounds in this case yet.
+            return;
+        }
         final Rect rect = new Rect();
         getLocalVisibleRect(rect);
         final RectF visibleRect = new RectF(rect);
@@ -13601,8 +13686,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return null;
         }
         final CharSequence text = layout.getText();
-        if (text == null) {
-            // It's impossible that a layout has no text. Check here to avoid NPE.
+        if (text == null || isOffsetMappingAvailable()) {
+            // The text is Null or the text has been transformed. Can't provide TextBoundsInfo.
             return null;
         }
 
@@ -14624,9 +14709,39 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     int getOffsetAtCoordinate(int line, float x) {
         x = convertToLocalHorizontalCoordinate(x);
-        return getLayout().getOffsetForHorizontal(line, x);
+        final int offset = getLayout().getOffsetForHorizontal(line, x);
+        return transformedToOriginal(offset, OffsetMapping.MAP_STRATEGY_CURSOR);
     }
 
+    /**
+     * Convenient method to convert an offset on the transformed text to the original text.
+     * @hide
+     */
+    public int transformedToOriginal(int offset, @OffsetMapping.MapStrategy int strategy) {
+        if (getTransformationMethod() == null) {
+            return offset;
+        }
+        if (mTransformed instanceof OffsetMapping) {
+            final OffsetMapping transformedText = (OffsetMapping) mTransformed;
+            return transformedText.transformedToOriginal(offset, strategy);
+        }
+        return offset;
+    }
+
+    /**
+     * Convenient method to convert an offset on the original text to the transformed text.
+     * @hide
+     */
+    public int originalToTransformed(int offset, @OffsetMapping.MapStrategy int strategy) {
+        if (getTransformationMethod() == null) {
+            return offset;
+        }
+        if (mTransformed instanceof OffsetMapping) {
+            final OffsetMapping transformedText = (OffsetMapping) mTransformed;
+            return transformedText.originalToTransformed(offset, strategy);
+        }
+        return offset;
+    }
     /**
      * Handles drag events sent by the system following a call to
      * {@link android.view.View#startDragAndDrop(ClipData,DragShadowBuilder,Object,int)

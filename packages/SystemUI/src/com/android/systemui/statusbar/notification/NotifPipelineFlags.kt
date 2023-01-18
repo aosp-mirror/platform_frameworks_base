@@ -35,14 +35,6 @@ class NotifPipelineFlags @Inject constructor(
 
     fun fsiOnDNDUpdate(): Boolean = featureFlags.isEnabled(Flags.FSI_ON_DND_UPDATE)
 
-    val isStabilityIndexFixEnabled: Boolean by lazy {
-        featureFlags.isEnabled(Flags.STABILITY_INDEX_FIX)
-    }
-
-    val isSemiStableSortEnabled: Boolean by lazy {
-        featureFlags.isEnabled(Flags.SEMI_STABLE_SORT)
-    }
-
     val shouldFilterUnseenNotifsOnKeyguard: Boolean by lazy {
         featureFlags.isEnabled(Flags.FILTER_UNSEEN_NOTIFS_ON_KEYGUARD)
     }

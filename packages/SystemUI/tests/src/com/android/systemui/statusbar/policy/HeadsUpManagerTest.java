@@ -197,7 +197,7 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
     public void testPinEntry_logsPeek() {
         // Needs full screen intent in order to be pinned
         final PendingIntent fullScreenIntent = PendingIntent.getActivity(mContext, 0,
-                new Intent(), PendingIntent.FLAG_MUTABLE);
+                new Intent().setPackage(mContext.getPackageName()), PendingIntent.FLAG_MUTABLE);
 
         HeadsUpManager.HeadsUpEntry entryToPin = mHeadsUpManager.new HeadsUpEntry();
         entryToPin.setEntry(new NotificationEntryBuilder()

@@ -3964,6 +3964,9 @@ public class DevicePolicyManager {
      * Called by a device owner, a profile owner of an organization-owned device or the system to
      * get the Memory Tagging Extension (MTE) policy
      *
+     * <a href="https://source.android.com/docs/security/test/memory-safety/arm-mte">
+     * Learn more about MTE</a>
+     *
      * @throws SecurityException if caller is not device owner or profile owner of org-owned device
      *                           or system uid, or if called on a parent instance
      * @return the currently set MTE policy
@@ -3986,6 +3989,7 @@ public class DevicePolicyManager {
      */
     public static final String AUTO_TIMEZONE_POLICY = "autoTimezone";
 
+    // TODO: Expose this as SystemAPI once we add the query API
     /**
      * @hide
      */
@@ -4012,7 +4016,22 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
-    public static final String USER_CONTROL_DISABLED_PACKAGES = "userControlDisabledPackages";
+    public static final String USER_CONTROL_DISABLED_PACKAGES_POLICY =
+            "userControlDisabledPackages";
+
+
+    // TODO: Expose this as SystemAPI once we add the query API
+    /**
+     * @hide
+     */
+    public static final String PERSISTENT_PREFERRED_ACTIVITY_POLICY =
+            "persistentPreferredActivity";
+
+    // TODO: Expose this as SystemAPI once we add the query API
+    /**
+     * @hide
+     */
+    public static final String PACKAGE_UNINSTALL_BLOCKED_POLICY = "packageUninstallBlocked";
 
     /**
      * This object is a single place to tack on invalidation and disable calls.  All

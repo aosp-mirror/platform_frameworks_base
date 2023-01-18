@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ACTIVITY_STARTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -27,20 +28,31 @@ import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_GRACE_PERIOD;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_BLOCK;
 
+import static java.util.Objects.requireNonNull;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.BackgroundStartPrivileges;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
+import android.compat.annotation.Overridable;
+import android.content.Context;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.IntPredicate;
 
 /**
@@ -51,6 +63,12 @@ import java.util.function.IntPredicate;
 class BackgroundLaunchProcessController {
     private static final String TAG =
             TAG_WITH_CLASS_NAME ? "BackgroundLaunchProcessController" : TAG_ATM;
+
+    /** If enabled BAL are prevented by default in applications targeting U and later. */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    @Overridable
+    private static final long DEFAULT_RESCIND_BAL_FG_PRIVILEGES_BOUND_SERVICE = 261072174;
 
     /** It is {@link ActivityTaskManagerService#hasActiveVisibleWindow(int)}. */
     private final IntPredicate mUidHasActiveVisibleWindowPredicate;
@@ -63,11 +81,13 @@ class BackgroundLaunchProcessController {
      * (can be null) and are used to trace back the grant to the notification token mechanism.
      */
     @GuardedBy("this")
-    private @Nullable ArrayMap<Binder, IBinder> mBackgroundActivityStartTokens;
+    private @Nullable ArrayMap<Binder, BackgroundStartPrivileges> mBackgroundStartPrivileges;
 
-    /** Set of UIDs of clients currently bound to this process. */
+    /** Set of UIDs of clients currently bound to this process and opt in to allow this process to
+     * launch background activity.
+     */
     @GuardedBy("this")
-    private @Nullable IntArray mBoundClientUids;
+    private @Nullable IntArray mBalOptInBoundClientUids;
 
     BackgroundLaunchProcessController(@NonNull IntPredicate uidHasActiveVisibleWindowPredicate,
             @Nullable BackgroundActivityStartCallback callback) {
@@ -153,30 +173,54 @@ class BackgroundLaunchProcessController {
     private boolean isBackgroundStartAllowedByToken(int uid, String packageName,
             boolean isCheckingForFgsStart) {
         synchronized (this) {
-            if (mBackgroundActivityStartTokens == null
-                    || mBackgroundActivityStartTokens.isEmpty()) {
+            if (mBackgroundStartPrivileges == null
+                    || mBackgroundStartPrivileges.isEmpty()) {
+                // no tokens to allow anything
                 return false;
             }
             if (isCheckingForFgsStart) {
-                // BG-FGS-start only checks if there is a token.
-                return true;
+                // check if any token allows foreground service starts
+                for (int i = mBackgroundStartPrivileges.size(); i-- > 0; ) {
+                    if (mBackgroundStartPrivileges.valueAt(i).allowsBackgroundFgsStarts()) {
+                        return true;
+                    }
+                }
+                return false;
             }
-
             if (mBackgroundActivityStartCallback == null) {
-                // We have tokens but no callback to decide => allow.
-                return true;
+                // without a callback just check if any token allows background activity starts
+                for (int i = mBackgroundStartPrivileges.size(); i-- > 0; ) {
+                    if (mBackgroundStartPrivileges.valueAt(i)
+                            .allowsBackgroundActivityStarts()) {
+                        return true;
+                    }
+                }
+                return false;
             }
+            List<IBinder> binderTokens = getOriginatingTokensThatAllowBal();
             // The callback will decide.
             return mBackgroundActivityStartCallback.isActivityStartAllowed(
-                    mBackgroundActivityStartTokens.values(), uid, packageName);
+                    binderTokens, uid, packageName);
         }
+    }
+
+    private List<IBinder> getOriginatingTokensThatAllowBal() {
+        List<IBinder> originatingTokens = new ArrayList<>();
+        for (int i = mBackgroundStartPrivileges.size(); i-- > 0; ) {
+            BackgroundStartPrivileges privilege =
+                    mBackgroundStartPrivileges.valueAt(i);
+            if (privilege.allowsBackgroundActivityStarts()) {
+                originatingTokens.add(privilege.getOriginatingToken());
+            }
+        }
+        return originatingTokens;
     }
 
     private boolean isBoundByForegroundUid() {
         synchronized (this) {
-            if (mBoundClientUids != null) {
-                for (int i = mBoundClientUids.size() - 1; i >= 0; i--) {
-                    if (mUidHasActiveVisibleWindowPredicate.test(mBoundClientUids.get(i))) {
+            if (mBalOptInBoundClientUids != null) {
+                for (int i = mBalOptInBoundClientUids.size() - 1; i >= 0; i--) {
+                    if (mUidHasActiveVisibleWindowPredicate.test(mBalOptInBoundClientUids.get(i))) {
                         return true;
                     }
                 }
@@ -185,48 +229,61 @@ class BackgroundLaunchProcessController {
         return false;
     }
 
-    void setBoundClientUids(ArraySet<Integer> boundClientUids) {
+    void clearBalOptInBoundClientUids() {
         synchronized (this) {
-            if (boundClientUids == null || boundClientUids.isEmpty()) {
-                mBoundClientUids = null;
-                return;
-            }
-            if (mBoundClientUids == null) {
-                mBoundClientUids = new IntArray();
+            if (mBalOptInBoundClientUids == null) {
+                mBalOptInBoundClientUids = new IntArray();
             } else {
-                mBoundClientUids.clear();
+                mBalOptInBoundClientUids.clear();
             }
-            for (int i = boundClientUids.size() - 1; i >= 0; i--) {
-                mBoundClientUids.add(boundClientUids.valueAt(i));
+        }
+    }
+
+    void addBoundClientUid(int clientUid, String clientPackageName, int bindFlags) {
+        if (!CompatChanges.isChangeEnabled(
+                DEFAULT_RESCIND_BAL_FG_PRIVILEGES_BOUND_SERVICE,
+                clientPackageName,
+                UserHandle.getUserHandleForUid(clientUid))
+                || (bindFlags & Context.BIND_ALLOW_ACTIVITY_STARTS) != 0) {
+            if (mBalOptInBoundClientUids == null) {
+                mBalOptInBoundClientUids = new IntArray();
+            }
+            if (mBalOptInBoundClientUids.indexOf(clientUid) == -1) {
+                mBalOptInBoundClientUids.add(clientUid);
             }
         }
     }
 
     /**
      * Allows background activity starts using token {@code entity}. Optionally, you can provide
-     * {@code originatingToken} if you have one such originating token, this is useful for tracing
-     * back the grant in the case of the notification token.
+     * {@code originatingToken} in the {@link BackgroundStartPrivileges} if you have one such
+     * originating token, this is useful for tracing back the grant in the case of the notification
+     * token.
      *
      * If {@code entity} is already added, this method will update its {@code originatingToken}.
      */
-    void addOrUpdateAllowBackgroundActivityStartsToken(Binder entity,
-            @Nullable IBinder originatingToken) {
+    void addOrUpdateAllowBackgroundStartPrivileges(
+            Binder entity, BackgroundStartPrivileges backgroundStartPrivileges) {
+        requireNonNull(entity, "entity");
+        requireNonNull(backgroundStartPrivileges, "backgroundStartPrivileges");
+        checkArgument(backgroundStartPrivileges.allowsAny());
         synchronized (this) {
-            if (mBackgroundActivityStartTokens == null) {
-                mBackgroundActivityStartTokens = new ArrayMap<>();
+            if (mBackgroundStartPrivileges == null) {
+                mBackgroundStartPrivileges = new ArrayMap<>();
             }
-            mBackgroundActivityStartTokens.put(entity, originatingToken);
+            mBackgroundStartPrivileges.put(entity, backgroundStartPrivileges);
         }
     }
 
     /**
      * Removes token {@code entity} that allowed background activity starts added via {@link
-     * #addOrUpdateAllowBackgroundActivityStartsToken(Binder, IBinder)}.
+     * #addOrUpdateAllowBackgroundStartPrivileges(Binder, BackgroundStartPrivileges)}.
      */
-    void removeAllowBackgroundActivityStartsToken(Binder entity) {
+    void removeAllowBackgroundStartPrivileges(Binder entity) {
+        requireNonNull(entity, "entity");
         synchronized (this) {
-            if (mBackgroundActivityStartTokens != null) {
-                mBackgroundActivityStartTokens.remove(entity);
+            if (mBackgroundStartPrivileges != null) {
+                mBackgroundStartPrivileges.remove(entity);
             }
         }
     }
@@ -240,33 +297,33 @@ class BackgroundLaunchProcessController {
             return false;
         }
         synchronized (this) {
-            if (mBackgroundActivityStartTokens == null
-                    || mBackgroundActivityStartTokens.isEmpty()) {
+            if (mBackgroundStartPrivileges == null
+                    || mBackgroundStartPrivileges.isEmpty()) {
                 return false;
             }
             return mBackgroundActivityStartCallback.canCloseSystemDialogs(
-                    mBackgroundActivityStartTokens.values(), uid);
+                    getOriginatingTokensThatAllowBal(), uid);
         }
     }
 
     void dump(PrintWriter pw, String prefix) {
         synchronized (this) {
-            if (mBackgroundActivityStartTokens != null
-                    && !mBackgroundActivityStartTokens.isEmpty()) {
+            if (mBackgroundStartPrivileges != null
+                    && !mBackgroundStartPrivileges.isEmpty()) {
                 pw.print(prefix);
                 pw.println("Background activity start tokens (token: originating token):");
-                for (int i = mBackgroundActivityStartTokens.size() - 1; i >= 0; i--) {
+                for (int i = mBackgroundStartPrivileges.size() - 1; i >= 0; i--) {
                     pw.print(prefix);
                     pw.print("  - ");
-                    pw.print(mBackgroundActivityStartTokens.keyAt(i));
+                    pw.print(mBackgroundStartPrivileges.keyAt(i));
                     pw.print(": ");
-                    pw.println(mBackgroundActivityStartTokens.valueAt(i));
+                    pw.println(mBackgroundStartPrivileges.valueAt(i));
                 }
             }
-            if (mBoundClientUids != null && mBoundClientUids.size() > 0) {
+            if (mBalOptInBoundClientUids != null && mBalOptInBoundClientUids.size() > 0) {
                 pw.print(prefix);
                 pw.print("BoundClientUids:");
-                pw.println(Arrays.toString(mBoundClientUids.toArray()));
+                pw.println(Arrays.toString(mBalOptInBoundClientUids.toArray()));
             }
         }
     }

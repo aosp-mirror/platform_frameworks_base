@@ -18,9 +18,11 @@ package com.android.server.alarm;
 
 import static com.android.internal.util.FrameworkStatsLog.ALARM_SCHEDULED__EXACT_ALARM_ALLOWED_REASON__ALLOW_LIST;
 import static com.android.internal.util.FrameworkStatsLog.ALARM_SCHEDULED__EXACT_ALARM_ALLOWED_REASON__CHANGE_DISABLED;
+import static com.android.internal.util.FrameworkStatsLog.ALARM_SCHEDULED__EXACT_ALARM_ALLOWED_REASON__LISTENER;
 import static com.android.internal.util.FrameworkStatsLog.ALARM_SCHEDULED__EXACT_ALARM_ALLOWED_REASON__NOT_APPLICABLE;
 import static com.android.internal.util.FrameworkStatsLog.ALARM_SCHEDULED__EXACT_ALARM_ALLOWED_REASON__PERMISSION;
 import static com.android.internal.util.FrameworkStatsLog.ALARM_SCHEDULED__EXACT_ALARM_ALLOWED_REASON__POLICY_PERMISSION;
+import static com.android.internal.util.FrameworkStatsLog.ALARM_SCHEDULED__EXACT_ALARM_ALLOWED_REASON__PRIORITIZED;
 import static com.android.server.alarm.AlarmManagerService.INDEFINITE_DELAY;
 
 import android.app.ActivityManager;
@@ -84,14 +86,18 @@ class MetricsHelper {
 
     private static int reasonToStatsReason(int reasonCode) {
         switch (reasonCode) {
-            case Alarm.EXACT_ALLOW_REASON_ALLOW_LIST:
-                return ALARM_SCHEDULED__EXACT_ALARM_ALLOWED_REASON__ALLOW_LIST;
             case Alarm.EXACT_ALLOW_REASON_PERMISSION:
                 return ALARM_SCHEDULED__EXACT_ALARM_ALLOWED_REASON__PERMISSION;
+            case Alarm.EXACT_ALLOW_REASON_ALLOW_LIST:
+                return ALARM_SCHEDULED__EXACT_ALARM_ALLOWED_REASON__ALLOW_LIST;
             case Alarm.EXACT_ALLOW_REASON_COMPAT:
                 return ALARM_SCHEDULED__EXACT_ALARM_ALLOWED_REASON__CHANGE_DISABLED;
             case Alarm.EXACT_ALLOW_REASON_POLICY_PERMISSION:
                 return ALARM_SCHEDULED__EXACT_ALARM_ALLOWED_REASON__POLICY_PERMISSION;
+            case Alarm.EXACT_ALLOW_REASON_LISTENER:
+                return ALARM_SCHEDULED__EXACT_ALARM_ALLOWED_REASON__LISTENER;
+            case Alarm.EXACT_ALLOW_REASON_PRIORITIZED:
+                return ALARM_SCHEDULED__EXACT_ALARM_ALLOWED_REASON__PRIORITIZED;
             default:
                 return ALARM_SCHEDULED__EXACT_ALARM_ALLOWED_REASON__NOT_APPLICABLE;
         }

@@ -533,11 +533,6 @@ class LockSettingsStorage {
         if (userId == USER_FRP) {
             return null;
         }
-
-        if (LockPatternUtils.LEGACY_LOCK_PATTERN_ENABLED.equals(key)) {
-            key = Settings.Secure.LOCK_PATTERN_ENABLED;
-        }
-
         return readKeyValue(key, defaultValue, userId);
     }
 

@@ -233,7 +233,8 @@ final class VerifyingSession {
                 PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_SESSION_ID,
                 mSessionId);
         enableRollbackIntent.setType(PACKAGE_MIME_TYPE);
-        enableRollbackIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        enableRollbackIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
+                | Intent.FLAG_RECEIVER_FOREGROUND);
 
         // Allow the broadcast to be sent before boot complete.
         // This is needed when committing the apk part of a staged

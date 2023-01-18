@@ -61,9 +61,9 @@ open class OpenAppFromNotificationCold(flicker: FlickerTest) :
             }
         }
 
-    @Postsubmit @Test override fun appWindowBecomesVisible() = appWindowBecomesVisible_coldStart()
+    @Presubmit @Test override fun appWindowBecomesVisible() = appWindowBecomesVisible_coldStart()
 
-    @Postsubmit @Test override fun appLayerBecomesVisible() = appLayerBecomesVisible_coldStart()
+    @Presubmit @Test override fun appLayerBecomesVisible() = appLayerBecomesVisible_coldStart()
 
     /** {@inheritDoc} */
     @Test

@@ -84,4 +84,8 @@ interface ICompanionDeviceManager {
     boolean isCompanionApplicationBound(String packageName, int userId);
 
     PendingIntent buildAssociationCancellationIntent(in String callingPackage, int userId);
+
+    void enableSystemDataSync(int associationId, int flags);
+
+    void disableSystemDataSync(int associationId, int flags);
 }

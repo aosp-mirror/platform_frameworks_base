@@ -33,13 +33,15 @@ import com.android.settingslib.spa.framework.compose.LocalNavController
 import com.android.settingslib.spa.framework.compose.NavControllerWrapper
 
 @Composable
-internal fun SettingsPageProvider.PageEvent(arguments: Bundle? = null) {
+internal fun SettingsPageProvider.PageWithEvent(arguments: Bundle? = null) {
+    if (!isEnabled(arguments)) return
     val page = remember(arguments) { createSettingsPage(arguments) }
     val navController = LocalNavController.current
     LifecycleEffect(
         onStart = { page.logPageEvent(LogEvent.PAGE_ENTER, navController) },
         onStop = { page.logPageEvent(LogEvent.PAGE_LEAVE, navController) },
     )
+    Page(arguments)
 }
 
 private fun SettingsPage.logPageEvent(event: LogEvent, navController: NavControllerWrapper) {

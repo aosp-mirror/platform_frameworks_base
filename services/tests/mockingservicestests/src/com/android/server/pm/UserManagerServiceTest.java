@@ -34,6 +34,7 @@ import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.util.Log;
+import android.util.Pair;
 import android.util.SparseArray;
 
 import androidx.test.annotation.UiThreadTest;
@@ -151,6 +152,15 @@ public final class UserManagerServiceTest extends ExtendedMockitoTestCase {
 
         assertWithMessage("getCurrentUserId()").that(mUms.getCurrentUserId())
                 .isEqualTo(UserHandle.USER_NULL);
+    }
+
+    @Test
+    public void testGetCurrentAndTargetUserIds() {
+        mockCurrentAndTargetUser(USER_ID, OTHER_USER_ID);
+
+        assertWithMessage("getCurrentAndTargetUserIds()")
+                .that(mUms.getCurrentAndTargetUserIds())
+                .isEqualTo(new Pair<>(USER_ID, OTHER_USER_ID));
     }
 
     @Test
@@ -327,6 +337,14 @@ public final class UserManagerServiceTest extends ExtendedMockitoTestCase {
         mockGetLocalService(ActivityManagerInternal.class, mActivityManagerInternal);
 
         when(mActivityManagerInternal.getCurrentUserId()).thenReturn(userId);
+    }
+
+    private void mockCurrentAndTargetUser(@UserIdInt int currentUserId,
+            @UserIdInt int targetUserId) {
+        mockGetLocalService(ActivityManagerInternal.class, mActivityManagerInternal);
+
+        when(mActivityManagerInternal.getCurrentAndTargetUserIds())
+                .thenReturn(new Pair<>(currentUserId, targetUserId));
     }
 
     private <T> void mockGetLocalService(Class<T> serviceClass, T service) {

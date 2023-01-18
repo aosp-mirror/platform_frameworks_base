@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AppProtoEnums;
+import android.app.BackgroundStartPrivileges;
 import android.app.IActivityManager;
 import android.app.IApplicationThread;
 import android.app.ProfilerInfo;
@@ -209,14 +210,14 @@ public abstract class ActivityTaskManagerInternal {
             String callingPackage, @Nullable String callingFeatureId, Intent[] intents,
             String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options, int userId,
             boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
-            boolean allowBackgroundActivityStart);
+            BackgroundStartPrivileges backgroundStartPrivileges);
 
     public abstract int startActivityInPackage(int uid, int realCallingPid, int realCallingUid,
             String callingPackage, @Nullable String callingFeaturId, Intent intent,
             String resolvedType, IBinder resultTo, String resultWho, int requestCode,
             int startFlags, SafeActivityOptions options, int userId, Task inTask, String reason,
             boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
-            boolean allowBackgroundActivityStart);
+            BackgroundStartPrivileges backgroundStartPrivileges);
 
     /**
      * Callback to be called on certain activity start scenarios.

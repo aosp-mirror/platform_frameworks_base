@@ -30,6 +30,7 @@ import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.tests.testutils.SpaEnvironmentForTest
 import com.android.settingslib.spa.tests.testutils.SpaLoggerForTest
+import com.android.settingslib.spa.tests.testutils.SppDisabled
 import com.android.settingslib.spa.tests.testutils.SppHome
 import com.android.settingslib.spa.testutils.waitUntil
 import com.google.common.truth.Truth
@@ -46,12 +47,12 @@ class BrowseActivityTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val spaLogger = SpaLoggerForTest()
-    private val spaEnvironment =
-        SpaEnvironmentForTest(context, listOf(SppHome.createSettingsPage()), logger = spaLogger)
 
     @Test
     fun testBrowsePage() {
         spaLogger.reset()
+        val spaEnvironment =
+            SpaEnvironmentForTest(context, listOf(SppHome.createSettingsPage()), logger = spaLogger)
         SpaEnvironmentFactory.reset(spaEnvironment)
 
         val sppRepository by spaEnvironment.pageProviderRepository
@@ -74,6 +75,24 @@ class BrowseActivityTest {
         }
         spaLogger.verifyPageEvent(pageHome.id, 1, 1)
         spaLogger.verifyPageEvent(pageLayer1.id, 1, 0)
+    }
+
+    @Test
+    fun testBrowseDisabledPage() {
+        spaLogger.reset()
+        val spaEnvironment = SpaEnvironmentForTest(
+            context, listOf(SppDisabled.createSettingsPage()), logger = spaLogger
+        )
+        SpaEnvironmentFactory.reset(spaEnvironment)
+
+        val sppRepository by spaEnvironment.pageProviderRepository
+        val sppDisabled = sppRepository.getProviderOrNull("SppDisabled")!!
+        val pageDisabled = sppDisabled.createSettingsPage()
+
+        composeTestRule.setContent { BrowseContent(sppRepository) }
+
+        composeTestRule.onNodeWithText(sppDisabled.getTitle(null)).assertDoesNotExist()
+        spaLogger.verifyPageEvent(pageDisabled.id, 0, 0)
     }
 }
 

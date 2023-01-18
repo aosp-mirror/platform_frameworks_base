@@ -1381,8 +1381,8 @@ public class UserBackupManagerServiceTest {
          * BackupManagerConstants)} that throws an {@link IllegalArgumentException}.
          */
         public static void schedule(int userId, Context ctx, long delay,
-                BackupManagerConstants constants) {
-            ShadowKeyValueBackupJob.schedule(userId, ctx, delay, constants);
+                UserBackupManagerService userBackupManagerService) {
+            ShadowKeyValueBackupJob.schedule(userId, ctx, delay, userBackupManagerService);
             throw new IllegalArgumentException();
         }
     }

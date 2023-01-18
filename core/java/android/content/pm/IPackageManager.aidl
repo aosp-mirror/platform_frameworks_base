@@ -276,6 +276,8 @@ interface IPackageManager {
 
     void clearPackagePersistentPreferredActivities(String packageName, int userId);
 
+    void clearPersistentPreferredActivity(in IntentFilter filter, int userId);
+
     void addCrossProfileIntentFilter(in IntentFilter intentFilter, String ownerPackage,
             int sourceUserId, int targetUserId, int flags);
 

@@ -3417,14 +3417,25 @@ public abstract class AccessibilityService extends Service {
     }
 
     /**
-     * Attaches a {@link android.view.SurfaceControl} containing an accessibility overlay to the
-     * specified display. This type of overlay should be used for content that does not need to
-     * track the location and size of Views in the currently active app e.g. service configuration
-     * or general service UI. To remove this overlay and free the associated resources, use
+     * Attaches a {@link android.view.SurfaceControl} containing an accessibility
+     * overlay to the
+     * specified display. This type of overlay should be used for content that does
+     * not need to
+     * track the location and size of Views in the currently active app e.g. service
+     * configuration
+     * or general service UI. To remove this overlay and free the associated
+     * resources, use
      * <code> new SurfaceControl.Transaction().reparent(sc, null).apply();</code>.
+     * If the specified overlay has already been attached to the specified display
+     * this method does nothing.
+     * If the specified overlay has already been attached to a previous display this
+     * function will transfer the overlay to the new display.
+     * Services can attach multiple overlays. Use
+     * <code> new SurfaceControl.Transaction().setLayer(sc, layer).apply();</code>.
+     * to coordinate the order of the overlays on screen.
      *
      * @param displayId the display to which the SurfaceControl should be attached.
-     * @param sc the SurfaceControl containing the overlay content
+     * @param sc        the SurfaceControl containing the overlay content
      */
     public void attachAccessibilityOverlayToDisplay(int displayId, @NonNull SurfaceControl sc) {
         Preconditions.checkNotNull(sc, "SurfaceControl cannot be null");
@@ -3436,18 +3447,30 @@ public abstract class AccessibilityService extends Service {
         try {
             connection.attachAccessibilityOverlayToDisplay(displayId, sc);
         } catch (RemoteException re) {
-            throw new RuntimeException(re);
+            re.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Attaches an accessibility overlay {@link android.view.SurfaceControl} to the specified
-     * window. This method should be used when you want the overlay to move and resize as the parent
-     * window moves and resizes. To remove this overlay and free the associated resources, use
+     * Attaches an accessibility overlay {@link android.view.SurfaceControl} to the
+     * specified
+     * window. This method should be used when you want the overlay to move and
+     * resize as the parent
+     * window moves and resizes. To remove this overlay and free the associated
+     * resources, use
      * <code> new SurfaceControl.Transaction().reparent(sc, null).apply();</code>.
+     * If the specified overlay has already been attached to the specified window
+     * this method does nothing.
+     * If the specified overlay has already been attached to a previous window this
+     * function will transfer the overlay to the new window.
+     * Services can attach multiple overlays. Use
+     * <code> new SurfaceControl.Transaction().setLayer(sc, layer).apply();</code>.
+     * to coordinate the order of the overlays on screen.
      *
-     * @param accessibilityWindowId The window id, from {@link AccessibilityWindowInfo#getId()}.
-     * @param sc the SurfaceControl containing the overlay content
+     * @param accessibilityWindowId The window id, from
+     *                              {@link AccessibilityWindowInfo#getId()}.
+     * @param sc                    the SurfaceControl containing the overlay
+     *                              content
      */
     public void attachAccessibilityOverlayToWindow(
             int accessibilityWindowId, @NonNull SurfaceControl sc) {

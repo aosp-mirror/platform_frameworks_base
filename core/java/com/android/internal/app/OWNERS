@@ -3,6 +3,7 @@ per-file *Resolver* = file:/packages/SystemUI/OWNERS
 per-file *Chooser* = file:/packages/SystemUI/OWNERS
 per-file SimpleIconFactory.java = file:/packages/SystemUI/OWNERS
 per-file AbstractMultiProfilePagerAdapter.java = file:/packages/SystemUI/OWNERS
+per-file *EmptyStateProvider.java = file:/packages/SystemUI/OWNERS
 per-file NetInitiatedActivity.java = file:/location/java/android/location/OWNERS
 per-file *BatteryStats* = file:/BATTERY_STATS_OWNERS
 

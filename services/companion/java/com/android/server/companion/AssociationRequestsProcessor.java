@@ -268,9 +268,9 @@ class AssociationRequestsProcessor {
             @NonNull ResultReceiver resultReceiver) {
         final long callingIdentity = Binder.clearCallingIdentity();
         try {
-            createAssociation(userId, packageName, macAddress,
-                    request.getDisplayName(), request.getDeviceProfile(),
-                    request.getAssociatedDevice(), request.isSelfManaged(),
+            createAssociation(userId, packageName, macAddress, request.getDisplayName(),
+                    request.getDeviceProfile(), request.getAssociatedDevice(),
+                    request.isSelfManaged(),
                     callback, resultReceiver);
         } finally {
             Binder.restoreCallingIdentity(callingIdentity);
@@ -287,7 +287,8 @@ class AssociationRequestsProcessor {
 
         final AssociationInfo association = new AssociationInfo(id, userId, packageName,
                 macAddress, displayName, deviceProfile, associatedDevice, selfManaged,
-                /* notifyOnDeviceNearby */ false, /* revoked */ false, timestamp, Long.MAX_VALUE);
+                /* notifyOnDeviceNearby */ false, /* revoked */ false, timestamp, Long.MAX_VALUE,
+                /* systemDataSyncFlags */ ~0);
 
         if (deviceProfile != null) {
             // If the "Device Profile" is specified, make the companion application a holder of the
@@ -313,6 +314,20 @@ class AssociationRequestsProcessor {
         // Don't need to update the mRevokedAssociationsPendingRoleHolderRemoval since
         // maybeRemoveRoleHolderForAssociation in PackageInactivityListener will handle the case
         // that there are other devices with the same profile, so the role holder won't be removed.
+    }
+
+    public void enableSystemDataSync(int associationId, int flags) {
+        AssociationInfo association = mAssociationStore.getAssociationById(associationId);
+        AssociationInfo updated = AssociationInfo.builder(association)
+                .setSystemDataSyncFlags(association.getSystemDataSyncFlags() | flags).build();
+        mAssociationStore.updateAssociation(updated);
+    }
+
+    public void disableSystemDataSync(int associationId, int flags) {
+        AssociationInfo association = mAssociationStore.getAssociationById(associationId);
+        AssociationInfo updated = AssociationInfo.builder(association)
+                .setSystemDataSyncFlags(association.getSystemDataSyncFlags() & (~flags)).build();
+        mAssociationStore.updateAssociation(updated);
     }
 
     private void addAssociationToStore(@NonNull AssociationInfo association,

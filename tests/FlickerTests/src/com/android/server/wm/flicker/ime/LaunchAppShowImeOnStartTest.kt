@@ -72,7 +72,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class LaunchAppShowImeOnStartTest(flicker: FlickerTest) : BaseTest(flicker) {
+open class LaunchAppShowImeOnStartTest(flicker: FlickerTest) : BaseTest(flicker) {
     private val testApp = ImeAppAutoFocusHelper(instrumentation, flicker.scenario.startRotation)
     private val initializeApp = ImeStateInitializeHelper(instrumentation)
 

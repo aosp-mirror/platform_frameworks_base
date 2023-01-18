@@ -79,9 +79,6 @@ open class OpenAppWarmTest(flicker: FlickerTest) : OpenAppFromLauncherTransition
     override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @Presubmit @Test override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()
-
-    /** {@inheritDoc} */
     @Presubmit
     @Test
     override fun appLayerBecomesVisible() = super.appLayerBecomesVisible_warmStart()

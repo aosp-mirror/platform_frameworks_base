@@ -31,6 +31,7 @@
 using Status = ::ndk::ScopedAStatus;
 
 using ::aidl::android::hardware::tv::tuner::DemuxCapabilities;
+using ::aidl::android::hardware::tv::tuner::DemuxInfo;
 using ::aidl::android::hardware::tv::tuner::FrontendInfo;
 using ::aidl::android::hardware::tv::tuner::FrontendType;
 using ::aidl::android::hardware::tv::tuner::Result;
@@ -81,6 +82,21 @@ public:
      * @return a newly created DemuxClient interface.
      */
     sp<DemuxClient> openDemux(int32_t demuxHandle);
+
+    /**
+     * Retrieve the DemuxInfo of a specific demux
+     *
+     * @param demuxHandle the handle of the demux to query demux info for
+     * @return the demux info
+     */
+    shared_ptr<DemuxInfo> getDemuxInfo(int32_t demuxHandle);
+
+    /**
+     * Retrieve a list of demux info
+     *
+     * @return a list of DemuxInfo
+     */
+    void getDemuxInfoList(vector<DemuxInfo>* demuxInfoList);
 
     /**
      * Retrieve the Demux capabilities.

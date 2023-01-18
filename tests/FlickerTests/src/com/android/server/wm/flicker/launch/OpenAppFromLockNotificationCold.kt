@@ -113,9 +113,6 @@ open class OpenAppFromLockNotificationCold(flicker: FlickerTest) :
     override fun navBarWindowIsAlwaysVisible() {}
 
     /** {@inheritDoc} */
-    @Postsubmit @Test override fun appWindowBecomesVisible() = super.appWindowBecomesVisible()
-
-    /** {@inheritDoc} */
     @Postsubmit
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =

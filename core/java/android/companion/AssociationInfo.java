@@ -56,6 +56,7 @@ public final class AssociationInfo implements Parcelable {
 
     private final boolean mSelfManaged;
     private final boolean mNotifyOnDeviceNearby;
+    private final int mSystemDataSyncFlags;
 
     /**
      * Indicates that the association has been revoked (removed), but we keep the association
@@ -73,7 +74,6 @@ public final class AssociationInfo implements Parcelable {
 
     /**
      * Creates a new Association.
-     * Only to be used by the CompanionDeviceManagerService.
      *
      * @hide
      */
@@ -81,7 +81,7 @@ public final class AssociationInfo implements Parcelable {
             @Nullable MacAddress macAddress, @Nullable CharSequence displayName,
             @Nullable String deviceProfile, @Nullable AssociatedDevice associatedDevice,
             boolean selfManaged, boolean notifyOnDeviceNearby, boolean revoked,
-            long timeApprovedMs, long lastTimeConnectedMs) {
+            long timeApprovedMs, long lastTimeConnectedMs, int systemDataSyncFlags) {
         if (id <= 0) {
             throw new IllegalArgumentException("Association ID should be greater than 0");
         }
@@ -105,6 +105,7 @@ public final class AssociationInfo implements Parcelable {
         mRevoked = revoked;
         mTimeApprovedMs = timeApprovedMs;
         mLastTimeConnectedMs = lastTimeConnectedMs;
+        mSystemDataSyncFlags = systemDataSyncFlags;
     }
 
     /**
@@ -221,6 +222,16 @@ public final class AssociationInfo implements Parcelable {
     }
 
     /**
+     * @return Enabled system data sync flags set via
+     * {@link CompanionDeviceManager#enableSystemDataSync(int, int)} and
+     * {@link CompanionDeviceManager#disableSystemDataSync(int, int)}.
+     * Or by default all flags are 1 (enabled).
+     */
+    public int getSystemDataSyncFlags() {
+        return mSystemDataSyncFlags;
+    }
+
+    /**
      * Utility method for checking if the association represents a device with the given MAC
      * address.
      *
@@ -287,6 +298,7 @@ public final class AssociationInfo implements Parcelable {
                 + ", mLastTimeConnectedMs=" + (
                     mLastTimeConnectedMs == Long.MAX_VALUE
                         ? LAST_TIME_CONNECTED_NONE : new Date(mLastTimeConnectedMs))
+                + ", mSystemDataSyncFlags=" + mSystemDataSyncFlags
                 + '}';
     }
 
@@ -306,14 +318,15 @@ public final class AssociationInfo implements Parcelable {
                 && Objects.equals(mDeviceMacAddress, that.mDeviceMacAddress)
                 && Objects.equals(mDisplayName, that.mDisplayName)
                 && Objects.equals(mDeviceProfile, that.mDeviceProfile)
-                && Objects.equals(mAssociatedDevice, that.mAssociatedDevice);
+                && Objects.equals(mAssociatedDevice, that.mAssociatedDevice)
+                && mSystemDataSyncFlags == that.mSystemDataSyncFlags;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mId, mUserId, mPackageName, mDeviceMacAddress, mDisplayName,
                 mDeviceProfile, mAssociatedDevice, mSelfManaged, mNotifyOnDeviceNearby, mRevoked,
-                mTimeApprovedMs, mLastTimeConnectedMs);
+                mTimeApprovedMs, mLastTimeConnectedMs, mSystemDataSyncFlags);
     }
 
     @Override
@@ -338,6 +351,7 @@ public final class AssociationInfo implements Parcelable {
         dest.writeBoolean(mRevoked);
         dest.writeLong(mTimeApprovedMs);
         dest.writeLong(mLastTimeConnectedMs);
+        dest.writeInt(mSystemDataSyncFlags);
     }
 
     private AssociationInfo(@NonNull Parcel in) {
@@ -356,6 +370,7 @@ public final class AssociationInfo implements Parcelable {
         mRevoked = in.readBoolean();
         mTimeApprovedMs = in.readLong();
         mLastTimeConnectedMs = in.readLong();
+        mSystemDataSyncFlags = in.readInt();
     }
 
     @NonNull
@@ -390,27 +405,24 @@ public final class AssociationInfo implements Parcelable {
         return new Builder(info);
     }
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public static final class Builder implements NonActionableBuilder {
         @NonNull
         private final AssociationInfo mOriginalInfo;
         private boolean mNotifyOnDeviceNearby;
         private boolean mRevoked;
         private long mLastTimeConnectedMs;
+        private int mSystemDataSyncFlags;
 
         private Builder(@NonNull AssociationInfo info) {
             mOriginalInfo = info;
             mNotifyOnDeviceNearby = info.mNotifyOnDeviceNearby;
             mRevoked = info.mRevoked;
             mLastTimeConnectedMs = info.mLastTimeConnectedMs;
+            mSystemDataSyncFlags = info.mSystemDataSyncFlags;
         }
 
-        /**
-         * Should only be used by the CompanionDeviceManagerService.
-         * @hide
-         */
+        /** @hide */
         @Override
         @NonNull
         public Builder setLastTimeConnected(long lastTimeConnectedMs) {
@@ -423,10 +435,7 @@ public final class AssociationInfo implements Parcelable {
             return this;
         }
 
-        /**
-         * Should only be used by the CompanionDeviceManagerService.
-         * @hide
-         */
+        /** @hide */
         @Override
         @NonNull
         public Builder setNotifyOnDeviceNearby(boolean notifyOnDeviceNearby) {
@@ -434,10 +443,7 @@ public final class AssociationInfo implements Parcelable {
             return this;
         }
 
-        /**
-         * Should only be used by the CompanionDeviceManagerService.
-         * @hide
-         */
+        /** @hide */
         @Override
         @NonNull
         public Builder setRevoked(boolean revoked) {
@@ -445,9 +451,15 @@ public final class AssociationInfo implements Parcelable {
             return this;
         }
 
-        /**
-         * @hide
-         */
+        /** @hide */
+        @Override
+        @NonNull
+        public Builder setSystemDataSyncFlags(int flags) {
+            mSystemDataSyncFlags = flags;
+            return this;
+        }
+
+        /** @hide */
         @NonNull
         public AssociationInfo build() {
             return new AssociationInfo(
@@ -462,7 +474,8 @@ public final class AssociationInfo implements Parcelable {
                     mNotifyOnDeviceNearby,
                     mRevoked,
                     mOriginalInfo.mTimeApprovedMs,
-                    mLastTimeConnectedMs
+                    mLastTimeConnectedMs,
+                    mSystemDataSyncFlags
             );
         }
     }
@@ -480,25 +493,20 @@ public final class AssociationInfo implements Parcelable {
      * @hide
      */
     public interface NonActionableBuilder {
-        /**
-         * Should only be used by the CompanionDeviceManagerService.
-         * @hide
-         */
+        /** @hide */
         @NonNull
         Builder setNotifyOnDeviceNearby(boolean notifyOnDeviceNearby);
 
-        /**
-         * Should only be used by the CompanionDeviceManagerService.
-         * @hide
-         */
+        /** @hide */
         @NonNull
         Builder setLastTimeConnected(long lastTimeConnectedMs);
 
-        /**
-         * Should only be used by the CompanionDeviceManagerService.
-         * @hide
-         */
+        /** @hide */
         @NonNull
         Builder setRevoked(boolean revoked);
+
+        /** @hide */
+        @NonNull
+        Builder setSystemDataSyncFlags(int flags);
     }
 }

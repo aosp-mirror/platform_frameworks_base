@@ -32,6 +32,7 @@ import android.annotation.Nullable;
 import android.annotation.UptimeMillisLong;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
+import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
 import android.app.compat.CompatChanges;
 import android.content.ComponentName;
@@ -42,7 +43,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.PrintWriterPrinter;
@@ -135,12 +135,8 @@ final class BroadcastRecord extends Binder {
     int deferredCount;      // number of receivers in deferred state.
     @Nullable BroadcastQueue queue;   // the outbound queue handling this broadcast
 
-    // if set to true, app's process will be temporarily allowed to start activities from background
-    // for the duration of the broadcast dispatch
-    final boolean allowBackgroundActivityStarts;
-    // token used to trace back the grant for activity starts, optional
-    @Nullable
-    final IBinder mBackgroundActivityStartsToken;
+    // Determines the privileges the app's process has in regard to background starts.
+    final BackgroundStartPrivileges mBackgroundStartPrivileges;
 
     // Filter the intent extras by using the rules of the package visibility before broadcasting
     // the intent to the receiver.
@@ -371,8 +367,9 @@ final class BroadcastRecord extends Binder {
             BroadcastOptions _options, List _receivers,
             ProcessRecord _resultToApp, IIntentReceiver _resultTo, int _resultCode,
             String _resultData, Bundle _resultExtras, boolean _serialized, boolean _sticky,
-            boolean _initialSticky, int _userId, boolean allowBackgroundActivityStarts,
-            @Nullable IBinder backgroundActivityStartsToken, boolean timeoutExempt,
+            boolean _initialSticky, int _userId,
+            @NonNull BackgroundStartPrivileges backgroundStartPrivileges,
+            boolean timeoutExempt,
             @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver) {
         if (_intent == null) {
             throw new NullPointerException("Can't construct with a null intent");
@@ -414,8 +411,7 @@ final class BroadcastRecord extends Binder {
         userId = _userId;
         nextReceiver = 0;
         state = IDLE;
-        this.allowBackgroundActivityStarts = allowBackgroundActivityStarts;
-        mBackgroundActivityStartsToken = backgroundActivityStartsToken;
+        mBackgroundStartPrivileges = backgroundStartPrivileges;
         this.timeoutExempt = timeoutExempt;
         alarm = options != null && options.isAlarmBroadcast();
         pushMessage = options != null && options.isPushMessagingBroadcast();
@@ -479,8 +475,7 @@ final class BroadcastRecord extends Binder {
         manifestCount = from.manifestCount;
         manifestSkipCount = from.manifestSkipCount;
         queue = from.queue;
-        allowBackgroundActivityStarts = from.allowBackgroundActivityStarts;
-        mBackgroundActivityStartsToken = from.mBackgroundActivityStartsToken;
+        mBackgroundStartPrivileges = from.mBackgroundStartPrivileges;
         timeoutExempt = from.timeoutExempt;
         alarm = from.alarm;
         pushMessage = from.pushMessage;
@@ -521,8 +516,8 @@ final class BroadcastRecord extends Binder {
                 callerFeatureId, callingPid, callingUid, callerInstantApp, resolvedType,
                 requiredPermissions, excludedPermissions, excludedPackages, appOp, options,
                 splitReceivers, resultToApp, resultTo, resultCode, resultData, resultExtras,
-                ordered, sticky, initialSticky, userId, allowBackgroundActivityStarts,
-                mBackgroundActivityStartsToken, timeoutExempt, filterExtrasForReceiver);
+                ordered, sticky, initialSticky, userId,
+                mBackgroundStartPrivileges, timeoutExempt, filterExtrasForReceiver);
         split.enqueueTime = this.enqueueTime;
         split.enqueueRealTime = this.enqueueRealTime;
         split.enqueueClockTime = this.enqueueClockTime;
@@ -601,7 +596,7 @@ final class BroadcastRecord extends Binder {
                     requiredPermissions, excludedPermissions, excludedPackages, appOp, options,
                     uid2receiverList.valueAt(i), null /* _resultToApp */, null /* _resultTo */,
                     resultCode, resultData, resultExtras, ordered, sticky, initialSticky, userId,
-                    allowBackgroundActivityStarts, mBackgroundActivityStartsToken, timeoutExempt,
+                    mBackgroundStartPrivileges, timeoutExempt,
                     filterExtrasForReceiver);
             br.enqueueTime = this.enqueueTime;
             br.enqueueRealTime = this.enqueueRealTime;
