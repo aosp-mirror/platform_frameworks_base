@@ -1083,19 +1083,32 @@ final class InstallPackageHelper {
                             "MinInstallableTargetSdk__min_installable_target_sdk",
                             0);
 
+            // Determine if enforcement is in strict mode
+            boolean strictMode = false;
+            if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                    "MinInstallableTargetSdk__install_block_strict_mode_enabled",
+                    false)) {
+                if (parsedPackage.getTargetSdkVersion()
+                        < DeviceConfig.getInt(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                        "MinInstallableTargetSdk__strict_mode_target_sdk",
+                        0)) {
+                    strictMode = true;
+                }
+            }
+
             // Skip enforcement when the bypass flag is set
             boolean bypassLowTargetSdkBlock =
                     ((installFlags & PackageManager.INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK) != 0);
 
             // Skip enforcement for tests that were installed from adb
-            if (!bypassLowTargetSdkBlock
+            if (!strictMode && !bypassLowTargetSdkBlock
                     && ((installFlags & PackageManager.INSTALL_FROM_ADB) != 0)) {
                 bypassLowTargetSdkBlock = true;
             }
 
             // Skip enforcement if the installer package name is not set
             // (e.g. "pm install" from shell)
-            if (!bypassLowTargetSdkBlock) {
+            if (!strictMode && !bypassLowTargetSdkBlock) {
                 if (request.getInstallerPackageName() == null) {
                     bypassLowTargetSdkBlock = true;
                 } else {
