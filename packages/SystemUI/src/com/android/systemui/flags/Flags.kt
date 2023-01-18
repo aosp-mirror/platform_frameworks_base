@@ -373,6 +373,9 @@ object Flags {
     // TODO(b/265045965): Tracking Bug
     val SHOW_LOWLIGHT_ON_DIRECT_BOOT = releasedFlag(1003, "show_lowlight_on_direct_boot")
 
+    @JvmField
+    val ENABLE_LOW_LIGHT_CLOCK_UNDOCKED = unreleasedFlag(1004, "enable_low_light_clock_undocked")
+
     // 1100 - windowing
     @Keep
     @JvmField
