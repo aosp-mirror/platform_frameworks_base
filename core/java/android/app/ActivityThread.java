@@ -785,9 +785,10 @@ public final class ActivityThread extends ClientTransactionHandler
     static final class ReceiverData extends BroadcastReceiver.PendingResult {
         public ReceiverData(Intent intent, int resultCode, String resultData, Bundle resultExtras,
                 boolean ordered, boolean sticky, boolean assumeDelivered, IBinder token,
-                int sendingUser) {
+                int sendingUser, int sentFromUid, String sentFromPackage) {
             super(resultCode, resultData, resultExtras, TYPE_COMPONENT, ordered, sticky,
-                    assumeDelivered, token, sendingUser, intent.getFlags());
+                    assumeDelivered, token, sendingUser, intent.getFlags(), sentFromUid,
+                    sentFromPackage);
             this.intent = intent;
         }
 
@@ -801,7 +802,8 @@ public final class ActivityThread extends ClientTransactionHandler
             return "ReceiverData{intent=" + intent + " packageName=" +
                     info.packageName + " resultCode=" + getResultCode()
                     + " resultData=" + getResultData() + " resultExtras="
-                    + getResultExtras(false) + "}";
+                    + getResultExtras(false) + " sentFromUid="
+                    + getSentFromUid() + " sentFromPackage=" + getSentFromPackage() + "}";
         }
     }
 
@@ -1041,10 +1043,12 @@ public final class ActivityThread extends ClientTransactionHandler
 
         public final void scheduleReceiver(Intent intent, ActivityInfo info,
                 CompatibilityInfo compatInfo, int resultCode, String data, Bundle extras,
-                boolean ordered, boolean assumeDelivered, int sendingUser, int processState) {
+                boolean ordered, boolean assumeDelivered, int sendingUser, int processState,
+                int sentFromUid, String sentFromPackage) {
             updateProcessState(processState, false);
             ReceiverData r = new ReceiverData(intent, resultCode, data, extras,
-                    ordered, false, assumeDelivered, mAppThread.asBinder(), sendingUser);
+                    ordered, false, assumeDelivered, mAppThread.asBinder(), sendingUser,
+                    sentFromUid, sentFromPackage);
             r.info = info;
             sendMessage(H.RECEIVER, r);
         }
@@ -1055,11 +1059,13 @@ public final class ActivityThread extends ClientTransactionHandler
                 if (r.registered) {
                     scheduleRegisteredReceiver(r.receiver, r.intent,
                             r.resultCode, r.data, r.extras, r.ordered, r.sticky,
-                            r.assumeDelivered, r.sendingUser, r.processState);
+                            r.assumeDelivered, r.sendingUser, r.processState,
+                            r.sentFromUid, r.sentFromPackage);
                 } else {
                     scheduleReceiver(r.intent, r.activityInfo, r.compatInfo,
                             r.resultCode, r.data, r.extras, r.sync,
-                            r.assumeDelivered, r.sendingUser, r.processState);
+                            r.assumeDelivered, r.sendingUser, r.processState,
+                            r.sentFromUid, r.sentFromPackage);
                 }
             }
         }
@@ -1289,7 +1295,8 @@ public final class ActivityThread extends ClientTransactionHandler
         // applies transaction ordering per object for such calls.
         public void scheduleRegisteredReceiver(IIntentReceiver receiver, Intent intent,
                 int resultCode, String dataStr, Bundle extras, boolean ordered,
-                boolean sticky, boolean assumeDelivered, int sendingUser, int processState)
+                boolean sticky, boolean assumeDelivered, int sendingUser, int processState,
+                int sentFromUid, String sentFromPackage)
                 throws RemoteException {
             updateProcessState(processState, false);
 
@@ -1299,11 +1306,18 @@ public final class ActivityThread extends ClientTransactionHandler
             // report an expected delivery event
             if (receiver instanceof LoadedApk.ReceiverDispatcher.InnerReceiver) {
                 ((LoadedApk.ReceiverDispatcher.InnerReceiver) receiver).performReceive(intent,
-                        resultCode, dataStr, extras, ordered, sticky, assumeDelivered, sendingUser);
+                        resultCode, dataStr, extras, ordered, sticky, assumeDelivered, sendingUser,
+                        sentFromUid, sentFromPackage);
             } else {
                 if (!assumeDelivered) {
                     Log.wtf(TAG, "scheduleRegisteredReceiver() called for " + receiver
                             + " and " + intent + " without mechanism to finish delivery");
+                }
+                if (sentFromUid != Process.INVALID_UID || sentFromPackage != null) {
+                    Log.wtf(TAG,
+                            "scheduleRegisteredReceiver() called for " + receiver + " and " + intent
+                                    + " from " + sentFromPackage + " (UID: " + sentFromUid
+                                    + ") without mechanism to propagate the sender's identity");
                 }
                 receiver.performReceive(intent, resultCode, dataStr, extras, ordered, sticky,
                         sendingUser);

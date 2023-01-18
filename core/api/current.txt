@@ -5204,6 +5204,13 @@ package android.app {
     field @NonNull public static final android.os.Parcelable.Creator<android.app.BackgroundServiceStartNotAllowedException> CREATOR;
   }
 
+  public class BroadcastOptions {
+    method public boolean isShareIdentityEnabled();
+    method @NonNull public static android.app.BroadcastOptions makeBasic();
+    method @NonNull public android.app.BroadcastOptions setShareIdentityEnabled(boolean);
+    method @NonNull public android.os.Bundle toBundle();
+  }
+
   public class DatePickerDialog extends android.app.AlertDialog implements android.widget.DatePicker.OnDateChangedListener android.content.DialogInterface.OnClickListener {
     ctor public DatePickerDialog(@NonNull android.content.Context);
     ctor public DatePickerDialog(@NonNull android.content.Context, @StyleRes int);
@@ -9567,6 +9574,8 @@ package android.content {
     method public final int getResultCode();
     method public final String getResultData();
     method public final android.os.Bundle getResultExtras(boolean);
+    method @Nullable public String getSentFromPackage();
+    method public int getSentFromUid();
     method public final android.content.BroadcastReceiver.PendingResult goAsync();
     method public final boolean isInitialStickyBroadcast();
     method public final boolean isOrderedBroadcast();
@@ -10167,11 +10176,14 @@ package android.content {
     method public abstract void revokeUriPermission(String, android.net.Uri, int);
     method public abstract void sendBroadcast(@RequiresPermission android.content.Intent);
     method public abstract void sendBroadcast(@RequiresPermission android.content.Intent, @Nullable String);
+    method public void sendBroadcast(@NonNull android.content.Intent, @Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission("android.permission.INTERACT_ACROSS_USERS") public abstract void sendBroadcastAsUser(@RequiresPermission android.content.Intent, android.os.UserHandle);
     method @RequiresPermission("android.permission.INTERACT_ACROSS_USERS") public abstract void sendBroadcastAsUser(@RequiresPermission android.content.Intent, android.os.UserHandle, @Nullable String);
     method public void sendBroadcastWithMultiplePermissions(@NonNull android.content.Intent, @NonNull String[]);
     method public abstract void sendOrderedBroadcast(@RequiresPermission android.content.Intent, @Nullable String);
+    method public void sendOrderedBroadcast(@NonNull android.content.Intent, @Nullable String, @Nullable android.os.Bundle);
     method public abstract void sendOrderedBroadcast(@NonNull @RequiresPermission android.content.Intent, @Nullable String, @Nullable android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
+    method public void sendOrderedBroadcast(@NonNull android.content.Intent, @Nullable String, @Nullable android.os.Bundle, @Nullable android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
     method public void sendOrderedBroadcast(@NonNull android.content.Intent, @Nullable String, @Nullable String, @Nullable android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission("android.permission.INTERACT_ACROSS_USERS") public abstract void sendOrderedBroadcastAsUser(@RequiresPermission android.content.Intent, android.os.UserHandle, @Nullable String, android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
     method @Deprecated @RequiresPermission(android.Manifest.permission.BROADCAST_STICKY) public abstract void sendStickyBroadcast(@RequiresPermission android.content.Intent);
