@@ -37,7 +37,15 @@ import org.junit.Test;
 public final class UserVisibilityMediatorSUSDTest extends UserVisibilityMediatorTestCase {
 
     public UserVisibilityMediatorSUSDTest() {
-        super(/* usersOnSecondaryDisplaysEnabled= */ false);
+        super(/* backgroundUsersOnDisplaysEnabled= */ false,
+                /* backgroundUserOnDefaultDisplayAllowed= */ false);
+    }
+
+    @Test
+    public void testStartVisibleBgUser_onDefaultDisplay() throws Exception {
+        int userId = visibleBgUserCannotBeStartedOnDefaultDisplayTest();
+
+        assertInvisibleUserCannotBeAssignedExtraDisplay(userId, SECONDARY_DISPLAY_ID);
     }
 
     @Test
@@ -98,6 +106,11 @@ public final class UserVisibilityMediatorSUSDTest extends UserVisibilityMediator
         expectNoDisplayAssignedToUser(previousCurrentUserId);
 
         listener.verify();
+    }
+
+    @Test
+    public void testStartBgUser_onDefaultDisplay_visible() throws Exception {
+        visibleBgUserCannotBeStartedOnDefaultDisplayTest();
     }
 
     @Test
