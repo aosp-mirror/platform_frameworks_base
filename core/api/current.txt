@@ -21522,6 +21522,16 @@ package android.media {
     field public static final int AACObjectSSR = 3; // 0x3
     field public static final int AACObjectScalable = 6; // 0x6
     field public static final int AACObjectXHE = 42; // 0x2a
+    field public static final int AC4Level0 = 1; // 0x1
+    field public static final int AC4Level1 = 2; // 0x2
+    field public static final int AC4Level2 = 4; // 0x4
+    field public static final int AC4Level3 = 8; // 0x8
+    field public static final int AC4Level4 = 16; // 0x10
+    field public static final int AC4Profile00 = 257; // 0x101
+    field public static final int AC4Profile10 = 513; // 0x201
+    field public static final int AC4Profile11 = 514; // 0x202
+    field public static final int AC4Profile21 = 1026; // 0x402
+    field public static final int AC4Profile22 = 1028; // 0x404
     field public static final int AV1Level2 = 1; // 0x1
     field public static final int AV1Level21 = 2; // 0x2
     field public static final int AV1Level22 = 4; // 0x4
