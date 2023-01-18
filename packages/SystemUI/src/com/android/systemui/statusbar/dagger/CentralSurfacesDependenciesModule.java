@@ -284,7 +284,8 @@ public interface CentralSurfacesDependenciesModule {
     static DialogLaunchAnimator provideDialogLaunchAnimator(IDreamManager dreamManager,
             KeyguardStateController keyguardStateController,
             Lazy<AlternateBouncerInteractor> alternateBouncerInteractor,
-            InteractionJankMonitor interactionJankMonitor) {
+            InteractionJankMonitor interactionJankMonitor,
+            AnimationFeatureFlags animationFeatureFlags) {
         DialogLaunchAnimator.Callback callback = new DialogLaunchAnimator.Callback() {
             @Override
             public boolean isDreaming() {
@@ -306,7 +307,7 @@ public interface CentralSurfacesDependenciesModule {
                 return alternateBouncerInteractor.get().canShowAlternateBouncerForFingerprint();
             }
         };
-        return new DialogLaunchAnimator(callback, interactionJankMonitor);
+        return new DialogLaunchAnimator(callback, interactionJankMonitor, animationFeatureFlags);
     }
 
     /**
