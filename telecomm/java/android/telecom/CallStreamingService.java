@@ -19,6 +19,7 @@ package android.telecom;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Handler;
@@ -38,10 +39,22 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * This service is implemented by an app that wishes to provide functionality for a general call
  * streaming sender for voip calls.
- *
- * TODO: add doc of how to be the general streaming sender
- *
+ * <p>
+ * Below is an example manifest registration for a {@code CallStreamingService}.
+ * <pre>
+ * {@code
+ * <service android:name=".EgCallStreamingService"
+ *     android:permission="android.permission.BIND_CALL_STREAMING_SERVICE" >
+ *     ...
+ *     <intent-filter>
+ *         <action android:name="android.telecom.CallStreamingService" />
+ *     </intent-filter>
+ * </service>
+ * }
+ * </pre>
+ * @hide
  */
+@SystemApi
 public abstract class CallStreamingService extends Service {
     /**
      * The {@link android.content.Intent} that must be declared as handled by the service.
@@ -122,6 +135,13 @@ public abstract class CallStreamingService extends Service {
     /**
      * Call streaming request reject reason used with
      * {@link CallEventCallback#onCallStreamingFailed(int)} to indicate that telecom is rejecting a
+     * call streaming request due to unknown reason.
+     */
+    public static final int STREAMING_FAILED_UNKNOWN = 0;
+
+    /**
+     * Call streaming request reject reason used with
+     * {@link CallEventCallback#onCallStreamingFailed(int)} to indicate that telecom is rejecting a
      * call streaming request because there's an ongoing streaming call on this device.
      */
     public static final int STREAMING_FAILED_ALREADY_STREAMING = 1;
@@ -149,6 +169,7 @@ public abstract class CallStreamingService extends Service {
      */
     @IntDef(prefix = {"STREAMING_FAILED"},
             value = {
+                    STREAMING_FAILED_UNKNOWN,
                     STREAMING_FAILED_ALREADY_STREAMING,
                     STREAMING_FAILED_NO_SENDER,
                     STREAMING_FAILED_SENDER_BINDING_ERROR

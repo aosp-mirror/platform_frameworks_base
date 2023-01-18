@@ -197,10 +197,10 @@ public final class CallControl {
      *                 of the requested operation.
      *
      *                 {@link OutcomeReceiver#onResult} will be called if Telecom has successfully
-     *                 rejected the incoming call.
+     *                 started the call streaming.
      *
      *                 {@link OutcomeReceiver#onError} will be called if Telecom has failed to
-     *                 reject the incoming call.  A {@link CallException} will be passed that
+     *                 start the call streaming. A {@link CallException} will be passed that
      *                 details why the operation failed.
      */
     public void startCallStreaming(@CallbackExecutor @NonNull Executor executor,
