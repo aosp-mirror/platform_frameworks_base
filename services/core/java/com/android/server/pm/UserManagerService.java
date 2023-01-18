@@ -6376,6 +6376,11 @@ public class UserManagerService extends IUserManager.Stub {
                 return userData != null && userData.getIgnorePrepareStorageErrors();
             }
         }
+
+        @Override
+        public @UserIdInt int getMainUserId() {
+            return UserHandle.USER_SYSTEM;
+        }
     }
 
     /**
