@@ -1241,10 +1241,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android іске қосылуда…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Планшет іске қосылуда…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"Құрылғы іске қосылуда…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"Қойманы оңтайландыру."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Жүйелік жаңарту аяқталуда…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> жаңартылуда…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"<xliff:g id="NUMBER_1">%2$d</xliff:g> ішінен <xliff:g id="NUMBER_0">%1$d</xliff:g> қолданба оңтайландырылуда."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> дайындалуда."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Қолданбалар іске қосылуда."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Қосуды аяқтауда."</string>

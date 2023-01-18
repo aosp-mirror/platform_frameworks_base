@@ -1241,10 +1241,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android កំពុង​ចាប់ផ្ដើម…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"ថេប្លេត​កំពុង​ចាប់ផ្ដើម…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"ឧបករណ៍​កំពុង​ចាប់ផ្ដើម…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"កំពុងធ្វើឲ្យឧបករណ៍ផ្ទុកមានប្រសិទ្ធភាព។"</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"កំពុងបញ្ចប់​បច្ចុប្បន្នភាព​ប្រព័ន្ធ…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> អាប់គ្រេត…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"ធ្វើ​ឲ្យ​កម្មវិធី​ប្រសើរ​ឡើង <xliff:g id="NUMBER_0">%1$d</xliff:g> នៃ <xliff:g id="NUMBER_1">%2$d</xliff:g> ។"</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"កំពុងរៀបចំ <xliff:g id="APPNAME">%1$s</xliff:g>។"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ចាប់ផ្ដើម​កម្មវិធី។"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"បញ្ចប់​ការ​ចាប់ផ្ដើម។"</string>

@@ -1241,10 +1241,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android-ը մեկնարկում է…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Պլանշետը միանում է…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"Սարքը միանում է…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"Պահեստի օպտիմալացում:"</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Համակարգի թարմացումը շուտով կվերջանա…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածը նորացվում է…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"Օպտիմալացվում է հավելված <xliff:g id="NUMBER_0">%1$d</xliff:g>-ը <xliff:g id="NUMBER_1">%2$d</xliff:g>-ից:"</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> հավելվածը պատրաստվում է:"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Հավելվածները մեկնարկում են:"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Բեռնումն ավարտվում է:"</string>

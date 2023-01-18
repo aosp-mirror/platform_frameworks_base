@@ -1241,10 +1241,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android 正在启动…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"平板电脑正在启动…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"设备正在启动…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"正在优化存储空间。"</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"正在完成系统更新…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"正在升级<xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"正在优化第<xliff:g id="NUMBER_0">%1$d</xliff:g>个应用（共<xliff:g id="NUMBER_1">%2$d</xliff:g>个）。"</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"正在准备升级<xliff:g id="APPNAME">%1$s</xliff:g>。"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"正在启动应用。"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"即将完成启动。"</string>

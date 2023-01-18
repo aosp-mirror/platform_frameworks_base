@@ -1243,10 +1243,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Systém Android sa spúšťa…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Tablet sa spúšťa…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"Zariadenie sa spúšťa…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"Optimalizuje sa úložisko"</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Dokončuje sa aktualizácia systému…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"Aplikácia <xliff:g id="APPLICATION">%1$s</xliff:g> sa inovuje…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"Prebieha optimalizácia aplikácie <xliff:g id="NUMBER_0">%1$d</xliff:g> z <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"Pripravuje sa aplikácia <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Prebieha spúšťanie aplikácií."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Prebieha dokončovanie spúšťania."</string>

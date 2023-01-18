@@ -1241,10 +1241,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android शुरू हुँदैछ..."</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"ट्याब्लेट सुरु हुँदै छ…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"यन्त्र सुरु हुँदै छ…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"भण्डारण आफू अनुकूल गर्दै।"</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"सिस्टम अपडेट सम्पन्न गरिँदै छ…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> को स्तरवृद्धि हुँदैछ…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"एप अनुकुल हुँदै <xliff:g id="NUMBER_0">%1$d</xliff:g> को <xliff:g id="NUMBER_1">%2$d</xliff:g>।"</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> तयारी गर्दै।"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"सुरुवात एपहरू।"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"बुट पुरा हुँदै।"</string>
