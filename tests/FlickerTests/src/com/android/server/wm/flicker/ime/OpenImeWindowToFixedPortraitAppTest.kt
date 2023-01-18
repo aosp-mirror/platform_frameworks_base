@@ -19,11 +19,11 @@ import android.platform.test.annotations.Postsubmit
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
+import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.traces.region.RegionSubject
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.service.PlatformConsts
@@ -34,15 +34,15 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test IME window shown on the app with fixing portrait orientation.
- * To run this test: `atest FlickerTests:OpenImeWindowToFixedPortraitAppTest`
+ * Test IME window shown on the app with fixing portrait orientation. To run this test: `atest
+ * FlickerTests:OpenImeWindowToFixedPortraitAppTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class OpenImeWindowToFixedPortraitAppTest(flicker: FlickerTest) : BaseTest(flicker) {
-    private val testApp = ImeAppAutoFocusHelper(instrumentation, flicker.scenario.startRotation)
+    private val testApp = ImeShownOnAppStartHelper(instrumentation, flicker.scenario.startRotation)
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
@@ -52,9 +52,7 @@ class OpenImeWindowToFixedPortraitAppTest(flicker: FlickerTest) : BaseTest(flick
             // Enable letterbox when the app calls setRequestedOrientation
             device.executeShellCommand("cmd window set-ignore-orientation-request true")
         }
-        transitions {
-            testApp.toggleFixPortraitOrientation(wmHelper)
-        }
+        transitions { testApp.toggleFixPortraitOrientation(wmHelper) }
         teardown {
             testApp.exit()
             device.executeShellCommand("cmd window set-ignore-orientation-request false")
@@ -64,17 +62,13 @@ class OpenImeWindowToFixedPortraitAppTest(flicker: FlickerTest) : BaseTest(flick
     @Postsubmit
     @Test
     fun imeLayerVisibleStart() {
-        flicker.assertLayersStart {
-            this.isVisible(ComponentNameMatcher.IME)
-        }
+        flicker.assertLayersStart { this.isVisible(ComponentNameMatcher.IME) }
     }
 
     @Postsubmit
     @Test
     fun imeLayerExistsEnd() {
-        flicker.assertLayersEnd {
-            this.isVisible(ComponentNameMatcher.IME)
-        }
+        flicker.assertLayersEnd { this.isVisible(ComponentNameMatcher.IME) }
     }
 
     @Postsubmit
@@ -86,7 +80,7 @@ class OpenImeWindowToFixedPortraitAppTest(flicker: FlickerTest) : BaseTest(flick
         }
         flicker.assertLayersEnd {
             this.visibleRegion(ComponentNameMatcher.IME)
-                    .coversExactly(imeLayerVisibleRegionBeforeTransition!!.region)
+                .coversExactly(imeLayerVisibleRegionBeforeTransition!!.region)
         }
     }
 
@@ -96,7 +90,7 @@ class OpenImeWindowToFixedPortraitAppTest(flicker: FlickerTest) : BaseTest(flick
         val displayBounds = WindowUtils.getDisplayBounds(flicker.scenario.startRotation)
         flicker.assertLayersEnd {
             this.visibleRegion(testApp.or(ComponentNameMatcher.LETTERBOX))
-                    .coversExactly(displayBounds)
+                .coversExactly(displayBounds)
         }
     }
 
@@ -111,14 +105,13 @@ class OpenImeWindowToFixedPortraitAppTest(flicker: FlickerTest) : BaseTest(flick
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
-                            supportedRotations = listOf(
-                                PlatformConsts.Rotation.ROTATION_90,
-                            ),
-                            supportedNavigationModes = listOf(
-                                PlatformConsts.NavBar.MODE_3BUTTON,
-                                PlatformConsts.NavBar.MODE_GESTURAL
-                            )
-                    )
+                supportedRotations =
+                    listOf(
+                        PlatformConsts.Rotation.ROTATION_90,
+                    ),
+                supportedNavigationModes =
+                    listOf(PlatformConsts.NavBar.MODE_3BUTTON, PlatformConsts.NavBar.MODE_GESTURAL)
+            )
         }
     }
 }

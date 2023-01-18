@@ -22,7 +22,7 @@ import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
+import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.service.PlatformConsts
@@ -42,26 +42,32 @@ import org.junit.runners.Parameterized
  * ```
  * More details on b/190352379
  *
- * To run this test: `atest FlickerTests:CloseImeAutoOpenWindowToAppTest`
+ * To run this test: `atest FlickerTests:CloseImeAutoOpenWindowToHomeTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class CloseImeAutoOpenWindowToAppTest(flicker: FlickerTest) : BaseTest(flicker) {
-    private val testApp = ImeAppAutoFocusHelper(instrumentation, flicker.scenario.startRotation)
+open class CloseImeShownOnAppStartOnGoHomeTest(flicker: FlickerTest) : BaseTest(flicker) {
+    private val testApp = ImeShownOnAppStartHelper(instrumentation, flicker.scenario.startRotation)
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
-        setup { testApp.launchViaIntent(wmHelper) }
+        setup {
+            tapl.setExpectedRotationCheckEnabled(false)
+            testApp.launchViaIntent(wmHelper)
+        }
         teardown { testApp.exit(wmHelper) }
-        transitions { testApp.closeIME(wmHelper) }
+        transitions {
+            tapl.goHome()
+            wmHelper.StateSyncBuilder().withHomeActivityVisible().withImeGone().waitForAndVerify()
+        }
     }
 
     @Presubmit
     @Test
-    fun imeAppWindowIsAlwaysVisible() {
-        flicker.assertWm { this.isAppWindowOnTop(testApp) }
+    fun imeAppWindowBecomesInvisible() {
+        flicker.assertWm { this.isAppWindowOnTop(testApp).then().isAppWindowNotOnTop(testApp) }
     }
 
     @Presubmit
@@ -80,8 +86,8 @@ open class CloseImeAutoOpenWindowToAppTest(flicker: FlickerTest) : BaseTest(flic
 
     @Presubmit
     @Test
-    fun imeAppLayerIsAlwaysVisible() {
-        flicker.assertLayers { this.isVisible(testApp) }
+    fun imeAppLayerBecomesInvisible() {
+        flicker.assertLayers { this.isVisible(testApp).then().isInvisible(testApp) }
     }
 
     companion object {

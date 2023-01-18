@@ -38,8 +38,8 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class SwitchImeWindowsFromGestureNavTest_ShellTransit(flicker: FlickerTest) :
-    SwitchImeWindowsFromGestureNavTest(flicker) {
+class ShowImeOnAppStartWhenLaunchingAppFromQuickSwitchTestShellTransit(flicker: FlickerTest) :
+    ShowImeOnAppStartWhenLaunchingAppFromQuickSwitchTest(flicker) {
     @Before
     override fun before() {
         Assume.assumeTrue(isShellTransitionsEnabled)

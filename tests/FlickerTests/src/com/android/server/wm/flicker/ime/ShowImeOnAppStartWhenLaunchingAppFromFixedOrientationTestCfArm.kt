@@ -26,5 +26,5 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class CloseImeAutoOpenWindowToHomeTestCfArm(flicker: FlickerTest) :
-    CloseImeAutoOpenWindowToHomeTest(flicker)
+class ShowImeOnAppStartWhenLaunchingAppFromFixedOrientationTestCfArm(flicker: FlickerTest) :
+    ShowImeOnAppStartWhenLaunchingAppFromFixedOrientationTest(flicker)

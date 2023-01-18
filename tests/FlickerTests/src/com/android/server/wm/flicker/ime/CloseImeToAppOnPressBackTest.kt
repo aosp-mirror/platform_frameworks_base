@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.ime
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
@@ -25,8 +26,9 @@ import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
+import com.android.server.wm.flicker.navBarLayerPositionAtStartAndEnd
 import com.android.server.wm.traces.common.ComponentNameMatcher
-import com.android.server.wm.traces.common.service.PlatformConsts
+import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,28 +36,24 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test IME window closing to home transitions. To run this test: `atest
- * FlickerTests:CloseImeWindowToHomeTest`
+ * Test IME window closing back to app window transitions. To run this test: `atest
+ * FlickerTests:CloseImeWindowToAppTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class CloseImeWindowToHomeTest(flicker: FlickerTest) : BaseTest(flicker) {
+open class CloseImeToAppOnPressBackTest(flicker: FlickerTest) : BaseTest(flicker) {
     private val testApp = ImeAppHelper(instrumentation)
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
-            tapl.setExpectedRotationCheckEnabled(false)
             testApp.launchViaIntent(wmHelper)
             testApp.openIME(wmHelper)
         }
-        transitions {
-            tapl.goHome()
-            wmHelper.StateSyncBuilder().withHomeActivityVisible().withImeGone().waitForAndVerify()
-        }
         teardown { testApp.exit(wmHelper) }
+        transitions { testApp.closeIME(wmHelper) }
     }
 
     /** {@inheritDoc} */
@@ -76,28 +74,32 @@ open class CloseImeWindowToHomeTest(flicker: FlickerTest) : BaseTest(flicker) {
     /** {@inheritDoc} */
     @Presubmit
     @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
-        flicker.assertLayers {
-            this.visibleLayersShownMoreThanOneConsecutiveEntry(
-                listOf(ComponentNameMatcher.IME, ComponentNameMatcher.SPLASH_SCREEN)
-            )
-        }
+    override fun navBarLayerPositionAtStartAndEnd() {
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeFalse(flicker.scenario.isLandscapeOrSeascapeAtStart)
+        flicker.navBarLayerPositionAtStartAndEnd()
+    }
+
+    @FlakyTest
+    @Test
+    fun navBarLayerPositionAtStartAndEndLandscapeOrSeascapeAtStart() {
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeTrue(flicker.scenario.isLandscapeOrSeascapeAtStart)
+        flicker.navBarLayerPositionAtStartAndEnd()
     }
 
     @Presubmit @Test fun imeLayerBecomesInvisible() = flicker.imeLayerBecomesInvisible()
 
-    @Presubmit @Test fun imeWindowBecomesInvisible() = flicker.imeWindowBecomesInvisible()
-
     @Presubmit
     @Test
-    fun imeAppWindowBecomesInvisible() {
-        flicker.assertWm { this.isAppWindowVisible(testApp).then().isAppWindowInvisible(testApp) }
+    fun imeAppLayerIsAlwaysVisible() {
+        flicker.assertLayers { this.isVisible(testApp) }
     }
 
     @Presubmit
     @Test
-    fun imeAppLayerBecomesInvisible() {
-        flicker.assertLayers { this.isVisible(testApp).then().isInvisible(testApp) }
+    fun imeAppWindowIsAlwaysVisible() {
+        flicker.assertWm { this.isAppWindowOnTop(testApp) }
     }
 
     @Test
@@ -105,9 +107,8 @@ open class CloseImeWindowToHomeTest(flicker: FlickerTest) : BaseTest(flicker) {
     override fun cujCompleted() {
         super.cujCompleted()
         imeLayerBecomesInvisible()
-        imeAppWindowBecomesInvisible()
-        imeWindowBecomesInvisible()
-        imeLayerBecomesInvisible()
+        imeAppLayerIsAlwaysVisible()
+        imeAppWindowIsAlwaysVisible()
         runAndIgnoreAssumptionViolation { navBarLayerPositionAtStartAndEnd() }
     }
 
@@ -115,9 +116,7 @@ open class CloseImeWindowToHomeTest(flicker: FlickerTest) : BaseTest(flicker) {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
-            return FlickerTestFactory.nonRotationTests(
-                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
-            )
+            return FlickerTestFactory.nonRotationTests()
         }
     }
 }

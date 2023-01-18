@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,10 @@ import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.ImeAppHelper
+import com.android.server.wm.flicker.helpers.SimpleAppHelper
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.navBarLayerPositionAtStartAndEnd
-import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -36,70 +37,46 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test IME window closing back to app window transitions. To run this test: `atest
- * FlickerTests:CloseImeWindowToAppTest`
+ * Unlike {@link OpenImeWindowTest} testing IME window opening transitions, this test also verify
+ * there is no flickering when back to the simple activity without requesting IME to show.
+ *
+ * To run this test: `atest FlickerTests:OpenImeWindowAndCloseTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class CloseImeWindowToAppTest(flicker: FlickerTest) : BaseTest(flicker) {
+open class CloseImeToHomeOnFinishActivityTest(flicker: FlickerTest) : BaseTest(flicker) {
+    private val simpleApp = SimpleAppHelper(instrumentation)
     private val testApp = ImeAppHelper(instrumentation)
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
+            simpleApp.launchViaIntent(wmHelper)
             testApp.launchViaIntent(wmHelper)
             testApp.openIME(wmHelper)
         }
-        teardown { testApp.exit(wmHelper) }
-        transitions { testApp.closeIME(wmHelper) }
+        transitions { testApp.finishActivity(wmHelper) }
+        teardown { simpleApp.exit(wmHelper) }
     }
 
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
-        flicker.assertWm {
-            this.visibleWindowsShownMoreThanOneConsecutiveEntry(
-                listOf(
-                    ComponentNameMatcher.IME,
-                    ComponentNameMatcher.SPLASH_SCREEN,
-                    ComponentNameMatcher.SNAPSHOT
-                )
-            )
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun navBarLayerPositionAtStartAndEnd() {
-        Assume.assumeFalse(flicker.scenario.isTablet)
-        Assume.assumeFalse(flicker.scenario.isLandscapeOrSeascapeAtStart)
-        flicker.navBarLayerPositionAtStartAndEnd()
-    }
-
-    @FlakyTest
-    @Test
-    fun navBarLayerPositionAtStartAndEndLandscapeOrSeascapeAtStart() {
-        Assume.assumeFalse(flicker.scenario.isTablet)
-        Assume.assumeTrue(flicker.scenario.isLandscapeOrSeascapeAtStart)
-        flicker.navBarLayerPositionAtStartAndEnd()
-    }
+    @Presubmit @Test fun imeWindowBecomesInvisible() = flicker.imeWindowBecomesInvisible()
 
     @Presubmit @Test fun imeLayerBecomesInvisible() = flicker.imeLayerBecomesInvisible()
 
     @Presubmit
     @Test
-    fun imeAppLayerIsAlwaysVisible() {
-        flicker.assertLayers { this.isVisible(testApp) }
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
     }
 
-    @Presubmit
+    @FlakyTest(bugId = 246284124)
     @Test
-    fun imeAppWindowIsAlwaysVisible() {
-        flicker.assertWm { this.isAppWindowOnTop(testApp) }
+    fun visibleLayersShownMoreThanOneConsecutiveEntry_shellTransit() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
     }
 
     @Test
@@ -107,16 +84,16 @@ open class CloseImeWindowToAppTest(flicker: FlickerTest) : BaseTest(flicker) {
     override fun cujCompleted() {
         super.cujCompleted()
         imeLayerBecomesInvisible()
-        imeAppLayerIsAlwaysVisible()
-        imeAppWindowIsAlwaysVisible()
-        runAndIgnoreAssumptionViolation { navBarLayerPositionAtStartAndEnd() }
+        imeWindowBecomesInvisible()
     }
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
-            return FlickerTestFactory.nonRotationTests()
+            return FlickerTestFactory.nonRotationTests(
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+            )
         }
     }
 }

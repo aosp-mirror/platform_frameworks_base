@@ -25,7 +25,7 @@ import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
+import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.service.PlatformConsts
@@ -45,8 +45,8 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class LaunchAppShowImeAndDialogThemeAppTest(flicker: FlickerTest) : BaseTest(flicker) {
-    private val testApp = ImeAppAutoFocusHelper(instrumentation, flicker.scenario.startRotation)
+class ShowImeWhileDismissingThemedPopupDialogTest(flicker: FlickerTest) : BaseTest(flicker) {
+    private val testApp = ImeShownOnAppStartHelper(instrumentation, flicker.scenario.startRotation)
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
