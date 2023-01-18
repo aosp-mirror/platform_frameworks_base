@@ -116,6 +116,7 @@ public class DozeSensors {
     private boolean mListening;
     private boolean mListeningTouchScreenSensors;
     private boolean mListeningProxSensors;
+    private boolean mListeningAodOnlySensors;
     private boolean mUdfpsEnrolled;
 
     @DevicePostureController.DevicePostureInt
@@ -184,7 +185,8 @@ public class DozeSensors {
                         dozeParameters.getPulseOnSigMotion(),
                         DozeLog.PULSE_REASON_SENSOR_SIGMOTION,
                         false /* touchCoords */,
-                        false /* touchscreen */),
+                        false /* touchscreen */
+                ),
                 new TriggerSensor(
                         mSensorManager.getDefaultSensor(Sensor.TYPE_PICK_UP_GESTURE),
                         Settings.Secure.DOZE_PICK_UP_GESTURE,
@@ -195,14 +197,17 @@ public class DozeSensors {
                         false /* touchscreen */,
                         false /* ignoresSetting */,
                         false /* requires prox */,
-                        true /* immediatelyReRegister */),
+                        true /* immediatelyReRegister */,
+                        false /* requiresAod */
+                ),
                 new TriggerSensor(
                         findSensor(config.doubleTapSensorType()),
                         Settings.Secure.DOZE_DOUBLE_TAP_GESTURE,
                         true /* configured */,
                         DozeLog.REASON_SENSOR_DOUBLE_TAP,
                         dozeParameters.doubleTapReportsTouchCoordinates(),
-                        true /* touchscreen */),
+                        true /* touchscreen */
+                ),
                 new TriggerSensor(
                         findSensors(config.tapSensorTypeMapping()),
                         Settings.Secure.DOZE_TAP_SCREEN_GESTURE,
@@ -214,7 +219,9 @@ public class DozeSensors {
                         false /* ignoresSetting */,
                         dozeParameters.singleTapUsesProx(mDevicePosture) /* requiresProx */,
                         true /* immediatelyReRegister */,
-                        mDevicePosture),
+                        mDevicePosture,
+                        false
+                ),
                 new TriggerSensor(
                         findSensor(config.longPressSensorType()),
                         Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
@@ -225,7 +232,9 @@ public class DozeSensors {
                         true /* touchscreen */,
                         false /* ignoresSetting */,
                         dozeParameters.longPressUsesProx() /* requiresProx */,
-                        true /* immediatelyReRegister */),
+                        true /* immediatelyReRegister */,
+                        false /* requiresAod */
+                ),
                 new TriggerSensor(
                         findSensor(config.udfpsLongPressSensorType()),
                         "doze_pulse_on_auth",
@@ -236,7 +245,9 @@ public class DozeSensors {
                         true /* touchscreen */,
                         false /* ignoresSetting */,
                         dozeParameters.longPressUsesProx(),
-                        false /* immediatelyReRegister */),
+                        false /* immediatelyReRegister */,
+                        true /* requiresAod */
+                ),
                 new PluginSensor(
                         new SensorManagerPlugin.Sensor(TYPE_WAKE_DISPLAY),
                         Settings.Secure.DOZE_WAKE_DISPLAY_GESTURE,
@@ -244,7 +255,8 @@ public class DozeSensors {
                           && mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT),
                         DozeLog.REASON_SENSOR_WAKE_UP_PRESENCE,
                         false /* reports touch coordinates */,
-                        false /* touchscreen */),
+                        false /* touchscreen */
+                ),
                 new PluginSensor(
                         new SensorManagerPlugin.Sensor(TYPE_WAKE_LOCK_SCREEN),
                         Settings.Secure.DOZE_WAKE_LOCK_SCREEN_GESTURE,
@@ -252,7 +264,8 @@ public class DozeSensors {
                         DozeLog.PULSE_REASON_SENSOR_WAKE_REACH,
                         false /* reports touch coordinates */,
                         false /* touchscreen */,
-                        mConfig.getWakeLockScreenDebounce()),
+                        mConfig.getWakeLockScreenDebounce()
+                ),
                 new TriggerSensor(
                         findSensor(config.quickPickupSensorType()),
                         Settings.Secure.DOZE_QUICK_PICKUP_GESTURE,
@@ -263,7 +276,9 @@ public class DozeSensors {
                         false /* requiresTouchscreen */,
                         false /* ignoresSetting */,
                         false /* requiresProx */,
-                        true /* immediatelyReRegister */),
+                        true /* immediatelyReRegister */,
+                        false /* requiresAod */
+                ),
         };
         setProxListening(false);  // Don't immediately start listening when we register.
         mProximitySensor.register(
@@ -357,29 +372,36 @@ public class DozeSensors {
     /**
      * If sensors should be registered and sending signals.
      */
-    public void setListening(boolean listen, boolean includeTouchScreenSensors) {
-        if (mListening == listen && mListeningTouchScreenSensors == includeTouchScreenSensors) {
+    public void setListening(boolean listen, boolean includeTouchScreenSensors,
+            boolean includeAodOnlySensors) {
+        if (mListening == listen && mListeningTouchScreenSensors == includeTouchScreenSensors
+                && mListeningAodOnlySensors == includeAodOnlySensors) {
             return;
         }
         mListening = listen;
         mListeningTouchScreenSensors = includeTouchScreenSensors;
+        mListeningAodOnlySensors = includeAodOnlySensors;
         updateListening();
     }
 
     /**
      * If sensors should be registered and sending signals.
      */
-    public void setListening(boolean listen, boolean includeTouchScreenSensors,
-            boolean lowPowerStateOrOff) {
+    public void setListeningWithPowerState(boolean listen, boolean includeTouchScreenSensors,
+            boolean includeAodRequiringSensors, boolean lowPowerStateOrOff) {
         final boolean shouldRegisterProxSensors =
                 !mSelectivelyRegisterProxSensors || lowPowerStateOrOff;
-        if (mListening == listen && mListeningTouchScreenSensors == includeTouchScreenSensors
-                && mListeningProxSensors == shouldRegisterProxSensors) {
+        if (mListening == listen
+                && mListeningTouchScreenSensors == includeTouchScreenSensors
+                && mListeningProxSensors == shouldRegisterProxSensors
+                && mListeningAodOnlySensors == includeAodRequiringSensors
+        ) {
             return;
         }
         mListening = listen;
         mListeningTouchScreenSensors = includeTouchScreenSensors;
         mListeningProxSensors = shouldRegisterProxSensors;
+        mListeningAodOnlySensors = includeAodRequiringSensors;
         updateListening();
     }
 
@@ -391,7 +413,8 @@ public class DozeSensors {
         for (TriggerSensor s : mTriggerSensors) {
             boolean listen = mListening
                     && (!s.mRequiresTouchscreen || mListeningTouchScreenSensors)
-                    && (!s.mRequiresProx || mListeningProxSensors);
+                    && (!s.mRequiresProx || mListeningProxSensors)
+                    && (!s.mRequiresAod || mListeningAodOnlySensors);
             s.setListening(listen);
             if (listen) {
                 anyListening = true;
@@ -499,6 +522,9 @@ public class DozeSensors {
         private final boolean mRequiresTouchscreen;
         private final boolean mRequiresProx;
 
+        // Whether the sensor should only register if the device is in AOD
+        private final boolean mRequiresAod;
+
         // Whether to immediately re-register this sensor after the sensor is triggered.
         // If false, the sensor registration will be updated on the next AOD state transition.
         private final boolean mImmediatelyReRegister;
@@ -527,7 +553,8 @@ public class DozeSensors {
                     requiresTouchscreen,
                     false /* ignoresSetting */,
                     false /* requiresProx */,
-                    true /* immediatelyReRegister */
+                    true /* immediatelyReRegister */,
+                    false
             );
         }
 
@@ -541,7 +568,8 @@ public class DozeSensors {
                 boolean requiresTouchscreen,
                 boolean ignoresSetting,
                 boolean requiresProx,
-                boolean immediatelyReRegister
+                boolean immediatelyReRegister,
+                boolean requiresAod
         ) {
             this(
                     new Sensor[]{ sensor },
@@ -554,7 +582,8 @@ public class DozeSensors {
                     ignoresSetting,
                     requiresProx,
                     immediatelyReRegister,
-                    DevicePostureController.DEVICE_POSTURE_UNKNOWN
+                    DevicePostureController.DEVICE_POSTURE_UNKNOWN,
+                    requiresAod
             );
         }
 
@@ -569,7 +598,8 @@ public class DozeSensors {
                 boolean ignoresSetting,
                 boolean requiresProx,
                 boolean immediatelyReRegister,
-                @DevicePostureController.DevicePostureInt int posture
+                @DevicePostureController.DevicePostureInt int posture,
+                boolean requiresAod
         ) {
             mSensors = sensors;
             mSetting = setting;
@@ -580,6 +610,7 @@ public class DozeSensors {
             mRequiresTouchscreen = requiresTouchscreen;
             mIgnoresSetting = ignoresSetting;
             mRequiresProx = requiresProx;
+            mRequiresAod = requiresAod;
             mPosture = posture;
             mImmediatelyReRegister = immediatelyReRegister;
         }
