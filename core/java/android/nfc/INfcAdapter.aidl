@@ -73,4 +73,10 @@ interface INfcAdapter
     boolean isControllerAlwaysOnSupported();
     void registerControllerAlwaysOnListener(in INfcControllerAlwaysOnListener listener);
     void unregisterControllerAlwaysOnListener(in INfcControllerAlwaysOnListener listener);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)")
+    boolean isTagIntentAppPreferenceSupported();
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)")
+    Map getTagIntentAppPreferenceForUser(int userId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)")
+    int setTagIntentAppPreferenceForUser(int userId, String pkg, boolean allow);
 }
