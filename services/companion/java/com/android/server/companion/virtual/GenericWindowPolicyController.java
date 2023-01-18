@@ -23,6 +23,7 @@ import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTE
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.WindowConfiguration;
 import android.app.compat.CompatChanges;
 import android.companion.virtual.VirtualDeviceManager.ActivityListener;
@@ -302,14 +303,14 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     }
 
     @Override
-    public void onTopActivityChanged(ComponentName topActivity, int uid) {
+    public void onTopActivityChanged(ComponentName topActivity, int uid, @UserIdInt int userId) {
         // Don't send onTopActivityChanged() callback when topActivity is null because it's defined
         // as @NonNull in ActivityListener interface. Sends onDisplayEmpty() callback instead when
         // there is no activity running on virtual display.
         if (mActivityListener != null && topActivity != null) {
             // Post callback on the main thread so it doesn't block activity launching
             mHandler.post(() ->
-                    mActivityListener.onTopActivityChanged(mDisplayId, topActivity));
+                    mActivityListener.onTopActivityChanged(mDisplayId, topActivity, userId));
         }
     }
 

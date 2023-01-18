@@ -26,6 +26,7 @@ import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
+import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.PendingIntent;
@@ -138,7 +139,18 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             @Override
             public void onTopActivityChanged(int displayId, ComponentName topActivity) {
                 try {
-                    mActivityListener.onTopActivityChanged(displayId, topActivity);
+                    mActivityListener.onTopActivityChanged(displayId, topActivity,
+                            UserHandle.USER_NULL);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Unable to call mActivityListener", e);
+                }
+            }
+
+            @Override
+            public void onTopActivityChanged(int displayId, ComponentName topActivity,
+                    @UserIdInt int userId) {
+                try {
+                    mActivityListener.onTopActivityChanged(displayId, topActivity, userId);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Unable to call mActivityListener", e);
                 }
