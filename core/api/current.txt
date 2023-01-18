@@ -13318,7 +13318,7 @@ package android.credentials {
     method @NonNull public android.os.Bundle getCandidateQueryData();
     method @NonNull public android.os.Bundle getCredentialData();
     method @NonNull public String getType();
-    method public boolean requireSystemProvider();
+    method public boolean isSystemProviderRequired();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.credentials.CreateCredentialRequest> CREATOR;
   }
@@ -13365,7 +13365,7 @@ package android.credentials {
     method @NonNull public android.os.Bundle getCandidateQueryData();
     method @NonNull public android.os.Bundle getCredentialRetrievalData();
     method @NonNull public String getType();
-    method public boolean requireSystemProvider();
+    method public boolean isSystemProviderRequired();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.credentials.GetCredentialOption> CREATOR;
   }

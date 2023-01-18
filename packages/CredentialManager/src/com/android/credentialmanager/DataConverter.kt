@@ -269,7 +269,7 @@ class CreateFlowUtils {
       val createCredentialRequest = requestInfo.createCredentialRequest
       val createCredentialRequestJetpack = createCredentialRequest?.let {
         CreateCredentialRequest.createFrom(
-                it.type, it.credentialData, it.candidateQueryData, it.requireSystemProvider()
+                it.type, it.credentialData, it.candidateQueryData, it.isSystemProviderRequired()
         )
       }
       when (createCredentialRequestJetpack) {
