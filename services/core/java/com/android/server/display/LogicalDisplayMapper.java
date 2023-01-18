@@ -177,6 +177,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     private Layout mCurrentLayout = null;
     private int mDeviceState = DeviceStateManager.INVALID_DEVICE_STATE;
     private int mPendingDeviceState = DeviceStateManager.INVALID_DEVICE_STATE;
+    private int mDeviceStateToBeAppliedAfterBoot = DeviceStateManager.INVALID_DEVICE_STATE;
     private boolean mBootCompleted = false;
     private boolean mInteractive;
 
@@ -373,6 +374,12 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         ipw.println("mDeviceStatesOnWhichToWakeUp=" + mDeviceStatesOnWhichToWakeUp);
         ipw.println("mDeviceStatesOnWhichToSleep=" + mDeviceStatesOnWhichToSleep);
         ipw.println("mInteractive=" + mInteractive);
+        ipw.println("mBootCompleted=" + mBootCompleted);
+
+        ipw.println();
+        ipw.println("mDeviceState=" + mDeviceState);
+        ipw.println("mPendingDeviceState=" + mPendingDeviceState);
+        ipw.println("mDeviceStateToBeAppliedAfterBoot=" + mDeviceStateToBeAppliedAfterBoot);
 
         final int logicalDisplayCount = mLogicalDisplays.size();
         ipw.println();
@@ -403,10 +410,6 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     }
 
     void setDeviceStateLocked(int state, boolean isOverrideActive) {
-        Slog.i(TAG, "Requesting Transition to state: " + state + ", from state=" + mDeviceState
-                + ", interactive=" + mInteractive + ", mBootCompleted=" + mBootCompleted);
-        mPendingDeviceState = state;
-
         if (!mBootCompleted) {
             // The boot animation might still be in progress, we do not want to switch states now
             // as the boot animation would end up with an incorrect size.
@@ -414,14 +417,19 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                 Slog.d(TAG, "Postponing transition to state: " + mPendingDeviceState
                         + " until boot is completed");
             }
+            mDeviceStateToBeAppliedAfterBoot = state;
             return;
         }
 
+        Slog.i(TAG, "Requesting Transition to state: " + state + ", from state=" + mDeviceState
+                + ", interactive=" + mInteractive + ", mBootCompleted=" + mBootCompleted);
         // As part of a state transition, we may need to turn off some displays temporarily so that
         // the transition is smooth. Plus, on some devices, only one internal displays can be
         // on at a time. We use LogicalDisplay.setIsInTransition to mark a display that needs to be
         // temporarily turned off.
         resetLayoutLocked(mDeviceState, state, /* transitionValue= */ true);
+        mPendingDeviceState = state;
+        mDeviceStateToBeAppliedAfterBoot = DeviceStateManager.INVALID_DEVICE_STATE;
         final boolean wakeDevice = shouldDeviceBeWoken(mPendingDeviceState, mDeviceState,
                 mInteractive, mBootCompleted);
         final boolean sleepDevice = shouldDeviceBePutToSleep(mPendingDeviceState, mDeviceState,
@@ -468,8 +476,9 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     void onBootCompleted() {
         synchronized (mSyncRoot) {
             mBootCompleted = true;
-            if (mPendingDeviceState != DeviceStateManager.INVALID_DEVICE_STATE) {
-                setDeviceStateLocked(mPendingDeviceState, /* isOverrideActive= */ false);
+            if (mDeviceStateToBeAppliedAfterBoot != DeviceStateManager.INVALID_DEVICE_STATE) {
+                setDeviceStateLocked(mDeviceStateToBeAppliedAfterBoot,
+                        /* isOverrideActive= */ false);
             }
         }
     }
@@ -524,7 +533,8 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     @VisibleForTesting
     boolean shouldDeviceBePutToSleep(int pendingState, int currentState, boolean isOverrideActive,
             boolean isInteractive, boolean isBootCompleted) {
-        return mDeviceStatesOnWhichToSleep.get(pendingState)
+        return currentState != DeviceStateManager.INVALID_DEVICE_STATE
+                && mDeviceStatesOnWhichToSleep.get(pendingState)
                 && !mDeviceStatesOnWhichToSleep.get(currentState)
                 && !isOverrideActive
                 && isInteractive && isBootCompleted;
