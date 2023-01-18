@@ -46,6 +46,7 @@ import android.view.accessibility.IWindowMagnificationConnection;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
 import android.view.accessibility.MagnificationAnimationCallback;
 
+import com.android.internal.accessibility.common.MagnificationConstants;
 import com.android.internal.accessibility.util.AccessibilityStatsLogUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -717,17 +718,20 @@ public class WindowMagnificationManager implements
      */
     float getPersistedScale(int displayId) {
         return MathUtils.constrain(mScaleProvider.getScale(displayId),
-                2.0f, MagnificationScaleProvider.MAX_SCALE);
+                MagnificationConstants.PERSISTED_SCALE_MIN_VALUE,
+                MagnificationScaleProvider.MAX_SCALE);
     }
 
     /**
      * Persists the default display magnification scale to the current user's settings
-     *     <strong>if scale is >= 2.0</strong>. Only the
-     * value of the default display is persisted in user's settings.
+     * <strong>if scale is >= {@link MagnificationConstants.PERSISTED_SCALE_MIN_VALUE}</strong>.
+     * We assume if the scale is < {@link MagnificationConstants.PERSISTED_SCALE_MIN_VALUE}, there
+     * will be no obvious magnification effect.
+     * Only the value of the default display is persisted in user's settings.
      */
     void persistScale(int displayId) {
         float scale = getScale(displayId);
-        if (scale < 2.0f) {
+        if (scale < MagnificationConstants.PERSISTED_SCALE_MIN_VALUE) {
             return;
         }
         mScaleProvider.putScale(scale, displayId);

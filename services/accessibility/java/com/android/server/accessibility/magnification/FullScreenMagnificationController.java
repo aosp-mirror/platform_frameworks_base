@@ -52,6 +52,7 @@ import android.view.accessibility.MagnificationAnimationCallback;
 import android.view.animation.DecelerateInterpolator;
 
 import com.android.internal.R;
+import com.android.internal.accessibility.common.MagnificationConstants;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -1156,11 +1157,14 @@ public class FullScreenMagnificationController implements
     }
 
     /**
-     * Persists the default display magnification scale to the current user's settings.
+     * Persists the default display magnification scale to the current user's settings
+     * <strong>if scale is >= {@link MagnificationConstants.PERSISTED_SCALE_MIN_VALUE}</strong>.
+     * We assume if the scale is < {@link MagnificationConstants.PERSISTED_SCALE_MIN_VALUE}, there
+     * will be no obvious magnification effect.
      */
     public void persistScale(int displayId) {
         final float scale = getScale(Display.DEFAULT_DISPLAY);
-        if (scale < 2.0f) {
+        if (scale < MagnificationConstants.PERSISTED_SCALE_MIN_VALUE) {
             return;
         }
         mScaleProvider.putScale(scale, displayId);
@@ -1175,7 +1179,8 @@ public class FullScreenMagnificationController implements
      */
     public float getPersistedScale(int displayId) {
         return MathUtils.constrain(mScaleProvider.getScale(displayId),
-                2.0f, MagnificationScaleProvider.MAX_SCALE);
+                MagnificationConstants.PERSISTED_SCALE_MIN_VALUE,
+                MagnificationScaleProvider.MAX_SCALE);
     }
 
     /**

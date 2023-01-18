@@ -50,6 +50,7 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Switch;
 
+import com.android.internal.accessibility.common.MagnificationConstants;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.R;
@@ -136,8 +137,10 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             float scale = progress * A11Y_CHANGE_SCALE_DIFFERENCE + A11Y_SCALE_MIN_VALUE;
-            // update persisted scale only when scale >= 2.0
-            if (scale >= 2.0f) {
+            // Update persisted scale only when scale >= PERSISTED_SCALE_MIN_VALUE const.
+            // We assume if the scale is lower than the PERSISTED_SCALE_MIN_VALUE, there will be
+            // no obvious magnification effect.
+            if (scale >= MagnificationConstants.PERSISTED_SCALE_MIN_VALUE) {
                 Settings.Secure.putFloatForUser(mContext.getContentResolver(),
                         Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, scale,
                         UserHandle.USER_CURRENT);
