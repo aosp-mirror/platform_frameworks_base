@@ -95,9 +95,7 @@ class UserSwitchingDialog extends AlertDialog
                 R.layout.user_switching_dialog, null);
 
         String viewMessage = null;
-        if (UserManager.isSplitSystemUser() && mNewUser.id == UserHandle.USER_SYSTEM) {
-            viewMessage = res.getString(R.string.user_logging_out_message, mOldUser.name);
-        } else if (UserManager.isDeviceInDemoMode(mContext)) {
+        if (UserManager.isDeviceInDemoMode(mContext)) {
             if (mOldUser.isDemo()) {
                 viewMessage = res.getString(R.string.demo_restarting_message);
             } else {

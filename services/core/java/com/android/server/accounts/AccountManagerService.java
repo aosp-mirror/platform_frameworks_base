@@ -1491,13 +1491,7 @@ public class AccountManagerService
         Account[] sharedAccounts = getSharedAccountsAsUser(userId);
         if (sharedAccounts == null || sharedAccounts.length == 0) return;
         Account[] accounts = getAccountsAsUser(null, userId, mContext.getOpPackageName());
-        int parentUserId = UserManager.isSplitSystemUser()
-                ? getUserManager().getUserInfo(userId).restrictedProfileParentId
-                : UserHandle.USER_SYSTEM;
-        if (parentUserId < 0) {
-            Log.w(TAG, "User " + userId + " has shared accounts, but no parent user");
-            return;
-        }
+        int parentUserId = UserHandle.USER_SYSTEM;
         for (Account sa : sharedAccounts) {
             if (ArrayUtils.contains(accounts, sa)) continue;
             // Account doesn't exist. Copy it now.
