@@ -57,7 +57,6 @@ import android.util.AndroidException;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
-import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
@@ -430,10 +429,9 @@ public final class PendingIntent implements Parcelable {
         }
 
         // Whenever creation or retrieval of a mutable implicit PendingIntent occurs:
-        // - For apps with target SDK >= U, Log.wtfStack() that it is blocked for security reasons.
-        //   This will be changed to a throw of an exception on the server side once we finish
-        //   migrating to safer PendingIntents b/262253127.
-        // - Otherwise, warn that it will be blocked from target SDK U.
+        // - For apps with target SDK >= U, throw an IllegalArgumentException for
+        //   security reasons.
+        // - Otherwise, warn that it will be blocked from target SDK U onwards.
         if (isNewMutableDisallowedImplicitPendingIntent(flags, intent)) {
             if (Compatibility.isChangeEnabled(BLOCK_MUTABLE_IMPLICIT_PENDING_INTENT)) {
                 String msg = packageName + ": Targeting U+ (version "
@@ -445,7 +443,7 @@ public final class PendingIntent implements Parcelable {
                         + " PendingIntent, use FLAG_NO_CREATE, however, to create a"
                         + " new PendingIntent with an implicit Intent use"
                         + " FLAG_IMMUTABLE.";
-                Slog.wtfStack(TAG, msg);
+                throw new IllegalArgumentException(msg);
             } else {
                 String msg = "New mutable implicit PendingIntent: pkg=" + packageName
                         + ", action=" + intent.getAction()
