@@ -47,6 +47,7 @@ import com.android.systemui.plugins.ClockAnimations;
 import com.android.systemui.plugins.ClockController;
 import com.android.systemui.plugins.ClockEvents;
 import com.android.systemui.plugins.ClockFaceController;
+import com.android.systemui.plugins.ClockFaceEvents;
 import com.android.systemui.plugins.log.LogBuffer;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.clocks.AnimatableClockView;
@@ -98,6 +99,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     private ClockAnimations mClockAnimations;
     @Mock
     private ClockEvents mClockEvents;
+    @Mock
+    private ClockFaceEvents mClockFaceEvents;
     @Mock
     DumpManager mDumpManager;
     @Mock
@@ -168,6 +171,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         when(mClockController.getLargeClock()).thenReturn(mLargeClockController);
         when(mClockController.getSmallClock()).thenReturn(mSmallClockController);
         when(mClockController.getEvents()).thenReturn(mClockEvents);
+        when(mSmallClockController.getEvents()).thenReturn(mClockFaceEvents);
+        when(mLargeClockController.getEvents()).thenReturn(mClockFaceEvents);
         when(mClockController.getAnimations()).thenReturn(mClockAnimations);
         when(mClockRegistry.createCurrentClock()).thenReturn(mClockController);
         when(mClockEventController.getClock()).thenReturn(mClockController);
