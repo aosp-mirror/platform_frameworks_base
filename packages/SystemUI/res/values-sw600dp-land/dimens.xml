@@ -28,6 +28,7 @@
 
     <!-- QS-->
     <dimen name="qs_panel_padding_top">16dp</dimen>
+    <dimen name="qs_panel_padding">24dp</dimen>
     <dimen name="qs_content_horizontal_padding">24dp</dimen>
     <dimen name="qs_horizontal_margin">24dp</dimen>
     <!-- in split shade qs_tiles_page_horizontal_margin should be equal of qs_horizontal_margin/2,
