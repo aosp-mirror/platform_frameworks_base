@@ -16,12 +16,14 @@
 
 package android.app.admin;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.QUERY_ADMIN_POLICY;
 import static android.Manifest.permission.SET_TIME;
 import static android.Manifest.permission.SET_TIME_ZONE;
 import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
 import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
+import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
@@ -13546,11 +13548,14 @@ public class DevicePolicyManager {
             android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS
     })
     @UserProvisioningState
+    @UserHandleAware(
+            enabledSinceTargetSdkVersion = UPSIDE_DOWN_CAKE,
+            requiresPermissionIfNotCaller = INTERACT_ACROSS_USERS)
     public int getUserProvisioningState() {
         throwIfParentInstance("getUserProvisioningState");
         if (mService != null) {
             try {
-                return mService.getUserProvisioningState();
+                return mService.getUserProvisioningState(mContext.getUserId());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

@@ -415,7 +415,7 @@ interface IDevicePolicyManager {
     CharSequence getDeviceOwnerOrganizationName();
     CharSequence getOrganizationNameForUser(int userHandle);
 
-    int getUserProvisioningState();
+    int getUserProvisioningState(int userHandle);
     void setUserProvisioningState(int state, int userHandle);
 
     void setAffiliationIds(in ComponentName admin, in List<String> ids);

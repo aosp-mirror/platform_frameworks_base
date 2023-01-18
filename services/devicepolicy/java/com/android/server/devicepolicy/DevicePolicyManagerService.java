@@ -9290,7 +9290,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public int getUserProvisioningState() {
+    public int getUserProvisioningState(int userHandle) {
         if (!mHasFeature) {
             return DevicePolicyManager.STATE_USER_UNMANAGED;
         }
@@ -9298,10 +9298,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkCallAuthorization(canManageUsers(caller)
                 || hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
 
-        return getUserProvisioningState(caller.getUserId());
-    }
+        if (userHandle != caller.getUserId()) {
+            Preconditions.checkCallAuthorization(canManageUsers(caller)
+                    || hasCallingOrSelfPermission(permission.INTERACT_ACROSS_USERS));
+        }
 
-    private int getUserProvisioningState(int userHandle) {
         return getUserData(userHandle).mUserProvisioningState;
     }
 
@@ -9312,7 +9313,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     + userId);
             return;
         }
-
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
 
@@ -19280,6 +19280,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mInjector.settingsGlobalPutStringForUser(
                     Settings.Global.DEVICE_DEMO_MODE, Integer.toString(/* value= */ 1), userId);
         }
+
         setUserProvisioningState(STATE_USER_SETUP_FINALIZED, userId);
     }
 
