@@ -3,19 +3,25 @@ package com.android.systemui.unfold
 import android.os.SystemProperties
 import android.os.VibrationEffect
 import android.os.Vibrator
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
+import com.android.systemui.unfold.updates.FoldProvider
+import com.android.systemui.unfold.updates.FoldProvider.FoldCallback
+import java.util.concurrent.Executor
 import javax.inject.Inject
 
-/**
- * Class that plays a haptics effect during unfolding a foldable device
- */
+/** Class that plays a haptics effect during unfolding a foldable device */
 @SysUIUnfoldScope
 class UnfoldHapticsPlayer
 @Inject
 constructor(
     unfoldTransitionProgressProvider: UnfoldTransitionProgressProvider,
+    foldProvider: FoldProvider,
+    @Main private val mainExecutor: Executor,
     private val vibrator: Vibrator?
 ) : TransitionProgressListener {
+
+    private var isFirstAnimationAfterUnfold = false
 
     init {
         if (vibrator != null) {
@@ -23,6 +29,17 @@ constructor(
             // the whole time when SystemUI process is alive
             unfoldTransitionProgressProvider.addCallback(this)
         }
+
+        foldProvider.registerCallback(
+            object : FoldCallback {
+                override fun onFoldUpdated(isFolded: Boolean) {
+                    if (isFolded) {
+                        isFirstAnimationAfterUnfold = true
+                    }
+                }
+            },
+            mainExecutor
+        )
     }
 
     private var lastTransitionProgress = TRANSITION_PROGRESS_FULL_OPEN
@@ -36,6 +53,13 @@ constructor(
     }
 
     override fun onTransitionFinishing() {
+        // Run haptics only when unfolding the device (first animation after unfolding)
+        if (!isFirstAnimationAfterUnfold) {
+            return
+        }
+
+        isFirstAnimationAfterUnfold = false
+
         // Run haptics only if the animation is long enough to notice
         if (lastTransitionProgress < TRANSITION_NOTICEABLE_THRESHOLD) {
             playHaptics()

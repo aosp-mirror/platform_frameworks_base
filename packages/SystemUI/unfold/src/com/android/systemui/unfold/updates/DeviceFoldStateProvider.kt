@@ -79,6 +79,7 @@ constructor(
         screenStatusProvider.addCallback(screenListener)
         hingeAngleProvider.addCallback(hingeAngleListener)
         rotationChangeProvider.addCallback(rotationListener)
+        activityTypeProvider.init()
     }
 
     override fun stop() {
@@ -87,6 +88,7 @@ constructor(
         hingeAngleProvider.removeCallback(hingeAngleListener)
         hingeAngleProvider.stop()
         rotationChangeProvider.removeCallback(rotationListener)
+        activityTypeProvider.uninit()
     }
 
     override fun addCallback(listener: FoldUpdatesListener) {
@@ -115,19 +117,17 @@ constructor(
         }
 
         val isClosing = angle < lastHingeAngle
-        val closingThreshold = getClosingThreshold()
-        val closingThresholdMet = closingThreshold == null || angle < closingThreshold
         val isFullyOpened = FULLY_OPEN_DEGREES - angle < FULLY_OPEN_THRESHOLD_DEGREES
         val closingEventDispatched = lastFoldUpdate == FOLD_UPDATE_START_CLOSING
         val screenAvailableEventSent = isUnfoldHandled
 
         if (isClosing // hinge angle should be decreasing since last update
-                && closingThresholdMet // hinge angle is below certain threshold
                 && !closingEventDispatched  // we haven't sent closing event already
                 && !isFullyOpened // do not send closing event if we are in fully opened hinge
                                   // angle range as closing threshold could overlap this range
                 && screenAvailableEventSent // do not send closing event if we are still in
                                             // the process of turning on the inner display
+                && isClosingThresholdMet(angle) // hinge angle is below certain threshold.
         ) {
             notifyFoldUpdate(FOLD_UPDATE_START_CLOSING)
         }
@@ -144,6 +144,11 @@ constructor(
 
         lastHingeAngle = angle
         outputListeners.forEach { it.onHingeAngleUpdate(angle) }
+    }
+
+    private fun isClosingThresholdMet(currentAngle: Float) : Boolean {
+        val closingThreshold = getClosingThreshold()
+        return closingThreshold == null || currentAngle < closingThreshold
     }
 
     /**

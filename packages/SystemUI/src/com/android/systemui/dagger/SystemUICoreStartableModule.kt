@@ -31,6 +31,7 @@ import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.keyboard.KeyboardUI
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.log.SessionTracker
+import com.android.systemui.media.dialog.MediaOutputSwitcherDialogUI
 import com.android.systemui.media.RingtonePlayer
 import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper
 import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver
@@ -216,6 +217,12 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(ToastUI::class)
     abstract fun bindToastUI(service: ToastUI): CoreStartable
+
+    /** Inject into MediaOutputSwitcherDialogUI.  */
+    @Binds
+    @IntoMap
+    @ClassKey(MediaOutputSwitcherDialogUI::class)
+    abstract fun MediaOutputSwitcherDialogUI(sysui: MediaOutputSwitcherDialogUI): CoreStartable
 
     /** Inject into VolumeUI.  */
     @Binds

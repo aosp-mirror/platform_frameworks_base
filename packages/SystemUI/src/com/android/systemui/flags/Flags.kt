@@ -487,8 +487,7 @@ object Flags {
 
     // 1800 - shade container
     @JvmField
-    val LEAVE_SHADE_OPEN_FOR_BUGREPORT =
-        unreleasedFlag(1800, "leave_shade_open_for_bugreport", teamfood = true)
+    val LEAVE_SHADE_OPEN_FOR_BUGREPORT = releasedFlag(1800, "leave_shade_open_for_bugreport")
 
     // 1900
     @JvmField val NOTE_TASKS = unreleasedFlag(1900, "keycode_flag")
@@ -531,6 +530,11 @@ object Flags {
         unreleasedFlag(2501, "output_switcher_routes_processing")
     @JvmField
     val OUTPUT_SWITCHER_DEVICE_STATUS = unreleasedFlag(2502, "output_switcher_device_status")
+
+    // TODO(b/20911786): Tracking Bug
+    @JvmField
+    val OUTPUT_SWITCHER_SHOW_API_ENABLED =
+        unreleasedFlag(2503, "output_switcher_show_api_enabled", teamfood = true)
 
     // TODO(b259590361): Tracking bug
     val EXPERIMENTAL_FLAG = unreleasedFlag(2, "exp_flag_release")
