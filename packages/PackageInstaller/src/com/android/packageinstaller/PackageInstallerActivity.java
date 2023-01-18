@@ -392,7 +392,7 @@ public class PackageInstallerActivity extends AlertActivity {
             final int sessionId = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID,
                     -1 /* defaultValue */);
             final SessionInfo info = mInstaller.getSessionInfo(sessionId);
-            if (info == null || !info.getIsPreApprovalRequested()) {
+            if (info == null || !info.isPreApprovalRequested()) {
                 Log.w(TAG, "Session " + mSessionId + " in funky state; ignoring");
                 finish();
                 return;
