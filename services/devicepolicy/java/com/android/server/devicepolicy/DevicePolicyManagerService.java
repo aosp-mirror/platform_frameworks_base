@@ -7957,13 +7957,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userId));
 
         synchronized (getLockObject()) {
-            if (mOwners.hasProfileOwner(userId) || mOwners.hasDeviceOwner()) {
-                final ActiveAdmin admin = getDeviceOrProfileOwnerAdminLocked(userId);
-                return admin.mNearbyNotificationStreamingPolicy;
-            }
+            final ActiveAdmin admin = getDeviceOrProfileOwnerAdminLocked(userId);
+            return admin != null
+                    ? admin.mNearbyNotificationStreamingPolicy
+                    : NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY;
         }
-
-        return NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY;
     }
 
     @Override
@@ -7998,13 +7996,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userId));
 
         synchronized (getLockObject()) {
-            if (mOwners.hasProfileOwner(userId) || mOwners.hasDeviceOwner()) {
-                final ActiveAdmin admin = getDeviceOrProfileOwnerAdminLocked(userId);
-                return admin.mNearbyAppStreamingPolicy;
-            }
+            final ActiveAdmin admin = getDeviceOrProfileOwnerAdminLocked(userId);
+            return admin != null
+                    ? admin.mNearbyAppStreamingPolicy
+                    : NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY;
         }
-
-        return NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY;
     }
 
     /**
