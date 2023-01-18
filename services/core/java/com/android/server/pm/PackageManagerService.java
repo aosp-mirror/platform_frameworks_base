@@ -196,6 +196,7 @@ import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
 import com.android.server.apphibernation.AppHibernationManagerInternal;
 import com.android.server.art.DexUseManagerLocal;
+import com.android.server.art.model.DeleteResult;
 import com.android.server.compat.CompatChange;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.Installer.InstallerException;
@@ -7091,17 +7092,39 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         return AndroidPackageUtils.canHaveOatDir(packageState, packageState.getPkg());
     }
 
-    long deleteOatArtifactsOfPackage(@NonNull Computer snapshot, String packageName)
-            throws LegacyDexoptDisabledException {
+    long deleteOatArtifactsOfPackage(@NonNull Computer snapshot, String packageName) {
         PackageManagerServiceUtils.enforceSystemOrRootOrShell(
                 "Only the system or shell can delete oat artifacts");
 
-        PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
-        if (packageState == null || packageState.getPkg() == null) {
-            return -1; // error code of deleteOptimizedFiles
+        if (DexOptHelper.useArtService()) {
+            // TODO(chiuwinson): Retrieve filtered snapshot from Computer instance instead.
+            try (PackageManagerLocal.FilteredSnapshot filteredSnapshot =
+                            PackageManagerServiceUtils.getPackageManagerLocal()
+                                    .withFilteredSnapshot()) {
+                try {
+                    DeleteResult res = DexOptHelper.getArtManagerLocal().deleteDexoptArtifacts(
+                            filteredSnapshot, packageName);
+                    return res.getFreedBytes();
+                } catch (IllegalArgumentException e) {
+                    Log.e(TAG, e.toString());
+                    return -1;
+                } catch (IllegalStateException e) {
+                    Slog.wtfStack(TAG, e.toString());
+                    return -1;
+                }
+            }
+        } else {
+            PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
+            if (packageState == null || packageState.getPkg() == null) {
+                return -1; // error code of deleteOptimizedFiles
+            }
+            try {
+                return mDexManager.deleteOptimizedFiles(
+                        ArtUtils.createArtPackageInfo(packageState.getPkg(), packageState));
+            } catch (LegacyDexoptDisabledException e) {
+                throw new RuntimeException(e);
+            }
         }
-        return mDexManager.deleteOptimizedFiles(
-                ArtUtils.createArtPackageInfo(packageState.getPkg(), packageState));
     }
 
     List<String> getMimeGroupInternal(@NonNull Computer snapshot, String packageName,
