@@ -55038,6 +55038,22 @@ package android.view.inputmethod {
     method @NonNull public android.view.inputmethod.InsertGesture.Builder setTextToInsert(@NonNull String);
   }
 
+  public final class InsertModeGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.os.CancellationSignal getCancellationSignal();
+    method @NonNull public android.graphics.PointF getInsertionPoint();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.InsertModeGesture> CREATOR;
+  }
+
+  public static final class InsertModeGesture.Builder {
+    ctor public InsertModeGesture.Builder();
+    method @NonNull public android.view.inputmethod.InsertModeGesture build();
+    method @NonNull public android.view.inputmethod.InsertModeGesture.Builder setCancellationSignal(@NonNull android.os.CancellationSignal);
+    method @NonNull public android.view.inputmethod.InsertModeGesture.Builder setFallbackText(@Nullable String);
+    method @NonNull public android.view.inputmethod.InsertModeGesture.Builder setInsertionPoint(@NonNull android.graphics.PointF);
+  }
+
   public final class JoinOrSplitGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.graphics.PointF getJoinOrSplitPoint();
