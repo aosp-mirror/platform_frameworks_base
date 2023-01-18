@@ -28,7 +28,8 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class ExpandPipOnDoubleClickTestCfArm(flicker: FlickerTest) : ExpandPipOnDoubleClickTest(flicker) {
+class ExitPipToAppViaExpandButtonTestCfArm(flicker: FlickerTest) :
+    ExitPipToAppViaExpandButtonTest(flicker) {
     companion object {
         /**
          * Creates the test configurations.

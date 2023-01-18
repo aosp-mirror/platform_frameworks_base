@@ -20,9 +20,7 @@ import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import com.android.server.wm.traces.common.service.PlatformConsts
 import com.android.wm.shell.flicker.Direction
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -56,8 +54,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class MovePipDownShelfHeightChangeTest(flicker: FlickerTest) :
-    MovePipShelfHeightTransition(flicker) {
+class MovePipDownOnShelfHeightChange(flicker: FlickerTest) : MovePipShelfHeightTransition(flicker) {
     /** Defines the transition used to run the test */
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition {
@@ -73,20 +70,4 @@ class MovePipDownShelfHeightChangeTest(flicker: FlickerTest) :
 
     /** Checks that the visible region of [pipApp] layer always moves down during the animation. */
     @Presubmit @Test fun pipLayerMovesDown() = pipLayerMoves(Direction.DOWN)
-
-    companion object {
-        /**
-         * Creates the test configurations.
-         *
-         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
-         * navigation modes.
-         */
-        @Parameterized.Parameters(name = "{0}")
-        @JvmStatic
-        fun getParams(): List<FlickerTest> {
-            return FlickerTestFactory.nonRotationTests(
-                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
-            )
-        }
-    }
 }
