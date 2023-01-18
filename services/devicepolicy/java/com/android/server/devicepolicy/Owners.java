@@ -579,6 +579,19 @@ class Owners {
         }
     }
 
+    void markMigrationToPolicyEngine() {
+        synchronized (mData) {
+            mData.mMigratedToPolicyEngine = true;
+            mData.writeDeviceOwner();
+        }
+    }
+
+    boolean isMigratedToPolicyEngine() {
+        synchronized (mData) {
+            return mData.mMigratedToPolicyEngine;
+        }
+    }
+
     @GuardedBy("mData")
     void pushToAppOpsLocked() {
         if (!mSystemReady) {

@@ -745,11 +745,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     + "management app's authentication policy";
     private static final String NOT_SYSTEM_CALLER_MSG = "Only the system can %s";
 
+    // ENABLE_DEVICE_POLICY_ENGINE_FLAG must be enabled before this could be enabled.
     private static final String PERMISSION_BASED_ACCESS_EXPERIMENT_FLAG =
             "enable_permission_based_access";
-    private static final String ENABLE_COEXISTENCE_FLAG = "enable_coexistence";
     private static final boolean DEFAULT_VALUE_PERMISSION_BASED_ACCESS_FLAG = false;
-    private static final boolean DEFAULT_ENABLE_COEXISTENCE_FLAG = false;
+
+    // This must be enabled before PERMISSION_BASED_ACCESS_EXPERIMENT_FLAG is enabled, the reason
+    // we're not just relying on PERMISSION_BASED_ACCESS_EXPERIMENT_FLAG to enable the policy engine
+    // is that we might want to enable it before the permission changes are ready if we want to test
+    // it on DPCs.
+    // Once this is enabled, it can no longer be disabled in production
+    private static final String ENABLE_DEVICE_POLICY_ENGINE_FLAG = "enable_device_policy_engine";
+    private static final boolean DEFAULT_ENABLE_DEVICE_POLICY_ENGINE_FLAG = false;
 
     // TODO(b/258425381) remove the flag after rollout.
     private static final String KEEP_PROFILES_RUNNING_FLAG = "enable_keep_profiles_running";
@@ -1309,10 +1316,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     && (owner.getPackageName().equals(packageName))) {
                 startOwnerService(userHandle, "package-broadcast");
             }
-            if (isCoexistenceFlagEnabled()) {
+            if (shouldMigrateToDevicePolicyEngine()) {
+                migratePoliciesToDevicePolicyEngine();
+            }
+            if (isDevicePolicyEngineFlagEnabled()) {
                 mDevicePolicyEngine.handlePackageChanged(packageName, userHandle);
             }
-
             // Persist updates if the removed package was an admin or delegate.
             if (removedAdmin || removedDelegate) {
                 saveSettingsLocked(policy.mUserId);
@@ -2002,7 +2011,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mUserManagerInternal.addUserLifecycleListener(new UserLifecycleListener());
 
         mDeviceManagementResourcesProvider.load();
-        if (isCoexistenceFlagEnabled()) {
+        if (isDevicePolicyEngineFlagEnabled()) {
             mDevicePolicyEngine.load();
         }
 
@@ -3133,6 +3142,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 synchronized (getLockObject()) {
                     migrateToProfileOnOrganizationOwnedDeviceIfCompLocked();
                     applyProfileRestrictionsIfDeviceOwnerLocked();
+
+                    // TODO: Is this the right place to trigger the migration?
+                    if (shouldMigrateToDevicePolicyEngine()) {
+                        migratePoliciesToDevicePolicyEngine();
+                    }
                 }
                 maybeStartSecurityLogMonitorOnActivityManagerReady();
                 break;
@@ -3341,7 +3355,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         updateNetworkPreferenceForUser(userId, preferentialNetworkServiceConfigs);
 
         startOwnerService(userId, "start-user");
-        if (isCoexistenceFlagEnabled()) {
+        if (isDevicePolicyEngineFlagEnabled()) {
             mDevicePolicyEngine.handleStartUser(userId);
         }
     }
@@ -3366,7 +3380,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     void handleUnlockUser(int userId) {
         startOwnerService(userId, "unlock-user");
-        if (isCoexistenceFlagEnabled()) {
+        if (isDevicePolicyEngineFlagEnabled()) {
             mDevicePolicyEngine.handleUnlockUser(userId);
         }
     }
@@ -3378,7 +3392,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     void handleStopUser(int userId) {
         updateNetworkPreferenceForUser(userId, List.of(PreferentialNetworkServiceConfig.DEFAULT));
         mDeviceAdminServiceController.stopServicesForUser(userId, /* actionForLog= */ "stop-user");
-        if (isCoexistenceFlagEnabled()) {
+        if (isDevicePolicyEngineFlagEnabled()) {
             mDevicePolicyEngine.handleStopUser(userId);
         }
     }
@@ -3486,7 +3500,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * @param refreshing true = update an active admin, no error
      */
     @Override
-    public void setActiveAdmin(ComponentName adminReceiver, boolean refreshing, int userHandle) {
+    public void setActiveAdmin(
+            ComponentName adminReceiver, boolean refreshing, int userHandle) {
         if (!mHasFeature) {
             return;
         }
@@ -3503,6 +3518,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (getLockObject()) {
             checkActiveAdminPrecondition(adminReceiver, info, policy);
             mInjector.binderWithCleanCallingIdentity(() -> {
+                if (!canAddActiveAdminIfPolicyEngineEnabled(
+                        adminReceiver.getPackageName(), userHandle)) {
+                    throw new IllegalStateException("Can't add non-coexistable admin.");
+                }
+
                 final ActiveAdmin existingAdmin
                         = getActiveAdminUncheckedLocked(adminReceiver, userHandle);
                 if (!refreshing && existingAdmin != null) {
@@ -8246,7 +8266,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     caller));
         }
 
-        if (isCoexistenceEnabled(caller)) {
+        if (useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
             mDevicePolicyEngine.setGlobalPolicy(
                     PolicyDefinition.AUTO_TIMEZONE,
                     // TODO(b/260573124): add correct enforcing admin when permission changes are
@@ -10356,7 +10376,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 || isDefaultDeviceOwner(caller) || isFinancedDeviceOwner(caller));
 
         final int userHandle = caller.getUserId();
-        if (isCoexistenceEnabled(caller)) {
+        if (useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
             mDevicePolicyEngine.setLocalPolicy(
                     PolicyDefinition.PERSISTENT_PREFERRED_ACTIVITY(filter),
                     EnforcingAdmin.createEnterpriseEnforcingAdmin(who, userHandle),
@@ -10394,7 +10414,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         final int userHandle = caller.getUserId();
 
-        if (isCoexistenceEnabled(caller)) {
+        if (useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
             clearPackagePersistentPreferredActivitiesFromPolicyEngine(
                     EnforcingAdmin.createEnterpriseEnforcingAdmin(who, userHandle),
                     packageName,
@@ -11348,7 +11368,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         final int userId = user.id;
 
-        if (isCoexistenceFlagEnabled()) {
+        if (isDevicePolicyEngineFlagEnabled()) {
             mDevicePolicyEngine.handleUserCreated(user);
         }
 
@@ -12378,7 +12398,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 || isFinancedDeviceOwner(caller)))
                 || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_BLOCK_UNINSTALL)));
 
-        if (isCoexistenceEnabled(caller)) {
+        if (useDevicePolicyEngine(caller, DELEGATION_BLOCK_UNINSTALL)) {
             // TODO(b/260573124): Add correct enforcing admin when permission changes are
             //  merged, and don't forget to handle delegates! Enterprise admins assume
             //  component name isn't null.
@@ -12942,7 +12962,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_LOCK_TASK_PACKAGES);
         }
 
-        if (isCoexistenceEnabled(caller)) {
+        if (useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
             EnforcingAdmin admin = EnforcingAdmin.createEnterpriseEnforcingAdmin(
                     who, caller.getUserId());
             if (packages.length == 0) {
@@ -12996,7 +13016,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             enforceCanCallLockTaskLocked(caller);
         }
 
-        if (isCoexistenceEnabled(caller)) {
+        if (useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
             LockTaskPolicy policy = mDevicePolicyEngine.getResolvedPolicy(
                     PolicyDefinition.LOCK_TASK, userHandle);
             if (policy == null) {
@@ -13024,9 +13044,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         final int userId = mInjector.userHandleGetCallingUserId();
-        // TODO(b/260560985): This is not the right check, as the flag could be enabled but there
-        //  could be an admin that hasn't targeted U.
-        if (isCoexistenceFlagEnabled()) {
+        // Is it ok to just check that no active policies exist currently?
+        if (mDevicePolicyEngine.hasActivePolicies()) {
             LockTaskPolicy policy = mDevicePolicyEngine.getResolvedPolicy(
                     PolicyDefinition.LOCK_TASK, userId);
             if (policy == null) {
@@ -13060,7 +13079,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             enforceCanSetLockTaskFeaturesOnFinancedDevice(caller, flags);
             checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_LOCK_TASK_FEATURES);
         }
-        if (isCoexistenceEnabled(caller)) {
+        if (useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
             EnforcingAdmin admin = EnforcingAdmin.createEnterpriseEnforcingAdmin(who, userHandle);
             LockTaskPolicy currentPolicy = mDevicePolicyEngine.getLocalPolicySetByAdmin(
                     PolicyDefinition.LOCK_TASK,
@@ -13101,7 +13120,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             enforceCanCallLockTaskLocked(caller);
         }
 
-        if (isCoexistenceEnabled(caller)) {
+        if (useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
             LockTaskPolicy policy = mDevicePolicyEngine.getResolvedPolicy(
                     PolicyDefinition.LOCK_TASK, userHandle);
             if (policy == null) {
@@ -14773,7 +14792,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 enforcePermissionGrantStateOnFinancedDevice(packageName, permission);
             }
         }
-        if (isCoexistenceEnabled(caller)) {
+        if (useDevicePolicyEngine(caller, DELEGATION_PERMISSION_GRANT)) {
             mDevicePolicyEngine.setLocalPolicy(
                     PolicyDefinition.PERMISSION_GRANT(packageName, permission),
                     // TODO(b/260573124): Add correct enforcing admin when permission changes are
@@ -16183,6 +16202,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // The removed admin might have disabled camera, so update user
         // restrictions.
         pushUserRestrictions(userHandle);
+
+        // The removed admin might've been stopping the migration if it was targeting pre Android U
+        if (shouldMigrateToDevicePolicyEngine()) {
+            migratePoliciesToDevicePolicyEngine();
+        }
     }
 
     @Override
@@ -18076,7 +18100,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         checkCanExecuteOrThrowUnsafe(
                 DevicePolicyManager.OPERATION_SET_USER_CONTROL_DISABLED_PACKAGES);
 
-        if (isCoexistenceEnabled(caller)) {
+        if (useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
             Binder.withCleanCallingIdentity(() -> {
                 if (packages.isEmpty()) {
                     removeUserControlDisabledPackages(caller);
@@ -18156,7 +18180,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller) || isProfileOwner(caller)
                 || isFinancedDeviceOwner(caller));
 
-        if (isCoexistenceEnabled(caller)) {
+        if (useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
             // This retrieves the policy for the calling user only, DOs for example can't know
             // what's enforced globally or on another user.
             Set<String> packages = mDevicePolicyEngine.getResolvedPolicy(
@@ -20360,20 +20384,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 DEFAULT_VALUE_PERMISSION_BASED_ACCESS_FLAG);
     }
 
-    // TODO(b/260560985): properly gate coexistence changes
-    private boolean isCoexistenceEnabled(CallerIdentity caller) {
-        return isCoexistenceFlagEnabled()
-                && mInjector.isChangeEnabled(
-                        ENABLE_COEXISTENCE_CHANGE, caller.getPackageName(), caller.getUserId());
-    }
-
-    private boolean isCoexistenceFlagEnabled() {
-        return DeviceConfig.getBoolean(
-                NAMESPACE_DEVICE_POLICY_MANAGER,
-                ENABLE_COEXISTENCE_FLAG,
-                DEFAULT_ENABLE_COEXISTENCE_FLAG);
-    }
-
     private static boolean isKeepProfilesRunningFlagEnabled() {
         return DeviceConfig.getBoolean(
                 NAMESPACE_DEVICE_POLICY_MANAGER,
@@ -20622,7 +20632,123 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public DevicePolicyState getDevicePolicyState() {
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
-        return mInjector.binderWithCleanCallingIdentity(() ->
-                mDevicePolicyEngine.getParcelablePoliciesStateMap());
+        return mInjector.binderWithCleanCallingIdentity(mDevicePolicyEngine::getDevicePolicyState);
+    }
+
+    // TODO(b/266808047): handle DeviceAdmin migration when there is no DPCs on the device
+    private boolean shouldMigrateToDevicePolicyEngine() {
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            if (!isDevicePolicyEngineFlagEnabled()) {
+                return false;
+            }
+            if (mOwners.isMigratedToPolicyEngine()) {
+                return false;
+            }
+            // We're only checking if existing DPCs are not targeting U, regardless of what
+            // DeviceAdmins are targeting, as they can access very limited APIs, and we'll ensure
+            // that these APIs maintain the current behaviour of strictest applies.
+            boolean hasDPCs = false;
+            for (UserInfo userInfo : mUserManager.getUsers()) {
+                List<ComponentName> activeAdmins = getActiveAdmins(userInfo.id);
+                if (activeAdmins == null) {
+                    continue;
+                }
+                for (ComponentName admin : activeAdmins) {
+                    if ((isProfileOwner(admin, userInfo.id) || isDeviceOwner(admin, userInfo.id))) {
+                        if (!mInjector.isChangeEnabled(ENABLE_COEXISTENCE_CHANGE,
+                                admin.getPackageName(), userInfo.id)) {
+                            return false;
+                        }
+                        hasDPCs = true;
+                    }
+                }
+            }
+            return hasDPCs;
+        });
+    }
+
+    private void migratePoliciesToDevicePolicyEngine() {
+        // TODO(b/258811766): add migration logic for each policy
+
+        mOwners.markMigrationToPolicyEngine();
+    }
+
+    // TODO: This can actually accept an EnforcingAdmin that gets created in the permission check
+    //  method.
+    private boolean useDevicePolicyEngine(CallerIdentity caller, @Nullable String delegateScope) {
+        if (!isCallerActiveAdminOrDelegate(caller, delegateScope)) {
+            if (!isDevicePolicyEngineFlagEnabled()) {
+                throw new IllegalStateException("Non DPC caller can't set device policies.");
+            }
+            if (hasDPCsNotSupportingCoexistence()) {
+                throw new IllegalStateException("Non DPC caller can't set device policies with "
+                        + "existing legacy admins on the device.");
+            }
+            return true;
+        } else {
+            return isDevicePolicyEngineFlagEnabled() && !hasDPCsNotSupportingCoexistence();
+        }
+    }
+
+    private boolean isDevicePolicyEngineFlagEnabled() {
+        return DeviceConfig.getBoolean(
+                NAMESPACE_DEVICE_POLICY_MANAGER,
+                ENABLE_DEVICE_POLICY_ENGINE_FLAG,
+                DEFAULT_ENABLE_DEVICE_POLICY_ENGINE_FLAG);
+    }
+
+    private boolean hasDPCsNotSupportingCoexistence() {
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            for (UserInfo userInfo : mUserManager.getUsers()) {
+                List<ComponentName> activeAdmins = getActiveAdmins(userInfo.id);
+                if (activeAdmins == null) {
+                    continue;
+                }
+                for (ComponentName admin : activeAdmins) {
+                    if ((isProfileOwner(admin, userInfo.id) || isDeviceOwner(admin, userInfo.id))
+                            && !mInjector.isChangeEnabled(ENABLE_COEXISTENCE_CHANGE,
+                            admin.getPackageName(), userInfo.id)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        });
+    }
+
+    // TODO: this can actually accept an EnforcingAdmin that gets created in the permission
+    //  check method.
+    private boolean isCallerActiveAdminOrDelegate(
+            CallerIdentity caller, @Nullable String delegateScope) {
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            List<ComponentName> activeAdmins = getActiveAdmins(caller.getUserId());
+            if (activeAdmins != null) {
+                for (ComponentName admin : activeAdmins) {
+                    if (admin.getPackageName().equals(caller.getPackageName())) {
+                        return true;
+                    }
+                }
+            }
+            return delegateScope != null && isCallerDelegate(caller, delegateScope);
+        });
+    }
+
+    // TODO(b/266808047): This will return false for DeviceAdmins not targetting U, which is
+    //  inconsistent with the migration logic that allows migration with old DeviceAdmins.
+    private boolean canAddActiveAdminIfPolicyEngineEnabled(String packageName, int userId) {
+        if (!isDevicePolicyEngineFlagEnabled()) {
+            return true;
+        }
+        if (hasDPCsNotSupportingCoexistence()) {
+            return true;
+        }
+        if (mInjector.isChangeEnabled(ENABLE_COEXISTENCE_CHANGE, packageName, userId)) {
+            // This will always return true unless we turn off coexistence, in which case it will
+            // return true if no current admins exist, or more than one admin exist
+            return mDevicePolicyEngine.canAdminAddPolicies(packageName, userId);
+        }
+        // Is it ok to just check that no active policies exist currently, or should we return false
+        // if the policy engine was ever used?
+        return !mDevicePolicyEngine.hasActivePolicies();
     }
 }
