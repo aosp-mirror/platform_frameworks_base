@@ -182,8 +182,7 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
         boolean targetChanged = isTargetChangedWithinActivity(imeTarget);
         mImeRequester = imeTarget;
         // There was still a stats token, so that request presumably failed.
-        ImeTracker.forLogging().onFailed(
-                mImeRequesterStatsToken, ImeTracker.PHASE_WM_SHOW_IME_RUNNER);
+        ImeTracker.get().onFailed(mImeRequesterStatsToken, ImeTracker.PHASE_WM_SHOW_IME_RUNNER);
         mImeRequesterStatsToken = statsToken;
         if (targetChanged) {
             // target changed, check if new target can show IME.
@@ -198,12 +197,12 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
         ProtoLog.d(WM_DEBUG_IME, "Schedule IME show for %s", mImeRequester.getWindow() == null
                 ? mImeRequester : mImeRequester.getWindow().getName());
         mShowImeRunner = () -> {
-            ImeTracker.forLogging().onProgress(mImeRequesterStatsToken,
+            ImeTracker.get().onProgress(mImeRequesterStatsToken,
                     ImeTracker.PHASE_WM_SHOW_IME_RUNNER);
             ProtoLog.d(WM_DEBUG_IME, "Run showImeRunner");
             // Target should still be the same.
             if (isReadyToShowIme()) {
-                ImeTracker.forLogging().onProgress(mImeRequesterStatsToken,
+                ImeTracker.get().onProgress(mImeRequesterStatsToken,
                         ImeTracker.PHASE_WM_SHOW_IME_READY);
                 final InsetsControlTarget target = mDisplayContent.getImeTarget(IME_TARGET_CONTROL);
 
@@ -220,7 +219,7 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
                                     ? mImeRequester.getWindow().getName() : ""));
                 }
             } else {
-                ImeTracker.forLogging().onFailed(mImeRequesterStatsToken,
+                ImeTracker.get().onFailed(mImeRequesterStatsToken,
                         ImeTracker.PHASE_WM_SHOW_IME_READY);
             }
             // Clear token here so we don't report an error in abortShowImePostLayout().
@@ -259,8 +258,7 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
         mImeRequester = null;
         mIsImeLayoutDrawn = false;
         mShowImeRunner = null;
-        ImeTracker.forLogging().onCancelled(
-                mImeRequesterStatsToken, ImeTracker.PHASE_WM_SHOW_IME_RUNNER);
+        ImeTracker.get().onCancelled(mImeRequesterStatsToken, ImeTracker.PHASE_WM_SHOW_IME_RUNNER);
         mImeRequesterStatsToken = null;
     }
 
