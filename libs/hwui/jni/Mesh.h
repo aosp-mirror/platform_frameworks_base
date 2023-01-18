@@ -20,6 +20,7 @@
 #include <SkMesh.h>
 #include <jni.h>
 
+#include <log/log.h>
 #include <utility>
 
 #include "graphics_jni_helpers.h"
@@ -186,23 +187,24 @@ public:
         std::enable_if_t<std::is_trivially_copyable<T>::value, MeshUniform> operator=(
                 const T& val) {
             if (!fVar) {
-                SkDEBUGFAIL("Assigning to missing variable");
+                LOG_FATAL("Assigning to missing variable");
             } else if (sizeof(val) != fVar->sizeInBytes()) {
-                SkDEBUGFAIL("Incorrect value size");
+                LOG_FATAL("Incorrect value size");
             } else {
-                memcpy(SkTAddOffset<void>(fOwner->writableUniformData(), fVar->offset), &val,
-                       szeof(val));
+                void* dst = reinterpret_cast<void*>(
+                    reinterpret_cast<uint8_t*>(fOwner->writableUniformData()) + fVar->offset);
+                memcpy(dst, &val, sizeof(val));
             }
         }
 
         MeshUniform& operator=(const SkMatrix& val) {
             if (!fVar) {
-                SkDEBUGFAIL("Assigning to missing variable");
+                LOG_FATAL("Assigning to missing variable");
             } else if (fVar->sizeInBytes() != 9 * sizeof(float)) {
-                SkDEBUGFAIL("Incorrect value size");
+                LOG_FATAL("Incorrect value size");
             } else {
-                float* data =
-                        SkTAddOffset<float>(fOwner->writableUniformData(), (ptrdiff_t)fVar->offset);
+                float* data = reinterpret_cast<float*>(
+                    reinterpret_cast<uint8_t*>(fOwner->writableUniformData()) + fVar->offset);
                 data[0] = val.get(0);
                 data[1] = val.get(3);
                 data[2] = val.get(6);
@@ -220,14 +222,15 @@ public:
         bool set(const T val[], const int count) {
             static_assert(std::is_trivially_copyable<T>::value, "Value must be trivial copyable");
             if (!fVar) {
-                SkDEBUGFAIL("Assigning to missing variable");
+                LOG_FATAL("Assigning to missing variable");
                 return false;
             } else if (sizeof(T) * count != fVar->sizeInBytes()) {
-                SkDEBUGFAIL("Incorrect value size");
+                LOG_FATAL("Incorrect value size");
                 return false;
             } else {
-                memcpy(SkTAddOffset<void>(fOwner->writableUniformData(), fVar->offset), val,
-                       sizeof(T) * count);
+                void* dst = reinterpret_cast<void*>(
+                    reinterpret_cast<uint8_t*>(fOwner->writableUniformData()) + fVar->offset);
+                memcpy(dst, val, sizeof(T) * count);
             }
             return true;
         }
