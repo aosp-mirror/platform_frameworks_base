@@ -463,7 +463,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     AbsPositionScroller mPositionScroller;
 
     /**
-     * The offset in pixels form the top of the AdapterView to the top
+     * The offset in pixels from the top of the AdapterView to the top
      * of the currently selected view. Used to save and restore state.
      */
     int mSelectedTop = 0;
