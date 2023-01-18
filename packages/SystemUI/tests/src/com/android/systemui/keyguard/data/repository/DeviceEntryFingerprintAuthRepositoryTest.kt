@@ -55,7 +55,11 @@ class DeviceEntryFingerprintAuthRepositoryTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         testScope = TestScope()
 
-        underTest = DeviceEntryFingerprintAuthRepositoryImpl(keyguardUpdateMonitor)
+        underTest =
+            DeviceEntryFingerprintAuthRepositoryImpl(
+                keyguardUpdateMonitor,
+                testScope.backgroundScope,
+            )
     }
 
     @After
