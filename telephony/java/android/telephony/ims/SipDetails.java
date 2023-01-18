@@ -37,11 +37,14 @@ public final class SipDetails implements Parcelable {
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "METHOD_", value = {
+            METHOD_UNKNOWN,
             METHOD_REGISTER,
             METHOD_PUBLISH,
             METHOD_SUBSCRIBE
     })
     public @interface Method {}
+
+    public static final int METHOD_UNKNOWN = 0;
 
     /**
      * Indicates information related to the SIP registration method.
@@ -97,14 +100,14 @@ public final class SipDetails implements Parcelable {
         }
 
         /**
-         * Sets the sip response code and reason response for this SIP method.
+         * Sets the SIP response code and reason response for this SIP method.
          * Ref RFC3261 Section 21.
          * @param responseCode The SIP response code sent from the network for the
          * operation token specified.
          * @param responsePhrase The optional reason response from the network. If
          * there is a reason header included in the response, that should take
          * precedence over the reason provided in the status line. If the network
-         * provided no reason with the sip code, the string should be empty.
+         * provided no reason with the SIP code, the string should be empty.
          * @return The same instance of the builder.
          */
         public Builder setSipResponseCode(int responseCode,
@@ -170,13 +173,16 @@ public final class SipDetails implements Parcelable {
     }
 
     /**
+     * Get the method type of this instance.
      * @return The method type associated with this SIP information.
      */
-    public int getMethod() {
+    public @Method int getMethod() {
         return mMethod;
     }
 
     /**
+     * Get the value of CSeq header field.
+     * The CSeq header field serves as a way to identify and order transactions.
      * @return The command sequence value associated with this SIP information.
      */
     public int getCSeq() {
@@ -184,35 +190,48 @@ public final class SipDetails implements Parcelable {
     }
 
     /**
-     * @return The sip response code associated with this SIP information.
+     * Get the value of response code from the SIP response.
+     * The SIP response code sent from the network for the operation token specified.
+     * @return The SIP response code associated with this SIP information.
      */
     public int getResponseCode() {
         return mResponseCode;
     }
 
     /**
-     * @return The optional reason response associated with this SIP information.
+     * Get the value of reason from the SIP response.
+     * The optional reason response from the network. If
+     * there is a reason header included in the response, that should take
+     * precedence over the reason provided in the status line.
+     * @return The optional reason response associated with this SIP information. If the network
+     *          provided no reason with the SIP code, the string should be empty.
      */
     public @NonNull String getResponsePhrase() {
         return mResponsePhrase;
     }
 
     /**
-     * @return The "cause" parameter of the reason header included in the SIP message
+     * Get the "cause" parameter of the "reason" header.
+     * @return The "cause" parameter of the reason header. If the SIP message from the network
+     *          does not have a reason header, it should be 0.
      */
     public int getReasonHeaderCause() {
         return mReasonHeaderCause;
     }
 
     /**
-     * @return The "text" parameter of the reason header included in the SIP message.
+     * Get the "text" parameter of the "reason" header in the SIP message.
+     * @return The "text" parameter of the reason header. If the SIP message from the network
+     *          does not have a reason header, it can be empty.
      */
     public @NonNull String getReasonHeaderText() {
         return mReasonHeaderText;
     }
 
     /**
-     * @return The Call-ID value associated with this SIP information.
+     * Get the value of the Call-ID header field for this SIP method.
+     * @return The Call-ID value associated with this SIP information. If the Call-ID value is
+     *          not set when ImsService notifies the framework, this value will be null.
      */
     public @Nullable String getCallId() {
         return mCallId;
