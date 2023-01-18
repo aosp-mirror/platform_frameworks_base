@@ -19,7 +19,6 @@ package com.android.systemui.keyguard.domain.interactor
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.statusbar.phone.KeyguardBouncer
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,8 +33,10 @@ class PrimaryBouncerCallbackInteractorTest : SysuiTestCase() {
     private val mPrimaryBouncerCallbackInteractor = PrimaryBouncerCallbackInteractor()
     @Mock
     private lateinit var mPrimaryBouncerExpansionCallback:
-        KeyguardBouncer.PrimaryBouncerExpansionCallback
-    @Mock private lateinit var keyguardResetCallback: KeyguardBouncer.KeyguardResetCallback
+        PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback
+    @Mock
+    private lateinit var keyguardResetCallback:
+        PrimaryBouncerCallbackInteractor.KeyguardResetCallback
 
     @Before
     fun setup() {

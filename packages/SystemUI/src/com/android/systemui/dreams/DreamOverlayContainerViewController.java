@@ -38,6 +38,7 @@ import com.android.systemui.dreams.complication.ComplicationHostViewController;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayModule;
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor;
+import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
 import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -85,8 +86,9 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
 
     private boolean mBouncerAnimating;
 
-    private final KeyguardBouncer.PrimaryBouncerExpansionCallback mBouncerExpansionCallback =
-            new KeyguardBouncer.PrimaryBouncerExpansionCallback() {
+    private final PrimaryBouncerExpansionCallback
+            mBouncerExpansionCallback =
+            new PrimaryBouncerExpansionCallback() {
 
                 @Override
                 public void onStartingToShow() {

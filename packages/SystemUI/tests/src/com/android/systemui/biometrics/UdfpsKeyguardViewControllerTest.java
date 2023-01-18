@@ -32,9 +32,9 @@ import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
 import com.android.systemui.shade.ShadeExpansionListener;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.phone.KeyguardBouncer;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,9 +46,9 @@ import org.mockito.Captor;
 
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class UdfpsKeyguardViewControllerTest extends UdfpsKeyguardViewControllerBaseTest {
-    private @Captor ArgumentCaptor<KeyguardBouncer.PrimaryBouncerExpansionCallback>
+    private @Captor ArgumentCaptor<PrimaryBouncerExpansionCallback>
             mBouncerExpansionCallbackCaptor;
-    private KeyguardBouncer.PrimaryBouncerExpansionCallback mBouncerExpansionCallback;
+    private PrimaryBouncerExpansionCallback mBouncerExpansionCallback;
 
     @Override
     public UdfpsKeyguardViewController createUdfpsKeyguardViewController() {
