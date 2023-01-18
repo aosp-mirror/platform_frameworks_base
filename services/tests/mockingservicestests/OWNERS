@@ -6,3 +6,6 @@ per-file FakeGameServiceProviderInstance = file:/GAME_MANAGER_OWNERS
 per-file FakeServiceConnector.java = file:/GAME_MANAGER_OWNERS
 per-file Game* = file:/GAME_MANAGER_OWNERS
 per-file res/xml/game_manager* = file:/GAME_MANAGER_OWNERS
+
+# General utilities
+per-file services/tests/mockingservicestests/src/com/android/server/*.java=felipeal@google.com
