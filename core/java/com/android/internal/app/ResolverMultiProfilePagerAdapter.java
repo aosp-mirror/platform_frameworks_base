@@ -41,9 +41,10 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
             ResolverListAdapter adapter,
             EmptyStateProvider emptyStateProvider,
             QuietModeManager quietModeManager,
-            UserHandle workProfileUserHandle) {
+            UserHandle workProfileUserHandle,
+            UserHandle cloneUserHandle) {
         super(context, /* currentPage */ 0, emptyStateProvider, quietModeManager,
-                workProfileUserHandle);
+                workProfileUserHandle, cloneUserHandle);
         mItems = new ResolverProfileDescriptor[] {
                 createProfileDescriptor(adapter)
         };
@@ -55,9 +56,10 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
             EmptyStateProvider emptyStateProvider,
             QuietModeManager quietModeManager,
             @Profile int defaultProfile,
-            UserHandle workProfileUserHandle) {
+            UserHandle workProfileUserHandle,
+            UserHandle cloneUserHandle) {
         super(context, /* currentPage */ defaultProfile, emptyStateProvider, quietModeManager,
-                workProfileUserHandle);
+                workProfileUserHandle, cloneUserHandle);
         mItems = new ResolverProfileDescriptor[] {
                 createProfileDescriptor(personalAdapter),
                 createProfileDescriptor(workAdapter)
@@ -107,11 +109,12 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
     @Override
     @Nullable
     ResolverListAdapter getListAdapterForUserHandle(UserHandle userHandle) {
-        if (getActiveListAdapter().getUserHandle().equals(userHandle)) {
-            return getActiveListAdapter();
-        } else if (getInactiveListAdapter() != null
-                && getInactiveListAdapter().getUserHandle().equals(userHandle)) {
-            return getInactiveListAdapter();
+        if (getPersonalListAdapter().getUserHandle().equals(userHandle)
+                || userHandle.equals(getCloneUserHandle())) {
+            return getPersonalListAdapter();
+        } else if (getWorkListAdapter() != null
+                && getWorkListAdapter().getUserHandle().equals(userHandle)) {
+            return getWorkListAdapter();
         }
         return null;
     }

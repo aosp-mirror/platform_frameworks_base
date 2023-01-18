@@ -60,6 +60,7 @@ public class ResolverListController {
 
     private AbstractResolverComparator mResolverComparator;
     private boolean isComputed = false;
+    private final UserHandle mQueryIntentsAsUser;
 
     public ResolverListController(
             Context context,
@@ -67,10 +68,11 @@ public class ResolverListController {
             Intent targetIntent,
             String referrerPackage,
             int launchedFromUid,
-            UserHandle userHandle) {
+            UserHandle userHandle,
+            UserHandle queryIntentsAsUser) {
         this(context, pm, targetIntent, referrerPackage, launchedFromUid, userHandle,
                     new ResolverRankerServiceResolverComparator(
-                        context, targetIntent, referrerPackage, null, null));
+                        context, targetIntent, referrerPackage, null, null), queryIntentsAsUser);
     }
 
     public ResolverListController(
@@ -80,7 +82,8 @@ public class ResolverListController {
             String referrerPackage,
             int launchedFromUid,
             UserHandle userHandle,
-            AbstractResolverComparator resolverComparator) {
+            AbstractResolverComparator resolverComparator,
+            UserHandle queryIntentsAsUser) {
         mContext = context;
         mpm = pm;
         mLaunchedFromUid = launchedFromUid;
@@ -88,6 +91,7 @@ public class ResolverListController {
         mReferrerPackage = referrerPackage;
         mUserHandle = userHandle;
         mResolverComparator = resolverComparator;
+        mQueryIntentsAsUser = queryIntentsAsUser;
     }
 
     @VisibleForTesting
@@ -113,7 +117,7 @@ public class ResolverListController {
             boolean shouldGetOnlyDefaultActivities,
             List<Intent> intents) {
         return getResolversForIntentAsUser(shouldGetResolvedFilter, shouldGetActivityMetadata,
-                shouldGetOnlyDefaultActivities, intents, mUserHandle);
+                shouldGetOnlyDefaultActivities, intents, mQueryIntentsAsUser);
     }
 
     public List<ResolverActivity.ResolvedComponentInfo> getResolversForIntentAsUser(
@@ -171,6 +175,10 @@ public class ResolverListController {
         final int intoCount = into.size();
         for (int i = 0; i < fromCount; i++) {
             final ResolveInfo newInfo = from.get(i);
+            if (newInfo.userHandle == null) {
+                Log.w(TAG, "Skipping ResolveInfo with no userHandle: " + newInfo);
+                continue;
+            }
             boolean found = false;
             // Only loop to the end of into as it was before we started; no dupes in from.
             for (int j = 0; j < intoCount; j++) {
