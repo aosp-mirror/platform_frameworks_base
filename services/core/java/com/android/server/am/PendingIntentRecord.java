@@ -22,16 +22,21 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
 import android.app.PendingIntent;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerWhitelistManager;
@@ -40,6 +45,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -55,6 +61,13 @@ import java.util.Objects;
 
 public final class PendingIntentRecord extends IIntentSender.Stub {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "PendingIntentRecord" : TAG_AM;
+
+    /** If enabled BAL are prevented by default in applications targeting U and later. */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    private static final long DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER = 244637991;
+    private static final String ENABLE_DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER =
+            "enable_default_rescind_bal_privileges_from_pending_intent_sender";
 
     public static final int FLAG_ACTIVITY_SENDER = 1 << 0;
     public static final int FLAG_BROADCAST_SENDER = 1 << 1;
@@ -357,16 +370,34 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                 : BackgroundStartPrivileges.NONE;
     }
 
+    private static boolean isDefaultRescindBalPrivilegesFromPendingIntentSenderEnabled() {
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                ENABLE_DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER,
+                true); // assume true if the property is unknown
+    }
+
     /**
      * Default {@link BackgroundStartPrivileges} to be used if the intent sender has not made an
      * explicit choice.
      *
      * @hide
      */
-    public static BackgroundStartPrivileges getDefaultBackgroundStartPrivileges(int callingUid) {
-        // TODO: In the next step this will return ALLOW_FGS instead, if the app that sent the
-        // PendingIntent is targeting Android U
-        return BackgroundStartPrivileges.ALLOW_BAL;
+    @RequiresPermission(
+            allOf = {
+                    android.Manifest.permission.READ_COMPAT_CHANGE_CONFIG,
+                    android.Manifest.permission.LOG_COMPAT_CHANGE
+            })
+    public static BackgroundStartPrivileges getDefaultBackgroundStartPrivileges(
+            int callingUid) {
+        boolean isFlagEnabled = isDefaultRescindBalPrivilegesFromPendingIntentSenderEnabled();
+        boolean isChangeEnabledForApp = CompatChanges.isChangeEnabled(
+                DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER, callingUid);
+        if (isFlagEnabled && isChangeEnabledForApp) {
+            return BackgroundStartPrivileges.ALLOW_FGS;
+        } else {
+            return BackgroundStartPrivileges.ALLOW_BAL;
+        }
     }
 
     @Deprecated

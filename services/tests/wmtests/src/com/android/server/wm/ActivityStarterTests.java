@@ -71,6 +71,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -749,16 +750,15 @@ public class ActivityStarterTests extends WindowTestsBase {
     }
 
     /**
-     * This test ensures that supported usecases aren't aborted when background starts are
-     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
-     * this case the real calling process (pending intent) has a visible window.
+     * The sending app has a visible window, but does not (by default) allow the pending intent to
+     * start the background activity.
      */
     @Test
-    public void
-            testBackgroundActivityStartsDisallowed_realCallingUidHasVisibleWindowNotAborted() {
+    public void testBackgroundActivityStartsDisallowed_realCallingUidHasVisibleWindowAborted() {
         doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
+
         runAndVerifyBackgroundActivityStartsSubtest(
-                "disallowed_realCallingUidHasVisibleWindow_notAborted", false,
+                "disallowed_realCallingUidHasVisibleWindow_abortedInU", true,
                 UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
                 UNIMPORTANT_UID2, true, PROCESS_STATE_BOUND_TOP,
                 false, false, false, false, false, false);
