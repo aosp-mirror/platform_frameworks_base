@@ -4060,16 +4060,6 @@
     -->
     <string-array translatable="false" name="config_convert_to_emergency_number_map" />
 
-    <!-- An array of packages for which notifications cannot be blocked.
-         Should only be used for core device functionality that must not be
-         rendered inoperative for safety reasons, like the phone dialer and
-         SMS handler. -->
-    <string-array translatable="false" name="config_nonBlockableNotificationPackages">
-        <item>com.android.dialer</item>
-        <item>com.android.messaging</item>
-        <item>com.android.cellbroadcastreceiver.module</item>
-    </string-array>
-
     <!-- An array of packages that can make sound on the ringer stream in priority-only DND
      mode -->
     <string-array translatable="false" name="config_priorityOnlyDndExemptPackages">
