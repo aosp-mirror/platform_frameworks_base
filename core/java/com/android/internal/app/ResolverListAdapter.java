@@ -21,7 +21,6 @@ import static android.content.Context.ACTIVITY_SERVICE;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.PermissionChecker;
@@ -157,17 +156,17 @@ public class ResolverListAdapter extends BaseAdapter {
     /**
      * Returns the app share score of the given {@code componentName}.
      */
-    public float getScore(ComponentName componentName) {
-        return mResolverListController.getScore(componentName);
+    public float getScore(TargetInfo targetInfo) {
+        return mResolverListController.getScore(targetInfo);
     }
 
-    public void updateModel(ComponentName componentName) {
-        mResolverListController.updateModel(componentName);
+    public void updateModel(TargetInfo targetInfo) {
+        mResolverListController.updateModel(targetInfo);
     }
 
-    public void updateChooserCounts(String packageName, String action) {
+    public void updateChooserCounts(String packageName, String action, UserHandle userHandle) {
         mResolverListController.updateChooserCounts(
-                packageName, getUserHandle().getIdentifier(), action);
+                packageName, userHandle, action);
     }
 
     List<ResolvedComponentInfo> getUnfilteredResolveList() {

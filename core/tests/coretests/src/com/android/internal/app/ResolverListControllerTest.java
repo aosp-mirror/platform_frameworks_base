@@ -86,6 +86,7 @@ public class ResolverListControllerTest {
         config.locale = Locale.getDefault();
         List<ResolveInfo> services = new ArrayList<>();
         mUsm = new UsageStatsManager(mMockContext, mMockService);
+        when(mMockContext.createContextAsUser(any(), anyInt())).thenReturn(mMockContext);
         when(mMockContext.getSystemService(Context.USAGE_STATS_SERVICE)).thenReturn(mUsm);
         when(mMockPackageManager.queryIntentServices(any(), anyInt())).thenReturn(services);
         when(mMockResources.getConfiguration()).thenReturn(config);
@@ -126,7 +127,7 @@ public class ResolverListControllerTest {
                 UserHandle.SYSTEM);
         mController.sort(new ArrayList<ResolvedComponentInfo>());
         long beforeReport = getCount(mUsm, packageName, action, annotation);
-        mController.updateChooserCounts(packageName, UserHandle.USER_CURRENT, action);
+        mController.updateChooserCounts(packageName, UserHandle.SYSTEM, action);
         long afterReport = getCount(mUsm, packageName, action, annotation);
         assertThat(afterReport, is(beforeReport + 1l));
     }

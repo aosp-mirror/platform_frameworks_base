@@ -30,11 +30,16 @@ import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
+import com.android.internal.app.chooser.TargetInfo;
+
+import com.google.android.collect.Lists;
 
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Used to sort resolved activities in {@link ResolverListController}.
@@ -48,8 +53,8 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
     private static final String TAG = "AbstractResolverComp";
 
     protected AfterCompute mAfterCompute;
-    protected final PackageManager mPm;
-    protected final UsageStatsManager mUsm;
+    protected final Map<UserHandle, PackageManager> mPmMap = new HashMap<>();
+    protected final Map<UserHandle, UsageStatsManager> mUsmMap = new HashMap<>();
     protected String[] mAnnotations;
     protected String mContentType;
 
@@ -98,14 +103,28 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
         }
     };
 
-    public AbstractResolverComparator(Context context, Intent intent) {
+    // context here refers to the activity calling this comparator.
+    // targetUserSpace refers to the userSpace in which the targets to be ranked lie.
+    public AbstractResolverComparator(Context launchedFromContext, Intent intent,
+            UserHandle targetUserSpace) {
+        this(launchedFromContext, intent, Lists.newArrayList(targetUserSpace));
+    }
+
+    // context here refers to the activity calling this comparator.
+    // targetUserSpaceList refers to the userSpace(s) in which the targets to be ranked lie.
+    public AbstractResolverComparator(Context launchedFromContext, Intent intent,
+            List<UserHandle> targetUserSpaceList) {
         String scheme = intent.getScheme();
         mHttp = "http".equals(scheme) || "https".equals(scheme);
         mContentType = intent.getType();
         getContentAnnotations(intent);
-        mPm = context.getPackageManager();
-        mUsm = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
-        mAzComparator = new AzInfoComparator(context);
+        for (UserHandle user : targetUserSpaceList) {
+            Context userContext = launchedFromContext.createContextAsUser(user, 0);
+            mPmMap.put(user, userContext.getPackageManager());
+            mUsmMap.put(user,
+                    (UsageStatsManager) userContext.getSystemService(Context.USAGE_STATS_SERVICE));
+        }
+        mAzComparator = new AzInfoComparator(launchedFromContext);
     }
 
     // get annotations of content from intent.
@@ -208,8 +227,8 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
 
     /**
      * Computes features for each target. This will be called before calls to {@link
-     * #getScore(ComponentName)} or {@link #compare(Object, Object)}, in order to prepare the
-     * comparator for those calls. Note that {@link #getScore(ComponentName)} uses {@link
+     * #getScore(TargetInfo)} or {@link #compare(ResolveInfo, ResolveInfo)}, in order to prepare the
+     * comparator for those calls. Note that {@link #getScore(TargetInfo)} uses {@link
      * ComponentName}, so the implementation will have to be prepared to identify a {@link
      * ResolvedComponentInfo} by {@link ComponentName}. {@link #beforeCompute()} will be called
      * before doing any computing.
@@ -226,7 +245,7 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
      * Returns the score that was calculated for the corresponding {@link ResolvedComponentInfo}
      * when {@link #compute(List)} was called before this.
      */
-    abstract float getScore(ComponentName name);
+    abstract float getScore(TargetInfo targetInfo);
 
     /** Handles result message sent to mHandler. */
     abstract void handleResultMessage(Message message);
@@ -234,9 +253,11 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
     /**
      * Reports to UsageStats what was chosen.
      */
-    final void updateChooserCounts(String packageName, int userId, String action) {
-        if (mUsm != null) {
-            mUsm.reportChooserSelection(packageName, userId, mContentType, mAnnotations, action);
+    final void updateChooserCounts(String packageName, UserHandle user, String action) {
+        if (mUsmMap.containsKey(user)) {
+            mUsmMap.get(user)
+                    .reportChooserSelection(packageName, user.getIdentifier(), mContentType,
+                            mAnnotations, action);
         }
     }
 
@@ -246,9 +267,9 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
      * <p>Default implementation does nothing, as we could have simple model that does not train
      * online.
      *
-     * @param componentName the component that the user clicked
+     * @param targetInfo the target that the user clicked.
      */
-    void updateModel(ComponentName componentName) {
+    void updateModel(TargetInfo targetInfo) {
     }
 
     /** Called before {@link #doCompute(List)}. Sets up 500ms timeout. */

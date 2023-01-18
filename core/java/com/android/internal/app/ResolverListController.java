@@ -33,6 +33,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.chooser.DisplayResolveInfo;
+import com.android.internal.app.chooser.TargetInfo;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -72,7 +73,13 @@ public class ResolverListController {
             UserHandle queryIntentsAsUser) {
         this(context, pm, targetIntent, referrerPackage, launchedFromUid, userHandle,
                     new ResolverRankerServiceResolverComparator(
-                        context, targetIntent, referrerPackage, null, null), queryIntentsAsUser);
+                            context,
+                            targetIntent,
+                            referrerPackage,
+                            null,
+                            null,
+                            userHandle),
+                queryIntentsAsUser);
     }
 
     public ResolverListController(
@@ -397,22 +404,22 @@ public class ResolverListController {
 
     @VisibleForTesting
     public float getScore(DisplayResolveInfo target) {
-        return mResolverComparator.getScore(target.getResolvedComponentName());
+        return mResolverComparator.getScore(target);
     }
 
     /**
      * Returns the app share score of the given {@code componentName}.
      */
-    public float getScore(ComponentName componentName) {
-        return mResolverComparator.getScore(componentName);
+    public float getScore(TargetInfo targetInfo) {
+        return mResolverComparator.getScore(targetInfo);
     }
 
-    public void updateModel(ComponentName componentName) {
-        mResolverComparator.updateModel(componentName);
+    public void updateModel(TargetInfo targetInfo) {
+        mResolverComparator.updateModel(targetInfo);
     }
 
-    public void updateChooserCounts(String packageName, int userId, String action) {
-        mResolverComparator.updateChooserCounts(packageName, userId, action);
+    public void updateChooserCounts(String packageName, UserHandle user, String action) {
+        mResolverComparator.updateChooserCounts(packageName, user, action);
     }
 
     public void destroy() {
