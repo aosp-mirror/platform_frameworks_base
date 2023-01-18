@@ -30,6 +30,7 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertFalse;
+import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
@@ -53,6 +54,7 @@ import android.util.MathUtils;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
@@ -328,7 +330,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     public void updateEmptyView_dndSuppressing() {
         when(mEmptyShadeView.willBeGone()).thenReturn(true);
 
-        mStackScroller.updateEmptyShadeView(true, true, false);
+        mStackScroller.updateEmptyShadeView(true, true);
 
         verify(mEmptyShadeView).setText(R.string.dnd_suppressing_shade_text);
     }
@@ -338,7 +340,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
         when(mEmptyShadeView.willBeGone()).thenReturn(true);
 
-        mStackScroller.updateEmptyShadeView(true, false, false);
+        mStackScroller.updateEmptyShadeView(true, false);
 
         verify(mEmptyShadeView).setText(R.string.empty_shade_text);
     }
@@ -347,10 +349,10 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     public void updateEmptyView_noNotificationsToDndSuppressing() {
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
         when(mEmptyShadeView.willBeGone()).thenReturn(true);
-        mStackScroller.updateEmptyShadeView(true, false, false);
+        mStackScroller.updateEmptyShadeView(true, false);
         verify(mEmptyShadeView).setText(R.string.empty_shade_text);
 
-        mStackScroller.updateEmptyShadeView(true, true, false);
+        mStackScroller.updateEmptyShadeView(true, true);
         verify(mEmptyShadeView).setText(R.string.dnd_suppressing_shade_text);
     }
 
@@ -816,6 +818,29 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         // NotificationPanelViewController and not in NotificationStackScrollLayout. Therefore
         // mAmbientState must have stackY set to 0
         assertEquals(0f, mAmbientState.getStackY());
+    }
+
+    @Test
+    public void hasFilteredOutSeenNotifs_updateFooter() {
+        mStackScroller.setCurrentUserSetup(true);
+
+        // add footer
+        mStackScroller.inflateFooterView();
+        TextView footerLabel =
+                mStackScroller.mFooterView.requireViewById(R.id.unlock_prompt_footer);
+
+        mStackScroller.setHasFilteredOutSeenNotifications(true);
+        mStackScroller.updateFooter();
+
+        assertThat(footerLabel.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void hasFilteredOutSeenNotifs_updateEmptyShadeView() {
+        mStackScroller.setHasFilteredOutSeenNotifications(true);
+        mStackScroller.updateEmptyShadeView(true, false);
+
+        verify(mEmptyShadeView).setFooterText(not(0));
     }
 
     private void setBarStateForTest(int state) {
