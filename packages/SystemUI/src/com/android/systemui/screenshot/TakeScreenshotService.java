@@ -54,7 +54,7 @@ import android.widget.Toast;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
-import com.android.internal.util.ScreenshotHelper;
+import com.android.internal.util.ScreenshotRequest;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.flags.FeatureFlags;
@@ -186,8 +186,7 @@ public class TakeScreenshotService extends Service {
         final Consumer<Uri> onSaved = (uri) -> reportUri(replyTo, uri);
         RequestCallback callback = new RequestCallbackImpl(replyTo);
 
-        ScreenshotHelper.ScreenshotRequest request =
-                (ScreenshotHelper.ScreenshotRequest) msg.obj;
+        ScreenshotRequest request = (ScreenshotRequest) msg.obj;
 
         handleRequest(request, onSaved, callback);
         return true;
@@ -195,7 +194,7 @@ public class TakeScreenshotService extends Service {
 
     @MainThread
     @VisibleForTesting
-    void handleRequest(ScreenshotHelper.ScreenshotRequest request, Consumer<Uri> onSaved,
+    void handleRequest(ScreenshotRequest request, Consumer<Uri> onSaved,
             RequestCallback callback) {
         // If the storage for this user is locked, we have no place to store
         // the screenshot, so skip taking it instead of showing a misleading
@@ -226,7 +225,7 @@ public class TakeScreenshotService extends Service {
                 (r) -> dispatchToController(r, onSaved, callback));
     }
 
-    private void dispatchToController(ScreenshotHelper.ScreenshotRequest request,
+    private void dispatchToController(ScreenshotRequest request,
             Consumer<Uri> uriConsumer, RequestCallback callback) {
 
         ComponentName topComponent = request.getTopComponent();
@@ -244,8 +243,7 @@ public class TakeScreenshotService extends Service {
                 if (DEBUG_SERVICE) {
                     Log.d(TAG, "handleMessage: TAKE_SCREENSHOT_PROVIDED_IMAGE");
                 }
-                Bitmap screenshot = ScreenshotHelper.HardwareBitmapBundler.bundleToHardwareBitmap(
-                        request.getBitmapBundle());
+                Bitmap screenshot = request.getBitmap();
                 Rect screenBounds = request.getBoundsInScreen();
                 Insets insets = request.getInsets();
                 int taskId = request.getTaskId();
