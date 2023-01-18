@@ -9254,8 +9254,10 @@ package android.companion {
     method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public void addOnAssociationsChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.companion.CompanionDeviceManager.OnAssociationsChangedListener);
     method @RequiresPermission(anyOf={android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH, android.Manifest.permission.REQUEST_COMPANION_PROFILE_COMPUTER, android.Manifest.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING, android.Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION}, conditional=true) public void associate(@NonNull android.companion.AssociationRequest, @NonNull android.companion.CompanionDeviceManager.Callback, @Nullable android.os.Handler);
     method @RequiresPermission(anyOf={android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH, android.Manifest.permission.REQUEST_COMPANION_PROFILE_COMPUTER, android.Manifest.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING, android.Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION}, conditional=true) public void associate(@NonNull android.companion.AssociationRequest, @NonNull java.util.concurrent.Executor, @NonNull android.companion.CompanionDeviceManager.Callback);
+    method @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES) public void attachSystemDataTransport(int, @NonNull java.io.InputStream, @NonNull java.io.OutputStream) throws android.companion.DeviceNotAssociatedException;
     method @Nullable public android.content.IntentSender buildAssociationCancellationIntent();
     method @Nullable public android.content.IntentSender buildPermissionTransferUserConsentIntent(int) throws android.companion.DeviceNotAssociatedException;
+    method @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES) public void detachSystemDataTransport(int) throws android.companion.DeviceNotAssociatedException;
     method public void disableSystemDataSync(int, int);
     method @Deprecated public void disassociate(@NonNull String);
     method public void disassociate(int);
@@ -9267,6 +9269,7 @@ package android.companion {
     method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public void removeOnAssociationsChangedListener(@NonNull android.companion.CompanionDeviceManager.OnAssociationsChangedListener);
     method public void requestNotificationAccess(android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE) public void startObservingDevicePresence(@NonNull String) throws android.companion.DeviceNotAssociatedException;
+    method public void startSystemDataTransfer(int, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.companion.CompanionException>) throws android.companion.DeviceNotAssociatedException;
     method @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE) public void stopObservingDevicePresence(@NonNull String) throws android.companion.DeviceNotAssociatedException;
     field public static final String EXTRA_ASSOCIATION = "android.companion.extra.ASSOCIATION";
     field @Deprecated public static final String EXTRA_DEVICE = "android.companion.extra.DEVICE";
@@ -9292,12 +9295,17 @@ package android.companion {
 
   public abstract class CompanionDeviceService extends android.app.Service {
     ctor public CompanionDeviceService();
+    method @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES) public final void attachSystemDataTransport(int, @NonNull java.io.InputStream, @NonNull java.io.OutputStream) throws android.companion.DeviceNotAssociatedException;
+    method @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES) public final void detachSystemDataTransport(int) throws android.companion.DeviceNotAssociatedException;
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method @Deprecated @MainThread public void onDeviceAppeared(@NonNull String);
     method @MainThread public void onDeviceAppeared(@NonNull android.companion.AssociationInfo);
     method @Deprecated @MainThread public void onDeviceDisappeared(@NonNull String);
     method @MainThread public void onDeviceDisappeared(@NonNull android.companion.AssociationInfo);
     field public static final String SERVICE_INTERFACE = "android.companion.CompanionDeviceService";
+  }
+
+  public class CompanionException extends java.lang.RuntimeException {
   }
 
   public interface DeviceFilter<D extends android.os.Parcelable> extends android.os.Parcelable {
