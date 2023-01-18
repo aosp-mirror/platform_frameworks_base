@@ -1142,12 +1142,15 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     private void commitVisibleActivities(SurfaceControl.Transaction transaction) {
         for (int i = mParticipants.size() - 1; i >= 0; --i) {
             final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
-            if (ar == null || !ar.isVisibleRequested()) {
+            if (ar == null || ar.getTask() == null) {
                 continue;
             }
-            ar.commitVisibility(true /* visible */, false /* performLayout */,
-                    true /* fromTransition */);
-            ar.commitFinishDrawing(transaction);
+            if (ar.isVisibleRequested()) {
+                ar.commitVisibility(true /* visible */, false /* performLayout */,
+                        true /* fromTransition */);
+                ar.commitFinishDrawing(transaction);
+            }
+            ar.getTask().setDeferTaskAppear(false);
         }
     }
 

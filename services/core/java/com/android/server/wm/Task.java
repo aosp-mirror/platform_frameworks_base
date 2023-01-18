@@ -4148,21 +4148,28 @@ class Task extends TaskFragment {
 
     void setHasBeenVisible(boolean hasBeenVisible) {
         mHasBeenVisible = hasBeenVisible;
-        if (hasBeenVisible) {
-            if (!mDeferTaskAppear) sendTaskAppeared();
-            if (!isRootTask()) {
-                getRootTask().setHasBeenVisible(true);
+        if (!hasBeenVisible || mDeferTaskAppear) {
+            return;
+        }
+        sendTaskAppeared();
+        for (WindowContainer<?> parent = getParent(); parent != null; parent = parent.getParent()) {
+            final Task parentTask = parent.asTask();
+            if (parentTask == null) {
+                break;
             }
+            parentTask.setHasBeenVisible(true);
         }
     }
+
 
     boolean getHasBeenVisible() {
         return mHasBeenVisible;
     }
 
     void setDeferTaskAppear(boolean deferTaskAppear) {
+        final boolean wasDeferred = mDeferTaskAppear;
         mDeferTaskAppear = deferTaskAppear;
-        if (!mDeferTaskAppear) {
+        if (wasDeferred && !deferTaskAppear) {
             sendTaskAppeared();
         }
     }
