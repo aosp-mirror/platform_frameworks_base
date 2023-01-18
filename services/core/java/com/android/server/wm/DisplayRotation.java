@@ -41,6 +41,7 @@ import static com.android.server.wm.WindowManagerService.WINDOW_FREEZE_TIMEOUT_D
 
 import android.annotation.AnimRes;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.ContentResolver;
@@ -117,6 +118,8 @@ public class DisplayRotation {
     private SettingsObserver mSettingsObserver;
     @Nullable
     private FoldController mFoldController;
+    @NonNull
+    private final DeviceStateController mDeviceStateController;
 
     @ScreenOrientation
     private int mCurrentAppOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
@@ -218,21 +221,24 @@ public class DisplayRotation {
     private boolean mDemoRotationLock;
 
     DisplayRotation(WindowManagerService service, DisplayContent displayContent,
-            DisplayAddress displayAddress) {
+            DisplayAddress displayAddress, @NonNull DeviceStateController deviceStateController) {
         this(service, displayContent, displayAddress, displayContent.getDisplayPolicy(),
-                service.mDisplayWindowSettings, service.mContext, service.getWindowManagerLock());
+                service.mDisplayWindowSettings, service.mContext, service.getWindowManagerLock(),
+                deviceStateController);
     }
 
     @VisibleForTesting
     DisplayRotation(WindowManagerService service, DisplayContent displayContent,
             DisplayAddress displayAddress, DisplayPolicy displayPolicy,
-            DisplayWindowSettings displayWindowSettings, Context context, Object lock) {
+            DisplayWindowSettings displayWindowSettings, Context context, Object lock,
+            @NonNull DeviceStateController deviceStateController) {
         mService = service;
         mDisplayContent = displayContent;
         mDisplayPolicy = displayPolicy;
         mDisplayWindowSettings = displayWindowSettings;
         mContext = context;
         mLock = lock;
+        mDeviceStateController = deviceStateController;
         isDefaultDisplay = displayContent.isDefaultDisplay;
         mCompatPolicyForImmersiveApps = initImmersiveAppCompatPolicy(service, displayContent);
 
@@ -1137,6 +1143,15 @@ public class DisplayRotation {
         int sensorRotation = mOrientationListener != null
                 ? mOrientationListener.getProposedRotation() // may be -1
                 : -1;
+        if (mDeviceStateController.shouldReverseRotationDirectionAroundZAxis()) {
+            // Flipping 270 and 90 has the same effect as changing the direction which rotation is
+            // applied.
+            if (sensorRotation == Surface.ROTATION_90) {
+                sensorRotation = Surface.ROTATION_270;
+            } else if (sensorRotation == Surface.ROTATION_270) {
+                sensorRotation = Surface.ROTATION_90;
+            }
+        }
         mLastSensorRotation = sensorRotation;
         if (sensorRotation < 0) {
             sensorRotation = lastRotation;
