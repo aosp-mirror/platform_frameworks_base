@@ -11,13 +11,34 @@
   <string name="string_continue">Continue</string>
   <!-- This is a label for a button that links to different places where the user can save their passkeys. [CHAR LIMIT=20] -->
   <string name="string_more_options">More options</string>
+  <!-- This is a label for a button that links to additional information about passkeys. [CHAR LIMIT=20] -->
+  <string name="string_learn_more">Learn more</string>
   <!-- This string introduces passkeys to the users for the first time they use this method. Tip: to avoid gendered language patterns, this header could be translated as if the original string were "More safety with passkeys". [CHAR LIMIT=200] -->
   <string name="passkey_creation_intro_title">Safer with passkeys</string>
-  <!-- These strings highlight passkey benefits. [CHAR LIMIT=200] -->
+  <!-- This string highlight passkey benefits related with the password. [CHAR LIMIT=200] -->
   <string name="passkey_creation_intro_body_password">With passkeys, you don’t need to create or remember complex passwords</string>
+  <!-- This string highlight passkey benefits related with encrypted. [CHAR LIMIT=200] -->
   <string name="passkey_creation_intro_body_fingerprint">Passkeys are encrypted digital keys you create using your fingerprint, face, or screen lock</string>
+  <!-- This string highlight passkey benefits related with signing with other devices. [CHAR LIMIT=200] -->
   <string name="passkey_creation_intro_body_device">They are saved to a password manager, so you can sign in on other devices</string>
-
+  <!-- This string introduces passkeys in more detail to the users for the first time they use this method. [CHAR LIMIT=200] -->
+  <string name="more_about_passkeys_title">More about passkeys</string>
+  <!-- Title for subsection of "Learn more about passkeys" screen about passwordless technology. [CHAR LIMIT=80] -->
+  <string name="passwordless_technology_title">Passwordless technology</string>
+  <!-- Detail for subsection of "Learn more about passkeys" screen about passwordless technology. [CHAR LIMIT=500] -->
+  <string name="passwordless_technology_detail">Passkeys allow you to sign in without relying on passwords. You just need to use your fingerprint, face recognition, PIN, or swipe pattern to verify your identity and create a passkey.</string>
+  <!-- Title for subsection of "Learn more about passkeys" screen about public key cryptography. [CHAR LIMIT=80] -->
+  <string name="public_key_cryptography_title">Public key cryptography</string>
+  <!-- Detail for subsection of "Learn more about passkeys" screen about public key cryptography. [CHAR LIMIT=500] -->
+  <string name="public_key_cryptography_detail">Based on FIDO Alliance (which includes Google, Apple, Microsoft, and more) and W3C standards, passkeys use cryptographic key pairs. Unlike the username and string of characters we use for passwords, a private-public key pair is created for an app or website. The private key is safely stored on your device or password manager and it confirms your identity. The public key is  shared with the app or website server. With corresponding keys, you can instantly register and sign in.</string>
+  <!-- Title for subsection of "Learn more about passkeys" screen about improved account security. [CHAR LIMIT=80] -->
+  <string name="improved_account_security_title">Improved account security</string>
+  <!-- Detail for subsection of "Learn more about passkeys" screen about improved account security. [CHAR LIMIT=500] -->
+  <string name="improved_account_security_detail">Each key is exclusively linked with the app or website they were created for, so you can never sign in to a fraudulent app or website by mistake. Plus, with servers only keeping public keys, hacking is a lot harder.</string>
+  <!-- Title for subsection of "Learn more about passkeys" screen about seamless transition. [CHAR LIMIT=80] -->
+  <string name="seamless_transition_title">Seamless transition</string>
+  <!-- Detail for subsection of "Learn more about passkeys" screen about seamless transition. [CHAR LIMIT=500] -->
+  <string name="seamless_transition_detail">As we move towards a passwordless future, passwords will still be available alongside passkeys.</string>
   <!-- This appears as the title of the modal bottom sheet which provides all available providers for users to choose. [CHAR LIMIT=200] -->
   <string name="choose_provider_title">Choose where to save your <xliff:g id="createTypes" example="passkeys">%1$s</xliff:g></string>
   <!-- This appears as the description body of the modal bottom sheet which provides all available providers for users to choose. [CHAR LIMIT=200] -->
