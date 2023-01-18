@@ -533,13 +533,6 @@ object Flags {
     val OUTPUT_SWITCHER_SHOW_API_ENABLED =
         unreleasedFlag(2503, "output_switcher_show_api_enabled", teamfood = true)
 
-    // 2600 - unfold transitions
-    // TODO(b/265764985): Tracking Bug
-    @Keep
-    @JvmField
-    val ENABLE_DARK_VIGNETTE_WHEN_FOLDING =
-        unreleasedFlag(2600, "enable_dark_vignette_when_folding")
-
     // TODO(b259590361): Tracking bug
     val EXPERIMENTAL_FLAG = unreleasedFlag(2, "exp_flag_release")
 
