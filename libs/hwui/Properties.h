@@ -143,9 +143,32 @@ enum DebugLevel {
 #define PROPERTY_CAPTURE_SKP_ENABLED "debug.hwui.capture_skp_enabled"
 
 /**
- * Allows to record Skia drawing commands with systrace.
+ * Allows broad recording of Skia drawing commands.
+ *
+ * If disabled, a very minimal set of trace events *may* be recorded.
+ * If enabled, a much broader set of trace events *may* be recorded.
+ *
+ * In either case, trace events are only recorded if an appropriately configured tracing session is
+ * active.
+ *
+ * Use debug.hwui.skia_use_perfetto_track_events to determine if ATrace (default) or Perfetto is
+ * used as the tracing backend.
  */
-#define PROPERTY_SKIA_ATRACE_ENABLED "debug.hwui.skia_atrace_enabled"
+#define PROPERTY_SKIA_TRACING_ENABLED "debug.hwui.skia_tracing_enabled"
+
+/**
+ * Switches Skia's tracing to use Perfetto's Track Event system instead of ATrace.
+ *
+ * If disabled, ATrace will be used by default, which will record trace events from any of Skia's
+ * tracing categories if overall system tracing is active and the "gfx" and "view" ATrace categories
+ * are enabled.
+ *
+ * If enabled, then Perfetto's Track Event system will be used instead, which will only record if an
+ * active Perfetto tracing session is targeting the correct apps and Skia tracing categories with
+ * the Track Event data source enabled. This approach may be used to selectively filter out
+ * undesired Skia tracing categories, and events will contain more data fields.
+ */
+#define PROPERTY_SKIA_USE_PERFETTO_TRACK_EVENTS "debug.hwui.skia_use_perfetto_track_events"
 
 /**
  * Defines how many frames in a sequence to capture.
