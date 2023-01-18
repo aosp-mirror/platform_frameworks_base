@@ -60,6 +60,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.art.ArtManagerLocal;
 import com.android.server.art.DexUseManagerLocal;
+import com.android.server.art.ReasonMapping;
 import com.android.server.art.model.ArtFlags;
 import com.android.server.art.model.DexoptParams;
 import com.android.server.art.model.DexoptResult;
@@ -84,6 +85,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 
 /**
@@ -93,6 +95,10 @@ public final class DexOptHelper {
     private static final long SEVEN_DAYS_IN_MILLISECONDS = 7 * 24 * 60 * 60 * 1000;
 
     private final PackageManagerService mPm;
+
+    // Start time for the boot dexopt in performPackageDexOptUpgradeIfNeeded when ART Service is
+    // used, to make it available to the onDexoptDone callback.
+    private volatile long mBootDexoptStartTime;
 
     DexOptHelper(PackageManagerService pm) {
         mPm = pm;
@@ -210,6 +216,7 @@ public final class DexOptHelper {
                 pkgCompilationReason = PackageManagerService.REASON_BACKGROUND_DEXOPT;
             }
 
+            // TODO(b/251903639): Do this when ART Service is used, or remove it from here.
             if (SystemProperties.getBoolean(mPm.PRECOMPILE_LAYOUTS, false)) {
                 mPm.mArtManagerService.compileLayouts(packageState, pkg);
             }
@@ -317,7 +324,7 @@ public final class DexOptHelper {
      * Called during startup to do any boot time dexopting. This can occasionally be time consuming
      * (30+ seconds) and the function will block until it is complete.
      */
-    public void performPackageDexOptUpgradeIfNeeded() throws LegacyDexoptDisabledException {
+    public void performPackageDexOptUpgradeIfNeeded() {
         PackageManagerServiceUtils.enforceSystemOrRoot(
                 "Only the system can request package update");
 
@@ -332,29 +339,49 @@ public final class DexOptHelper {
             return;
         }
 
-        // System UI is important to user experience, so we check it after a mainline update
-        // or an OTA. It may need to be re-compiled in these cases.
-        checkAndDexOptSystemUi(reason);
-
-        if (reason != REASON_BOOT_AFTER_OTA && reason != REASON_FIRST_BOOT) {
-            return;
-        }
-
-        final Computer snapshot = mPm.snapshotComputer();
-        List<PackageStateInternal> pkgSettings =
-                getPackagesForDexopt(snapshot.getPackageStates().values(), mPm);
-
         final long startTime = System.nanoTime();
-        final int[] stats = performDexOptUpgrade(pkgSettings, reason, false /* bootComplete */);
 
+        if (useArtService()) {
+            mBootDexoptStartTime = startTime;
+            getArtManagerLocal().onBoot(DexoptOptions.convertToArtServiceDexoptReason(reason),
+                    null /* progressCallbackExecutor */, null /* progressCallback */);
+        } else {
+            try {
+                // System UI is important to user experience, so we check it after a mainline update
+                // or an OTA. It may need to be re-compiled in these cases.
+                checkAndDexOptSystemUi(reason);
+
+                if (reason != REASON_BOOT_AFTER_OTA && reason != REASON_FIRST_BOOT) {
+                    return;
+                }
+
+                final Computer snapshot = mPm.snapshotComputer();
+
+                // TODO(b/251903639): Align this with how ART Service selects packages for boot
+                // compilation.
+                List<PackageStateInternal> pkgSettings =
+                        getPackagesForDexopt(snapshot.getPackageStates().values(), mPm);
+
+                final int[] stats =
+                        performDexOptUpgrade(pkgSettings, reason, false /* bootComplete */);
+                reportBootDexopt(startTime, stats[0], stats[1], stats[2]);
+            } catch (LegacyDexoptDisabledException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void reportBootDexopt(long startTime, int numDexopted, int numSkipped, int numFailed) {
         final int elapsedTimeSeconds =
                 (int) TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - startTime);
 
         final Computer newSnapshot = mPm.snapshotComputer();
 
-        MetricsLogger.histogram(mPm.mContext, "opt_dialog_num_dexopted", stats[0]);
-        MetricsLogger.histogram(mPm.mContext, "opt_dialog_num_skipped", stats[1]);
-        MetricsLogger.histogram(mPm.mContext, "opt_dialog_num_failed", stats[2]);
+        MetricsLogger.histogram(mPm.mContext, "opt_dialog_num_dexopted", numDexopted);
+        MetricsLogger.histogram(mPm.mContext, "opt_dialog_num_skipped", numSkipped);
+        MetricsLogger.histogram(mPm.mContext, "opt_dialog_num_failed", numFailed);
+        // TODO(b/251903639): getOptimizablePackages calls PackageDexOptimizer.canOptimizePackage
+        // which duplicates logic in ART Service (com.android.server.art.Utils.canDexoptPackage).
         MetricsLogger.histogram(mPm.mContext, "opt_dialog_num_total",
                 getOptimizablePackages(newSnapshot).size());
         MetricsLogger.histogram(mPm.mContext, "opt_dialog_time_s", elapsedTimeSeconds);
@@ -918,6 +945,32 @@ public final class DexOptHelper {
          */
         @Override
         public void onDexoptDone(@NonNull DexoptResult result) {
+            switch (result.getReason()) {
+                case ReasonMapping.REASON_FIRST_BOOT:
+                case ReasonMapping.REASON_BOOT_AFTER_OTA:
+                case ReasonMapping.REASON_BOOT_AFTER_MAINLINE_UPDATE:
+                    int numDexopted = 0;
+                    int numSkipped = 0;
+                    int numFailed = 0;
+                    for (DexoptResult.PackageDexoptResult pkgRes :
+                            result.getPackageDexoptResults()) {
+                        switch (pkgRes.getStatus()) {
+                            case DexoptResult.DEXOPT_PERFORMED:
+                                numDexopted += 1;
+                                break;
+                            case DexoptResult.DEXOPT_SKIPPED:
+                                numSkipped += 1;
+                                break;
+                            case DexoptResult.DEXOPT_FAILED:
+                                numFailed += 1;
+                                break;
+                        }
+                    }
+
+                    reportBootDexopt(mBootDexoptStartTime, numDexopted, numSkipped, numFailed);
+                    break;
+            }
+
             for (DexoptResult.PackageDexoptResult pkgRes : result.getPackageDexoptResults()) {
                 CompilerStats.PackageStats stats =
                         mPm.getOrCreateCompilerPackageStats(pkgRes.getPackageName());

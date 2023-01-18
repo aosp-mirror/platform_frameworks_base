@@ -2969,12 +2969,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     public void updatePackagesIfNeeded() {
-        // TODO(b/251903639): Call into ART Service.
-        try {
-            mDexOptHelper.performPackageDexOptUpgradeIfNeeded();
-        } catch (LegacyDexoptDisabledException e) {
-            throw new RuntimeException(e);
-        }
+        mDexOptHelper.performPackageDexOptUpgradeIfNeeded();
     }
 
     private void notifyPackageUseInternal(String packageName, int reason) {
