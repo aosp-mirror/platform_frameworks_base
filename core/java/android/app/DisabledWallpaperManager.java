@@ -178,12 +178,22 @@ final class DisabledWallpaperManager extends WallpaperManager {
     }
 
     @Override
+    public ParcelFileDescriptor getWallpaperFile(int which, boolean getCropped) {
+        return unsupported();
+    }
+
+    @Override
     public void forgetLoadedWallpaper() {
         unsupported();
     }
 
     @Override
     public WallpaperInfo getWallpaperInfo() {
+        return unsupported();
+    }
+
+    @Override
+    public ParcelFileDescriptor getWallpaperInfoFile() {
         return unsupported();
     }
 

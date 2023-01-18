@@ -281,6 +281,8 @@ public class UserBackupManagerService {
     // Pseudoname that we use for the Package Manager metadata "package".
     public static final String PACKAGE_MANAGER_SENTINEL = "@pm@";
 
+    public static final String WALLPAPER_PACKAGE = "com.android.wallpaperbackup";
+
     // Retry interval for clear/init when the transport is unavailable
     private static final long TRANSPORT_RETRY_INTERVAL = 1 * AlarmManager.INTERVAL_HOUR;
 
@@ -309,7 +311,6 @@ public class UserBackupManagerService {
     private static final String SERIAL_ID_FILE = "serial_id";
 
     private static final String SKIP_USER_FACING_PACKAGES = "backup_skip_user_facing_packages";
-    private static final String WALLPAPER_PACKAGE = "com.android.wallpaperbackup";
 
     private final @UserIdInt int mUserId;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;

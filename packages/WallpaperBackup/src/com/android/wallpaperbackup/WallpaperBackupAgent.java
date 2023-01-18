@@ -31,7 +31,6 @@ import android.content.SharedPreferences;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.graphics.Rect;
-import android.os.Environment;
 import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -43,8 +42,6 @@ import android.util.Xml;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 
-import libcore.io.IoUtils;
-
 import org.xmlpull.v1.XmlPullParser;
 
 import java.io.File;
@@ -52,39 +49,60 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+/**
+ * Backs up and restores wallpaper and metadata related to it.
+ *
+ * This agent has its own package because it does full backup as opposed to SystemBackupAgent
+ * which does key/value backup.
+ *
+ * This class stages wallpaper files for backup by copying them into its own directory because of
+ * the following reasons:
+ *
+ * <ul>
+ *     <li>Non-system users don't have permission to read the directory that the system stores
+ *     the wallpaper files in</li>
+ *     <li>{@link BackupAgent} enforces that backed up files must live inside the package's
+ *     {@link Context#getFilesDir()}</li>
+ * </ul>
+ *
+ * There are 3 files to back up:
+ * <ul>
+ *     <li>The "wallpaper info"  file which contains metadata like the crop applied to the
+ *     wallpaper or the live wallpaper component name.</li>
+ *     <li>The "system" wallpaper file.</li>
+ *     <li>An optional "lock" wallpaper, which is shown on the lockscreen instead of the system
+ *     wallpaper if set.</li>
+ * </ul>
+ *
+ * On restore, the metadata file is parsed and {@link WallpaperManager} APIs are used to set the
+ * wallpaper. Note that if there's a live wallpaper, the live wallpaper package name will be
+ * part of the metadata file and the wallpaper will be applied when the package it's installed.
+ */
 public class WallpaperBackupAgent extends BackupAgent {
     private static final String TAG = "WallpaperBackup";
     private static final boolean DEBUG = false;
 
-    // NB: must be kept in sync with WallpaperManagerService but has no
-    // compile-time visibility.
+    // Names of our local-data stage files
+    @VisibleForTesting
+    static final String SYSTEM_WALLPAPER_STAGE = "wallpaper-stage";
+    @VisibleForTesting
+    static final String LOCK_WALLPAPER_STAGE = "wallpaper-lock-stage";
+    @VisibleForTesting
+    static final String WALLPAPER_INFO_STAGE = "wallpaper-info-stage";
 
-    // Target filenames within the system's wallpaper directory
-    static final String WALLPAPER = "wallpaper_orig";
-    static final String WALLPAPER_LOCK = "wallpaper_lock_orig";
-    static final String WALLPAPER_INFO = "wallpaper_info.xml";
-
-    // Names of our local-data stage files/links
-    static final String IMAGE_STAGE = "wallpaper-stage";
-    static final String LOCK_IMAGE_STAGE = "wallpaper-lock-stage";
-    static final String INFO_STAGE = "wallpaper-info-stage";
     static final String EMPTY_SENTINEL = "empty";
     static final String QUOTA_SENTINEL = "quota";
 
-    // Not-for-backup bookkeeping
+    // Shared preferences constants.
     static final String PREFS_NAME = "wbprefs.xml";
     static final String SYSTEM_GENERATION = "system_gen";
     static final String LOCK_GENERATION = "lock_gen";
-
-    private File mWallpaperInfo;        // wallpaper metadata file
-    private File mWallpaperFile;        // primary wallpaper image file
-    private File mLockWallpaperFile;    // lock wallpaper image file
 
     // If this file exists, it means we exceeded our quota last time
     private File mQuotaFile;
     private boolean mQuotaExceeded;
 
-    private WallpaperManager mWm;
+    private WallpaperManager mWallpaperManager;
 
     @Override
     public void onCreate() {
@@ -92,11 +110,7 @@ public class WallpaperBackupAgent extends BackupAgent {
             Slog.v(TAG, "onCreate()");
         }
 
-        File wallpaperDir = getWallpaperDir();
-        mWallpaperInfo = new File(wallpaperDir, WALLPAPER_INFO);
-        mWallpaperFile = new File(wallpaperDir, WALLPAPER);
-        mLockWallpaperFile = new File(wallpaperDir, WALLPAPER_LOCK);
-        mWm = (WallpaperManager) getSystemService(Context.WALLPAPER_SERVICE);
+        mWallpaperManager = getSystemService(WallpaperManager.class);
 
         mQuotaFile = new File(getFilesDir(), QUOTA_SENTINEL);
         mQuotaExceeded = mQuotaFile.exists();
@@ -105,111 +119,39 @@ public class WallpaperBackupAgent extends BackupAgent {
         }
     }
 
-    @VisibleForTesting
-    protected File getWallpaperDir() {
-        return Environment.getUserSystemDirectory(UserHandle.USER_SYSTEM);
-    }
-
     @Override
     public void onFullBackup(FullBackupDataOutput data) throws IOException {
-        // To avoid data duplication and disk churn, use links as the stage.
-        final File filesDir = getFilesDir();
-        final File infoStage = new File(filesDir, INFO_STAGE);
-        final File imageStage = new File (filesDir, IMAGE_STAGE);
-        final File lockImageStage = new File (filesDir, LOCK_IMAGE_STAGE);
-        final File empty = new File (filesDir, EMPTY_SENTINEL);
-
         try {
             // We always back up this 'empty' file to ensure that the absence of
             // storable wallpaper imagery still produces a non-empty backup data
             // stream, otherwise it'd simply be ignored in preflight.
+            final File empty = new File(getFilesDir(), EMPTY_SENTINEL);
             if (!empty.exists()) {
                 FileOutputStream touch = new FileOutputStream(empty);
                 touch.close();
             }
             backupFile(empty, data);
 
-            SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-            final int lastSysGeneration = prefs.getInt(SYSTEM_GENERATION, -1);
-            final int lastLockGeneration = prefs.getInt(LOCK_GENERATION, -1);
+            SharedPreferences sharedPrefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
-            final int sysGeneration =
-                    mWm.getWallpaperIdForUser(FLAG_SYSTEM, UserHandle.USER_SYSTEM);
-            final int lockGeneration =
-                    mWm.getWallpaperIdForUser(FLAG_LOCK, UserHandle.USER_SYSTEM);
+            // Check the IDs of the wallpapers that we backed up last time. If they haven't
+            // changed, we won't re-stage them for backup and use the old staged versions to avoid
+            // disk churn.
+            final int lastSysGeneration = sharedPrefs.getInt(SYSTEM_GENERATION, /* defValue= */ -1);
+            final int lastLockGeneration = sharedPrefs.getInt(LOCK_GENERATION, /* defValue= */ -1);
+            final int sysGeneration = mWallpaperManager.getWallpaperId(FLAG_SYSTEM);
+            final int lockGeneration = mWallpaperManager.getWallpaperId(FLAG_LOCK);
             final boolean sysChanged = (sysGeneration != lastSysGeneration);
             final boolean lockChanged = (lockGeneration != lastLockGeneration);
-
-            final boolean sysEligible = mWm.isWallpaperBackupEligible(FLAG_SYSTEM);
-            final boolean lockEligible = mWm.isWallpaperBackupEligible(FLAG_LOCK);
-
-                // There might be a latent lock wallpaper file present but unused: don't
-                // include it in the backup if that's the case.
-                ParcelFileDescriptor lockFd = mWm.getWallpaperFile(FLAG_LOCK, UserHandle.USER_SYSTEM);
-                final boolean hasLockWallpaper = (lockFd != null);
-                IoUtils.closeQuietly(lockFd);
 
             if (DEBUG) {
                 Slog.v(TAG, "sysGen=" + sysGeneration + " : sysChanged=" + sysChanged);
                 Slog.v(TAG, "lockGen=" + lockGeneration + " : lockChanged=" + lockChanged);
-                Slog.v(TAG, "sysEligble=" + sysEligible);
-                Slog.v(TAG, "lockEligible=" + lockEligible);
-                Slog.v(TAG, "hasLockWallpaper=" + hasLockWallpaper);
             }
 
-            // only back up the wallpapers if we've been told they're eligible
-            if (mWallpaperInfo.exists()) {
-                if (sysChanged || lockChanged || !infoStage.exists()) {
-                    if (DEBUG) Slog.v(TAG, "New wallpaper configuration; copying");
-                    FileUtils.copyFileOrThrow(mWallpaperInfo, infoStage);
-                }
-                if (DEBUG) Slog.v(TAG, "Storing wallpaper metadata");
-                backupFile(infoStage, data);
-            } else {
-                Slog.w(TAG, "Wallpaper metadata file doesn't exist: " +
-                        mWallpaperFile.getPath());
-            }
-            if (sysEligible && mWallpaperFile.exists()) {
-                if (sysChanged || !imageStage.exists()) {
-                    if (DEBUG) Slog.v(TAG, "New system wallpaper; copying");
-                    FileUtils.copyFileOrThrow(mWallpaperFile, imageStage);
-                }
-                if (DEBUG) Slog.v(TAG, "Storing system wallpaper image");
-                backupFile(imageStage, data);
-                prefs.edit().putInt(SYSTEM_GENERATION, sysGeneration).apply();
-            } else {
-                Slog.w(TAG, "Not backing up wallpaper as one of conditions is not "
-                        + "met: sysEligible = " + sysEligible + " wallpaperFileExists = "
-                        + mWallpaperFile.exists());
-            }
-
-            // If there's no lock wallpaper, then we have nothing to add to the backup.
-            if (lockGeneration == -1) {
-                if (lockChanged && lockImageStage.exists()) {
-                    if (DEBUG) Slog.v(TAG, "Removed lock wallpaper; deleting");
-                    lockImageStage.delete();
-                }
-                Slog.d(TAG, "No lockscreen wallpaper set, add nothing to backup");
-                prefs.edit().putInt(LOCK_GENERATION, lockGeneration).apply();
-                return;
-            }
-
-            // Don't try to store the lock image if we overran our quota last time
-            if (lockEligible && hasLockWallpaper && mLockWallpaperFile.exists() && !mQuotaExceeded) {
-                if (lockChanged || !lockImageStage.exists()) {
-                    if (DEBUG) Slog.v(TAG, "New lock wallpaper; copying");
-                    FileUtils.copyFileOrThrow(mLockWallpaperFile, lockImageStage);
-                }
-                if (DEBUG) Slog.v(TAG, "Storing lock wallpaper image");
-                backupFile(lockImageStage, data);
-                prefs.edit().putInt(LOCK_GENERATION, lockGeneration).apply();
-            } else {
-                Slog.w(TAG, "Not backing up lockscreen wallpaper as one of conditions is not "
-                        + "met: lockEligible = " + lockEligible + " hasLockWallpaper = "
-                        + hasLockWallpaper + " lockWallpaperFileExists = "
-                        + mLockWallpaperFile.exists() + " quotaExceeded (last time) = "
-                        + mQuotaExceeded);
-            }
+            backupWallpaperInfoFile(/* sysOrLockChanged= */ sysChanged || lockChanged, data);
+            backupSystemWallpaperFile(sharedPrefs, sysChanged, sysGeneration, data);
+            backupLockWallpaperFileIfItExists(sharedPrefs, lockChanged, lockGeneration, data);
         } catch (Exception e) {
             Slog.e(TAG, "Unable to back up wallpaper", e);
         } finally {
@@ -219,6 +161,114 @@ public class WallpaperBackupAgent extends BackupAgent {
             // is no lock image to store, or the quota is raised, or both fit under the
             // quota.
             mQuotaFile.delete();
+        }
+    }
+
+    private void backupWallpaperInfoFile(boolean sysOrLockChanged, FullBackupDataOutput data)
+            throws IOException {
+        final ParcelFileDescriptor wallpaperInfoFd = mWallpaperManager.getWallpaperInfoFile();
+
+        if (wallpaperInfoFd == null) {
+            Slog.w(TAG, "Wallpaper metadata file doesn't exist");
+            return;
+        }
+
+        final File infoStage = new File(getFilesDir(), WALLPAPER_INFO_STAGE);
+
+        if (sysOrLockChanged || !infoStage.exists()) {
+            if (DEBUG) Slog.v(TAG, "New wallpaper configuration; copying");
+            copyFromPfdToFileAndClosePfd(wallpaperInfoFd, infoStage);
+        }
+
+        if (DEBUG) Slog.v(TAG, "Storing wallpaper metadata");
+        backupFile(infoStage, data);
+    }
+
+    private void backupSystemWallpaperFile(SharedPreferences sharedPrefs,
+            boolean sysChanged, int sysGeneration, FullBackupDataOutput data) throws IOException {
+        if (!mWallpaperManager.isWallpaperBackupEligible(FLAG_SYSTEM)) {
+            Slog.d(TAG, "System wallpaper ineligible for backup");
+            return;
+        }
+
+        final ParcelFileDescriptor systemWallpaperImageFd = mWallpaperManager.getWallpaperFile(
+                FLAG_SYSTEM,
+                /* getCropped= */ false);
+
+        if (systemWallpaperImageFd == null) {
+            Slog.w(TAG, "System wallpaper doesn't exist");
+            return;
+        }
+
+        final File imageStage = new File(getFilesDir(), SYSTEM_WALLPAPER_STAGE);
+
+        if (sysChanged || !imageStage.exists()) {
+            if (DEBUG) Slog.v(TAG, "New system wallpaper; copying");
+            copyFromPfdToFileAndClosePfd(systemWallpaperImageFd, imageStage);
+        }
+
+        if (DEBUG) Slog.v(TAG, "Storing system wallpaper image");
+        backupFile(imageStage, data);
+        sharedPrefs.edit().putInt(SYSTEM_GENERATION, sysGeneration).apply();
+    }
+
+    private void backupLockWallpaperFileIfItExists(SharedPreferences sharedPrefs,
+            boolean lockChanged, int lockGeneration, FullBackupDataOutput data) throws IOException {
+        final File lockImageStage = new File(getFilesDir(), LOCK_WALLPAPER_STAGE);
+
+        // This means there's no lock wallpaper set by the user.
+        if (lockGeneration == -1) {
+            if (lockChanged && lockImageStage.exists()) {
+                if (DEBUG) Slog.v(TAG, "Removed lock wallpaper; deleting");
+                lockImageStage.delete();
+            }
+            Slog.d(TAG, "No lockscreen wallpaper set, add nothing to backup");
+            sharedPrefs.edit().putInt(LOCK_GENERATION, lockGeneration).apply();
+            return;
+        }
+
+        if (!mWallpaperManager.isWallpaperBackupEligible(FLAG_LOCK)) {
+            Slog.d(TAG, "Lock screen wallpaper ineligible for backup");
+            return;
+        }
+
+        final ParcelFileDescriptor lockWallpaperFd = mWallpaperManager.getWallpaperFile(
+                FLAG_LOCK, /* getCropped= */ false);
+
+        // If we get to this point, that means lockGeneration != -1 so there's a lock wallpaper
+        // set, but we can't find it.
+        if (lockWallpaperFd == null) {
+            Slog.w(TAG, "Lock wallpaper doesn't exist");
+            return;
+        }
+
+        if (mQuotaExceeded) {
+            Slog.w(TAG, "Not backing up lock screen wallpaper. Quota was exceeded last time");
+            return;
+        }
+
+        if (lockChanged || !lockImageStage.exists()) {
+            if (DEBUG) Slog.v(TAG, "New lock wallpaper; copying");
+            copyFromPfdToFileAndClosePfd(lockWallpaperFd, lockImageStage);
+        }
+
+        if (DEBUG) Slog.v(TAG, "Storing lock wallpaper image");
+        backupFile(lockImageStage, data);
+        sharedPrefs.edit().putInt(LOCK_GENERATION, lockGeneration).apply();
+    }
+
+    /**
+     * Copies the contents of the given {@code pfd} to the given {@code file}.
+     *
+     * All resources used in the process including the {@code pfd} will be closed.
+     */
+    private static void copyFromPfdToFileAndClosePfd(ParcelFileDescriptor pfd, File file)
+            throws IOException {
+        try (ParcelFileDescriptor.AutoCloseInputStream inputStream =
+                     new ParcelFileDescriptor.AutoCloseInputStream(pfd);
+             FileOutputStream outputStream = new FileOutputStream(file)
+        ) {
+            FileUtils.copy(inputStream, outputStream);
         }
     }
 
@@ -244,9 +294,9 @@ public class WallpaperBackupAgent extends BackupAgent {
     public void onRestoreFinished() {
         Slog.v(TAG, "onRestoreFinished()");
         final File filesDir = getFilesDir();
-        final File infoStage = new File(filesDir, INFO_STAGE);
-        final File imageStage = new File (filesDir, IMAGE_STAGE);
-        final File lockImageStage = new File (filesDir, LOCK_IMAGE_STAGE);
+        final File infoStage = new File(filesDir, WALLPAPER_INFO_STAGE);
+        final File imageStage = new File(filesDir, SYSTEM_WALLPAPER_STAGE);
+        final File lockImageStage = new File(filesDir, LOCK_WALLPAPER_STAGE);
 
         // If we restored separate lock imagery, the system wallpaper should be
         // applied as system-only; but if there's no separate lock image, make
@@ -283,11 +333,11 @@ public class WallpaperBackupAgent extends BackupAgent {
     void updateWallpaperComponent(ComponentName wpService, boolean applyToLock) throws IOException {
         if (servicePackageExists(wpService)) {
             Slog.i(TAG, "Using wallpaper service " + wpService);
-            mWm.setWallpaperComponent(wpService, UserHandle.USER_SYSTEM);
+            mWallpaperManager.setWallpaperComponent(wpService);
             if (applyToLock) {
                 // We have a live wallpaper and no static lock image,
                 // allow live wallpaper to show "through" on lock screen.
-                mWm.clear(FLAG_LOCK);
+                mWallpaperManager.clear(FLAG_LOCK);
             }
         } else {
             // If we've restored a live wallpaper, but the component doesn't exist,
@@ -311,8 +361,9 @@ public class WallpaperBackupAgent extends BackupAgent {
                 Slog.i(TAG, "Got restored wallpaper; applying which=" + which
                         + "; cropHint = " + cropHint);
                 try (FileInputStream in = new FileInputStream(stage)) {
-                    mWm.setStream(in, cropHint.isEmpty() ? null : cropHint, true, which);
-                } finally {} // auto-closes 'in'
+                    mWallpaperManager.setStream(in, cropHint.isEmpty() ? null : cropHint, true,
+                            which);
+                }
             }
         } else {
             Slog.d(TAG, "Restore data doesn't exist for file " + stage.getPath());
@@ -384,7 +435,7 @@ public class WallpaperBackupAgent extends BackupAgent {
             if (comp != null) {
                 final IPackageManager pm = AppGlobals.getPackageManager();
                 final PackageInfo info = pm.getPackageInfo(comp.getPackageName(),
-                        0, UserHandle.USER_SYSTEM);
+                        0, getUserId());
                 return (info != null);
             }
         } catch (RemoteException e) {
@@ -393,16 +444,14 @@ public class WallpaperBackupAgent extends BackupAgent {
         return false;
     }
 
-    //
-    // Key/value API: abstract, therefore required; but not used
-    //
-
+    /** Unused Key/Value API. */
     @Override
     public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
             ParcelFileDescriptor newState) throws IOException {
         // Intentionally blank
     }
 
+    /** Unused Key/Value API. */
     @Override
     public void onRestore(BackupDataInput data, int appVersionCode, ParcelFileDescriptor newState)
             throws IOException {
@@ -427,10 +476,10 @@ public class WallpaperBackupAgent extends BackupAgent {
 
                 if (componentName.getPackageName().equals(packageName)) {
                     Slog.d(TAG, "Applying component " + componentName);
-                    mWm.setWallpaperComponent(componentName);
+                    mWallpaperManager.setWallpaperComponent(componentName);
                     if (applyToLock) {
                         try {
-                            mWm.clear(FLAG_LOCK);
+                            mWallpaperManager.clear(FLAG_LOCK);
                         } catch (IOException e) {
                             Slog.w(TAG, "Failed to apply live wallpaper to lock screen: " + e);
                         }

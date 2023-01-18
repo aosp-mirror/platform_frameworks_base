@@ -20,6 +20,7 @@ import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 import static com.android.server.backup.UserBackupManagerService.PACKAGE_MANAGER_SENTINEL;
 import static com.android.server.backup.UserBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
+import static com.android.server.backup.UserBackupManagerService.WALLPAPER_PACKAGE;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.annotation.Nullable;
@@ -56,7 +57,7 @@ public class BackupEligibilityRules {
     private static final boolean DEBUG = false;
     // List of system packages that are eligible for backup in non-system users.
     private static final Set<String> systemPackagesAllowedForAllUsers =
-            Sets.newArraySet(PACKAGE_MANAGER_SENTINEL, PLATFORM_PACKAGE_NAME);
+            Sets.newArraySet(PACKAGE_MANAGER_SENTINEL, PLATFORM_PACKAGE_NAME, WALLPAPER_PACKAGE);
 
     private final PackageManager mPackageManager;
     private final PackageManagerInternal mPackageManagerInternal;
