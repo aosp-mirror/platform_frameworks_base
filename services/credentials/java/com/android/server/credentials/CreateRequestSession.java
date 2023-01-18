@@ -35,7 +35,7 @@ import android.util.Log;
 import java.util.ArrayList;
 
 /**
- * Central session for a single {@link CredentialManager#executeCreateCredential} request.
+ * Central session for a single {@link CredentialManager#createCredential} request.
  * This class listens to the responses from providers, and the UX app, and updates the
  * provider(s) state maintained in {@link ProviderCreateSession}.
  */

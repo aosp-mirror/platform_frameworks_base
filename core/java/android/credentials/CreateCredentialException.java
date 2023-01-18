@@ -28,7 +28,7 @@ import java.util.concurrent.Executor;
 
 /**
  * Represents an error encountered during the
- * {@link CredentialManager#executeCreateCredential(CreateCredentialRequest,
+ * {@link CredentialManager#createCredential(CreateCredentialRequest,
  * Activity, CancellationSignal, Executor, OutcomeReceiver)} operation.
  */
 public class CreateCredentialException extends Exception {
@@ -41,7 +41,7 @@ public class CreateCredentialException extends Exception {
 
     /**
      * The error type value for when no credential is available for the given {@link
-     * CredentialManager#executeCreateCredential(CreateCredentialRequest, Activity,
+     * CredentialManager#createCredential(CreateCredentialRequest, Activity,
      * CancellationSignal, Executor, OutcomeReceiver)} request.
      */
     @NonNull
