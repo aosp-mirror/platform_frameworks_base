@@ -380,7 +380,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
         mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context, mStats,
                 mBatteryUsageStatsStore);
-        mCpuWakeupStats = new CpuWakeupStats(context, R.xml.irq_device_map);
+        mCpuWakeupStats = new CpuWakeupStats(context, R.xml.irq_device_map, mHandler);
     }
 
     public void publish() {

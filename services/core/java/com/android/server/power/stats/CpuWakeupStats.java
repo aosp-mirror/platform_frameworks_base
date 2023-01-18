@@ -20,8 +20,10 @@ import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_ALARM;
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_UNKNOWN;
 
 import android.content.Context;
+import android.os.Handler;
 import android.os.UserHandle;
 import android.util.IndentingPrintWriter;
+import android.util.IntArray;
 import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -32,6 +34,7 @@ import android.util.TimeUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IntPair;
 
 import java.util.Arrays;
@@ -43,12 +46,16 @@ import java.util.regex.Pattern;
  * Stores stats about CPU wakeups and tries to attribute them to subsystems and uids.
  */
 public class CpuWakeupStats {
+    private static final String TAG = "CpuWakeupStats";
+
     private static final String SUBSYSTEM_ALARM_STRING = "Alarm";
     @VisibleForTesting
     static final long WAKEUP_RETENTION_MS = 3 * 24 * 60 * 60_000; // 3 days.
     @VisibleForTesting
     static final long WAKEUP_REASON_HALF_WINDOW_MS = 500;
+    private static final long WAKEUP_WRITE_DELAY_MS = 2 * 60 * 1000;  // 2 minutes.
 
+    private final Handler mHandler;
     private final IrqDeviceMap mIrqDeviceMap;
     private final WakingActivityHistory mRecentWakingActivity = new WakingActivityHistory();
 
@@ -58,8 +65,58 @@ public class CpuWakeupStats {
     final TimeSparseArray<SparseArray<SparseBooleanArray>> mWakeupAttribution =
             new TimeSparseArray<>();
 
-    public CpuWakeupStats(Context context, int mapRes) {
+    public CpuWakeupStats(Context context, int mapRes, Handler handler) {
         mIrqDeviceMap = IrqDeviceMap.getInstance(context, mapRes);
+        mHandler = handler;
+    }
+
+    private static int subsystemToStatsReason(int subsystem) {
+        switch (subsystem) {
+            case CPU_WAKEUP_SUBSYSTEM_ALARM:
+                return FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__REASON__ALARM;
+        }
+        return FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__REASON__UNKNOWN;
+    }
+
+    private synchronized void logWakeupToStatsLog(Wakeup wakeupToLog) {
+        if (ArrayUtils.isEmpty(wakeupToLog.mDevices)) {
+            FrameworkStatsLog.write(FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED,
+                    FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__TYPE__TYPE_UNKNOWN,
+                    FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__REASON__UNKNOWN,
+                    null,
+                    wakeupToLog.mElapsedMillis);
+            return;
+        }
+
+        final SparseArray<SparseBooleanArray> wakeupAttribution = mWakeupAttribution.get(
+                wakeupToLog.mElapsedMillis);
+        if (wakeupAttribution == null) {
+            // This is not expected but can theoretically happen in extreme situations, e.g. if we
+            // remove the wakeup before the handler gets to process this message.
+            Slog.wtf(TAG, "Unexpected null attribution found for " + wakeupToLog);
+            return;
+        }
+        for (int i = 0; i < wakeupAttribution.size(); i++) {
+            final int subsystem = wakeupAttribution.keyAt(i);
+            final SparseBooleanArray uidMap = wakeupAttribution.valueAt(i);
+            final int[] uids;
+            if (uidMap == null || uidMap.size() == 0) {
+                uids = new int[0];
+            } else {
+                final IntArray tmp = new IntArray(uidMap.size());
+                for (int j = 0; j < uidMap.size(); j++) {
+                    if (uidMap.valueAt(j)) {
+                        tmp.add(uidMap.keyAt(j));
+                    }
+                }
+                uids = tmp.toArray();
+            }
+            FrameworkStatsLog.write(FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED,
+                    FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__TYPE__TYPE_IRQ,
+                    subsystemToStatsReason(subsystem),
+                    uids,
+                    wakeupToLog.mElapsedMillis);
+        }
     }
 
     /** Notes a wakeup reason as reported by SuspendControlService to battery stats. */
@@ -83,6 +140,7 @@ public class CpuWakeupStats {
         for (int i = lastIdx; i >= 0; i--) {
             mWakeupAttribution.removeAt(i);
         }
+        mHandler.postDelayed(() -> logWakeupToStatsLog(parsedWakeup), WAKEUP_WRITE_DELAY_MS);
     }
 
     /** Notes a waking activity that could have potentially woken up the CPU. */
