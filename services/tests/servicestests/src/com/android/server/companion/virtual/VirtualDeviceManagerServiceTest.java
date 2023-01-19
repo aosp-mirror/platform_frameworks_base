@@ -634,6 +634,8 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void onAppsOnVirtualDeviceChanged_multipleVirtualDevices_listenersNotified() {
+        createVirtualDevice(VIRTUAL_DEVICE_ID_2, DEVICE_OWNER_UID_2);
+
         ArraySet<Integer> uidsOnDevice1 = new ArraySet<>(Arrays.asList(UID_1, UID_2));
         ArraySet<Integer> uidsOnDevice2 = new ArraySet<>(Arrays.asList(UID_3, UID_4));
         mLocalService.registerAppsOnVirtualDeviceListener(mAppsOnVirtualDeviceListener);
@@ -645,7 +647,7 @@ public class VirtualDeviceManagerServiceTest {
                 new ArraySet<>(Arrays.asList(UID_1, UID_2)));
 
         // Notifies that the running apps on the second virtual device has changed.
-        mVdms.notifyRunningAppsChanged(mDeviceImpl.getDeviceId() + 1, uidsOnDevice2);
+        mVdms.notifyRunningAppsChanged(VIRTUAL_DEVICE_ID_2, uidsOnDevice2);
         TestableLooper.get(this).processAllMessages();
         // The union of the apps running on both virtual devices are sent to the listeners.
         verify(mAppsOnVirtualDeviceListener).onAppsOnAnyVirtualDeviceChanged(
@@ -1056,6 +1058,16 @@ public class VirtualDeviceManagerServiceTest {
 
         assertThat(mSensorController.getSensorDescriptors()).isEmpty();
         verify(mSensorManagerInternalMock).removeRuntimeSensor(SENSOR_HANDLE);
+    }
+
+    @Test
+    public void closedDevice_lateCallToRunningAppsChanged_isIgnored() {
+        mLocalService.registerAppsOnVirtualDeviceListener(mAppsOnVirtualDeviceListener);
+        int deviceId = mDeviceImpl.getDeviceId();
+        mDeviceImpl.close();
+        mVdms.notifyRunningAppsChanged(deviceId, Sets.newArraySet(UID_1));
+        TestableLooper.get(this).processAllMessages();
+        verify(mAppsOnVirtualDeviceListener, never()).onAppsOnAnyVirtualDeviceChanged(any());
     }
 
     @Test
