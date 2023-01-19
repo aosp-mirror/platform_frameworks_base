@@ -2028,7 +2028,7 @@ class ContextImpl extends Context {
     /** @hide */
     @NonNull
     @Override
-    public IBinder getIApplicationThreadBinder() {
+    public IBinder getProcessToken() {
         return getIApplicationThread().asBinder();
     }
 
