@@ -46,6 +46,8 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
+import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor.KeyguardResetCallback;
+import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ListenerSet;
@@ -656,56 +658,6 @@ public class KeyguardBouncer {
      */
     public void removeBouncerExpansionCallback(PrimaryBouncerExpansionCallback callback) {
         mExpansionCallbacks.remove(callback);
-    }
-
-    /**
-     * Callback updated when the primary bouncer's show and hide states change.
-     */
-    public interface PrimaryBouncerExpansionCallback {
-        /**
-         * Invoked when the bouncer expansion reaches {@link KeyguardBouncer#EXPANSION_VISIBLE}.
-         * This is NOT called each time the bouncer is shown, but rather only when the fully
-         * shown amount has changed based on the panel expansion. The bouncer's visibility
-         * can still change when the expansion amount hasn't changed.
-         * See {@link KeyguardBouncer#isShowing()} for the checks for the bouncer showing state.
-         */
-        default void onFullyShown() {
-        }
-
-        /**
-         * Invoked when the bouncer is starting to transition to a hidden state.
-         */
-        default void onStartingToHide() {
-        }
-
-        /**
-         * Invoked when the bouncer is starting to transition to a visible state.
-         */
-        default void onStartingToShow() {
-        }
-
-        /**
-         * Invoked when the bouncer expansion reaches {@link KeyguardBouncer#EXPANSION_HIDDEN}.
-         */
-        default void onFullyHidden() {
-        }
-
-        /**
-         * From 0f {@link KeyguardBouncer#EXPANSION_VISIBLE} when fully visible
-         * to 1f {@link KeyguardBouncer#EXPANSION_HIDDEN} when fully hidden
-         */
-        default void onExpansionChanged(float bouncerHideAmount) {}
-
-        /**
-         * Invoked when visibility of KeyguardBouncer has changed.
-         * Note the bouncer expansion can be {@link KeyguardBouncer#EXPANSION_VISIBLE}, but the
-         * view's visibility can be {@link View.INVISIBLE}.
-         */
-        default void onVisibilityChanged(boolean isVisible) {}
-    }
-
-    public interface KeyguardResetCallback {
-        void onKeyguardReset();
     }
 
     /** Create a {@link KeyguardBouncer} once a container and bouncer callback are available. */

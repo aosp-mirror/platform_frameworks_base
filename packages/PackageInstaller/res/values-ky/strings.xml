@@ -88,7 +88,7 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Планшетиңиз жана жеке дайын-даректериңиз белгисиз колдонмолордон зыян тартып калышы мүмкүн. Бул колдонмону орнотуп, аны пайдалануудан улам планшетиңизге кандайдыр бир зыян келтирилсе же дайын-даректериңизды жоготуп алсаңыз, өзүңүз жооптуу болосуз."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Сыналгыңыз жана жеке дайын-даректериңиз белгисиз колдонмолордон зыян тартып калышы мүмкүн. Бул колдонмону орнотуп, аны пайдалануудан улам сыналгыңызга кандайдыр бир зыян келтирилсе же дайын-даректериңизды жоготуп алсаңыз, өзүңүз жооптуу болосуз."</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Улантуу"</string>
-    <string name="external_sources_settings" msgid="4046964413071713807">"Жөндөөлөр"</string>
+    <string name="external_sources_settings" msgid="4046964413071713807">"Параметрлер"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Тагынма колдонмолорду орнотуу/чыгаруу"</string>
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Колдонмолорду орноткучтун билдирмелери"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"Ийгиликтүү орнотулду"</string>

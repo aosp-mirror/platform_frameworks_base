@@ -274,6 +274,41 @@ class MobileIconViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun `network type - alwaysShow - shown when not connected`() =
+        testScope.runTest {
+            interactor.setIconGroup(THREE_G)
+            interactor.isConnected.value = false
+            interactor.alwaysShowDataRatIcon.value = true
+
+            var latest: Icon? = null
+            val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
+
+            val expected =
+                Icon.Resource(
+                    THREE_G.dataType,
+                    ContentDescription.Resource(THREE_G.dataContentDescription)
+                )
+            assertThat(latest).isEqualTo(expected)
+
+            job.cancel()
+        }
+
+    @Test
+    fun `network type - not shown when not connected`() =
+        testScope.runTest {
+            interactor.setIconGroup(THREE_G)
+            interactor.isDataConnected.value = true
+            interactor.isConnected.value = false
+
+            var latest: Icon? = null
+            val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isNull()
+
+            job.cancel()
+        }
+
+    @Test
     fun roaming() =
         testScope.runTest {
             interactor.isRoaming.value = true

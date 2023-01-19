@@ -27,9 +27,11 @@ import com.google.auto.service.AutoService
 class SystemUIIssueRegistry : IssueRegistry() {
 
     override val issues: List<Issue>
-        get() = listOf(
+        get() =
+            listOf(
                 BindServiceOnMainThreadDetector.ISSUE,
                 BroadcastSentViaContextDetector.ISSUE,
+                CleanArchitectureDependencyViolationDetector.ISSUE,
                 SlowUserQueryDetector.ISSUE_SLOW_USER_ID_QUERY,
                 SlowUserQueryDetector.ISSUE_SLOW_USER_INFO_QUERY,
                 NonInjectedMainThreadDetector.ISSUE,
@@ -37,7 +39,7 @@ class SystemUIIssueRegistry : IssueRegistry() {
                 SoftwareBitmapDetector.ISSUE,
                 NonInjectedServiceDetector.ISSUE,
                 StaticSettingsProviderDetector.ISSUE
-        )
+            )
 
     override val api: Int
         get() = CURRENT_API
@@ -45,9 +47,9 @@ class SystemUIIssueRegistry : IssueRegistry() {
         get() = 8
 
     override val vendor: Vendor =
-            Vendor(
-                    vendorName = "Android",
-                    feedbackUrl = "http://b/issues/new?component=78010",
-                    contact = "jernej@google.com"
-            )
+        Vendor(
+            vendorName = "Android",
+            feedbackUrl = "http://b/issues/new?component=78010",
+            contact = "jernej@google.com"
+        )
 }

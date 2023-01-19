@@ -91,6 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Marge inferior <xliff:g id="PERCENT">%1$d</xliff:g> per cent"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Marge esquerre <xliff:g id="PERCENT">%1$d</xliff:g> per cent"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Marge dret <xliff:g id="PERCENT">%1$d</xliff:g> per cent"</string>
+    <!-- no translation found for screenshot_work_profile_notification (2812417845875653929) -->
+    <skip />
+    <!-- no translation found for screenshot_default_files_app_name (8721579578575161912) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"Gravació de pantalla"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Processant gravació de pantalla"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificació en curs d\'una sessió de gravació de la pantalla"</string>
@@ -98,7 +102,7 @@
     <string name="screenrecord_description" msgid="1123231719680353736">"Durant la gravació, el sistema Android pot capturar qualsevol informació sensible que es mostri a la pantalla o que es reprodueixi al dispositiu. Això inclou contrasenyes, informació de pagament, fotos, missatges i àudio."</string>
     <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"Grava la pantalla completa"</string>
     <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Grava una sola aplicació"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Mentre graves, Android té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi al dispositiu. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges o altra informació sensible."</string>
+    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Mentre graves contingut, Android pot accedir a tot el que es veu a la pantalla o que es reprodueix al dispositiu. Per això cal que vagis amb compte amb les contrasenyes, les dades de pagament, els missatges o qualsevol altra informació sensible."</string>
     <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Mentre graves una aplicació, Android té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi a l\'aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges o altra informació sensible."</string>
     <string name="screenrecord_start_recording" msgid="348286842544768740">"Inicia la gravació"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Grava l\'àudio"</string>
@@ -371,11 +375,11 @@
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"El servei que ofereix aquesta funció tindrà accés a tota la informació visible a la teva pantalla o que es reprodueix al dispositiu mentre graves o emets contingut, com ara contrasenyes, detalls dels pagaments, fotos, missatges i àudio que reprodueixis."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Vols començar a gravar o emetre contingut?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Vols començar a gravar o emetre contingut amb <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"Vols permetre que <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> comparteixi o gravi?"</string>
+    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"Vols permetre que <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> comparteixi o gravi contingut?"</string>
     <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Tota la pantalla"</string>
     <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Una sola aplicació"</string>
     <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Quan estàs compartint, gravant o emetent, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi al dispositiu. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges o altra informació sensible."</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Quan estàs compartint, gravant o emetent, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi a l\'aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges o altra informació sensible."</string>
+    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Mentre comparteixes, graves o emets contingut, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> pot accedir a tot el que es veu a la pantalla o que es reprodueix a l\'aplicació. Per això cal que vagis amb compte amb les contrasenyes, les dades de pagament, els missatges o qualsevol altra informació sensible."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Continua"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Comparteix o grava una aplicació"</string>
     <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Vols permetre que aquesta aplicació comparteixi o gravi contingut?"</string>
@@ -850,10 +854,12 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Reprodueix <xliff:g id="SONG_NAME">%1$s</xliff:g> des de l\'aplicació <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Desfés"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Mou més a prop per reproduir a <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Acosta\'t a <xliff:g id="DEVICENAME">%1$s</xliff:g> per reproduir el contingut aquí"</string>
+    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
+    <skip />
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"S\'està reproduint a <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"S\'ha produït un error. Torna-ho a provar."</string>
-    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <string name="media_transfer_loading" msgid="5544017127027152422">"S\'està carregant"</string>
+    <!-- no translation found for media_ttt_default_device_type (4457646436153370169) -->
     <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactiu; comprova l\'aplicació"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"No s\'ha trobat"</string>
@@ -878,6 +884,8 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volum"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Altaveus i pantalles"</string>
+    <!-- no translation found for media_output_group_title_suggested_device (4157186235837903826) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Com funciona l\'emissió"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Emet"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Les persones properes amb dispositius Bluetooth compatibles poden escoltar el contingut multimèdia que emets"</string>
@@ -1015,5 +1023,8 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Aquesta pantalla s\'apagarà"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Dispositiu plegable desplegant-se"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Dispositiu plegable girant"</string>
-    <string name="stylus_battery_low" msgid="7134370101603167096">"Bateria del llapis òptic baixa"</string>
+    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
+    <skip />
+    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
+    <skip />
 </resources>

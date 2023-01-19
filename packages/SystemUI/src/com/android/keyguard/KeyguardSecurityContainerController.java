@@ -40,7 +40,9 @@ import android.util.Log;
 import android.util.Slog;
 import android.view.MotionEvent;
 import android.view.View;
+import android.window.OnBackAnimationCallback;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -479,6 +481,9 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     /** Called when the bouncer changes visibility. */
     public void onBouncerVisibilityChanged(@View.Visibility int visibility) {
         setBouncerVisible(visibility == View.VISIBLE);
+        if (visibility == View.INVISIBLE) {
+            mView.resetScale();
+        }
     }
 
     private void setBouncerVisible(boolean visible) {
@@ -585,6 +590,14 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
 
     public boolean needsInput() {
         return getCurrentSecurityController().needsInput();
+    }
+
+    /**
+     * @return the {@link OnBackAnimationCallback} to animate this view during a back gesture.
+     */
+    @NonNull
+    OnBackAnimationCallback getBackCallback() {
+        return mView.getBackCallback();
     }
 
     /**

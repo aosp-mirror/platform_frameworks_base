@@ -91,6 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"បន្ទាត់បែងចែក​ខាងក្រោម <xliff:g id="PERCENT">%1$d</xliff:g> ភាគរយ"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"បន្ទាត់បែងចែក​ខាងឆ្វេង <xliff:g id="PERCENT">%1$d</xliff:g> ភាគរយ"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"បន្ទាត់បែងចែក​ខាងស្ដាំ <xliff:g id="PERCENT">%1$d</xliff:g> ភាគរយ"</string>
+    <!-- no translation found for screenshot_work_profile_notification (2812417845875653929) -->
+    <skip />
+    <!-- no translation found for screenshot_default_files_app_name (8721579578575161912) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"មុខងារថត​វីដេអូអេក្រង់"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"កំពុង​ដំណើរការ​ការថតអេក្រង់"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ការជូនដំណឹង​ដែល​កំពុង​ដំណើរការ​សម្រាប់​រយៈពេលប្រើ​ការថត​សកម្មភាព​អេក្រង់"</string>
@@ -371,7 +375,7 @@
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"សេវាកម្មដែល​ផ្ដល់​មុខងារ​នេះ​នឹងមាន​សិទ្ធិ​ចូលប្រើ​ព័ត៌មាន​ទាំងអស់​ដែល​អាច​មើលឃើញ​នៅលើ​អេក្រង់​របស់អ្នក ឬ​ដែលចាក់​ពីឧបករណ៍​របស់អ្នក នៅពេល​កំពុង​ថត ឬភ្ជាប់។ ព័ត៌មាន​នេះមាន​ដូចជា ពាក្យសម្ងាត់ ព័ត៌មាន​លម្អិត​អំពីការទូទាត់​ប្រាក់ រូបថត សារ និង​សំឡេង​ដែល​អ្នកចាក់​ជាដើម។"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ចាប់ផ្ដើម​ថត ឬភ្ជាប់​មែនទេ?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"ចាប់ផ្ដើម​ថត ឬភ្ជាប់​ដោយប្រើ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ឬ?"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"អនុញ្ញាតឱ្យ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ចែករំលែក ឬថតទេ?"</string>
+    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"អនុញ្ញាតឱ្យ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ចែករំលែក ឬថត?"</string>
     <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"អេក្រង់ទាំងមូល"</string>
     <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"កម្មវិធីតែមួយ"</string>
     <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"នៅពេលអ្នកកំពុងចែករំលែក ថត ឬបញ្ជូន <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> មានសិទ្ធិចូលប្រើប្រាស់អ្វីៗដែលបង្ហាញឱ្យឃើញនៅលើអេក្រង់របស់អ្នក ឬលេងនៅលើឧបករណ៍របស់អ្នក។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះពាក្យសម្ងាត់ ព័ត៌មាន​លម្អិតអំពី​ការ​ទូទាត់ប្រាក់ សារ ឬព័ត៌មានរសើបផ្សេងទៀត។"</string>
@@ -850,10 +854,12 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"ចាក់ <xliff:g id="SONG_NAME">%1$s</xliff:g> ពី <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"ត្រឡប់វិញ"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"រំកិលឱ្យកាន់តែជិត ដើម្បីចាក់នៅលើ <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"រំកិលឱ្យកាន់តែជិត <xliff:g id="DEVICENAME">%1$s</xliff:g> ដើម្បីចាក់នៅទីនេះ"</string>
+    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
+    <skip />
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"កំពុង​ចាក់​​នៅ​លើ <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"មានអ្វីមួយខុសប្រក្រតី។ សូមព្យាយាមម្ដងទៀត។"</string>
-    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <string name="media_transfer_loading" msgid="5544017127027152422">"កំពុងផ្ទុក"</string>
+    <!-- no translation found for media_ttt_default_device_type (4457646436153370169) -->
     <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"អសកម្ម ពិនិត្យមើល​កម្មវិធី"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"រកមិន​ឃើញទេ"</string>
@@ -878,6 +884,8 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"កម្រិតសំឡេង"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ឧបករណ៍បំពងសំឡេង និងផ្ទាំងអេក្រង់"</string>
+    <!-- no translation found for media_output_group_title_suggested_device (4157186235837903826) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"របៀបដែលការផ្សាយដំណើរការ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ការ​ផ្សាយ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"មនុស្សនៅជិត​អ្នកដែលមាន​ឧបករណ៍ប៊្លូធូស​ត្រូវគ្នា​អាចស្តាប់​មេឌៀ​ដែលអ្នកកំពុងផ្សាយបាន"</string>
@@ -1015,5 +1023,8 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ អេក្រង់នេះនឹងបិទ"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ឧបករណ៍អាច​បត់បានកំពុងត្រូវបានលា"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ឧបករណ៍អាច​បត់បានកំពុងត្រូវបានលា"</string>
-    <string name="stylus_battery_low" msgid="7134370101603167096">"ថ្មប៊ិកនៅសល់តិច"</string>
+    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
+    <skip />
+    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
+    <skip />
 </resources>

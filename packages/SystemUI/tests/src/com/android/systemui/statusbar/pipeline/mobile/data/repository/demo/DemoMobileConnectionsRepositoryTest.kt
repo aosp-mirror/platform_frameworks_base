@@ -90,6 +90,14 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
     }
 
     @Test
+    fun `connectivity - defaults to connected and validated`() =
+        testScope.runTest {
+            val connectivity = underTest.defaultMobileNetworkConnectivity.value
+            assertThat(connectivity.isConnected).isTrue()
+            assertThat(connectivity.isValidated).isTrue()
+        }
+
+    @Test
     fun `network event - create new subscription`() =
         testScope.runTest {
             var latest: List<SubscriptionModel>? = null

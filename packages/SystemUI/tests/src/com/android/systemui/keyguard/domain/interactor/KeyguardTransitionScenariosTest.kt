@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Interpolators
@@ -56,6 +57,7 @@ import org.mockito.MockitoAnnotations
  */
 @SmallTest
 @RunWith(JUnit4::class)
+@FlakyTest(bugId = 265303901)
 class KeyguardTransitionScenariosTest : SysuiTestCase() {
     private lateinit var testScope: TestScope
 

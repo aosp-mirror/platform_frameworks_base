@@ -91,6 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"<xliff:g id="PERCENT">%1$d</xliff:g> %% dolnej hranice"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"<xliff:g id="PERCENT">%1$d</xliff:g> %% ľavej hranice"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"<xliff:g id="PERCENT">%1$d</xliff:g> %% pravej hranice"</string>
+    <!-- no translation found for screenshot_work_profile_notification (2812417845875653929) -->
+    <skip />
+    <!-- no translation found for screenshot_default_files_app_name (8721579578575161912) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"Rekordér obrazovky"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Spracúva sa záznam obrazovky"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Zobrazuje sa upozornenie týkajúce sa relácie záznamu obrazovky"</string>
@@ -375,9 +379,9 @@
     <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Celá obrazovka"</string>
     <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Jedna aplikácia"</string>
     <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Počas zdieľania, nahrávania alebo prenosu bude mať <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> prístup k všetkému na obrazovke, prípadne k obsahu, ktorý sa bude v zariadení prehrávať. Preto venujte zvýšenú pozornosť heslám, platobným údajom, správam a ďalším citlivým údajom."</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Počas zdieľania, nahrávania alebo prenosu bude mať aplikácia <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> prístup k všetkému obsahu, ktorý sa v nej bude zobrazovať alebo prehrávať. Preto venujte zvýšenú pozornosť heslám, platobným údajom, správam a ďalším citlivým údajom."</string>
+    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Keď zdieľate, nahrávate alebo prenášate nejakú aplikáciu, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> má prístup k všetkému obsahu, ktorý sa v aplikácii zobrazuje alebo prehráva. Dajte preto pozor na heslá, platobné údaje, osobné správy a iné citlivé údaje."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Pokračovať"</string>
-    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Aplikácia na zdieľanie alebo nahrávanie"</string>
+    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Vyberte aplikáciu, ktorú chcete zdieľať alebo nahrávať"</string>
     <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Chcete povoliť tejto aplikácii zdieľať alebo nahrávať?"</string>
     <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Počas zdieľania, nahrávania alebo prenosu bude mať táto aplikácia prístup k všetkému na obrazovke, prípadne k obsahu, ktorý sa bude v zariadení prehrávať. Venujte preto zvýšenú pozornosť heslám, platobným údajom, správam a ďalším citlivým údajom."</string>
     <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Počas zdieľania, nahrávania alebo prenosu bude mať táto aplikácia prístup k všetkému obsahu, ktorý sa v nej bude zobrazovať alebo prehrávať. Venujte preto zvýšenú pozornosť heslám, platobným údajom, správam či ďalším citlivým údajom."</string>
@@ -849,11 +853,13 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Prehrať skladbu <xliff:g id="SONG_NAME">%1$s</xliff:g> od interpreta <xliff:g id="ARTIST_NAME">%2$s</xliff:g> z aplikácie <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Prehrať skladbu <xliff:g id="SONG_NAME">%1$s</xliff:g> z aplikácie <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Späť"</string>
-    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Ak chcete prehrávať v zariadení <xliff:g id="DEVICENAME">%1$s</xliff:g>, priblížte sa"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Ak chcete prehrávať v zariadení <xliff:g id="DEVICENAME">%1$s</xliff:g>, priblížte sa k nemu"</string>
+    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Ak chcete prehrávať v zariadení <xliff:g id="DEVICENAME">%1$s</xliff:g>, priblížte sa k nemu"</string>
+    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
+    <skip />
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Prehráva sa v zariadení <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Niečo sa pokazilo. Skúste to znova."</string>
-    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <string name="media_transfer_loading" msgid="5544017127027152422">"Načítava sa"</string>
+    <!-- no translation found for media_ttt_default_device_type (4457646436153370169) -->
     <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktívne, preverte aplikáciu"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nenájdené"</string>
@@ -878,6 +884,8 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Hlasitosť"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Reproduktory a obrazovky"</string>
+    <!-- no translation found for media_output_group_title_suggested_device (4157186235837903826) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Ako vysielanie funguje"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Vysielanie"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Ľudia v okolí s kompatibilnými zariadeniami s rozhraním Bluetooth si môžu vypočuť médiá, ktoré vysielate"</string>
@@ -1015,5 +1023,8 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Táto obrazovka sa vypne"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Rozloženie skladacieho zariadenia"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Prevrátenie skladacieho zariadenia"</string>
-    <string name="stylus_battery_low" msgid="7134370101603167096">"Stav batérie dotykového pera je nízky"</string>
+    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
+    <skip />
+    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
+    <skip />
 </resources>

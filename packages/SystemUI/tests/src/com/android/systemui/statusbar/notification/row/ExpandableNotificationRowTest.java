@@ -44,16 +44,23 @@ import static org.mockito.Mockito.when;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.graphics.Color;
+import android.graphics.drawable.AnimatedVectorDrawable;
+import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.Drawable;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.DisplayMetrics;
 import android.view.View;
+import android.widget.ImageView;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
+import com.android.internal.widget.CachingIconView;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
@@ -61,6 +68,7 @@ import com.android.systemui.statusbar.notification.FeedbackIcon;
 import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
+import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
 
 import org.junit.Assert;
@@ -72,6 +80,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.util.Arrays;
 import java.util.List;
 
 @SmallTest
@@ -96,6 +105,9 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
                 mDependency,
                 TestableLooper.get(this));
         mNotificationTestHelper.setDefaultInflationFlags(FLAG_CONTENT_VIEW_ALL);
+        FakeFeatureFlags fakeFeatureFlags = new FakeFeatureFlags();
+        fakeFeatureFlags.set(Flags.NOTIFICATION_ANIMATE_BIG_PICTURE, true);
+        mNotificationTestHelper.setFeatureFlags(fakeFeatureFlags);
         // create a standard private notification row
         Notification normalNotif = mNotificationTestHelper.createNotification();
         normalNotif.publicVersion = null;
@@ -558,5 +570,124 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
         Assert.assertEquals(1f, mGroupRow.getBottomRoundness(), 0.001f);
         Assert.assertEquals(1f, mGroupRow.getChildrenContainer().getBottomRoundness(), 0.001f);
+    }
+
+    @Test
+    public void testSetContentAnimationRunning_Run() throws Exception {
+        // Create views for the notification row.
+        NotificationContentView publicLayout = mock(NotificationContentView.class);
+        mNotifRow.setPublicLayout(publicLayout);
+        NotificationContentView privateLayout = mock(NotificationContentView.class);
+        mNotifRow.setPrivateLayout(privateLayout);
+
+        mNotifRow.setAnimationRunning(true);
+        verify(publicLayout, times(1)).setContentAnimationRunning(true);
+        verify(privateLayout, times(1)).setContentAnimationRunning(true);
+    }
+
+    @Test
+    public void testSetContentAnimationRunning_Stop() {
+        // Create views for the notification row.
+        NotificationContentView publicLayout = mock(NotificationContentView.class);
+        mNotifRow.setPublicLayout(publicLayout);
+        NotificationContentView privateLayout = mock(NotificationContentView.class);
+        mNotifRow.setPrivateLayout(privateLayout);
+
+        mNotifRow.setAnimationRunning(false);
+        verify(publicLayout, times(1)).setContentAnimationRunning(false);
+        verify(privateLayout, times(1)).setContentAnimationRunning(false);
+    }
+
+    @Test
+    public void testSetContentAnimationRunningInGroupChild_Run() {
+        // Creates parent views on mGroupRow.
+        NotificationContentView publicParentLayout = mock(NotificationContentView.class);
+        mGroupRow.setPublicLayout(publicParentLayout);
+        NotificationContentView privateParentLayout = mock(NotificationContentView.class);
+        mGroupRow.setPrivateLayout(privateParentLayout);
+
+        // Create child views on mNotifRow.
+        NotificationContentView publicChildLayout = mock(NotificationContentView.class);
+        mNotifRow.setPublicLayout(publicChildLayout);
+        NotificationContentView privateChildLayout = mock(NotificationContentView.class);
+        mNotifRow.setPrivateLayout(privateChildLayout);
+        when(mNotifRow.isGroupExpanded()).thenReturn(true);
+        setMockChildrenContainer(mGroupRow, mNotifRow);
+
+        mGroupRow.setAnimationRunning(true);
+        verify(publicParentLayout, times(1)).setContentAnimationRunning(true);
+        verify(privateParentLayout, times(1)).setContentAnimationRunning(true);
+        // The child layouts should be started too.
+        verify(publicChildLayout, times(1)).setContentAnimationRunning(true);
+        verify(privateChildLayout, times(1)).setContentAnimationRunning(true);
+    }
+
+
+    @Test
+    public void testSetIconAnimationRunningGroup_Run() {
+        // Create views for a group row.
+        NotificationContentView publicParentLayout = mock(NotificationContentView.class);
+        mGroupRow.setPublicLayout(publicParentLayout);
+        NotificationContentView privateParentLayout = mock(NotificationContentView.class);
+        mGroupRow.setPrivateLayout(privateParentLayout);
+        when(mGroupRow.isGroupExpanded()).thenReturn(true);
+
+        // Sets up mNotifRow as a child ExpandableNotificationRow.
+        NotificationContentView publicChildLayout = mock(NotificationContentView.class);
+        mNotifRow.setPublicLayout(publicChildLayout);
+        NotificationContentView privateChildLayout = mock(NotificationContentView.class);
+        mNotifRow.setPrivateLayout(privateChildLayout);
+        when(mNotifRow.isGroupExpanded()).thenReturn(true);
+
+        NotificationChildrenContainer mockContainer =
+                setMockChildrenContainer(mGroupRow, mNotifRow);
+
+        // Mock the children view wrappers, and give them each an icon.
+        NotificationViewWrapper mockViewWrapper = mock(NotificationViewWrapper.class);
+        when(mockContainer.getNotificationViewWrapper()).thenReturn(mockViewWrapper);
+        CachingIconView mockIcon = mock(CachingIconView.class);
+        when(mockViewWrapper.getIcon()).thenReturn(mockIcon);
+
+        NotificationViewWrapper mockLowPriorityViewWrapper = mock(NotificationViewWrapper.class);
+        when(mockContainer.getLowPriorityViewWrapper()).thenReturn(mockLowPriorityViewWrapper);
+        CachingIconView mockLowPriorityIcon = mock(CachingIconView.class);
+        when(mockLowPriorityViewWrapper.getIcon()).thenReturn(mockLowPriorityIcon);
+
+        // Give the icon image views drawables, so we can make sure they animate.
+        // We use both AnimationDrawables and AnimatedVectorDrawables to ensure both work.
+        AnimationDrawable drawable = mock(AnimationDrawable.class);
+        AnimatedVectorDrawable vectorDrawable = mock(AnimatedVectorDrawable.class);
+        setDrawableIconsInImageView(mockIcon, drawable, vectorDrawable);
+
+        AnimationDrawable lowPriDrawable = mock(AnimationDrawable.class);
+        AnimatedVectorDrawable lowPriVectorDrawable = mock(AnimatedVectorDrawable.class);
+        setDrawableIconsInImageView(mockLowPriorityIcon, lowPriDrawable, lowPriVectorDrawable);
+
+        mGroupRow.setAnimationRunning(true);
+        verify(drawable, times(1)).start();
+        verify(vectorDrawable, times(1)).start();
+        verify(lowPriDrawable, times(1)).start();
+        verify(lowPriVectorDrawable, times(1)).start();
+    }
+
+    private void setDrawableIconsInImageView(CachingIconView icon, Drawable iconDrawable,
+            Drawable rightIconDrawable) {
+        ImageView iconView = mock(ImageView.class);
+        when(icon.findViewById(com.android.internal.R.id.icon)).thenReturn(iconView);
+        when(iconView.getDrawable()).thenReturn(iconDrawable);
+
+        ImageView rightIconView = mock(ImageView.class);
+        when(icon.findViewById(com.android.internal.R.id.right_icon)).thenReturn(rightIconView);
+        when(rightIconView.getDrawable()).thenReturn(rightIconDrawable);
+    }
+
+    private NotificationChildrenContainer setMockChildrenContainer(
+            ExpandableNotificationRow parentRow, ExpandableNotificationRow childRow) {
+        List<ExpandableNotificationRow> rowList = Arrays.asList(childRow);
+        NotificationChildrenContainer mockContainer = mock(NotificationChildrenContainer.class);
+        when(mockContainer.getNotificationChildCount()).thenReturn(1);
+        when(mockContainer.getAttachedChildren()).thenReturn(rowList);
+        parentRow.setChildrenContainer(mockContainer);
+        return mockContainer;
     }
 }

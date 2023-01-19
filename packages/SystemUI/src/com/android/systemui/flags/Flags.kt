@@ -77,12 +77,6 @@ object Flags {
     // TODO(b/254512731): Tracking Bug
     @JvmField val NOTIFICATION_DISMISSAL_FADE = releasedFlag(113, "notification_dismissal_fade")
 
-    // TODO(b/259558771): Tracking Bug
-    val STABILITY_INDEX_FIX = releasedFlag(114, "stability_index_fix")
-
-    // TODO(b/259559750): Tracking Bug
-    val SEMI_STABLE_SORT = releasedFlag(115, "semi_stable_sort")
-
     @JvmField val USE_ROUNDNESS_SOURCETYPES = releasedFlag(116, "use_roundness_sourcetype")
 
     // TODO(b/259217907)
@@ -107,6 +101,10 @@ object Flags {
 
     val FILTER_UNSEEN_NOTIFS_ON_KEYGUARD =
         unreleasedFlag(254647461, "filter_unseen_notifs_on_keyguard", teamfood = true)
+
+    // TODO(b/263414400): Tracking Bug
+    @JvmField
+    val NOTIFICATION_ANIMATE_BIG_PICTURE = unreleasedFlag(120, "notification_animate_big_picture")
 
     // 200 - keyguard/lockscreen
     // ** Flag retired **
@@ -181,7 +179,7 @@ object Flags {
      * of the Alternate/Authentication Bouncer. No visual UI changes.
      */
     // TODO(b/260619425): Tracking Bug
-    @JvmField val MODERN_ALTERNATE_BOUNCER = unreleasedFlag(219, "modern_alternate_bouncer")
+    @JvmField val MODERN_ALTERNATE_BOUNCER = releasedFlag(219, "modern_alternate_bouncer")
 
     /** Flag to control the migration of face auth to modern architecture. */
     // TODO(b/262838215): Tracking bug
@@ -538,4 +536,9 @@ object Flags {
 
     // TODO(b259590361): Tracking bug
     val EXPERIMENTAL_FLAG = unreleasedFlag(2, "exp_flag_release")
+
+    // 2600 - keyboard shortcut
+    // TODO(b/259352579): Tracking Bug
+    @JvmField
+    val SHORTCUT_LIST_SEARCH_LAYOUT = unreleasedFlag(2600, "shortcut_list_search_layout")
 }
