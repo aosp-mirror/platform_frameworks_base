@@ -318,6 +318,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     transition = mTransitionController.createTransition(type);
                 }
                 transition.start();
+                transition.mLogger.mStartWCT = wct;
                 applyTransaction(wct, -1 /*syncId*/, transition, caller);
                 if (needsSetReady) {
                     transition.setAllReady();

@@ -2599,6 +2599,12 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
+    "273212558": {
+      "message": "    info=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
     "274773837": {
       "message": "applyAnimation: anim=%s nextAppTransition=ANIM_CLIP_REVEAL transit=%s Callers=%s",
       "level": "VERBOSE",
@@ -3937,6 +3943,12 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "1621562070": {
+      "message": "    startWCT=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
     "1628345525": {
       "message": "Now opening app %s",
       "level": "VERBOSE",
@@ -4345,6 +4357,12 @@
       "group": "WM_DEBUG_ANIM",
       "at": "com\/android\/server\/wm\/DisplayRotation.java"
     },
+    "2021079047": {
+      "message": "%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
     "2022422429": {
       "message": "createAnimationAdapter(): container=%s",
       "level": "DEBUG",
@@ -4549,6 +4567,9 @@
       "tag": "WindowManager"
     },
     "WM_DEBUG_WINDOW_TRANSITIONS": {
+      "tag": "WindowManager"
+    },
+    "WM_DEBUG_WINDOW_TRANSITIONS_MIN": {
       "tag": "WindowManager"
     },
     "WM_ERROR": {
