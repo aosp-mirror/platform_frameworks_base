@@ -147,12 +147,12 @@ class CreateCredentialViewModel(
   }
 
   fun onDisabledProvidersSelected() {
-    credManRepo.onCancel()
+    credManRepo.onSettingLaunchCancel()
     dialogResult.tryEmit(DialogResult(ResultState.LAUNCH_SETTING_CANCELED))
   }
 
   fun onCancel() {
-    credManRepo.onCancel()
+    credManRepo.onUserCancel()
     dialogResult.tryEmit(DialogResult(ResultState.NORMAL_CANCELED))
   }
 

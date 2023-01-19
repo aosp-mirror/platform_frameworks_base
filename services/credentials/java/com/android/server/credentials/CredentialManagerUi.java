@@ -64,8 +64,11 @@ public class CredentialManagerUi {
             } else {
                 Slog.i(TAG, "No selection found in UI result");
             }
-        } else if (resultCode == UserSelectionDialogResult.RESULT_CODE_DIALOG_CANCELED) {
-            mCallbacks.onUiCancellation();
+        } else if (resultCode == UserSelectionDialogResult.RESULT_CODE_DIALOG_USER_CANCELED) {
+            mCallbacks.onUiCancellation(/* isUserCancellation= */ true);
+        } else if (resultCode
+                == UserSelectionDialogResult.RESULT_CODE_CANCELED_AND_LAUNCHED_SETTINGS) {
+            mCallbacks.onUiCancellation(/* isUserCancellation= */ false);
         }
     }
 
@@ -75,8 +78,8 @@ public class CredentialManagerUi {
     public interface CredentialManagerUiCallback {
         /** Called when the user makes a selection. */
         void onUiSelection(UserSelectionDialogResult selection);
-        /** Called when the user cancels the UI. */
-        void onUiCancellation();
+        /** Called when the UI is canceled without a successful provider result. */
+        void onUiCancellation(boolean isUserCancellation);
     }
     public CredentialManagerUi(Context context, int userId,
             CredentialManagerUiCallback callbacks) {

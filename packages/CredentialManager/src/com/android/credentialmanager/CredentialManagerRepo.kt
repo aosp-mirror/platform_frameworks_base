@@ -99,10 +99,20 @@ class CredentialManagerRepo(
     )
   }
 
-  fun onCancel() {
+  // The dialog is canceled by the user.
+  fun onUserCancel() {
+    onCancel(BaseDialogResult.RESULT_CODE_DIALOG_USER_CANCELED)
+  }
+
+  // The dialog is canceled because we launched into settings.
+  fun onSettingLaunchCancel() {
+    onCancel(BaseDialogResult.RESULT_CODE_DIALOG_COMPLETE_WITH_SELECTION)
+  }
+
+  private fun onCancel(cancelCode: Int) {
     val resultData = Bundle()
     BaseDialogResult.addToBundle(BaseDialogResult(requestInfo.token), resultData)
-    resultReceiver?.send(BaseDialogResult.RESULT_CODE_DIALOG_CANCELED, resultData)
+    resultReceiver?.send(cancelCode, resultData)
   }
 
   fun onOptionSelected(

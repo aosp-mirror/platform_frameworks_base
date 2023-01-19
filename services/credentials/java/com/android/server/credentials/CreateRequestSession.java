@@ -107,9 +107,14 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
     }
 
     @Override
-    public void onUiCancellation() {
-        respondToClientWithErrorAndFinish(CreateCredentialException.TYPE_USER_CANCELED,
-                "User cancelled the selector");
+    public void onUiCancellation(boolean isUserCancellation) {
+        if (isUserCancellation) {
+            respondToClientWithErrorAndFinish(CreateCredentialException.TYPE_USER_CANCELED,
+                    "User cancelled the selector");
+        } else {
+            respondToClientWithErrorAndFinish(CreateCredentialException.TYPE_INTERRUPTED,
+                    "The UI was interrupted - please try again.");
+        }
     }
 
     private void respondToClientWithResponseAndFinish(CreateCredentialResponse response) {
