@@ -528,7 +528,7 @@ class UidPermissionPolicy : SchemePolicy() {
                     it.isTree && it.name == permissionTreeName
                 }
             ) && (
-                disabledSystemPackage?.permissions?.anyIndexed {
+                disabledSystemPackage?.permissions?.anyIndexed { _, it ->
                     it.isTree && it.name == permissionTreeName
                 } != true
             )
@@ -545,7 +545,7 @@ class UidPermissionPolicy : SchemePolicy() {
                     !it.isTree && it.name == permissionName
                 }
             ) && (
-                disabledSystemPackage?.permissions?.anyIndexed {
+                disabledSystemPackage?.permissions?.anyIndexed { _, it ->
                     !it.isTree && it.name == permissionName
                 } != true
             )) {
