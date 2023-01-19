@@ -32,11 +32,11 @@ import javax.inject.Inject
  * gesture is detected, add a callback via [addOnGestureDetectedCallback].
  */
 @SysUISingleton
-open class SwipeStatusBarAwayGestureHandler @Inject constructor(
+open class SwipeUpGestureHandler @Inject constructor(
     context: Context,
     private val statusBarWindowController: StatusBarWindowController,
-    private val logger: SwipeStatusBarAwayGestureLogger
-) : GenericGestureDetector(SwipeStatusBarAwayGestureHandler::class.simpleName!!) {
+    private val logger: SwipeUpGestureLogger
+) : GenericGestureDetector(SwipeUpGestureHandler::class.simpleName!!) {
 
     private var startY: Float = 0f
     private var startTime: Long = 0L
@@ -72,11 +72,11 @@ open class SwipeStatusBarAwayGestureHandler @Inject constructor(
                 }
                 if (
                     // Gesture is up
-                    ev.y < startY
+                    ev.y < startY &&
                     // Gesture went far enough
-                    && (startY - ev.y) >= swipeDistanceThreshold
+                    (startY - ev.y) >= swipeDistanceThreshold &&
                     // Gesture completed quickly enough
-                    && (ev.eventTime - startTime) < SWIPE_TIMEOUT_MS
+                    (ev.eventTime - startTime) < SWIPE_TIMEOUT_MS
                 ) {
                     monitoringCurrentTouch = false
                     logger.logGestureDetected(ev.y.toInt())

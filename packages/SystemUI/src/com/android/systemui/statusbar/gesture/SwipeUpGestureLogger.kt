@@ -16,14 +16,14 @@
 
 package com.android.systemui.statusbar.gesture
 
-import com.android.systemui.log.dagger.SwipeStatusBarAwayLog
+import com.android.systemui.log.dagger.SwipeUpLog
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel
 import javax.inject.Inject
 
-/** Log messages for [SwipeStatusBarAwayGestureHandler]. */
-class SwipeStatusBarAwayGestureLogger @Inject constructor(
-    @SwipeStatusBarAwayLog private val buffer: LogBuffer
+/** Log messages for [SwipeUpGestureHandler]. */
+class SwipeUpGestureLogger @Inject constructor(
+    @SwipeUpLog private val buffer: LogBuffer,
 ) {
     fun logGestureDetectionStarted(y: Int) {
         buffer.log(
@@ -61,4 +61,4 @@ class SwipeStatusBarAwayGestureLogger @Inject constructor(
     }
 }
 
-private const val TAG = "SwipeStatusBarAwayGestureHandler"
+private const val TAG = "SwipeUpGestureHandler"
