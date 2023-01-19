@@ -24,7 +24,7 @@ import android.content.Intent
 import android.content.pm.SigningInfo
 import android.credentials.CreateCredentialRequest
 import android.credentials.Credential.TYPE_PASSWORD_CREDENTIAL
-import android.credentials.GetCredentialOption
+import android.credentials.CredentialOption
 import android.credentials.GetCredentialRequest
 import android.credentials.ui.Constants
 import android.credentials.ui.Entry
@@ -496,8 +496,8 @@ class CredentialManagerRepo(
             GetCredentialRequest.Builder(
                 Bundle()
             )
-                .addGetCredentialOption(
-                    GetCredentialOption(
+                .addCredentialOption(
+                    CredentialOption(
                         TYPE_PUBLIC_KEY_CREDENTIAL,
                         Bundle(),
                         Bundle(), /*isSystemProviderRequired=*/

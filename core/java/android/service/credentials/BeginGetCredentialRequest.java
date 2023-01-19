@@ -19,7 +19,6 @@ package android.service.credentials;
 import android.annotation.NonNull;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.credentials.GetCredentialOption;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -33,7 +32,7 @@ import java.util.Objects;
 /**
  * Query stage request for getting user's credentials from a given credential provider.
  *
- * <p>This request contains a list of {@link GetCredentialOption} that have parameters
+ * <p>This request contains a list of {@link BeginGetCredentialOption} that have parameters
  * to be used to query credentials, and return a list of {@link CredentialEntry} to be set
  * on the {@link BeginGetCredentialResponse}. This list is then shown to the user on a selector.
  *

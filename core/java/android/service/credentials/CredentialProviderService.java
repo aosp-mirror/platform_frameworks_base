@@ -308,7 +308,7 @@ public abstract class CredentialProviderService extends Service {
      *
      * <p>This API denotes a query stage request for getting user's credentials from a given
      * credential provider. The request contains a list of
-     * {@link android.credentials.GetCredentialOption} that have parameters to be used for
+     * {@link BeginGetCredentialOption} that have parameters to be used for
      * populating candidate credentials, as a list of {@link CredentialEntry} to be set
      * on the {@link BeginGetCredentialResponse}. This list is then shown to the user on a
      * selector.

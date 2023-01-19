@@ -29,8 +29,8 @@ import android.credentials.ClearCredentialStateRequest;
 import android.credentials.CreateCredentialException;
 import android.credentials.CreateCredentialRequest;
 import android.credentials.CredentialDescription;
+import android.credentials.CredentialOption;
 import android.credentials.GetCredentialException;
-import android.credentials.GetCredentialOption;
 import android.credentials.GetCredentialRequest;
 import android.credentials.IClearCredentialStateCallback;
 import android.credentials.ICreateCredentialCallback;
@@ -268,10 +268,10 @@ public final class CredentialManagerService
 
         // All requested credential descriptions based on the given request.
         Set<String> requestedCredentialDescriptions =
-                request.getGetCredentialOptions().stream().map(
-                        getCredentialOption -> getCredentialOption
+                request.getCredentialOptions().stream().map(
+                        credentialOption -> credentialOption
                                         .getCredentialRetrievalData()
-                                        .getString(GetCredentialOption
+                                        .getString(CredentialOption
                                                 .FLATTENED_REQUEST))
                         .collect(Collectors.toSet());
 
@@ -342,11 +342,11 @@ public final class CredentialManagerService
 
             // Initiate all provider sessions
             List<ProviderSession> providerSessions =
-                        initiateProviderSessions(
-                                session,
-                                request.getGetCredentialOptions().stream()
-                                        .map(GetCredentialOption::getType)
-                                        .collect(Collectors.toList()));
+                    initiateProviderSessions(
+                            session,
+                            request.getCredentialOptions().stream()
+                                    .map(CredentialOption::getType)
+                                    .collect(Collectors.toList()));
 
             if (providerSessions.isEmpty()) {
                 try {

@@ -27,9 +27,11 @@ import com.android.internal.util.AnnotationValidations;
 import com.android.internal.util.Preconditions;
 
 /**
- * A specific type of credential request.
+ * Information about a specific type of credential to be requested during a {@link
+ * CredentialManager#getCredential(GetCredentialRequest, Activity, CancellationSignal, Executor,
+ * OutcomeReceiver)} operation.
  */
-public final class GetCredentialOption implements Parcelable {
+public final class CredentialOption implements Parcelable {
 
     /**
      * Bundle key to the flattened version of the JSON request string. Framework will use this key
@@ -118,7 +120,7 @@ public final class GetCredentialOption implements Parcelable {
 
     @Override
     public String toString() {
-        return "GetCredentialOption {"
+        return "CredentialOption {"
                 + "type=" + mType
                 + ", requestData=" + mCredentialRetrievalData
                 + ", candidateQueryData=" + mCandidateQueryData
@@ -127,17 +129,17 @@ public final class GetCredentialOption implements Parcelable {
     }
 
     /**
-     * Constructs a {@link GetCredentialOption}.
+     * Constructs a {@link CredentialOption}.
      *
-     * @param type                    the requested credential type
-     * @param credentialRetrievalData the request data
-     * @param candidateQueryData      the partial request data that will be sent to the provider
-     *                                during the initial credential candidate query stage
-     * @param isSystemProviderRequired   whether the request must only be fulfilled by a system
-     *                                provider
+     * @param type                     the requested credential type
+     * @param credentialRetrievalData  the request data
+     * @param candidateQueryData       the partial request data that will be sent to the provider
+     *                                 during the initial credential candidate query stage
+     * @param isSystemProviderRequired whether the request must only be fulfilled by a system
+     *                                 provider
      * @throws IllegalArgumentException If type is empty.
      */
-    public GetCredentialOption(
+    public CredentialOption(
             @NonNull String type,
             @NonNull Bundle credentialRetrievalData,
             @NonNull Bundle candidateQueryData,
@@ -150,7 +152,7 @@ public final class GetCredentialOption implements Parcelable {
         mIsSystemProviderRequired = isSystemProviderRequired;
     }
 
-    private GetCredentialOption(@NonNull Parcel in) {
+    private CredentialOption(@NonNull Parcel in) {
         String type = in.readString8();
         Bundle data = in.readBundle();
         Bundle candidateQueryData = in.readBundle();
@@ -165,16 +167,16 @@ public final class GetCredentialOption implements Parcelable {
         mIsSystemProviderRequired = isSystemProviderRequired;
     }
 
-    public static final @NonNull Parcelable.Creator<GetCredentialOption> CREATOR =
-            new Parcelable.Creator<GetCredentialOption>() {
-                @Override
-                public GetCredentialOption[] newArray(int size) {
-                    return new GetCredentialOption[size];
-                }
+    @NonNull
+    public static final Parcelable.Creator<CredentialOption> CREATOR = new Parcelable.Creator<>() {
+        @Override
+        public CredentialOption[] newArray(int size) {
+            return new CredentialOption[size];
+        }
 
-                @Override
-                public GetCredentialOption createFromParcel(@NonNull Parcel in) {
-                    return new GetCredentialOption(in);
-                }
-            };
+        @Override
+        public CredentialOption createFromParcel(@NonNull Parcel in) {
+            return new CredentialOption(in);
+        }
+    };
 }

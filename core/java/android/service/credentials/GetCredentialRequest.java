@@ -17,7 +17,7 @@
 package android.service.credentials;
 
 import android.annotation.NonNull;
-import android.credentials.GetCredentialOption;
+import android.credentials.CredentialOption;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -32,28 +32,30 @@ import com.android.internal.util.AnnotationValidations;
  */
 public final class GetCredentialRequest implements Parcelable {
     /** Calling package of the app requesting for credentials. */
-    private final @NonNull CallingAppInfo mCallingAppInfo;
+    @NonNull
+    private final CallingAppInfo mCallingAppInfo;
 
     /**
      * Holds parameters to be used for retrieving a specific type of credential.
      */
-    private final @NonNull GetCredentialOption mGetCredentialOption;
+    @NonNull
+    private final CredentialOption mCredentialOption;
 
     public GetCredentialRequest(@NonNull CallingAppInfo callingAppInfo,
-            @NonNull GetCredentialOption getCredentialOption) {
+            @NonNull CredentialOption credentialOption) {
         this.mCallingAppInfo = callingAppInfo;
-        this.mGetCredentialOption = getCredentialOption;
+        this.mCredentialOption = credentialOption;
     }
 
     private GetCredentialRequest(@NonNull Parcel in) {
         mCallingAppInfo = in.readTypedObject(CallingAppInfo.CREATOR);
         AnnotationValidations.validate(NonNull.class, null, mCallingAppInfo);
-        mGetCredentialOption = in.readTypedObject(GetCredentialOption.CREATOR);
-        AnnotationValidations.validate(NonNull.class, null, mGetCredentialOption);
+        mCredentialOption = in.readTypedObject(CredentialOption.CREATOR);
+        AnnotationValidations.validate(NonNull.class, null, mCredentialOption);
     }
 
-    public static final @NonNull Creator<GetCredentialRequest> CREATOR =
-            new Creator<GetCredentialRequest>() {
+    @NonNull public static final  Creator<GetCredentialRequest> CREATOR =
+            new Creator<>() {
                 @Override
                 public GetCredentialRequest createFromParcel(Parcel in) {
                     return new GetCredentialRequest(in);
@@ -73,20 +75,22 @@ public final class GetCredentialRequest implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeTypedObject(mCallingAppInfo, flags);
-        dest.writeTypedObject(mGetCredentialOption, flags);
+        dest.writeTypedObject(mCredentialOption, flags);
     }
 
     /**
      * Returns info pertaining to the app requesting credentials.
      */
-    public @NonNull CallingAppInfo getCallingAppInfo() {
+    @NonNull
+    public CallingAppInfo getCallingAppInfo() {
         return mCallingAppInfo;
     }
 
     /**
      * Returns the parameters needed to return a given type of credential.
      */
-    public @NonNull GetCredentialOption getGetCredentialOption() {
-        return mGetCredentialOption;
+    @NonNull
+    public CredentialOption getGetCredentialOption() {
+        return mCredentialOption;
     }
 }
