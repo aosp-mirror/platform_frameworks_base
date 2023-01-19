@@ -41,7 +41,7 @@ import java.util.concurrent.Executor;
  * @hide
  */
 @SystemApi
-@SystemService(Context.TIME_MANAGER)
+@SystemService(Context.TIME_MANAGER_SERVICE)
 public final class TimeManager {
     private static final String TAG = "time.TimeManager";
     private static final boolean DEBUG = false;
