@@ -223,6 +223,27 @@ public class UserLifecycleTests {
         }
     }
 
+    /** Tests creating and starting a new user. */
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
+    public void createAndStartUser_realistic() throws RemoteException {
+        while (mRunner.keepRunning()) {
+            Log.d(TAG, "Starting timer");
+            final int userId = createUserNoFlags();
+
+            // Don't use this.startUserInBackgroundAndWaitForUnlock() since only waiting until
+            // ACTION_USER_STARTED.
+            runThenWaitForBroadcasts(userId, () -> {
+                mIam.startUserInBackground(userId);
+            }, Intent.ACTION_USER_STARTED);
+
+            mRunner.pauseTiming();
+            Log.d(TAG, "Stopping timer");
+            removeUser(userId);
+            waitCoolDownPeriod();
+            mRunner.resumeTimingForNextIteration();
+        }
+    }
+
     /**
      * Tests starting an uninitialized user.
      * Measures the time until ACTION_USER_STARTED is received.
@@ -295,6 +316,29 @@ public class UserLifecycleTests {
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
             removeUser(userId);
+            mRunner.resumeTimingForNextIteration();
+        }
+    }
+
+    /**
+     * Tests starting & unlocking an uninitialized user.
+     * Measures the time until unlock listener is triggered and user is unlocked.
+     */
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
+    public void startAndUnlockUser_realistic() throws RemoteException {
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            final int userId = createUserNoFlags();
+            mRunner.resumeTiming();
+            Log.d(TAG, "Starting timer");
+
+            // Waits for UserState.mUnlockProgress.finish().
+            startUserInBackgroundAndWaitForUnlock(userId);
+
+            mRunner.pauseTiming();
+            Log.d(TAG, "Stopping timer");
+            removeUser(userId);
+            waitCoolDownPeriod();
             mRunner.resumeTimingForNextIteration();
         }
     }
@@ -527,7 +571,7 @@ public class UserLifecycleTests {
         removeUser(userId);
     }
 
-    /** Tests reaching LOOKED_BOOT_COMPLETE when switching to uninitialized user. */
+    /** Tests reaching LOCKED_BOOT_COMPLETE when switching to uninitialized user. */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void lockedBootCompleted() throws RemoteException {
         while (mRunner.keepRunning()) {
@@ -544,6 +588,29 @@ public class UserLifecycleTests {
 
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
+            switchUserNoCheck(startUser);
+            removeUser(userId);
+            mRunner.resumeTimingForNextIteration();
+        }
+    }
+
+    /** Tests reaching LOCKED_BOOT_COMPLETE when switching to uninitialized user. */
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
+    public void lockedBootCompleted_realistic() throws RemoteException {
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            final int startUser = ActivityManager.getCurrentUser();
+            final int userId = createUserNoFlags();
+
+            waitCoolDownPeriod();
+            mUserSwitchWaiter.runThenWaitUntilBootCompleted(userId, () -> {
+                mRunner.resumeTiming();
+                Log.d(TAG, "Starting timer");
+                mAm.switchUser(userId);
+            }, () -> fail("Failed to achieve onLockedBootComplete for user " + userId));
+
+            mRunner.pauseTiming();
+            Log.d(TAG, "Stopping timer");
             switchUserNoCheck(startUser);
             removeUser(userId);
             mRunner.resumeTimingForNextIteration();
@@ -579,6 +646,33 @@ public class UserLifecycleTests {
         }
     }
 
+    /** Tests stopping an ephemeral foreground user. */
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
+    public void ephemeralUserStopped_realistic() throws RemoteException {
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            final int startUser = ActivityManager.getCurrentUser();
+            final int userId = createUserWithFlags(UserInfo.FLAG_EPHEMERAL | UserInfo.FLAG_DEMO);
+            runThenWaitForBroadcasts(userId, () -> {
+                switchUser(userId);
+            }, Intent.ACTION_MEDIA_MOUNTED);
+
+            waitCoolDownPeriod();
+            mUserSwitchWaiter.runThenWaitUntilSwitchCompleted(startUser, () -> {
+                runThenWaitForBroadcasts(userId, () -> {
+                    mRunner.resumeTiming();
+                    Log.d(TAG, "Starting timer");
+
+                    mAm.switchUser(startUser);
+                }, Intent.ACTION_USER_STOPPED);
+
+                mRunner.pauseTiming();
+                Log.d(TAG, "Stopping timer");
+            }, null);
+            mRunner.resumeTimingForNextIteration();
+        }
+    }
+
     /** Tests creating a new profile. */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void managedProfileCreate() throws RemoteException {
@@ -592,6 +686,24 @@ public class UserLifecycleTests {
             Log.i(TAG, "Stopping timer");
             attestTrue("Failed creating profile " + userId, mUm.isManagedProfile(userId));
             removeUser(userId);
+            mRunner.resumeTimingForNextIteration();
+        }
+    }
+
+    /** Tests creating a new profile. */
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
+    public void managedProfileCreate_realistic() throws RemoteException {
+        assumeTrue(mHasManagedUserFeature);
+
+        while (mRunner.keepRunning()) {
+            Log.d(TAG, "Starting timer");
+            final int userId = createManagedProfile();
+
+            mRunner.pauseTiming();
+            Log.d(TAG, "Stopping timer");
+            attestTrue("Failed creating profile " + userId, mUm.isManagedProfile(userId));
+            removeUser(userId);
+            waitCoolDownPeriod();
             mRunner.resumeTimingForNextIteration();
         }
     }
@@ -612,6 +724,27 @@ public class UserLifecycleTests {
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
             removeUser(userId);
+            mRunner.resumeTimingForNextIteration();
+        }
+    }
+
+    /** Tests starting (unlocking) an uninitialized profile. */
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
+    public void managedProfileUnlock_realistic() throws RemoteException {
+        assumeTrue(mHasManagedUserFeature);
+
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            final int userId = createManagedProfile();
+            mRunner.resumeTiming();
+            Log.d(TAG, "Starting timer");
+
+            startUserInBackgroundAndWaitForUnlock(userId);
+
+            mRunner.pauseTiming();
+            Log.d(TAG, "Stopping timer");
+            removeUser(userId);
+            waitCoolDownPeriod();
             mRunner.resumeTimingForNextIteration();
         }
     }
@@ -639,6 +772,29 @@ public class UserLifecycleTests {
         }
     }
 
+    /** Tests starting (unlocking) a previously-started, but no-longer-running, profile. */
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
+    public void managedProfileUnlock_stopped_realistic() throws RemoteException {
+        assumeTrue(mHasManagedUserFeature);
+        final int userId = createManagedProfile();
+        // Start the profile initially, then stop it. Similar to setQuietModeEnabled.
+        startUserInBackgroundAndWaitForUnlock(userId);
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            stopUserAfterWaitingForBroadcastIdle(userId, true);
+            mRunner.resumeTiming();
+            Log.d(TAG, "Starting timer");
+
+            startUserInBackgroundAndWaitForUnlock(userId);
+
+            mRunner.pauseTiming();
+            Log.d(TAG, "Stopping timer");
+            waitCoolDownPeriod();
+            mRunner.resumeTimingForNextIteration();
+        }
+        removeUser(userId);
+    }
+
     /**
      * Tests starting (unlocking) & launching an already-installed app in an uninitialized profile.
      */
@@ -660,6 +816,32 @@ public class UserLifecycleTests {
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
             removeUser(userId);
+            mRunner.resumeTimingForNextIteration();
+        }
+    }
+
+    /**
+     * Tests starting (unlocking) & launching an already-installed app in an uninitialized profile.
+     */
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
+    public void managedProfileUnlockAndLaunchApp_realistic() throws RemoteException {
+        assumeTrue(mHasManagedUserFeature);
+
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            final int userId = createManagedProfile();
+            WindowManagerGlobal.getWindowManagerService().dismissKeyguard(null, null);
+            installPreexistingApp(userId, DUMMY_PACKAGE_NAME);
+            mRunner.resumeTiming();
+            Log.d(TAG, "Starting timer");
+
+            startUserInBackgroundAndWaitForUnlock(userId);
+            startApp(userId, DUMMY_PACKAGE_NAME);
+
+            mRunner.pauseTiming();
+            Log.d(TAG, "Stopping timer");
+            removeUser(userId);
+            waitCoolDownPeriod();
             mRunner.resumeTimingForNextIteration();
         }
     }
@@ -696,6 +878,39 @@ public class UserLifecycleTests {
         }
     }
 
+    /**
+     * Tests starting (unlocking) and launching a previously-launched app
+     * in a previously-started, but no-longer-running, profile.
+     * A sort of combination of {@link #managedProfileUnlockAndLaunchApp} and
+     * {@link #managedProfileUnlock_stopped}}.
+     */
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
+    public void managedProfileUnlockAndLaunchApp_stopped_realistic() throws RemoteException {
+        assumeTrue(mHasManagedUserFeature);
+
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            final int userId = createManagedProfile();
+            WindowManagerGlobal.getWindowManagerService().dismissKeyguard(null, null);
+            installPreexistingApp(userId, DUMMY_PACKAGE_NAME);
+            startUserInBackgroundAndWaitForUnlock(userId);
+            startApp(userId, DUMMY_PACKAGE_NAME);
+            stopUserAfterWaitingForBroadcastIdle(userId, true);
+            SystemClock.sleep(1_000); // 1 second cool-down before re-starting profile.
+            mRunner.resumeTiming();
+            Log.d(TAG, "Starting timer");
+
+            startUserInBackgroundAndWaitForUnlock(userId);
+            startApp(userId, DUMMY_PACKAGE_NAME);
+
+            mRunner.pauseTiming();
+            Log.d(TAG, "Stopping timer");
+            removeUser(userId);
+            waitCoolDownPeriod();
+            mRunner.resumeTimingForNextIteration();
+        }
+    }
+
     /** Tests installing a pre-existing app in an uninitialized profile. */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void managedProfileInstall() throws RemoteException {
@@ -712,6 +927,27 @@ public class UserLifecycleTests {
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
             removeUser(userId);
+            mRunner.resumeTimingForNextIteration();
+        }
+    }
+
+    /** Tests installing a pre-existing app in an uninitialized profile. */
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
+    public void managedProfileInstall_realistic() throws RemoteException {
+        assumeTrue(mHasManagedUserFeature);
+
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            final int userId = createManagedProfile();
+            mRunner.resumeTiming();
+            Log.d(TAG, "Starting timer");
+
+            installPreexistingApp(userId, DUMMY_PACKAGE_NAME);
+
+            mRunner.pauseTiming();
+            Log.d(TAG, "Stopping timer");
+            removeUser(userId);
+            waitCoolDownPeriod();
             mRunner.resumeTimingForNextIteration();
         }
     }
@@ -742,6 +978,33 @@ public class UserLifecycleTests {
         }
     }
 
+    /**
+     * Tests creating a new profile, starting (unlocking) it, installing an app,
+     * and launching that app in it.
+     */
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
+    public void managedProfileCreateUnlockInstallAndLaunchApp_realistic() throws RemoteException {
+        assumeTrue(mHasManagedUserFeature);
+
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            WindowManagerGlobal.getWindowManagerService().dismissKeyguard(null, null);
+            mRunner.resumeTiming();
+            Log.d(TAG, "Starting timer");
+
+            final int userId = createManagedProfile();
+            startUserInBackgroundAndWaitForUnlock(userId);
+            installPreexistingApp(userId, DUMMY_PACKAGE_NAME);
+            startApp(userId, DUMMY_PACKAGE_NAME);
+
+            mRunner.pauseTiming();
+            Log.d(TAG, "Stopping timer");
+            removeUser(userId);
+            waitCoolDownPeriod();
+            mRunner.resumeTimingForNextIteration();
+        }
+    }
+
     /** Tests stopping a profile. */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void managedProfileStopped() throws RemoteException {
@@ -764,6 +1027,30 @@ public class UserLifecycleTests {
             removeUser(userId);
             mRunner.resumeTimingForNextIteration();
         }
+    }
+
+    /** Tests stopping a profile. */
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
+    public void managedProfileStopped_realistic() throws RemoteException {
+        assumeTrue(mHasManagedUserFeature);
+        final int userId = createManagedProfile();
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+
+            runThenWaitForBroadcasts(userId, () -> {
+                startUserInBackgroundAndWaitForUnlock(userId);
+            }, Intent.ACTION_MEDIA_MOUNTED);
+            waitCoolDownPeriod();
+            mRunner.resumeTiming();
+            Log.d(TAG, "Starting timer");
+
+            stopUser(userId, true);
+
+            mRunner.pauseTiming();
+            Log.d(TAG, "Stopping timer");
+            mRunner.resumeTimingForNextIteration();
+        }
+        removeUser(userId);
     }
 
     // TODO: This is just a POC. Do this properly and add more.
