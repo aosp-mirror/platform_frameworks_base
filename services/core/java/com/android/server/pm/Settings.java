@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import static android.app.admin.flags.Flags.crossUserSuspensionEnabled;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
@@ -342,6 +343,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
     private static final String ATTR_DISTRACTION_FLAGS = "distraction_flags";
     private static final String ATTR_SUSPENDED = "suspended";
     private static final String ATTR_SUSPENDING_PACKAGE = "suspending-package";
+    private static final String ATTR_SUSPENDING_USER = "suspending-user";
 
     private static final String ATTR_OPTIONAL = "optional";
     /**
@@ -2051,7 +2053,20 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             Slog.wtf(TAG, "No suspendingPackage found inside tag " + TAG_SUSPEND_PARAMS);
             return null;
         }
-        final int suspendingUserId = userId;
+        int suspendingUserId;
+        if (crossUserSuspensionEnabled()) {
+            suspendingUserId = parser.getAttributeInt(
+                    null, ATTR_SUSPENDING_USER, UserHandle.USER_NULL);
+            if (suspendingUserId == UserHandle.USER_NULL) {
+                suspendingUserId = switch (suspendingPackage) {
+                    case "root", "com.android.shell", PLATFORM_PACKAGE_NAME
+                            -> UserHandle.USER_SYSTEM;
+                    default -> userId;
+                };
+            }
+        } else {
+            suspendingUserId = userId;
+        }
         return Map.entry(
                 UserPackage.of(suspendingUserId, suspendingPackage),
                 SuspendParams.restoreFromXml(parser));
@@ -2418,6 +2433,10 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                                 serializer.startTag(null, TAG_SUSPEND_PARAMS);
                                 serializer.attribute(null, ATTR_SUSPENDING_PACKAGE,
                                         suspendingPackage.packageName);
+                                if (crossUserSuspensionEnabled()) {
+                                    serializer.attributeInt(null, ATTR_SUSPENDING_USER,
+                                            suspendingPackage.userId);
+                                }
                                 final SuspendParams params =
                                         ustate.getSuspendParams().valueAt(i);
                                 if (params != null) {
