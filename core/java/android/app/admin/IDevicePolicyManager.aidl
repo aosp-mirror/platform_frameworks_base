@@ -418,8 +418,8 @@ interface IDevicePolicyManager {
     int getOrganizationColor(in ComponentName admin);
     int getOrganizationColorForUser(int userHandle);
 
-    void setOrganizationName(in ComponentName admin, in CharSequence title);
-    CharSequence getOrganizationName(in ComponentName admin);
+    void setOrganizationName(in ComponentName admin, String callerPackageName, in CharSequence title);
+    CharSequence getOrganizationName(in ComponentName admin, String callerPackageName);
     CharSequence getDeviceOwnerOrganizationName();
     CharSequence getOrganizationNameForUser(int userHandle);
 

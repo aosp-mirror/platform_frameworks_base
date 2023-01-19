@@ -20,6 +20,7 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.MANAGE_DEVICE_ADMINS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_CAMERA;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_CAMERA;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_CERTIFICATES;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_FACTORY_RESET;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_INPUT_METHODS;
@@ -12960,7 +12961,8 @@ public class DevicePolicyManager {
      * cannot manage it through the UI, and {@link #PERMISSION_GRANT_STATE_GRANTED granted} in which
      * the permission is granted and the user cannot manage it through the UI. This method can only
      * be called by a profile owner, device owner, or a delegate given the
-     * {@link #DELEGATION_PERMISSION_GRANT} scope via {@link #setDelegatedScopes}.
+     * {@link #DELEGATION_PERMISSION_GRANT} scope via {@link #setDelegatedScopes} or holders of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS} .
      * <p/>
      * Note that user cannot manage other permissions in the affected group through the UI
      * either and their granted state will be kept as the current value. Thus, it's recommended that
@@ -13023,14 +13025,16 @@ public class DevicePolicyManager {
      * the permissions listed above and {@code grantState} of
      * {@code #PERMISSION_GRANT_STATE_GRANTED}), but may deny them.
      *
-     * @param admin Which profile or device owner this request is associated with.
+     * @param admin Which profile or device owner this request is associated with. {@code null} if
+     *              the caller is not a device policy controller.
      * @param packageName The application to grant or revoke a permission to.
      * @param permission The permission to grant or revoke.
      * @param grantState The permission grant state which is one of
      *            {@link #PERMISSION_GRANT_STATE_DENIED}, {@link #PERMISSION_GRANT_STATE_DEFAULT},
      *            {@link #PERMISSION_GRANT_STATE_GRANTED},
      * @return whether the permission was successfully granted or revoked.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner or holder of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS}.
      * @see #PERMISSION_GRANT_STATE_DENIED
      * @see #PERMISSION_GRANT_STATE_DEFAULT
      * @see #PERMISSION_GRANT_STATE_GRANTED
@@ -13067,10 +13071,10 @@ public class DevicePolicyManager {
      * {@link #DELEGATION_PERMISSION_GRANT} scope via {@link #setDelegatedScopes}.
      *
      * @param admin Which profile or device owner this request is associated with, or {@code null}
-     *            if the caller is a permission grant delegate.
+     *            if the caller is not a device policy controller..
      * @param packageName The application to check the grant state for.
      * @param permission The permission to check for.
-     * @return the current grant state specified by device policy. If the profile or device owner
+     * @return the current grant state specified by device policy. If admins have not set a grant
      *         has not set a grant state, the return value is
      *         {@link #PERMISSION_GRANT_STATE_DEFAULT}. This does not indicate whether or not the
      *         permission is currently granted for the package.
@@ -13079,7 +13083,8 @@ public class DevicePolicyManager {
      *         be one of {@link #PERMISSION_GRANT_STATE_DENIED} or
      *         {@link #PERMISSION_GRANT_STATE_GRANTED}, which indicates if the permission is
      *         currently denied or granted.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner or holder of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS}.
      * @see #setPermissionGrantState(ComponentName, String, String, int)
      * @see PackageManager#checkPermission(String, String)
      * @see #setDelegatedScopes
@@ -13785,7 +13790,7 @@ public class DevicePolicyManager {
     public void setOrganizationName(@Nullable ComponentName admin, @Nullable CharSequence title) {
         throwIfParentInstance("setOrganizationName");
         try {
-            mService.setOrganizationName(admin, title);
+            mService.setOrganizationName(admin, mContext.getPackageName(), title);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -13809,7 +13814,7 @@ public class DevicePolicyManager {
     public @Nullable CharSequence getOrganizationName(@Nullable ComponentName admin) {
         throwIfParentInstance("getOrganizationName");
         try {
-            return mService.getOrganizationName(admin);
+            return mService.getOrganizationName(admin, mContext.getPackageName());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
