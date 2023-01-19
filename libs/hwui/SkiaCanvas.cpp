@@ -19,6 +19,8 @@
 #include <SkAndroidFrameworkUtils.h>
 #include <SkAnimatedImage.h>
 #include <SkBitmap.h>
+#include <SkBlendMode.h>
+#include <SkCanvas.h>
 #include <SkCanvasPriv.h>
 #include <SkCanvasStateUtils.h>
 #include <SkColorFilter.h>
@@ -35,7 +37,6 @@
 #include <SkRect.h>
 #include <SkRefCnt.h>
 #include <SkShader.h>
-#include <SkTemplates.h>
 #include <SkTextBlob.h>
 #include <SkVertices.h>
 
@@ -45,13 +46,14 @@
 
 #include "CanvasProperty.h"
 #include "NinePatchUtils.h"
-#include "SkBlendMode.h"
 #include "VectorDrawable.h"
 #include "hwui/Bitmap.h"
 #include "hwui/MinikinUtils.h"
 #include "hwui/PaintFilter.h"
+#include <log/log.h>
 #include "pipeline/skia/AnimatedDrawables.h"
 #include "pipeline/skia/HolePunch.h"
+#include <ui/FatVector.h>
 
 namespace android {
 
@@ -248,7 +250,7 @@ const SkiaCanvas::SaveRec* SkiaCanvas::currentSaveRec() const {
                                  ? static_cast<const SaveRec*>(&mSaveStack->back())
                                  : nullptr;
     int currentSaveCount = mCanvas->getSaveCount();
-    SkASSERT(!rec || currentSaveCount >= rec->saveCount);
+    LOG_FATAL_IF(!(!rec || currentSaveCount >= rec->saveCount));
 
     return (rec && rec->saveCount == currentSaveCount) ? rec : nullptr;
 }
@@ -298,7 +300,7 @@ void SkiaCanvas::recordClip(const T& clip, SkClipOp op) {
 
 // Applies and optionally removes all clips >= index.
 void SkiaCanvas::applyPersistentClips(size_t clipStartIndex) {
-    SkASSERT(clipStartIndex <= mClipStack.size());
+    LOG_FATAL_IF(clipStartIndex > mClipStack.size());
     const auto begin = mClipStack.cbegin() + clipStartIndex;
     const auto end = mClipStack.cend();
 
@@ -646,7 +648,7 @@ void SkiaCanvas::drawBitmapMesh(Bitmap& bitmap, int meshWidth, int meshHeight,
             texsPtr += 1;
             y += dy;
         }
-        SkASSERT(texsPtr - texs == ptCount);
+        LOG_FATAL_IF((texsPtr - texs) != ptCount);
     }
 
     // cons up indices
@@ -669,14 +671,14 @@ void SkiaCanvas::drawBitmapMesh(Bitmap& bitmap, int meshWidth, int meshHeight,
             // bump to the next row
             index += 1;
         }
-        SkASSERT(indexPtr - indices == indexCount);
+        LOG_FATAL_IF((indexPtr - indices) != indexCount);
     }
 
 // double-check that we have legal indices
-#ifdef SK_DEBUG
+#if !defined(NDEBUG)
     {
         for (int i = 0; i < indexCount; i++) {
-            SkASSERT((unsigned)indices[i] < (unsigned)ptCount);
+            LOG_FATAL_IF((unsigned)indices[i] >= (unsigned)ptCount);
         }
     }
 #endif
@@ -718,10 +720,12 @@ void SkiaCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& chunk, floa
         numFlags = (lattice.fXCount + 1) * (lattice.fYCount + 1);
     }
 
-    SkAutoSTMalloc<25, SkCanvas::Lattice::RectType> flags(numFlags);
-    SkAutoSTMalloc<25, SkColor> colors(numFlags);
+    // Most times, we do not have very many flags/colors, so the stack allocated part of
+    // FatVector will save us a heap allocation.
+    FatVector<SkCanvas::Lattice::RectType, 25> flags(numFlags);
+    FatVector<SkColor, 25> colors(numFlags);
     if (numFlags > 0) {
-        NinePatchUtils::SetLatticeFlags(&lattice, flags.get(), numFlags, chunk, colors.get());
+        NinePatchUtils::SetLatticeFlags(&lattice, flags.data(), numFlags, chunk, colors.data());
     }
 
     lattice.fBounds = nullptr;

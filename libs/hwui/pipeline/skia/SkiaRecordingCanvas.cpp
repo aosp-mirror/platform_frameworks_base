@@ -16,7 +16,6 @@
 
 #include "SkiaRecordingCanvas.h"
 #include "hwui/Paint.h"
-#include <include/private/SkTemplates.h> // SkAutoSTMalloc
 #include <SkBlendMode.h>
 #include <SkData.h>
 #include <SkDrawable.h>
@@ -43,6 +42,8 @@
 #include "pipeline/skia/VkFunctorDrawable.h"
 #include "pipeline/skia/VkInteropFunctorDrawable.h"
 #endif
+#include <log/log.h>
+#include <ui/FatVector.h>
 
 namespace android {
 namespace uirenderer {
@@ -55,7 +56,7 @@ namespace skiapipeline {
 void SkiaRecordingCanvas::initDisplayList(uirenderer::RenderNode* renderNode, int width,
                                           int height) {
     mCurrentBarrier = nullptr;
-    SkASSERT(mDisplayList.get() == nullptr);
+    LOG_FATAL_IF(mDisplayList.get() != nullptr);
 
     if (renderNode) {
         mDisplayList = renderNode->detachAvailableList();
@@ -285,10 +286,12 @@ void SkiaRecordingCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& ch
         numFlags = (lattice.fXCount + 1) * (lattice.fYCount + 1);
     }
 
-    SkAutoSTMalloc<25, SkCanvas::Lattice::RectType> flags(numFlags);
-    SkAutoSTMalloc<25, SkColor> colors(numFlags);
+    // Most times, we do not have very many flags/colors, so the stack allocated part of
+    // FatVector will save us a heap allocation.
+    FatVector<SkCanvas::Lattice::RectType, 25> flags(numFlags);
+    FatVector<SkColor, 25> colors(numFlags);
     if (numFlags > 0) {
-        NinePatchUtils::SetLatticeFlags(&lattice, flags.get(), numFlags, chunk, colors.get());
+        NinePatchUtils::SetLatticeFlags(&lattice, flags.data(), numFlags, chunk, colors.data());
     }
 
     lattice.fBounds = nullptr;
