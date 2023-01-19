@@ -146,6 +146,8 @@ java_genrule {
         ":FrameworksServicesTests_keyset_sb_ub",
         ":FrameworksServicesTests_keyset_splat_api",
         ":FrameworksServicesTests_keyset_splata_api",
+        ":FrameworksServicesTests_install_target_sdk_22",
+        ":FrameworksServicesTests_install_target_sdk_23",
     ],
     out: ["PackageManagerServiceServerTests_apks_as_resources.res.zip"],
     tools: ["soong_zip"],
