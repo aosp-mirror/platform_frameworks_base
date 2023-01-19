@@ -477,7 +477,8 @@ fun MoreOptionsRowIntroCard(
                 Icons.Outlined.NewReleases,
                 contentDescription = null,
                 modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
-                    .padding(all = 24.dp)
+                    .padding(all = 24.dp),
+                tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
             )
             TextOnSurface(
                 text = stringResource(
@@ -642,7 +643,7 @@ fun ExternalOnlySelectionCard(
             Icon(
                 painter = painterResource(R.drawable.ic_other_devices),
                 contentDescription = null,
-                tint = Color.Unspecified,
+                tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
                 modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
                     .padding(all = 24.dp).size(32.dp)
             )
@@ -972,7 +973,8 @@ fun MoreOptionsDisabledProvidersRow(
                 Icon(
                     Icons.Filled.Add,
                     contentDescription = null,
-                    modifier = Modifier.padding(start = 16.dp)
+                    modifier = Modifier.padding(start = 16.dp),
+                    tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
                 )
             },
             label = {
@@ -1006,8 +1008,8 @@ fun RemoteEntryRow(
             Icon(
                 painter = painterResource(R.drawable.ic_other_devices),
                 contentDescription = null,
-                tint = Color.Unspecified,
-                modifier = Modifier.padding(start = 18.dp)
+                tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
+                modifier = Modifier.padding(start = 10.dp)
             )
         },
         label = {
@@ -1015,7 +1017,7 @@ fun RemoteEntryRow(
                 TextOnSurfaceVariant(
                     text = stringResource(R.string.another_device),
                     style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(start = 16.dp, top = 18.dp, bottom = 18.dp)
+                    modifier = Modifier.padding(start = 10.dp, top = 18.dp, bottom = 18.dp)
                         .align(alignment = Alignment.CenterHorizontally),
                 )
             }
