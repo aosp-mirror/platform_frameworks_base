@@ -14254,6 +14254,16 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
+        if (Process.isSdkSandboxUid(realCallingUid)) {
+            SdkSandboxManagerLocal sdkSandboxManagerLocal = LocalManagerRegistry.getManager(
+                    SdkSandboxManagerLocal.class);
+            if (sdkSandboxManagerLocal == null) {
+                throw new IllegalStateException("SdkSandboxManagerLocal not found when sending"
+                    + " a broadcast from an SDK sandbox uid.");
+            }
+            sdkSandboxManagerLocal.enforceAllowedToSendBroadcast(intent);
+        }
+
         boolean timeoutExempt = false;
 
         if (action != null) {
@@ -14262,16 +14272,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Slog.i(TAG, "Broadcast action " + action + " forcing include-background");
                 }
                 intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-            }
-
-            if (Process.isSdkSandboxUid(realCallingUid)) {
-                SdkSandboxManagerLocal sdkSandboxManagerLocal = LocalManagerRegistry.getManager(
-                        SdkSandboxManagerLocal.class);
-                if (sdkSandboxManagerLocal == null) {
-                    throw new IllegalStateException("SdkSandboxManagerLocal not found when sending"
-                            + " a broadcast from an SDK sandbox uid.");
-                }
-                sdkSandboxManagerLocal.enforceAllowedToSendBroadcast(intent);
             }
 
             switch (action) {
