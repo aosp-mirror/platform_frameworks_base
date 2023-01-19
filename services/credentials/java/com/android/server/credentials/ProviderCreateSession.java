@@ -51,6 +51,8 @@ public final class ProviderCreateSession extends ProviderSession<
 
     // Key to be used as an entry key for a save entry
     private static final String SAVE_ENTRY_KEY = "save_entry_key";
+    // Key to be used as an entry key for a remote entry
+    private static final String REMOTE_ENTRY_KEY = "remote_entry_key";
 
     @NonNull
     private final Map<String, CreateEntry> mUiSaveEntries = new HashMap<>();
@@ -199,9 +201,9 @@ public final class ProviderCreateSession extends ProviderSession<
 
     @Override
     protected void invokeSession() {
-        this.mRemoteCredentialService.onCreateCredential(
-                this.getProviderRequest(),
-                /*callback=*/this);
+        if (mRemoteCredentialService != null) {
+            mRemoteCredentialService.onCreateCredential(mProviderRequest, this);
+        }
     }
 
     private List<Entry> prepareUiSaveEntries(@NonNull List<CreateEntry> saveEntries) {

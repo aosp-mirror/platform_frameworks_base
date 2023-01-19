@@ -61,13 +61,11 @@ import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.SecureSettingsServiceNameResolver;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Entry point service for credential management.
@@ -236,6 +234,7 @@ public final class CredentialManagerService
         concatenatedServices.addAll(getOrConstructSystemServiceListLock(userId));
         return concatenatedServices;
     }
+
     public static boolean isCredentialDescriptionApiEnabled() {
         return DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_CREDENTIAL, DEVICE_CONFIG_ENABLE_CREDENTIAL_DESC_API, false);
@@ -244,44 +243,38 @@ public final class CredentialManagerService
     @SuppressWarnings("GuardedBy") // ErrorProne requires initiateProviderSessionForRequestLocked
     // to be guarded by 'service.mLock', which is the same as mLock.
     private List<ProviderSession> initiateProviderSessionsWithActiveContainers(
-            RequestSession session,
-            List<String> requestOptions, Set<ComponentName> activeCredentialContainers) {
+            GetRequestSession session,
+            List<String> requestOptions, Set<String> activeCredentialContainers) {
         List<ProviderSession> providerSessions = new ArrayList<>();
         // Invoke all services of a user to initiate a provider session
-        runForUser((service) -> {
-            if (activeCredentialContainers.contains(service.getComponentName())) {
-                ProviderSession providerSession = service
-                        .initiateProviderSessionForRequestLocked(session, requestOptions);
-                if (providerSession != null) {
-                    providerSessions.add(providerSession);
-                }
-            }
-        });
+        for (String packageName: activeCredentialContainers) {
+            providerSessions.add(ProviderRegistryGetSession.createNewSession(
+                    mContext,
+                    UserHandle.getCallingUserId(),
+                    session,
+                    packageName,
+                    requestOptions));
+        }
         return providerSessions;
     }
 
     @NonNull
-    private Set<String> getMatchingProviders(GetCredentialRequest request) {
+    private Set<String> getFilteredResultFromRegistry(List<CredentialOption> options) {
         // Session for active/provisioned credential descriptions;
         CredentialDescriptionRegistry registry = CredentialDescriptionRegistry
                 .forUser(UserHandle.getCallingUserId());
 
         // All requested credential descriptions based on the given request.
         Set<String> requestedCredentialDescriptions =
-                request.getCredentialOptions().stream().map(
-                        credentialOption -> credentialOption
+                options.stream().map(
+                        getCredentialOption -> getCredentialOption
                                         .getCredentialRetrievalData()
                                         .getString(CredentialOption
                                                 .FLATTENED_REQUEST))
                         .collect(Collectors.toSet());
 
         // All requested credential descriptions based on the given request.
-        return requestedCredentialDescriptions.stream()
-                .map(registry::filterCredentials)
-                .flatMap(
-                        (Function<Set<String>, Stream<String>>)
-                                Collection::stream)
-                .collect(Collectors.toSet());
+        return registry.getMatchingProviders(requestedCredentialDescriptions);
     }
 
     @SuppressWarnings("GuardedBy") // ErrorProne requires initiateProviderSessionForRequestLocked
@@ -302,6 +295,13 @@ public final class CredentialManagerService
                     }
                 });
         return providerSessions;
+    }
+
+    @Override
+    @GuardedBy("CredentialDescriptionRegistry.sLock")
+    public void onUserStopped(@NonNull TargetUser user) {
+        super.onUserStopped(user);
+        CredentialDescriptionRegistry.clearUserSession(user.getUserIdentifier());
     }
 
     private CallingAppInfo constructCallingAppInfo(String packageName, int userId) {
@@ -340,13 +340,57 @@ public final class CredentialManagerService
                             request,
                             constructCallingAppInfo(callingPackage, userId));
 
-            // Initiate all provider sessions
-            List<ProviderSession> providerSessions =
-                    initiateProviderSessions(
-                            session,
-                            request.getCredentialOptions().stream()
-                                    .map(CredentialOption::getType)
-                                    .collect(Collectors.toList()));
+            List<ProviderSession> providerSessions;
+
+            if (isCredentialDescriptionApiEnabled()) {
+                List<CredentialOption> optionsThatRequireActiveCredentials =
+                        request.getCredentialOptions().stream()
+                                .filter(getCredentialOption ->
+                                        !TextUtils.isEmpty(getCredentialOption
+                                                .getCredentialRetrievalData().getString(
+                                                CredentialOption
+                                                        .FLATTENED_REQUEST, null)))
+                                .toList();
+
+                List<CredentialOption> optionsThatDoNotRequireActiveCredentials =
+                        request.getCredentialOptions().stream()
+                                .filter(getCredentialOption ->
+                                        TextUtils.isEmpty(getCredentialOption
+                                                .getCredentialRetrievalData().getString(
+                                                        CredentialOption
+                                                                .FLATTENED_REQUEST, null)))
+                                .toList();
+
+                List<ProviderSession> sessionsWithoutRemoteService =
+                        initiateProviderSessionsWithActiveContainers(session,
+                                optionsThatRequireActiveCredentials
+                                        .stream().map(getCredentialOption ->
+                                                getCredentialOption.getCredentialRetrievalData()
+                                                        .getString(CredentialOption
+                                                .FLATTENED_REQUEST))
+                                        .collect(Collectors.toList()),
+                                getFilteredResultFromRegistry(optionsThatRequireActiveCredentials));
+
+                List<ProviderSession> sessionsWithRemoteService = initiateProviderSessions(
+                        session,
+                        optionsThatDoNotRequireActiveCredentials.stream()
+                                .map(CredentialOption::getType)
+                                .collect(Collectors.toList()));
+
+                Set<ProviderSession> all = new LinkedHashSet<>();
+                all.addAll(sessionsWithRemoteService);
+                all.addAll(sessionsWithoutRemoteService);
+
+                providerSessions = new ArrayList<>(all);
+            } else {
+                // Initiate all provider sessions
+                providerSessions =
+                        initiateProviderSessions(
+                                session,
+                                request.getCredentialOptions().stream()
+                                        .map(CredentialOption::getType)
+                                        .collect(Collectors.toList()));
+            }
 
             if (providerSessions.isEmpty()) {
                 try {
@@ -363,6 +407,7 @@ public final class CredentialManagerService
 
             // Iterate over all provider sessions and invoke the request
             providerSessions.forEach(ProviderSession::invokeSession);
+
             return cancelTransport;
         }
 
