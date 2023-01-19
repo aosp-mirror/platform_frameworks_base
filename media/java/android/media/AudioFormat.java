@@ -608,6 +608,40 @@ public final class AudioFormat implements Parcelable {
             CHANNEL_OUT_LOW_FREQUENCY_2);
     // CHANNEL_OUT_ALL is not yet defined; if added then it should match AUDIO_CHANNEL_OUT_ALL
 
+    /** @hide */
+    @IntDef(flag = true, prefix = "CHANNEL_OUT", value = {
+            CHANNEL_OUT_FRONT_LEFT,
+            CHANNEL_OUT_FRONT_RIGHT,
+            CHANNEL_OUT_FRONT_CENTER,
+            CHANNEL_OUT_LOW_FREQUENCY,
+            CHANNEL_OUT_BACK_LEFT,
+            CHANNEL_OUT_BACK_RIGHT,
+            CHANNEL_OUT_FRONT_LEFT_OF_CENTER,
+            CHANNEL_OUT_FRONT_RIGHT_OF_CENTER,
+            CHANNEL_OUT_BACK_CENTER,
+            CHANNEL_OUT_SIDE_LEFT,
+            CHANNEL_OUT_SIDE_RIGHT,
+            CHANNEL_OUT_TOP_CENTER,
+            CHANNEL_OUT_TOP_FRONT_LEFT,
+            CHANNEL_OUT_TOP_FRONT_CENTER,
+            CHANNEL_OUT_TOP_FRONT_RIGHT,
+            CHANNEL_OUT_TOP_BACK_LEFT,
+            CHANNEL_OUT_TOP_BACK_CENTER,
+            CHANNEL_OUT_TOP_BACK_RIGHT,
+            CHANNEL_OUT_TOP_SIDE_LEFT,
+            CHANNEL_OUT_TOP_SIDE_RIGHT,
+            CHANNEL_OUT_BOTTOM_FRONT_LEFT,
+            CHANNEL_OUT_BOTTOM_FRONT_CENTER,
+            CHANNEL_OUT_BOTTOM_FRONT_RIGHT,
+            CHANNEL_OUT_LOW_FREQUENCY_2,
+            CHANNEL_OUT_FRONT_WIDE_LEFT,
+            CHANNEL_OUT_FRONT_WIDE_RIGHT,
+            CHANNEL_OUT_HAPTIC_B,
+            CHANNEL_OUT_HAPTIC_A
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ChannelOut {}
+
     /** Minimum value for sample rate,
      *  assuming AudioTrack and AudioRecord share the same limitations.
      * @hide
