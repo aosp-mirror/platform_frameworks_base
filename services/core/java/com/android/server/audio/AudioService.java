@@ -11164,12 +11164,12 @@ public class AudioService extends IAudioService.Stub
         }
 
         try {
-            if (!projectionService.isValidMediaProjection(projection)) {
+            if (!projectionService.isCurrentProjection(projection)) {
                 Log.w(TAG, "App passed invalid MediaProjection token");
                 return false;
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "Can't call .isValidMediaProjection() on IMediaProjectionManager"
+            Log.e(TAG, "Can't call .isCurrentProjection() on IMediaProjectionManager"
                     + projectionService.asBinder(), e);
             return false;
         }

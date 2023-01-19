@@ -1312,8 +1312,9 @@ public final class DisplayManagerService extends SystemService {
 
         if (projection != null) {
             try {
-                if (!getProjectionService().isValidMediaProjection(projection)) {
-                    throw new SecurityException("Invalid media projection");
+                if (!getProjectionService().isCurrentProjection(projection)) {
+                    throw new SecurityException("Cannot create VirtualDisplay with "
+                            + "non-current MediaProjection");
                 }
                 flags = projection.applyVirtualDisplayFlags(flags);
             } catch (RemoteException e) {
