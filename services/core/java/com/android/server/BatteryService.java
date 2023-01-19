@@ -52,6 +52,7 @@ import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UEventObserver;
 import android.os.UserHandle;
@@ -574,6 +575,10 @@ public final class BatteryService extends SystemService {
                 EventLog.writeEvent(EventLogTags.BATTERY_STATUS,
                         mHealthInfo.batteryStatus, mHealthInfo.batteryHealth, mHealthInfo.batteryPresent ? 1 : 0,
                         mPlugType, mHealthInfo.batteryTechnology);
+                SystemProperties.set(
+                        "debug.tracing.battery_status",
+                        Integer.toString(mHealthInfo.batteryStatus));
+                SystemProperties.set("debug.tracing.plug_type", Integer.toString(mPlugType));
             }
             if (mHealthInfo.batteryLevel != mLastBatteryLevel) {
                 // Don't do this just from voltage or temperature changes, that is
