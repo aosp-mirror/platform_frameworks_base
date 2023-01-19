@@ -2003,6 +2003,9 @@
          STREAM_MUSIC as if it's on TV platform. -->
     <bool name="config_single_volume">false</bool>
 
+    <!-- Volume policy -->
+    <bool name="config_volume_down_to_enter_silent">false</bool>
+
     <!-- The number of volume steps for the notification stream -->
     <integer name="config_audio_notif_vol_steps">7</integer>
 
