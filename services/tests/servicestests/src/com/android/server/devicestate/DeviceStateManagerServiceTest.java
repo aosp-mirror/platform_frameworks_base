@@ -945,13 +945,15 @@ public final class DeviceStateManagerServiceTest {
             }
 
             mListener = listener;
-            mListener.onSupportedDeviceStatesChanged(mSupportedDeviceStates);
+            mListener.onSupportedDeviceStatesChanged(mSupportedDeviceStates,
+                    SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED);
             mListener.onStateChanged(mSupportedDeviceStates[0].getIdentifier());
         }
 
         public void notifySupportedDeviceStates(DeviceState[] supportedDeviceStates) {
             mSupportedDeviceStates = supportedDeviceStates;
-            mListener.onSupportedDeviceStatesChanged(supportedDeviceStates);
+            mListener.onSupportedDeviceStatesChanged(supportedDeviceStates,
+                    SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED);
         }
 
         public void setState(int identifier) {

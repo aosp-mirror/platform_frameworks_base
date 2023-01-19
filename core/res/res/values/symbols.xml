@@ -4874,6 +4874,18 @@
   <java-symbol type="array" name="config_deviceStatesAvailableForAppRequests" />
   <java-symbol type="array" name="config_serviceStateLocationAllowedPackages" />
   <java-symbol type="integer" name="config_deviceStateRearDisplay"/>
+  <java-symbol type="array" name="device_state_notification_state_identifiers"/>
+  <java-symbol type="array" name="device_state_notification_names"/>
+  <java-symbol type="array" name="device_state_notification_active_titles"/>
+  <java-symbol type="array" name="device_state_notification_active_contents"/>
+  <java-symbol type="array" name="device_state_notification_thermal_titles"/>
+  <java-symbol type="array" name="device_state_notification_thermal_contents"/>
+  <java-symbol type="string" name="concurrent_display_notification_name"/>
+  <java-symbol type="string" name="concurrent_display_notification_active_title"/>
+  <java-symbol type="string" name="concurrent_display_notification_active_content"/>
+  <java-symbol type="string" name="concurrent_display_notification_thermal_title"/>
+  <java-symbol type="string" name="concurrent_display_notification_thermal_content"/>
+  <java-symbol type="string" name="device_state_notification_turn_off_button"/>
   <java-symbol type="bool" name="config_independentLockscreenLiveWallpaper"/>
 
   <!-- For app language picker -->
