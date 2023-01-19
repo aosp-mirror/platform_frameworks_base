@@ -2425,8 +2425,9 @@ public abstract class BatteryStats {
     public abstract int getHistoryTagPoolUid(int index);
 
     /**
-     * Returns a BatteryStatsHistoryIterator. Battery history will remain immutable until the
-     * {@link BatteryStatsHistoryIterator#close()} method is invoked.
+     * Returns a BatteryStatsHistoryIterator. Battery history will continue being writable,
+     * but the iterator will continue iterating over the snapshot taken at the time this method
+     * is called.
      */
     public abstract BatteryStatsHistoryIterator iterateBatteryStatsHistory();
 
@@ -5120,14 +5121,6 @@ public abstract class BatteryStats {
         sb.append(formatCharge(power));
     }
 
-    /**
-     * Temporary for settings.
-     */
-    public final void dumpLocked(Context context, PrintWriter pw, String prefix, int which,
-            int reqUid) {
-        dumpLocked(context, pw, prefix, which, reqUid, checkWifiOnly(context));
-    }
-
     @SuppressWarnings("unused")
     public final void dumpLocked(Context context, PrintWriter pw, String prefix, final int which,
             int reqUid, boolean wifiOnly) {
@@ -7483,7 +7476,25 @@ public abstract class BatteryStats {
     public static final int DUMP_VERBOSE = 1<<5;
     public static final int DUMP_DEVICE_WIFI_ONLY = 1<<6;
 
-    private void dumpHistoryLocked(PrintWriter pw, int flags, long histStart, boolean checkin) {
+    private void dumpHistory(PrintWriter pw, int flags, long histStart, boolean checkin) {
+        if (!checkin) {
+            synchronized (this) {
+                final long historyTotalSize = getHistoryTotalSize();
+                final long historyUsedSize = getHistoryUsedSize();
+                pw.print("Battery History (");
+                pw.print((100 * historyUsedSize) / historyTotalSize);
+                pw.print("% used, ");
+                printSizeValue(pw, historyUsedSize);
+                pw.print(" used of ");
+                printSizeValue(pw, historyTotalSize);
+                pw.print(", ");
+                pw.print(getHistoryStringPoolSize());
+                pw.print(" strings using ");
+                printSizeValue(pw, getHistoryStringPoolBytes());
+                pw.println("):");
+            }
+        }
+
         final HistoryPrinter hprinter = new HistoryPrinter();
         long lastTime = -1;
         long baseTime = -1;
@@ -7628,27 +7639,14 @@ public abstract class BatteryStats {
      * @param pw a Printer to receive the dump output.
      */
     @SuppressWarnings("unused")
-    public void dumpLocked(Context context, PrintWriter pw, int flags, int reqUid, long histStart) {
+    public void dump(Context context, PrintWriter pw, int flags, int reqUid, long histStart) {
         prepareForDumpLocked();
 
         final boolean filtering = (flags
                 & (DUMP_HISTORY_ONLY|DUMP_CHARGED_ONLY|DUMP_DAILY_ONLY)) != 0;
 
         if ((flags&DUMP_HISTORY_ONLY) != 0 || !filtering) {
-            final long historyTotalSize = getHistoryTotalSize();
-            final long historyUsedSize = getHistoryUsedSize();
-            pw.print("Battery History (");
-            pw.print((100 * historyUsedSize) / historyTotalSize);
-            pw.print("% used, ");
-            printSizeValue(pw, historyUsedSize);
-            pw.print(" used of ");
-            printSizeValue(pw, historyTotalSize);
-            pw.print(", ");
-            pw.print(getHistoryStringPoolSize());
-            pw.print(" strings using ");
-            printSizeValue(pw, getHistoryStringPoolBytes());
-            pw.println("):");
-            dumpHistoryLocked(pw, flags, histStart, false);
+            dumpHistory(pw, flags, histStart, false);
             pw.println();
         }
 
@@ -7656,6 +7654,13 @@ public abstract class BatteryStats {
             return;
         }
 
+        synchronized (this) {
+            dumpLocked(context, pw, flags, reqUid, filtering);
+        }
+    }
+
+    private void dumpLocked(Context context, PrintWriter pw, int flags, int reqUid,
+            boolean filtering) {
         if (!filtering) {
             SparseArray<? extends Uid> uidStats = getUidStats();
             final int NU = uidStats.size();
@@ -7823,7 +7828,7 @@ public abstract class BatteryStats {
                 }
                 pw.print("\"");
                 pw.println();
-                dumpHistoryLocked(pw, flags, histStart, true);
+                dumpHistory(pw, flags, histStart, true);
             }
         }
 

@@ -40,12 +40,12 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ParseUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -198,6 +198,8 @@ public class BatteryStatsHistory {
     private final VarintParceler mVarintParceler = new VarintParceler();
     private byte mLastHistoryStepLevel = 0;
     private boolean mMutable = true;
+    private final BatteryStatsHistory mWritableHistory;
+    private boolean mCleanupEnabled = true;
 
     /**
      * A delegate responsible for computing additional details for a step in battery history.
@@ -272,10 +274,32 @@ public class BatteryStatsHistory {
         initHistoryBuffer();
     }
 
+    /**
+     * Creates a read-only wrapper for the supplied writable history.
+     */
+    public BatteryStatsHistory(BatteryStatsHistory writableHistory) {
+        this(Parcel.obtain(), writableHistory.mSystemDir, 0, 0, null, null, null, writableHistory);
+        mMutable = false;
+
+        synchronized (mWritableHistory) {
+            // Make a copy of battery history to avoid concurrent modification.
+            mHistoryBuffer.appendFrom(mWritableHistory.mHistoryBuffer, 0,
+                    mWritableHistory.mHistoryBuffer.dataSize());
+        }
+    }
+
     @VisibleForTesting
     public BatteryStatsHistory(Parcel historyBuffer, File systemDir,
             int maxHistoryFiles, int maxHistoryBufferSize,
             HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock, TraceDelegate tracer) {
+        this(historyBuffer, systemDir, maxHistoryFiles, maxHistoryBufferSize, stepDetailsCalculator,
+                clock, tracer, null);
+    }
+
+    private BatteryStatsHistory(Parcel historyBuffer, File systemDir,
+            int maxHistoryFiles, int maxHistoryBufferSize,
+            HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock, TraceDelegate tracer,
+            BatteryStatsHistory writableHistory) {
         mHistoryBuffer = historyBuffer;
         mSystemDir = systemDir;
         mMaxHistoryFiles = maxHistoryFiles;
@@ -283,6 +307,7 @@ public class BatteryStatsHistory {
         mStepDetailsCalculator = stepDetailsCalculator;
         mTracer = tracer;
         mClock = clock;
+        mWritableHistory = writableHistory;
 
         mHistoryDir = new File(systemDir, HISTORY_DIR);
         mHistoryDir.mkdirs();
@@ -292,21 +317,17 @@ public class BatteryStatsHistory {
 
         final Set<Integer> dedup = new ArraySet<>();
         // scan directory, fill mFileNumbers and mActiveFile.
-        mHistoryDir.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                final int b = name.lastIndexOf(FILE_SUFFIX);
-                if (b <= 0) {
-                    return false;
-                }
-                final Integer c =
-                        ParseUtils.parseInt(name.substring(0, b), -1);
-                if (c != -1) {
-                    dedup.add(c);
-                    return true;
-                } else {
-                    return false;
-                }
+        mHistoryDir.listFiles((dir, name) -> {
+            final int b = name.lastIndexOf(FILE_SUFFIX);
+            if (b <= 0) {
+                return false;
+            }
+            final int c = ParseUtils.parseInt(name.substring(0, b), -1);
+            if (c != -1) {
+                dedup.add(c);
+                return true;
+            } else {
+                return false;
             }
         });
         if (!dedup.isEmpty()) {
@@ -328,21 +349,29 @@ public class BatteryStatsHistory {
         mHistoryBuffer = Parcel.obtain();
         mSystemDir = null;
         mHistoryDir = null;
+        mWritableHistory = null;
         initHistoryBuffer();
     }
 
     /**
-     * Used when BatteryStatsImpl object is created from deserialization of a parcel,
-     * such as a checkin file.
+     * Used when BatteryStatsHistory object is created from deserialization of a BatteryUsageStats
+     * parcel.
      */
-    private BatteryStatsHistory(Parcel historyBuffer,
-            HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock) {
-        mHistoryBuffer = historyBuffer;
-        mTracer = new TraceDelegate();
-        mClock = clock;
+    private BatteryStatsHistory(Parcel parcel) {
+        mClock = Clock.SYSTEM_CLOCK;
+        mTracer = null;
         mSystemDir = null;
         mHistoryDir = null;
-        mStepDetailsCalculator = stepDetailsCalculator;
+        mStepDetailsCalculator = null;
+        mWritableHistory = null;
+        mMutable = false;
+
+        final byte[] historyBlob = parcel.readBlob();
+
+        mHistoryBuffer = Parcel.obtain();
+        mHistoryBuffer.unmarshall(historyBlob, 0, historyBlob.length);
+
+        readFromParcel(parcel, true /* useBlobs */);
     }
 
     private void initHistoryBuffer() {
@@ -386,10 +415,7 @@ public class BatteryStatsHistory {
      * in the system directory, so it is not safe while actively writing history.
      */
     public BatteryStatsHistory copy() {
-        // Make a copy of battery history to avoid concurrent modification.
-        Parcel historyBuffer = Parcel.obtain();
-        historyBuffer.appendFrom(mHistoryBuffer, 0, mHistoryBuffer.dataSize());
-        return new BatteryStatsHistory(historyBuffer, mSystemDir, 0, 0, null, null, mTracer);
+        return new BatteryStatsHistory(this);
     }
 
     /**
@@ -448,6 +474,25 @@ public class BatteryStatsHistory {
             Slog.e(TAG, "Could not create history file: " + mActiveFile.getBaseFile());
         }
 
+        synchronized (this) {
+            cleanupLocked();
+        }
+    }
+
+    @GuardedBy("this")
+    private void setCleanupEnabledLocked(boolean enabled) {
+        mCleanupEnabled = enabled;
+        if (mCleanupEnabled) {
+            cleanupLocked();
+        }
+    }
+
+    @GuardedBy("this")
+    private void cleanupLocked() {
+        if (!mCleanupEnabled || mHistoryDir == null) {
+            return;
+        }
+
         // if free disk space is less than 100MB, delete oldest history file.
         if (!hasFreeDiskSpace()) {
             int oldest = mFileNumbers.remove(0);
@@ -461,6 +506,16 @@ public class BatteryStatsHistory {
             int oldest = mFileNumbers.get(0);
             getFile(oldest).delete();
             mFileNumbers.remove(0);
+        }
+    }
+
+    /**
+     * Returns true if it is safe to reset history. It will return false if the history is
+     * currently being read.
+     */
+    public boolean isResetEnabled() {
+        synchronized (this) {
+            return mCleanupEnabled;
         }
     }
 
@@ -491,6 +546,11 @@ public class BatteryStatsHistory {
         mCurrentParcelEnd = 0;
         mParcelIndex = 0;
         mMutable = false;
+        if (mWritableHistory != null) {
+            synchronized (mWritableHistory) {
+                mWritableHistory.setCleanupEnabledLocked(false);
+            }
+        }
         return new BatteryStatsHistoryIterator(this);
     }
 
@@ -500,7 +560,13 @@ public class BatteryStatsHistory {
     void iteratorFinished() {
         // setDataPosition so mHistoryBuffer Parcel can be written.
         mHistoryBuffer.setDataPosition(mHistoryBuffer.dataSize());
-        mMutable = true;
+        if (mWritableHistory != null) {
+            synchronized (mWritableHistory) {
+                mWritableHistory.setCleanupEnabledLocked(true);
+            }
+        } else {
+            mMutable = true;
+        }
     }
 
     /**
@@ -717,15 +783,7 @@ public class BatteryStatsHistory {
      * the {@link #writeToBatteryUsageStatsParcel} method.
      */
     public static BatteryStatsHistory createFromBatteryUsageStatsParcel(Parcel in) {
-        final byte[] historyBlob = in.readBlob();
-
-        Parcel historyBuffer = Parcel.obtain();
-        historyBuffer.unmarshall(historyBlob, 0, historyBlob.length);
-
-        BatteryStatsHistory history = new BatteryStatsHistory(historyBuffer, null,
-                Clock.SYSTEM_CLOCK);
-        history.readFromParcel(in, true /* useBlobs */);
-        return history;
+        return new BatteryStatsHistory(in);
     }
 
     /**

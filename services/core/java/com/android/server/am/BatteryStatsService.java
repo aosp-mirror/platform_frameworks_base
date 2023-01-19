@@ -2900,11 +2900,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             if (DBG) Slog.d(TAG, "begin dumpLocked from UID " + Binder.getCallingUid());
             awaitCompletion();
 
-            synchronized (mStats) {
-                mStats.dumpLocked(mContext, pw, flags, reqUid, historyStart);
-                if (writeData) {
-                    mStats.writeAsyncLocked();
-                }
+            mStats.dump(mContext, pw, flags, reqUid, historyStart);
+            if (writeData) {
+                mStats.writeAsyncLocked();
             }
             pw.println();
             mCpuWakeupStats.dump(new IndentingPrintWriter(pw, "  "), SystemClock.elapsedRealtime());
