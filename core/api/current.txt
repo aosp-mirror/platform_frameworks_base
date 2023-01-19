@@ -42175,7 +42175,7 @@ package android.telecom {
     method @NonNull public String getDisplayName();
     method @NonNull public android.os.Bundle getExtras();
     method public int getState();
-    method public void setStreamingState(int);
+    method public void requestStreamingState(int);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telecom.StreamingCall> CREATOR;
     field public static final int STATE_DISCONNECTED = 3; // 0x3
