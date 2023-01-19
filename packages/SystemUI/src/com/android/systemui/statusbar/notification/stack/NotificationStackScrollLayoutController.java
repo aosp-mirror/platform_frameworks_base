@@ -1242,11 +1242,7 @@ public class NotificationStackScrollLayoutController {
                 // For more details, see: b/228790482
                 && !isInTransitionToKeyguard();
 
-        mView.updateEmptyShadeView(
-                shouldShow,
-                mZenModeController.areNotificationsHiddenInShade(),
-                mNotifPipelineFlags.getShouldFilterUnseenNotifsOnKeyguard()
-                        && mSeenNotificationsProvider.getHasFilteredOutSeenNotifications());
+        mView.updateEmptyShadeView(shouldShow, mZenModeController.areNotificationsHiddenInShade());
 
         Trace.endSection();
     }
@@ -1942,6 +1938,9 @@ public class NotificationStackScrollLayoutController {
         @Override
         public void setNotifStats(@NonNull NotifStats notifStats) {
             mNotifStats = notifStats;
+            mView.setHasFilteredOutSeenNotifications(
+                    mNotifPipelineFlags.getShouldFilterUnseenNotifsOnKeyguard()
+                            && mSeenNotificationsProvider.getHasFilteredOutSeenNotifications());
             updateFooter();
             updateShowEmptyShadeView();
         }

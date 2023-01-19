@@ -94,6 +94,11 @@ public interface BcSmartspaceDataPlugin extends Plugin {
         void registerDataProvider(BcSmartspaceDataPlugin plugin);
 
         /**
+         * Sets {@link BcSmartspaceConfigPlugin}.
+         */
+        void registerConfigProvider(BcSmartspaceConfigPlugin configProvider);
+
+        /**
          * Primary color for unprotected text
          */
         void setPrimaryTextColor(int color);

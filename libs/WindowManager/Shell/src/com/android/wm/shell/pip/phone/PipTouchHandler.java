@@ -337,8 +337,10 @@ public class PipTouchHandler {
         mMotionHelper.synchronizePinnedStackBounds();
         reloadResources();
 
-        // Recreate the dismiss target for the new orientation.
-        mPipDismissTargetHandler.createOrUpdateDismissTarget();
+        if (mPipTaskOrganizer.isInPip()) {
+            // Recreate the dismiss target for the new orientation.
+            mPipDismissTargetHandler.createOrUpdateDismissTarget();
+        }
     }
 
     public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {

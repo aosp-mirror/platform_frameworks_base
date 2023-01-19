@@ -91,6 +91,8 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"下方邊界百分之 <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"左側邊界百分之 <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"右側邊界百分之 <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
+    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"工作的螢幕截圖會儲存在「<xliff:g id="APP">%1$s</xliff:g>」應用程式"</string>
+    <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"檔案"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"螢幕錄影器"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"處理螢幕錄影內容"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"持續顯示螢幕畫面錄製工作階段通知"</string>
@@ -374,8 +376,8 @@
     <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"允許 <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> 分享或錄製？"</string>
     <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"整個螢幕畫面"</string>
     <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"單一應用程式"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"進行分享、錄製或投放時，<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> 可以存取顯示在螢幕畫面上或在裝置上播放的所有內容。因此請謹慎處理密碼、付款資料、訊息或其他機密資訊。"</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"進行分享、錄製或投放應用程式時，<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> 可以存取在該應用程式中顯示或播放的所有內容。因此請謹慎處理密碼、付款資料、訊息或其他機密資訊。"</string>
+    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"分享、錄製或投放時，<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> 可以存取顯示在螢幕畫面上或在裝置上播放的所有內容。因此請謹慎處理密碼、付款資料、訊息或其他機密資訊。"</string>
+    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"分享、錄製或投放應用程式時，<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> 可以存取在應用程式中顯示或播放的所有內容。因此請謹慎處理密碼、付款資料、訊息或其他機密資訊。"</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"繼續"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"分享或錄製應用程式"</string>
     <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"要允許這個應用程式分享或錄製嗎？"</string>
@@ -850,11 +852,12 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"透過「<xliff:g id="APP_LABEL">%2$s</xliff:g>」播放〈<xliff:g id="SONG_NAME">%1$s</xliff:g>〉"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"復原"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"如要在「<xliff:g id="DEVICENAME">%1$s</xliff:g>」上播放，請靠近一點"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"如要在這部裝置上播放，請移到更靠近「<xliff:g id="DEVICENAME">%1$s</xliff:g>」的位置"</string>
+    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
+    <skip />
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"正在「<xliff:g id="DEVICENAME">%1$s</xliff:g>」上播放"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"發生錯誤，請再試一次。"</string>
-    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
-    <skip />
+    <string name="media_transfer_loading" msgid="5544017127027152422">"載入中"</string>
+    <string name="media_ttt_default_device_type" msgid="4457646436153370169">"平板電腦"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"無效，請查看應用程式"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"找不到控制項"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"無法使用控制項"</string>
@@ -878,6 +881,7 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"音量"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"喇叭和螢幕"</string>
+    <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"建議的裝置"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"廣播功能的運作方式"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"廣播"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"如果附近的人有相容的藍牙裝置，就可以聽到你正在廣播的媒體內容"</string>
@@ -1015,5 +1019,8 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ 這麼做會關閉這個螢幕"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"正在展開的折疊式裝置"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"正在翻轉折疊式裝置"</string>
-    <string name="stylus_battery_low" msgid="7134370101603167096">"觸控筆電力不足"</string>
+    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
+    <skip />
+    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
+    <skip />
 </resources>

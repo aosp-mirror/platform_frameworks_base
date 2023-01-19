@@ -34,9 +34,12 @@ import com.android.systemui.media.dialog.MediaOutputDialogFactory
 import com.android.systemui.statusbar.notification.FeedbackIcon
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
+import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import junit.framework.Assert.assertEquals
+import junit.framework.Assert.assertFalse
+import junit.framework.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,6 +47,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations.initMocks
 
@@ -303,6 +307,86 @@ class NotificationContentViewTest : SysuiTestCase() {
 
         // Then: bottom margin of actionListMarginTarget should not change, still be 20
         assertEquals(0, getMarginBottom(actionListMarginTarget))
+    }
+
+    @Test
+    fun onSetAnimationRunning() {
+        // Given: contractedWrapper, enpandedWrapper, and headsUpWrapper being set
+        val mockContracted = mock<NotificationViewWrapper>()
+        val mockExpanded = mock<NotificationViewWrapper>()
+        val mockHeadsUp = mock<NotificationViewWrapper>()
+
+        view.setContractedWrapper(mockContracted)
+        view.setExpandedWrapper(mockExpanded)
+        view.setHeadsUpWrapper(mockHeadsUp)
+
+        // When: we set content animation running.
+        assertTrue(view.setContentAnimationRunning(true))
+
+        // Then: contractedChild, expandedChild, and headsUpChild should have setAnimationsRunning
+        // called on them.
+        verify(mockContracted, times(1)).setAnimationsRunning(true)
+        verify(mockExpanded, times(1)).setAnimationsRunning(true)
+        verify(mockHeadsUp, times(1)).setAnimationsRunning(true)
+
+        // When: we set content animation running true _again_.
+        assertFalse(view.setContentAnimationRunning(true))
+
+        // Then: the children should not have setAnimationRunning called on them again.
+        // Verify counts number of calls so far on the object, so these still register as 1.
+        verify(mockContracted, times(1)).setAnimationsRunning(true)
+        verify(mockExpanded, times(1)).setAnimationsRunning(true)
+        verify(mockHeadsUp, times(1)).setAnimationsRunning(true)
+    }
+
+    @Test
+    fun onSetAnimationStopped() {
+        // Given: contractedWrapper, expandedWrapper, and headsUpWrapper being set
+        val mockContracted = mock<NotificationViewWrapper>()
+        val mockExpanded = mock<NotificationViewWrapper>()
+        val mockHeadsUp = mock<NotificationViewWrapper>()
+
+        view.setContractedWrapper(mockContracted)
+        view.setExpandedWrapper(mockExpanded)
+        view.setHeadsUpWrapper(mockHeadsUp)
+
+        // When: we set content animation running.
+        assertTrue(view.setContentAnimationRunning(true))
+
+        // Then: contractedChild, expandedChild, and headsUpChild should have setAnimationsRunning
+        // called on them.
+        verify(mockContracted).setAnimationsRunning(true)
+        verify(mockExpanded).setAnimationsRunning(true)
+        verify(mockHeadsUp).setAnimationsRunning(true)
+
+        // When: we set content animation running false, the state changes, so the function
+        // returns true.
+        assertTrue(view.setContentAnimationRunning(false))
+
+        // Then: the children have their animations stopped.
+        verify(mockContracted).setAnimationsRunning(false)
+        verify(mockExpanded).setAnimationsRunning(false)
+        verify(mockHeadsUp).setAnimationsRunning(false)
+    }
+
+    @Test
+    fun onSetAnimationInitStopped() {
+        // Given: contractedWrapper, expandedWrapper, and headsUpWrapper being set
+        val mockContracted = mock<NotificationViewWrapper>()
+        val mockExpanded = mock<NotificationViewWrapper>()
+        val mockHeadsUp = mock<NotificationViewWrapper>()
+
+        view.setContractedWrapper(mockContracted)
+        view.setExpandedWrapper(mockExpanded)
+        view.setHeadsUpWrapper(mockHeadsUp)
+
+        // When: we try to stop the animations before they've been started.
+        assertFalse(view.setContentAnimationRunning(false))
+
+        // Then: the children should not have setAnimationRunning called on them again.
+        verify(mockContracted, never()).setAnimationsRunning(false)
+        verify(mockExpanded, never()).setAnimationsRunning(false)
+        verify(mockHeadsUp, never()).setAnimationsRunning(false)
     }
 
     private fun createMockContainingNotification(notificationEntry: NotificationEntry) =

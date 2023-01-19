@@ -4715,6 +4715,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mTaskChangeNotificationController.notifyTaskFocusChanged(prevTask.mTaskId, false);
             }
             mTaskChangeNotificationController.notifyTaskFocusChanged(task.mTaskId, true);
+            mTaskSupervisor.mRecentTasks.add(task);
         }
 
         applyUpdateLockStateLocked(r);

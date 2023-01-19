@@ -7944,8 +7944,6 @@ public class Notification implements Parcelable
          * @hide
          */
         public MessagingStyle setShortcutIcon(@Nullable Icon conversationIcon) {
-            // TODO(b/228941516): This icon should be downscaled to avoid using too much memory,
-            // see reduceImageSizes.
             mShortcutIcon = conversationIcon;
             return this;
         }

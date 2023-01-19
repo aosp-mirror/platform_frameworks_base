@@ -91,6 +91,8 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Borda inferior em <xliff:g id="PERCENT">%1$d</xliff:g> por cento"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Borda esquerda em <xliff:g id="PERCENT">%1$d</xliff:g> por cento"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Borda direita em <xliff:g id="PERCENT">%1$d</xliff:g> por cento"</string>
+    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"Capturas de tela do trabalho são salvas no app <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Files"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Gravador de tela"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Processando gravação de tela"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificação contínua para uma sessão de gravação de tela"</string>
@@ -450,7 +452,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"O app está fixado"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Ela é mantida à vista até que seja liberada. Toque em Voltar e em Visão geral e mantenha essas opções pressionadas para liberar."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Ela é mantida à vista até que seja liberada. Toque em Voltar e em Início e mantenha essas opções pressionadas para liberar."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Ele é mantido à vista até que seja liberado. Deslize para cima e mantenha pressionado para liberar."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Ele é mantido à vista até que seja liberado. Deslize para cima pressione para liberar."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Ela é mantida à vista até que seja liberada. Toque em Visão geral e mantenha essa opção pressionada para liberar."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Ela é mantida à vista até que seja liberada. Toque em Início e mantenha essa opção pressionada para liberar."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Dados pessoais podem ficar acessíveis (como contatos e conteúdo de e-mail)."</string>
@@ -850,11 +852,12 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Tocar <xliff:g id="SONG_NAME">%1$s</xliff:g> no app <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Desfazer"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Aproxime os dispositivos para tocar a mídia neste: <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Aproxime-se do dispositivo <xliff:g id="DEVICENAME">%1$s</xliff:g> para abrir a mídia aqui"</string>
+    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
+    <skip />
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Mídia aberta no dispositivo <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Algo deu errado. Tente novamente."</string>
-    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
-    <skip />
+    <string name="media_transfer_loading" msgid="5544017127027152422">"Carregando"</string>
+    <string name="media_ttt_default_device_type" msgid="4457646436153370169">"tablet"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inativo, verifique o app"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Não encontrado"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"O controle está indisponível"</string>
@@ -878,6 +881,7 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Alto-falantes e telas"</string>
+    <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Dispositivos sugeridos"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Como funciona a transmissão"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Transmitir"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"As pessoas próximas a você com dispositivos Bluetooth compatíveis podem ouvir a mídia que você está transmitindo"</string>
@@ -1015,5 +1019,8 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Esta tela vai ser desativada"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Dispositivo dobrável sendo aberto"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Dispositivo dobrável sendo virado"</string>
-    <string name="stylus_battery_low" msgid="7134370101603167096">"Bateria da stylus fraca"</string>
+    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
+    <skip />
+    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
+    <skip />
 </resources>
