@@ -70,6 +70,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -211,6 +212,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     private IContainerFreezer mContainerFreezer = null;
     private final SurfaceControl.Transaction mTmpTransaction = new SurfaceControl.Transaction();
 
+    final TransitionController.Logger mLogger = new TransitionController.Logger();
+
     Transition(@TransitionType int type, @TransitionFlags int flags,
             TransitionController controller, BLASTSyncEngine syncEngine) {
         mType = type;
@@ -219,6 +222,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mSyncEngine = syncEngine;
         mToken = new Token(this);
 
+        mLogger.mCreateWallTimeMs = System.currentTimeMillis();
+        mLogger.mCreateTimeNs = SystemClock.uptimeNanos();
         controller.mTransitionTracer.logState(this);
     }
 
@@ -380,6 +385,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mState = STATE_COLLECTING;
         mSyncId = mSyncEngine.startSyncSet(this, timeoutMs, TAG, method);
 
+        mLogger.mSyncId = mSyncId;
+        mLogger.mCollectTimeNs = SystemClock.uptimeNanos();
         mController.mTransitionTracer.logState(this);
     }
 
@@ -399,6 +406,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 mSyncId);
         applyReady();
 
+        mLogger.mStartTimeNs = SystemClock.uptimeNanos();
         mController.mTransitionTracer.logState(this);
 
         mController.updateAnimatingState(mTmpTransaction);
@@ -608,6 +616,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                 "Set transition ready=%b %d", ready, mSyncId);
         mSyncEngine.setReady(mSyncId, ready);
+        if (ready) mLogger.mReadyTimeNs = SystemClock.uptimeNanos();
     }
 
     /**
@@ -759,6 +768,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             Trace.asyncTraceEnd(TRACE_TAG_WINDOW_MANAGER, TRACE_NAME_PLAY_TRANSITION,
                     System.identityHashCode(this));
         }
+        mLogger.mFinishTimeNs = SystemClock.uptimeNanos();
+        mController.mLoggerHandler.post(mLogger::logOnFinish);
         // Close the transactions now. They were originally copied to Shell in case we needed to
         // apply them due to a remote failure. Since we don't need to apply them anymore, free them
         // immediately.
@@ -845,7 +856,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
             if (ar == null || !ar.isVisible() || ar.getParent() == null) continue;
             if (inputSinkTransaction == null) {
-                inputSinkTransaction = new SurfaceControl.Transaction();
+                inputSinkTransaction = ar.mWmService.mTransactionFactory.get();
             }
             ar.mActivityRecordInputSink.applyChangesToSurfaceIfChanged(inputSinkTransaction);
         }
@@ -960,6 +971,12 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // the "primary" one for most things. Eventually, this will need to change, but, for the
         // time being, we don't have full cross-display transitions so it isn't a problem.
         final DisplayContent dc = mTargetDisplays.get(0);
+
+        // Commit the visibility of visible activities before calculateTransitionInfo(), so the
+        // TaskInfo can be visible. Also it needs to be done before moveToPlaying(), otherwise
+        // ActivityRecord#canShowWindows() may reject to show its window. The visibility also
+        // needs to be updated for STATE_ABORT.
+        commitVisibleActivities(transaction);
 
         if (mState == STATE_ABORT) {
             mController.abort(this);
@@ -1082,6 +1099,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             try {
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                         "Calling onTransitionReady: %s", info);
+                mLogger.mSendTimeNs = SystemClock.uptimeNanos();
+                mLogger.mInfo = info;
                 mController.getTransitionPlayer().onTransitionReady(
                         mToken, info, transaction, mFinishTransaction);
                 if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
@@ -1097,6 +1116,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // No player registered, so just finish/apply immediately
             cleanUpOnFailure();
         }
+        mController.mLoggerHandler.post(mLogger::logOnSend);
         mOverrideOptions = null;
 
         reportStartReasonsToLogger();
@@ -1129,6 +1149,19 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (ci.mSnapshot != null) {
                 ci.mSnapshot.release();
             }
+        }
+    }
+
+    /** The transition is ready to play. Make the start transaction show the surfaces. */
+    private void commitVisibleActivities(SurfaceControl.Transaction transaction) {
+        for (int i = mParticipants.size() - 1; i >= 0; --i) {
+            final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
+            if (ar == null || !ar.isVisibleRequested()) {
+                continue;
+            }
+            ar.commitVisibility(true /* visible */, false /* performLayout */,
+                    true /* fromTransition */);
+            ar.commitFinishDrawing(transaction);
         }
     }
 

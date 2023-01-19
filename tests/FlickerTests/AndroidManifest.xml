@@ -43,7 +43,7 @@
     <!-- ActivityOptions.makeCustomTaskAnimation() -->
     <uses-permission android:name="android.permission.START_TASKS_FROM_RECENTS" />
     <!-- Allow the test to write directly to /sdcard/ -->
-    <application android:requestLegacyExternalStorage="true">
+    <application android:requestLegacyExternalStorage="true" android:largeHeap="true">
         <uses-library android:name="android.test.runner"/>
         <uses-library android:name="androidx.window.extensions" android:required="false"/>
     </application>

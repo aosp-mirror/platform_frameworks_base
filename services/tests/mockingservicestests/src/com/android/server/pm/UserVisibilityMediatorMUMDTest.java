@@ -15,6 +15,8 @@
  */
 package com.android.server.pm;
 
+import org.junit.Test;
+
 /**
  * Tests for {@link UserVisibilityMediator} tests for devices that support concurrent Multiple
  * Users on Multiple Displays (A.K.A {@code MUMD}).
@@ -26,6 +28,19 @@ public final class UserVisibilityMediatorMUMDTest
         extends UserVisibilityMediatorVisibleBackgroundUserTestCase {
 
     public UserVisibilityMediatorMUMDTest() throws Exception {
-        super(/* usersOnSecondaryDisplaysEnabled= */ true);
+        super(/* backgroundUsersOnDisplaysEnabled= */ true,
+                /* backgroundUserOnDefaultDisplayAllowed= */ false);
+    }
+
+    @Test
+    public void testStartVisibleBgUser_onDefaultDisplay() throws Exception {
+        int userId = visibleBgUserCannotBeStartedOnDefaultDisplayTest();
+
+        assertInvisibleUserCannotBeAssignedExtraDisplay(userId, SECONDARY_DISPLAY_ID);
+    }
+
+    @Test
+    public void testStartBgUser_onDefaultDisplay_visible() throws Exception {
+        visibleBgUserCannotBeStartedOnDefaultDisplayTest();
     }
 }

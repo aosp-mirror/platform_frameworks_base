@@ -3993,12 +3993,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     public void showInsets(@InsetsType int types, boolean fromIme,
             @Nullable ImeTracker.Token statsToken) {
         try {
-            ImeTracker.forLogging().onProgress(statsToken,
+            ImeTracker.get().onProgress(statsToken,
                     ImeTracker.PHASE_WM_WINDOW_INSETS_CONTROL_TARGET_SHOW_INSETS);
             mClient.showInsets(types, fromIme, statsToken);
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to deliver showInsets", e);
-            ImeTracker.forLogging().onFailed(statsToken,
+            ImeTracker.get().onFailed(statsToken,
                     ImeTracker.PHASE_WM_WINDOW_INSETS_CONTROL_TARGET_SHOW_INSETS);
         }
     }
@@ -4007,12 +4007,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     public void hideInsets(@InsetsType int types, boolean fromIme,
             @Nullable ImeTracker.Token statsToken) {
         try {
-            ImeTracker.forLogging().onProgress(statsToken,
+            ImeTracker.get().onProgress(statsToken,
                     ImeTracker.PHASE_WM_WINDOW_INSETS_CONTROL_TARGET_HIDE_INSETS);
             mClient.hideInsets(types, fromIme, statsToken);
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to deliver hideInsets", e);
-            ImeTracker.forLogging().onFailed(statsToken,
+            ImeTracker.get().onFailed(statsToken,
                     ImeTracker.PHASE_WM_WINDOW_INSETS_CONTROL_TARGET_HIDE_INSETS);
         }
     }
@@ -4614,6 +4614,19 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         } else {
             return -1;
         }
+    }
+
+    /** Makes the surface of drawn window (COMMIT_DRAW_PENDING) to be visible. */
+    boolean commitFinishDrawing(SurfaceControl.Transaction t) {
+        boolean committed = mWinAnimator.commitFinishDrawingLocked();
+        if (committed) {
+            // Ensure that the visibility of buffer layer is set.
+            mWinAnimator.prepareSurfaceLocked(t);
+        }
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            committed |= mChildren.get(i).commitFinishDrawing(t);
+        }
+        return committed;
     }
 
     // This must be called while inside a transaction.

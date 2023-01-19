@@ -34,7 +34,6 @@
 #include "SkImageFilter.h"
 #include "SkImageInfo.h"
 #include "SkLatticeIter.h"
-#include "SkMath.h"
 #include "SkPaint.h"
 #include "SkPicture.h"
 #include "SkRRect.h"

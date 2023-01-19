@@ -1606,8 +1606,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Encapsulates the global setting "hidden_api_blacklist_exemptions"
     final HiddenApiSettings mHiddenApiBlacklist;
 
-    final SdkSandboxSettings mSdkSandboxSettings;
-
     private final PlatformCompat mPlatformCompat;
 
     PackageManagerInternal mPackageManagerInt;
@@ -2324,53 +2322,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    /**
-     * Handles settings related to the enforcement of SDK sandbox restrictions.
-     */
-    static class SdkSandboxSettings implements DeviceConfig.OnPropertiesChangedListener {
-
-        private final Context mContext;
-        private final Object mLock = new Object();
-
-        @GuardedBy("mLock")
-        private boolean mEnforceBroadcastReceiverRestrictions;
-
-        /**
-         * Property to enforce broadcast receiver restrictions for SDK sandbox processes. If the
-         * value of this property is {@code true}, the restrictions will be enforced.
-         */
-        public static final String ENFORCE_BROADCAST_RECEIVER_RESTRICTIONS =
-                "enforce_broadcast_receiver_restrictions";
-
-        SdkSandboxSettings(Context context) {
-            mContext = context;
-        }
-
-        void registerObserver() {
-            synchronized (mLock) {
-                mEnforceBroadcastReceiverRestrictions = DeviceConfig.getBoolean(
-                        DeviceConfig.NAMESPACE_SDK_SANDBOX,
-                        ENFORCE_BROADCAST_RECEIVER_RESTRICTIONS, false);
-                DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SDK_SANDBOX,
-                        mContext.getMainExecutor(), this);
-            }
-        }
-
-        @Override
-        public void onPropertiesChanged(DeviceConfig.Properties properties) {
-            synchronized (mLock) {
-                mEnforceBroadcastReceiverRestrictions = properties.getBoolean(
-                        ENFORCE_BROADCAST_RECEIVER_RESTRICTIONS, false);
-            }
-        }
-
-        boolean isBroadcastReceiverRestrictionsEnforced() {
-            synchronized (mLock) {
-                return mEnforceBroadcastReceiverRestrictions;
-            }
-        }
-    }
-
     AppOpsManager getAppOpsManager() {
         if (mAppOpsManager == null) {
             mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
@@ -2414,7 +2365,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mProcStartHandlerThread = null;
         mProcStartHandler = null;
         mHiddenApiBlacklist = null;
-        mSdkSandboxSettings = null;
         mFactoryTest = FACTORY_TEST_OFF;
         mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
         mInternal = new LocalService();
@@ -2539,7 +2489,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mAtmInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
 
         mHiddenApiBlacklist = new HiddenApiSettings(mHandler, mContext);
-        mSdkSandboxSettings = new SdkSandboxSettings(mContext);
 
         Watchdog.getInstance().addMonitor(this);
         Watchdog.getInstance().addThread(mHandler);
@@ -6694,6 +6643,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void appNotResponding(final String reason) {
+        appNotResponding(reason, /*isContinuousAnr*/ false);
+    }
+
+    public void appNotResponding(final String reason, boolean isContinuousAnr) {
         TimeoutRecord timeoutRecord = TimeoutRecord.forApp("App requested: " + reason);
         final int callingPid = Binder.getCallingPid();
 
@@ -6706,7 +6659,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             mAnrHelper.appNotResponding(app, null, app.info, null, null, false,
-                    timeoutRecord);
+                    timeoutRecord, isContinuousAnr);
         }
     }
 
@@ -7434,11 +7387,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (shareDescription != null) {
             triggerShellBugreport.putExtra(EXTRA_DESCRIPTION, shareDescription);
         }
-        UserHandle callingUser = Binder.getCallingUserHandle();
         final long identity = Binder.clearCallingIdentity();
         try {
             // Send broadcast to shell to trigger bugreport using Bugreport API
-            mContext.sendBroadcastAsUser(triggerShellBugreport, callingUser);
+            // Always start the shell process on the current user to ensure that
+            // the foreground user can see all bugreport notifications.
+            mContext.sendBroadcastAsUser(triggerShellBugreport, getCurrentUser().getUserHandle());
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -7510,7 +7464,10 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @Override
     public boolean launchBugReportHandlerApp() {
-        if (!BugReportHandlerUtil.isBugReportHandlerEnabled(mContext)) {
+
+        Context currentUserContext = mContext.createContextAsUser(getCurrentUser().getUserHandle(),
+                /* flags= */ 0);
+        if (!BugReportHandlerUtil.isBugReportHandlerEnabled(currentUserContext)) {
             return false;
         }
 
@@ -7519,7 +7476,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         enforceCallingPermission(android.Manifest.permission.DUMP,
                 "launchBugReportHandlerApp");
 
-        return BugReportHandlerUtil.launchBugReportHandlerApp(mContext);
+        return BugReportHandlerUtil.launchBugReportHandlerApp(currentUserContext);
     }
 
     /**
@@ -8292,7 +8249,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         final boolean alwaysFinishActivities =
                 Settings.Global.getInt(resolver, ALWAYS_FINISH_ACTIVITIES, 0) != 0;
         mHiddenApiBlacklist.registerObserver();
-        mSdkSandboxSettings.registerObserver();
         mPlatformCompat.registerContentObserver();
 
         mAppProfiler.retrieveSettings();
@@ -8463,10 +8419,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Enable home activity for system user, so that the system can always boot. We don't
             // do this when the system user is not setup since the setup wizard should be the one
             // to handle home activity in this case.
-            if (UserManager.isSplitSystemUser() &&
-                    Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                         Settings.Secure.USER_SETUP_COMPLETE, 0, currentUserId) != 0
-                    || SystemProperties.getBoolean(SYSTEM_USER_HOME_NEEDED, false)) {
+            if (SystemProperties.getBoolean(SYSTEM_USER_HOME_NEEDED, false)) {
                 t.traceBegin("enableHomeActivity");
                 ComponentName cName = new ComponentName(mContext, SystemUserHomeActivity.class);
                 try {
@@ -13537,16 +13490,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             String callerFeatureId, String receiverId, IIntentReceiver receiver,
             IntentFilter filter, String permission, int userId, int flags) {
         enforceNotIsolatedCaller("registerReceiver");
-
-        // Allow Sandbox process to register only unexported receivers.
-        boolean unexported = (flags & Context.RECEIVER_NOT_EXPORTED) != 0;
-        if (mSdkSandboxSettings.isBroadcastReceiverRestrictionsEnforced()
-                && Process.isSdkSandboxUid(Binder.getCallingUid())
-                && !unexported) {
-            throw new SecurityException("SDK sandbox process not allowed to call "
-                + "registerReceiver");
-        }
-
         ArrayList<Intent> stickyIntents = null;
         ProcessRecord callerApp = null;
         final boolean visibleToInstantApps
@@ -13607,6 +13550,20 @@ public class ActivityManagerService extends IActivityManager.Stub
                         onlyProtectedBroadcasts = false;
                         Slog.w(TAG, "Remote exception", e);
                     }
+                }
+            }
+
+            if (Process.isSdkSandboxUid(Binder.getCallingUid())) {
+                SdkSandboxManagerLocal sdkSandboxManagerLocal =
+                        LocalManagerRegistry.getManager(SdkSandboxManagerLocal.class);
+                if (sdkSandboxManagerLocal == null) {
+                    throw new IllegalStateException("SdkSandboxManagerLocal not found when checking"
+                            + " whether SDK sandbox uid can register to broadcast receivers.");
+                }
+                if (!sdkSandboxManagerLocal.canRegisterBroadcastReceiver(
+                        /*IntentFilter=*/ filter, flags, onlyProtectedBroadcasts)) {
+                    throw new SecurityException("SDK sandbox not allowed to register receiver"
+                            + " with the given IntentFilter");
                 }
             }
 
@@ -18401,7 +18358,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
                 mAnrHelper.appNotResponding(proc, activityShortComponentName, aInfo,
-                        parentShortComponentName, parentProcess, aboveSystem, timeoutRecord);
+                        parentShortComponentName, parentProcess, aboveSystem, timeoutRecord,
+                        /*isContinuousAnr*/ true);
             }
 
             return true;

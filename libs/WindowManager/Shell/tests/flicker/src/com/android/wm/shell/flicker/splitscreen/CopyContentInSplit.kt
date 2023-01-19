@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.splitscreen
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
@@ -136,7 +137,7 @@ class CopyContentInSplit(flicker: FlickerTest) : SplitScreenBase(flicker) {
     }
 
     /** {@inheritDoc} */
-    @Presubmit
+    @FlakyTest(bugId = 264241018)
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()

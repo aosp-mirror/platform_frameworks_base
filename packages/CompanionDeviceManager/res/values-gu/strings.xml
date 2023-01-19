@@ -43,7 +43,7 @@
     <string name="consent_no" msgid="2640796915611404382">"મંજૂરી આપશો નહીં"</string>
     <string name="consent_back" msgid="2560683030046918882">"પાછળ"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"&lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; પરની ઍપને &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; પર છે તે જ પરવાનગીઓ આપીએ?"</string>
-    <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;આમાં &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; પરના માઇક્રોફોન, કૅમેરા અને લોકેશનના ઍક્સેસ તથા અન્ય સંવેદનશીલ માહિતીની પરવાનગીઓ શામેલ હોઈ શકે છે.&lt;/p&gt; &lt;p&gt;તમે &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt; પર તમારા સેટિંગમાં તમે કોઈપણ સમયે આ પરવાનગીઓને બદલી શકો છો.&lt;/p&gt;"</string>
+    <string name="permission_sync_summary" msgid="765497944331294275">"આમાં &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; પરના &lt;strong&gt;માઇક્રોફોન&lt;/strong&gt;, &lt;strong&gt;કૅમેરા&lt;/strong&gt; અને &lt;strong&gt;લોકેશનના ઍક્સેસ&lt;/strong&gt; તથા અન્ય સંવેદનશીલ માહિતીની પરવાનગીઓ શામેલ હોઈ શકે છે. &lt;br/&gt;&lt;br/&gt;તમે કોઈપણ સમયે &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g> પર તમારા સેટિંગમાં આ પરવાનગીઓમાં ફેરફાર કરી શકો છો&lt;/strong&gt;."</string>
     <string name="vendor_icon_description" msgid="4445875290032225965">"ઍપનું આઇકન"</string>
     <string name="vendor_header_button_description" msgid="6566660389500630608">"વધુ માહિતી માટેનું બટન"</string>
     <string name="permission_phone" msgid="2661081078692784919">"ફોન"</string>
@@ -51,26 +51,19 @@
     <string name="permission_contacts" msgid="3858319347208004438">"સંપર્કો"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"કૅલેન્ડર"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"માઇક્રોફોન"</string>
-    <!-- no translation found for permission_call_logs (5546761417694586041) -->
-    <skip />
+    <string name="permission_call_logs" msgid="5546761417694586041">"કૉલ લૉગ"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"નજીકના ડિવાઇસ"</string>
     <string name="permission_storage" msgid="6831099350839392343">"ફોટા અને મીડિયા"</string>
     <string name="permission_notification" msgid="693762568127741203">"નોટિફિકેશન"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"ઍપ"</string>
     <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"નજીકના ડિવાઇસ પર સ્ટ્રીમિંગ"</string>
-    <!-- no translation found for permission_phone_summary (6684396967861278044) -->
-    <skip />
-    <!-- no translation found for permission_call_logs_summary (6186103394658755022) -->
-    <skip />
-    <!-- no translation found for permission_sms_summary (3508442683678912017) -->
-    <skip />
-    <!-- no translation found for permission_contacts_summary (675861979475628708) -->
-    <skip />
-    <!-- no translation found for permission_calendar_summary (6460000922511766226) -->
-    <skip />
+    <string name="permission_phone_summary" msgid="6684396967861278044">"ફોન કૉલ કરી શકે છે અને તેને મેનેજ કરી શકે છે"</string>
+    <string name="permission_call_logs_summary" msgid="6186103394658755022">"ફોન કૉલ લૉગ વાંચી અને લખી શકે છે"</string>
+    <string name="permission_sms_summary" msgid="3508442683678912017">"SMS મેસેજ મોકલી શકે છે અને જોઈ શકે છે"</string>
+    <string name="permission_contacts_summary" msgid="675861979475628708">"તમારા સંપર્કો ઍક્સેસ કરી શકે છે"</string>
+    <string name="permission_calendar_summary" msgid="6460000922511766226">"તમારા કૅલેન્ડરનો ઍક્સેસ કરી શકે છે"</string>
     <string name="permission_microphone_summary" msgid="4241354865859396558">"માઇક્રોફોનનો ઉપયોગ કરીને ઑડિયો રેકોર્ડ કરી શકાય છે"</string>
-    <!-- no translation found for permission_nearby_devices_summary (931940524460876655) -->
-    <skip />
+    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"નજીકના ડિવાઇસ શોધી શકે છે, તેમની સાથે કનેક્ટ કરી શકે છે અને તેમની સંબંધિત સ્થિતિ નિર્ધારિત કરી શકે છે"</string>
     <string name="permission_notification_summary" msgid="884075314530071011">"સંપર્કો, મેસેજ અને ફોટા જેવી માહિતી સહિતના બધા નોટિફિકેશન વાંચી શકે છે"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"તમારા ફોનની ઍપ સ્ટ્રીમ કરો"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>

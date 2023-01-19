@@ -119,12 +119,13 @@ public class AnrHelperTest {
         final TimeoutRecord timeoutRecord = TimeoutRecord.forInputDispatchWindowUnresponsive(
                 annotation);
         mAnrHelper.appNotResponding(mAnrApp, activityShortComponentName, appInfo,
-                parentShortComponentName, parentProcess, aboveSystem, timeoutRecord);
+                parentShortComponentName, parentProcess, aboveSystem, timeoutRecord,
+                /*isContinuousAnr*/ false);
 
         verify(mAnrApp.mErrorState, timeout(TIMEOUT_MS)).appNotResponding(
                 eq(activityShortComponentName), eq(appInfo), eq(parentShortComponentName),
                 eq(parentProcess), eq(aboveSystem), eq(timeoutRecord), eq(mExecutorService),
-                eq(false) /* onlyDumpSelf */);
+                eq(false) /* onlyDumpSelf */, eq(false) /*isContinuousAnr*/);
     }
 
     @Test
@@ -137,13 +138,14 @@ public class AnrHelperTest {
             processingLatch.await();
             return null;
         }).when(mAnrApp.mErrorState).appNotResponding(anyString(), any(), any(), any(),
-                anyBoolean(), any(), any(), anyBoolean());
+                anyBoolean(), any(), any(), anyBoolean(), anyBoolean());
         final ApplicationInfo appInfo = new ApplicationInfo();
         final TimeoutRecord timeoutRecord = TimeoutRecord.forInputDispatchWindowUnresponsive(
                 "annotation");
         final Runnable reportAnr = () -> mAnrHelper.appNotResponding(mAnrApp,
                 "activityShortComponentName", appInfo, "parentShortComponentName",
-                null /* parentProcess */, false /* aboveSystem */, timeoutRecord);
+                null /* parentProcess */, false /* aboveSystem */, timeoutRecord,
+                false /*isContinuousAnr*/);
         reportAnr.run();
         // This should be skipped because the pid is pending in queue.
         reportAnr.run();
@@ -160,6 +162,6 @@ public class AnrHelperTest {
         // There is only one ANR reported.
         verify(mAnrApp.mErrorState, timeout(TIMEOUT_MS).only()).appNotResponding(
                 anyString(), any(), any(), any(), anyBoolean(), any(), eq(mExecutorService),
-                anyBoolean());
+                anyBoolean(), anyBoolean());
     }
 }

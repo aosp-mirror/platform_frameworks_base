@@ -1511,10 +1511,10 @@
     <string name="notification_conversation_summary_low">No sound or vibration and appears lower in conversation section</string>
 
     <!-- [CHAR LIMIT=150] Notification Importance title: normal importance level summary -->
-    <string name="notification_channel_summary_default">May ring or vibrate based on phone settings</string>
+    <string name="notification_channel_summary_default">May ring or vibrate based on device settings</string>
 
     <!-- [CHAR LIMIT=150] Conversation Notification Importance title: normal conversation level, with bubbling summary -->
-    <string name="notification_channel_summary_default_with_bubbles">May ring or vibrate based on phone settings. Conversations from <xliff:g id="app_name" example="YouTube">%1$s</xliff:g> bubble by default.</string>
+    <string name="notification_channel_summary_default_with_bubbles">May ring or vibrate based on device settings. Conversations from <xliff:g id="app_name" example="YouTube">%1$s</xliff:g> bubble by default.</string>
 
     <!-- [CHAR LIMIT=150] Notification Importance title: automatic importance level summary -->
     <string name="notification_channel_summary_automatic">Have the system determine if this notification should make sound or vibration</string>
@@ -2522,6 +2522,8 @@
     <string name="media_output_group_title_speakers_and_displays">Speakers &amp; Displays</string>
     <!-- Title for Suggested Devices group. [CHAR LIMIT=NONE] -->
     <string name="media_output_group_title_suggested_device">Suggested Devices</string>
+    <!-- Sub status indicates device need premium account. [CHAR LIMIT=NONE] -->
+    <string name="media_output_status_require_premium">Requires premium account</string>
 
     <!-- Media Output Broadcast Dialog -->
     <!-- Title for Broadcast First Notify Dialog [CHAR LIMIT=60] -->
@@ -2896,4 +2898,19 @@
     <string name="stylus_battery_low_percentage"><xliff:g id="percentage" example="16%">%s</xliff:g> battery remaining</string>
     <!-- Subtitle for the notification sent when a stylus battery is low. [CHAR LIMIT=none]-->
     <string name="stylus_battery_low_subtitle">Connect your stylus to a charger</string>
+
+    <!-- Switch to work profile dialer app for placing a call dialog. -->
+    <!-- Text for Switch to work profile dialog's Title. Switch to work profile dialog guide users to make call from work
+    profile dialer app as it's not possible to make call from current profile due to an admin policy. [CHAR LIMIT=60] -->
+    <string name="call_from_work_profile_title">Can\'t call from this profile</string>
+    <!-- Text for switch to work profile for call dialog to guide users to make call from work
+    profile dialer app as it's not possible to make call from current profile due to an admin policy. [CHAR LIMIT=NONE]
+    -->
+    <string name="call_from_work_profile_text">Your work policy allows you to make phone calls only from the work profile</string>
+    <!-- Label for the button to switch to work profile for placing call. Switch to work profile dialog guide users to make call from work
+    profile dialer app as it's not possible to make call from current profile due to an admin policy.[CHAR LIMIT=60] -->
+    <string name="call_from_work_profile_action">Switch to work profile</string>
+    <!-- Label for the close button on switch to work profile dialog. Switch to work profile dialog guide users to make call from work
+    profile dialer app as it's not possible to make call from current profile due to an admin policy.[CHAR LIMIT=60] -->
+    <string name="call_from_work_profile_close">Close</string>
 </resources>

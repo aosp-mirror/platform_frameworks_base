@@ -25,6 +25,7 @@ import static com.android.server.power.stats.CpuWakeupStats.WAKEUP_RETENTION_MS;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
+import android.os.Handler;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
@@ -35,6 +36,7 @@ import com.android.frameworks.servicestests.R;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -55,12 +57,13 @@ public class CpuWakeupStatsTest {
     private static final int TEST_UID_5 = 76421423;
 
     private static final Context sContext = InstrumentationRegistry.getTargetContext();
+    private final Handler mHandler = Mockito.mock(Handler.class);
     private final ThreadLocalRandom mRandom = ThreadLocalRandom.current();
 
     @Test
     public void removesOldWakeups() {
         // The xml resource doesn't matter for this test.
-        final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_1);
+        final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_1, mHandler);
 
         final Set<Long> timestamps = new HashSet<>();
         final long firstWakeup = 453192;
@@ -88,7 +91,7 @@ public class CpuWakeupStatsTest {
 
     @Test
     public void alarmIrqAttributionSolo() {
-        final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_3);
+        final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_3, mHandler);
         final long wakeupTime = 12423121;
 
         obj.noteWakeupTimeAndReason(wakeupTime, 1, KERNEL_REASON_ALARM_IRQ);
@@ -113,7 +116,7 @@ public class CpuWakeupStatsTest {
 
     @Test
     public void alarmIrqAttributionCombined() {
-        final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_3);
+        final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_3, mHandler);
         final long wakeupTime = 92123210;
 
         obj.noteWakeupTimeAndReason(wakeupTime, 4,
@@ -143,7 +146,7 @@ public class CpuWakeupStatsTest {
 
     @Test
     public void unknownIrqAttribution() {
-        final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_3);
+        final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_3, mHandler);
         final long wakeupTime = 92123410;
 
         obj.noteWakeupTimeAndReason(wakeupTime, 24, KERNEL_REASON_UNKNOWN_IRQ);
@@ -163,7 +166,7 @@ public class CpuWakeupStatsTest {
 
     @Test
     public void unknownAttribution() {
-        final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_3);
+        final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_3, mHandler);
         final long wakeupTime = 72123210;
 
         obj.noteWakeupTimeAndReason(wakeupTime, 34, KERNEL_REASON_UNKNOWN);
@@ -178,7 +181,7 @@ public class CpuWakeupStatsTest {
 
     @Test
     public void unsupportedAttribution() {
-        final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_3);
+        final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_3, mHandler);
 
         long wakeupTime = 970934;
         obj.noteWakeupTimeAndReason(wakeupTime, 34, KERNEL_REASON_UNSUPPORTED);

@@ -640,7 +640,7 @@ public class WallpaperManager {
                 Bundle params = new Bundle();
                 try (ParcelFileDescriptor pfd = mService.getWallpaperWithFeature(
                         context.getOpPackageName(), context.getAttributionTag(), this, which,
-                        params, userId)) {
+                        params, userId, /* getCropped = */ true)) {
                     // Let's peek user wallpaper first.
                     if (pfd != null) {
                         BitmapFactory.Options options = new BitmapFactory.Options();
@@ -690,7 +690,7 @@ public class WallpaperManager {
                 Bundle params = new Bundle();
                 ParcelFileDescriptor pfd = mService.getWallpaperWithFeature(
                         context.getOpPackageName(), context.getAttributionTag(), this, which,
-                        params, userId);
+                        params, userId, /* getCropped = */ true);
 
                 if (pfd != null) {
                     try (BufferedInputStream bis = new BufferedInputStream(
@@ -1437,6 +1437,27 @@ public class WallpaperManager {
      */
     @UnsupportedAppUsage
     public ParcelFileDescriptor getWallpaperFile(@SetWallpaperFlags int which, int userId) {
+        return getWallpaperFile(which, userId, /* getCropped = */ true);
+    }
+
+    /**
+     * Version of {@link #getWallpaperFile(int)} that allows specifying whether to get the
+     * cropped version of the wallpaper file or the original.
+     *
+     * @param which The wallpaper whose image file is to be retrieved.  Must be a single
+     *    defined kind of wallpaper, either {@link #FLAG_SYSTEM} or {@link #FLAG_LOCK}.
+     * @param getCropped If true the cropped file will be retrieved, if false the original will
+     *                   be retrieved.
+     *
+     * @hide
+     */
+    @Nullable
+    public ParcelFileDescriptor getWallpaperFile(@SetWallpaperFlags int which, boolean getCropped) {
+        return getWallpaperFile(which, mContext.getUserId(), getCropped);
+    }
+
+    private ParcelFileDescriptor getWallpaperFile(@SetWallpaperFlags int which, int userId,
+            boolean getCropped) {
         checkExactlyOneWallpaperFlagSet(which);
 
         if (sGlobals.mService == null) {
@@ -1446,7 +1467,8 @@ public class WallpaperManager {
             try {
                 Bundle outParams = new Bundle();
                 return sGlobals.mService.getWallpaperWithFeature(mContext.getOpPackageName(),
-                        mContext.getAttributionTag(), null, which, outParams, userId);
+                        mContext.getAttributionTag(), null, which, outParams,
+                        userId, getCropped);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             } catch (SecurityException e) {
@@ -1526,6 +1548,28 @@ public class WallpaperManager {
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get an open, readable file descriptor for the file that contains metadata about the
+     * context user's wallpaper.
+     *
+     * The caller is responsible for closing the file descriptor when done ingesting the file.
+     *
+     * @hide
+     */
+    @Nullable
+    public ParcelFileDescriptor getWallpaperInfoFile() {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            throw new RuntimeException(new DeadSystemException());
+        } else {
+            try {
+                return sGlobals.mService.getWallpaperInfoFile(mContext.getUserId());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
     }
 

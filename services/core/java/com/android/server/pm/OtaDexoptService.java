@@ -168,13 +168,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             Log.i(TAG, "Low on space, deleting oat files in an attempt to free up space: "
                     + DexOptHelper.packagesToString(others));
             for (PackageStateInternal pkg : others) {
-                // TODO(b/251903639): Call into ART Service.
-                try {
-                    mPackageManagerService.deleteOatArtifactsOfPackage(
-                            snapshot, pkg.getPackageName());
-                } catch (LegacyDexoptDisabledException e) {
-                    throw new RuntimeException(e);
-                }
+                mPackageManagerService.deleteOatArtifactsOfPackage(snapshot, pkg.getPackageName());
             }
         }
         long spaceAvailableNow = getAvailableSpace();

@@ -275,8 +275,11 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
     }
 
     /**
-     * Returns whether there is only one user on this device, not including
-     * the system-only user.
+     * Returns whether there is only one "full" user on this device.
+     *
+     * <p><b>Note:</b> on devices that use {@link android.os.UserManager#isHeadlessSystemUserMode()
+     * headless system user mode}, the system user is not "full", so it's not be considered in the
+     * calculation.
      */
     private boolean isSingleUser(UserManager userManager) {
         final int userCount = userManager.getUserCount();

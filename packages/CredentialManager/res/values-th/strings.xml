@@ -5,31 +5,25 @@
     <string name="string_cancel" msgid="6369133483981306063">"ยกเลิก"</string>
     <string name="string_continue" msgid="1346732695941131882">"ต่อไป"</string>
     <string name="string_more_options" msgid="7990658711962795124">"ตัวเลือกเพิ่มเติม"</string>
-    <string name="string_create_in_another_place" msgid="1033635365843437603">"สร้างในตำแหน่งอื่น"</string>
-    <string name="string_save_to_another_place" msgid="7590325934591079193">"บันทึกลงในตำแหน่งอื่น"</string>
-    <string name="string_use_another_device" msgid="8754514926121520445">"ใช้อุปกรณ์อื่น"</string>
-    <string name="string_save_to_another_device" msgid="1959562542075194458">"ย้ายไปยังอุปกรณ์อื่น"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"ปลอดภัยขึ้นด้วยพาสคีย์"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"พาสคีย์ช่วยให้คุณไม่ต้องสร้างหรือจำรหัสผ่านที่ซับซ้อน"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"พาสคีย์คือกุญแจดิจิทัลที่เข้ารหัสซึ่งคุณสร้างโดยใช้ลายนิ้วมือ ใบหน้า หรือการล็อกหน้าจอ"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"ข้อมูลนี้จะบันทึกอยู่ในเครื่องมือจัดการรหัสผ่านเพื่อให้คุณลงชื่อเข้าใช้ในอุปกรณ์อื่นๆ ได้"</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"เลือกตำแหน่งที่จะ <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
-    <string name="create_your_passkeys" msgid="8901224153607590596">"สร้างพาสคีย์"</string>
-    <string name="save_your_password" msgid="6597736507991704307">"บันทึกรหัสผ่าน"</string>
-    <string name="save_your_sign_in_info" msgid="7213978049817076882">"บันทึกข้อมูลการลงชื่อเข้าใช้"</string>
-    <string name="choose_provider_body" msgid="4384188171872005547">"เลือกเครื่องมือจัดการรหัสผ่านเพื่อบันทึกข้อมูลและลงชื่อเข้าใช้เร็วขึ้นในครั้งถัดไป"</string>
+    <string name="choose_provider_title" msgid="8870795677024868108">"เลือกว่าต้องการบันทึก<xliff:g id="CREATETYPES">%1$s</xliff:g>ไว้ที่ใด"</string>
+    <string name="choose_provider_body" msgid="4967074531845147434">"เลือกเครื่องมือจัดการรหัสผ่านเพื่อบันทึกข้อมูลและลงชื่อเข้าใช้เร็วขึ้นในครั้งถัดไป"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"สร้างพาสคีย์สำหรับ <xliff:g id="APPNAME">%1$s</xliff:g> ไหม"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"บันทึกรหัสผ่านสำหรับ <xliff:g id="APPNAME">%1$s</xliff:g> ไหม"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"บันทึกข้อมูลการลงชื่อเข้าใช้สำหรับ <xliff:g id="APPNAME">%1$s</xliff:g> ไหม"</string>
-    <string name="choose_create_option_description" msgid="5531335144879100664">"คุณสามารถใช้ <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> ของ <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> ในอุปกรณ์ใดก็ได้ โดยระบบจะบันทึกลงใน <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> สำหรับ <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>"</string>
     <string name="passkey" msgid="632353688396759522">"พาสคีย์"</string>
     <string name="password" msgid="6738570945182936667">"รหัสผ่าน"</string>
+    <string name="passkeys" msgid="5733880786866559847">"พาสคีย์"</string>
+    <string name="passwords" msgid="5419394230391253816">"รหัสผ่าน"</string>
     <string name="sign_ins" msgid="4710739369149469208">"การลงชื่อเข้าใช้"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"ข้อมูลการลงชื่อเข้าใช้"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"บันทึก<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>ไปยัง"</string>
-    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"สร้างพาสคีย์ในอุปกรณ์อื่นไหม"</string>
+    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"สร้างพาสคีย์ในอุปกรณ์อื่นไหม"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"ใช้ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> สำหรับการลงชื่อเข้าใช้ทั้งหมดใช่ไหม"</string>
-    <string name="use_provider_for_all_description" msgid="6560593199974037820">"เครื่องมือจัดการรหัสผ่านนี้จะจัดเก็บรหัสผ่านและพาสคีย์ไว้เพื่อช่วยให้คุณลงชื่อเข้าใช้ได้โดยง่าย"</string>
+    <string name="use_provider_for_all_description" msgid="8466427781848268490">"เครื่องมือจัดการรหัสผ่านนี้จะจัดเก็บรหัสผ่านและพาสคีย์ไว้เพื่อช่วยให้คุณลงชื่อเข้าใช้ได้โดยง่าย"</string>
     <string name="set_as_default" msgid="4415328591568654603">"ตั้งเป็นค่าเริ่มต้น"</string>
     <string name="use_once" msgid="9027366575315399714">"ใช้ครั้งเดียว"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"รหัสผ่าน <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> รายการ • พาสคีย์ <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> รายการ"</string>

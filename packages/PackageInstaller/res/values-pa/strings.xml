@@ -26,6 +26,10 @@
     <string name="install_done" msgid="5987363587661783896">"ਐਪ ਸਥਾਪਤ ਕੀਤੀ ਗਈ।"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਅੱਪਡੇਟ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"ਐਪ ਸਥਾਪਤ ਨਹੀਂ ਕੀਤੀ ਗਈ।"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ਪੈਕੇਜ ਨੂੰ ਸਥਾਪਤ ਹੋਣ ਤੋਂ ਬਲਾਕ ਕੀਤਾ ਗਿਆ ਸੀ।"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ਪੈਕੇਜ ਦੇ ਇੱਕ ਮੌਜੂਦਾ ਪੈਕੇਜ ਨਾਲ ਵਿਵਾਦ ਹੋਣ ਕਰਕੇ ਐਪ ਸਥਾਪਤ ਨਹੀਂ ਕੀਤੀ ਗਈ।"</string>

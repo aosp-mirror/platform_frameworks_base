@@ -26,6 +26,10 @@
     <string name="install_done" msgid="5987363587661783896">"ଆପ ଇନଷ୍ଟଲ ହୋଇଗଲା।"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"ଆପଣ ଏହି ଆପକୁ ଇନଷ୍ଟଲ୍ କରିବା ପାଇଁ ଚାହୁଁଛନ୍ତି କି?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"ଆପଣ ଏହି ଆପକୁ ଅପଡେଟ୍ କରିବା ପାଇଁ ଚାହୁଁଛନ୍ତି କି?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"ଆପ୍‍ ଇନଷ୍ଟଲ୍‌ ହୋଇନାହିଁ।"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ଏହି ପ୍ୟାକେଜ୍‌କୁ ଇନଷ୍ଟଲ୍‍ କରାଯିବାରୁ ଅବରୋଧ କରାଯାଇଥିଲା।"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ପୂର୍ବରୁ ଥିବା ପ୍ୟାକେଜ୍‍ ସହ ଏହି ପ୍ୟାକେଜ୍‌ର ସମସ୍ୟା ଉପୁଯିବାରୁ ଆପ୍‍ ଇନଷ୍ଟଲ୍‍ ହୋଇପାରିଲା ନାହିଁ।"</string>

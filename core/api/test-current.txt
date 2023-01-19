@@ -908,8 +908,6 @@ package android.content.pm {
     method public boolean isProfile();
     method public boolean isQuietModeEnabled();
     method public boolean isRestricted();
-    method public boolean isSystemOnly();
-    method public static boolean isSystemOnly(int);
     method public boolean supportsSwitchTo();
     method public boolean supportsSwitchToByUser();
     method public void writeToParcel(android.os.Parcel, int);
@@ -2032,7 +2030,6 @@ package android.os {
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public String getUserType();
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public java.util.List<android.content.pm.UserInfo> getUsers(boolean, boolean, boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public boolean hasBaseUserRestriction(@NonNull String, @NonNull android.os.UserHandle);
-    method public static boolean isSplitSystemUser();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public boolean isUserTypeEnabled(@NonNull String);
     method public boolean isVisibleBackgroundUsersSupported();
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public android.content.pm.UserInfo preCreateUser(@NonNull String) throws android.os.UserManager.UserOperationException;
@@ -3338,6 +3335,7 @@ package android.view.inputmethod {
     field public static final int GESTURE_TYPE_DELETE = 4; // 0x4
     field public static final int GESTURE_TYPE_DELETE_RANGE = 64; // 0x40
     field public static final int GESTURE_TYPE_INSERT = 2; // 0x2
+    field public static final int GESTURE_TYPE_INSERT_MODE = 128; // 0x80
     field public static final int GESTURE_TYPE_JOIN_OR_SPLIT = 16; // 0x10
     field public static final int GESTURE_TYPE_NONE = 0; // 0x0
     field public static final int GESTURE_TYPE_REMOVE_SPACE = 8; // 0x8

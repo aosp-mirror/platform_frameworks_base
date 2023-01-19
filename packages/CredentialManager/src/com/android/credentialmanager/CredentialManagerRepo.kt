@@ -414,7 +414,7 @@ class CredentialManagerRepo(
         credentialData,
         // TODO: populate with actual data
         /*candidateQueryData=*/ Bundle(),
-        /*requireSystemProvider=*/ false
+        /*isSystemProviderRequired=*/ false
       ),
       "com.google.android.youtube"
     )
@@ -429,7 +429,7 @@ class CredentialManagerRepo(
         data,
         // TODO: populate with actual data
         /*candidateQueryData=*/ Bundle(),
-        /*requireSystemProvider=*/ false
+        /*isSystemProviderRequired=*/ false
       ),
       "com.google.android.youtube"
     )
@@ -443,7 +443,7 @@ class CredentialManagerRepo(
         "other-sign-ins",
         data,
         /*candidateQueryData=*/ Bundle(),
-        /*requireSystemProvider=*/ false
+        /*isSystemProviderRequired=*/ false
       ),
       "com.google.android.youtube"
     )
@@ -457,7 +457,7 @@ class CredentialManagerRepo(
       )
         .addGetCredentialOption(
           GetCredentialOption(
-            TYPE_PUBLIC_KEY_CREDENTIAL, Bundle(), Bundle(), /*requireSystemProvider=*/ false)
+            TYPE_PUBLIC_KEY_CREDENTIAL, Bundle(), Bundle(), /*isSystemProviderRequired=*/ false)
         )
         .build(),
       "com.google.android.youtube"

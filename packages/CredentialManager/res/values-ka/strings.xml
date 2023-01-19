@@ -5,31 +5,25 @@
     <string name="string_cancel" msgid="6369133483981306063">"გაუქმება"</string>
     <string name="string_continue" msgid="1346732695941131882">"გაგრძელება"</string>
     <string name="string_more_options" msgid="7990658711962795124">"სხვა ვარიანტები"</string>
-    <string name="string_create_in_another_place" msgid="1033635365843437603">"სხვა სივრცეში შექმნა"</string>
-    <string name="string_save_to_another_place" msgid="7590325934591079193">"სხვა სივრცეში შენახვა"</string>
-    <string name="string_use_another_device" msgid="8754514926121520445">"სხვა მოწყობილობის გამოყენება"</string>
-    <string name="string_save_to_another_device" msgid="1959562542075194458">"სხვა მოწყობილობაზე შენახვა"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"უფრო უსაფრთხოა წვდომის გასაღების შემთხვევაში"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"წვდომის გასაღებების დახმარებით აღარ მოგიწევთ რთული პაროლების შექმნა და დამახსოვრება"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"წვდომის გასაღებები დაშიფრული ციფრული გასაღებებია, რომლებსაც თქვენი თითის ანაბეჭდით, სახით ან ეკრანის დაბლოკვით ქმნით"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"ისინი შეინახება პაროლების მმართველში, რათა სხვა მოწყობილობებიდან შესვლაც შეძლოთ"</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"აირჩიეთ, სად უნდა <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
-    <string name="create_your_passkeys" msgid="8901224153607590596">"შექმენით თქვენი პაროლი"</string>
-    <string name="save_your_password" msgid="6597736507991704307">"შეინახეთ თქვენი პაროლი"</string>
-    <string name="save_your_sign_in_info" msgid="7213978049817076882">"შეინახეთ თქვენი სისტემაში შესვლის ინფორმაცია"</string>
-    <string name="choose_provider_body" msgid="4384188171872005547">"აირჩიეთ პაროლების მმართველი თქვენი ინფორმაციის შესანახად, რომ მომავალში უფრო სწრაფად შეხვიდეთ."</string>
+    <string name="choose_provider_title" msgid="8870795677024868108">"აირჩიეთ სად შეინახოთ თქვენი <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
+    <string name="choose_provider_body" msgid="4967074531845147434">"აირჩიეთ პაროლების მმართველი თქვენი ინფორმაციის შესანახად, რომ მომავალში უფრო სწრაფად შეხვიდეთ."</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"შექმნით წვდომის გასაღებს <xliff:g id="APPNAME">%1$s</xliff:g> აპისთვის?"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"შეინახავთ <xliff:g id="APPNAME">%1$s</xliff:g> აპის პაროლს?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"შეინახავთ <xliff:g id="APPNAME">%1$s</xliff:g> აპში შესვლის ინფორმაციას?"</string>
-    <string name="choose_create_option_description" msgid="5531335144879100664">"შეგიძლიათ გამოიყენოთ თქვენი <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> ნებისმიერ მოწყობილობაზე. ის შეინახება <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g>-ზე <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>-თვის."</string>
     <string name="passkey" msgid="632353688396759522">"წვდომის გასაღები"</string>
     <string name="password" msgid="6738570945182936667">"პაროლი"</string>
+    <string name="passkeys" msgid="5733880786866559847">"წვდომის გასაღები"</string>
+    <string name="passwords" msgid="5419394230391253816">"პაროლი"</string>
     <string name="sign_ins" msgid="4710739369149469208">"სისტემაში შესვლა"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"შესვლის ინფორმაცია"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>-ის შენახვა"</string>
-    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"გსურთ პაროლის შექმნა სხვა მოწყობილობაში?"</string>
+    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"გსურთ პაროლის შექმნა სხვა მოწყობილობაში?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"გსურთ, გამოიყენოთ<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> სისტემაში ყველა შესვლისთვის?"</string>
-    <string name="use_provider_for_all_description" msgid="6560593199974037820">"მოცემული პაროლების მმართველი შეინახავს თქვენს პაროლებს და წვდომის გასაღებს, რომლებიც დაგეხმარებათ სისტემაში მარტივად შესვლაში."</string>
+    <string name="use_provider_for_all_description" msgid="8466427781848268490">"მოცემული პაროლების მმართველი შეინახავს თქვენს პაროლებს და წვდომის გასაღებს, რომლებიც დაგეხმარებათ სისტემაში მარტივად შესვლაში."</string>
     <string name="set_as_default" msgid="4415328591568654603">"ნაგულისხმევად დაყენება"</string>
     <string name="use_once" msgid="9027366575315399714">"ერთხელ გამოყენება"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> პაროლები • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> წვდომის გასაღებები"</string>

@@ -142,6 +142,13 @@ public abstract class HandwritingGesture {
     public static final int GESTURE_TYPE_DELETE_RANGE = 1 << 6;
 
     /**
+     * Gesture of type {@link InsertModeGesture} to begin an insert mode at a designated point.
+     * @hide
+     */
+    @TestApi
+    public static final int GESTURE_TYPE_INSERT_MODE = 1 << 7;
+
+    /**
      * Type of gesture like {@link #GESTURE_TYPE_SELECT}, {@link #GESTURE_TYPE_INSERT},
      * or {@link #GESTURE_TYPE_DELETE}.
      */
@@ -150,6 +157,7 @@ public abstract class HandwritingGesture {
             GESTURE_TYPE_SELECT,
             GESTURE_TYPE_SELECT_RANGE,
             GESTURE_TYPE_INSERT,
+            GESTURE_TYPE_INSERT_MODE,
             GESTURE_TYPE_DELETE,
             GESTURE_TYPE_DELETE_RANGE,
             GESTURE_TYPE_REMOVE_SPACE,
@@ -168,6 +176,7 @@ public abstract class HandwritingGesture {
             GESTURE_TYPE_SELECT,
             GESTURE_TYPE_SELECT_RANGE,
             GESTURE_TYPE_INSERT,
+            GESTURE_TYPE_INSERT_MODE,
             GESTURE_TYPE_DELETE,
             GESTURE_TYPE_DELETE_RANGE,
             GESTURE_TYPE_REMOVE_SPACE,

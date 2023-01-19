@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,19 @@
  * limitations under the License.
  */
 
-package android.nfc;
+syntax = "proto3";
 
-parcelable BeamShareData;
+package android.companion;
+
+import "frameworks/base/core/proto/android/companion/telecom.proto";
+
+option java_multiple_files = true;
+
+// Next index: 5
+message ContextSyncMessage {
+  int32 version = 1;
+  // Media data and invitations data omitted.
+  reserved 2, 3;
+  // The current telecom snapshot.
+  Telecom telecom = 4;
+}

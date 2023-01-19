@@ -27,6 +27,7 @@ import android.view.ViewGroup
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dreams.smartspace.DreamSmartspaceController
+import com.android.systemui.plugins.BcSmartspaceConfigPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceView
 import com.android.systemui.plugins.FalsingManager
@@ -93,6 +94,8 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
      */
     private class TestView(context: Context?) : View(context), SmartspaceView {
         override fun registerDataProvider(plugin: BcSmartspaceDataPlugin?) {}
+
+        override fun registerConfigProvider(plugin: BcSmartspaceConfigPlugin?) {}
 
         override fun setPrimaryTextColor(color: Int) {}
 

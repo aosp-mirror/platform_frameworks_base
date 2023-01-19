@@ -16,7 +16,6 @@
 
 #include "SkiaInterpolator.h"
 
-#include "include/core/SkMath.h"
 #include "include/core/SkScalar.h"
 #include "include/core/SkTypes.h"
 #include "include/private/SkFixed.h"

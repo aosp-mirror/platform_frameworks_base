@@ -96,7 +96,6 @@ package android {
     field public static final String FOREGROUND_SERVICE_CAMERA = "android.permission.FOREGROUND_SERVICE_CAMERA";
     field public static final String FOREGROUND_SERVICE_CONNECTED_DEVICE = "android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE";
     field public static final String FOREGROUND_SERVICE_DATA_SYNC = "android.permission.FOREGROUND_SERVICE_DATA_SYNC";
-    field public static final String FOREGROUND_SERVICE_FILE_MANAGEMENT = "android.permission.FOREGROUND_SERVICE_FILE_MANAGEMENT";
     field public static final String FOREGROUND_SERVICE_HEALTH = "android.permission.FOREGROUND_SERVICE_HEALTH";
     field public static final String FOREGROUND_SERVICE_LOCATION = "android.permission.FOREGROUND_SERVICE_LOCATION";
     field public static final String FOREGROUND_SERVICE_MEDIA_PLAYBACK = "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK";
@@ -12727,7 +12726,6 @@ package android.content.pm {
     field @RequiresPermission(allOf={android.Manifest.permission.FOREGROUND_SERVICE_CAMERA}, anyOf={android.Manifest.permission.CAMERA}, conditional=true) public static final int FOREGROUND_SERVICE_TYPE_CAMERA = 64; // 0x40
     field @RequiresPermission(allOf={android.Manifest.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE}, anyOf={android.Manifest.permission.BLUETOOTH_ADVERTISE, android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_SCAN, android.Manifest.permission.CHANGE_NETWORK_STATE, android.Manifest.permission.CHANGE_WIFI_STATE, android.Manifest.permission.CHANGE_WIFI_MULTICAST_STATE, android.Manifest.permission.NFC, android.Manifest.permission.TRANSMIT_IR, android.Manifest.permission.UWB_RANGING}, conditional=true) public static final int FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE = 16; // 0x10
     field @RequiresPermission(value=android.Manifest.permission.FOREGROUND_SERVICE_DATA_SYNC, conditional=true) public static final int FOREGROUND_SERVICE_TYPE_DATA_SYNC = 1; // 0x1
-    field @RequiresPermission(android.Manifest.permission.FOREGROUND_SERVICE_FILE_MANAGEMENT) public static final int FOREGROUND_SERVICE_TYPE_FILE_MANAGEMENT = 4096; // 0x1000
     field @RequiresPermission(allOf={android.Manifest.permission.FOREGROUND_SERVICE_HEALTH}, anyOf={android.Manifest.permission.ACTIVITY_RECOGNITION, android.Manifest.permission.BODY_SENSORS, android.Manifest.permission.HIGH_SAMPLING_RATE_SENSORS}) public static final int FOREGROUND_SERVICE_TYPE_HEALTH = 256; // 0x100
     field @RequiresPermission(allOf={android.Manifest.permission.FOREGROUND_SERVICE_LOCATION}, anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}, conditional=true) public static final int FOREGROUND_SERVICE_TYPE_LOCATION = 8; // 0x8
     field public static final int FOREGROUND_SERVICE_TYPE_MANIFEST = -1; // 0xffffffff
@@ -13027,9 +13025,9 @@ package android.content.res {
     field @NonNull public static final android.os.Parcelable.Creator<android.content.res.Configuration> CREATOR;
     field public static final int DENSITY_DPI_UNDEFINED = 0; // 0x0
     field public static final int FONT_WEIGHT_ADJUSTMENT_UNDEFINED = 2147483647; // 0x7fffffff
-    field public static final int GRAMMATICAL_GENDER_FEMININE = 3; // 0x3
-    field public static final int GRAMMATICAL_GENDER_MASCULINE = 4; // 0x4
-    field public static final int GRAMMATICAL_GENDER_NEUTRAL = 2; // 0x2
+    field public static final int GRAMMATICAL_GENDER_FEMININE = 2; // 0x2
+    field public static final int GRAMMATICAL_GENDER_MASCULINE = 3; // 0x3
+    field public static final int GRAMMATICAL_GENDER_NEUTRAL = 1; // 0x1
     field public static final int GRAMMATICAL_GENDER_NOT_SPECIFIED = 0; // 0x0
     field public static final int HARDKEYBOARDHIDDEN_NO = 1; // 0x1
     field public static final int HARDKEYBOARDHIDDEN_UNDEFINED = 0; // 0x0
@@ -13320,7 +13318,7 @@ package android.credentials {
     method @NonNull public android.os.Bundle getCandidateQueryData();
     method @NonNull public android.os.Bundle getCredentialData();
     method @NonNull public String getType();
-    method public boolean requireSystemProvider();
+    method public boolean isSystemProviderRequired();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.credentials.CreateCredentialRequest> CREATOR;
   }
@@ -13345,8 +13343,8 @@ package android.credentials {
 
   public final class CredentialManager {
     method public void clearCredentialState(@NonNull android.credentials.ClearCredentialStateRequest, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.credentials.ClearCredentialStateException>);
-    method public void executeCreateCredential(@NonNull android.credentials.CreateCredentialRequest, @NonNull android.app.Activity, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.credentials.CreateCredentialResponse,android.credentials.CreateCredentialException>);
-    method public void executeGetCredential(@NonNull android.credentials.GetCredentialRequest, @NonNull android.app.Activity, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.credentials.GetCredentialResponse,android.credentials.GetCredentialException>);
+    method public void createCredential(@NonNull android.credentials.CreateCredentialRequest, @NonNull android.app.Activity, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.credentials.CreateCredentialResponse,android.credentials.CreateCredentialException>);
+    method public void getCredential(@NonNull android.credentials.GetCredentialRequest, @NonNull android.app.Activity, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.credentials.GetCredentialResponse,android.credentials.GetCredentialException>);
   }
 
   public class GetCredentialException extends java.lang.Exception {
@@ -13367,7 +13365,7 @@ package android.credentials {
     method @NonNull public android.os.Bundle getCandidateQueryData();
     method @NonNull public android.os.Bundle getCredentialRetrievalData();
     method @NonNull public String getType();
-    method public boolean requireSystemProvider();
+    method public boolean isSystemProviderRequired();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.credentials.GetCredentialOption> CREATOR;
   }
@@ -16338,7 +16336,10 @@ package android.graphics {
 
   public class YuvImage {
     ctor public YuvImage(byte[], int, int, int, int[]);
+    ctor public YuvImage(@NonNull byte[], int, int, int, @Nullable int[], @NonNull android.graphics.ColorSpace);
     method public boolean compressToJpeg(android.graphics.Rect, int, java.io.OutputStream);
+    method public boolean compressToJpegR(@NonNull android.graphics.YuvImage, int, @NonNull java.io.OutputStream);
+    method @NonNull public android.graphics.ColorSpace getColorSpace();
     method public int getHeight();
     method public int[] getStrides();
     method public int getWidth();
@@ -24050,6 +24051,7 @@ package android.media {
     method @Nullable public android.os.Bundle getControlHints();
     method @NonNull public java.util.List<android.media.MediaRoute2Info> getDeselectableRoutes();
     method @NonNull public String getId();
+    method @NonNull public android.media.RoutingSessionInfo getRoutingSessionInfo();
     method @NonNull public java.util.List<android.media.MediaRoute2Info> getSelectableRoutes();
     method @NonNull public java.util.List<android.media.MediaRoute2Info> getSelectedRoutes();
     method public int getVolume();
@@ -28399,24 +28401,15 @@ package android.nfc {
 
   public final class NfcAdapter {
     method public void disableForegroundDispatch(android.app.Activity);
-    method @Deprecated public void disableForegroundNdefPush(android.app.Activity);
     method public void disableReaderMode(android.app.Activity);
     method public void enableForegroundDispatch(android.app.Activity, android.app.PendingIntent, android.content.IntentFilter[], String[][]);
-    method @Deprecated public void enableForegroundNdefPush(android.app.Activity, android.nfc.NdefMessage);
     method public void enableReaderMode(android.app.Activity, android.nfc.NfcAdapter.ReaderCallback, int, android.os.Bundle);
     method public static android.nfc.NfcAdapter getDefaultAdapter(android.content.Context);
     method @Nullable public android.nfc.NfcAntennaInfo getNfcAntennaInfo();
     method public boolean ignore(android.nfc.Tag, int, android.nfc.NfcAdapter.OnTagRemovedListener, android.os.Handler);
-    method @Deprecated public boolean invokeBeam(android.app.Activity);
     method public boolean isEnabled();
-    method @Deprecated public boolean isNdefPushEnabled();
     method public boolean isSecureNfcEnabled();
     method public boolean isSecureNfcSupported();
-    method @Deprecated public void setBeamPushUris(android.net.Uri[], android.app.Activity);
-    method @Deprecated public void setBeamPushUrisCallback(android.nfc.NfcAdapter.CreateBeamUrisCallback, android.app.Activity);
-    method @Deprecated public void setNdefPushMessage(android.nfc.NdefMessage, android.app.Activity, android.app.Activity...);
-    method @Deprecated public void setNdefPushMessageCallback(android.nfc.NfcAdapter.CreateNdefMessageCallback, android.app.Activity, android.app.Activity...);
-    method @Deprecated public void setOnNdefPushCompleteCallback(android.nfc.NfcAdapter.OnNdefPushCompleteCallback, android.app.Activity, android.app.Activity...);
     field public static final String ACTION_ADAPTER_STATE_CHANGED = "android.nfc.action.ADAPTER_STATE_CHANGED";
     field public static final String ACTION_NDEF_DISCOVERED = "android.nfc.action.NDEF_DISCOVERED";
     field @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public static final String ACTION_PREFERRED_PAYMENT_CHANGED = "android.nfc.action.PREFERRED_PAYMENT_CHANGED";
@@ -28446,18 +28439,6 @@ package android.nfc {
     field public static final int STATE_ON = 3; // 0x3
     field public static final int STATE_TURNING_OFF = 4; // 0x4
     field public static final int STATE_TURNING_ON = 2; // 0x2
-  }
-
-  @Deprecated public static interface NfcAdapter.CreateBeamUrisCallback {
-    method @Deprecated public android.net.Uri[] createBeamUris(android.nfc.NfcEvent);
-  }
-
-  @Deprecated public static interface NfcAdapter.CreateNdefMessageCallback {
-    method @Deprecated public android.nfc.NdefMessage createNdefMessage(android.nfc.NfcEvent);
-  }
-
-  @Deprecated public static interface NfcAdapter.OnNdefPushCompleteCallback {
-    method @Deprecated public void onNdefPushComplete(android.nfc.NfcEvent);
   }
 
   public static interface NfcAdapter.OnTagRemovedListener {
@@ -40452,17 +40433,24 @@ package android.service.quickaccesswallet {
     method @NonNull public String getCardId();
     method @NonNull public android.graphics.drawable.Icon getCardImage();
     method @Nullable public CharSequence getCardLabel();
+    method @NonNull public int getCardType();
     method @NonNull public CharSequence getContentDescription();
     method @NonNull public android.app.PendingIntent getPendingIntent();
+    method @Nullable public android.graphics.drawable.Icon getValuableCardSecondaryImage();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CARD_TYPE_PAYMENT = 1; // 0x1
+    field public static final int CARD_TYPE_UNKNOWN = 0; // 0x0
+    field public static final int CARD_TYPE_VALUABLE = 2; // 0x2
     field @NonNull public static final android.os.Parcelable.Creator<android.service.quickaccesswallet.WalletCard> CREATOR;
   }
 
   public static final class WalletCard.Builder {
+    ctor public WalletCard.Builder(@NonNull String, @NonNull int, @NonNull android.graphics.drawable.Icon, @NonNull CharSequence, @NonNull android.app.PendingIntent);
     ctor public WalletCard.Builder(@NonNull String, @NonNull android.graphics.drawable.Icon, @NonNull CharSequence, @NonNull android.app.PendingIntent);
     method @NonNull public android.service.quickaccesswallet.WalletCard build();
     method @NonNull public android.service.quickaccesswallet.WalletCard.Builder setCardIcon(@Nullable android.graphics.drawable.Icon);
     method @NonNull public android.service.quickaccesswallet.WalletCard.Builder setCardLabel(@Nullable CharSequence);
+    method @NonNull public android.service.quickaccesswallet.WalletCard.Builder setValuableCardSecondaryImage(@Nullable android.graphics.drawable.Icon);
   }
 
   public final class WalletServiceEvent implements android.os.Parcelable {
@@ -41382,8 +41370,7 @@ package android.telecom {
     field public static final int ROUTE_WIRED_OR_EARPIECE = 5; // 0x5
   }
 
-  public final class CallControl implements java.lang.AutoCloseable {
-    method public void close();
+  public final class CallControl {
     method public void disconnect(@NonNull android.telecom.DisconnectCause, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.telecom.CallException>);
     method @NonNull public android.os.ParcelUuid getCallId();
     method public void rejectCall(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.telecom.CallException>);
@@ -41632,6 +41619,7 @@ package android.telecom {
     method public void onUsingAlternativeUi(boolean);
     method public static String propertiesToString(int);
     method public final void putExtras(@NonNull android.os.Bundle);
+    method public final void queryLocationForEmergency(@IntRange(from=100, to=5000) long, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.location.Location,android.telecom.QueryLocationException>);
     method public final void removeExtras(java.util.List<java.lang.String>);
     method public final void removeExtras(java.lang.String...);
     method @Deprecated public void requestBluetoothAudio(@NonNull android.bluetooth.BluetoothDevice);
@@ -42033,6 +42021,22 @@ package android.telecom {
     field public static final int REASON_NONE = 0; // 0x0
     field public static final int REASON_OTHER = 4; // 0x4
     field public static final int REASON_USER_SET = 3; // 0x3
+  }
+
+  public final class QueryLocationException extends java.lang.RuntimeException implements android.os.Parcelable {
+    ctor public QueryLocationException(@Nullable String);
+    ctor public QueryLocationException(@Nullable String, int);
+    ctor public QueryLocationException(@Nullable String, int, @Nullable Throwable);
+    method public int describeContents();
+    method public int getCode();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telecom.QueryLocationException> CREATOR;
+    field public static final int ERROR_NOT_ALLOWED_FOR_NON_EMERGENCY_CONNECTIONS = 4; // 0x4
+    field public static final int ERROR_NOT_PERMITTED = 3; // 0x3
+    field public static final int ERROR_PREVIOUS_REQUEST_EXISTS = 2; // 0x2
+    field public static final int ERROR_REQUEST_TIME_OUT = 1; // 0x1
+    field public static final int ERROR_SERVICE_UNAVAILABLE = 5; // 0x5
+    field public static final int ERROR_UNSPECIFIED = 6; // 0x6
   }
 
   public final class RemoteConference {
@@ -46028,6 +46032,7 @@ package android.telephony.ims {
     field public static final int METHOD_PUBLISH = 2; // 0x2
     field public static final int METHOD_REGISTER = 1; // 0x1
     field public static final int METHOD_SUBSCRIBE = 3; // 0x3
+    field public static final int METHOD_UNKNOWN = 0; // 0x0
   }
 
 }
@@ -54250,6 +54255,7 @@ package android.view.autofill {
     method public void notifyViewExited(@NonNull android.view.View, int);
     method public void notifyViewVisibilityChanged(@NonNull android.view.View, boolean);
     method public void notifyViewVisibilityChanged(@NonNull android.view.View, int, boolean);
+    method public void notifyVirtualViewsReady(@NonNull android.view.View, @NonNull android.util.SparseArray<android.view.autofill.VirtualViewFillInfo>);
     method public void registerCallback(@Nullable android.view.autofill.AutofillManager.AutofillCallback);
     method public void requestAutofill(@NonNull android.view.View);
     method public void requestAutofill(@NonNull android.view.View, int, @NonNull android.graphics.Rect);
@@ -54294,6 +54300,16 @@ package android.view.autofill {
     method public boolean isToggle();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.autofill.AutofillValue> CREATOR;
+  }
+
+  public final class VirtualViewFillInfo {
+    method @Nullable public String[] getAutofillHints();
+  }
+
+  public static final class VirtualViewFillInfo.Builder {
+    ctor public VirtualViewFillInfo.Builder();
+    method @NonNull public android.view.autofill.VirtualViewFillInfo build();
+    method @NonNull public android.view.autofill.VirtualViewFillInfo.Builder setAutofillHints(@NonNull java.lang.String...);
   }
 
 }
@@ -55020,6 +55036,22 @@ package android.view.inputmethod {
     method @NonNull public android.view.inputmethod.InsertGesture.Builder setFallbackText(@Nullable String);
     method @NonNull public android.view.inputmethod.InsertGesture.Builder setInsertionPoint(@NonNull android.graphics.PointF);
     method @NonNull public android.view.inputmethod.InsertGesture.Builder setTextToInsert(@NonNull String);
+  }
+
+  public final class InsertModeGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.os.CancellationSignal getCancellationSignal();
+    method @NonNull public android.graphics.PointF getInsertionPoint();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.InsertModeGesture> CREATOR;
+  }
+
+  public static final class InsertModeGesture.Builder {
+    ctor public InsertModeGesture.Builder();
+    method @NonNull public android.view.inputmethod.InsertModeGesture build();
+    method @NonNull public android.view.inputmethod.InsertModeGesture.Builder setCancellationSignal(@NonNull android.os.CancellationSignal);
+    method @NonNull public android.view.inputmethod.InsertModeGesture.Builder setFallbackText(@Nullable String);
+    method @NonNull public android.view.inputmethod.InsertModeGesture.Builder setInsertionPoint(@NonNull android.graphics.PointF);
   }
 
   public final class JoinOrSplitGesture extends android.view.inputmethod.HandwritingGesture implements android.os.Parcelable {

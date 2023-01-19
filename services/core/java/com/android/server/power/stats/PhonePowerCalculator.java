@@ -42,14 +42,27 @@ public class PhonePowerCalculator extends PowerCalculator {
     @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
+        final long energyConsumerUC = batteryStats.getPhoneEnergyConsumptionUC();
+        final int powerModel = getPowerModel(energyConsumerUC, query);
+
         final long phoneOnTimeMs = batteryStats.getPhoneOnTime(rawRealtimeUs,
                 BatteryStats.STATS_SINCE_CHARGED) / 1000;
-        final double phoneOnPower = mPowerEstimator.calculatePower(phoneOnTimeMs);
-        if (phoneOnPower != 0) {
-            builder.getAggregateBatteryConsumerBuilder(
-                    BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
-                    .setConsumedPower(BatteryConsumer.POWER_COMPONENT_PHONE, phoneOnPower)
-                    .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_PHONE, phoneOnTimeMs);
+
+        final double phoneOnPower;
+        switch (powerModel) {
+            case BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION:
+                phoneOnPower = uCtoMah(energyConsumerUC);
+                break;
+            case BatteryConsumer.POWER_MODEL_POWER_PROFILE:
+            default:
+                phoneOnPower = mPowerEstimator.calculatePower(phoneOnTimeMs);
         }
+
+        if (phoneOnPower == 0.0)  return;
+
+        builder.getAggregateBatteryConsumerBuilder(
+                        BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_PHONE, phoneOnPower, powerModel)
+                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_PHONE, phoneOnTimeMs);
     }
 }

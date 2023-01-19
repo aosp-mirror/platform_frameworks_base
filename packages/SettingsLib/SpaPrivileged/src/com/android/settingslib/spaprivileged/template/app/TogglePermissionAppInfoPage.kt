@@ -141,6 +141,7 @@ internal fun TogglePermissionAppListModel<out AppRecord>.TogglePermissionAppInfo
         packageName = packageName,
         userId = userId,
         footerText = stringResource(footerResId),
+        footerContent = footerContent(),
         packageManagers = packageManagers,
     ) {
         val model = createSwitchModel(applicationInfo)

@@ -18,7 +18,7 @@ package com.android.wm.shell.flicker.pip
 
 import android.app.Instrumentation
 import android.content.Intent
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.helpers.PipAppHelper
@@ -80,7 +80,7 @@ abstract class PipTransition(flicker: FlickerTest) : BaseTest(flicker) {
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun hasAtMostOnePipDismissOverlayWindow() {
         val matcher = ComponentNameMatcher("", "pip-dismiss-overlay")

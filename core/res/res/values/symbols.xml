@@ -2656,7 +2656,7 @@
   <java-symbol type="array" name="config_face_acquire_vendor_biometricprompt_ignorelist" />
   <java-symbol type="bool" name="config_faceAuthSupportsSelfIllumination" />
   <java-symbol type="bool" name="config_faceAuthDismissesKeyguard" />
-  <java-symbol type="bool" name="config_requireScreenOnToAuthEnabled" />
+  <java-symbol type="bool" name="config_performantAuthDefault" />
 
   <!-- Face config -->
   <java-symbol type="integer" name="config_faceMaxTemplatesPerUser" />
@@ -3480,6 +3480,7 @@
   <java-symbol type="string" name="color_correction_feature_name" />
   <java-symbol type="string" name="reduce_bright_colors_feature_name" />
   <java-symbol type="string" name="config_defaultAccessibilityService" />
+  <java-symbol type="string" name="config_defaultAccessibilityNotificationSound" />
   <java-symbol type="string" name="accessibility_shortcut_spoken_feedback" />
 
   <java-symbol type="string" name="accessibility_select_shortcut_menu_title" />

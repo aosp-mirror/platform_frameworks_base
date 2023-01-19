@@ -275,6 +275,10 @@ void SerializeConfig(const ConfigDescription& config, pb::Configuration* out_pb_
   }
 
   out_pb_config->set_sdk_version(config.sdkVersion);
+
+  // The constant values are the same across the structs.
+  out_pb_config->set_grammatical_gender(
+      static_cast<pb::Configuration_GrammaticalGender>(config.grammaticalInflection));
 }
 
 static void SerializeOverlayableItemToPb(const OverlayableItem& overlayable_item,

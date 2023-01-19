@@ -5,31 +5,31 @@
     <string name="string_cancel" msgid="6369133483981306063">"ይቅር"</string>
     <string name="string_continue" msgid="1346732695941131882">"ቀጥል"</string>
     <string name="string_more_options" msgid="7990658711962795124">"ተጨማሪ አማራጮች"</string>
-    <string name="string_create_in_another_place" msgid="1033635365843437603">"በሌላ ቦታ ውስጥ ይፍጠሩ"</string>
-    <string name="string_save_to_another_place" msgid="7590325934591079193">"ወደ ሌላ ቦታ ያስቀምጡ"</string>
-    <string name="string_use_another_device" msgid="8754514926121520445">"ሌላ መሣሪያ ይጠቀሙ"</string>
-    <string name="string_save_to_another_device" msgid="1959562542075194458">"ወደ ሌላ መሣሪያ ያስቀምጡ"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"በይለፍ ቃል ይበልጥ ደህንነቱ የተጠበቀ"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"በይለፍ ቁልፎች ውስብስብ የይለፍ ቁልፎችን መፍጠር ወይም ማስታወስ አያስፈልግዎትም"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"የይለፍ ቁልፎች የእርስዎን የጣት አሻራ፣ መልክ ወይም የማያ ገጽ መቆለፊያ በመጠቀም የሚፈጥሯቸው የተመሰጠሩ ዲጂታል ቆልፎች ናቸው"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"በሌሎች መሣሪያዎች ላይ መግባት እንዲችሉ በሚስጥር ቁልፍ አስተዳዳሪ ላይ ይቀመጣሉ"</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"የት <xliff:g id="CREATETYPES">%1$s</xliff:g> እንደሚሆን ይምረጡ"</string>
-    <string name="create_your_passkeys" msgid="8901224153607590596">"የይለፍ ቁልፎችዎን ይፍጠሩ"</string>
-    <string name="save_your_password" msgid="6597736507991704307">"የይለፍ ቃልዎን ያስቀምጡ"</string>
-    <string name="save_your_sign_in_info" msgid="7213978049817076882">"የመግቢያ መረጃዎን ያስቀምጡ"</string>
-    <string name="choose_provider_body" msgid="4384188171872005547">"መረጃዎን ለማስቀመጥ እና በሚቀጥለው ጊዜ በፍጥነት ለመግባት የሚስጥር ቁልፍ አስተዳዳሪን ይጠቀሙ።"</string>
+    <!-- no translation found for choose_provider_title (8870795677024868108) -->
+    <skip />
+    <!-- no translation found for choose_provider_body (4967074531845147434) -->
+    <skip />
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"ለ<xliff:g id="APPNAME">%1$s</xliff:g> የይለፍ ቁልፍ ይፈጠር?"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"ለ<xliff:g id="APPNAME">%1$s</xliff:g> የይለፍ ቃል ይቀመጥ?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"ለ<xliff:g id="APPNAME">%1$s</xliff:g> የመግቢያ መረጃ ይቀመጥ?"</string>
-    <string name="choose_create_option_description" msgid="5531335144879100664">"የእርስዎን <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> በማንኛውም መሣሪያ ላይ መጠቀም ይችላሉ። ለ<xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g> ወደ <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> ተቀምጧል።"</string>
     <string name="passkey" msgid="632353688396759522">"የይለፍ ቁልፍ"</string>
     <string name="password" msgid="6738570945182936667">"የይለፍ ቃል"</string>
+    <!-- no translation found for passkeys (5733880786866559847) -->
+    <skip />
+    <!-- no translation found for passwords (5419394230391253816) -->
+    <skip />
     <string name="sign_ins" msgid="4710739369149469208">"መግቢያዎች"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"የመግቢያ መረጃ"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>ን አስቀምጥ ወደ"</string>
-    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"በሌላ መሣሪያ የይለፍ ቁልፍ ይፈጠር?"</string>
+    <!-- no translation found for create_passkey_in_other_device_title (9195411122362461390) -->
+    <skip />
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"ለሁሉም መግቢያዎችዎ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>ን ይጠቀሙ?"</string>
-    <string name="use_provider_for_all_description" msgid="6560593199974037820">"ይህ የይለፍ ቃል አስተዳዳሪ በቀላሉ እንዲገቡ ለማገዝ የእርስዎን የይለፍ ቃሎች እና የይለፍ ቁልፎች ያከማቻል።"</string>
+    <!-- no translation found for use_provider_for_all_description (8466427781848268490) -->
+    <skip />
     <string name="set_as_default" msgid="4415328591568654603">"እንደ ነባሪ ያዋቅሩ"</string>
     <string name="use_once" msgid="9027366575315399714">"አንዴ ይጠቀሙ"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> የይለፍ ቃሎች • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> የይለፍ ቁልፎች"</string>

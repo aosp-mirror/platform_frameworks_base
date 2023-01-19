@@ -38,9 +38,9 @@ import org.junit.Test;
 abstract class UserVisibilityMediatorVisibleBackgroundUserTestCase
         extends UserVisibilityMediatorTestCase {
 
-    UserVisibilityMediatorVisibleBackgroundUserTestCase(boolean backgroundUsersOnDisplaysEnabled)
-            throws Exception {
-        super(backgroundUsersOnDisplaysEnabled);
+    UserVisibilityMediatorVisibleBackgroundUserTestCase(boolean backgroundUsersOnDisplaysEnabled,
+            boolean backgroundUserOnDefaultDisplayAllowed) throws Exception {
+        super(backgroundUsersOnDisplaysEnabled, backgroundUserOnDefaultDisplayAllowed);
     }
 
     @Test

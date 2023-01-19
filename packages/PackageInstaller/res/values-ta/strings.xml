@@ -26,6 +26,10 @@
     <string name="install_done" msgid="5987363587661783896">"ஆப்ஸ் நிறுவப்பட்டது."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"இந்த ஆப்ஸை நிறுவ வேண்டுமா?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"இந்த ஆப்ஸைப் புதுப்பிக்க வேண்டுமா?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"ஆப்ஸ் நிறுவப்படவில்லை."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"இந்தத் தொகுப்பு நிறுவப்படுவதிலிருந்து தடுக்கப்பட்டது."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"இந்தத் தொகுப்பு ஏற்கனவே உள்ள தொகுப்புடன் முரண்படுவதால் ஆப்ஸ் நிறுவப்படவில்லை."</string>

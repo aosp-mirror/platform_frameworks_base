@@ -602,6 +602,8 @@ public class MobileRadioPowerCalculatorTest {
         stats.noteNetworkInterfaceForTransports("cellular",
                 new int[]{NetworkCapabilities.TRANSPORT_CELLULAR});
 
+        stats.notePhoneOnLocked(9800, 9800);
+
         // Note application network activity
         NetworkStats networkStats = new NetworkStats(10000, 1)
                 .addEntry(new NetworkStats.Entry("cellular", APP_UID, 0, 0,
@@ -614,27 +616,34 @@ public class MobileRadioPowerCalculatorTest {
 
         mStatsRule.setTime(12_000, 12_000);
 
-        MobileRadioPowerCalculator calculator =
+        MobileRadioPowerCalculator mobileRadioPowerCalculator =
                 new MobileRadioPowerCalculator(mStatsRule.getPowerProfile());
-
-        mStatsRule.apply(calculator);
+        PhonePowerCalculator phonePowerCalculator =
+                new PhonePowerCalculator(mStatsRule.getPowerProfile());
+        mStatsRule.apply(mobileRadioPowerCalculator, phonePowerCalculator);
 
         BatteryConsumer deviceConsumer = mStatsRule.getDeviceBatteryConsumer();
         // 10_000_000 micro-Coulomb * 1/1000 milli/micro * 1/3600 hour/second = 2.77778 mAh
+        // 1800ms data duration / 2000 total duration *  2.77778 mAh = 2.5
+        // 200ms phone on duration / 2000 total duration *  2.77778 mAh = 0.27777
         assertThat(deviceConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
-                .isWithin(PRECISION).of(2.77778);
+                .isWithin(PRECISION).of(2.5);
         assertThat(deviceConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
+        assertThat(deviceConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_PHONE))
+                .isWithin(PRECISION).of(0.27778);
+        assertThat(deviceConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_PHONE))
                 .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
 
         BatteryConsumer appsConsumer = mStatsRule.getAppsBatteryConsumer();
         assertThat(appsConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
-                .isWithin(PRECISION).of(1.53934);
+                .isWithin(PRECISION).of(1.38541);
         assertThat(appsConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
                 .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
 
         UidBatteryConsumer uidConsumer = mStatsRule.getUidBatteryConsumer(APP_UID);
         assertThat(uidConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
-                .isWithin(PRECISION).of(1.53934);
+                .isWithin(PRECISION).of(1.38541);
         assertThat(uidConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
                 .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
     }
@@ -648,6 +657,9 @@ public class MobileRadioPowerCalculatorTest {
                         BatteryStatsImpl.PER_UID_MODEM_POWER_MODEL_MODEM_ACTIVITY_INFO_RX_TX)
                 .initMeasuredEnergyStatsLocked();
         BatteryStatsImpl stats = mStatsRule.getBatteryStats();
+
+        stats.noteMobileRadioPowerStateLocked(DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH, 0, -1,
+                0, 0);
 
         // Scan for a cell
         stats.notePhoneStateLocked(ServiceState.STATE_OUT_OF_SERVICE,
@@ -686,6 +698,9 @@ public class MobileRadioPowerCalculatorTest {
         stats.notePhoneSignalStrengthLocked(signalStrength, 8333, 8333);
         when(gsmSignalStrength.getLevel()).thenReturn(SignalStrength.SIGNAL_STRENGTH_MODERATE);
         stats.notePhoneSignalStrengthLocked(signalStrength, 8666, 8666);
+
+        stats.notePhoneOnLocked(9000, 9000);
+
         when(gsmSignalStrength.getLevel()).thenReturn(SignalStrength.SIGNAL_STRENGTH_GOOD);
         stats.notePhoneSignalStrengthLocked(signalStrength, 9110, 9110);
 
@@ -732,15 +747,23 @@ public class MobileRadioPowerCalculatorTest {
 
         mStatsRule.setTime(10_000, 10_000);
 
-        MobileRadioPowerCalculator calculator =
+        MobileRadioPowerCalculator mobileRadioPowerCalculator =
                 new MobileRadioPowerCalculator(mStatsRule.getPowerProfile());
-
-        mStatsRule.apply(calculator);
+        PhonePowerCalculator phonePowerCalculator =
+                new PhonePowerCalculator(mStatsRule.getPowerProfile());
+        mStatsRule.apply(mobileRadioPowerCalculator, phonePowerCalculator);
 
         BatteryConsumer deviceConsumer = mStatsRule.getDeviceBatteryConsumer();
+        // 10_000_000 micro-Coulomb * 1/1000 milli/micro * 1/3600 hour/second = 2.77778 mAh
+        // 9000ms data duration / 10000 total duration *  2.77778 mAh = 2.5
+        // 1000ms phone on duration / 10000 total duration *  2.77778 mAh = 0.27777
         assertThat(deviceConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
-                .isWithin(PRECISION).of(2.77778);
+                .isWithin(PRECISION).of(2.5);
         assertThat(deviceConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
+        assertThat(deviceConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_PHONE))
+                .isWithin(PRECISION).of(0.27778);
+        assertThat(deviceConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_PHONE))
                 .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
 
         // CDMA2000 [Tx0, Tx1, Tx2, Tx3, Tx4, Rx] drain * duration
@@ -767,10 +790,10 @@ public class MobileRadioPowerCalculatorTest {
         // _________________
         // =    5177753 mA-ms estimated total consumption
         //
-        // 2.77778 mA-h measured total consumption * 3957753 / 5177753 = 2.123268 mA-h
+        // 2.5 mA-h measured total consumption * 3957753 / 5177753 = 1.91094 mA-h
         BatteryConsumer appsConsumer = mStatsRule.getAppsBatteryConsumer();
         assertThat(appsConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
-                .isWithin(PRECISION).of(2.123268);
+                .isWithin(PRECISION).of(1.91094);
         assertThat(appsConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
                 .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
 
@@ -791,17 +814,17 @@ public class MobileRadioPowerCalculatorTest {
         // 3333768 * 133.33333 / 204.44444 = 2174196.52174 mA-ms App 1 Tx Power Consumption
         //
         // Total App Power consumption * Ratio of App 1 / Total Estimated Power Consumption
-        // 2.123268 * (467988.75 + 2174196.52174) / 3957753 = 1.41749 App 1 Power Consumption
+        // 1.91094 * (467988.75 + 2174196.52174) / 3957753 = 1.27574 App 1 Power Consumption
         UidBatteryConsumer uidConsumer = mStatsRule.getUidBatteryConsumer(APP_UID);
         assertThat(uidConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
-                .isWithin(PRECISION).of(1.41749);
+                .isWithin(PRECISION).of(1.27574);
         assertThat(uidConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
                 .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
 
         // Rest should go to the other app
         UidBatteryConsumer uidConsumer2 = mStatsRule.getUidBatteryConsumer(APP_UID2);
         assertThat(uidConsumer2.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
-                .isWithin(PRECISION).of(0.705778);
+                .isWithin(PRECISION).of(0.63520);
         assertThat(uidConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
                 .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
     }
@@ -813,6 +836,9 @@ public class MobileRadioPowerCalculatorTest {
                         BatteryStatsImpl.PER_UID_MODEM_POWER_MODEL_MODEM_ACTIVITY_INFO_RX_TX)
                 .initMeasuredEnergyStatsLocked();
         BatteryStatsImpl stats = mStatsRule.getBatteryStats();
+
+        stats.noteMobileRadioPowerStateLocked(DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH, 0, -1,
+                0, 0);
 
         // Scan for a cell
         stats.notePhoneStateLocked(ServiceState.STATE_OUT_OF_SERVICE,
@@ -851,6 +877,9 @@ public class MobileRadioPowerCalculatorTest {
         stats.notePhoneSignalStrengthLocked(signalStrength, 8333, 8333);
         when(gsmSignalStrength.getLevel()).thenReturn(SignalStrength.SIGNAL_STRENGTH_MODERATE);
         stats.notePhoneSignalStrengthLocked(signalStrength, 8666, 8666);
+
+        stats.notePhoneOnLocked(9000, 9000);
+
         when(gsmSignalStrength.getLevel()).thenReturn(SignalStrength.SIGNAL_STRENGTH_GOOD);
         stats.notePhoneSignalStrengthLocked(signalStrength, 9110, 9110);
         when(gsmSignalStrength.getLevel()).thenReturn(SignalStrength.SIGNAL_STRENGTH_GREAT);
@@ -868,30 +897,38 @@ public class MobileRadioPowerCalculatorTest {
 
         mStatsRule.setTime(12_000, 12_000);
 
-        MobileRadioPowerCalculator calculator =
-                new MobileRadioPowerCalculator(mStatsRule.getPowerProfile());
 
-        mStatsRule.apply(calculator);
+        MobileRadioPowerCalculator mobileRadioPowerCalculator =
+                new MobileRadioPowerCalculator(mStatsRule.getPowerProfile());
+        PhonePowerCalculator phonePowerCalculator =
+                new PhonePowerCalculator(mStatsRule.getPowerProfile());
+        mStatsRule.apply(mobileRadioPowerCalculator, phonePowerCalculator);
 
         BatteryConsumer deviceConsumer = mStatsRule.getDeviceBatteryConsumer();
         // 10_000_000 micro-Coulomb * 1/1000 milli/micro * 1/3600 hour/second = 2.77778 mAh
+        // 9000ms data duration / 10000 total duration *  2.77778 mAh = 2.5
+        // 1000ms phone on duration / 10000 total duration *  2.77778 mAh = 0.27777
         assertThat(deviceConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
-                .isWithin(PRECISION).of(2.77778);
+                .isWithin(PRECISION).of(2.5);
         assertThat(deviceConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
+        assertThat(deviceConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_PHONE))
+                .isWithin(PRECISION).of(0.27778);
+        assertThat(deviceConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_PHONE))
                 .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
 
         BatteryConsumer appsConsumer = mStatsRule.getAppsBatteryConsumer();
         // Estimated Rx/Tx modem consumption = 0.94 mAh
         // Estimated total modem consumption = 1.27888 mAh
-        // 2.77778 * 0.94 / 1.27888 = 2.04170 mAh
+        // 2.5 * 0.94 / 1.27888 = 1.83754 mAh
         assertThat(appsConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
-                .isWithin(PRECISION).of(2.04170);
+                .isWithin(PRECISION).of(1.83754);
         assertThat(appsConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
                 .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
 
         UidBatteryConsumer uidConsumer = mStatsRule.getUidBatteryConsumer(APP_UID);
         assertThat(uidConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
-                .isWithin(PRECISION).of(2.04170);
+                .isWithin(PRECISION).of(1.83754);
         assertThat(uidConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
                 .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
     }

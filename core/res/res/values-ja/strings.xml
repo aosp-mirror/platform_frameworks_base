@@ -1708,6 +1708,7 @@
     <string name="color_correction_feature_name" msgid="7975133554160979214">"色補正"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"片手モード"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"さらに輝度を下げる"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"補聴器"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"音量ボタンを長押ししました。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> が ON になりました。"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"音量ボタンを長押ししました。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> が OFF になりました。"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> を使用するには、音量大と音量小の両方のボタンを 3 秒間長押ししてください"</string>
@@ -1942,6 +1943,10 @@
     <string name="work_mode_off_title" msgid="961171256005852058">"仕事用アプリを ON にしますか？"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"仕事用のアプリを利用し、通知を受け取れるようになります"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ON にする"</string>
+    <!-- no translation found for work_mode_emergency_call_button (6818855962881612322) -->
+    <skip />
+    <!-- no translation found for work_mode_dialer_off_message (2193299184850387465) -->
+    <skip />
     <string name="app_blocked_title" msgid="7353262160455028160">"アプリの利用不可"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"現在 <xliff:g id="APP_NAME">%1$s</xliff:g> はご利用になれません。"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g>は利用できません"</string>

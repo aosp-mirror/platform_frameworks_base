@@ -31,8 +31,10 @@ import javax.inject.Inject
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -87,6 +89,9 @@ constructor(
     private fun listenForDreamingToOccluded() {
         scope.launch {
             keyguardInteractor.isDreaming
+                // Add a slight delay, as dreaming and occluded events will arrive with a small gap
+                // in time. This prevents a transition to OCCLUSION happening prematurely.
+                .onEach { delay(50) }
                 .sample(
                     combine(
                         keyguardInteractor.isKeyguardOccluded,

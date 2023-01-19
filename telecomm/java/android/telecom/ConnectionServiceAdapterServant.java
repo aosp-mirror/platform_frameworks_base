@@ -78,6 +78,7 @@ final class ConnectionServiceAdapterServant {
     private static final int MSG_SET_CONFERENCE_STATE = 36;
     private static final int MSG_HANDLE_CREATE_CONFERENCE_COMPLETE = 37;
     private static final int MSG_SET_CALL_DIRECTION = 38;
+    private static final int MSG_QUERY_LOCATION = 39;
 
     private final IConnectionServiceAdapter mDelegate;
 
@@ -373,6 +374,18 @@ final class ConnectionServiceAdapterServant {
                     } finally {
                         args.recycle();
                     }
+                    break;
+                }
+                case MSG_QUERY_LOCATION: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        mDelegate.queryLocation((String) args.arg1, (long) args.arg2,
+                                (String) args.arg3, (ResultReceiver) args.arg4,
+                                (Session.Info) args.arg5);
+                    } finally {
+                        args.recycle();
+                    }
+                    break;
                 }
             }
         }
@@ -698,6 +711,18 @@ final class ConnectionServiceAdapterServant {
         public void requestCallEndpointChange(String callId, CallEndpoint endpoint,
                 ResultReceiver callback, Session.Info sessionInfo) {
             // Do nothing
+        }
+
+        @Override
+        public void queryLocation(String callId, long timeoutMillis, String provider,
+                ResultReceiver callback, Session.Info sessionInfo) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = callId;
+            args.arg2 = timeoutMillis;
+            args.arg3 = provider;
+            args.arg4 = callback;
+            args.arg5 = sessionInfo;
+            mHandler.obtainMessage(MSG_QUERY_LOCATION, args).sendToTarget();
         }
     };
 

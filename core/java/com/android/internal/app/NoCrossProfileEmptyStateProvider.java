@@ -27,7 +27,6 @@ import android.os.UserHandle;
 import com.android.internal.app.AbstractMultiProfilePagerAdapter.CrossProfileIntentsChecker;
 import com.android.internal.app.AbstractMultiProfilePagerAdapter.EmptyState;
 import com.android.internal.app.AbstractMultiProfilePagerAdapter.EmptyStateProvider;
-import com.android.internal.app.AbstractMultiProfilePagerAdapter.MyUserIdProvider;
 
 /**
  * Empty state provider that does not allow cross profile sharing, it will return a blocker
@@ -39,28 +38,28 @@ public class NoCrossProfileEmptyStateProvider implements EmptyStateProvider {
     private final EmptyState mNoWorkToPersonalEmptyState;
     private final EmptyState mNoPersonalToWorkEmptyState;
     private final CrossProfileIntentsChecker mCrossProfileIntentsChecker;
-    private final MyUserIdProvider mUserIdProvider;
+    private final UserHandle mTabOwnerUserHandleForLaunch;
 
     public NoCrossProfileEmptyStateProvider(UserHandle personalUserHandle,
             EmptyState noWorkToPersonalEmptyState,
             EmptyState noPersonalToWorkEmptyState,
             CrossProfileIntentsChecker crossProfileIntentsChecker,
-            MyUserIdProvider myUserIdProvider) {
+            UserHandle preselectedTabOwnerUserHandle) {
         mPersonalProfileUserHandle = personalUserHandle;
         mNoWorkToPersonalEmptyState = noWorkToPersonalEmptyState;
         mNoPersonalToWorkEmptyState = noPersonalToWorkEmptyState;
         mCrossProfileIntentsChecker = crossProfileIntentsChecker;
-        mUserIdProvider = myUserIdProvider;
+        mTabOwnerUserHandleForLaunch = preselectedTabOwnerUserHandle;
     }
 
     @Nullable
     @Override
     public EmptyState getEmptyState(ResolverListAdapter resolverListAdapter) {
         boolean shouldShowBlocker =
-                mUserIdProvider.getMyUserId() != resolverListAdapter.getUserHandle().getIdentifier()
+                !mTabOwnerUserHandleForLaunch.equals(resolverListAdapter.getUserHandle())
                 && !mCrossProfileIntentsChecker
                         .hasCrossProfileIntents(resolverListAdapter.getIntents(),
-                                mUserIdProvider.getMyUserId(),
+                                mTabOwnerUserHandleForLaunch.getIdentifier(),
                                 resolverListAdapter.getUserHandle().getIdentifier());
 
         if (!shouldShowBlocker) {

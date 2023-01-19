@@ -70,6 +70,8 @@ public final class ParcelableHandwritingGesture implements Parcelable {
                 return SelectRangeGesture.CREATOR.createFromParcel(parcel);
             case HandwritingGesture.GESTURE_TYPE_INSERT:
                 return InsertGesture.CREATOR.createFromParcel(parcel);
+            case HandwritingGesture.GESTURE_TYPE_INSERT_MODE:
+                return InsertModeGesture.CREATOR.createFromParcel(parcel);
             case HandwritingGesture.GESTURE_TYPE_DELETE:
                 return DeleteGesture.CREATOR.createFromParcel(parcel);
             case HandwritingGesture.GESTURE_TYPE_DELETE_RANGE:

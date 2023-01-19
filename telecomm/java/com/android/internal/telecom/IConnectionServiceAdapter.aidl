@@ -139,4 +139,7 @@ oneway interface IConnectionServiceAdapter {
     void setConferenceState(String callId, boolean isConference, in Session.Info sessionInfo);
 
     void setCallDirection(String callId, int direction, in Session.Info sessionInfo);
+
+    void queryLocation(String callId, long timeoutMillis, String provider,
+            in ResultReceiver callback, in Session.Info sessionInfo);
 }

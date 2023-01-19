@@ -1710,6 +1710,7 @@
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Корекція кольору"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Режим керування однією рукою"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Додаткове зменшення яскравості"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Слухові апарати"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Утримано клавіші гучності. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> увімкнено."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Утримано клавіші гучності. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> вимкнено."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Щоб скористатися службою <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, утримуйте обидві клавіші гучності впродовж трьох секунд"</string>
@@ -1944,6 +1945,10 @@
     <string name="work_mode_off_title" msgid="961171256005852058">"Увімкнути робочі додатки?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"Отримайте доступ до своїх робочих додатків і сповіщень"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Увімкнути"</string>
+    <!-- no translation found for work_mode_emergency_call_button (6818855962881612322) -->
+    <skip />
+    <!-- no translation found for work_mode_dialer_off_message (2193299184850387465) -->
+    <skip />
     <string name="app_blocked_title" msgid="7353262160455028160">"Додаток недоступний"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> зараз недоступний."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"Недоступно: <xliff:g id="ACTIVITY">%1$s</xliff:g>"</string>

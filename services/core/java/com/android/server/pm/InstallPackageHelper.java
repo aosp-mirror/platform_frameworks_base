@@ -158,6 +158,8 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.EventLogTags;
+import com.android.server.LocalManagerRegistry;
+import com.android.server.art.model.DexoptParams;
 import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.DexManager;
@@ -388,7 +390,8 @@ final class InstallPackageHelper {
         }
 
         if (reconciledPkg.mCollectedSharedLibraryInfos != null
-                || (oldPkgSetting != null && oldPkgSetting.getUsesLibraries() != null)) {
+                || (oldPkgSetting != null
+                && !oldPkgSetting.getSharedLibraryDependencies().isEmpty())) {
             // Reconcile if the new package or the old package uses shared libraries.
             // It is possible that the old package uses shared libraries but the new one doesn't.
             mSharedLibraries.executeSharedLibrariesUpdate(pkg, pkgSetting, null, null,
@@ -1080,19 +1083,32 @@ final class InstallPackageHelper {
                             "MinInstallableTargetSdk__min_installable_target_sdk",
                             0);
 
+            // Determine if enforcement is in strict mode
+            boolean strictMode = false;
+            if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                    "MinInstallableTargetSdk__install_block_strict_mode_enabled",
+                    false)) {
+                if (parsedPackage.getTargetSdkVersion()
+                        < DeviceConfig.getInt(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                        "MinInstallableTargetSdk__strict_mode_target_sdk",
+                        0)) {
+                    strictMode = true;
+                }
+            }
+
             // Skip enforcement when the bypass flag is set
             boolean bypassLowTargetSdkBlock =
                     ((installFlags & PackageManager.INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK) != 0);
 
             // Skip enforcement for tests that were installed from adb
-            if (!bypassLowTargetSdkBlock
+            if (!strictMode && !bypassLowTargetSdkBlock
                     && ((installFlags & PackageManager.INSTALL_FROM_ADB) != 0)) {
                 bypassLowTargetSdkBlock = true;
             }
 
             // Skip enforcement if the installer package name is not set
             // (e.g. "pm install" from shell)
-            if (!bypassLowTargetSdkBlock) {
+            if (!strictMode && !bypassLowTargetSdkBlock) {
                 if (request.getInstallerPackageName() == null) {
                     bypassLowTargetSdkBlock = true;
                 } else {
@@ -2325,7 +2341,6 @@ final class InstallPackageHelper {
     @GuardedBy("mPm.mInstallLock")
     private void executePostCommitStepsLIF(List<ReconciledPackage> reconciledPackages) {
         final ArraySet<IncrementalStorage> incrementalStorages = new ArraySet<>();
-        final ArrayList<String> apkPaths = new ArrayList<>();
         for (ReconciledPackage reconciledPkg : reconciledPackages) {
             final InstallRequest installRequest = reconciledPkg.mInstallRequest;
             final boolean instantApp = ((installRequest.getScanFlags() & SCAN_AS_INSTANT_APP) != 0);
@@ -2342,13 +2357,6 @@ final class InstallPackageHelper {
                             "Install: null storage for incremental package " + packageName);
                 }
                 incrementalStorages.add(storage);
-            }
-
-            // Enabling fs-verity is a blocking operation. To reduce the impact to the install time,
-            // collect the files to later enable in a background thread.
-            apkPaths.add(pkg.getBaseApkPath());
-            if (pkg.getSplitCodePaths() != null) {
-                Collections.addAll(apkPaths, pkg.getSplitCodePaths());
             }
 
             // Hardcode previousAppId to 0 to disable any data migration (http://b/221088088)
@@ -2392,6 +2400,7 @@ final class InstallPackageHelper {
                             || installRequest.getInstallReason() == INSTALL_REASON_DEVICE_SETUP;
 
             final int dexoptFlags = DexoptOptions.DEXOPT_BOOT_COMPLETE
+                    | DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES
                     | DexoptOptions.DEXOPT_INSTALL_WITH_DEX_METADATA_FILE
                     | (isBackupOrRestore ? DexoptOptions.DEXOPT_FOR_RESTORE : 0);
             DexoptOptions dexoptOptions =
@@ -2452,13 +2461,25 @@ final class InstallPackageHelper {
 
                 realPkgSetting.getPkgState().setUpdatedSystemApp(isUpdatedSystemApp);
 
-                // TODO(b/251903639): Call into ART Service.
-                try {
-                    mPackageDexOptimizer.performDexOpt(pkg, realPkgSetting,
-                            null /* instructionSets */, mPm.getOrCreateCompilerPackageStats(pkg),
-                            mDexManager.getPackageUseInfoOrDefault(packageName), dexoptOptions);
-                } catch (LegacyDexoptDisabledException e) {
-                    throw new RuntimeException(e);
+                if (useArtService()) {
+                    PackageManagerLocal packageManagerLocal =
+                            LocalManagerRegistry.getManager(PackageManagerLocal.class);
+                    try (PackageManagerLocal.FilteredSnapshot snapshot =
+                                    packageManagerLocal.withFilteredSnapshot()) {
+                        DexoptParams params =
+                                dexoptOptions.convertToDexoptParams(0 /* extraFlags */);
+                        DexOptHelper.getArtManagerLocal().dexoptPackage(
+                                snapshot, packageName, params);
+                    }
+                } else {
+                    try {
+                        mPackageDexOptimizer.performDexOpt(pkg, realPkgSetting,
+                                null /* instructionSets */,
+                                mPm.getOrCreateCompilerPackageStats(pkg),
+                                mDexManager.getPackageUseInfoOrDefault(packageName), dexoptOptions);
+                    } catch (LegacyDexoptDisabledException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
@@ -2479,20 +2500,6 @@ final class InstallPackageHelper {
         }
         PackageManagerServiceUtils.waitForNativeBinariesExtractionForIncremental(
                 incrementalStorages);
-
-        mInjector.getBackgroundHandler().post(() -> {
-            for (String path : apkPaths) {
-                if (!VerityUtils.hasFsverity(path)) {
-                    try {
-                        VerityUtils.setUpFsverity(path);
-                    } catch (IOException e) {
-                        // There's nothing we can do if the setup failed. Since fs-verity is
-                        // optional, just ignore the error for now.
-                        Slog.e(TAG, "Failed to fully enable fs-verity to " + path);
-                    }
-                }
-            }
-        });
     }
 
     Pair<Integer, String> verifyReplacingVersionCode(PackageInfoLite pkgLite,

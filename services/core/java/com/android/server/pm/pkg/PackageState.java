@@ -158,10 +158,11 @@ public interface PackageState {
     PackageUserState getStateForUser(@NonNull UserHandle user);
 
     /**
-     * @see R.styleable#AndroidManifestUsesLibrary
+     * List of shared libraries that this package declares a dependency on. This includes all
+     * types of libraries, system or app provided and Java or native.
      */
     @NonNull
-    List<SharedLibrary> getUsesLibraries();
+    List<SharedLibrary> getSharedLibraryDependencies();
 
     /** Whether this represents an APEX module. This is different from an APK inside an APEX. */
     boolean isApex();

@@ -43,7 +43,7 @@
     <string name="consent_no" msgid="2640796915611404382">"ไม่อนุญาต"</string>
     <string name="consent_back" msgid="2560683030046918882">"กลับ"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"ให้แอปใน &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; มีสิทธิ์เหมือนกับใน &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ไหม"</string>
-    <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;โดยอาจรวมถึงสิทธิ์เข้าถึงไมโครโฟน กล้อง และตำแหน่ง ตลอดจนสิทธิ์ที่มีความละเอียดอ่อนอื่นๆ ใน &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt; &lt;p&gt;คุณเปลี่ยนแปลงสิทธิ์เหล่านี้ได้ทุกเมื่อในการตั้งค่าใน &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt;"</string>
+    <string name="permission_sync_summary" msgid="765497944331294275">"โดยอาจรวมถึงสิทธิ์เข้าถึง &lt;strong&gt;ไมโครโฟน&lt;/strong&gt; &lt;strong&gt;กล้อง&lt;/strong&gt; และ&lt;strong&gt;ตำแหน่ง&lt;/strong&gt; ตลอดจนสิทธิ์ที่มีความละเอียดอ่อนอื่นๆ ใน &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; &lt;br/&gt;&lt;br/&gt;คุณเปลี่ยนแปลงสิทธิ์เหล่านี้ได้ทุกเมื่อในการตั้งค่าบน &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="vendor_icon_description" msgid="4445875290032225965">"ไอคอนแอป"</string>
     <string name="vendor_header_button_description" msgid="6566660389500630608">"ปุ่มข้อมูลเพิ่มเติม"</string>
     <string name="permission_phone" msgid="2661081078692784919">"โทรศัพท์"</string>
@@ -51,26 +51,19 @@
     <string name="permission_contacts" msgid="3858319347208004438">"รายชื่อติดต่อ"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"ปฏิทิน"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"ไมโครโฟน"</string>
-    <!-- no translation found for permission_call_logs (5546761417694586041) -->
-    <skip />
+    <string name="permission_call_logs" msgid="5546761417694586041">"บันทึกการโทร"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"อุปกรณ์ที่อยู่ใกล้เคียง"</string>
     <string name="permission_storage" msgid="6831099350839392343">"รูปภาพและสื่อ"</string>
     <string name="permission_notification" msgid="693762568127741203">"การแจ้งเตือน"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"แอป"</string>
     <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"การสตรีมไปยังอุปกรณ์ที่อยู่ใกล้เคียง"</string>
-    <!-- no translation found for permission_phone_summary (6684396967861278044) -->
-    <skip />
-    <!-- no translation found for permission_call_logs_summary (6186103394658755022) -->
-    <skip />
-    <!-- no translation found for permission_sms_summary (3508442683678912017) -->
-    <skip />
-    <!-- no translation found for permission_contacts_summary (675861979475628708) -->
-    <skip />
-    <!-- no translation found for permission_calendar_summary (6460000922511766226) -->
-    <skip />
+    <string name="permission_phone_summary" msgid="6684396967861278044">"สามารถโทรออกและจัดการการโทร"</string>
+    <string name="permission_call_logs_summary" msgid="6186103394658755022">"สามารถอ่านและเขียนบันทึกการโทรของโทรศัพท์"</string>
+    <string name="permission_sms_summary" msgid="3508442683678912017">"สามารถส่งและดูข้อความ SMS"</string>
+    <string name="permission_contacts_summary" msgid="675861979475628708">"สามารถเข้าถึงรายชื่อติดต่อของคุณ"</string>
+    <string name="permission_calendar_summary" msgid="6460000922511766226">"สามารถเข้าถึงปฏิทินของคุณ"</string>
     <string name="permission_microphone_summary" msgid="4241354865859396558">"บันทึกเสียงโดยใช้ไมโครโฟนได้"</string>
-    <!-- no translation found for permission_nearby_devices_summary (931940524460876655) -->
-    <skip />
+    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"สามารถค้นหา เชื่อมต่อ และระบุตำแหน่งซึ่งสัมพันธ์กับอุปกรณ์ที่อยู่ใกล้เคียง"</string>
     <string name="permission_notification_summary" msgid="884075314530071011">"สามารถอ่านการแจ้งเตือนทั้งหมด รวมถึงข้อมูลอย่างรายชื่อติดต่อ ข้อความ และรูปภาพ"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"สตรีมแอปของโทรศัพท์คุณ"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>

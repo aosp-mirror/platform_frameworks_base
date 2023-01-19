@@ -16,15 +16,22 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import android.annotation.ColorInt;
+import android.annotation.DrawableRes;
+import android.annotation.StringRes;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.IndentingPrintWriter;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.ViewState;
@@ -40,6 +47,11 @@ public class FooterView extends StackScrollerDecorView {
     // Reading them from a Resources object can be quite slow sometimes.
     private String mManageNotificationText;
     private String mManageNotificationHistoryText;
+
+    // Footer label
+    private TextView mSeenNotifsFooterTextView;
+    private @StringRes int mSeenNotifsFilteredText;
+    private int mUnlockIconSize;
 
     public FooterView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -73,8 +85,39 @@ public class FooterView extends StackScrollerDecorView {
         super.onFinishInflate();
         mClearAllButton = (FooterViewButton) findSecondaryView();
         mManageButton = findViewById(R.id.manage_text);
+        mSeenNotifsFooterTextView = findViewById(R.id.unlock_prompt_footer);
         updateResources();
         updateText();
+    }
+
+    public void setFooterLabelTextAndIcon(@StringRes int text, @DrawableRes int icon) {
+        mSeenNotifsFilteredText = text;
+        if (mSeenNotifsFilteredText != 0) {
+            mSeenNotifsFooterTextView.setText(mSeenNotifsFilteredText);
+        } else {
+            mSeenNotifsFooterTextView.setText(null);
+        }
+        Drawable drawable;
+        if (icon == 0) {
+            drawable = null;
+        } else {
+            drawable = getResources().getDrawable(icon);
+            drawable.setBounds(0, 0, mUnlockIconSize, mUnlockIconSize);
+        }
+        mSeenNotifsFooterTextView.setCompoundDrawablesRelative(drawable, null, null, null);
+        updateFooterVisibilityMode();
+    }
+
+    private void updateFooterVisibilityMode() {
+        if (mSeenNotifsFilteredText != 0) {
+            mManageButton.setVisibility(View.GONE);
+            mClearAllButton.setVisibility(View.GONE);
+            mSeenNotifsFooterTextView.setVisibility(View.VISIBLE);
+        } else {
+            mManageButton.setVisibility(View.VISIBLE);
+            mClearAllButton.setVisibility(View.VISIBLE);
+            mSeenNotifsFooterTextView.setVisibility(View.GONE);
+        }
     }
 
     public void setManageButtonClickListener(OnClickListener listener) {
@@ -135,12 +178,19 @@ public class FooterView extends StackScrollerDecorView {
         mClearAllButton.setTextColor(textColor);
         mManageButton.setBackground(theme.getDrawable(R.drawable.notif_footer_btn_background));
         mManageButton.setTextColor(textColor);
+        final @ColorInt int labelTextColor =
+                Utils.getColorAttrDefaultColor(mContext, android.R.attr.textColorPrimary);
+        mSeenNotifsFooterTextView.setTextColor(labelTextColor);
+        mSeenNotifsFooterTextView.setCompoundDrawableTintList(
+                ColorStateList.valueOf(labelTextColor));
     }
 
     private void updateResources() {
         mManageNotificationText = getContext().getString(R.string.manage_notifications_text);
         mManageNotificationHistoryText = getContext()
                 .getString(R.string.manage_notifications_history_text);
+        mUnlockIconSize = getResources()
+                .getDimensionPixelSize(R.dimen.notifications_unseen_footer_icon_size);
     }
 
     @Override

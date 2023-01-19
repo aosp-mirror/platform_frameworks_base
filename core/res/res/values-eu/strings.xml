@@ -75,7 +75,7 @@
     <string name="CLIRPermanent" msgid="166443681876381118">"Ezin duzu aldatu deitzailearen identitatearen ezarpena."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"<xliff:g id="CARRIERDISPLAY">%s</xliff:g> operadorearen datu-konexiora aldatu zara"</string>
     <string name="auto_data_switch_content" msgid="803557715007110959">"Ezarpenak atalean alda dezakezu aukera hori"</string>
-    <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Ez dago mugikorreko datu-zerbitzurik"</string>
+    <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Ez dago mugikorretarako datu-zerbitzurik"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Ezin da egin larrialdi-deirik"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Ez dago ahots-deien zerbitzurik"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="3982069078579103087">"Ez dago ahozko zerbitzurik eta ezin da egin larrialdi-deirik"</string>
@@ -1708,6 +1708,7 @@
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Koloreen zuzenketa"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Esku bakarreko modua"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Are ilunago"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Audifonoak"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Bolumen-botoiak sakatuta eduki direnez, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> aktibatu egin da."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Bolumen-botoiak sakatuta eduki direnez, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> desaktibatu egin da."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> erabiltzeko, eduki sakatuta bi bolumen-botoiak hiru segundoz"</string>
@@ -1942,6 +1943,10 @@
     <string name="work_mode_off_title" msgid="961171256005852058">"Laneko aplikazioak aktibatu nahi dituzu?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"Atzitu laneko aplikazioak eta jakinarazpenak"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Aktibatu"</string>
+    <!-- no translation found for work_mode_emergency_call_button (6818855962881612322) -->
+    <skip />
+    <!-- no translation found for work_mode_dialer_off_message (2193299184850387465) -->
+    <skip />
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikazioa ez dago erabilgarri"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ez dago erabilgarri une honetan."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ez dago erabilgarri"</string>

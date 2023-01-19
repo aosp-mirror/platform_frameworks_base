@@ -91,6 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Nederste kant: <xliff:g id="PERCENT">%1$d</xliff:g> procent"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Venstre kant: <xliff:g id="PERCENT">%1$d</xliff:g> procent"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Højre kant: <xliff:g id="PERCENT">%1$d</xliff:g> procent"</string>
+    <!-- no translation found for screenshot_work_profile_notification (2812417845875653929) -->
+    <skip />
+    <!-- no translation found for screenshot_default_files_app_name (8721579578575161912) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"Skærmoptagelse"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Behandler skærmoptagelse"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Konstant notifikation om skærmoptagelse"</string>
@@ -810,16 +814,15 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Mellem"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Lille"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"Stor"</string>
-    <string name="accessibility_magnification_close" msgid="1099965835844673375">"Luk"</string>
+    <!-- no translation found for accessibility_magnification_done (263349129937348512) -->
+    <skip />
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Rediger"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Indstillinger for lupvindue"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Tryk for at åbne hjælpefunktioner. Tilpas eller erstat denne knap i Indstillinger.\n\n"<annotation id="link">"Se indstillingerne"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Flyt knappen til kanten for at skjule den midlertidigt"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Fortryd"</string>
-    <!-- no translation found for accessibility_floating_button_undo_message_label_text (9017658016426242640) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_undo_message_number_text (4909270290725226075) -->
-    <skip />
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Genvejen til <xliff:g id="FEATURE_NAME">%s</xliff:g> er fjernet"</string>
+    <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# genvej er fjernet}one{# genvej er fjernet}other{# genveje er fjernet}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Flyt op til venstre"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Flyt op til højre"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Flyt ned til venstre"</string>
@@ -883,11 +886,13 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Afspil <xliff:g id="SONG_NAME">%1$s</xliff:g> af <xliff:g id="ARTIST_NAME">%2$s</xliff:g> via <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Afspil <xliff:g id="SONG_NAME">%1$s</xliff:g> via <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Fortryd"</string>
-    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Flyt enheden tættere på for at afspille på <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Ryk tættere på <xliff:g id="DEVICENAME">%1$s</xliff:g> for at afspille her"</string>
+    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Ryk tættere på for at afspille på <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
+    <skip />
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Afspilles på <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Noget gik galt. Prøv igen."</string>
-    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <string name="media_transfer_loading" msgid="5544017127027152422">"Indlæser"</string>
+    <!-- no translation found for media_ttt_default_device_type (4457646436153370169) -->
     <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktiv. Tjek appen"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Ikke fundet"</string>
@@ -912,6 +917,8 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Lydstyrke"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Højttalere og skærme"</string>
+    <!-- no translation found for media_output_group_title_suggested_device (4157186235837903826) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Sådan fungerer udsendelser"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Udsendelse"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Personer i nærheden, som har kompatible Bluetooth-enheder, kan lytte til det medie, du udsender"</string>
@@ -1053,5 +1060,8 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ *Denne skærm slukkes"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Foldbar enhed foldes ud"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Foldbar enhed vendes om"</string>
-    <string name="stylus_battery_low" msgid="7134370101603167096">"Lavt batteriniveau på styluspen"</string>
+    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
+    <skip />
+    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
+    <skip />
 </resources>

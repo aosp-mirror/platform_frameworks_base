@@ -43,7 +43,7 @@
     <string name="consent_no" msgid="2640796915611404382">"Уруксат берилбесин"</string>
     <string name="consent_back" msgid="2560683030046918882">"Артка"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"&lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; түзмөгүнө да &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; түзмөгүнө берилген уруксаттар берилсинби?"</string>
-    <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;Бул уруксаттарга микрофонду жана камераны пайдалануу мүмкүнчүлүгү, ошондой эле кайда жүргөнүңүздү жана &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; түзмөгүндөгү башка купуя маалыматты көрүү мүмкүнчүлүгү кириши мүмкүн.&lt;/p&gt; &lt;p&gt;Бул уруксаттарды каалаган убакта <xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g> түзмөгүндөгү Параметрлерден өзгөртө аласыз.&lt;/p&gt;"</string>
+    <string name="permission_sync_summary" msgid="765497944331294275">"Буга &lt;strong&gt;Микрофонду&lt;/strong&gt;, &lt;strong&gt;Камераны&lt;/strong&gt; пайдалануу жана &lt;strong&gt;Жайгашкан жерди аныктоо&lt;/strong&gt;, ошондой эле &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; түзмөгүндөгү башка купуя маалыматты көрүүгө уруксаттар кириши мүмкүн. &lt;br/&gt;&lt;br/&gt;Каалаган убакта &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt; түзмөгүндөгү параметрлерге өтүп, бул уруксаттарды өзгөртө аласыз."</string>
     <string name="vendor_icon_description" msgid="4445875290032225965">"Колдонмонун сүрөтчөсү"</string>
     <string name="vendor_header_button_description" msgid="6566660389500630608">"Дагы маалымат баскычы"</string>
     <string name="permission_phone" msgid="2661081078692784919">"Телефон"</string>
@@ -51,26 +51,19 @@
     <string name="permission_contacts" msgid="3858319347208004438">"Байланыштар"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"Жылнаама"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"Микрофон"</string>
-    <!-- no translation found for permission_call_logs (5546761417694586041) -->
-    <skip />
+    <string name="permission_call_logs" msgid="5546761417694586041">"Чалуулар тизмеси"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Жакын жердеги түзмөктөр"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Сүрөттөр жана медиафайлдар"</string>
     <string name="permission_notification" msgid="693762568127741203">"Билдирмелер"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Колдонмолор"</string>
     <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"Жакын жердеги түзмөктөрдө алып ойнотуу"</string>
-    <!-- no translation found for permission_phone_summary (6684396967861278044) -->
-    <skip />
-    <!-- no translation found for permission_call_logs_summary (6186103394658755022) -->
-    <skip />
-    <!-- no translation found for permission_sms_summary (3508442683678912017) -->
-    <skip />
-    <!-- no translation found for permission_contacts_summary (675861979475628708) -->
-    <skip />
-    <!-- no translation found for permission_calendar_summary (6460000922511766226) -->
-    <skip />
+    <string name="permission_phone_summary" msgid="6684396967861278044">"Телефон чалууларды аткарып жана тескей алат"</string>
+    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Телефондогу чалуулар тизмесин окуп жана жаза алат"</string>
+    <string name="permission_sms_summary" msgid="3508442683678912017">"SMS билдирүүлөрдү жөнөтүп жана көрө алат"</string>
+    <string name="permission_contacts_summary" msgid="675861979475628708">"Байланыштарыңызга кире алат"</string>
+    <string name="permission_calendar_summary" msgid="6460000922511766226">"Жылнаамаңызга кире алат"</string>
     <string name="permission_microphone_summary" msgid="4241354865859396558">"Микрофон аркылуу аудио жаздыра алат"</string>
-    <!-- no translation found for permission_nearby_devices_summary (931940524460876655) -->
-    <skip />
+    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Жакын жердеги түзмөктөрдү таап, аларга туташып, абалын аныктай алат"</string>
     <string name="permission_notification_summary" msgid="884075314530071011">"Бардык билдирмелерди, анын ичинде байланыштар, билдирүүлөр жана сүрөттөр сыяктуу маалыматты окуй алат"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Телефондогу колдонмолорду алып ойнотуу"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>

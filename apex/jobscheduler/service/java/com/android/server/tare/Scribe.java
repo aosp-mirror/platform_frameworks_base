@@ -717,8 +717,8 @@ public class Scribe {
         out.startTag(null, XML_TAG_USER);
         out.attributeInt(null, XML_ATTR_USER_ID, userId);
         out.attributeLong(null, XML_ATTR_TIME_SINCE_FIRST_SETUP_MS,
-                mRealtimeSinceUsersAddedOffsets.get(userId,
-                        mLoadedTimeSinceFirstSetup + SystemClock.elapsedRealtime()));
+                mRealtimeSinceUsersAddedOffsets.get(userId, mLoadedTimeSinceFirstSetup)
+                        + SystemClock.elapsedRealtime());
         for (int pIdx = mLedgers.numElementsForKey(userId) - 1; pIdx >= 0; --pIdx) {
             final String pkgName = mLedgers.keyAt(uIdx, pIdx);
             final Ledger ledger = mLedgers.get(userId, pkgName);

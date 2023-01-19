@@ -29,6 +29,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wallpaper.WallpaperUtils.WALLPAPER;
+import static com.android.server.wallpaper.WallpaperUtils.WALLPAPER_CROP;
 
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertEquals;
@@ -59,6 +60,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.ServiceInfo;
 import android.graphics.Color;
 import android.hardware.display.DisplayManager;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
@@ -100,6 +102,8 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
@@ -157,6 +161,9 @@ public class WallpaperManagerServiceTests {
                 PackageManager.PERMISSION_GRANTED);
         sContext.getTestablePermissions().setPermission(
                 android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT,
+                PackageManager.PERMISSION_GRANTED);
+        sContext.getTestablePermissions().setPermission(
+                android.Manifest.permission.READ_WALLPAPER_INTERNAL,
                 PackageManager.PERMISSION_GRANTED);
         doNothing().when(sContext).sendBroadcastAsUser(any(), any());
 
@@ -494,6 +501,50 @@ public class WallpaperManagerServiceTests {
                 colorHints & WallpaperColors.HINT_SUPPORTS_DARK_THEME);
     }
 
+    @Test
+    public void getWallpaperWithFeature_getCropped_returnsCropFile() throws Exception {
+        File cropSystemWallpaperFile =
+                new File(WallpaperUtils.getWallpaperDir(USER_SYSTEM), WALLPAPER_CROP);
+        cropSystemWallpaperFile.createNewFile();
+        try (FileOutputStream outputStream = new FileOutputStream(cropSystemWallpaperFile)) {
+            outputStream.write("Crop system wallpaper".getBytes());
+        }
+
+        ParcelFileDescriptor pfd =
+                mService.getWallpaperWithFeature(
+                        sContext.getPackageName(),
+                        sContext.getAttributionTag(),
+                        /* cb= */ null,
+                        FLAG_SYSTEM,
+                        /* outParams= */ null,
+                        USER_SYSTEM,
+                        /* getCropped= */ true);
+
+        assertPfdAndFileContentsEqual(pfd, cropSystemWallpaperFile);
+    }
+
+    @Test
+    public void getWallpaperWithFeature_notGetCropped_returnsOriginalFile() throws Exception {
+        File originalSystemWallpaperFile =
+                new File(WallpaperUtils.getWallpaperDir(USER_SYSTEM), WALLPAPER);
+        originalSystemWallpaperFile.createNewFile();
+        try (FileOutputStream outputStream = new FileOutputStream(originalSystemWallpaperFile)) {
+            outputStream.write("Original system wallpaper".getBytes());
+        }
+
+        ParcelFileDescriptor pfd =
+                mService.getWallpaperWithFeature(
+                        sContext.getPackageName(),
+                        sContext.getAttributionTag(),
+                        /* cb= */ null,
+                        FLAG_SYSTEM,
+                        /* outParams= */ null,
+                        USER_SYSTEM,
+                        /* getCropped= */ false);
+
+        assertPfdAndFileContentsEqual(pfd, originalSystemWallpaperFile);
+    }
+
     // Verify that after continue switch user from userId 0 to lastUserId, the wallpaper data for
     // non-current user must not bind to wallpaper service.
     private void verifyNoConnectionBeforeLastUser(int lastUserId) {
@@ -528,5 +579,23 @@ public class WallpaperManagerServiceTests {
             assertTrue("Display height must larger than maximum screen size",
                     data.mHeight >= DISPLAY_SIZE_DIMENSION);
         });
+    }
+
+    /**
+     * Asserts that the contents of the given {@link ParcelFileDescriptor} and {@link File} contain
+     * exactly the same bytes.
+     *
+     * Both the PFD and File contents will be loaded to memory. The PFD will be closed at the end.
+     */
+    private static void assertPfdAndFileContentsEqual(ParcelFileDescriptor pfd, File file)
+            throws IOException {
+        try (ParcelFileDescriptor.AutoCloseInputStream pfdInputStream =
+                     new ParcelFileDescriptor.AutoCloseInputStream(pfd);
+             FileInputStream fileInputStream = new FileInputStream(file)
+        ) {
+            String pfdContents = new String(pfdInputStream.readAllBytes());
+            String fileContents = new String(fileInputStream.readAllBytes());
+            assertEquals(pfdContents, fileContents);
+        }
     }
 }

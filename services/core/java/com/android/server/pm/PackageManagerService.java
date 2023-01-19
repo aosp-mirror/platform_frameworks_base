@@ -196,6 +196,7 @@ import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
 import com.android.server.apphibernation.AppHibernationManagerInternal;
 import com.android.server.art.DexUseManagerLocal;
+import com.android.server.art.model.DeleteResult;
 import com.android.server.compat.CompatChange;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.Installer.InstallerException;
@@ -552,6 +553,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     private static final int REQUIRED_VERIFIERS_MAX_COUNT = 2;
 
     // Compilation reasons.
+    // TODO(b/260124949): Clean this up with the legacy dexopt code.
     public static final int REASON_FIRST_BOOT = 0;
     public static final int REASON_BOOT_AFTER_OTA = 1;
     public static final int REASON_POST_BOOT = 2;
@@ -565,7 +567,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     public static final int REASON_AB_OTA = 10;
     public static final int REASON_INACTIVE_PACKAGE_DOWNGRADE = 11;
     public static final int REASON_CMDLINE = 12;
-    public static final int REASON_SHARED = 13;
+    public static final int REASON_BOOT_AFTER_MAINLINE_UPDATE = 13;
+    public static final int REASON_SHARED = 14;
 
     public static final int REASON_LAST = REASON_SHARED;
 
@@ -588,7 +591,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     private final int mDefParseFlags;
     private final String[] mSeparateProcesses;
     private final boolean mIsUpgrade;
-    private final boolean mIsPreNUpgrade;
     private final boolean mIsPreNMR1Upgrade;
     private final boolean mIsPreQUpgrade;
 
@@ -1734,7 +1736,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mInstantAppResolverConnection = testParams.instantAppResolverConnection;
         mInstantAppResolverSettingsComponent = testParams.instantAppResolverSettingsComponent;
         mIsPreNMR1Upgrade = testParams.isPreNmr1Upgrade;
-        mIsPreNUpgrade = testParams.isPreNupgrade;
         mIsPreQUpgrade = testParams.isPreQupgrade;
         mIsUpgrade = testParams.isUpgrade;
         mMetrics = testParams.Metrics;
@@ -2068,10 +2069,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             // when upgrading from pre-M, promote system app permissions from install to runtime
             mPromoteSystemApps =
                     mIsUpgrade && ver.sdkVersion <= Build.VERSION_CODES.LOLLIPOP_MR1;
-
-            // When upgrading from pre-N, we need to handle package extraction like first boot,
-            // as there is no profiling data available.
-            mIsPreNUpgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.N;
 
             mIsPreNMR1Upgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.N_MR1;
             mIsPreQUpgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.Q;
@@ -2954,13 +2951,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 }
                 if (doTrim) {
                     if (!isFirstBoot()) {
-                        if (mDexOptHelper.isDexOptDialogShown()) {
-                            try {
-                                ActivityManager.getService().showBootMessage(
-                                        mContext.getResources().getString(
-                                                R.string.android_upgrading_fstrim), true);
-                            } catch (RemoteException e) {
-                            }
+                        try {
+                            ActivityManager.getService().showBootMessage(
+                                    mContext.getResources().getString(
+                                            R.string.android_upgrading_fstrim),
+                                    true);
+                        } catch (RemoteException e) {
                         }
                     }
                     sm.runMaintenance();
@@ -2974,12 +2970,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     public void updatePackagesIfNeeded() {
-        // TODO(b/251903639): Call into ART Service.
-        try {
-            mDexOptHelper.performPackageDexOptUpgradeIfNeeded();
-        } catch (LegacyDexoptDisabledException e) {
-            throw new RuntimeException(e);
-        }
+        mDexOptHelper.performPackageDexOptUpgradeIfNeeded();
     }
 
     private void notifyPackageUseInternal(String packageName, int reason) {
@@ -2995,6 +2986,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     /*package*/ DexManager getDexManager() {
         return mDexManager;
+    }
+
+    /*package*/ DexOptHelper getDexOptHelper() {
+        return mDexOptHelper;
     }
 
     /*package*/ DynamicCodeLogger getDynamicCodeLogger() {
@@ -4827,35 +4822,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
-        public void dumpProfiles(String packageName, boolean dumpClassesAndMethods) {
-            /* Only the shell, root, or the app user should be able to dump profiles. */
-            final int callingUid = Binder.getCallingUid();
-            final Computer snapshot = snapshotComputer();
-            final String[] callerPackageNames = snapshot.getPackagesForUid(callingUid);
-            if (callingUid != Process.SHELL_UID
-                    && callingUid != Process.ROOT_UID
-                    && !ArrayUtils.contains(callerPackageNames, packageName)) {
-                throw new SecurityException("dumpProfiles");
-            }
-
-            AndroidPackage pkg = snapshot.getPackage(packageName);
-            if (pkg == null) {
-                throw new IllegalArgumentException("Unknown package: " + packageName);
-            }
-
-            // TODO(b/251903639): Call into ART Service.
-            synchronized (mInstallLock) {
-                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dump profiles");
-                try {
-                    mArtManagerService.dumpProfiles(pkg, dumpClassesAndMethods);
-                } catch (LegacyDexoptDisabledException e) {
-                    throw new RuntimeException(e);
-                }
-                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-            }
-        }
-
-        @Override
         public void enterSafeMode() {
             PackageManagerServiceUtils.enforceSystemOrRoot(
                     "Only the system can request entering safe mode");
@@ -5539,33 +5505,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 return ParceledListSlice.emptyList();
             }
             return new ParceledListSlice<>(result);
-        }
-
-        /**
-         * Reconcile the information we have about the secondary dex files belonging to
-         * {@code packageName} and the actual dex files. For all dex files that were
-         * deleted, update the internal records and delete the generated oat files.
-         */
-        @Override
-        public void reconcileSecondaryDexFiles(String packageName) {
-            if (useArtService()) {
-                // ART Service currently relies on a GC to find stale oat files, including secondary
-                // dex files. Hence it doesn't use this call for anything.
-                return;
-            }
-
-            final Computer snapshot = snapshotComputer();
-            if (snapshot.getInstantAppPackageName(Binder.getCallingUid()) != null) {
-                return;
-            } else if (snapshot.isInstantAppInternal(
-                               packageName, UserHandle.getCallingUserId(), Process.SYSTEM_UID)) {
-                return;
-            }
-            try {
-                mDexManager.reconcileSecondaryDexFiles(packageName);
-            } catch (LegacyDexoptDisabledException e) {
-                throw new RuntimeException(e);
-            }
         }
 
         @Override
@@ -6663,6 +6602,47 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             }
         }
 
+        /** @deprecated For legacy shell command only. */
+        @Override
+        @Deprecated
+        public void legacyDumpProfiles(String packageName, boolean dumpClassesAndMethods)
+                throws LegacyDexoptDisabledException {
+            /* Only the shell, root, or the app user should be able to dump profiles. */
+            final int callingUid = Binder.getCallingUid();
+            final Computer snapshot = snapshotComputer();
+            final String[] callerPackageNames = snapshot.getPackagesForUid(callingUid);
+            if (callingUid != Process.SHELL_UID && callingUid != Process.ROOT_UID
+                    && !ArrayUtils.contains(callerPackageNames, packageName)) {
+                throw new SecurityException("dumpProfiles");
+            }
+
+            AndroidPackage pkg = snapshot.getPackage(packageName);
+            if (pkg == null) {
+                throw new IllegalArgumentException("Unknown package: " + packageName);
+            }
+
+            synchronized (mInstallLock) {
+                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dump profiles");
+                mArtManagerService.dumpProfiles(pkg, dumpClassesAndMethods);
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+            }
+        }
+
+        /** @deprecated For legacy shell command only. */
+        @Override
+        @Deprecated
+        public void legacyReconcileSecondaryDexFiles(String packageName)
+                throws LegacyDexoptDisabledException {
+            final Computer snapshot = snapshotComputer();
+            if (snapshot.getInstantAppPackageName(Binder.getCallingUid()) != null) {
+                return;
+            } else if (snapshot.isInstantAppInternal(
+                               packageName, UserHandle.getCallingUserId(), Process.SYSTEM_UID)) {
+                return;
+            }
+            mDexManager.reconcileSecondaryDexFiles(packageName);
+        }
+
         @Override
         @SuppressWarnings("GuardedBy")
         public void updateRuntimePermissionsFingerprint(@UserIdInt int userId) {
@@ -7112,17 +7092,39 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         return AndroidPackageUtils.canHaveOatDir(packageState, packageState.getPkg());
     }
 
-    long deleteOatArtifactsOfPackage(@NonNull Computer snapshot, String packageName)
-            throws LegacyDexoptDisabledException {
+    long deleteOatArtifactsOfPackage(@NonNull Computer snapshot, String packageName) {
         PackageManagerServiceUtils.enforceSystemOrRootOrShell(
                 "Only the system or shell can delete oat artifacts");
 
-        PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
-        if (packageState == null || packageState.getPkg() == null) {
-            return -1; // error code of deleteOptimizedFiles
+        if (DexOptHelper.useArtService()) {
+            // TODO(chiuwinson): Retrieve filtered snapshot from Computer instance instead.
+            try (PackageManagerLocal.FilteredSnapshot filteredSnapshot =
+                            PackageManagerServiceUtils.getPackageManagerLocal()
+                                    .withFilteredSnapshot()) {
+                try {
+                    DeleteResult res = DexOptHelper.getArtManagerLocal().deleteDexoptArtifacts(
+                            filteredSnapshot, packageName);
+                    return res.getFreedBytes();
+                } catch (IllegalArgumentException e) {
+                    Log.e(TAG, e.toString());
+                    return -1;
+                } catch (IllegalStateException e) {
+                    Slog.wtfStack(TAG, e.toString());
+                    return -1;
+                }
+            }
+        } else {
+            PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
+            if (packageState == null || packageState.getPkg() == null) {
+                return -1; // error code of deleteOptimizedFiles
+            }
+            try {
+                return mDexManager.deleteOptimizedFiles(
+                        ArtUtils.createArtPackageInfo(packageState.getPkg(), packageState));
+            } catch (LegacyDexoptDisabledException e) {
+                throw new RuntimeException(e);
+            }
         }
-        return mDexManager.deleteOptimizedFiles(
-                ArtUtils.createArtPackageInfo(packageState.getPkg(), packageState));
     }
 
     List<String> getMimeGroupInternal(@NonNull Computer snapshot, String packageName,
@@ -7489,10 +7491,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     AndroidPackage getPlatformPackage() {
         return mPlatformPackage;
-    }
-
-    boolean isPreNUpgrade() {
-        return mIsPreNUpgrade;
     }
 
     boolean isPreNMR1Upgrade() {

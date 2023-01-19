@@ -15,8 +15,10 @@
     <string name="ssl_error_example" msgid="6188711843183058764">"ఉదాహరణకు, లాగిన్ పేజీ చూపిన సంస్థకు చెందినది కాకపోవచ్చు."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"ఏదేమైనా బ్రౌజర్ ద్వారా కొనసాగించండి"</string>
     <string name="performance_boost_notification_channel" msgid="3475440855635538592">"పనితీరు బూస్ట్"</string>
-    <string name="performance_boost_notification_title" msgid="5017421773334474875">"పనితీరు బూస్ట్‌ను %s సిఫార్సు చేస్తోంది"</string>
-    <string name="performance_boost_notification_detail" msgid="7216286153533321852">"మెరుగైన నెట్‌వర్క్ పనితీరు కోసం పనితీరు బూస్ట్‌ను కొనుగోలు చేయండి"</string>
+    <!-- no translation found for performance_boost_notification_title (946857427149305992) -->
+    <skip />
+    <!-- no translation found for performance_boost_notification_detail (362407668982648351) -->
+    <skip />
     <string name="performance_boost_notification_button_not_now" msgid="6459755324243683785">"ఇప్పుడు కాదు"</string>
     <string name="performance_boost_notification_button_manage" msgid="4976836444046497973">"మేనేజ్ చేయండి"</string>
     <string name="slice_purchase_app_label" msgid="7170191659233241166">"పనితీరు బూస్ట్‌ను కొనుగోలు చేయండి."</string>

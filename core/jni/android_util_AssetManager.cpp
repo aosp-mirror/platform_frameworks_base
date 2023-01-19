@@ -324,7 +324,7 @@ static void NativeSetConfiguration(JNIEnv* env, jclass /*clazz*/, jlong ptr, jin
                                    jint screen_width, jint screen_height,
                                    jint smallest_screen_width_dp, jint screen_width_dp,
                                    jint screen_height_dp, jint screen_layout, jint ui_mode,
-                                   jint color_mode, jint major_version) {
+                                   jint color_mode, jint grammatical_gender, jint major_version) {
   ATRACE_NAME("AssetManager::SetConfiguration");
 
   ResTable_config configuration;
@@ -345,6 +345,7 @@ static void NativeSetConfiguration(JNIEnv* env, jclass /*clazz*/, jlong ptr, jin
   configuration.screenLayout = static_cast<uint8_t>(screen_layout);
   configuration.uiMode = static_cast<uint8_t>(ui_mode);
   configuration.colorMode = static_cast<uint8_t>(color_mode);
+  configuration.grammaticalInflection = static_cast<uint8_t>(grammatical_gender);
   configuration.sdkVersion = static_cast<uint16_t>(major_version);
 
   if (locale != nullptr) {
@@ -1448,7 +1449,7 @@ static const JNINativeMethod gAssetManagerMethods[] = {
     {"nativeCreate", "()J", (void*)NativeCreate},
     {"nativeDestroy", "(J)V", (void*)NativeDestroy},
     {"nativeSetApkAssets", "(J[Landroid/content/res/ApkAssets;Z)V", (void*)NativeSetApkAssets},
-    {"nativeSetConfiguration", "(JIILjava/lang/String;IIIIIIIIIIIIIII)V",
+    {"nativeSetConfiguration", "(JIILjava/lang/String;IIIIIIIIIIIIIIII)V",
      (void*)NativeSetConfiguration},
     {"nativeGetAssignedPackageIdentifiers", "(JZZ)Landroid/util/SparseArray;",
      (void*)NativeGetAssignedPackageIdentifiers},

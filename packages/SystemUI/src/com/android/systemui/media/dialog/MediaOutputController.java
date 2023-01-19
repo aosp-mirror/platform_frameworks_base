@@ -493,20 +493,20 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         ColorScheme mCurrentColorScheme = new ColorScheme(wallpaperColors,
                 isDarkTheme);
         if (isDarkTheme) {
-            mColorItemContent = mCurrentColorScheme.getAccent1().get(2); // A1-100
-            mColorSeekbarProgress = mCurrentColorScheme.getAccent2().get(7); // A2-600
-            mColorButtonBackground = mCurrentColorScheme.getAccent1().get(4); // A1-300
-            mColorItemBackground = mCurrentColorScheme.getNeutral2().get(9); // N2-800
-            mColorConnectedItemBackground = mCurrentColorScheme.getAccent2().get(9); // A2-800
-            mColorPositiveButtonText = mCurrentColorScheme.getAccent2().get(9); // A2-800
-            mColorDialogBackground = mCurrentColorScheme.getNeutral1().get(10); // N1-900
+            mColorItemContent = mCurrentColorScheme.getAccent1().getS100(); // A1-100
+            mColorSeekbarProgress = mCurrentColorScheme.getAccent2().getS600(); // A2-600
+            mColorButtonBackground = mCurrentColorScheme.getAccent1().getS300(); // A1-300
+            mColorItemBackground = mCurrentColorScheme.getNeutral2().getS800(); // N2-800
+            mColorConnectedItemBackground = mCurrentColorScheme.getAccent2().getS800(); // A2-800
+            mColorPositiveButtonText = mCurrentColorScheme.getAccent2().getS800(); // A2-800
+            mColorDialogBackground = mCurrentColorScheme.getNeutral1().getS900(); // N1-900
         } else {
-            mColorItemContent = mCurrentColorScheme.getAccent1().get(9); // A1-800
-            mColorSeekbarProgress = mCurrentColorScheme.getAccent1().get(4); // A1-300
-            mColorButtonBackground = mCurrentColorScheme.getAccent1().get(7); // A1-600
-            mColorItemBackground = mCurrentColorScheme.getAccent2().get(1); // A2-50
-            mColorConnectedItemBackground = mCurrentColorScheme.getAccent1().get(2); // A1-100
-            mColorPositiveButtonText = mCurrentColorScheme.getNeutral1().get(1); // N1-50
+            mColorItemContent = mCurrentColorScheme.getAccent1().getS800(); // A1-800
+            mColorSeekbarProgress = mCurrentColorScheme.getAccent1().getS300(); // A1-300
+            mColorButtonBackground = mCurrentColorScheme.getAccent1().getS600(); // A1-600
+            mColorItemBackground = mCurrentColorScheme.getAccent2().getS50(); // A2-50
+            mColorConnectedItemBackground = mCurrentColorScheme.getAccent1().getS100(); // A1-100
+            mColorPositiveButtonText = mCurrentColorScheme.getNeutral1().getS50(); // N1-50
             mColorDialogBackground = mCurrentColorScheme.getBackgroundColor();
         }
     }
@@ -746,6 +746,10 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
 
     public boolean isRouteProcessSupported() {
         return mFeatureFlags.isEnabled(Flags.OUTPUT_SWITCHER_ROUTES_PROCESSING);
+    }
+
+    public boolean isSubStatusSupported() {
+        return mFeatureFlags.isEnabled(Flags.OUTPUT_SWITCHER_DEVICE_STATUS);
     }
 
     List<MediaDevice> getGroupMediaDevices() {

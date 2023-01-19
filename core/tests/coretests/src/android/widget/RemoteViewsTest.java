@@ -324,7 +324,9 @@ public class RemoteViewsTest {
         RemoteViews nested = new RemoteViews(mPackage, R.layout.remote_views_text);
         nested.setOnClickPendingIntent(
                 R.id.text,
-                PendingIntent.getActivity(mContext, 0, new Intent(), PendingIntent.FLAG_MUTABLE)
+                PendingIntent.getActivity(mContext, 0,
+                        new Intent().setPackage(mContext.getPackageName()),
+                        PendingIntent.FLAG_MUTABLE)
         );
 
         RemoteViews listItem = new RemoteViews(mPackage, R.layout.remote_view_host);
@@ -341,7 +343,9 @@ public class RemoteViewsTest {
         RemoteViews inner = new RemoteViews(mPackage, R.layout.remote_views_text);
         inner.setOnClickPendingIntent(
                 R.id.text,
-                PendingIntent.getActivity(mContext, 0, new Intent(), PendingIntent.FLAG_MUTABLE)
+                PendingIntent.getActivity(mContext, 0,
+                        new Intent().setPackage(mContext.getPackageName()),
+                        PendingIntent.FLAG_MUTABLE)
         );
 
         RemoteViews listItem = new RemoteViews(inner, inner);
@@ -357,7 +361,9 @@ public class RemoteViewsTest {
         RemoteViews inner = new RemoteViews(mPackage, R.layout.remote_views_text);
         inner.setOnClickPendingIntent(
                 R.id.text,
-                PendingIntent.getActivity(mContext, 0, new Intent(), PendingIntent.FLAG_MUTABLE)
+                PendingIntent.getActivity(mContext, 0,
+                        new Intent().setPackage(mContext.getPackageName()),
+                        PendingIntent.FLAG_MUTABLE)
         );
 
         RemoteViews listItem = new RemoteViews(
@@ -559,7 +565,9 @@ public class RemoteViewsTest {
         RemoteViews views = new RemoteViews(mPackage, R.layout.remote_views_test);
         for (int i = 1; i < 10; i++) {
             PendingIntent pi = PendingIntent.getBroadcast(mContext, 0,
-                    new Intent("android.widget.RemoteViewsTest_" + i), PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                    new Intent("android.widget.RemoteViewsTest_" + i)
+                            .setPackage(mContext.getPackageName()),
+                    PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_MUTABLE);
             views.setOnClickPendingIntent(i, pi);
         }
         try {
@@ -575,7 +583,8 @@ public class RemoteViewsTest {
 
         RemoteViews views = new RemoteViews(mPackage, R.layout.remote_views_test);
         PendingIntent pi = PendingIntent.getBroadcast(mContext, 0,
-                new Intent("test"), PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                new Intent("test").setPackage(mContext.getPackageName()),
+                PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_MUTABLE);
         views.setOnClickPendingIntent(1, pi);
         RemoteViews withCookie = parcelAndRecreateWithPendingIntentCookie(views, whitelistToken);
 
@@ -606,8 +615,9 @@ public class RemoteViewsTest {
     public void sharedElement_pendingIntent_notifyParent() throws Exception {
         RemoteViews views = new RemoteViews(mPackage, R.layout.remote_views_test);
         PendingIntent pi = PendingIntent.getBroadcast(mContext, 0,
-                new Intent("android.widget.RemoteViewsTest_shared_element"),
-                PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                new Intent("android.widget.RemoteViewsTest_shared_element")
+                        .setPackage(mContext.getPackageName()),
+                PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_MUTABLE);
         views.setOnClickResponse(R.id.image, RemoteViews.RemoteResponse.fromPendingIntent(pi)
                 .addSharedElement(0, "e0")
                 .addSharedElement(1, "e1")

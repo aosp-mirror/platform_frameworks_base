@@ -209,8 +209,10 @@ public class InternalResourceService extends SystemService {
     @GuardedBy("mLock")
     private int mCurrentBatteryLevel;
 
-    // TODO(250007395): make configurable per device
-    private final int mTargetBackgroundBatteryLifeHours;
+    // TODO(250007395): make configurable per device (via config.xml)
+    private final int mDefaultTargetBackgroundBatteryLifeHours;
+    @GuardedBy("mLock")
+    private int mTargetBackgroundBatteryLifeHours;
 
     private final IAppOpsCallback mApbListener = new IAppOpsCallback.Stub() {
         @Override
@@ -353,10 +355,11 @@ public class InternalResourceService extends SystemService {
 
         mConfigObserver = new ConfigObserver(mHandler, context);
 
-        mTargetBackgroundBatteryLifeHours =
+        mDefaultTargetBackgroundBatteryLifeHours =
                 mPackageManager.hasSystemFeature(PackageManager.FEATURE_WATCH)
-                        ? 200 // ~ 0.5%/hr
-                        : 100; // ~ 1%/hr
+                        ? 100 // ~ 1.0%/hr
+                        : 40; // ~ 2.5%/hr
+        mTargetBackgroundBatteryLifeHours = mDefaultTargetBackgroundBatteryLifeHours;
 
         publishLocalService(EconomyManagerInternal.class, new LocalService());
     }
@@ -1483,6 +1486,8 @@ public class InternalResourceService extends SystemService {
     private class ConfigObserver extends ContentObserver
             implements DeviceConfig.OnPropertiesChangedListener {
         private static final String KEY_ENABLE_TIP3 = "enable_tip3";
+        private static final String KEY_TARGET_BACKGROUND_BATTERY_LIFE_HOURS =
+                "target_bg_battery_life_hrs";
 
         private static final boolean DEFAULT_ENABLE_TIP3 = true;
 
@@ -1540,6 +1545,13 @@ public class InternalResourceService extends SystemService {
                             break;
                         case KEY_ENABLE_TIP3:
                             ENABLE_TIP3 = properties.getBoolean(name, DEFAULT_ENABLE_TIP3);
+                            break;
+                        case KEY_TARGET_BACKGROUND_BATTERY_LIFE_HOURS:
+                            synchronized (mLock) {
+                                mTargetBackgroundBatteryLifeHours = properties.getInt(name,
+                                        mDefaultTargetBackgroundBatteryLifeHours);
+                                maybeAdjustDesiredStockLevelLocked();
+                            }
                             break;
                         default:
                             if (!economicPolicyUpdated
@@ -1669,6 +1681,12 @@ public class InternalResourceService extends SystemService {
             pw.print(cakeToString(mCompleteEconomicPolicy.getInitialSatiatedConsumptionLimit()));
             pw.print("/");
             pw.println(cakeToString(mScribe.getSatiatedConsumptionLimitLocked()));
+
+            pw.print("Target bg battery life (hours): ");
+            pw.print(mTargetBackgroundBatteryLifeHours);
+            pw.print(" (");
+            pw.print(String.format("%.2f", 100f / mTargetBackgroundBatteryLifeHours));
+            pw.println("%/hr)");
 
             final long remainingConsumable = mScribe.getRemainingConsumableCakesLocked();
             pw.print("Goods remaining: ");

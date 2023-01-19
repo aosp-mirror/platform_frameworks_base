@@ -408,7 +408,7 @@ public class Analyst {
             if (report.screenOffDurationMs > 0) {
                 pw.print(padStringWithSpaces(String.format("%d mAh (%.2f%%/hr)",
                                 report.screenOffDischargeMah,
-                                1.0 * report.screenOffDischargeMah * HOUR_IN_MILLIS
+                                100.0 * report.screenOffDischargeMah * HOUR_IN_MILLIS
                                         / (batteryCapacityMah * report.screenOffDurationMs)),
                         statColsLength));
             } else {

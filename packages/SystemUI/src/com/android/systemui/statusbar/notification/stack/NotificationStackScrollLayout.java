@@ -538,6 +538,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private NotificationStackScrollLayoutController.TouchHandler mTouchHandler;
     private final ScreenOffAnimationController mScreenOffAnimationController;
     private boolean mShouldUseSplitNotificationShade;
+    private boolean mHasFilteredOutSeenNotifications;
 
     private final ExpandableView.OnHeightChangedListener mOnChildHeightChangedListener =
             new ExpandableView.OnHeightChangedListener() {
@@ -682,6 +683,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     public void setIsRemoteInputActive(boolean isActive) {
         mIsRemoteInputActive = isActive;
         updateFooter();
+    }
+
+    void setHasFilteredOutSeenNotifications(boolean hasFilteredOutSeenNotifications) {
+        mHasFilteredOutSeenNotifications = hasFilteredOutSeenNotifications;
     }
 
     @VisibleForTesting
@@ -3132,7 +3137,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private void updateAnimationState(boolean running, View child) {
         if (child instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-            row.setIconAnimationRunning(running);
+            row.setAnimationRunning(running);
         }
     }
 
@@ -4612,13 +4617,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    void updateEmptyShadeView(
-            boolean visible, boolean areNotificationsHiddenInShade, boolean areSeenNotifsFiltered) {
+    void updateEmptyShadeView(boolean visible, boolean areNotificationsHiddenInShade) {
         mEmptyShadeView.setVisible(visible, mIsExpanded && mAnimationsEnabled);
 
         if (areNotificationsHiddenInShade) {
             updateEmptyShadeView(R.string.dnd_suppressing_shade_text, 0, 0);
-        } else if (areSeenNotifsFiltered) {
+        } else if (mHasFilteredOutSeenNotifications) {
             updateEmptyShadeView(
                     R.string.no_unseen_notif_text,
                     R.string.unlock_to_see_notif_text,
@@ -4657,13 +4661,20 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void updateFooterView(boolean visible, boolean showDismissView, boolean showHistory) {
-        if (mFooterView == null) {
+        if (mFooterView == null || mNotificationStackSizeCalculator == null) {
             return;
         }
         boolean animate = mIsExpanded && mAnimationsEnabled;
         mFooterView.setVisible(visible, animate);
         mFooterView.setSecondaryVisible(showDismissView, animate);
         mFooterView.showHistory(showHistory);
+        if (mHasFilteredOutSeenNotifications) {
+            mFooterView.setFooterLabelTextAndIcon(
+                    R.string.unlock_to_see_notif_text,
+                    R.drawable.ic_friction_lock_closed);
+        } else {
+            mFooterView.setFooterLabelTextAndIcon(0, 0);
+        }
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)

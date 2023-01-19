@@ -31,6 +31,9 @@ import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
+import com.android.internal.app.chooser.TargetInfo;
+
+import com.google.android.collect.Lists;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -70,7 +73,7 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
             AppPredictor appPredictor,
             UserHandle user,
             ChooserActivityLogger chooserActivityLogger) {
-        super(context, intent);
+        super(context, intent, Lists.newArrayList(user));
         mContext = context;
         mIntent = intent;
         mAppPredictor = appPredictor;
@@ -99,13 +102,13 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
     }
 
     @Override
-    float getScore(ComponentName name) {
-        return mComparatorModel.getScore(name);
+    float getScore(TargetInfo targetInfo) {
+        return mComparatorModel.getScore(targetInfo);
     }
 
     @Override
-    void updateModel(ComponentName componentName) {
-        mComparatorModel.notifyOnTargetSelected(componentName);
+    void updateModel(TargetInfo targetInfo) {
+        mComparatorModel.notifyOnTargetSelected(targetInfo);
     }
 
     @Override
@@ -158,9 +161,12 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
     private void setupFallbackModel(List<ResolvedComponentInfo> targets) {
         mResolverRankerService =
                 new ResolverRankerServiceResolverComparator(
-                        mContext, mIntent, mReferrerPackage,
+                        mContext,
+                        mIntent,
+                        mReferrerPackage,
                         () -> mHandler.sendEmptyMessage(RANKER_SERVICE_RESULT),
-                        getChooserActivityLogger());
+                        getChooserActivityLogger(),
+                        mUser);
         mComparatorModel = mModelBuilder.buildFallbackModel(mResolverRankerService);
         mResolverRankerService.compute(targets);
     }
@@ -224,13 +230,13 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
                     }
 
                     @Override
-                    public float getScore(ComponentName componentName) {
-                        return comparator.getScore(componentName);
+                    public float getScore(TargetInfo targetInfo) {
+                        return comparator.getScore(targetInfo);
                     }
 
                     @Override
-                    public void notifyOnTargetSelected(ComponentName componentName) {
-                        comparator.updateModel(componentName);
+                    public void notifyOnTargetSelected(TargetInfo targetInfo) {
+                        comparator.updateModel(targetInfo);
                     }
                 };
         }
@@ -271,8 +277,8 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
         }
 
         @Override
-        public float getScore(ComponentName name) {
-            Integer rank = mTargetRanks.get(name);
+        public float getScore(TargetInfo targetInfo) {
+            Integer rank = mTargetRanks.get(targetInfo.getResolvedComponentName());
             if (rank == null) {
                 Log.w(TAG, "Score requested for unknown component. Did you call compute yet?");
                 return 0f;
@@ -282,13 +288,14 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
         }
 
         @Override
-        public void notifyOnTargetSelected(ComponentName componentName) {
+        public void notifyOnTargetSelected(TargetInfo targetInfo) {
             mAppPredictor.notifyAppTargetEvent(
                     new AppTargetEvent.Builder(
                         new AppTarget.Builder(
-                            new AppTargetId(componentName.toString()),
-                            componentName.getPackageName(), mUser)
-                            .setClassName(componentName.getClassName()).build(),
+                            new AppTargetId(targetInfo.getResolvedComponentName().toString()),
+                                targetInfo.getResolvedComponentName().getPackageName(), mUser)
+                            .setClassName(targetInfo.getResolvedComponentName()
+                                    .getClassName()).build(),
                         ACTION_LAUNCH).build());
         }
     }

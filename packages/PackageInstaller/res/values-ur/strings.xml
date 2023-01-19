@@ -26,6 +26,8 @@
     <string name="install_done" msgid="5987363587661783896">"ایپ انسٹال ہو گئی۔"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"کیا آپ یہ ایپ انسٹال کرنا چاہتے ہیں؟"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"کیا آپ یہ ایپ اپ ڈیٹ کرنا چاہتے ہیں؟"</string>
+    <string name="install_confirm_question_update_owner_changed" msgid="4215696609006069124">"اس ایپس میں اپ ڈیٹس <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g> کے زیر انتظام ہیں۔\n\nاپ ڈیٹ کر کے، آپ اس کے بجائے <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g> سے مستقبل کی اپ ڈیٹس موصول کر سکتے ہیں۔"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="8778026710268011466">"اس ایپس میں اپ ڈیٹس <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g> کے زیر انتظام ہیں۔\n\nآپ یہ اپ ڈیٹ <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g> سے انسٹال کرنا چاہتے ہیں۔"</string>
     <string name="install_failed" msgid="5777824004474125469">"ایپ انسٹال نہیں ہوئی۔"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"پیکج کو انسٹال ہونے سے مسدود کر دیا گیا تھا۔"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ایپ انسٹال نہیں ہوئی کیونکہ پیکج ایک موجودہ پیکیج سے متصادم ہے۔"</string>

@@ -91,6 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Przycięcie dolnej krawędzi o <xliff:g id="PERCENT">%1$d</xliff:g> procent"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Przycięcie lewej krawędzi o <xliff:g id="PERCENT">%1$d</xliff:g> procent"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Przycięcie prawej krawędzi o <xliff:g id="PERCENT">%1$d</xliff:g> procent"</string>
+    <!-- no translation found for screenshot_work_profile_notification (2812417845875653929) -->
+    <skip />
+    <!-- no translation found for screenshot_default_files_app_name (8721579578575161912) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"Nagrywanie ekranu"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Przetwarzam nagrywanie ekranu"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Stałe powiadomienie o sesji rejestrowania zawartości ekranu"</string>
@@ -388,7 +392,7 @@
     <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Podczas udostępniania, nagrywania lub przesyłania treści aplikacja <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ma dostęp do wszystkiego, co jest widoczne na ekranie lub odtwarzane na urządzeniu. Zachowaj ostrożność w przypadku haseł, danych do płatności, wiadomości i innych informacji poufnych."</string>
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Podczas udostępniania, nagrywania lub przesyłania treści aplikacja <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ma dostęp do wszystkiego, co jest w niej wyświetlane lub odtwarzane. Zachowaj ostrożność w przypadku haseł, danych do płatności, wiadomości i innych informacji poufnych."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Dalej"</string>
-    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Udostępnianie i nagrywanie za pomocą aplikacji"</string>
+    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Udostępnianie i nagrywanie aplikacji"</string>
     <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Zezwolić tej aplikacji na udostępnianie lub nagrywanie?"</string>
     <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Podczas udostępniania, nagrywania lub przesyłania treści ta aplikacja ma dostęp do wszystkiego, co jest widoczne na ekranie lub odtwarzane na urządzeniu. Zachowaj ostrożność w przypadku haseł, danych do płatności, wiadomości i innych informacji poufnych."</string>
     <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Podczas udostępniania, nagrywania lub przesyłania treści ta aplikacja ma dostęp do wszystkiego, co jest w niej wyświetlane lub odtwarzane. Zachowaj ostrożność w przypadku haseł, danych do płatności, wiadomości i innych informacji poufnych."</string>
@@ -810,16 +814,15 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Średni"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Mały"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"Duży"</string>
-    <string name="accessibility_magnification_close" msgid="1099965835844673375">"Zamknij"</string>
+    <!-- no translation found for accessibility_magnification_done (263349129937348512) -->
+    <skip />
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Edytuj"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Ustawienia okna powiększania"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Kliknij, aby otworzyć ułatwienia dostępu. Dostosuj lub zmień ten przycisk w Ustawieniach.\n\n"<annotation id="link">"Wyświetl ustawienia"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Przesuń przycisk do krawędzi, aby ukryć go tymczasowo"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Cofnij"</string>
-    <!-- no translation found for accessibility_floating_button_undo_message_label_text (9017658016426242640) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_undo_message_number_text (4909270290725226075) -->
-    <skip />
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> – skrót został usunięty"</string>
+    <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# skrót został usunięty}few{# skróty zostały usunięte}many{# skrótów zostało usuniętych}other{# skrótu zostało usunięte}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Przenieś w lewy górny róg"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Przenieś w prawy górny róg"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Przenieś w lewy dolny róg"</string>
@@ -884,10 +887,12 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Odtwórz utwór <xliff:g id="SONG_NAME">%1$s</xliff:g> w aplikacji <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Cofnij"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Przysuń się bliżej, aby odtwarzać na urządzeniu <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Zbliż do urządzenia <xliff:g id="DEVICENAME">%1$s</xliff:g>, aby na nim odtwarzać"</string>
+    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
+    <skip />
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Odtwarzam na ekranie <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Coś poszło nie tak. Spróbuj ponownie."</string>
-    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <string name="media_transfer_loading" msgid="5544017127027152422">"Wczytuję"</string>
+    <!-- no translation found for media_ttt_default_device_type (4457646436153370169) -->
     <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Nieaktywny, sprawdź aplikację"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nie znaleziono"</string>
@@ -912,6 +917,8 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Głośność"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Głośniki i wyświetlacze"</string>
+    <!-- no translation found for media_output_group_title_suggested_device (4157186235837903826) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Jak działa transmitowanie"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Transmisja"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Osoby w pobliżu ze zgodnymi urządzeniami Bluetooth mogą słuchać transmitowanych przez Ciebie multimediów"</string>
@@ -1053,5 +1060,8 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"* Ekran się wyłączy"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Składane urządzenie jest rozkładane"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Składane urządzenie jest obracane"</string>
-    <string name="stylus_battery_low" msgid="7134370101603167096">"Słaba bateria w rysiku"</string>
+    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
+    <skip />
+    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
+    <skip />
 </resources>

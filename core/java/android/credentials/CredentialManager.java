@@ -82,7 +82,7 @@ public final class CredentialManager {
      * @param executor the callback will take place on this {@link Executor}
      * @param callback the callback invoked when the request succeeds or fails
      */
-    public void executeGetCredential(
+    public void getCredential(
             @NonNull GetCredentialRequest request,
             @NonNull Activity activity,
             @Nullable CancellationSignal cancellationSignal,
@@ -94,7 +94,7 @@ public final class CredentialManager {
         requireNonNull(callback, "callback must not be null");
 
         if (cancellationSignal != null && cancellationSignal.isCanceled()) {
-            Log.w(TAG, "executeGetCredential already canceled");
+            Log.w(TAG, "getCredential already canceled");
             return;
         }
 
@@ -126,7 +126,7 @@ public final class CredentialManager {
      * @param executor the callback will take place on this {@link Executor}
      * @param callback the callback invoked when the request succeeds or fails
      */
-    public void executeCreateCredential(
+    public void createCredential(
             @NonNull CreateCredentialRequest request,
             @NonNull Activity activity,
             @Nullable CancellationSignal cancellationSignal,
@@ -139,7 +139,7 @@ public final class CredentialManager {
         requireNonNull(callback, "callback must not be null");
 
         if (cancellationSignal != null && cancellationSignal.isCanceled()) {
-            Log.w(TAG, "executeCreateCredential already canceled");
+            Log.w(TAG, "createCredential already canceled");
             return;
         }
 
@@ -185,7 +185,7 @@ public final class CredentialManager {
         requireNonNull(callback, "callback must not be null");
 
         if (cancellationSignal != null && cancellationSignal.isCanceled()) {
-            Log.w(TAG, "executeCreateCredential already canceled");
+            Log.w(TAG, "clearCredentialState already canceled");
             return;
         }
 

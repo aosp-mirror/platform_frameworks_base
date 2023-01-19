@@ -41,6 +41,7 @@ data class GetCredentialUiState(
   val currentScreenState: GetScreenState = toGetScreenState(providerInfoList),
   val providerDisplayInfo: ProviderDisplayInfo = toProviderDisplayInfo(providerInfoList),
   val selectedEntry: EntryInfo? = null,
+  val activeEntry: EntryInfo? = toActiveEntry(providerDisplayInfo),
   val hidden: Boolean = false,
   val providerActivityPending: Boolean = false,
   val isNoAccount: Boolean = false,
@@ -69,6 +70,17 @@ class GetCredentialViewModel(private val credManRepo: CredentialManagerRepo) : V
       )
     } else {
       credManRepo.onOptionSelected(entry.providerId, entry.entryKey, entry.entrySubkey)
+      dialogResult.tryEmit(DialogResult(ResultState.COMPLETE))
+    }
+  }
+
+  fun onConfirmEntrySelected() {
+    val activeEntry = uiState.activeEntry
+    if (activeEntry != null) {
+      onEntrySelected(activeEntry)
+    } else {
+      Log.w("Account Selector",
+        "Illegal state: confirm is pressed but activeEntry isn't set.")
       dialogResult.tryEmit(DialogResult(ResultState.COMPLETE))
     }
   }
@@ -196,6 +208,26 @@ private fun toProviderDisplayInfo(
     authenticationEntryList = authenticationEntryList,
     remoteEntry = remoteEntryList.getOrNull(0),
   )
+}
+
+private fun toActiveEntry(
+  providerDisplayInfo: ProviderDisplayInfo,
+): EntryInfo? {
+  val sortedUserNameToCredentialEntryList =
+    providerDisplayInfo.sortedUserNameToCredentialEntryList
+  val authenticationEntryList = providerDisplayInfo.authenticationEntryList
+  var activeEntry: EntryInfo? = null
+  if (sortedUserNameToCredentialEntryList
+      .size == 1 && authenticationEntryList.isEmpty()
+  ) {
+    activeEntry = sortedUserNameToCredentialEntryList.first().sortedCredentialEntryList.first()
+  } else if (
+    sortedUserNameToCredentialEntryList
+      .isEmpty() && authenticationEntryList.size == 1
+  ) {
+    activeEntry = authenticationEntryList.first()
+  }
+  return activeEntry
 }
 
 private fun toGetScreenState(

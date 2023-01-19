@@ -62,12 +62,19 @@ public final class DumpableDumperRule implements TestRule {
         };
     }
 
-    private void dumpOnFailure(String testName) throws IOException {
+    /**
+     * Logs all dumpables.
+     */
+    public void dump(String reason) {
         if (mDumpables.isEmpty()) {
             return;
         }
-        Log.w(TAG, "Dumping " + mDumpables.size() + " dumpables on failure of " + testName);
+        Log.w(TAG, "Dumping " + mDumpables.size() + " dumpable(s). Reason: " + reason);
         mDumpables.forEach(d -> logDumpable(d));
+    }
+
+    private void dumpOnFailure(String testName) throws IOException {
+        dump("failure of " + testName);
     }
 
     private void logDumpable(Dumpable dumpable) {

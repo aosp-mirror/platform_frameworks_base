@@ -97,14 +97,18 @@ public final class PublishAttributes implements Parcelable {
     }
 
     /**
+     * Get the current publication state when the publishing state has changed or
+     * the publishing operation has done.
      * @return The current publication state. See {@link RcsUceAdapter.PublishState}.
      */
-    public int getPublishState() {
+    public @PublishState int getPublishState() {
         return mPublishState;
     }
 
     /**
-     * @return The list of the {@link RcsContactPresenceTuple} sent to the server.
+     * Get the presence tuples from the PIDF on which the publishing was successful.
+     * @return The list of the {@link RcsContactPresenceTuple} sent to the server. If publish is
+     *          not successful yet, the value is empty.
      */
     public @NonNull List<RcsContactPresenceTuple> getPresenceTuples() {
         if (mPresenceTuples == null) {
@@ -114,7 +118,9 @@ public final class PublishAttributes implements Parcelable {
     }
 
     /**
-     * @return The {@link SipDetails} received in response.
+     * Get the SipDetails set in ImsService.
+     * @return The {@link SipDetails} received in response. This value may be null if
+     *          the device doesn't support the collection of this information.
      */
     public @Nullable SipDetails getSipDetails() {
         return mSipDetails;

@@ -23,4 +23,6 @@
     <string name="app_permission_summary_allowed" msgid="6115213465364138103">"允許"</string>
     <string name="app_permission_summary_not_allowed" msgid="58396132188553920">"不允許"</string>
     <string name="version_text" msgid="4001669804596458577">"版本 <xliff:g id="VERSION_NUM">%1$s</xliff:g>"</string>
+    <!-- no translation found for cloned_app_info_label (1765651167024478391) -->
+    <skip />
 </resources>

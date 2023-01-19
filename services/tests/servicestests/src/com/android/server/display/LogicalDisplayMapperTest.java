@@ -691,6 +691,7 @@ public class LogicalDisplayMapperTest {
         // 2) Mark the displays as STATE_OFF so that it can continue with transition
         // 3) Send DISPLAY_DEVICE_EVENT_CHANGE to inform the mapper of the new display state
         // 4) Dispatch handler events.
+        mLogicalDisplayMapper.onBootCompleted();
         mLogicalDisplayMapper.setDeviceStateLocked(0, false);
         mDisplayDeviceRepo.onDisplayDeviceEvent(device3, DISPLAY_DEVICE_EVENT_CHANGED);
         advanceTime(1000);

@@ -218,17 +218,19 @@ class BackNavigationController {
             // - We don't have any ActivityRecord or Task to animate.
             // - The IME is opened, and we just need to close it.
             // - The home activity is the focused activity.
+            // - The current activity will do shared element transition when exiting.
             if (backType == BackNavigationInfo.TYPE_CALLBACK
                     || currentActivity == null
                     || currentTask == null
-                    || currentActivity.isActivityTypeHome()) {
+                    || currentActivity.isActivityTypeHome()
+                    || currentActivity.mHasSceneTransition) {
                 infoBuilder.setType(BackNavigationInfo.TYPE_CALLBACK);
                 final WindowState finalFocusedWindow = window;
                 infoBuilder.setOnBackNavigationDone(new RemoteCallback(result ->
                         onBackNavigationDone(result, finalFocusedWindow,
                                 BackNavigationInfo.TYPE_CALLBACK)));
-                mLastBackType = backType;
-                return infoBuilder.setType(backType).build();
+                mLastBackType = BackNavigationInfo.TYPE_CALLBACK;
+                return infoBuilder.build();
             }
 
             mBackAnimationInProgress = true;

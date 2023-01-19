@@ -26,6 +26,10 @@
     <string name="install_done" msgid="5987363587661783896">"App geïnstalleerd."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Wil je deze app installeren?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Wil je deze app updaten?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"App niet geïnstalleerd."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"De installatie van het pakket is geblokkeerd."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"App die niet is geïnstalleerd als pakket conflicteert met een bestaand pakket."</string>

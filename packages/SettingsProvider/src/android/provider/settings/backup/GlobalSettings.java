@@ -39,7 +39,7 @@ public class GlobalSettings {
      */
     public static final String[] SETTINGS_TO_BACKUP = {
         Settings.Global.APPLY_RAMPING_RINGER,
-        Settings.Global.BUGREPORT_IN_POWER_MENU,
+        Settings.Global.BUGREPORT_IN_POWER_MENU,                        // moved to secure
         Settings.Global.STAY_ON_WHILE_PLUGGED_IN,
         Settings.Global.APP_AUTO_RESTRICTION_ENABLED,
         Settings.Global.AUTO_TIME,
@@ -70,8 +70,8 @@ public class GlobalSettings {
         Settings.Global.ZEN_DURATION,
         Settings.Global.CHARGING_VIBRATION_ENABLED,
         Settings.Global.AWARE_ALLOWED,
-        Settings.Global.CUSTOM_BUGREPORT_HANDLER_APP,
-        Settings.Global.CUSTOM_BUGREPORT_HANDLER_USER,
+        Settings.Global.CUSTOM_BUGREPORT_HANDLER_APP,                   // moved to secure
+        Settings.Global.CUSTOM_BUGREPORT_HANDLER_USER,                  // moved to secure
         Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
         Settings.Global.USER_DISABLED_HDR_FORMATS,
         Settings.Global.ARE_USER_DISABLED_HDR_FORMATS_ALLOWED,

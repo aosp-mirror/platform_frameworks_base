@@ -87,7 +87,6 @@ import android.os.IBinder;
 import android.os.IInterface;
 import android.os.IRemoteCallback;
 import android.os.ParcelFileDescriptor;
-import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -2169,12 +2168,14 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     @Override
     public ParcelFileDescriptor getWallpaper(String callingPkg, IWallpaperManagerCallback cb,
             final int which, Bundle outParams, int wallpaperUserId) {
-        return getWallpaperWithFeature(callingPkg, null, cb, which, outParams, wallpaperUserId);
+        return getWallpaperWithFeature(callingPkg, null, cb, which, outParams,
+                wallpaperUserId, /* getCropped= */ true);
     }
 
     @Override
     public ParcelFileDescriptor getWallpaperWithFeature(String callingPkg, String callingFeatureId,
-            IWallpaperManagerCallback cb, final int which, Bundle outParams, int wallpaperUserId) {
+            IWallpaperManagerCallback cb, final int which, Bundle outParams, int wallpaperUserId,
+            boolean getCropped) {
         final boolean hasPrivilege = hasPermission(READ_WALLPAPER_INTERNAL);
         if (!hasPrivilege) {
             mContext.getSystemService(StorageManager.class).checkPermissionReadImages(true,
@@ -2209,10 +2210,14 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 if (cb != null) {
                     wallpaper.callbacks.register(cb);
                 }
-                if (!wallpaper.cropFile.exists()) {
+
+                File fileToReturn = getCropped ? wallpaper.cropFile : wallpaper.wallpaperFile;
+
+                if (!fileToReturn.exists()) {
                     return null;
                 }
-                return ParcelFileDescriptor.open(wallpaper.cropFile, MODE_READ_ONLY);
+
+                return ParcelFileDescriptor.open(fileToReturn, MODE_READ_ONLY);
             } catch (FileNotFoundException e) {
                 /* Shouldn't happen as we check to see if the file exists */
                 Slog.w(TAG, "Error getting wallpaper", e);
@@ -2247,6 +2252,25 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
 
         return null;
+    }
+
+    @Override
+    public ParcelFileDescriptor getWallpaperInfoFile(int userId) {
+        synchronized (mLock) {
+            try {
+                File file = new File(getWallpaperDir(userId), WALLPAPER_INFO);
+
+                if (!file.exists()) {
+                    return null;
+                }
+
+                return ParcelFileDescriptor.open(file, MODE_READ_ONLY);
+            } catch (FileNotFoundException e) {
+                /* Shouldn't happen as we check to see if the file exists */
+                Slog.w(TAG, "Error getting wallpaper info file", e);
+            }
+            return null;
+        }
     }
 
     @Override
@@ -3201,10 +3225,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
     @Override
     public boolean isWallpaperBackupEligible(int which, int userId) {
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException("Only the system may call isWallpaperBackupEligible");
-        }
-
         WallpaperData wallpaper = (which == FLAG_LOCK)
                 ? mLockWallpaperMap.get(userId)
                 : mWallpaperMap.get(userId);

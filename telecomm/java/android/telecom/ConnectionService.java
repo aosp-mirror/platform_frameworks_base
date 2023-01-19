@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -25,6 +26,7 @@ import android.annotation.TestApi;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -2018,6 +2020,16 @@ public abstract class ConnectionService extends Service {
             String id = mIdByConnection.get(c);
             if (id != null) {
                 mAdapter.requestCallEndpointChange(id, endpoint, executor, callback);
+            }
+        }
+
+        @Override
+        public void onQueryLocation(Connection c, long timeoutMillis, @NonNull String provider,
+                @NonNull @CallbackExecutor Executor executor,
+                @NonNull OutcomeReceiver<Location, QueryLocationException> callback) {
+            String id = mIdByConnection.get(c);
+            if (id != null) {
+                mAdapter.queryLocation(id, timeoutMillis, provider, executor, callback);
             }
         }
     };

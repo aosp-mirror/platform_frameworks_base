@@ -26,6 +26,8 @@
     <string name="install_done" msgid="5987363587661783896">"App instalada."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Instalar esta app?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Pretende atualizar esta app?"</string>
+    <string name="install_confirm_question_update_owner_changed" msgid="4215696609006069124">"Atualmente, as atualizações desta app são geridas por <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g>.\n\nAo atualizar, vai obter atualizações futuras de <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g>."</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="8778026710268011466">"Atualmente, as atualizações desta app são geridas por <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g>.\n\nQuer instalar esta atualização de <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g>?"</string>
     <string name="install_failed" msgid="5777824004474125469">"Aplicação não instalada."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Foi bloqueada a instalação do pacote."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"A app não foi instalada porque o pacote entra em conflito com um pacote existente."</string>

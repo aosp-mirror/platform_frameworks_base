@@ -26,6 +26,10 @@
     <string name="install_done" msgid="5987363587661783896">"Колдонмо орнотулду."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Бул колдонмону орнотоюн деп жатасызбы?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Бул колдонмону жаңыртайын деп жатасызбы?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"Колдонмо орнотулган жок."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Топтомду орнотууга болбойт."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Башка топтом менен дал келбегендиктен колдонмо орнотулган жок."</string>
@@ -93,7 +97,7 @@
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Сыналгыңыз жана жеке дайын-даректериңиз белгисиз колдонмолордон зыян тартып калышы мүмкүн. Бул колдонмону орнотуп, аны пайдалануудан улам сыналгыңызга кандайдыр бир зыян келтирилсе же дайын-даректериңизды жоготуп алсаңыз, өзүңүз жооптуу болосуз."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> клону"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Улантуу"</string>
-    <string name="external_sources_settings" msgid="4046964413071713807">"Жөндөөлөр"</string>
+    <string name="external_sources_settings" msgid="4046964413071713807">"Параметрлер"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Тагынма колдонмолорду орнотуу/чыгаруу"</string>
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Колдонмолорду орноткучтун билдирмелери"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"Ийгиликтүү орнотулду"</string>
