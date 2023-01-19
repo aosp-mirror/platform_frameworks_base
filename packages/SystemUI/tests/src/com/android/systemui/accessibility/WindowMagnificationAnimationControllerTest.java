@@ -49,6 +49,7 @@ import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.After;
 import org.junit.Before;
@@ -97,6 +98,8 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
     IRemoteMagnificationAnimationCallback mAnimationCallback2;
     @Mock(answer = Answers.RETURNS_SELF)
     SysUiState mSysUiState;
+    @Mock
+    SecureSettings mSecureSettings;
     private SpyWindowMagnificationController mController;
     private WindowMagnificationController mSpyController;
     private WindowMagnificationAnimationController mWindowMagnificationAnimationController;
@@ -121,7 +124,7 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         mController = new SpyWindowMagnificationController(mContext, mHandler,
                 mWindowMagnificationAnimationController,
                 mSfVsyncFrameProvider, null, new SurfaceControl.Transaction(),
-                mWindowMagnifierCallback, mSysUiState);
+                mWindowMagnifierCallback, mSysUiState, mSecureSettings);
         mSpyController = mController.getSpyController();
     }
 
@@ -761,7 +764,8 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
                 WindowMagnificationAnimationController animationController,
                 SfVsyncFrameCallbackProvider sfVsyncFrameProvider,
                 MirrorWindowControl mirrorWindowControl, SurfaceControl.Transaction transaction,
-                WindowMagnifierCallback callback, SysUiState sysUiState) {
+                WindowMagnifierCallback callback, SysUiState sysUiState,
+                SecureSettings secureSettings) {
             super(
                     context,
                     handler,
@@ -771,7 +775,8 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
                     transaction,
                     callback,
                     sysUiState,
-                    WindowManagerGlobal::getWindowSession);
+                    WindowManagerGlobal::getWindowSession,
+                    secureSettings);
             mSpyController = Mockito.mock(WindowMagnificationController.class);
         }
 

@@ -58,6 +58,7 @@ import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 import com.android.systemui.R;
+import com.android.systemui.util.settings.SecureSettings;
 import com.android.wm.shell.bubbles.DismissView;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 
@@ -87,6 +88,7 @@ class MenuViewLayer extends FrameLayout implements
     private final AccessibilityManager mAccessibilityManager;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final IAccessibilityFloatingMenu mFloatingMenu;
+    private final SecureSettings mSecureSettings;
     private final DismissAnimationController mDismissAnimationController;
     private final MenuViewModel mMenuViewModel;
     private final Observer<Boolean> mDockTooltipObserver =
@@ -126,7 +128,7 @@ class MenuViewLayer extends FrameLayout implements
     final Runnable mDismissMenuAction = new Runnable() {
         @Override
         public void run() {
-            Settings.Secure.putStringForUser(getContext().getContentResolver(),
+            mSecureSettings.putStringForUser(
                     Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, /* value= */ "",
                     UserHandle.USER_CURRENT);
 
@@ -147,7 +149,8 @@ class MenuViewLayer extends FrameLayout implements
     };
 
     MenuViewLayer(@NonNull Context context, WindowManager windowManager,
-            AccessibilityManager accessibilityManager, IAccessibilityFloatingMenu floatingMenu) {
+            AccessibilityManager accessibilityManager, IAccessibilityFloatingMenu floatingMenu,
+            SecureSettings secureSettings) {
         super(context);
 
         // Simplifies the translation positioning and animations
@@ -156,8 +159,9 @@ class MenuViewLayer extends FrameLayout implements
         mWindowManager = windowManager;
         mAccessibilityManager = accessibilityManager;
         mFloatingMenu = floatingMenu;
+        mSecureSettings = secureSettings;
 
-        mMenuViewModel = new MenuViewModel(context, accessibilityManager);
+        mMenuViewModel = new MenuViewModel(context, accessibilityManager, secureSettings);
         mMenuViewAppearance = new MenuViewAppearance(context, windowManager);
         mMenuView = new MenuView(context, mMenuViewModel, mMenuViewAppearance);
         mMenuAnimationController = mMenuView.getMenuAnimationController();

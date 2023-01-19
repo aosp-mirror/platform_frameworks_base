@@ -37,11 +37,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.Sensor;
 import android.hardware.display.AmbientDisplayConfiguration;
-import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -122,11 +122,13 @@ public class DozeSensorsTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mTestableLooper = TestableLooper.get(this);
+        when(mUserTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
         when(mAmbientDisplayConfiguration.tapSensorTypeMapping())
                 .thenReturn(new String[]{"tapSensor"});
         when(mAmbientDisplayConfiguration.getWakeLockScreenDebounce()).thenReturn(5000L);
         when(mAmbientDisplayConfiguration.alwaysOnEnabled(anyInt())).thenReturn(true);
-        when(mAmbientDisplayConfiguration.enabled(UserHandle.USER_CURRENT)).thenReturn(true);
+        when(mAmbientDisplayConfiguration.enabled(ActivityManager.getCurrentUser())).thenReturn(
+                true);
         doAnswer(invocation -> {
             ((Runnable) invocation.getArgument(0)).run();
             return null;

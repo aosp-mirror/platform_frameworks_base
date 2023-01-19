@@ -97,6 +97,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
+import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.SystemClock;
 
 import java.io.PrintWriter;
@@ -166,6 +167,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @Nullable private final TouchProcessor mTouchProcessor;
     @NonNull private final SessionTracker mSessionTracker;
     @NonNull private final AlternateBouncerInteractor mAlternateBouncerInteractor;
+    @NonNull private final SecureSettings mSecureSettings;
 
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
@@ -261,7 +263,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                             mLockscreenShadeTransitionController, mConfigurationController,
                             mKeyguardStateController,
                             mUnlockedScreenOffAnimationController,
-                            mUdfpsDisplayMode, requestId, reason, callback,
+                            mUdfpsDisplayMode, mSecureSettings, requestId, reason, callback,
                             (view, event, fromUdfpsView) -> onTouch(requestId, event,
                                     fromUdfpsView), mActivityLaunchAnimator, mFeatureFlags,
                             mPrimaryBouncerInteractor, mAlternateBouncerInteractor)));
@@ -834,7 +836,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             @NonNull PrimaryBouncerInteractor primaryBouncerInteractor,
             @NonNull SinglePointerTouchProcessor singlePointerTouchProcessor,
             @NonNull SessionTracker sessionTracker,
-            @NonNull AlternateBouncerInteractor alternateBouncerInteractor) {
+            @NonNull AlternateBouncerInteractor alternateBouncerInteractor,
+            @NonNull SecureSettings secureSettings) {
         mContext = context;
         mExecution = execution;
         mVibrator = vibrator;
@@ -875,6 +878,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         mBiometricExecutor = biometricsExecutor;
         mPrimaryBouncerInteractor = primaryBouncerInteractor;
         mAlternateBouncerInteractor = alternateBouncerInteractor;
+        mSecureSettings = secureSettings;
 
         mTouchProcessor = mFeatureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)
                 ? singlePointerTouchProcessor : null;
