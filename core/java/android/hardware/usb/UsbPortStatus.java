@@ -311,7 +311,7 @@ public final class UsbPortStatus implements Parcelable {
 
     /**
      * Indicates that the Type-C plug orientation cannot be
-     * determined.
+     * determined because the connected state of the device is unknown.
      */
     public static final int PLUG_STATE_UNKNOWN = 0;
 
@@ -600,13 +600,8 @@ public final class UsbPortStatus implements Parcelable {
     }
 
     /**
-     * Returns the orientation state of the attached cable/adapter.
+     * Returns the plug state of the attached cable/adapter.
      *
-     * @return one of {@link #PLUG_STATE_UNKNOWN},
-     *                {@link #PLUG_STATE_UNPLUGGED},
-     *                {@link #PLUG_STATE_PLUGGED_ORIENTATION_UNKNOWN},
-     *                {@link #PLUG_STATE_PLUGGED_ORIENTATION_NORMAL},
-     *                {@link #PLUG_STATE_PLUGGED_ORIENTATION_FLIPPED},
      */
     public @PlugState int getPlugState() {
         return mPlugState;
