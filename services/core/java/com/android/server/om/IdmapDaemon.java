@@ -274,20 +274,16 @@ class IdmapDaemon {
             }
         }
 
-        final long endMillis = SystemClock.elapsedRealtime() + SERVICE_CONNECT_TIMEOUT_MS;
-        while (SystemClock.elapsedRealtime() <= endMillis) {
+        final long endMillis = SystemClock.uptimeMillis() + SERVICE_CONNECT_TIMEOUT_MS;
+        do {
             final IBinder binder = ServiceManager.getService(IDMAP_SERVICE);
             if (binder != null) {
                 binder.linkToDeath(
                         () -> Slog.w(TAG, String.format("service '%s' died", IDMAP_SERVICE)), 0);
                 return binder;
             }
-
-            try {
-                Thread.sleep(SERVICE_CONNECT_INTERVAL_SLEEP_MS);
-            } catch (InterruptedException ignored) {
-            }
-        }
+            SystemClock.sleep(SERVICE_CONNECT_INTERVAL_SLEEP_MS);
+        } while (SystemClock.uptimeMillis() <= endMillis);
 
         throw new TimeoutException(
             String.format("Failed to connect to '%s' in %d milliseconds", IDMAP_SERVICE,
