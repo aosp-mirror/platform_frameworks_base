@@ -185,6 +185,7 @@ constructor(
                     }
                 },
             vibrationEffect = chipStateSender.transferStatus.vibrationEffect,
+            allowSwipeToDismiss = true,
             windowTitle = MediaTttUtils.WINDOW_TITLE_SENDER,
             wakeReason = MediaTttUtils.WAKE_REASON_SENDER,
             timeoutMs = chipStateSender.timeout,
