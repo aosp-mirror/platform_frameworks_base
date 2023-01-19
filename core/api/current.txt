@@ -52816,10 +52816,10 @@ package android.view {
     method public void onRestrictedCaptionAreaChanged(android.graphics.Rect);
   }
 
-  public final class WindowAnimationFrameStats extends android.view.FrameStats implements android.os.Parcelable {
-    method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.view.WindowAnimationFrameStats> CREATOR;
+  @Deprecated public final class WindowAnimationFrameStats extends android.view.FrameStats implements android.os.Parcelable {
+    method @Deprecated public int describeContents();
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.view.WindowAnimationFrameStats> CREATOR;
   }
 
   public final class WindowContentFrameStats extends android.view.FrameStats implements android.os.Parcelable {
