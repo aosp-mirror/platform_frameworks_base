@@ -84,8 +84,6 @@ public final class DisplayPowerControllerTest {
     @Mock
     private DisplayDevice mDisplayDeviceMock;
     @Mock
-    private HighBrightnessModeMetadata mHighBrightnessModeMetadataMock;
-    @Mock
     private BrightnessTracker mBrightnessTrackerMock;
     @Mock
     private BrightnessSetting mBrightnessSettingMock;
@@ -153,7 +151,7 @@ public final class DisplayPowerControllerTest {
                 mContextSpy, mInjector, mDisplayPowerCallbacksMock, mHandler,
                 mSensorManagerMock, mDisplayBlankerMock, mLogicalDisplayMock,
                 mBrightnessTrackerMock, mBrightnessSettingMock, () -> {
-        }, mHighBrightnessModeMetadataMock);
+        });
 
         when(mDisplayPowerStateMock.getScreenState()).thenReturn(Display.STATE_ON);
         // send a display power request
