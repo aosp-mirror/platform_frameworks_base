@@ -292,7 +292,7 @@ public class InstallLocationUtils {
 
         // For new installations of a predefined size, check property to let it through
         // regardless of the actual free space.
-        if (bestCandidate != null && Integer.MAX_VALUE == params.sizeBytes
+        if (!volumePaths.isEmpty() && Integer.MAX_VALUE == params.sizeBytes
                 && SystemProperties.getBoolean("debug.pm.install_skip_size_check_for_maxint",
                 false)) {
             return bestCandidate;
