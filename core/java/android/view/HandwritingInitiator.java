@@ -19,6 +19,7 @@ package android.view;
 import android.annotation.IdRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
 import android.graphics.Rect;
 import android.view.inputmethod.InputMethodManager;
 
@@ -76,6 +77,15 @@ public class HandwritingInitiator {
      */
     private int mConnectionCount = 0;
     private final InputMethodManager mImm;
+
+    /**
+     * The handwrite-able View that is currently the target of a hovering stylus pointer. This is
+     * used to help determine whether the handwriting PointerIcon should be shown in
+     * {@link #onResolvePointerIcon(Context, MotionEvent)} so that we can reduce the number of calls
+     * to {@link #findBestCandidateView(float, float)}.
+     */
+    @Nullable
+    private View mCachedHoverTarget = null;
 
     @VisibleForTesting
     public HandwritingInitiator(@NonNull ViewConfiguration viewConfiguration,
@@ -308,6 +318,48 @@ public class HandwritingInitiator {
     }
 
     /**
+     * Returns the pointer icon for the motion event, or null if it doesn't specify the icon.
+     * This gives HandwritingInitiator a chance to show the stylus handwriting icon over a
+     * handwrite-able area.
+     */
+    public PointerIcon onResolvePointerIcon(Context context, MotionEvent event) {
+        if (shouldShowHandwritingPointerIcon(event)) {
+            return PointerIcon.getSystemIcon(context, PointerIcon.TYPE_HANDWRITING);
+        }
+        return null;
+    }
+
+    private boolean shouldShowHandwritingPointerIcon(MotionEvent event) {
+        if (!event.isStylusPointer() || !event.isHoverEvent()) {
+            return false;
+        }
+
+        if (event.getActionMasked() == MotionEvent.ACTION_HOVER_ENTER
+                || event.getActionMasked() == MotionEvent.ACTION_HOVER_MOVE) {
+            final float hoverX = event.getX(event.getActionIndex());
+            final float hoverY = event.getY(event.getActionIndex());
+
+            if (mCachedHoverTarget != null) {
+                final Rect handwritingArea = getViewHandwritingArea(mCachedHoverTarget);
+                if (isInHandwritingArea(handwritingArea, hoverX, hoverY, mCachedHoverTarget)
+                        && shouldTriggerStylusHandwritingForView(mCachedHoverTarget)) {
+                    return true;
+                }
+            }
+
+            final View candidateView = findBestCandidateView(hoverX, hoverY);
+
+            if (candidateView != null) {
+                mCachedHoverTarget = candidateView;
+                return true;
+            }
+        }
+
+        mCachedHoverTarget = null;
+        return false;
+    }
+
+    /**
      * Given the location of the stylus event, return the best candidate view to initialize
      * handwriting mode.
      *
@@ -437,7 +489,7 @@ public class HandwritingInitiator {
      * Return true if the (x, y) is inside by the given {@link Rect} with the View's
      * handwriting bounds with offsets applied.
      */
-    private boolean isInHandwritingArea(@Nullable Rect handwritingArea,
+    private static boolean isInHandwritingArea(@Nullable Rect handwritingArea,
             float x, float y, View view) {
         if (handwritingArea == null) return false;
 

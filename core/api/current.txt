@@ -19291,6 +19291,7 @@ package android.hardware.input {
     method @Nullable public android.view.InputDevice getInputDevice(int);
     method public int[] getInputDeviceIds();
     method @FloatRange(from=0, to=1) public float getMaximumObscuringOpacityForTouch();
+    method public boolean isStylusPointerIconEnabled();
     method public void registerInputDeviceListener(android.hardware.input.InputManager.InputDeviceListener, android.os.Handler);
     method public void unregisterInputDeviceListener(android.hardware.input.InputManager.InputDeviceListener);
     method @Nullable public android.view.VerifiedInputEvent verifyInputEvent(@NonNull android.view.InputEvent);
@@ -50812,6 +50813,7 @@ package android.view {
     field public static final int TYPE_GRAB = 1020; // 0x3fc
     field public static final int TYPE_GRABBING = 1021; // 0x3fd
     field public static final int TYPE_HAND = 1002; // 0x3ea
+    field public static final int TYPE_HANDWRITING = 1022; // 0x3fe
     field public static final int TYPE_HELP = 1003; // 0x3eb
     field public static final int TYPE_HORIZONTAL_DOUBLE_ARROW = 1014; // 0x3f6
     field public static final int TYPE_NO_DROP = 1012; // 0x3f4

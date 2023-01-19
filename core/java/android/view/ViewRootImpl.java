@@ -6836,7 +6836,13 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         private void maybeUpdatePointerIcon(MotionEvent event) {
-            if (event.getPointerCount() == 1 && event.isFromSource(InputDevice.SOURCE_MOUSE)) {
+            if (event.getPointerCount() != 1) {
+                return;
+            }
+            final boolean needsStylusPointerIcon =
+                    InputManager.getInstance().isStylusPointerIconEnabled()
+                            && event.isStylusPointer();
+            if (needsStylusPointerIcon || event.isFromSource(InputDevice.SOURCE_MOUSE)) {
                 if (event.getActionMasked() == MotionEvent.ACTION_HOVER_ENTER
                         || event.getActionMasked() == MotionEvent.ACTION_HOVER_EXIT) {
                     // Other apps or the window manager may change the icon type outside of
@@ -6904,7 +6910,17 @@ public final class ViewRootImpl implements ViewParent,
             Slog.d(mTag, "updatePointerIcon called with position out of bounds");
             return false;
         }
-        final PointerIcon pointerIcon = mView.onResolvePointerIcon(event, pointerIndex);
+
+        PointerIcon pointerIcon = null;
+
+        if (event.isStylusPointer() && InputManager.getInstance().isStylusPointerIconEnabled()) {
+            pointerIcon = mHandwritingInitiator.onResolvePointerIcon(mContext, event);
+        }
+
+        if (pointerIcon == null) {
+            pointerIcon = mView.onResolvePointerIcon(event, pointerIndex);
+        }
+
         final int pointerType = (pointerIcon != null) ?
                 pointerIcon.getType() : PointerIcon.TYPE_DEFAULT;
 

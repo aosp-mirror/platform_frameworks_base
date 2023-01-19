@@ -5943,6 +5943,10 @@
          When this resource is empty, that button will not be shown. -->
     <string name="config_supervisedUserCreationPackage" translatable="false"></string>
 
+    <!-- Flag indicating whether the show Stylus pointer icon.
+     If set, a pointer icon will be shown over the location of a stylus pointer.-->
+    <bool name="config_enableStylusPointerIcon">false</bool>
+
     <!-- Determines whether SafetyCenter feature is enabled. -->
     <bool name="config_enableSafetyCenter">true</bool>
 

@@ -102,6 +102,8 @@ public final class InputManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final IInputManager mIm;
 
+    private final boolean mIsStylusPointerIconEnabled;
+
     // Guarded by mInputDevicesLock
     private final Object mInputDevicesLock = new Object();
     private SparseArray<InputDevice> mInputDevices;
@@ -323,6 +325,15 @@ public final class InputManager {
             sVelocityTrackerStrategy = mIm.getVelocityTrackerStrategy();
         } catch (RemoteException ex) {
             Log.w(TAG, "Could not get VelocityTracker strategy: " + ex);
+        }
+
+        // TODO(b/266013036): Pass a Context into InputManager constructor.
+        final Context context = ActivityThread.currentApplication();
+        if (context != null) {
+            mIsStylusPointerIconEnabled = context.getResources()
+                    .getBoolean(com.android.internal.R.bool.config_enableStylusPointerIcon);
+        } else {
+            mIsStylusPointerIconEnabled = false;
         }
     }
 
@@ -1382,7 +1393,7 @@ public final class InputManager {
      * Changes the mouse pointer's icon shape into the specified id.
      *
      * @param iconId The id of the pointer graphic, as a value between
-     * {@link PointerIcon.TYPE_ARROW} and {@link PointerIcon.TYPE_GRABBING}.
+     * {@link PointerIcon.TYPE_ARROW} and {@link PointerIcon.TYPE_HANDWRITING}.
      *
      * @hide
      */
@@ -1402,6 +1413,16 @@ public final class InputManager {
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Check if showing a {@link android.view.PointerIcon} for styluses is enabled.
+     *
+     * @return true if a pointer icon will be shown over the location of a
+     * stylus pointer, false if there is no pointer icon shown for styluses.
+     */
+    public boolean isStylusPointerIconEnabled() {
+        return mIsStylusPointerIconEnabled;
     }
 
     /**

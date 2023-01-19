@@ -3299,6 +3299,8 @@
             <enum name="grab" value="1020" />
             <!-- Pointer icon of a hand sign while grabbing something. -->
             <enum name="grabbing" value="1021" />
+            <!-- Pointer icon indicating handwriting. -->
+            <enum name="handwriting" value="1022"/>
         </attr>
 
         <!-- Whether this view has elements that may overlap when drawn. See
@@ -9307,6 +9309,8 @@
         <attr name="pointerIconGrab" format="reference"/>
         <!-- Reference to a pointer drawable with STYLE_GRABBING. -->
         <attr name="pointerIconGrabbing" format="reference"/>
+        <!-- Reference to a pointer drawable with HANDWRITING. -->
+        <attr name="pointerIconHandwriting" format="reference"/>
     </declare-styleable>
 
     <declare-styleable name="PointerIcon">
