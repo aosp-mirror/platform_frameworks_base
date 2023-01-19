@@ -39,5 +39,15 @@ oneway interface IUdfpsHbmListener {
      *        {@link android.view.Display#getDisplayId()}.
      */
     void onHbmDisabled(int displayId);
+
+    /**
+     * To avoid delay in switching refresh rate when activating LHBM, allow screens to request
+     * higher refersh rate if auth is possible on particular screen
+     *
+     * @param displayId The displayId for which the refresh rate should be unset. See
+     *        {@link android.view.Display#getDisplayId()}.
+     * @param isPossible If authentication is possible on particualr screen
+     */
+    void onAuthenticationPossible(int displayId, boolean isPossible);
 }
 
