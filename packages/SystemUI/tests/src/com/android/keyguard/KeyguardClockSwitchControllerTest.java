@@ -29,7 +29,6 @@ import static org.mockito.Mockito.when;
 
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.net.Uri;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
@@ -275,7 +274,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         ArgumentCaptor<ContentObserver> observerCaptor =
                 ArgumentCaptor.forClass(ContentObserver.class);
         mController.init();
-        verify(mSecureSettings).registerContentObserverForUser(any(Uri.class),
+        verify(mSecureSettings).registerContentObserverForUser(any(String.class),
                 anyBoolean(), observerCaptor.capture(), eq(UserHandle.USER_ALL));
         ContentObserver observer = observerCaptor.getValue();
         mExecutor.runAllReady();
