@@ -16,11 +16,14 @@
 
 package com.android.systemui.settings
 
+import android.app.IActivityManager
+import android.app.IUserSwitchObserver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.UserInfo
 import android.os.Handler
+import android.os.IRemoteCallback
 import android.os.UserHandle
 import android.os.UserManager
 import android.testing.AndroidTestingRunner
@@ -29,19 +32,20 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.mockito.capture
 import com.google.common.truth.Truth.assertThat
+import java.util.concurrent.Executor
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.ArgumentMatchers.isNull
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import java.util.concurrent.Executor
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -51,6 +55,10 @@ class UserTrackerImplTest : SysuiTestCase() {
     private lateinit var context: Context
     @Mock
     private lateinit var userManager: UserManager
+    @Mock
+    private lateinit var iActivityManager: IActivityManager
+    @Mock
+    private lateinit var userSwitchingReply: IRemoteCallback
     @Mock(stubOnly = true)
     private lateinit var dumpManager: DumpManager
     @Mock(stubOnly = true)
@@ -76,7 +84,7 @@ class UserTrackerImplTest : SysuiTestCase() {
             listOf(info)
         }
 
-        tracker = UserTrackerImpl(context, userManager, dumpManager, handler)
+        tracker = UserTrackerImpl(context, userManager, iActivityManager, dumpManager, handler)
     }
 
     @Test
@@ -125,8 +133,7 @@ class UserTrackerImplTest : SysuiTestCase() {
         verify(context).registerReceiverForAllUsers(
                 eq(tracker), capture(captor), isNull(), eq(handler))
         with(captor.value) {
-            assertThat(countActions()).isEqualTo(7)
-            assertThat(hasAction(Intent.ACTION_USER_SWITCHED)).isTrue()
+            assertThat(countActions()).isEqualTo(6)
             assertThat(hasAction(Intent.ACTION_USER_INFO_CHANGED)).isTrue()
             assertThat(hasAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE)).isTrue()
             assertThat(hasAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)).isTrue()
@@ -158,8 +165,10 @@ class UserTrackerImplTest : SysuiTestCase() {
         tracker.initialize(0)
         val newID = 5
 
-        val intent = Intent(Intent.ACTION_USER_SWITCHED).putExtra(Intent.EXTRA_USER_HANDLE, newID)
-        tracker.onReceive(context, intent)
+        val captor = ArgumentCaptor.forClass(IUserSwitchObserver::class.java)
+        verify(iActivityManager).registerUserSwitchObserver(capture(captor), anyString())
+        captor.value.onUserSwitching(newID, userSwitchingReply)
+        verify(userSwitchingReply).sendResult(any())
 
         verify(userManager).getProfiles(newID)
 
@@ -272,6 +281,24 @@ class UserTrackerImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun testCallbackCalledOnUserChanging() {
+        tracker.initialize(0)
+        val callback = TestCallback()
+        tracker.addCallback(callback, executor)
+
+        val newID = 5
+
+        val captor = ArgumentCaptor.forClass(IUserSwitchObserver::class.java)
+        verify(iActivityManager).registerUserSwitchObserver(capture(captor), anyString())
+        captor.value.onUserSwitching(newID, userSwitchingReply)
+        verify(userSwitchingReply).sendResult(any())
+
+        assertThat(callback.calledOnUserChanging).isEqualTo(1)
+        assertThat(callback.lastUser).isEqualTo(newID)
+        assertThat(callback.lastUserContext?.userId).isEqualTo(newID)
+    }
+
+    @Test
     fun testCallbackCalledOnUserChanged() {
         tracker.initialize(0)
         val callback = TestCallback()
@@ -279,8 +306,9 @@ class UserTrackerImplTest : SysuiTestCase() {
 
         val newID = 5
 
-        val intent = Intent(Intent.ACTION_USER_SWITCHED).putExtra(Intent.EXTRA_USER_HANDLE, newID)
-        tracker.onReceive(context, intent)
+        val captor = ArgumentCaptor.forClass(IUserSwitchObserver::class.java)
+        verify(iActivityManager).registerUserSwitchObserver(capture(captor), anyString())
+        captor.value.onUserSwitchComplete(newID)
 
         assertThat(callback.calledOnUserChanged).isEqualTo(1)
         assertThat(callback.lastUser).isEqualTo(newID)
@@ -330,24 +358,35 @@ class UserTrackerImplTest : SysuiTestCase() {
         tracker.addCallback(callback, executor)
         tracker.removeCallback(callback)
 
-        val intent = Intent(Intent.ACTION_USER_SWITCHED).putExtra(Intent.EXTRA_USER_HANDLE, 5)
-        tracker.onReceive(context, intent)
+        val captor = ArgumentCaptor.forClass(IUserSwitchObserver::class.java)
+        verify(iActivityManager).registerUserSwitchObserver(capture(captor), anyString())
+        captor.value.onUserSwitching(newID, userSwitchingReply)
+        verify(userSwitchingReply).sendResult(any())
+        captor.value.onUserSwitchComplete(newID)
 
         val intentProfiles = Intent(Intent.ACTION_MANAGED_PROFILE_AVAILABLE)
                 .putExtra(Intent.EXTRA_USER, UserHandle.of(profileID))
 
         tracker.onReceive(context, intentProfiles)
 
+        assertThat(callback.calledOnUserChanging).isEqualTo(0)
         assertThat(callback.calledOnUserChanged).isEqualTo(0)
         assertThat(callback.calledOnProfilesChanged).isEqualTo(0)
     }
 
     private class TestCallback : UserTracker.Callback {
+        var calledOnUserChanging = 0
         var calledOnUserChanged = 0
         var calledOnProfilesChanged = 0
         var lastUser: Int? = null
         var lastUserContext: Context? = null
         var lastUserProfiles = emptyList<UserInfo>()
+
+        override fun onUserChanging(newUser: Int, userContext: Context) {
+            calledOnUserChanging++
+            lastUser = newUser
+            lastUserContext = userContext
+        }
 
         override fun onUserChanged(newUser: Int, userContext: Context) {
             calledOnUserChanged++
