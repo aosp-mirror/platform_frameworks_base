@@ -19,6 +19,7 @@ package android.credentials;
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -32,6 +33,7 @@ import com.android.internal.util.AnnotationValidations;
  *
  * @hide
  */
+@TestApi
 public final class UnregisterCredentialDescriptionRequest implements Parcelable {
 
     @NonNull

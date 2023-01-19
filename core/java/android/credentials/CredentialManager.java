@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -329,6 +330,7 @@ public final class CredentialManager {
      *
      * @hide
      */
+    @TestApi
     public void registerCredentialDescription(
             @NonNull RegisterCredentialDescriptionRequest request,
             @Nullable CancellationSignal cancellationSignal,
@@ -376,6 +378,7 @@ public final class CredentialManager {
      *
      * @hide
      */
+    @TestApi
     public void unRegisterCredentialDescription(
             @NonNull UnregisterCredentialDescriptionRequest request,
             @Nullable CancellationSignal cancellationSignal,
