@@ -25,7 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
 
 interface NavControllerWrapper {
-    fun navigate(route: String)
+    fun navigate(route: String, popUpCurrent: Boolean = false)
     fun navigateBack()
 
     val highlightEntryId: String?
@@ -48,17 +48,17 @@ fun NavHostController.localNavController(): ProvidedValue<NavControllerWrapper> 
 
 val LocalNavController = compositionLocalOf<NavControllerWrapper> {
     object : NavControllerWrapper {
-        override fun navigate(route: String) {}
+        override fun navigate(route: String, popUpCurrent: Boolean) {}
 
         override fun navigateBack() {}
     }
 }
 
 @Composable
-fun navigator(route: String?): () -> Unit {
+fun navigator(route: String?, popUpCurrent: Boolean = false): () -> Unit {
     if (route == null) return {}
     val navController = LocalNavController.current
-    return { navController.navigate(route) }
+    return { navController.navigate(route, popUpCurrent) }
 }
 
 internal class NavControllerWrapperImpl(
@@ -68,8 +68,16 @@ internal class NavControllerWrapperImpl(
     var highlightId: String? = null
     var sessionName: String? = null
 
-    override fun navigate(route: String) {
-        navController.navigate(route)
+    override fun navigate(route: String, popUpCurrent: Boolean) {
+        navController.navigate(route) {
+            if (popUpCurrent) {
+                navController.currentDestination?.let { currentDestination ->
+                    popUpTo(currentDestination.id) {
+                        inclusive = true
+                    }
+                }
+            }
+        }
     }
 
     override fun navigateBack() {
