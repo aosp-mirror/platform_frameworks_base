@@ -382,6 +382,23 @@ public abstract class IContextHubWrapper {
      */
     public abstract void registerExistingCallback(int contextHubId) throws RemoteException;
 
+    /**
+     * Puts the context hub in and out of test mode. Test mode is a clean state
+     * where tests can be executed in the same environment. If enable is true,
+     * this will enable test mode by unloading all nanoapps. If enable is false,
+     * this will disable test mode and reverse the actions of enabling test mode
+     * by loading all preloaded nanoapps. This puts CHRE in a normal state.
+     *
+     * This should only be used for a test environment, either through a
+     * @TestApi or development tools. This should not be used in a production
+     * environment.
+     *
+     * @param enable If true, put the context hub in test mode. If false, disable
+     *               test mode.
+     * @return       If true, the operation was successful; false otherwise.
+     */
+    public abstract boolean setTestMode(boolean enable);
+
     private static class ContextHubWrapperAidl extends IContextHubWrapper
             implements IBinder.DeathRecipient {
         private android.hardware.contexthub.IContextHub mHub;
@@ -741,6 +758,22 @@ public abstract class IContextHubWrapper {
             registerExistingCallback(contextHubId);
         }
 
+        public boolean setTestMode(boolean enable) {
+            android.hardware.contexthub.IContextHub hub = getHub();
+            if (hub == null) {
+                return false;
+            }
+
+            try {
+                hub.setTestMode(enable);
+                return true;
+            } catch (RemoteException | ServiceSpecificException e) {
+                Log.e(TAG, "Exception while setting test mode (enable: "
+                        + (enable ? "true" : "false") + "): " + e.getMessage());
+                return false;
+            }
+        }
+
         private void onSettingChanged(byte setting, boolean enabled) {
             android.hardware.contexthub.IContextHub hub = getHub();
             if (hub == null) {
@@ -909,6 +942,10 @@ public abstract class IContextHubWrapper {
             }
 
             mHub.registerCallback(contextHubId, callback);
+        }
+
+        public boolean setTestMode(boolean enable) {
+            return false;
         }
 
         public boolean supportsBtSettingNotifications() {
