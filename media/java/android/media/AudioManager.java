@@ -6442,6 +6442,20 @@ public class AudioManager {
     }
 
     /**
+     * Returns the registered volume controller interface.
+     *
+     * @hide
+     */
+    @Nullable
+    public IVolumeController getVolumeController() {
+        try {
+            return getService().getVolumeController();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Notify audio manager about volume controller visibility changes.
      * Currently limited to SystemUI.
      *
@@ -6498,6 +6512,106 @@ public class AudioManager {
     public void lowerVolumeToRs1() {
         try {
             getService().lowerVolumeToRs1(mApplicationContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * @return the RS2 value used for momentary exposure warnings
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    public float getRs2Value() {
+        try {
+            return getService().getRs2Value();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Sets the RS2 value used for momentary exposure warnings
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    public void setRs2Value(float rs2Value) {
+        try {
+            getService().setRs2Value(rs2Value);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * @return the current computed sound dose value
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    public float getCsd() {
+        try {
+            return getService().getCsd();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Sets the computed sound dose value to {@code csd}
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    public void setCsd(float csd) {
+        try {
+            getService().setCsd(csd);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Forces the computation of MEL values (used for CSD) on framework level. This will have the
+     * result of ignoring the MEL values computed on HAL level. Should only be used in testing
+     * since this can affect the certification of a device with EN50332-3 regulation.
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    public void forceUseFrameworkMel(boolean useFrameworkMel) {
+        try {
+            getService().forceUseFrameworkMel(useFrameworkMel);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Forces the computation of CSD on all output devices.
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    public void forceComputeCsdOnAllDevices(boolean computeCsdOnAllDevices) {
+        try {
+            getService().forceComputeCsdOnAllDevices(computeCsdOnAllDevices);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Returns whether CSD is enabled on this device.
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    public boolean isCsdEnabled() {
+        try {
+            return getService().isCsdEnabled();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

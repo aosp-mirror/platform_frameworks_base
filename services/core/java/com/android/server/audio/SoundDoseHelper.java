@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -69,9 +70,6 @@ public class SoundDoseHelper {
 
     /*package*/ static final String ACTION_CHECK_MUSIC_ACTIVE =
             "com.android.server.audio.action.CHECK_MUSIC_ACTIVE";
-
-    /** Flag to enable/disable the sound dose computation. */
-    private static final boolean USE_CSD_FOR_SAFE_HEARING = false;
 
     // mSafeMediaVolumeState indicates whether the media volume is limited over headphones.
     // It is SAFE_MEDIA_VOLUME_NOT_CONFIGURED at boot time until a network service is connected
@@ -95,8 +93,6 @@ public class SoundDoseHelper {
 
     private static final int MUSIC_ACTIVE_POLL_PERIOD_MS = 60000;  // 1 minute polling interval
     private static final int REQUEST_CODE_CHECK_MUSIC_ACTIVE = 1;
-
-    private static final float CUSTOM_RS2_VALUE = 90;
 
     // timeouts for the CSD warnings, -1 means no timeout (dialog must be ack'd by user)
     private static final int CSD_WARNING_TIMEOUT_MS_DOSE_1X = 7000;
@@ -233,6 +229,94 @@ public class SoundDoseHelper {
         initCsd();
     }
 
+    float getRs2Value() {
+        if (!mEnableCsd) {
+            return 0.f;
+        }
+
+        Objects.requireNonNull(mSoundDose, "Sound dose interface not initialized");
+        try {
+            return mSoundDose.getOutputRs2();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Exception while getting the RS2 exposure value", e);
+            return 0.f;
+        }
+    }
+
+    void setRs2Value(float rs2Value) {
+        if (!mEnableCsd) {
+            return;
+        }
+
+        Objects.requireNonNull(mSoundDose, "Sound dose interface not initialized");
+        try {
+            mSoundDose.setOutputRs2(rs2Value);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Exception while setting the RS2 exposure value", e);
+        }
+    }
+
+    float getCsd() {
+        if (!mEnableCsd) {
+            return -1.f;
+        }
+
+        Objects.requireNonNull(mSoundDose, "Sound dose interface not initialized");
+        try {
+            return mSoundDose.getCsd();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Exception while getting the CSD value", e);
+            return -1.f;
+        }
+    }
+
+    void setCsd(float csd) {
+        if (!mEnableCsd) {
+            return;
+        }
+
+        Objects.requireNonNull(mSoundDose, "Sound dose interface not initialized");
+        try {
+            final SoundDoseRecord record = new SoundDoseRecord();
+            record.timestamp = System.currentTimeMillis();
+            record.value = csd;
+            final SoundDoseRecord[] recordArray = new SoundDoseRecord[] { record };
+            mSoundDose.resetCsd(csd, recordArray);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Exception while setting the CSD value", e);
+        }
+    }
+
+    void forceUseFrameworkMel(boolean useFrameworkMel) {
+        if (!mEnableCsd) {
+            return;
+        }
+
+        Objects.requireNonNull(mSoundDose, "Sound dose interface not initialized");
+        try {
+            mSoundDose.forceUseFrameworkMel(useFrameworkMel);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Exception while forcing the internal MEL computation", e);
+        }
+    }
+
+    void forceComputeCsdOnAllDevices(boolean computeCsdOnAllDevices) {
+        if (!mEnableCsd) {
+            return;
+        }
+
+        Objects.requireNonNull(mSoundDose, "Sound dose interface not initialized");
+        try {
+            mSoundDose.forceComputeCsdOnAllDevices(computeCsdOnAllDevices);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Exception while forcing CSD computation on all devices", e);
+        }
+    }
+
+    boolean isCsdEnabled() {
+        return mEnableCsd;
+    }
+
     /*package*/ int safeMediaVolumeIndex(int device) {
         if (!mSafeMediaVolumeDevices.contains(device)) {
             return MAX_STREAM_VOLUME[AudioSystem.STREAM_MUSIC];
@@ -293,7 +377,7 @@ public class SoundDoseHelper {
                     || (AudioService.mStreamVolumeAlias[streamType] != AudioSystem.STREAM_MUSIC)
                     || (!mSafeMediaVolumeDevices.contains(device))
                     || (index <= safeMediaVolumeIndex(device))
-                    || USE_CSD_FOR_SAFE_HEARING;
+                    || mEnableCsd;
     }
 
     /*package*/ boolean willDisplayWarningAfterCheckVolume(int streamType, int index, int device,
@@ -329,7 +413,7 @@ public class SoundDoseHelper {
     /*package*/ void scheduleMusicActiveCheck() {
         synchronized (mSafeMediaVolumeStateLock) {
             cancelMusicActiveCheck();
-            if (!USE_CSD_FOR_SAFE_HEARING) {
+            if (!mEnableCsd) {
                 mMusicActiveIntent = PendingIntent.getBroadcast(mContext,
                         REQUEST_CODE_CHECK_MUSIC_ACTIVE,
                         new Intent(ACTION_CHECK_MUSIC_ACTIVE),
@@ -460,14 +544,13 @@ public class SoundDoseHelper {
 
     private void initCsd() {
         synchronized (mSafeMediaVolumeStateLock) {
-            if (USE_CSD_FOR_SAFE_HEARING) {
+            if (mEnableCsd) {
                 Log.v(TAG, "Initializing sound dose");
 
                 mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_DISABLED;
                 mSoundDose = AudioSystem.getSoundDoseInterface(mSoundDoseCallback);
                 try {
                     if (mSoundDose != null && mSoundDose.asBinder().isBinderAlive()) {
-                        mSoundDose.setOutputRs2(CUSTOM_RS2_VALUE);
                         if (mCurrentCsd != 0.f) {
                             Log.d(TAG, "Resetting the saved sound dose value " + mCurrentCsd);
                             SoundDoseRecord[] records = mDoseRecords.toArray(
@@ -502,7 +585,7 @@ public class SoundDoseHelper {
                 // The persisted state is either "disabled" or "active": this is the state applied
                 // next time we boot and cannot be "inactive"
                 int persistedState;
-                if (safeMediaVolumeEnabled && !safeMediaVolumeBypass && !USE_CSD_FOR_SAFE_HEARING) {
+                if (safeMediaVolumeEnabled && !safeMediaVolumeBypass && !mEnableCsd) {
                     persistedState = SAFE_MEDIA_VOLUME_ACTIVE;
                     // The state can already be "inactive" here if the user has forced it before
                     // the 30 seconds timeout for forced configuration. In this case we don't reset
