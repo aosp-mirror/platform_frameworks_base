@@ -310,6 +310,11 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         }
     }
 
+    @Override
+    public void performHapticFeedbackAsync(int effectId, boolean always) {
+        performHapticFeedback(effectId, always);
+    }
+
     /* Drag/drop */
 
     @Override
