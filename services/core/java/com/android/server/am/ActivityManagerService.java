@@ -15582,16 +15582,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             return false;
         }
 
-        final ApplicationInfo sdkSandboxInfo;
-        try {
-            final PackageManager pm = mContext.getPackageManager();
-            sdkSandboxInfo = pm.getApplicationInfoAsUser(pm.getSdkSandboxPackageName(), 0, userId);
-        } catch (NameNotFoundException e) {
-            reportStartInstrumentationFailureLocked(
-                    watcher, className, "Can't find SdkSandbox package");
-            return false;
-        }
-
         final SdkSandboxManagerLocal sandboxManagerLocal =
                 LocalManagerRegistry.getManager(SdkSandboxManagerLocal.class);
         if (sandboxManagerLocal == null) {
@@ -15600,12 +15590,20 @@ public class ActivityManagerService extends IActivityManager.Stub
             return false;
         }
 
-        final String processName = sandboxManagerLocal.getSdkSandboxProcessNameForInstrumentation(
-                sdkSandboxClientAppInfo);
+        final ApplicationInfo sdkSandboxInfo;
+        try {
+            sdkSandboxInfo =
+                    sandboxManagerLocal.getSdkSandboxApplicationInfoForInstrumentation(
+                            sdkSandboxClientAppInfo, userId);
+        } catch (NameNotFoundException e) {
+            reportStartInstrumentationFailureLocked(
+                    watcher, className, "Can't find SdkSandbox package");
+            return false;
+        }
 
         ActiveInstrumentation activeInstr = new ActiveInstrumentation(this);
         activeInstr.mClass = className;
-        activeInstr.mTargetProcesses = new String[]{processName};
+        activeInstr.mTargetProcesses = new String[]{sdkSandboxInfo.processName};
         activeInstr.mTargetInfo = sdkSandboxInfo;
         activeInstr.mProfileFile = profileFile;
         activeInstr.mArguments = arguments;
@@ -15639,7 +15637,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 ProcessRecord app = addAppLocked(
                         sdkSandboxInfo,
-                        processName,
+                        sdkSandboxInfo.processName,
                         /* isolated= */ false,
                         /* isSdkSandbox= */ true,
                         sdkSandboxUid,
