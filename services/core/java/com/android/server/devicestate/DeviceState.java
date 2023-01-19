@@ -64,10 +64,20 @@ public final class DeviceState {
      */
     public static final int FLAG_EMULATED_ONLY = 1 << 2;
 
+    /**
+     * This flag indicates that the corresponding state should be automatically canceled when the
+     * requesting app is no longer on top. The app is considered not on top when (1) the top
+     * activity in the system is from a different app, (2) the device is in sleep mode, or
+     * (3) the keyguard shows up.
+     */
+    public static final int FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP = 1 << 3;
+
     /** @hide */
     @IntDef(prefix = {"FLAG_"}, flag = true, value = {
             FLAG_CANCEL_OVERRIDE_REQUESTS,
-            FLAG_APP_INACCESSIBLE
+            FLAG_APP_INACCESSIBLE,
+            FLAG_EMULATED_ONLY,
+            FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DeviceStateFlags {}
