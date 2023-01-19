@@ -35,7 +35,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.statusbar.gesture.SwipeUpGestureHandler
+import com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureHandler
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
@@ -50,7 +50,9 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.*
+import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.ArgumentMatchers.anyString
+import org.mockito.ArgumentMatchers.nullable
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.eq
@@ -83,7 +85,8 @@ class OngoingCallControllerTest : SysuiTestCase() {
     private lateinit var notifCollectionListener: NotifCollectionListener
 
     @Mock private lateinit var mockOngoingCallFlags: OngoingCallFlags
-    @Mock private lateinit var mockSwipeStatusBarAwayGestureHandler: SwipeUpGestureHandler
+    @Mock private lateinit var mockSwipeStatusBarAwayGestureHandler:
+        SwipeStatusBarAwayGestureHandler
     @Mock private lateinit var mockOngoingCallListener: OngoingCallListener
     @Mock private lateinit var mockActivityStarter: ActivityStarter
     @Mock private lateinit var mockIActivityManager: IActivityManager
