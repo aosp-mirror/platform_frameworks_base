@@ -90,7 +90,7 @@
       ]
     },
     {
-      "file_patterns": ["Broadcast"],
+      "file_patterns": ["Broadcast.*"],
       "name": "FrameworksMockingServicesTests",
       "options": [
         { "include-filter": "com.android.server.am.BroadcastRecordTest" },
@@ -99,7 +99,7 @@
       ]
     },
     {
-      "file_patterns": ["Broadcast"],
+      "file_patterns": ["Broadcast.*"],
       "name": "CtsBroadcastTestCases",
       "options": [
         { "exclude-annotation": "androidx.test.filters.LargeTest" },
