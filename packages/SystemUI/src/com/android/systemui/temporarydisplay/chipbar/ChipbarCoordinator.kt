@@ -80,6 +80,7 @@ constructor(
     powerManager: PowerManager,
     private val falsingManager: FalsingManager,
     private val falsingCollector: FalsingCollector,
+    private val swipeChipbarAwayGestureHandler: SwipeChipbarAwayGestureHandler?,
     private val viewUtil: ViewUtil,
     private val vibratorHelper: VibratorHelper,
     wakeLockBuilder: WakeLock.Builder,
@@ -105,6 +106,8 @@ constructor(
         commonWindowLayoutParams.apply { gravity = Gravity.TOP.or(Gravity.CENTER_HORIZONTAL) }
 
     override fun updateView(newInfo: ChipbarInfo, currentView: ViewGroup) {
+        updateGestureListening()
+
         logger.logViewUpdate(
             newInfo.windowTitle,
             newInfo.text.loadText(context),
@@ -228,6 +231,42 @@ constructor(
             includeMargins = true,
             onAnimationEnd,
         )
+
+        updateGestureListening()
+    }
+
+    private fun updateGestureListening() {
+        if (swipeChipbarAwayGestureHandler == null) {
+            return
+        }
+
+        val currentDisplayInfo = getCurrentDisplayInfo()
+        if (currentDisplayInfo != null && currentDisplayInfo.info.allowSwipeToDismiss) {
+            swipeChipbarAwayGestureHandler.setViewFetcher { currentDisplayInfo.view }
+            swipeChipbarAwayGestureHandler.addOnGestureDetectedCallback(TAG) {
+                onSwipeUpGestureDetected()
+            }
+        } else {
+            swipeChipbarAwayGestureHandler.resetViewFetcher()
+            swipeChipbarAwayGestureHandler.removeOnGestureDetectedCallback(TAG)
+        }
+    }
+
+    private fun onSwipeUpGestureDetected() {
+        val currentDisplayInfo = getCurrentDisplayInfo()
+        if (currentDisplayInfo == null) {
+            logger.logSwipeGestureError(id = null, errorMsg = "No info is being displayed")
+            return
+        }
+        if (!currentDisplayInfo.info.allowSwipeToDismiss) {
+            logger.logSwipeGestureError(
+                id = currentDisplayInfo.info.id,
+                errorMsg = "This view prohibits swipe-to-dismiss",
+            )
+            return
+        }
+        removeView(currentDisplayInfo.info.id, SWIPE_UP_GESTURE_REASON)
+        updateGestureListening()
     }
 
     private fun ViewGroup.getInnerView(): ViewGroup {
@@ -250,3 +289,5 @@ constructor(
 private const val ANIMATION_IN_DURATION = 500L
 private const val ANIMATION_OUT_DURATION = 250L
 @IdRes private val INFO_TAG = R.id.tag_chipbar_info
+private const val SWIPE_UP_GESTURE_REASON = "SWIPE_UP_GESTURE_DETECTED"
+private const val TAG = "ChipbarCoordinator"
