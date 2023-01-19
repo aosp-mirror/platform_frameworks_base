@@ -25,6 +25,7 @@ package com.android.systemui.keyguard.data.quickaffordance
 object BuiltInKeyguardQuickAffordanceKeys {
     // Please keep alphabetical order of const names to simplify future maintenance.
     const val CAMERA = "camera"
+    const val CREATE_NOTE = "create_note"
     const val DO_NOT_DISTURB = "do_not_disturb"
     const val FLASHLIGHT = "flashlight"
     const val HOME_CONTROLS = "home"
