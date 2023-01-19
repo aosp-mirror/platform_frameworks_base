@@ -7570,7 +7570,7 @@ package android.app.admin {
     method @RequiresPermission(value=android.Manifest.permission.READ_NEARBY_STREAMING_POLICY, conditional=true) public int getNearbyAppStreamingPolicy();
     method @RequiresPermission(value=android.Manifest.permission.READ_NEARBY_STREAMING_POLICY, conditional=true) public int getNearbyNotificationStreamingPolicy();
     method @Deprecated @ColorInt public int getOrganizationColor(@NonNull android.content.ComponentName);
-    method @Nullable public CharSequence getOrganizationName(@NonNull android.content.ComponentName);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY) public CharSequence getOrganizationName(@Nullable android.content.ComponentName);
     method public java.util.List<android.telephony.data.ApnSetting> getOverrideApns(@NonNull android.content.ComponentName);
     method @NonNull public android.app.admin.DevicePolicyManager getParentProfileInstance(@NonNull android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY) public int getPasswordComplexity();
@@ -7724,7 +7724,7 @@ package android.app.admin {
     method public void setNetworkLoggingEnabled(@Nullable android.content.ComponentName, boolean);
     method @Deprecated public void setOrganizationColor(@NonNull android.content.ComponentName, int);
     method public void setOrganizationId(@NonNull String);
-    method public void setOrganizationName(@NonNull android.content.ComponentName, @Nullable CharSequence);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY) public void setOrganizationName(@Nullable android.content.ComponentName, @Nullable CharSequence);
     method public void setOverrideApnsEnabled(@NonNull android.content.ComponentName, boolean);
     method @NonNull public String[] setPackagesSuspended(@NonNull android.content.ComponentName, @NonNull String[], boolean);
     method public void setPasswordExpirationTimeout(@NonNull android.content.ComponentName, long);

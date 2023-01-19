@@ -21,6 +21,7 @@ import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY;
 import static android.Manifest.permission.QUERY_ADMIN_POLICY;
 import static android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY;
 import static android.Manifest.permission.SET_TIME;
@@ -15257,16 +15258,27 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void setOrganizationName(@NonNull ComponentName who, CharSequence text) {
+    public void setOrganizationName(@Nullable ComponentName who, CharSequence text) {
         if (!mHasFeature) {
             return;
         }
-        Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity caller = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
+        CallerIdentity caller = getCallerIdentity(who);
+        ActiveAdmin admin = null;
+
+        if (isPermissionCheckFlagEnabled()) {
+            EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
+                    who,
+                    MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY,
+                    caller.getUserId());
+            admin = enforcingAdmin.getActiveAdmin();
+        } else {
+            Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
+        }
 
         synchronized (getLockObject()) {
-            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller.getUserId());
+            if (!isPermissionCheckFlagEnabled()) {
+                admin = getProfileOwnerOrDeviceOwnerLocked(caller.getUserId());
+            }
             if (!TextUtils.equals(admin.organizationName, text)) {
                 admin.organizationName = (text == null || text.length() == 0)
                         ? null : text.toString();
@@ -15276,20 +15288,29 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public CharSequence getOrganizationName(@NonNull ComponentName who) {
+    public CharSequence getOrganizationName(@Nullable ComponentName who) {
         if (!mHasFeature) {
             return null;
         }
-        Objects.requireNonNull(who, "ComponentName is null");
+        CallerIdentity caller = getCallerIdentity(who);
+        ActiveAdmin admin = null;
 
-        final CallerIdentity caller = getCallerIdentity(who);
-        Preconditions.checkCallingUser(isManagedProfile(caller.getUserId()));
-        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
+        if (isPermissionCheckFlagEnabled()) {
+            EnforcingAdmin enforcingAdmin = enforceCanQueryAndGetEnforcingAdmin(
+                    who,
+                    MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY,
+                    caller.getUserId());
+            admin = enforcingAdmin.getActiveAdmin();
+        } else {
+            Preconditions.checkCallingUser(isManagedProfile(caller.getUserId()));
+            Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
 
-        synchronized (getLockObject()) {
-            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller.getUserId());
-            return admin.organizationName;
+            synchronized (getLockObject()) {
+                admin = getProfileOwnerOrDeviceOwnerLocked(caller.getUserId());
+            }
         }
+
+        return admin.organizationName;
     }
 
     /**
@@ -19910,22 +19931,26 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             MANAGE_DEVICE_POLICY_ACROSS_USERS,
             MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL,
             SET_TIME,
-            SET_TIME_ZONE);
+            SET_TIME_ZONE,
+            MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY);
     private static final List<String> FINANCED_DEVICE_OWNER_PERMISSIONS = List.of(
             MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL,
             MANAGE_DEVICE_POLICY_ACROSS_USERS,
-            MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL);
+            MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL,
+            MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY);
     private static final List<String> PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE_PERMISSIONS =
             List.of(
                 MANAGE_DEVICE_POLICY_ACROSS_USERS,
                 MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL,
                 SET_TIME,
-                SET_TIME_ZONE);
+                SET_TIME_ZONE,
+                MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY);
     private static final List<String> PROFILE_OWNER_ON_USER_0_PERMISSIONS  = List.of(
             SET_TIME,
             SET_TIME_ZONE);
     private static final List<String> PROFILE_OWNER_PERMISSIONS  = List.of(
-            MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL);
+            MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL,
+            MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY);
 
     private static final HashMap<Integer, List<String>> DPC_PERMISSIONS = new HashMap<>();
     {
@@ -19943,9 +19968,48 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private static final HashMap<String, String> CROSS_USER_PERMISSIONS =
             new HashMap<>();
     {
-        // Auto time is intrinsically global so there is no cross-user permission.
+        // Time and Timezone is intrinsically global so there is no cross-user permission.
         CROSS_USER_PERMISSIONS.put(SET_TIME, null);
         CROSS_USER_PERMISSIONS.put(SET_TIME_ZONE, null);
+        // Organisation identity policy will involve data of other organisations on the device and
+        // therefore the FULL cross-user permission is required.
+        CROSS_USER_PERMISSIONS.put(MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY,
+                MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL);
+    }
+
+    /**
+     * Checks if the calling process has been granted permission to apply a device policy on a
+     * specific user.
+     * The given permission will be checked along with its associated cross-user permission if it
+     * exists and the target user is different to the calling user.
+     * Returns the {@link ActiveAdmin} of the caller.
+     *
+     * @param permission The name of the permission being checked.
+     * @param targetUserId The userId of the user which the caller needs permission to act on.
+     * @throws SecurityException if the caller has not been granted the given permission,
+     * the associated cross-user permission if the caller's user is different to the target user.
+     */
+    private EnforcingAdmin enforcePermissionAndGetEnforcingAdmin(@Nullable ComponentName admin,
+            String permission, int targetUserId) {
+        enforcePermission(permission, targetUserId);
+        return getEnforcingAdminForCaller(admin, getCallerIdentity());
+    }
+
+    /**
+     * Checks whether the calling process has been granted permission to query a device policy on
+     * a specific user.
+     * The given permission will be checked along with its associated cross-user permission if it
+     * exists and the target user is different to the calling user.
+     *
+     * @param permission The name of the permission being checked.
+     * @param targetUserId The userId of the user which the caller needs permission to act on.
+     * @throws SecurityException if the caller has not been granted the given permission,
+     * the associated cross-user permission if the caller's user is different to the target user.
+     */
+    private EnforcingAdmin enforceCanQueryAndGetEnforcingAdmin(@Nullable ComponentName admin,
+            String permission, int targetUserId) {
+        enforceCanQuery(permission, targetUserId);
+        return getEnforcingAdminForCaller(admin, getCallerIdentity());
     }
 
     /**
@@ -19957,7 +20021,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * @param permission The name of the permission being checked.
      * @param targetUserId The userId of the user which the caller needs permission to act on.
      * @throws SecurityException if the caller has not been granted the given permission,
-     * the associtated cross-user permission if the caller's user is different to the target user.
+     * the associated cross-user permission if the caller's user is different to the target user.
      */
     private void enforcePermission(String permission, int targetUserId)
             throws SecurityException {
@@ -19972,13 +20036,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     /**
-     * Return whether the calling process has been granted permission to query a device policy on
+     * Checks whether the calling process has been granted permission to query a device policy on
      * a specific user.
+     * The given permission will be checked along with its associated cross-user permission if it
+     * exists and the target user is different to the calling user.
      *
      * @param permission The name of the permission being checked.
      * @param targetUserId The userId of the user which the caller needs permission to act on.
      * @throws SecurityException if the caller has not been granted the given permission,
-     * the associatated cross-user permission if the caller's user is different to the target user
+     * the associated cross-user permission if the caller's user is different to the target user
      * and if the user has not been granted {@link QUERY_ADMIN_POLICY}.
      */
     private void enforceCanQuery(String permission, int targetUserId) throws SecurityException {
@@ -20043,10 +20109,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         // Check if the caller is an active admin that uses a certain policy.
         if (ACTIVE_ADMIN_POLICIES.containsKey(permission)) {
-            return getActiveAdminForCallerLocked(
-                    null, ACTIVE_ADMIN_POLICIES.get(permission), false) != null;
+            try {
+                return getActiveAdminForCallerLocked(
+                        null, ACTIVE_ADMIN_POLICIES.get(permission), false) != null;
+            } catch (SecurityException e) {
+                // A security exception means there is not an active admin with permission and
+                // therefore
+                return false;
+            }
         }
-
         return false;
     }
 
@@ -20074,6 +20145,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return DPC_PERMISSIONS.get(PROFILE_OWNER).contains(permission);
         }
         return false;
+    }
+
+    private EnforcingAdmin getEnforcingAdminForCaller(@Nullable ComponentName who,
+            CallerIdentity caller) {
+        int userId = caller.getUserId();
+        ActiveAdmin admin = null;
+        synchronized (getLockObject()) {
+            admin = getActiveAdminUncheckedLocked(who, userId);
+        }
+        if (isDeviceOwner(caller) || isProfileOwner(caller)) {
+            return EnforcingAdmin.createEnterpriseEnforcingAdmin(who, userId, admin);
+        }
+        if (getActiveAdminUncheckedLocked(who, userId) != null) {
+            return EnforcingAdmin.createDeviceAdminEnforcingAdmin(who, userId, admin);
+        }
+        return  EnforcingAdmin.createEnforcingAdmin(caller.getPackageName(), userId);
     }
 
     private boolean isPermissionCheckFlagEnabled() {

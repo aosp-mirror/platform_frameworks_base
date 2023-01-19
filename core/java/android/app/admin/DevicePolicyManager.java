@@ -17,6 +17,7 @@
 package android.app.admin;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY;
 import static android.Manifest.permission.QUERY_ADMIN_POLICY;
 import static android.Manifest.permission.SET_TIME;
 import static android.Manifest.permission.SET_TIME_ZONE;
@@ -13410,18 +13411,24 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by the device owner (since API 26) or profile owner (since API 24) to set the name of
-     * the organization under management.
+     * Called by the device owner (since API 26) or profile owner (since API 24) or, starting from
+     * Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY} to set the
+     * name of the organization under management.
      *
-     * <p>If the organization name needs to be localized, it is the responsibility of the {@link
-     * DeviceAdminReceiver} to listen to the {@link Intent#ACTION_LOCALE_CHANGED} broadcast and set
-     * a new version of this string accordingly.
+     * <p>If the organization name needs to be localized, it is the responsibility of the caller
+     * to listen to the {@link Intent#ACTION_LOCALE_CHANGED} broadcast and set a new version of this
+     * string accordingly.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with or can be
+     * {@code null} if accessing with a permission without association with a DeviceAdminReceiver.
      * @param title The organization name or {@code null} to clear a previously set name.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner or holder of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY}.
      */
-    public void setOrganizationName(@NonNull ComponentName admin, @Nullable CharSequence title) {
+    @RequiresPermission(MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY)
+    public void setOrganizationName(@Nullable ComponentName admin, @Nullable CharSequence title) {
         throwIfParentInstance("setOrganizationName");
         try {
             mService.setOrganizationName(admin, title);
@@ -13431,14 +13438,21 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile owner of a managed profile to retrieve the name of the organization under
-     * management.
+     * Called by the device owner (since API 26) or profile owner (since API 24) or, starting from
+     * Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY
+     * to retrieve the name of the organization under management.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with or can be
+     * {@code null} if accessing with a permission without association with a DeviceAdminReceiver.
      * @return The organization name or {@code null} if none is set.
-     * @throws SecurityException if {@code admin} is not a profile owner.
+     * @throws SecurityException if {@code admin} if {@code admin} is not a device or profile
+     * owner or holder of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY}.
      */
-    public @Nullable CharSequence getOrganizationName(@NonNull ComponentName admin) {
+    @RequiresPermission(MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY)
+    public @Nullable CharSequence getOrganizationName(@Nullable ComponentName admin) {
         throwIfParentInstance("getOrganizationName");
         try {
             return mService.getOrganizationName(admin);
