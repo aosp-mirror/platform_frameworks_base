@@ -16,49 +16,49 @@
 
 package com.android.systemui.statusbar.gesture
 
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.dagger.SwipeUpLog
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel
 import javax.inject.Inject
 
 /** Log messages for [SwipeUpGestureHandler]. */
+@SysUISingleton
 class SwipeUpGestureLogger @Inject constructor(
     @SwipeUpLog private val buffer: LogBuffer,
 ) {
-    fun logGestureDetectionStarted(y: Int) {
+    fun logGestureDetectionStarted(tag: String, y: Int) {
         buffer.log(
-            TAG,
+            tag,
             LogLevel.DEBUG,
             { int1 = y },
             { "Beginning gesture detection. y=$int1" }
         )
     }
 
-    fun logGestureDetectionEndedWithoutTriggering(y: Int) {
+    fun logGestureDetectionEndedWithoutTriggering(tag: String, y: Int) {
         buffer.log(
-            TAG,
+            tag,
             LogLevel.DEBUG,
             { int1 = y },
             { "Gesture finished; no swipe up gesture detected. Final y=$int1" }
         )
     }
 
-    fun logGestureDetected(y: Int) {
+    fun logGestureDetected(tag: String, y: Int) {
         buffer.log(
-            TAG,
+            tag,
             LogLevel.INFO,
             { int1 = y },
             { "Gesture detected; notifying callbacks. y=$int1" }
         )
     }
 
-    fun logInputListeningStarted() {
-        buffer.log(TAG, LogLevel.VERBOSE, {}, { "Input listening started "})
+    fun logInputListeningStarted(tag: String) {
+        buffer.log(tag, LogLevel.VERBOSE, {}, { "Input listening started "})
     }
 
-    fun logInputListeningStopped() {
-        buffer.log(TAG, LogLevel.VERBOSE, {}, { "Input listening stopped "})
+    fun logInputListeningStopped(tag: String) {
+        buffer.log(tag, LogLevel.VERBOSE, {}, { "Input listening stopped "})
     }
 }
-
-private const val TAG = "SwipeUpGestureHandler"

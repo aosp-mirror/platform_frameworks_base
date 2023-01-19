@@ -24,18 +24,16 @@ import android.view.MotionEvent.ACTION_DOWN
 import android.view.MotionEvent.ACTION_MOVE
 import android.view.MotionEvent.ACTION_UP
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.window.StatusBarWindowController
-import javax.inject.Inject
 
 /**
- * A class to detect when a user swipes away the status bar. To be notified when the swipe away
- * gesture is detected, add a callback via [addOnGestureDetectedCallback].
+ * A class to detect a generic "swipe up" gesture. To be notified when the swipe up gesture is
+ * detected, add a callback via [addOnGestureDetectedCallback].
  */
 @SysUISingleton
-open class SwipeUpGestureHandler @Inject constructor(
+abstract class SwipeUpGestureHandler(
     context: Context,
-    private val statusBarWindowController: StatusBarWindowController,
-    private val logger: SwipeUpGestureLogger
+    private val logger: SwipeUpGestureLogger,
+    private val loggerTag: String,
 ) : GenericGestureDetector(SwipeUpGestureHandler::class.simpleName!!) {
 
     private var startY: Float = 0f
@@ -54,11 +52,9 @@ open class SwipeUpGestureHandler @Inject constructor(
         when (ev.actionMasked) {
             ACTION_DOWN -> {
                 if (
-                    // Gesture starts just below the status bar
-                    ev.y >= statusBarWindowController.statusBarHeight
-                    && ev.y <= 3 * statusBarWindowController.statusBarHeight
+                    startOfGestureIsWithinBounds(ev)
                 ) {
-                    logger.logGestureDetectionStarted(ev.y.toInt())
+                    logger.logGestureDetectionStarted(loggerTag, ev.y.toInt())
                     startY = ev.y
                     startTime = ev.eventTime
                     monitoringCurrentTouch = true
@@ -79,27 +75,36 @@ open class SwipeUpGestureHandler @Inject constructor(
                     (ev.eventTime - startTime) < SWIPE_TIMEOUT_MS
                 ) {
                     monitoringCurrentTouch = false
-                    logger.logGestureDetected(ev.y.toInt())
+                    logger.logGestureDetected(loggerTag, ev.y.toInt())
                     onGestureDetected(ev)
                 }
             }
             ACTION_CANCEL, ACTION_UP -> {
                 if (monitoringCurrentTouch) {
-                    logger.logGestureDetectionEndedWithoutTriggering(ev.y.toInt())
+                    logger.logGestureDetectionEndedWithoutTriggering(loggerTag, ev.y.toInt())
                 }
                 monitoringCurrentTouch = false
             }
         }
     }
 
+    /**
+     * Returns true if the [ACTION_DOWN] event falls within bounds for this specific swipe-up
+     * gesture.
+     *
+     * Implementations must override this method to specify what part(s) of the screen are valid
+     * locations for the swipe up gesture to start at.
+     */
+    abstract fun startOfGestureIsWithinBounds(ev: MotionEvent): Boolean
+
     override fun startGestureListening() {
         super.startGestureListening()
-        logger.logInputListeningStarted()
+        logger.logInputListeningStarted(loggerTag)
     }
 
     override fun stopGestureListening() {
         super.stopGestureListening()
-        logger.logInputListeningStopped()
+        logger.logInputListeningStopped(loggerTag)
     }
 }
 
