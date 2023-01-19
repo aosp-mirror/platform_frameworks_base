@@ -51040,6 +51040,7 @@ package android.view {
     method public void relayout(int, int);
     method public void release();
     method public void setView(@NonNull android.view.View, int, int);
+    method public boolean transferTouchGestureToHost();
   }
 
   public static final class SurfaceControlViewHost.SurfacePackage implements android.os.Parcelable {
