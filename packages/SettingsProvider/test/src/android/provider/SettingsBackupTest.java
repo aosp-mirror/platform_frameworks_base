@@ -285,7 +285,6 @@ public class SettingsBackupTest {
                     Settings.Global.FANCY_IME_ANIMATIONS,
                     Settings.Global.ONE_HANDED_KEYGUARD_SIDE,
                     Settings.Global.FORCE_ALLOW_ON_EXTERNAL,
-                    Settings.Global.FORCED_APP_STANDBY_ENABLED,
                     Settings.Global.FORCED_APP_STANDBY_FOR_SMALL_BATTERY_ENABLED,
                     Settings.Global.WIFI_ON_WHEN_PROXY_DISCONNECTED,
                     Settings.Global.FSTRIM_MANDATORY_INTERVAL,

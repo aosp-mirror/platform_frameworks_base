@@ -14550,15 +14550,6 @@ public final class Settings {
                 "app_auto_restriction_enabled";
 
         /**
-         * Feature flag to enable or disable the Forced App Standby feature.
-         * Type: int (0 for false, 1 for true)
-         * Default: 1
-         * @hide
-         */
-        @Readable
-        public static final String FORCED_APP_STANDBY_ENABLED = "forced_app_standby_enabled";
-
-        /**
          * Whether or not to enable Forced App Standby on small battery devices.
          * Type: int (0 for false, 1 for true)
          * Default: 0
