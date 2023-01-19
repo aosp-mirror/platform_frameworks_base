@@ -73,10 +73,12 @@ import android.text.Spanned;
 import android.text.SpannedString;
 import android.text.StaticLayout;
 import android.text.TextUtils;
+import android.text.method.InsertModeTransformationMethod;
 import android.text.method.KeyListener;
 import android.text.method.MetaKeyKeyListener;
 import android.text.method.MovementMethod;
 import android.text.method.OffsetMapping;
+import android.text.method.TransformationMethod;
 import android.text.method.WordIterator;
 import android.text.style.EasyEditSpan;
 import android.text.style.SuggestionRangeSpan;
@@ -136,6 +138,7 @@ import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.graphics.ColorUtils;
 import com.android.internal.inputmethod.EditableInputConnection;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -461,6 +464,7 @@ public class Editor {
     private int mLineChangeSlopMin;
 
     private final AccessibilitySmartActions mA11ySmartActions;
+    private InsertModeController mInsertModeController;
 
     Editor(TextView textView) {
         mTextView = textView;
@@ -2107,6 +2111,10 @@ public class Editor {
             if (mSelectionActionModeHelper.isDrawingHighlight()) {
                 selectionHighlight = null;
             }
+        }
+
+        if (mInsertModeController != null) {
+            mInsertModeController.onDraw(canvas);
         }
 
         if (mTextView.canHaveDisplayList() && canvas.isHardwareAccelerated()) {
@@ -8052,6 +8060,110 @@ public class Editor {
             }
             return false;
         }
+    }
+
+    private static final class InsertModeController {
+        private final TextView mTextView;
+        private boolean mIsInsertModeActive;
+        private InsertModeTransformationMethod mInsertModeTransformationMethod;
+        private final Paint mHighlightPaint;
+
+        InsertModeController(@NonNull TextView textView) {
+            mTextView = Objects.requireNonNull(textView);
+            mIsInsertModeActive = false;
+            mInsertModeTransformationMethod = null;
+            mHighlightPaint = new Paint();
+
+            // The highlight color is supposed to be 12% of the color primary40. We can't
+            // directly access Material 3 theme. But because Material 3 sets the colorPrimary to
+            // be primary40, here we hardcoded it to be 12% of colorPrimary.
+            final TypedValue typedValue = new TypedValue();
+            mTextView.getContext().getTheme()
+                    .resolveAttribute(R.attr.colorPrimary, typedValue, true);
+            final int colorPrimary = typedValue.data;
+            final int highlightColor = ColorUtils.setAlphaComponent(colorPrimary,
+                    (int) (0.12f * Color.alpha(colorPrimary)));
+            mHighlightPaint.setColor(highlightColor);
+        }
+
+        /**
+         * Enter insert mode.
+         * @param offset the index to set the cursor.
+         * @return true if the call is successful. false if a) it's already in the insert mode,
+         * b) it failed to enter the insert mode.
+         */
+        boolean enterInsertMode(int offset) {
+            if (mIsInsertModeActive) return false;
+
+            TransformationMethod oldTransformationMethod =
+                    mTextView.getTransformationMethod();
+            if (oldTransformationMethod instanceof OffsetMapping) {
+                // We can't support the case where the oldTransformationMethod is an OffsetMapping.
+                return false;
+            }
+
+            final boolean isSingleLine = mTextView.isSingleLine();
+            mInsertModeTransformationMethod = new InsertModeTransformationMethod(offset,
+                    isSingleLine, oldTransformationMethod);
+            mTextView.setTransformationMethod(mInsertModeTransformationMethod);
+            Selection.setSelection((Spannable) mTextView.getText(), offset);
+
+            mIsInsertModeActive = true;
+            return true;
+        }
+
+        void exitInsertMode() {
+            if (!mIsInsertModeActive) return;
+            if (mInsertModeTransformationMethod == null
+                    || mInsertModeTransformationMethod != mTextView.getTransformationMethod()) {
+                // If mInsertionModeTransformationMethod doesn't match the one on TextView,
+                // something else have changed the TextView's TransformationMethod while the
+                // insertion mode is active. We don't need to restore the oldTransformationMethod.
+                // TODO(265871733): support the case where setTransformationMethod is called in
+                // the insert mode.
+                mIsInsertModeActive = false;
+                return;
+            }
+            // Changing TransformationMethod will reset selection range to [0, 0), we need to
+            // manually restore the old selection range.
+            final int selectionStart = mTextView.getSelectionStart();
+            final int selectionEnd = mTextView.getSelectionEnd();
+            final TransformationMethod oldTransformationMethod =
+                    mInsertModeTransformationMethod.getOldTransformationMethod();
+            mTextView.setTransformationMethod(oldTransformationMethod);
+            Selection.setSelection((Spannable) mTextView.getText(), selectionStart, selectionEnd);
+            mIsInsertModeActive = false;
+        }
+
+        void onDraw(Canvas canvas) {
+            if (!mIsInsertModeActive) return;
+            final CharSequence transformedText = mTextView.getTransformed();
+            if (transformedText instanceof InsertModeTransformationMethod.TransformedText) {
+                final Layout layout = mTextView.getLayout();
+                if (layout == null) return;
+                final InsertModeTransformationMethod.TransformedText insertModeTransformedText =
+                        ((InsertModeTransformationMethod.TransformedText) transformedText);
+                final int highlightStart = insertModeTransformedText.getHighlightStart();
+                final int highlightEnd = insertModeTransformedText.getHighlightEnd();
+                final Layout.SelectionRectangleConsumer consumer =
+                        (left, top, right, bottom, textSelectionLayout) ->
+                                canvas.drawRect(left, top, right, bottom, mHighlightPaint);
+                layout.getSelection(highlightStart, highlightEnd, consumer);
+            }
+        }
+    }
+
+    boolean enterInsertMode(int offset) {
+        if (mInsertModeController == null) {
+            if (mTextView == null) return false;
+            mInsertModeController = new InsertModeController(mTextView);
+        }
+        return mInsertModeController.enterInsertMode(offset);
+    }
+
+    void exitInsertMode() {
+        if (mInsertModeController == null) return;
+        mInsertModeController.exitInsertMode();
     }
 
     /**
