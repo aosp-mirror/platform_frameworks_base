@@ -49,6 +49,7 @@ import com.android.settingslib.spaprivileged.model.app.AppListModel
 import com.android.settingslib.spaprivileged.model.app.AppListViewModel
 import com.android.settingslib.spaprivileged.model.app.AppRecord
 import com.android.settingslib.spaprivileged.model.app.IAppListViewModel
+import com.android.settingslib.spaprivileged.model.app.userId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -135,7 +136,7 @@ private fun <T : AppRecord> AppListModel<T>.AppListWidget(
                 header()
             }
 
-            items(count = list.size, key = { option to list[it].record.app.packageName }) {
+            items(count = list.size, key = { list[it].record.itemKey(option) }) {
                 remember(list) { getGroupTitleIfFirst(option, list, it) }
                     ?.let { group -> CategoryTitle(title = group) }
 
@@ -148,6 +149,9 @@ private fun <T : AppRecord> AppListModel<T>.AppListWidget(
         }
     }
 }
+
+private fun <T : AppRecord> T.itemKey(option: Int) =
+    listOf(option, app.packageName, app.userId, System.identityHashCode(this))
 
 /** Returns group title if this is the first item of the group. */
 private fun <T : AppRecord> AppListModel<T>.getGroupTitleIfFirst(
