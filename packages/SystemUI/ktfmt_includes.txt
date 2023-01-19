@@ -321,8 +321,8 @@
 -packages/SystemUI/src/com/android/systemui/statusbar/events/SystemEventCoordinator.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/events/SystemStatusAnimationScheduler.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/gesture/GenericGestureDetector.kt
--packages/SystemUI/src/com/android/systemui/statusbar/gesture/SwipeStatusBarAwayGestureHandler.kt
--packages/SystemUI/src/com/android/systemui/statusbar/gesture/SwipeStatusBarAwayGestureLogger.kt
+-packages/SystemUI/src/com/android/systemui/statusbar/gesture/SwipeUpGestureHandler.kt
+-packages/SystemUI/src/com/android/systemui/statusbar/gesture/SwipeUpGestureLogger.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/gesture/TapGestureDetector.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/lockscreen/LockscreenSmartspaceController.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/notification/ConversationNotifications.kt
