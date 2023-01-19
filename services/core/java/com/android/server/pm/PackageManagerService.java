@@ -2950,15 +2950,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     }
                 }
                 if (doTrim) {
-                    if (!isFirstBoot()) {
-                        try {
-                            ActivityManager.getService().showBootMessage(
-                                    mContext.getResources().getString(
-                                            R.string.android_upgrading_fstrim),
-                                    true);
-                        } catch (RemoteException e) {
-                        }
-                    }
                     sm.runMaintenance();
                 }
             } else {
