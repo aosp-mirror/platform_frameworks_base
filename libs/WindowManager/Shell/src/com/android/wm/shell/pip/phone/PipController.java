@@ -616,7 +616,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                             return;
                         }
                         int oldMaxMovementBound = mPipBoundsState.getMovementBounds().bottom;
-                        onDisplayChanged(
+                        onDisplayChangedUncheck(
                                 mDisplayController.getDisplayLayout(mPipBoundsState.getDisplayId()),
                                 false /* saveRestoreSnapFraction */);
                         int newMaxMovementBound = mPipBoundsState.getMovementBounds().bottom;
@@ -702,9 +702,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     }
 
     private void onDisplayChanged(DisplayLayout layout, boolean saveRestoreSnapFraction) {
-        if (mPipBoundsState.getDisplayLayout().isSameGeometry(layout)) {
-            return;
+        if (!mPipBoundsState.getDisplayLayout().isSameGeometry(layout)) {
+            onDisplayChangedUncheck(layout, saveRestoreSnapFraction);
         }
+    }
+
+    private void onDisplayChangedUncheck(DisplayLayout layout, boolean saveRestoreSnapFraction) {
         Runnable updateDisplayLayout = () -> {
             final boolean fromRotation = Transitions.ENABLE_SHELL_TRANSITIONS
                     && mPipBoundsState.getDisplayLayout().rotation() != layout.rotation();
