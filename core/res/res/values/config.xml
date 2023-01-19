@@ -5303,6 +5303,9 @@
     <!-- Whether using split screen aspect ratio as a default aspect ratio for unresizable apps. -->
     <bool name="config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled">false</bool>
 
+    <!-- Whether using display aspect ratio as a default aspect ratio for all letterboxed apps. -->
+    <bool name="config_letterboxIsDisplayAspectRatioForFixedOrientationLetterboxEnabled">false</bool>
+
     <!-- Whether the specific behaviour for translucent activities letterboxing is enabled.
          TODO(b/255532890) Enable when ignoreOrientationRequest is set -->
     <bool name="config_letterboxIsEnabledForTranslucentActivities">false</bool>

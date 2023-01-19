@@ -584,7 +584,7 @@ final class LetterboxUiController {
                 ? getSplitScreenAspectRatio()
                 : mActivityRecord.shouldCreateCompatDisplayInsets()
                     ? getDefaultMinAspectRatioForUnresizableApps()
-                    : mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio();
+                    : getDefaultMinAspectRatio();
     }
 
     private float getDefaultMinAspectRatioForUnresizableApps() {
@@ -593,7 +593,7 @@ final class LetterboxUiController {
             return mLetterboxConfiguration.getDefaultMinAspectRatioForUnresizableApps()
                     > MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO
                             ? mLetterboxConfiguration.getDefaultMinAspectRatioForUnresizableApps()
-                            : mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio();
+                            : getDefaultMinAspectRatio();
         }
 
         return getSplitScreenAspectRatio();
@@ -619,6 +619,16 @@ final class LetterboxUiController {
             bounds.bottom = bounds.centerY();
         }
         return computeAspectRatio(bounds);
+    }
+
+    private float getDefaultMinAspectRatio() {
+        final DisplayContent displayContent = mActivityRecord.getDisplayContent();
+        if (displayContent == null
+                || !mLetterboxConfiguration
+                    .getIsDisplayAspectRatioEnabledForFixedOrientationLetterbox()) {
+            return mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio();
+        }
+        return computeAspectRatio(new Rect(displayContent.getBounds()));
     }
 
     Resources getResources() {
@@ -1014,6 +1024,9 @@ final class LetterboxUiController {
                 + mLetterboxConfiguration.getDefaultMinAspectRatioForUnresizableApps());
         pw.println(prefix + "  isSplitScreenAspectRatioForUnresizableAppsEnabled="
                 + mLetterboxConfiguration.getIsSplitScreenAspectRatioForUnresizableAppsEnabled());
+        pw.println(prefix + "  isDisplayAspectRatioEnabledForFixedOrientationLetterbox="
+                + mLetterboxConfiguration
+                .getIsDisplayAspectRatioEnabledForFixedOrientationLetterbox());
     }
 
     /**
