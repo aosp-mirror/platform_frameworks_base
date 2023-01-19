@@ -4186,9 +4186,7 @@ public final class NotificationPanelViewController implements Dumpable {
     }
 
     private void updateStatusBarIcons() {
-        boolean showIconsWhenExpanded =
-                (isPanelVisibleBecauseOfHeadsUp() || mIsFullWidth)
-                        && getExpandedHeight() < getOpeningHeight();
+        boolean showIconsWhenExpanded = getExpandedHeight() < getOpeningHeight();
         if (showIconsWhenExpanded && isOnKeyguard()) {
             showIconsWhenExpanded = false;
         }
@@ -4255,7 +4253,7 @@ public final class NotificationPanelViewController implements Dumpable {
                 && mHeadsUpAppearanceController.shouldBeVisible()) {
             return false;
         }
-        return !mIsFullWidth || !mShowIconsWhenExpanded;
+        return !mShowIconsWhenExpanded;
     }
 
     private void onQsPanelScrollChanged(int scrollY) {
