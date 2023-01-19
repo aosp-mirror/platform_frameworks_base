@@ -2687,4 +2687,9 @@ interface ITelephony {
      * @return {@code true} if the domain selection service is supported.
      */
     boolean isDomainSelectionSupported();
+
+    /**
+     * Get the carrier restriction status of the device.
+     */
+     void getCarrierRestrictionStatus(IIntegerConsumer internalCallback, String packageName);
 }

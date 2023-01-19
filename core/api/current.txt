@@ -44885,6 +44885,7 @@ package android.telephony {
     method public int getCardIdForDefaultEuicc();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) @WorkerThread public android.os.PersistableBundle getCarrierConfig();
     method public int getCarrierIdFromSimMccMnc();
+    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void getCarrierRestrictionStatus(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public android.telephony.CellLocation getCellLocation();
     method public int getDataActivity();
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.READ_BASIC_PHONE_STATE}) public int getDataNetworkType();
@@ -45044,6 +45045,10 @@ package android.telephony {
     field public static final int CALL_STATE_OFFHOOK = 2; // 0x2
     field public static final int CALL_STATE_RINGING = 1; // 0x1
     field public static final String CAPABILITY_SLICING_CONFIG_SUPPORTED = "CAPABILITY_SLICING_CONFIG_SUPPORTED";
+    field public static final int CARRIER_RESTRICTION_STATUS_NOT_RESTRICTED = 1; // 0x1
+    field public static final int CARRIER_RESTRICTION_STATUS_RESTRICTED = 2; // 0x2
+    field public static final int CARRIER_RESTRICTION_STATUS_RESTRICTED_TO_CALLER = 3; // 0x3
+    field public static final int CARRIER_RESTRICTION_STATUS_UNKNOWN = 0; // 0x0
     field public static final int CDMA_ROAMING_MODE_AFFILIATED = 1; // 0x1
     field public static final int CDMA_ROAMING_MODE_ANY = 2; // 0x2
     field public static final int CDMA_ROAMING_MODE_HOME = 0; // 0x0

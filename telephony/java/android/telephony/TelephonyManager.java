@@ -13162,6 +13162,81 @@ public class TelephonyManager {
     }
 
     /**
+     * Carrier restriction status value is unknown, in case modem did not provide any
+     * information about carrier restriction status.
+     */
+    public static final int CARRIER_RESTRICTION_STATUS_UNKNOWN = 0;
+
+    /** The device is not restricted to a carrier */
+    public static final int CARRIER_RESTRICTION_STATUS_NOT_RESTRICTED = 1;
+
+    /** The device is restricted to a carrier. */
+    public static final int CARRIER_RESTRICTION_STATUS_RESTRICTED = 2;
+
+    /** The device is restricted to the carrier of the calling application. */
+    public static final int CARRIER_RESTRICTION_STATUS_RESTRICTED_TO_CALLER = 3;
+
+    /** @hide */
+    @IntDef(prefix = {"CARRIER_RESTRICTION_STATUS_"}, value = {
+            CARRIER_RESTRICTION_STATUS_UNKNOWN,
+            CARRIER_RESTRICTION_STATUS_NOT_RESTRICTED,
+            CARRIER_RESTRICTION_STATUS_RESTRICTED,
+            CARRIER_RESTRICTION_STATUS_RESTRICTED_TO_CALLER
+    })
+
+    public @interface CarrierRestrictionStatus {
+    }
+
+    /**
+     * Get the carrier restriction status of the device.
+     * <p>To fetch the carrier restriction status of the device the calling application needs to be
+     * allowlisted to Android at <a href="https://android.googlesource.com/platform/packages/services/Telephony/+/master/assets/CarrierRestrictionOperatorDetails.json">here</a>.
+     * The calling application also needs the READ_PHONE_STATE permission.
+     * The return value of the API is as follows.
+     * <ul>
+     *      <li>return {@link #CARRIER_RESTRICTION_STATUS_RESTRICTED_TO_CALLER} if the caller
+     *      and the device locked by the network are same</li>
+     *      <li>return {@link #CARRIER_RESTRICTION_STATUS_RESTRICTED} if the caller and the
+     *      device locked by the network are different</li>
+     *      <li>return {@link #CARRIER_RESTRICTION_STATUS_NOT_RESTRICTED} if the device is
+     *      not locked</li>
+     *      <li>return {@link #CARRIER_RESTRICTION_STATUS_UNKNOWN} if the device locking
+     *      state is unavailable or radio does not supports the feature</li>
+     * </ul>
+     *
+     * @param executor The executor on which the result listener will be called.
+     * @param resultListener {@link Consumer} that will be called with the result fetched
+     *                       from the radio of type {@link CarrierRestrictionStatus}
+     * @throws SecurityException if the caller does not have the required permission/privileges or
+     *                           if the caller is not pre-registered.
+     */
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    public void getCarrierRestrictionStatus(@NonNull Executor executor,
+            @NonNull @CarrierRestrictionStatus
+                    Consumer<Integer> resultListener) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(resultListener);
+
+        IIntegerConsumer internalCallback = new IIntegerConsumer.Stub() {
+            @Override
+            public void accept(@CarrierRestrictionStatus int result) {
+                executor.execute(() -> Binder.withCleanCallingIdentity(
+                        () -> resultListener.accept(result)));
+            }
+        };
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                service.getCarrierRestrictionStatus(internalCallback, getOpPackageName());
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getCarrierRestrictionStatus: RemoteException = " + ex);
+            throw ex.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
      * Used to enable or disable carrier data by the system based on carrier signalling or
      * carrier privileged apps. Different from {@link #setDataEnabled(boolean)} which is linked to
      * user settings, carrier data on/off won't affect user settings but will bypass the
