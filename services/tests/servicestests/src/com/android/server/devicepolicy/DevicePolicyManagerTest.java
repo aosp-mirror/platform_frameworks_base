@@ -273,6 +273,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext = getContext();
         mServiceContext = mContext;
         mServiceContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        when(getServices().userManagerInternal.getUserIds()).thenReturn(new int[]{0});
         when(getServices().packageManager.hasSystemFeature(eq(PackageManager.FEATURE_DEVICE_ADMIN)))
                 .thenReturn(true);
         doReturn(Collections.singletonList(new ResolveInfo()))

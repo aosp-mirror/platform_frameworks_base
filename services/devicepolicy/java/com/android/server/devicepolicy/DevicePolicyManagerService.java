@@ -3766,21 +3766,56 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void clearDeviceOwnerUserRestriction(UserHandle userHandle) {
-        // ManagedProvisioning/DPC sets DISALLOW_ADD_USER. Clear to recover to the original state
-        if (mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_USER, userHandle)) {
-            mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, false, userHandle);
-        }
-        // When a device owner is set, the system automatically restricts adding a managed profile.
-        // Remove this restriction when the device owner is cleared.
-        if (mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, userHandle)) {
-            mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, false,
-                    userHandle);
-        }
-        // When a device owner is set, the system automatically restricts adding a clone profile.
-        // Remove this restriction when the device owner is cleared.
-        if (mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE, userHandle)) {
-            mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE, false,
-                    userHandle);
+        if (isHeadlessFlagEnabled()) {
+            for (int userId : mUserManagerInternal.getUserIds()) {
+                UserHandle user = UserHandle.of(userId);
+                // ManagedProvisioning/DPC sets DISALLOW_ADD_USER. Clear to recover to the
+                // original state
+                if (mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_USER, user)) {
+                    mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER,
+                            false, user);
+                }
+                // When a device owner is set, the system automatically restricts adding a
+                // managed profile.
+                // Remove this restriction when the device owner is cleared.
+                if (mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE,
+                        user)) {
+                    mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE,
+                            false,
+                            user);
+                }
+                // When a device owner is set, the system automatically restricts adding a
+                // clone profile.
+                // Remove this restriction when the device owner is cleared.
+                if (mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE, user)) {
+                    mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE,
+                            false, user);
+                }
+            }
+        } else {
+            // ManagedProvisioning/DPC sets DISALLOW_ADD_USER. Clear to recover to the original state
+            if (mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_USER, userHandle)) {
+                mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, false,
+                        userHandle);
+            }
+            // When a device owner is set, the system automatically restricts adding a
+            // managed profile.
+            // Remove this restriction when the device owner is cleared.
+            if (mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE,
+                    userHandle)) {
+                mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE,
+                        false,
+                        userHandle);
+            }
+            // When a device owner is set, the system automatically restricts adding a clone
+            // profile.
+            // Remove this restriction when the device owner is cleared.
+            if (mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE,
+                    userHandle)) {
+                mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE,
+                        false,
+                        userHandle);
+            }
         }
     }
 
@@ -8656,14 +8691,31 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 // profile, such that the admin on that managed profile has extended management
                 // capabilities that can affect the entire device (but not access private data
                 // on the primary profile).
-                mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, true,
-                        UserHandle.of(userId));
-                // Restrict adding a clone profile when a device owner is set on the device.
-                // That is to prevent the co-existence of a clone profile and a device owner
-                // on the same device.
-                // CDD for reference : https://source.android.com/compatibility/12/android-12-cdd#95_multi-user_support
-                mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE, true,
-                        UserHandle.of(userId));
+                if (isHeadlessFlagEnabled()) {
+                    for (int u : mUserManagerInternal.getUserIds()) {
+                        mUserManager.setUserRestriction(
+                                UserManager.DISALLOW_ADD_MANAGED_PROFILE, true,
+                                UserHandle.of(u));
+                        // Restrict adding a clone profile when a device owner is set on the device.
+                        // That is to prevent the co-existence of a clone profile and a device owner
+                        // on the same device.
+                        // CDD for reference : https://source.android.com/compatibility/12/android-12-cdd#95_multi-user_support
+                        mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE,
+                                true,
+                                UserHandle.of(u));
+                    }
+                } else {
+                    mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE,
+                            true,
+                            UserHandle.of(userId));
+                    // Restrict adding a clone profile when a device owner is set on the device.
+                    // That is to prevent the co-existence of a clone profile and a device owner
+                    // on the same device.
+                    // CDD for reference : https://source.android.com/compatibility/12/android-12-cdd#95_multi-user_support
+                    mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE,
+                            true,
+                            UserHandle.of(userId));
+                }
                 // TODO Send to system too?
                 sendOwnerChangedBroadcast(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED, userId);
             });
