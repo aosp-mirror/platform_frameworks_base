@@ -28,7 +28,7 @@ android_test {
     ],
 
     srcs: [
-        "src/server/**/*.java",
+        "src/com/android/server/inputmethod/**/*.java",
     ],
 
     static_libs: [

@@ -65,19 +65,24 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
 
     @Test
     public void testPerformShowIme() throws Exception {
-        mVisibilityApplier.performShowIme(mWindowToken, null, null, SHOW_SOFT_INPUT);
+        synchronized (ImfLock.class) {
+            mVisibilityApplier.performShowIme(mWindowToken, null /* statsToken */,
+                    InputMethodManager.SHOW_IMPLICIT, null, SHOW_SOFT_INPUT);
+        }
         verifyShowSoftInput(false, true, InputMethodManager.SHOW_IMPLICIT);
     }
 
     @Test
     public void testPerformHideIme() throws Exception {
-        mVisibilityApplier.performHideIme(mWindowToken, null, null, HIDE_SOFT_INPUT);
+        synchronized (ImfLock.class) {
+            mVisibilityApplier.performHideIme(mWindowToken, null /* statsToken */, null,
+                    HIDE_SOFT_INPUT);
+        }
         verifyHideSoftInput(false, true);
     }
 
     @Test
     public void testApplyImeVisibility_throwForInvalidState() {
-        mVisibilityApplier.applyImeVisibility(mWindowToken, null, STATE_INVALID);
         assertThrows(IllegalArgumentException.class,
                 () -> mVisibilityApplier.applyImeVisibility(mWindowToken, null, STATE_INVALID));
     }
