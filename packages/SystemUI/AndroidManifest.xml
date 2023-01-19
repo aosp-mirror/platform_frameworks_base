@@ -921,7 +921,7 @@
             android:excludeFromRecents="true"
             android:theme="@android:style/Theme.NoDisplay"
             android:label="@string/note_task_button_label"
-            android:icon="@drawable/ic_note_task_button">
+            android:icon="@drawable/ic_note_task_shortcut_widget">
 
             <intent-filter>
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />

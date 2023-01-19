@@ -72,6 +72,9 @@ constructor(
     companion object {
         // TODO(b/254606432): Use Intent.ACTION_CREATE_NOTE instead.
         const val ACTION_CREATE_NOTE = "android.intent.action.CREATE_NOTE"
+
+        // TODO(b/265912743): Use RoleManager.NOTES_ROLE instead.
+        const val NOTE_ROLE = "android.app.role.NOTES"
     }
 }
 
