@@ -128,7 +128,7 @@ constructor(
                 awaitClose { controller.removeCallback(callback) }
             },
             secureSettings
-                .observerFlow(Settings.Secure.ZEN_DURATION)
+                .observerFlow(userTracker.userId, Settings.Secure.ZEN_DURATION)
                 .onStart { emit(Unit) }
                 .map { secureSettings.getInt(Settings.Secure.ZEN_DURATION, ZEN_MODE_OFF) }
                 .flowOn(backgroundDispatcher)

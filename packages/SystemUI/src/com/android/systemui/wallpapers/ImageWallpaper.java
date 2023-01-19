@@ -26,7 +26,6 @@ import android.graphics.RectF;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.os.Trace;
-import android.os.UserHandle;
 import android.service.wallpaper.WallpaperService;
 import android.util.Log;
 import android.view.Surface;
@@ -37,6 +36,7 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.io.FileDescriptor;
@@ -58,6 +58,8 @@ public class ImageWallpaper extends WallpaperService {
     private volatile int mPages = 1;
     private boolean mPagesComputed = false;
 
+    private final UserTracker mUserTracker;
+
     // used for most tasks (call canvas.drawBitmap, load/unload the bitmap)
     @Background
     private final DelayableExecutor mBackgroundExecutor;
@@ -66,9 +68,11 @@ public class ImageWallpaper extends WallpaperService {
     private static final int DELAY_UNLOAD_BITMAP = 2000;
 
     @Inject
-    public ImageWallpaper(@Background DelayableExecutor backgroundExecutor) {
+    public ImageWallpaper(@Background DelayableExecutor backgroundExecutor,
+            UserTracker userTracker) {
         super();
         mBackgroundExecutor = backgroundExecutor;
+        mUserTracker = userTracker;
     }
 
     @Override
@@ -288,7 +292,7 @@ public class ImageWallpaper extends WallpaperService {
             boolean loadSuccess = false;
             Bitmap bitmap;
             try {
-                bitmap = mWallpaperManager.getBitmapAsUser(UserHandle.USER_CURRENT, false);
+                bitmap = mWallpaperManager.getBitmapAsUser(mUserTracker.getUserId(), false);
                 if (bitmap != null
                         && bitmap.getByteCount() > RecordingCanvas.MAX_BITMAP_SIZE) {
                     throw new RuntimeException("Wallpaper is too large to draw!");
@@ -300,9 +304,9 @@ public class ImageWallpaper extends WallpaperService {
                 // default wallpaper can't be loaded.
                 Log.w(TAG, "Unable to load wallpaper!", exception);
                 mWallpaperManager.clearWallpaper(
-                        WallpaperManager.FLAG_SYSTEM, UserHandle.USER_CURRENT);
+                        WallpaperManager.FLAG_SYSTEM, mUserTracker.getUserId());
                 try {
-                    bitmap = mWallpaperManager.getBitmapAsUser(UserHandle.USER_CURRENT, false);
+                    bitmap = mWallpaperManager.getBitmapAsUser(mUserTracker.getUserId(), false);
                 } catch (RuntimeException | OutOfMemoryError e) {
                     Log.w(TAG, "Unable to load default wallpaper!", e);
                     bitmap = null;

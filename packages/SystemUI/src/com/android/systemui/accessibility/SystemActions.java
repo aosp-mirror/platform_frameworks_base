@@ -35,7 +35,6 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.util.Log;
 import android.view.Display;
 import android.view.IWindowManager;
@@ -51,6 +50,7 @@ import com.android.internal.util.ScreenshotHelper;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -178,6 +178,7 @@ public class SystemActions implements CoreStartable {
 
     private final SystemActionsBroadcastReceiver mReceiver;
     private final Context mContext;
+    private final UserTracker mUserTracker;
     private final Optional<Recents> mRecentsOptional;
     private Locale mLocale;
     private final AccessibilityManager mA11yManager;
@@ -189,11 +190,13 @@ public class SystemActions implements CoreStartable {
 
     @Inject
     public SystemActions(Context context,
+            UserTracker userTracker,
             NotificationShadeWindowController notificationShadeController,
             ShadeController shadeController,
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             Optional<Recents> recentsOptional) {
         mContext = context;
+        mUserTracker = userTracker;
         mShadeController = shadeController;
         mRecentsOptional = recentsOptional;
         mReceiver = new SystemActionsBroadcastReceiver();
@@ -527,7 +530,7 @@ public class SystemActions implements CoreStartable {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         final String chooserClassName = AccessibilityButtonChooserActivity.class.getName();
         intent.setClassName(CHOOSER_PACKAGE_NAME, chooserClassName);
-        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+        mContext.startActivityAsUser(intent, mUserTracker.getUserHandle());
     }
 
     private void handleAccessibilityShortcut() {

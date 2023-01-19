@@ -120,6 +120,7 @@ import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.Compile;
+import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -189,6 +190,7 @@ public class NotificationStackScrollLayoutController {
     private final FeatureFlags mFeatureFlags;
     private final boolean mUseRoundnessSourceTypes;
     private final NotificationTargetsHelper mNotificationTargetsHelper;
+    private final SecureSettings mSecureSettings;
 
     private View mLongPressedView;
 
@@ -667,7 +669,8 @@ public class NotificationStackScrollLayoutController {
             NotificationStackScrollLogger logger,
             NotificationStackSizeCalculator notificationStackSizeCalculator,
             FeatureFlags featureFlags,
-            NotificationTargetsHelper notificationTargetsHelper) {
+            NotificationTargetsHelper notificationTargetsHelper,
+            SecureSettings secureSettings) {
         mStackStateLogger = stackLogger;
         mLogger = logger;
         mAllowLongPress = allowLongPress;
@@ -709,6 +712,7 @@ public class NotificationStackScrollLayoutController {
         mFeatureFlags = featureFlags;
         mUseRoundnessSourceTypes = featureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES);
         mNotificationTargetsHelper = notificationTargetsHelper;
+        mSecureSettings = secureSettings;
         updateResources();
     }
 
@@ -1015,8 +1019,7 @@ public class NotificationStackScrollLayoutController {
                 Log.wtf(TAG, "isHistoryEnabled failed to initialize its value");
                 return false;
             }
-            mHistoryEnabled = historyEnabled = Settings.Secure.getIntForUser(
-                    mView.getContext().getContentResolver(),
+            mHistoryEnabled = historyEnabled = mSecureSettings.getIntForUser(
                     Settings.Secure.NOTIFICATION_HISTORY_ENABLED,
                     0,
                     UserHandle.USER_CURRENT) == 1;
