@@ -374,7 +374,7 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
         return DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_WINDOW_MANAGER,
                 ENABLE_DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER,
-                true); // assume true if the property is unknown
+                false); // assume false if the property is unknown
     }
 
     /**
