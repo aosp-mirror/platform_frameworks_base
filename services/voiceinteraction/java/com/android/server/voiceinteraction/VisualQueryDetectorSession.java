@@ -33,6 +33,7 @@ import android.service.voice.IVisualQueryDetectionVoiceInteractionCallback;
 import android.util.Slog;
 
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
+import com.android.internal.app.IVisualQueryDetectionAttentionListener;
 
 import java.io.PrintWriter;
 import java.util.Objects;
@@ -49,6 +50,7 @@ import java.util.concurrent.ScheduledExecutorService;
 final class VisualQueryDetectorSession extends DetectorSession {
 
     private static final String TAG = "VisualQueryDetectorSession";
+    private IVisualQueryDetectionAttentionListener mAttentionListener;
     private boolean mEgressingData;
     private boolean mQueryStreaming;
 
@@ -64,6 +66,7 @@ final class VisualQueryDetectorSession extends DetectorSession {
                 logging);
         mEgressingData = false;
         mQueryStreaming = false;
+        mAttentionListener = null;
     }
 
     @Override
@@ -72,6 +75,11 @@ final class VisualQueryDetectorSession extends DetectorSession {
         Slog.v(TAG, "informRestartProcessLocked");
         mUpdateStateAfterStartFinished.set(false);
         //TODO(b/261783819): Starts detection in VisualQueryDetectionService.
+    }
+
+    void setVisualQueryDetectionAttentionListenerLocked(
+            @Nullable IVisualQueryDetectionAttentionListener listener) {
+        mAttentionListener = listener;
     }
 
     @SuppressWarnings("GuardedBy")
@@ -86,15 +94,31 @@ final class VisualQueryDetectorSession extends DetectorSession {
             @Override
             public void onAttentionGained() {
                 Slog.v(TAG, "BinderCallback#onAttentionGained");
-                //TODO check to see if there is an active SysUI listener registered
                 mEgressingData = true;
+                if (mAttentionListener == null) {
+                    return;
+                }
+                try {
+                    mAttentionListener.onAttentionGained();
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Error delivering attention gained event.", e);
+                    return;
+                }
             }
 
             @Override
             public void onAttentionLost() {
                 Slog.v(TAG, "BinderCallback#onAttentionLost");
-                //TODO check to see if there is an active SysUI listener registered
                 mEgressingData = false;
+                if (mAttentionListener == null) {
+                    return;
+                }
+                try {
+                    mAttentionListener.onAttentionLost();
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Error delivering attention lost event.", e);
+                    return;
+                }
             }
 
             @Override
