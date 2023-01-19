@@ -7412,6 +7412,7 @@ package android.app.admin {
     method public void dump(android.util.Printer, String);
     method public android.content.pm.ActivityInfo getActivityInfo();
     method @NonNull public android.content.ComponentName getComponent();
+    method public int getHeadlessDeviceOwnerMode();
     method public String getPackageName();
     method public String getReceiverName();
     method public String getTagForPolicy(int);
@@ -7423,6 +7424,8 @@ package android.app.admin {
     method public boolean usesPolicy(int);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.DeviceAdminInfo> CREATOR;
+    field public static final int HEADLESS_DEVICE_OWNER_MODE_AFFILIATED = 1; // 0x1
+    field public static final int HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED = 0; // 0x0
     field public static final int USES_ENCRYPTED_STORAGE = 7; // 0x7
     field public static final int USES_POLICY_DISABLE_CAMERA = 8; // 0x8
     field public static final int USES_POLICY_DISABLE_KEYGUARD_FEATURES = 9; // 0x9

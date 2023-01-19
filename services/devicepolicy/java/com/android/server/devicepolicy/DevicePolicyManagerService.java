@@ -30,6 +30,7 @@ import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.OPSTR_SYSTEM_EXEMPT_FROM_APP_STANDBY;
+import static android.app.admin.DeviceAdminInfo.HEADLESS_DEVICE_OWNER_MODE_AFFILIATED;
 import static android.app.admin.DeviceAdminReceiver.ACTION_COMPLIANCE_ACKNOWLEDGEMENT_REQUIRED;
 import static android.app.admin.DeviceAdminReceiver.EXTRA_TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE;
 import static android.app.admin.DevicePolicyManager.ACTION_CHECK_POLICY_COMPLIANCE;
@@ -105,6 +106,7 @@ import static android.app.admin.DevicePolicyManager.STATUS_CANNOT_ADD_MANAGED_PR
 import static android.app.admin.DevicePolicyManager.STATUS_DEVICE_ADMIN_NOT_SUPPORTED;
 import static android.app.admin.DevicePolicyManager.STATUS_HAS_DEVICE_OWNER;
 import static android.app.admin.DevicePolicyManager.STATUS_HAS_PAIRED;
+import static android.app.admin.DevicePolicyManager.STATUS_HEADLESS_SYSTEM_USER_MODE_NOT_SUPPORTED;
 import static android.app.admin.DevicePolicyManager.STATUS_MANAGED_USERS_NOT_SUPPORTED;
 import static android.app.admin.DevicePolicyManager.STATUS_NONSYSTEM_USER_EXISTS;
 import static android.app.admin.DevicePolicyManager.STATUS_NOT_SYSTEM_USER;
@@ -140,6 +142,7 @@ import static android.app.admin.ProvisioningException.ERROR_SETTING_PROFILE_OWNE
 import static android.app.admin.ProvisioningException.ERROR_SET_DEVICE_OWNER_FAILED;
 import static android.app.admin.ProvisioningException.ERROR_STARTING_PROFILE_FAILED;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.pm.PackageManager.GET_META_DATA;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
@@ -2929,7 +2932,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final ActivityInfo ai = mInjector.binderWithCleanCallingIdentity(() -> {
             try {
                 return mIPackageManager.getReceiverInfo(adminName,
-                        PackageManager.GET_META_DATA
+                        GET_META_DATA
                         | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
                         | PackageManager.MATCH_DIRECT_BOOT_AWARE
                         | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userHandle);
@@ -14758,7 +14761,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
 
-        return checkProvisioningPreconditionSkipPermission(action, packageName, caller.getUserId());
+        long originalId = mInjector.binderClearCallingIdentity();
+        try {
+            return checkProvisioningPreconditionSkipPermission(
+                    action, packageName, caller.getUserId());
+        } finally {
+            mInjector.binderRestoreCallingIdentity(originalId);
+        }
+
     }
     private int checkProvisioningPreconditionSkipPermission(String action,
             String packageName, int userId) {
@@ -14824,21 +14834,30 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return STATUS_USER_HAS_PROFILE_OWNER;
         }
 
-        boolean isHeadlessSystemUserMode = mInjector.userManagerIsHeadlessSystemUserMode();
-        // System user is always running in headless system user mode.
-        if (!isHeadlessSystemUserMode
-                && !mUserManager.isUserRunning(new UserHandle(deviceOwnerUserId))) {
+        if (!mUserManager.isUserRunning(new UserHandle(deviceOwnerUserId))) {
             return STATUS_USER_NOT_RUNNING;
         }
         if (mIsWatch && hasPaired(UserHandle.USER_SYSTEM)) {
             return STATUS_HAS_PAIRED;
         }
 
+        boolean isHeadlessSystemUserMode = mInjector.userManagerIsHeadlessSystemUserMode();
+
         if (isHeadlessSystemUserMode) {
             if (deviceOwnerUserId != UserHandle.USER_SYSTEM) {
                 Slogf.e(LOG_TAG, "In headless system user mode, "
                         + "device owner can only be set on headless system user.");
                 return STATUS_NOT_SYSTEM_USER;
+            }
+
+            if (owner != null) {
+                DeviceAdminInfo adminInfo = findAdmin(
+                        owner, deviceOwnerUserId, /* throwForMissingPermission= */ false);
+
+                if (adminInfo.getHeadlessDeviceOwnerMode()
+                        != HEADLESS_DEVICE_OWNER_MODE_AFFILIATED) {
+                    return STATUS_HEADLESS_SYSTEM_USER_MODE_NOT_SUPPORTED;
+                }
             }
         }
 
@@ -18971,11 +18990,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         "Provisioning preconditions failed with result: " + result);
             }
             onProvisionFullyManagedDeviceStarted(provisioningParams);
+
+            // These properties are global so will apply on all users
             setTimeAndTimezone(provisioningParams.getTimeZone(), provisioningParams.getLocalTime());
             setLocale(provisioningParams.getLocale());
 
-            final int deviceOwnerUserId = mInjector.userManagerIsHeadlessSystemUserMode()
-                    ? UserHandle.USER_SYSTEM : caller.getUserId();
+            int deviceOwnerUserId = UserHandle.USER_SYSTEM;
             if (!removeNonRequiredAppsForManagedDevice(
                     deviceOwnerUserId,
                     provisioningParams.isLeaveAllSystemAppsEnabled(),
@@ -19101,9 +19121,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void disallowAddUser() {
-        if (mInjector.userManagerIsHeadlessSystemUserMode()) {
-            Slogf.i(LOG_TAG, "Not setting DISALLOW_ADD_USER on headless system user mode.");
-            return;
+        if (!isHeadlessFlagEnabled() || mIsAutomotive) {
+            // Auto still enables adding users due to the communal nature of those devices
+            if (mInjector.userManagerIsHeadlessSystemUserMode()) {
+                Slogf.i(LOG_TAG, "Not setting DISALLOW_ADD_USER on headless system user mode.");
+                return;
+            }
         }
         for (UserInfo userInfo : mUserManager.getUsers()) {
             UserHandle userHandle = userInfo.getUserHandle();
