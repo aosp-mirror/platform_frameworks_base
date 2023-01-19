@@ -594,4 +594,6 @@ interface IDevicePolicyManager {
     ManagedSubscriptionsPolicy getManagedSubscriptionsPolicy();
 
     DevicePolicyState getDevicePolicyState();
+
+    boolean triggerDevicePolicyEngineMigration(boolean forceMigration);
 }

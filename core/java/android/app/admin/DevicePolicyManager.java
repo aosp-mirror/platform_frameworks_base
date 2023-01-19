@@ -4021,18 +4021,8 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
-    public static final String PERMISSION_GRANT_POLICY_KEY = "permissionGrant";
+    public static final String PERMISSION_GRANT_POLICY = "permissionGrant";
 
-    // TODO: Expose this as SystemAPI once we add the query API
-    /**
-     * @hide
-     */
-    public static String PERMISSION_GRANT_POLICY(
-            @NonNull String packageName, @NonNull String permission) {
-        Objects.requireNonNull(packageName);
-        Objects.requireNonNull(permission);
-        return PERMISSION_GRANT_POLICY_KEY + "_" + packageName + "_" + permission;
-    }
 
     // TODO: Expose this as SystemAPI once we add the query API
     /**
@@ -16333,5 +16323,27 @@ public class DevicePolicyManager {
             }
         }
         return null;
+    }
+
+    /**
+     * Triggers the data migration of device policies for existing DPCs to the Device Policy Engine.
+     * If {@code forceMigration} is set to {@code true} it skips the prerequisite checks before
+     * triggering the migration.
+     *
+     * <p>Returns {@code true} if migration was completed successfully, {@code false} otherwise.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public boolean triggerDevicePolicyEngineMigration(boolean forceMigration) {
+        if (mService != null) {
+            try {
+                return mService.triggerDevicePolicyEngineMigration(forceMigration);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
     }
 }

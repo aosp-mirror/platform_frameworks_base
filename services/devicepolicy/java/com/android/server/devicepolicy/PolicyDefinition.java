@@ -64,8 +64,8 @@ final class PolicyDefinition<V> {
 
     static PolicyDefinition<Boolean> AUTO_TIMEZONE = new PolicyDefinition<>(
             new NoArgsPolicyKey(DevicePolicyManager.AUTO_TIMEZONE_POLICY),
-            // auto timezone is enabled by default, hence disabling it is more restrictive.
-            FALSE_MORE_RESTRICTIVE,
+            // auto timezone is disabled by default, hence enabling it is more restrictive.
+            TRUE_MORE_RESTRICTIVE,
             POLICY_FLAG_GLOBAL_ONLY_POLICY,
             (Boolean value, Context context, Integer userId, PolicyKey policyKey) ->
                     PolicyEnforcerCallbacks.setAutoTimezoneEnabled(value, context),
@@ -76,7 +76,7 @@ final class PolicyDefinition<V> {
     // when reading the policies from xml.
     static final PolicyDefinition<Integer> GENERIC_PERMISSION_GRANT =
             new PolicyDefinition<>(
-                    new PackagePermissionPolicyKey(DevicePolicyManager.PERMISSION_GRANT_POLICY_KEY),
+                    new PackagePermissionPolicyKey(DevicePolicyManager.PERMISSION_GRANT_POLICY),
                     // TODO: is this really the best mechanism, what makes denied more
                     //  restrictive than
                     //  granted?
@@ -103,7 +103,7 @@ final class PolicyDefinition<V> {
         }
         return GENERIC_PERMISSION_GRANT.createPolicyDefinition(
                 new PackagePermissionPolicyKey(
-                        DevicePolicyManager.PERMISSION_GRANT_POLICY_KEY,
+                        DevicePolicyManager.PERMISSION_GRANT_POLICY,
                         packageName,
                         permissionName));
     }
@@ -184,7 +184,7 @@ final class PolicyDefinition<V> {
 
     private static final Map<String, PolicyDefinition<?>> sPolicyDefinitions = Map.of(
             DevicePolicyManager.AUTO_TIMEZONE_POLICY, AUTO_TIMEZONE,
-            DevicePolicyManager.PERMISSION_GRANT_POLICY_KEY, GENERIC_PERMISSION_GRANT,
+            DevicePolicyManager.PERMISSION_GRANT_POLICY, GENERIC_PERMISSION_GRANT,
             DevicePolicyManager.LOCK_TASK_POLICY, LOCK_TASK,
             DevicePolicyManager.USER_CONTROL_DISABLED_PACKAGES_POLICY,
             USER_CONTROLLED_DISABLED_PACKAGES,
