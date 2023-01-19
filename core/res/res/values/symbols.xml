@@ -4886,4 +4886,6 @@
   <java-symbol type="string" name="config_mainDisplayShape"/>
   <java-symbol type="string" name="config_secondaryDisplayShape"/>
   <java-symbol type="array" name="config_displayShapeArray" />
+
+  <java-symbol type="bool" name="config_stopSystemPackagesByDefault"/>
 </resources>
