@@ -205,7 +205,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     }
 
     private class DesktopModeTouchEventListener implements
-            View.OnClickListener, View.OnTouchListener {
+            View.OnClickListener, View.OnTouchListener, DragDetector.MotionEventHandler {
 
         private final int mTaskId;
         private final WindowContainerToken mTaskToken;
@@ -216,12 +216,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
         private DesktopModeTouchEventListener(
                 RunningTaskInfo taskInfo,
-                DragResizeCallback dragResizeCallback,
-                DragDetector dragDetector) {
+                DragResizeCallback dragResizeCallback) {
             mTaskId = taskInfo.taskId;
             mTaskToken = taskInfo.token;
             mDragResizeCallback = dragResizeCallback;
-            mDragDetector = dragDetector;
+            mDragDetector = new DragDetector(this);
         }
 
         @Override
@@ -254,8 +253,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 return false;
             }
             if (id == R.id.caption_handle) {
-                isDrag = mDragDetector.detectDragEvent(e);
-                handleEventForMove(e);
+                isDrag = mDragDetector.onMotionEvent(e);
             }
             if (e.getAction() != MotionEvent.ACTION_DOWN) {
                 return isDrag;
@@ -272,19 +270,19 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
         /**
          * @param e {@link MotionEvent} to process
-         * @return {@code true} if a drag is happening; or {@code false} if it is not
+         * @return {@code true} if the motion event is handled.
          */
-        private void handleEventForMove(MotionEvent e) {
+        @Override
+        public boolean handleMotionEvent(MotionEvent e) {
             final RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
             if (DesktopModeStatus.isProto2Enabled()
                     && taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
-                return;
+                return false;
             }
             if (DesktopModeStatus.isProto1Enabled() && mDesktopModeController.isPresent()
-                    && mDesktopModeController.get().getDisplayAreaWindowingMode(
-                    taskInfo.displayId)
+                    && mDesktopModeController.get().getDisplayAreaWindowingMode(taskInfo.displayId)
                     == WINDOWING_MODE_FULLSCREEN) {
-                return;
+                return false;
             }
             switch (e.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN: {
@@ -324,6 +322,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     break;
                 }
             }
+            return true;
         }
     }
 
@@ -560,10 +559,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         final TaskPositioner taskPositioner =
                 new TaskPositioner(mTaskOrganizer, windowDecoration, mDragStartListener);
         final DesktopModeTouchEventListener touchEventListener =
-                new DesktopModeTouchEventListener(
-                        taskInfo, taskPositioner, windowDecoration.getDragDetector());
+                new DesktopModeTouchEventListener(taskInfo, taskPositioner);
         windowDecoration.setCaptionListeners(touchEventListener, touchEventListener);
         windowDecoration.setDragResizeCallback(taskPositioner);
+        windowDecoration.setDragDetector(touchEventListener.mDragDetector);
         windowDecoration.relayout(taskInfo, startT, finishT);
         incrementEventReceiverTasks(taskInfo.displayId);
     }

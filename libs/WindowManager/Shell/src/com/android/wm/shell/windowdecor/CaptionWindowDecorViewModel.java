@@ -143,8 +143,8 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     private boolean shouldShowWindowDecor(RunningTaskInfo taskInfo) {
         return taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM
                 || (taskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD
-                    && taskInfo.configuration.windowConfiguration.getDisplayWindowingMode()
-                        == WINDOWING_MODE_FREEFORM);
+                && taskInfo.configuration.windowConfiguration.getDisplayWindowingMode()
+                == WINDOWING_MODE_FREEFORM);
     }
 
     private void createWindowDecoration(
@@ -175,16 +175,18 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                 new CaptionTouchEventListener(taskInfo, taskPositioner);
         windowDecoration.setCaptionListeners(touchEventListener, touchEventListener);
         windowDecoration.setDragResizeCallback(taskPositioner);
+        windowDecoration.setDragDetector(touchEventListener.mDragDetector);
         windowDecoration.relayout(taskInfo, startT, finishT);
         setupCaptionColor(taskInfo, windowDecoration);
     }
 
     private class CaptionTouchEventListener implements
-            View.OnClickListener, View.OnTouchListener {
+            View.OnClickListener, View.OnTouchListener, DragDetector.MotionEventHandler {
 
         private final int mTaskId;
         private final WindowContainerToken mTaskToken;
         private final DragResizeCallback mDragResizeCallback;
+        private final DragDetector mDragDetector;
 
         private int mDragPointerId = -1;
 
@@ -194,6 +196,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             mTaskId = taskInfo.taskId;
             mTaskToken = taskInfo.token;
             mDragResizeCallback = dragResizeCallback;
+            mDragDetector = new DragDetector(this);
         }
 
         @Override
@@ -216,7 +219,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             if (v.getId() != R.id.caption) {
                 return false;
             }
-            handleEventForMove(e);
+            mDragDetector.onMotionEvent(e);
 
             if (e.getAction() != MotionEvent.ACTION_DOWN) {
                 return false;
@@ -235,10 +238,11 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
          * @param e {@link MotionEvent} to process
          * @return {@code true} if a drag is happening; or {@code false} if it is not
          */
-        private void handleEventForMove(MotionEvent e) {
+        @Override
+        public boolean handleMotionEvent(MotionEvent e) {
             final RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
             if (taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
-                return;
+                return false;
             }
             switch (e.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN: {
@@ -261,6 +265,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                     break;
                 }
             }
+            return true;
         }
     }
 }

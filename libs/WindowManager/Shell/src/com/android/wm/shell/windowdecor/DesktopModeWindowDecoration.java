@@ -57,7 +57,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private View.OnTouchListener mOnCaptionTouchListener;
     private DragResizeCallback mDragResizeCallback;
     private DragResizeInputListener mDragResizeListener;
-    private final DragDetector mDragDetector;
+    private DragDetector mDragDetector;
 
     private RelayoutParams mRelayoutParams = new RelayoutParams();
     private final WindowDecoration.RelayoutResult<WindowDecorLinearLayout> mResult =
@@ -81,7 +81,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mChoreographer = choreographer;
         mSyncQueue = syncQueue;
         mDesktopActive = DesktopModeStatus.isActive(mContext);
-        mDragDetector = new DragDetector(ViewConfiguration.get(context).getScaledTouchSlop());
     }
 
     void setCaptionListeners(
@@ -95,8 +94,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mDragResizeCallback = dragResizeCallback;
     }
 
-    DragDetector getDragDetector() {
-        return mDragDetector;
+    void setDragDetector(DragDetector dragDetector) {
+        mDragDetector = dragDetector;
+        mDragDetector.setTouchSlop(ViewConfiguration.get(mContext).getScaledTouchSlop());
     }
 
     @Override
