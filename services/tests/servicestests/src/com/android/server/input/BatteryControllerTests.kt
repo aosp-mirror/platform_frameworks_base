@@ -25,6 +25,7 @@ import android.hardware.BatteryState.STATUS_CHARGING
 import android.hardware.BatteryState.STATUS_DISCHARGING
 import android.hardware.BatteryState.STATUS_FULL
 import android.hardware.BatteryState.STATUS_UNKNOWN
+import android.hardware.input.HostUsiVersion
 import android.hardware.input.IInputDeviceBatteryListener
 import android.hardware.input.IInputDeviceBatteryState
 import android.hardware.input.IInputDevicesChangedListener
@@ -86,7 +87,7 @@ private fun createInputDevice(
         .setDescriptor("descriptor $deviceId")
         .setExternal(true)
         .setHasBattery(hasBattery)
-        .setSupportsUsi(supportsUsi)
+        .setUsiVersion(if (supportsUsi) HostUsiVersion(1, 0) else null)
         .setGeneration(generation)
         .build()
 

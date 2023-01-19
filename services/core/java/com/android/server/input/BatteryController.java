@@ -234,7 +234,8 @@ final class BatteryController {
     }
 
     private boolean isUsiDevice(int deviceId) {
-        return processInputDevice(deviceId, false /*defaultValue*/, InputDevice::supportsUsi);
+        return processInputDevice(deviceId, false /*defaultValue*/,
+                (device) -> device.getHostUsiVersion() != null);
     }
 
     @Nullable

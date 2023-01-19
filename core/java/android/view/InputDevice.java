@@ -26,6 +26,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.hardware.BatteryState;
 import android.hardware.SensorManager;
+import android.hardware.input.HostUsiVersion;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
 import android.hardware.lights.LightsManager;
@@ -83,7 +84,8 @@ public final class InputDevice implements Parcelable {
     private final boolean mHasButtonUnderPad;
     private final boolean mHasSensor;
     private final boolean mHasBattery;
-    private final boolean mSupportsUsi;
+    private final HostUsiVersion mHostUsiVersion;
+    private final int mAssociatedDisplayId;
     private final ArrayList<MotionRange> mMotionRanges = new ArrayList<MotionRange>();
 
     @GuardedBy("mMotionRanges")
@@ -467,7 +469,8 @@ public final class InputDevice implements Parcelable {
             int productId, String descriptor, boolean isExternal, int sources, int keyboardType,
             KeyCharacterMap keyCharacterMap, @Nullable String keyboardLanguageTag,
             @Nullable String keyboardLayoutType, boolean hasVibrator, boolean hasMicrophone,
-            boolean hasButtonUnderPad, boolean hasSensor, boolean hasBattery, boolean supportsUsi) {
+            boolean hasButtonUnderPad, boolean hasSensor, boolean hasBattery, int usiVersionMajor,
+            int usiVersionMinor, int associatedDisplayId) {
         mId = id;
         mGeneration = generation;
         mControllerNumber = controllerNumber;
@@ -493,7 +496,8 @@ public final class InputDevice implements Parcelable {
         mHasSensor = hasSensor;
         mHasBattery = hasBattery;
         mIdentifier = new InputDeviceIdentifier(descriptor, vendorId, productId);
-        mSupportsUsi = supportsUsi;
+        mHostUsiVersion = new HostUsiVersion(usiVersionMajor, usiVersionMinor);
+        mAssociatedDisplayId = associatedDisplayId;
     }
 
     private InputDevice(Parcel in) {
@@ -515,7 +519,8 @@ public final class InputDevice implements Parcelable {
         mHasButtonUnderPad = in.readInt() != 0;
         mHasSensor = in.readInt() != 0;
         mHasBattery = in.readInt() != 0;
-        mSupportsUsi = in.readInt() != 0;
+        mHostUsiVersion = HostUsiVersion.CREATOR.createFromParcel(in);
+        mAssociatedDisplayId = in.readInt();
         mIdentifier = new InputDeviceIdentifier(mDescriptor, mVendorId, mProductId);
 
         int numRanges = in.readInt();
@@ -554,7 +559,8 @@ public final class InputDevice implements Parcelable {
         private boolean mHasBattery = false;
         private String mKeyboardLanguageTag = null;
         private String mKeyboardLayoutType = null;
-        private boolean mSupportsUsi = false;
+        private int mUsiVersionMajor = -1;
+        private int mUsiVersionMinor = -1;
         private List<MotionRange> mMotionRanges = new ArrayList<>();
 
         /** @see InputDevice#getId() */
@@ -665,9 +671,10 @@ public final class InputDevice implements Parcelable {
             return this;
         }
 
-        /** @see InputDevice#supportsUsi() () */
-        public Builder setSupportsUsi(boolean supportsUsi) {
-            mSupportsUsi = supportsUsi;
+        /** @see InputDevice#getHostUsiVersion() */
+        public Builder setUsiVersion(@Nullable HostUsiVersion usiVersion) {
+            mUsiVersionMajor = usiVersion != null ? usiVersion.getMajorVersion() : -1;
+            mUsiVersionMinor = usiVersion != null ? usiVersion.getMinorVersion() : -1;
             return this;
         }
 
@@ -699,7 +706,9 @@ public final class InputDevice implements Parcelable {
                     mHasButtonUnderPad,
                     mHasSensor,
                     mHasBattery,
-                    mSupportsUsi);
+                    mUsiVersionMajor,
+                    mUsiVersionMinor,
+                    Display.INVALID_DISPLAY);
 
             final int numRanges = mMotionRanges.size();
             for (int i = 0; i < numRanges; i++) {
@@ -1276,12 +1285,22 @@ public final class InputDevice implements Parcelable {
     }
 
     /**
-     * Reports whether the device supports the Universal Stylus Initiative (USI) protocol for
-     * styluses.
+     * Reports the version of the Universal Stylus Initiative (USI) protocol supported by this
+     * input device.
+     *
+     * @return the supported USI version, or null if the device does not support USI
+     * @see <a href="https://universalstylus.org">Universal Stylus Initiative</a>
+     * @see InputManager#getHostUsiVersion(int)
      * @hide
      */
-    public boolean supportsUsi() {
-        return mSupportsUsi;
+    @Nullable
+    public HostUsiVersion getHostUsiVersion() {
+        return mHostUsiVersion.isValid() ? mHostUsiVersion : null;
+    }
+
+    /** @hide */
+    public int getAssociatedDisplayId() {
+        return mAssociatedDisplayId;
     }
 
     /**
@@ -1415,7 +1434,8 @@ public final class InputDevice implements Parcelable {
         out.writeInt(mHasButtonUnderPad ? 1 : 0);
         out.writeInt(mHasSensor ? 1 : 0);
         out.writeInt(mHasBattery ? 1 : 0);
-        out.writeInt(mSupportsUsi ? 1 : 0);
+        mHostUsiVersion.writeToParcel(out, flags);
+        out.writeInt(mAssociatedDisplayId);
 
         int numRanges = mMotionRanges.size();
         numRanges = numRanges > MAX_RANGES ? MAX_RANGES : numRanges;
@@ -1468,7 +1488,7 @@ public final class InputDevice implements Parcelable {
 
         description.append("  Has mic: ").append(mHasMicrophone).append("\n");
 
-        description.append("  Supports USI: ").append(mSupportsUsi).append("\n");
+        description.append("  USI Version: ").append(getHostUsiVersion()).append("\n");
 
         if (mKeyboardLanguageTag != null) {
             description.append(" Keyboard language tag: ").append(mKeyboardLanguageTag).append(
