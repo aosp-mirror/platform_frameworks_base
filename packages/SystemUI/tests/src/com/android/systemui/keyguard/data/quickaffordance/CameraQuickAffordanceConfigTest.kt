@@ -22,15 +22,21 @@ import android.content.Context
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.camera.CameraGestureHelper
+import com.android.systemui.util.mockito.whenever
+import com.google.common.truth.Truth
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import org.mockito.Mock
+import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
 class CameraQuickAffordanceConfigTest : SysuiTestCase() {
@@ -61,5 +67,25 @@ class CameraQuickAffordanceConfigTest : SysuiTestCase() {
         verify(cameraGestureHelper)
             .launchCamera(StatusBarManager.CAMERA_LAUNCH_SOURCE_QUICK_AFFORDANCE)
         assertEquals(KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled, result)
+    }
+
+    @Test
+    fun `getPickerScreenState - default when launchable`() = runTest {
+        setLaunchable(true)
+
+        Truth.assertThat(underTest.getPickerScreenState())
+            .isInstanceOf(KeyguardQuickAffordanceConfig.PickerScreenState.Default::class.java)
+    }
+
+    @Test
+    fun `getPickerScreenState - unavailable when not launchable`() = runTest {
+        setLaunchable(false)
+
+        Truth.assertThat(underTest.getPickerScreenState())
+            .isEqualTo(KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice)
+    }
+
+    private fun setLaunchable(isLaunchable: Boolean) {
+        whenever(cameraGestureHelper.canCameraGestureBeLaunched(anyInt())).thenReturn(isLaunchable)
     }
 }
