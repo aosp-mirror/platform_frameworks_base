@@ -51,8 +51,10 @@ int AndroidRuntime::registerNativeMethods(JNIEnv* env, const char* className,
     std::string classNameString = fullClassName.substr(fullClassName.find_last_of("/"));
     std::string roboNativeBindingClass =
             "org/robolectric/nativeruntime" + classNameString + "Natives";
-    jclass clazz = env->FindClass(roboNativeBindingClass.c_str());
-    return env->RegisterNatives(clazz, gMethods, numMethods);
+    jclass clazz = FindClassOrDie(env, roboNativeBindingClass.c_str());
+    int res = env->RegisterNatives(clazz, gMethods, numMethods);
+    LOG_ALWAYS_FATAL_IF(res < 0, "Unable to register native methods.");
+    return res;
 }
 
 static int register_jni_procs(const RegJNIRec array[], size_t count, JNIEnv* env) {
