@@ -278,7 +278,7 @@ fun AllSignInOptionCard(
     ContainerCard() {
         Column() {
             TopAppBar(
-                colors = TopAppBarDefaults.smallTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent,
                 ),
                 title = {
@@ -415,8 +415,8 @@ fun RemoteEntryCard(
                     Icon(
                         painter = painterResource(R.drawable.ic_other_devices),
                         contentDescription = null,
-                        tint = Color.Unspecified,
-                        modifier = Modifier.padding(start = 16.dp)
+                        tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
+                        modifier = Modifier.padding(start = 10.dp)
                     )
                 },
                 label = {
@@ -424,7 +424,7 @@ fun RemoteEntryCard(
                         text = stringResource(
                             R.string.get_dialog_option_headline_use_a_different_device),
                         style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(start = 16.dp, top = 18.dp, bottom = 18.dp)
+                        modifier = Modifier.padding(start = 10.dp, top = 18.dp, bottom = 18.dp)
                             .align(alignment = Alignment.CenterHorizontally)
                     )
                 }
