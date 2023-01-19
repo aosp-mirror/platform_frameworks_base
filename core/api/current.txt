@@ -7275,6 +7275,7 @@ package android.app {
     method public android.view.accessibility.AccessibilityEvent executeAndWaitForEvent(Runnable, android.app.UiAutomation.AccessibilityEventFilter, long) throws java.util.concurrent.TimeoutException;
     method public android.os.ParcelFileDescriptor executeShellCommand(String);
     method @NonNull public android.os.ParcelFileDescriptor[] executeShellCommandRw(@NonNull String);
+    method @NonNull public android.os.ParcelFileDescriptor[] executeShellCommandRwe(@NonNull String);
     method public android.view.accessibility.AccessibilityNodeInfo findFocus(int);
     method public android.view.accessibility.AccessibilityNodeInfo getRootInActiveWindow();
     method public android.accessibilityservice.AccessibilityServiceInfo getServiceInfo();
