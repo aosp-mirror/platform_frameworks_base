@@ -9388,6 +9388,140 @@ public class AudioManager {
     }
 
     //====================================================================
+    // Stream aliasing changed listener, getter for stream alias or independent streams
+
+    /**
+     * manages the stream aliasing listeners and StreamAliasingDispatcherStub
+     */
+    private final CallbackUtil.LazyListenerManager<Runnable> mStreamAliasingListenerMgr =
+            new CallbackUtil.LazyListenerManager();
+
+
+    final class StreamAliasingDispatcherStub extends IStreamAliasingDispatcher.Stub
+            implements CallbackUtil.DispatcherStub {
+
+        @Override
+        public void register(boolean register) {
+            try {
+                getService().registerStreamAliasingDispatcher(this, register);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        }
+
+        @Override
+        public void dispatchStreamAliasingChanged() {
+            mStreamAliasingListenerMgr.callListeners((listener) -> listener.run());
+        }
+    }
+
+    /**
+     * @hide
+     * Adds a listener to be notified of changes to volume stream type aliasing.
+     * See {@link #getIndependentStreamTypes()} and {@link #getStreamTypeAlias(int)}
+     * @param executor the Executor running the listener
+     * @param onStreamAliasingChangedListener the listener to add for the aliasing changes
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    public void addOnStreamAliasingChangedListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Runnable onStreamAliasingChangedListener) {
+        mStreamAliasingListenerMgr.addListener(executor, onStreamAliasingChangedListener,
+                "addOnStreamAliasingChangedListener",
+                () -> new StreamAliasingDispatcherStub());
+    }
+
+    /**
+     * @hide
+     * Removes a previously added listener for changes to stream aliasing.
+     * See {@link #getIndependentStreamTypes()} and {@link #getStreamTypeAlias(int)}
+     * @see #addOnStreamAliasingChangedListener(Executor, Runnable)
+     * @param onStreamAliasingChangedListener the previously added listener of aliasing changes
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    public void removeOnStreamAliasingChangedListener(
+            @NonNull Runnable onStreamAliasingChangedListener) {
+        mStreamAliasingListenerMgr.removeListener(onStreamAliasingChangedListener,
+                "removeOnStreamAliasingChangedListener");
+    }
+
+    /**
+     * @hide
+     * Test method to temporarily override whether STREAM_NOTIFICATION is aliased to STREAM_RING,
+     * volumes will be updated in case of a change.
+     * @param isAliased if true, STREAM_NOTIFICATION is aliased to STREAM_RING
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    public void setNotifAliasRingForTest(boolean isAliased) {
+        final IAudioService service = getService();
+        try {
+            service.setNotifAliasRingForTest(isAliased);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Return the list of independent stream types for volume control.
+     * A stream type is considered independent when the volume changes of that type do not
+     * affect any other independent volume control stream type.
+     * An independent stream type is its own alias when using {@link #getStreamTypeAlias(int)}.
+     * @return list of independent stream types.
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    public @NonNull List<Integer> getIndependentStreamTypes() {
+        final IAudioService service = getService();
+        try {
+            return service.getIndependentStreamTypes();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Return the stream type that a given stream is aliased to.
+     * A stream alias means that any change to the source stream will also be applied to the alias,
+     * and vice-versa.
+     * If a stream is independent (i.e. part of the stream types returned by
+     * {@link #getIndependentStreamTypes()}), its alias is itself.
+     * @param sourceStreamType the stream type to query for the alias.
+     * @return the stream type the source type is aliased to.
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    public @PublicStreamTypes int getStreamTypeAlias(@PublicStreamTypes int sourceStreamType) {
+        final IAudioService service = getService();
+        try {
+            return service.getStreamTypeAlias(sourceStreamType);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Returns whether the system uses {@link AudioVolumeGroup} for volume control
+     * @return true when volume control is performed through volume groups, false if it uses
+     *     stream types.
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    public boolean isVolumeControlUsingVolumeGroups() {
+        final IAudioService service = getService();
+        try {
+            return service.isVolumeControlUsingVolumeGroups();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    //====================================================================
     // Mute await connection
 
     private final Object mMuteAwaitConnectionListenerLock = new Object();
