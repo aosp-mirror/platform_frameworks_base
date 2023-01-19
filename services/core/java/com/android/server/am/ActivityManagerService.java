@@ -16727,6 +16727,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public boolean startProfileWithListener(@UserIdInt int userId,
+            @Nullable IProgressListener unlockListener) {
+        return mUserController.startProfile(userId, unlockListener);
+    }
+
+    @Override
     public boolean stopProfile(@UserIdInt int userId) {
         return mUserController.stopProfile(userId);
     }

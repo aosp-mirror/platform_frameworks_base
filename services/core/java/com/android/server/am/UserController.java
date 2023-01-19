@@ -1470,7 +1470,11 @@ class UserController implements Handler.Callback {
      * @param userId the id of the user to start.
      * @return true if the operation was successful.
      */
-    boolean startProfile(final @UserIdInt int userId) {
+    boolean startProfile(@UserIdInt int userId) {
+        return startProfile(userId, /* unlockListener= */ null);
+    }
+
+    boolean startProfile(@UserIdInt int userId, @Nullable IProgressListener unlockListener) {
         if (mInjector.checkCallingPermission(android.Manifest.permission.MANAGE_USERS)
                 == PackageManager.PERMISSION_DENIED && mInjector.checkCallingPermission(
                 android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
@@ -1491,7 +1495,7 @@ class UserController implements Handler.Callback {
         }
 
         return startUserNoChecks(userId, Display.DEFAULT_DISPLAY,
-                USER_START_MODE_BACKGROUND_VISIBLE, /* unlockListener= */ null);
+                USER_START_MODE_BACKGROUND_VISIBLE, unlockListener);
     }
 
     @VisibleForTesting

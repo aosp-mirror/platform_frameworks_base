@@ -795,7 +795,7 @@ interface IActivityManager {
 
     // Start (?) of T transactions
     /**
-     * Similar to {@link #startUserInBackgroundWithListener(int userId, IProgressListener unlockProgressListener),
+     * Similar to {@link #startUserInBackgroundWithListener(int userId, IProgressListener unlockProgressListener)},
      * but setting the user as the visible user of that display (i.e., allowing the user and its
      * running profiles to launch activities on that display).
      *
@@ -804,6 +804,12 @@ interface IActivityManager {
     @JavaPassthrough(annotation=
             "@android.annotation.RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}, conditional = true)")
     boolean startUserInBackgroundVisibleOnDisplay(int userid, int displayId);
+
+    /**
+     * Similar to {@link #startProfile(int userId)}, but with a listener to report user unlock
+     * progress.
+     */
+    boolean startProfileWithListener(int userid, IProgressListener unlockProgressListener);
 
     /**
      * Gets the ids of displays that can be used on {@link #startUserInBackgroundVisibleOnDisplay(int userId, int displayId)}.
