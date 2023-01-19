@@ -169,6 +169,20 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     @Retention(RetentionPolicy.SOURCE)
     public @interface VoiceInteractionActivityEventType{}
 
+    /**
+     * Bundle key used to specify the id when the system prepares to show session. It increases for
+     * each request.
+     * <p>
+     * Type: int
+     * </p>
+     * @see VoiceInteractionService#showSession(Bundle, int)
+     * @see VoiceInteractionService#onPrepareToShowSession(Bundle, int)
+     * @see VoiceInteractionService#onShowSessionFailed(Bundle)
+     * @see #onShow(Bundle, int)
+     * @see #show(Bundle, int)
+     */
+    public static final String KEY_SHOW_SESSION_ID = "android.service.voice.SHOW_SESSION_ID";
+
     final Context mContext;
     final HandlerCaller mHandlerCaller;
 
@@ -1763,7 +1777,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * @param args The arguments that were supplied to
      * {@link VoiceInteractionService#showSession VoiceInteractionService.showSession}.
      * Some example keys include : "invocation_type", "invocation_phone_state",
-     * {@link VoiceInteractionService#KEY_SHOW_SESSION_ID}, "invocation_time_ms",
+     * {@link #KEY_SHOW_SESSION_ID}, "invocation_time_ms",
      * Intent.EXTRA_TIME ("android.intent.extra.TIME") indicating timing
      * in milliseconds of the KeyEvent that triggered Assistant and
      * Intent.EXTRA_ASSIST_INPUT_DEVICE_ID (android.intent.extra.ASSIST_INPUT_DEVICE_ID)

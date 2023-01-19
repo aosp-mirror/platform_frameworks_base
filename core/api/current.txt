@@ -40571,7 +40571,6 @@ package android.service.voice {
     method public void setDisabledShowContext(int);
     method public final void setUiHints(@NonNull android.os.Bundle);
     method public void showSession(android.os.Bundle, int);
-    field public static final String KEY_SHOW_SESSION_ID = "android.service.voice.SHOW_SESSION_ID";
     field public static final String SERVICE_INTERFACE = "android.service.voice.VoiceInteractionService";
     field public static final String SERVICE_META_DATA = "android.voice_interaction";
   }
@@ -40632,6 +40631,7 @@ package android.service.voice {
     method public void startAssistantActivity(android.content.Intent);
     method public void startVoiceActivity(android.content.Intent);
     method public final void unregisterVisibleActivityCallback(@NonNull android.service.voice.VoiceInteractionSession.VisibleActivityCallback);
+    field public static final String KEY_SHOW_SESSION_ID = "android.service.voice.SHOW_SESSION_ID";
     field public static final int SHOW_SOURCE_ACTIVITY = 16; // 0x10
     field public static final int SHOW_SOURCE_APPLICATION = 8; // 0x8
     field public static final int SHOW_SOURCE_ASSIST_GESTURE = 4; // 0x4
