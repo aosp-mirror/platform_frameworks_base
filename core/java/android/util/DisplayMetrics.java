@@ -283,7 +283,13 @@ public class DisplayMetrics {
      * A scaling factor for fonts displayed on the display.  This is the same
      * as {@link #density}, except that it may be adjusted in smaller
      * increments at runtime based on a user preference for the font size.
+     *
+     * @deprecated this scalar factor is no longer accurate due to adaptive non-linear font scaling.
+     *  Please use {@link TypedValue#applyDimension(int, float, DisplayMetrics)} or
+     *  {@link TypedValue#deriveDimension(int, float, DisplayMetrics)} to convert between SP font
+     *  sizes and pixels.
      */
+    @Deprecated
     public float scaledDensity;
 
     /**
