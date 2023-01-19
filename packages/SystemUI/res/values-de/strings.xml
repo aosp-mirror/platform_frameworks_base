@@ -91,6 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Unterer Rand <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Linker Rand <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Rechter Rand <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
+    <!-- no translation found for screenshot_work_profile_notification (2812417845875653929) -->
+    <skip />
+    <!-- no translation found for screenshot_default_files_app_name (8721579578575161912) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"Bildschirmaufzeichnung"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Bildschirmaufzeichnung…"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Fortlaufende Benachrichtigung für eine Bildschirmaufzeichnung"</string>
@@ -98,8 +102,8 @@
     <string name="screenrecord_description" msgid="1123231719680353736">"Beim Aufnehmen kann das Android-System vertrauliche Informationen erfassen, die auf deinem Bildschirm angezeigt oder von deinem Gerät wiedergegeben werden. Das können Passwörter, Zahlungsinformationen, Fotos, Nachrichten und Audioinhalte sein."</string>
     <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"Gesamten Bildschirm aufnehmen"</string>
     <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Eine einzelne App aufnehmen"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Während der Aufnahme hat Android Zugriff auf alle Inhalte, die auf dem Bildschirm sichtbar sind oder auf dem Gerät wiedergegeben werden. Sei daher mit Passwörtern, Zahlungsdetails, Nachrichten oder anderen vertraulichen Informationen vorsichtig."</string>
-    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Während der Aufnahme einer App hat Android Zugriff auf alle Inhalte, die in dieser App sichtbar sind oder wiedergegeben werden. Sei daher mit Passwörtern, Zahlungsdetails, Nachrichten oder anderen vertraulichen Informationen vorsichtig."</string>
+    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Während der Aufnahme hat Android Zugriff auf alle Inhalte, die auf dem Bildschirm sichtbar sind oder auf dem Gerät wiedergegeben werden. Sei daher vorsichtig mit Passwörtern, Zahlungsdetails, Nachrichten oder anderen vertraulichen Informationen."</string>
+    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Während der Aufnahme einer App hat Android Zugriff auf alle Inhalte, die in dieser App sichtbar sind oder wiedergegeben werden. Sei daher vorsichtig mit Passwörtern, Zahlungsdetails, Nachrichten oder anderen vertraulichen Informationen."</string>
     <string name="screenrecord_start_recording" msgid="348286842544768740">"Aufnahme starten"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Audio aufnehmen"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio des Geräts"</string>
@@ -374,13 +378,13 @@
     <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"Zulassen, dass <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> Inhalte teilt oder aufnimmt?"</string>
     <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Gesamter Bildschirm"</string>
     <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Eine einzelne App"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Beim Teilen, Aufnehmen oder Übertragen hat <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> Zugriff auf alle Inhalte, die auf dem Bildschirm sichtbar sind oder auf dem Gerät wiedergegeben werden. Sei daher mit Passwörtern, Zahlungsdetails, Nachrichten oder anderen vertraulichen Informationen vorsichtig."</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Beim Teilen, Aufnehmen oder Übertragen einer App hat <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> Zugriff auf alle Inhalte, die in dieser App sichtbar sind oder wiedergegeben werden. Sei daher mit Passwörtern, Zahlungsdetails, Nachrichten oder anderen vertraulichen Informationen vorsichtig."</string>
+    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Beim Teilen, Aufnehmen oder Übertragen hat <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> Zugriff auf alle Inhalte, die auf dem Bildschirm sichtbar sind oder auf dem Gerät wiedergegeben werden. Sei daher vorsichtig mit Passwörtern, Zahlungsdetails, Nachrichten oder anderen vertraulichen Informationen."</string>
+    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Beim Teilen, Aufnehmen oder Übertragen einer App hat <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> Zugriff auf alle Inhalte, die in dieser App sichtbar sind oder wiedergegeben werden. Sei daher vorsichtig mit Passwörtern, Zahlungsdetails, Nachrichten oder anderen vertraulichen Informationen."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Weiter"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"App teilen oder aufnehmen"</string>
     <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Dieser App das Teilen oder Aufnehmen erlauben?"</string>
-    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Beim Teilen, Aufnehmen oder Übertragen hat diese App Zugriff auf alle Inhalte, die auf dem Bildschirm sichtbar sind oder auf dem Gerät wiedergegeben werden. Sei daher mit Passwörtern, Zahlungsdetails, Nachrichten oder anderen vertraulichen Informationen vorsichtig."</string>
-    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Beim Teilen, Aufnehmen oder Übertragen einer App hat diese App Zugriff auf alle Inhalte, die in dieser App sichtbar sind oder wiedergegeben werden. Sei daher mit Passwörtern, Zahlungsdetails, Nachrichten oder anderen vertraulichen Informationen vorsichtig."</string>
+    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Beim Teilen, Aufnehmen oder Übertragen hat diese App Zugriff auf alle Inhalte, die auf dem Bildschirm sichtbar sind oder auf dem Gerät wiedergegeben werden. Sei daher vorsichtig mit Passwörtern, Zahlungsdetails, Nachrichten oder anderen vertraulichen Informationen."</string>
+    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Beim Teilen, Aufnehmen oder Übertragen einer App hat diese App Zugriff auf alle Inhalte, die in dieser App sichtbar sind oder wiedergegeben werden. Sei daher vorsichtig mit Passwörtern, Zahlungsdetails, Nachrichten oder anderen vertraulichen Informationen."</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Vom IT-Administrator blockiert"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Bildschirmaufnahme ist durch die Geräterichtlinien deaktiviert"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Alle löschen"</string>
@@ -849,11 +853,13 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="SONG_NAME">%1$s</xliff:g> von <xliff:g id="ARTIST_NAME">%2$s</xliff:g> über <xliff:g id="APP_LABEL">%3$s</xliff:g> wiedergeben"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="SONG_NAME">%1$s</xliff:g> über <xliff:g id="APP_LABEL">%2$s</xliff:g> wiedergeben"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Rückgängig machen"</string>
-    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Gehe für die Wiedergabe näher an <xliff:g id="DEVICENAME">%1$s</xliff:g> heran"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Platziere für die Wiedergabe dein Gerät näher an „<xliff:g id="DEVICENAME">%1$s</xliff:g>“"</string>
-    <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Wird auf „<xliff:g id="DEVICENAME">%1$s</xliff:g>“ abgespielt"</string>
+    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Gehe für die Wiedergabe näher an „<xliff:g id="DEVICENAME">%1$s</xliff:g>“ heran"</string>
+    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
+    <skip />
+    <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Wiedergabe läuft auf „<xliff:g id="DEVICENAME">%1$s</xliff:g>“"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Es gab ein Problem. Versuch es noch einmal."</string>
-    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <string name="media_transfer_loading" msgid="5544017127027152422">"Wird geladen"</string>
+    <!-- no translation found for media_ttt_default_device_type (4457646436153370169) -->
     <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktiv – sieh in der App nach"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nicht gefunden"</string>
@@ -878,6 +884,8 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Lautstärke"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Lautsprecher &amp; Displays"</string>
+    <!-- no translation found for media_output_group_title_suggested_device (4157186235837903826) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Funktionsweise von Nachrichten an alle"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Nachricht an alle"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Personen, die in der Nähe sind und kompatible Bluetooth-Geräten haben, können sich die Medien anhören, die du per Nachricht an alle sendest"</string>
@@ -1015,5 +1023,8 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Dieses Display wird dann ausgeschaltet"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Faltbares Gerät wird geöffnet"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Faltbares Gerät wird umgeklappt"</string>
-    <string name="stylus_battery_low" msgid="7134370101603167096">"Stylus-Akkustand niedrig"</string>
+    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
+    <skip />
+    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
+    <skip />
 </resources>

@@ -113,7 +113,7 @@ class LargeScreenShadeHeaderController @Inject constructor(
             QQS_HEADER_CONSTRAINT -> "QQS Header"
             QS_HEADER_CONSTRAINT -> "QS Header"
             LARGE_SCREEN_HEADER_CONSTRAINT -> "Large Screen Header"
-            else -> "Unknown state"
+            else -> "Unknown state $this"
         }
     }
 
@@ -296,6 +296,9 @@ class LargeScreenShadeHeaderController @Inject constructor(
 
     override fun onViewAttached() {
         privacyIconsController.chipVisibilityListener = chipVisibilityListener
+        updateVisibility()
+        updateTransition()
+
         if (header is MotionLayout) {
             header.setOnApplyWindowInsetsListener(insetListener)
             clock.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
@@ -308,9 +311,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
         dumpManager.registerDumpable(this)
         configurationController.addCallback(configurationControllerListener)
         demoModeController.addCallback(demoModeReceiver)
-
-        updateVisibility()
-        updateTransition()
     }
 
     override fun onViewDetached() {
@@ -436,15 +436,14 @@ class LargeScreenShadeHeaderController @Inject constructor(
         header as MotionLayout
         if (largeScreenActive) {
             logInstantEvent("Large screen constraints set")
-            header.setTransition(HEADER_TRANSITION_ID)
-            header.transitionToStart()
+            header.setTransition(LARGE_SCREEN_HEADER_TRANSITION_ID)
         } else {
             logInstantEvent("Small screen constraints set")
             header.setTransition(HEADER_TRANSITION_ID)
-            header.transitionToStart()
-            updatePosition()
-            updateScrollY()
         }
+        header.jumpToState(header.startState)
+        updatePosition()
+        updateScrollY()
     }
 
     private fun updatePosition() {

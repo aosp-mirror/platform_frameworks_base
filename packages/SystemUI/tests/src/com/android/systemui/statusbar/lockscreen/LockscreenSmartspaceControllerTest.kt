@@ -36,6 +36,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.plugins.BcSmartspaceConfigPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceTargetListener
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceView
@@ -113,6 +114,9 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
     @Mock
     private lateinit var plugin: BcSmartspaceDataPlugin
+
+    @Mock
+    private lateinit var configPlugin: BcSmartspaceConfigPlugin
 
     @Mock
     private lateinit var controllerListener: SmartspaceTargetListener
@@ -209,7 +213,8 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
                 executor,
                 bgExecutor,
                 handler,
-                Optional.of(plugin)
+                Optional.of(plugin),
+                Optional.of(configPlugin),
         )
 
         verify(deviceProvisionedController).addCallback(capture(deviceProvisionedCaptor))
@@ -520,6 +525,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         verify(smartspaceManager, never()).createSmartspaceSession(any())
         verify(smartspaceView2).setUiSurface(BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
         verify(smartspaceView2).registerDataProvider(plugin)
+        verify(smartspaceView2).registerConfigProvider(configPlugin)
     }
 
     @Test
@@ -557,6 +563,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
         verify(smartspaceView).setUiSurface(BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
         verify(smartspaceView).registerDataProvider(plugin)
+        verify(smartspaceView).registerConfigProvider(configPlugin)
         verify(smartspaceSession)
                 .addOnTargetsAvailableListener(any(), capture(sessionListenerCaptor))
         sessionListener = sessionListenerCaptor.value
@@ -636,6 +643,9 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     private fun createSmartspaceView(): SmartspaceView {
         return spy(object : View(context), SmartspaceView {
             override fun registerDataProvider(plugin: BcSmartspaceDataPlugin?) {
+            }
+
+            override fun registerConfigProvider(plugin: BcSmartspaceConfigPlugin?) {
             }
 
             override fun setPrimaryTextColor(color: Int) {

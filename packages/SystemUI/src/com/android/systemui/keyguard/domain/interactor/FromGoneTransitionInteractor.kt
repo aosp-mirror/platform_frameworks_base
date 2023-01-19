@@ -50,10 +50,9 @@ constructor(
     private fun listenForGoneToDreaming() {
         scope.launch {
             keyguardInteractor.isAbleToDream
-                .sample(keyguardTransitionInteractor.finishedKeyguardState, ::Pair)
-                .collect { pair ->
-                    val (isAbleToDream, keyguardState) = pair
-                    if (isAbleToDream && keyguardState == KeyguardState.GONE) {
+                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .collect { (isAbleToDream, lastStartedStep) ->
+                    if (isAbleToDream && lastStartedStep.to == KeyguardState.GONE) {
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(
                                 name,
@@ -72,15 +71,15 @@ constructor(
             keyguardInteractor.wakefulnessModel
                 .sample(
                     combine(
-                        keyguardTransitionInteractor.finishedKeyguardState,
+                        keyguardTransitionInteractor.startedKeyguardTransitionStep,
                         keyguardInteractor.isAodAvailable,
                         ::Pair
                     ),
                     ::toTriple
                 )
-                .collect { (wakefulnessState, keyguardState, isAodAvailable) ->
+                .collect { (wakefulnessState, lastStartedStep, isAodAvailable) ->
                     if (
-                        keyguardState == KeyguardState.GONE &&
+                        lastStartedStep.to == KeyguardState.GONE &&
                             wakefulnessState.state == WakefulnessState.STARTING_TO_SLEEP
                     ) {
                         keyguardTransitionRepository.startTransition(

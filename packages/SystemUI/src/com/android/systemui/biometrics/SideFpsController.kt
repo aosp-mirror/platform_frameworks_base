@@ -111,7 +111,7 @@ constructor(
         context.resources.getInteger(android.R.integer.config_mediumAnimTime).toLong()
 
     private val isReverseDefaultRotation =
-        context.getResources().getBoolean(com.android.internal.R.bool.config_reverseDefaultRotation)
+        context.resources.getBoolean(com.android.internal.R.bool.config_reverseDefaultRotation)
 
     private var overlayHideAnimator: ViewPropertyAnimator? = null
 
@@ -268,10 +268,12 @@ constructor(
         val isDefaultOrientation =
             if (isReverseDefaultRotation) !isNaturalOrientation else isNaturalOrientation
         val size = windowManager.maximumWindowMetrics.bounds
+
         val displayWidth = if (isDefaultOrientation) size.width() else size.height()
         val displayHeight = if (isDefaultOrientation) size.height() else size.width()
         val boundsWidth = if (isDefaultOrientation) bounds.width() else bounds.height()
         val boundsHeight = if (isDefaultOrientation) bounds.height() else bounds.width()
+
         val sensorBounds =
             if (overlayOffsets.isYAligned()) {
                 Rect(
@@ -297,6 +299,7 @@ constructor(
 
         overlayViewParams.x = sensorBounds.left
         overlayViewParams.y = sensorBounds.top
+
         windowManager.updateViewLayout(overlayView, overlayViewParams)
     }
 
@@ -306,7 +309,12 @@ constructor(
         }
         // hide after a few seconds if the sensor is oriented down and there are
         // large overlapping system bars
-        val rotation = context.display?.rotation
+        var rotation = context.display?.rotation
+
+        if (rotation != null) {
+            rotation = getRotationFromDefault(rotation)
+        }
+
         if (
             windowManager.currentWindowMetrics.windowInsets.hasBigNavigationBar() &&
                 ((rotation == Surface.ROTATION_270 && overlayOffsets.isYAligned()) ||

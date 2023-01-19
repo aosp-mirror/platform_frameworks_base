@@ -91,6 +91,8 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Ondergrens <xliff:g id="PERCENT">%1$d</xliff:g> persent"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Linkergrens <xliff:g id="PERCENT">%1$d</xliff:g> persent"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Regtergrens <xliff:g id="PERCENT">%1$d</xliff:g> persent"</string>
+    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"Werkskermskote word in die <xliff:g id="APP">%1$s</xliff:g>-app gestoor"</string>
+    <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Lêers"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Skermopnemer"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Verwerk tans skermopname"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Deurlopende kennisgewing vir \'n skermopnamesessie"</string>
@@ -373,11 +375,11 @@
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Begin opneem of uitsaai met <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"Laat <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> toe om te deel of op te neem?"</string>
     <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Hele skerm"</string>
-    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"’n Enkele program"</string>
+    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"’n Enkele app"</string>
     <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Wanneer jy deel, opneem of uitsaai, het <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> toegang tot enigiets wat op jou skerm sigbaar is of op jou toestel gespeel word. Wees dus versigtig met wagwoorde, betalingbesonderhede, boodskappe of ander sensitiewe inligting."</string>
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Wanneer jy ’n program deel, opneem of uitsaai, het <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> toegang tot enigiets wat in daardie program sigbaar is of daarin gespeel word. Wees dus versigtig met wagwoorde, betalingbesonderhede, boodskappe of ander sensitiewe inligting."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Gaan voort"</string>
-    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Deel of neem ’n program op"</string>
+    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Deel of neem ’n app op"</string>
     <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Laat hierdie app toe om te deel of op te neem?"</string>
     <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Wanneer jy deel, opneem of uitsaai, het hierdie app toegang tot enigiets wat op jou skerm sigbaar is of op jou toestel gespeel word. Wees dus versigtig met wagwoorde, betalingbesonderhede, boodskappe of ander sensitiewe inligting."</string>
     <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Wanneer jy ’n app deel, opneem of uitsaai, het hierdie app toegang tot enigiets wat in daardie program sigbaar is of daarin gespeel word. Wees dus versigtig met wagwoorde, betalingbesonderhede, boodskappe of ander sensitiewe inligting."</string>
@@ -850,11 +852,12 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Speel <xliff:g id="SONG_NAME">%1$s</xliff:g> vanaf <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Ontdoen"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Beweeg nader om op <xliff:g id="DEVICENAME">%1$s</xliff:g> te speel"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Beweeg nader aan <xliff:g id="DEVICENAME">%1$s</xliff:g> om hier te speel"</string>
+    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
+    <skip />
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Speel tans op <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Iets is fout. Probeer weer."</string>
-    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
-    <skip />
+    <string name="media_transfer_loading" msgid="5544017127027152422">"Laai tans"</string>
+    <string name="media_ttt_default_device_type" msgid="4457646436153370169">"tablet"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Onaktief, gaan program na"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nie gekry nie"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrole is nie beskikbaar nie"</string>
@@ -878,6 +881,7 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Luidsprekers en skerms"</string>
+    <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Voorgestelde toestelle"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Hoe uitsaai werk"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Saai uit"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Mense in jou omtrek met versoenbare Bluetooth-toestelle kan na die media luister wat jy uitsaai"</string>
@@ -1015,5 +1019,8 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Hierdie skerm sal afskakel"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Voubare toestel word ontvou"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Voubare toestel word omgekeer"</string>
-    <string name="stylus_battery_low" msgid="7134370101603167096">"Stilus se battery is amper pap"</string>
+    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
+    <skip />
+    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
+    <skip />
 </resources>

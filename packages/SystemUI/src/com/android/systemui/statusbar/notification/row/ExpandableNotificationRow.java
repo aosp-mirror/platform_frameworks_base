@@ -79,6 +79,8 @@ import com.android.internal.widget.CallLayout;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -177,6 +179,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private PeopleNotificationIdentifier mPeopleNotificationIdentifier;
     private Optional<BubblesManager> mBubblesManagerOptional;
     private MetricsLogger mMetricsLogger;
+    private FeatureFlags mFeatureFlags;
     private int mIconTransformContentShift;
     private int mMaxHeadsUpHeightBeforeN;
     private int mMaxHeadsUpHeightBeforeP;
@@ -277,7 +280,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mChildIsExpanding;
 
     private boolean mJustClicked;
-    private boolean mIconAnimationRunning;
+    private boolean mAnimationRunning;
     private boolean mShowNoBackground;
     private ExpandableNotificationRow mNotificationParent;
     private OnExpandClickListener mOnExpandClickListener;
@@ -451,10 +454,26 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return mPublicLayout;
     }
 
-    public void setIconAnimationRunning(boolean running) {
-        for (NotificationContentView l : mLayouts) {
-            setIconAnimationRunning(running, l);
+    /**
+     * Sets animations running in the layouts of this row, including public, private, and children.
+     * @param running whether the animations should be started running or stopped.
+     */
+    public void setAnimationRunning(boolean running) {
+        // Sets animations running in the private/public layouts.
+        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_ANIMATE_BIG_PICTURE)) {
+            for (NotificationContentView l : mLayouts) {
+                if (l != null) {
+                    l.setContentAnimationRunning(running);
+                    setIconAnimationRunning(running, l);
+                }
+            }
+        } else {
+            for (NotificationContentView l : mLayouts) {
+                setIconAnimationRunning(running, l);
+            }
         }
+        // For groups summaries with children, we want to set the children containers
+        // animating as well.
         if (mIsSummaryWithChildren) {
             NotificationViewWrapper viewWrapper = mChildrenContainer.getNotificationViewWrapper();
             if (viewWrapper != null) {
@@ -468,12 +487,18 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                     mChildrenContainer.getAttachedChildren();
             for (int i = 0; i < notificationChildren.size(); i++) {
                 ExpandableNotificationRow child = notificationChildren.get(i);
-                child.setIconAnimationRunning(running);
+                child.setAnimationRunning(running);
             }
         }
-        mIconAnimationRunning = running;
+        mAnimationRunning = running;
     }
 
+    /**
+     * Starts or stops animations of the icons in all potential content views (regardless of
+     * whether they're contracted, expanded, etc).
+     *
+     * @param running whether to start or stop the icon's animation.
+     */
     private void setIconAnimationRunning(boolean running, NotificationContentView layout) {
         if (layout != null) {
             View contractedChild = layout.getContractedChild();
@@ -485,16 +510,29 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
+    /**
+     * Starts or stops animations of the icon in the provided view's icon and right icon.
+     *
+     * @param running whether to start or stop the icon's animation.
+     * @param child   the view with the icon to start or stop.
+     */
     private void setIconAnimationRunningForChild(boolean running, View child) {
         if (child != null) {
             ImageView icon = child.findViewById(com.android.internal.R.id.icon);
-            setIconRunning(icon, running);
+            setImageViewAnimationRunning(icon, running);
             ImageView rightIcon = child.findViewById(com.android.internal.R.id.right_icon);
-            setIconRunning(rightIcon, running);
+            setImageViewAnimationRunning(rightIcon, running);
         }
     }
 
-    private void setIconRunning(ImageView imageView, boolean running) {
+    /**
+     * Starts or stops the animation of a provided image view if it's an AnimationDrawable or an
+     * AnimatedVectorDrawable.
+     *
+     * @param imageView the image view on which to start/stop animation.
+     * @param running   whether to start or stop the view's animation.
+     */
+    private void setImageViewAnimationRunning(ImageView imageView, boolean running) {
         if (imageView != null) {
             Drawable drawable = imageView.getDrawable();
             if (drawable instanceof AnimationDrawable) {
@@ -561,8 +599,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mChildrenContainer.recreateNotificationHeader(mExpandClickListener, isConversation());
             mChildrenContainer.onNotificationUpdated();
         }
-        if (mIconAnimationRunning) {
-            setIconAnimationRunning(true);
+        if (mAnimationRunning) {
+            setAnimationRunning(true);
         }
         if (mLastChronometerRunning) {
             setChronometerRunning(true);
@@ -1038,7 +1076,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             notifyHeightChanged(false /* needsAnimation */);
         }
         if (pinned) {
-            setIconAnimationRunning(true);
+            setAnimationRunning(true);
             mExpandedWhenPinned = false;
         } else if (mExpandedWhenPinned) {
             setUserExpanded(true);
@@ -1627,6 +1665,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         );
     }
 
+    /**
+     * Constructs an ExpandableNotificationRow.
+     * @param context context passed to image resolver
+     * @param attrs attributes used to initialize parent view
+     */
     public ExpandableNotificationRow(Context context, AttributeSet attrs) {
         super(context, attrs);
         mImageResolver = new NotificationInlineImageResolver(context,
@@ -1662,7 +1705,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             NotificationGutsManager gutsManager,
             MetricsLogger metricsLogger,
             SmartReplyConstants smartReplyConstants,
-            SmartReplyController smartReplyController) {
+            SmartReplyController smartReplyController,
+            FeatureFlags featureFlags) {
         mEntry = entry;
         mAppName = appName;
         if (mMenuRow == null) {
@@ -1697,6 +1741,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mBubblesManagerOptional = bubblesManagerOptional;
         mNotificationGutsManager = gutsManager;
         mMetricsLogger = metricsLogger;
+        mFeatureFlags = featureFlags;
     }
 
     private void initDimens() {
@@ -3588,11 +3633,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     @VisibleForTesting
     protected void setPrivateLayout(NotificationContentView privateLayout) {
         mPrivateLayout = privateLayout;
+        mLayouts = new NotificationContentView[]{mPrivateLayout, mPublicLayout};
     }
 
     @VisibleForTesting
     protected void setPublicLayout(NotificationContentView publicLayout) {
         mPublicLayout = publicLayout;
+        mLayouts = new NotificationContentView[]{mPrivateLayout, mPublicLayout};
     }
 
     /**

@@ -175,8 +175,10 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
 
             fold()
             underTest.onScreenTurningOn({})
-            underTest.onStartedWakingUp()
+            // The body of onScreenTurningOn is executed on fakeExecutor,
+            // run all pending tasks before calling the next method
             fakeExecutor.runAllReady()
+            underTest.onStartedWakingUp()
 
             verify(latencyTracker).onActionStart(any())
             verify(latencyTracker).onActionCancel(any())

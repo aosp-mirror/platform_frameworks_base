@@ -58,8 +58,8 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
+import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
-import com.android.systemui.statusbar.phone.KeyguardBouncer.PrimaryBouncerExpansionCallback;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Assert;
@@ -87,7 +87,7 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     @Mock
     private KeyguardHostViewController mKeyguardHostViewController;
     @Mock
-    private KeyguardBouncer.PrimaryBouncerExpansionCallback mExpansionCallback;
+    private PrimaryBouncerExpansionCallback mExpansionCallback;
     @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock

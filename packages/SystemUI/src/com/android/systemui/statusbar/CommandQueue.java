@@ -23,8 +23,6 @@ import static android.inputmethodservice.InputMethodService.IME_INVISIBLE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
-import static com.android.systemui.statusbar.phone.CentralSurfacesImpl.ONLY_CORE_APPS;
-
 import android.annotation.Nullable;
 import android.app.ITransientNotificationCallback;
 import android.app.StatusBarManager;
@@ -55,6 +53,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.Pair;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.InsetsVisibilities;
@@ -543,8 +542,7 @@ public class CommandQueue extends IStatusBar.Stub implements
         final int disabled1 = getDisabled1(DEFAULT_DISPLAY);
         final int disabled2 = getDisabled2(DEFAULT_DISPLAY);
         return (disabled1 & StatusBarManager.DISABLE_EXPAND) == 0
-                && (disabled2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) == 0
-                && !ONLY_CORE_APPS;
+                && (disabled2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) == 0;
     }
 
     @Override
@@ -1273,7 +1271,8 @@ public class CommandQueue extends IStatusBar.Stub implements
     public void showMediaOutputSwitcher(String packageName) {
         int callingUid = Binder.getCallingUid();
         if (callingUid != 0 && callingUid != Process.SYSTEM_UID) {
-            throw new SecurityException("Call only allowed from system server.");
+            Slog.e(TAG, "Call only allowed from system server.");
+            return;
         }
         synchronized (mLock) {
             SomeArgs args = SomeArgs.obtain();

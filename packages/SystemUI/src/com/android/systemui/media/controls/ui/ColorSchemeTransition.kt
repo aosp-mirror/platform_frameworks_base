@@ -162,8 +162,8 @@ internal constructor(
                     context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
                         UI_MODE_NIGHT_YES
                 )
-                    colorScheme.accent1[2]
-                else colorScheme.accent1[3]
+                    colorScheme.accent1.s100
+                else colorScheme.accent1.s200
             },
             { seamlessColor: Int ->
                 val accentColorList = ColorStateList.valueOf(seamlessColor)
