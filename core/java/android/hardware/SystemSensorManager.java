@@ -92,7 +92,8 @@ public class SystemSensorManager extends SensorManager {
     private static native boolean nativeIsDataInjectionEnabled(long nativeInstance);
 
     private static native int nativeCreateDirectChannel(
-            long nativeInstance, long size, int channelType, int fd, HardwareBuffer buffer);
+            long nativeInstance, int deviceId, long size, int channelType, int fd,
+            HardwareBuffer buffer);
     private static native void nativeDestroyDirectChannel(
             long nativeInstance, int channelHandle);
     private static native int nativeConfigDirectChannel(
@@ -695,6 +696,10 @@ public class SystemSensorManager extends SensorManager {
     /** @hide */
     protected SensorDirectChannel createDirectChannelImpl(
             MemoryFile memoryFile, HardwareBuffer hardwareBuffer) {
+        int deviceId = mContext.getDeviceId();
+        if (isDeviceSensorPolicyDefault(deviceId)) {
+            deviceId = DEVICE_ID_DEFAULT;
+        }
         int id;
         int type;
         long size;
@@ -713,8 +718,8 @@ public class SystemSensorManager extends SensorManager {
             }
 
             size = memoryFile.length();
-            id = nativeCreateDirectChannel(
-                    mNativeInstance, size, SensorDirectChannel.TYPE_MEMORY_FILE, fd, null);
+            id = nativeCreateDirectChannel(mNativeInstance, deviceId, size,
+                    SensorDirectChannel.TYPE_MEMORY_FILE, fd, null);
             if (id <= 0) {
                 throw new UncheckedIOException(
                         new IOException("create MemoryFile direct channel failed " + id));
@@ -738,7 +743,7 @@ public class SystemSensorManager extends SensorManager {
             }
             size = hardwareBuffer.getWidth();
             id = nativeCreateDirectChannel(
-                    mNativeInstance, size, SensorDirectChannel.TYPE_HARDWARE_BUFFER,
+                    mNativeInstance, deviceId, size, SensorDirectChannel.TYPE_HARDWARE_BUFFER,
                     -1, hardwareBuffer);
             if (id <= 0) {
                 throw new UncheckedIOException(

@@ -485,7 +485,7 @@ public class VirtualDeviceManagerServiceTest {
                 .build();
 
         doReturn(SENSOR_HANDLE).when(mSensorManagerInternalMock).createRuntimeSensor(
-                anyInt(), anyInt(), anyString(), anyString(), any());
+                anyInt(), anyInt(), anyString(), anyString(), anyInt(), any());
         mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID_1, DEVICE_OWNER_UID_1, params);
 
         VirtualSensor sensor = mLocalService.getVirtualSensor(VIRTUAL_DEVICE_ID_1, SENSOR_HANDLE);

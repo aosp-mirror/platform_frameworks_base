@@ -3344,10 +3344,15 @@ package android.companion.virtual.sensor {
 
   public interface VirtualSensorCallback {
     method public void onConfigurationChanged(@NonNull android.companion.virtual.sensor.VirtualSensor, boolean, @NonNull java.time.Duration, @NonNull java.time.Duration);
+    method public default void onDirectChannelConfigured(@IntRange(from=1) int, @NonNull android.companion.virtual.sensor.VirtualSensor, int, @IntRange(from=1) int);
+    method public default void onDirectChannelCreated(@IntRange(from=1) int, @NonNull android.os.SharedMemory);
+    method public default void onDirectChannelDestroyed(@IntRange(from=1) int);
   }
 
   public final class VirtualSensorConfig implements android.os.Parcelable {
     method public int describeContents();
+    method public int getDirectChannelTypesSupported();
+    method public int getHighestDirectReportRateLevel();
     method @NonNull public String getName();
     method public int getType();
     method @Nullable public String getVendor();
@@ -3358,6 +3363,8 @@ package android.companion.virtual.sensor {
   public static final class VirtualSensorConfig.Builder {
     ctor public VirtualSensorConfig.Builder(int, @NonNull String);
     method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig build();
+    method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setDirectChannelTypesSupported(int);
+    method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setHighestDirectReportRateLevel(int);
     method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setVendor(@Nullable String);
   }
 

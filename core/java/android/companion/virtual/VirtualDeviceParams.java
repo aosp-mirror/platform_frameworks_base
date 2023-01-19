@@ -35,6 +35,7 @@ import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SharedMemory;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.SparseArray;
@@ -576,6 +577,25 @@ public final class VirtualDeviceParams implements Parcelable {
                         Duration.ofNanos(MICROSECONDS.toNanos(batchReportLatencyMicros));
                 mExecutor.execute(() -> mCallback.onConfigurationChanged(
                         sensor, enabled, samplingPeriod, batchReportingLatency));
+            }
+
+            @Override
+            public void onDirectChannelCreated(int channelHandle,
+                    @NonNull SharedMemory sharedMemory) {
+                mExecutor.execute(
+                        () -> mCallback.onDirectChannelCreated(channelHandle, sharedMemory));
+            }
+
+            @Override
+            public void onDirectChannelDestroyed(int channelHandle) {
+                mExecutor.execute(() -> mCallback.onDirectChannelDestroyed(channelHandle));
+            }
+
+            @Override
+            public void onDirectChannelConfigured(int channelHandle, @NonNull VirtualSensor sensor,
+                    int rateLevel, int reportToken) {
+                mExecutor.execute(() -> mCallback.onDirectChannelConfigured(
+                        channelHandle, sensor, rateLevel, reportToken));
             }
         }
 
