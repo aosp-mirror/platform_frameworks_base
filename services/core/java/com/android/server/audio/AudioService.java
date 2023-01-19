@@ -2856,10 +2856,14 @@ public class AudioService extends IAudioService.Stub
         super.getPreferredDevicesForStrategy_enforcePermission();
 
         List<AudioDeviceAttributes> devices = new ArrayList<>();
+        int status = AudioSystem.SUCCESS;
         final long identity = Binder.clearCallingIdentity();
-        final int status = AudioSystem.getDevicesForRoleAndStrategy(
-                strategy, AudioSystem.DEVICE_ROLE_PREFERRED, devices);
-        Binder.restoreCallingIdentity(identity);
+        try {
+            status = AudioSystem.getDevicesForRoleAndStrategy(
+                    strategy, AudioSystem.DEVICE_ROLE_PREFERRED, devices);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
         if (status != AudioSystem.SUCCESS) {
             Log.e(TAG, String.format("Error %d in getPreferredDeviceForStrategy(%d)",
                     status, strategy));
@@ -3045,10 +3049,14 @@ public class AudioService extends IAudioService.Stub
         super.getPreferredDevicesForCapturePreset_enforcePermission();
 
         List<AudioDeviceAttributes> devices = new ArrayList<>();
+        int status = AudioSystem.SUCCESS;
         final long identity = Binder.clearCallingIdentity();
-        final int status = AudioSystem.getDevicesForRoleAndCapturePreset(
-                capturePreset, AudioSystem.DEVICE_ROLE_PREFERRED, devices);
-        Binder.restoreCallingIdentity(identity);
+        try {
+            status = AudioSystem.getDevicesForRoleAndCapturePreset(
+                    capturePreset, AudioSystem.DEVICE_ROLE_PREFERRED, devices);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
         if (status != AudioSystem.SUCCESS) {
             Log.e(TAG, String.format("Error %d in getPreferredDeviceForCapturePreset(%d)",
                     status, capturePreset));
@@ -3653,11 +3661,14 @@ public class AudioService extends IAudioService.Stub
         }
 
         final long identity = Binder.clearCallingIdentity();
-        mHdmiAudioSystemClient.sendReportAudioStatusCecCommand(
-                isMuteAdjust, getStreamVolume(AudioSystem.STREAM_MUSIC),
-                getStreamMaxVolume(AudioSystem.STREAM_MUSIC),
-                isStreamMute(AudioSystem.STREAM_MUSIC));
-        Binder.restoreCallingIdentity(identity);
+        try {
+            mHdmiAudioSystemClient.sendReportAudioStatusCecCommand(
+                    isMuteAdjust, getStreamVolume(AudioSystem.STREAM_MUSIC),
+                    getStreamMaxVolume(AudioSystem.STREAM_MUSIC),
+                    isStreamMute(AudioSystem.STREAM_MUSIC));
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     private int getNewRingerMode(int stream, int index, int flags) {
@@ -4985,26 +4996,26 @@ public class AudioService extends IAudioService.Stub
         if (getCurrentUserId() == userId || userId == android.os.Process.SYSTEM_UID) {
             final boolean currentMute = mAudioSystem.isMicrophoneMuted();
             final long identity = Binder.clearCallingIdentity();
-            final int ret = mAudioSystem.muteMicrophone(muted);
-
-            // update cache with the real state independently from what was set
-            mMicMuteFromSystemCached = mAudioSystem.isMicrophoneMuted();
-            if (ret != AudioSystem.AUDIO_STATUS_OK) {
-                Log.e(TAG, "Error changing mic mute state to " + muted + " current:"
-                        + mMicMuteFromSystemCached);
-            }
-
-            new MediaMetrics.Item(MediaMetrics.Name.AUDIO_MIC)
-                    .setUid(userId)
-                    .set(MediaMetrics.Property.EVENT, "setMicrophoneMuteNoCallerCheck")
-                    .set(MediaMetrics.Property.MUTE, mMicMuteFromSystemCached
-                            ? MediaMetrics.Value.ON : MediaMetrics.Value.OFF)
-                    .set(MediaMetrics.Property.REQUEST, muted
-                            ? MediaMetrics.Value.MUTE : MediaMetrics.Value.UNMUTE)
-                    .set(MediaMetrics.Property.STATUS, ret)
-                    .record();
-
             try {
+                final int ret = mAudioSystem.muteMicrophone(muted);
+
+                // update cache with the real state independently from what was set
+                mMicMuteFromSystemCached = mAudioSystem.isMicrophoneMuted();
+                if (ret != AudioSystem.AUDIO_STATUS_OK) {
+                    Log.e(TAG, "Error changing mic mute state to " + muted + " current:"
+                            + mMicMuteFromSystemCached);
+                }
+
+                new MediaMetrics.Item(MediaMetrics.Name.AUDIO_MIC)
+                        .setUid(userId)
+                        .set(MediaMetrics.Property.EVENT, "setMicrophoneMuteNoCallerCheck")
+                        .set(MediaMetrics.Property.MUTE, mMicMuteFromSystemCached
+                                ? MediaMetrics.Value.ON : MediaMetrics.Value.OFF)
+                        .set(MediaMetrics.Property.REQUEST, muted
+                                ? MediaMetrics.Value.MUTE : MediaMetrics.Value.UNMUTE)
+                        .set(MediaMetrics.Property.STATUS, ret)
+                        .record();
+
                 // send the intent even if there was a failure to change the actual mute state:
                 // the AudioManager.setMicrophoneMute API doesn't have a return value to
                 // indicate if the call failed to successfully change the mute state, and receiving
@@ -5614,9 +5625,13 @@ public class AudioService extends IAudioService.Stub
                     + mMode.get() + " requested mode: " + requestedMode);
         }
         if (mode != mMode.get() || force) {
+            int status = AudioSystem.SUCCESS;
             final long identity = Binder.clearCallingIdentity();
-            int status = mAudioSystem.setPhoneState(mode, uid);
-            Binder.restoreCallingIdentity(identity);
+            try {
+                status = mAudioSystem.setPhoneState(mode, uid);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
             if (status == AudioSystem.AUDIO_STATUS_OK) {
                 if (DEBUG_MODE) {
                     Log.v(TAG, "onUpdateAudioMode: mode successfully set to " + mode);
@@ -6023,17 +6038,22 @@ public class AudioService extends IAudioService.Stub
         }
 
         final long ident = Binder.clearCallingIdentity();
-        boolean status =
-                mDeviceBroker.setCommunicationDevice(cb, pid, device, eventSource);
-        Binder.restoreCallingIdentity(ident);
-        return status;
+        try {
+            return mDeviceBroker.setCommunicationDevice(cb, pid, device, eventSource);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     /** @see AudioManager#getCommunicationDevice() */
     public int getCommunicationDevice() {
+        AudioDeviceInfo device = null;
         final long ident = Binder.clearCallingIdentity();
-        AudioDeviceInfo device = mDeviceBroker.getCommunicationDevice();
-        Binder.restoreCallingIdentity(ident);
+        try {
+            device = mDeviceBroker.getCommunicationDevice();
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
         if (device == null) {
             return 0;
         }
@@ -6083,8 +6103,11 @@ public class AudioService extends IAudioService.Stub
                         ? MediaMetrics.Value.ON : MediaMetrics.Value.OFF)
                 .record();
         final long ident = Binder.clearCallingIdentity();
-        mDeviceBroker.setSpeakerphoneOn(cb, pid, on, eventSource);
-        Binder.restoreCallingIdentity(ident);
+        try {
+            mDeviceBroker.setSpeakerphoneOn(cb, pid, on, eventSource);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     /** @see AudioManager#isSpeakerphoneOn() */
@@ -6224,8 +6247,11 @@ public class AudioService extends IAudioService.Stub
             return;
         }
         final long ident = Binder.clearCallingIdentity();
-        mDeviceBroker.startBluetoothScoForClient(cb, pid, scoAudioMode, eventSource);
-        Binder.restoreCallingIdentity(ident);
+        try {
+            mDeviceBroker.startBluetoothScoForClient(cb, pid, scoAudioMode, eventSource);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
         mmi.record();
     }
 
@@ -6241,8 +6267,11 @@ public class AudioService extends IAudioService.Stub
                 .append(") from u/pid:").append(uid).append("/")
                 .append(pid).toString();
         final long ident = Binder.clearCallingIdentity();
-        mDeviceBroker.stopBluetoothScoForClient(cb, pid, eventSource);
-        Binder.restoreCallingIdentity(ident);
+        try {
+            mDeviceBroker.stopBluetoothScoForClient(cb, pid, eventSource);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
         new MediaMetrics.Item(MediaMetrics.Name.AUDIO_BLUETOOTH)
                 .setUid(uid)
                 .setPid(pid)
@@ -6531,8 +6560,11 @@ public class AudioService extends IAudioService.Stub
                 (TelecomManager) mContext.getSystemService(Context.TELECOM_SERVICE);
 
         final long ident = Binder.clearCallingIdentity();
-        IsInCall = telecomManager.isInCall();
-        Binder.restoreCallingIdentity(ident);
+        try {
+            IsInCall = telecomManager.isInCall();
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
 
         int mode = mMode.get();
         return (IsInCall
@@ -6672,10 +6704,13 @@ public class AudioService extends IAudioService.Stub
     private void queueMsgUnderWakeLock(Handler handler, int msg,
             int arg1, int arg2, Object obj, int delay) {
         final long ident = Binder.clearCallingIdentity();
-        // Always acquire the wake lock as AudioService because it is released by the
-        // message handler.
-        mAudioEventWakeLock.acquire();
-        Binder.restoreCallingIdentity(ident);
+        try {
+            // Always acquire the wake lock as AudioService because it is released by the
+            // message handler.
+            mAudioEventWakeLock.acquire();
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
         sendMsg(handler, msg, SENDMSG_QUEUE, arg1, arg2, obj, delay);
     }
 
@@ -11694,13 +11729,16 @@ public class AudioService extends IAudioService.Stub
         int callingUid = Binder.getCallingUid();
         int flags = AudioAttributes.capturePolicyToFlags(capturePolicy, 0x0);
         final long identity = Binder.clearCallingIdentity();
-        synchronized (mPlaybackMonitor) {
-            int result = mAudioSystem.setAllowedCapturePolicy(callingUid, flags);
-            if (result == AudioSystem.AUDIO_STATUS_OK) {
-                mPlaybackMonitor.setAllowedCapturePolicy(callingUid, capturePolicy);
+        try {
+            synchronized (mPlaybackMonitor) {
+                int result = mAudioSystem.setAllowedCapturePolicy(callingUid, flags);
+                if (result == AudioSystem.AUDIO_STATUS_OK) {
+                    mPlaybackMonitor.setAllowedCapturePolicy(callingUid, capturePolicy);
+                }
+                return result;
             }
+        } finally {
             Binder.restoreCallingIdentity(identity);
-            return result;
         }
     }
 
@@ -11711,9 +11749,11 @@ public class AudioService extends IAudioService.Stub
     public int getAllowedCapturePolicy() {
         int callingUid = Binder.getCallingUid();
         final long identity = Binder.clearCallingIdentity();
-        int capturePolicy = mPlaybackMonitor.getAllowedCapturePolicy(callingUid);
-        Binder.restoreCallingIdentity(identity);
-        return capturePolicy;
+        try {
+            return mPlaybackMonitor.getAllowedCapturePolicy(callingUid);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     //======================
@@ -11855,8 +11895,11 @@ public class AudioService extends IAudioService.Stub
                 }
             }
             final long identity = Binder.clearCallingIdentity();
-            mAudioSystem.registerPolicyMixes(mMixes, false);
-            Binder.restoreCallingIdentity(identity);
+            try {
+                mAudioSystem.registerPolicyMixes(mMixes, false);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
             synchronized (mAudioPolicies) {
                 mAudioPolicies.remove(mPolicyCallback.asBinder());
             }
@@ -11915,9 +11958,12 @@ public class AudioService extends IAudioService.Stub
 
         @AudioSystem.AudioSystemError int connectMixes() {
             final long identity = Binder.clearCallingIdentity();
-            int status = mAudioSystem.registerPolicyMixes(mMixes, true);
-            Binder.restoreCallingIdentity(identity);
-            return status;
+            try {
+                return mAudioSystem.registerPolicyMixes(mMixes, true);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+
         }
 
         int setUidDeviceAffinities(int uid, @NonNull int[] types, @NonNull String[] addresses) {
