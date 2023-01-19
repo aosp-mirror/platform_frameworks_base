@@ -81,7 +81,7 @@ public class SensorControllerTest {
     @Test
     public void createSensor_invalidHandle_throwsException() {
         doReturn(/* handle= */0).when(mSensorManagerInternalMock).createRuntimeSensor(
-                anyInt(), anyInt(), anyString(), anyString(), any());
+                anyInt(), anyInt(), anyString(), anyString(), anyInt(), any());
 
         Throwable thrown = assertThrows(
                 RuntimeException.class,
@@ -138,7 +138,7 @@ public class SensorControllerTest {
 
     private void doCreateSensorSuccessfully() {
         doReturn(SENSOR_HANDLE).when(mSensorManagerInternalMock).createRuntimeSensor(
-                anyInt(), anyInt(), anyString(), anyString(), any());
+                anyInt(), anyInt(), anyString(), anyString(), anyInt(), any());
         assertThat(mSensorController.createSensor(mSensorToken, mVirtualSensorConfig))
                 .isEqualTo(SENSOR_HANDLE);
     }

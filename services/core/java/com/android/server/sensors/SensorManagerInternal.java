@@ -17,6 +17,8 @@
 package com.android.server.sensors;
 
 import android.annotation.NonNull;
+import android.hardware.SensorDirectChannel;
+import android.os.ParcelFileDescriptor;
 
 import java.util.concurrent.Executor;
 
@@ -58,7 +60,7 @@ public abstract class SensorManagerInternal {
      * @return The sensor handle.
      */
     public abstract int createRuntimeSensor(int deviceId, int type, @NonNull String name,
-            @NonNull String vendor, @NonNull RuntimeSensorCallback callback);
+            @NonNull String vendor, int flags, @NonNull RuntimeSensorCallback callback);
 
     /**
      * Unregisters the sensor with the given handle from the framework.
@@ -98,9 +100,31 @@ public abstract class SensorManagerInternal {
     public interface RuntimeSensorCallback {
         /**
          * Invoked when the listeners of the runtime sensor have changed.
-         * Returns an error code if the invocation was unsuccessful, zero otherwise.
+         * Returns zero on success, negative error code otherwise.
          */
         int onConfigurationChanged(int handle, boolean enabled, int samplingPeriodMicros,
                 int batchReportLatencyMicros);
+
+        /**
+         * Invoked when a direct sensor channel has been created.
+         * Wraps the file descriptor in a {@link android.os.SharedMemory} object and passes it to
+         * the client process.
+         * Returns a positive identifier of the channel on success, negative error code otherwise.
+         */
+        int onDirectChannelCreated(ParcelFileDescriptor fd);
+
+        /**
+         * Invoked when a direct sensor channel has been destroyed.
+         */
+        void onDirectChannelDestroyed(int channelHandle);
+
+        /**
+         * Invoked when a direct sensor channel has been configured for a sensor.
+         * If the invocation is unsuccessful, a negative error code is returned.
+         * On success, the return value is zero if the rate level is {@code RATE_STOP}, and a
+         * positive report token otherwise.
+         */
+        int onDirectChannelConfigured(int channelHandle, int sensorHandle,
+                @SensorDirectChannel.RateLevel int rateLevel);
     }
 }
