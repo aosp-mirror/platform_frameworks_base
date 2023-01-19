@@ -26,6 +26,7 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.InsetDrawable
 import android.graphics.drawable.LayerDrawable
+import android.graphics.drawable.StateListDrawable
 import android.util.Log
 import android.view.GhostView
 import android.view.View
@@ -339,6 +340,10 @@ open class GhostedViewLaunchAnimatorController @JvmOverloads constructor(
                         return maybeGradient
                     }
                 }
+            }
+
+            if (drawable is StateListDrawable) {
+                return findGradientDrawable(drawable.current)
             }
 
             return null
