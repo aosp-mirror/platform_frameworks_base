@@ -995,6 +995,51 @@ public final class ContextHubManager {
     }
 
     /**
+     * Puts the Context Hub in test mode.
+     *
+     * The purpose of this API is to make testing CHRE/Context Hub more
+     * predictable and robust. This temporarily unloads all
+     * nanoapps.
+     *
+     * Note that this API must not cause CHRE/Context Hub to behave differently
+     * in test compared to production.
+     *
+     * @return true if the enable test mode operation succeeded.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @NonNull public boolean enableTestMode() {
+        try {
+            return mService.setTestMode(true);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Puts the Context Hub out of test mode.
+     *
+     * This API will undo any previously made enableTestMode() calls.
+     * After this API is called, it should restore the state of the system
+     * to the normal/production mode before any enableTestMode() call was
+     * made. If the enableTestMode() call unloaded any nanoapps
+     * to enter test mode, it should reload those nanoapps in this API call.
+     *
+     * @return true if the disable operation succeeded.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @NonNull public boolean disableTestMode() {
+        try {
+            return mService.setTestMode(false);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Unregister a callback for receive messages from the context hub.
      *
      * @see Callback
