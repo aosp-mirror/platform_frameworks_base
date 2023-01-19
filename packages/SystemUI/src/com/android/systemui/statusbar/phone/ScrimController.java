@@ -791,20 +791,28 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             if (!mScreenOffAnimationController.shouldExpandNotifications()
                     && !mAnimatingPanelExpansionOnUnlock
                     && !occluding) {
-                float behindFraction = getInterpolatedFraction();
-                behindFraction = (float) Math.pow(behindFraction, 0.8f);
                 if (mClipsQsScrim) {
+                    float behindFraction = getInterpolatedFraction();
+                    behindFraction = (float) Math.pow(behindFraction, 0.8f);
                     mBehindAlpha = mTransparentScrimBackground ? 0 : 1;
                     mNotificationsAlpha =
                             mTransparentScrimBackground ? 0 : behindFraction * mDefaultScrimAlpha;
                 } else {
-                    mBehindAlpha =
-                            mTransparentScrimBackground ? 0 : behindFraction * mDefaultScrimAlpha;
-                    // Delay fade-in of notification scrim a bit further, to coincide with the
-                    // view fade in. Otherwise the empty panel can be quite jarring.
-                    mNotificationsAlpha = mTransparentScrimBackground
-                            ? 0 : MathUtils.constrainedMap(0f, 1f, 0.3f, 0.75f,
-                            mPanelExpansionFraction);
+                    if (mTransparentScrimBackground) {
+                        mBehindAlpha = 0;
+                        mNotificationsAlpha = 0;
+                    } else {
+                        // Behind scrim will finish fading in at 30% expansion.
+                        float behindFraction = MathUtils
+                                .constrainedMap(0f, 1f, 0f, 0.3f, mPanelExpansionFraction);
+                        mBehindAlpha = behindFraction * mDefaultScrimAlpha;
+                        // Delay fade-in of notification scrim a bit further, to coincide with the
+                        // behind scrim finishing fading in.
+                        // Also to coincide with the view starting to fade in, otherwise the empty
+                        // panel can be quite jarring.
+                        mNotificationsAlpha = MathUtils
+                                .constrainedMap(0f, 1f, 0.3f, 0.75f, mPanelExpansionFraction);
+                    }
                 }
                 mBehindTint = mState.getBehindTint();
                 mInFrontAlpha = 0;
