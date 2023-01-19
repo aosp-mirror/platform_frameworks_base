@@ -125,8 +125,8 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
     }
 
     @Override // from CredentialManagerUiCallbacks
-    public void onUiCancellation() {
-        Log.i(TAG, "Ui canceled");
+    public void onUiCancellation(boolean isUserCancellation) {
+        Log.i(TAG, "Ui canceled. Canceled by user: " + isUserCancellation);
         // User canceled the activity
         finishSession();
     }
