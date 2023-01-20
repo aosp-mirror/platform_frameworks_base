@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.log.dagger;
+package com.android.systemui.media.taptotransfer.receiver;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -26,8 +26,7 @@ import java.lang.annotation.Retention;
 import javax.inject.Qualifier;
 
 /**
- * A {@link LogBuffer} for
- * {@link com.android.systemui.media.taptotransfer.receiver.MediaTttReceiverLogger}.
+ * A {@link LogBuffer} for receiver logs.
  */
 @Qualifier
 @Documented

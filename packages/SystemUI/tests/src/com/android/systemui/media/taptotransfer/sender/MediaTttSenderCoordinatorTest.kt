@@ -40,14 +40,12 @@ import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.common.shared.model.Text.Companion.loadText
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.taptotransfer.MediaTttFlags
-import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
-import com.android.systemui.temporarydisplay.chipbar.ChipbarInfo
 import com.android.systemui.temporarydisplay.chipbar.ChipbarLogger
 import com.android.systemui.temporarydisplay.chipbar.FakeChipbarCoordinator
 import com.android.systemui.temporarydisplay.chipbar.SwipeChipbarAwayGestureHandler
@@ -92,7 +90,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
     @Mock private lateinit var falsingManager: FalsingManager
     @Mock private lateinit var falsingCollector: FalsingCollector
     @Mock private lateinit var chipbarLogger: ChipbarLogger
-    @Mock private lateinit var logger: MediaTttLogger<ChipbarInfo>
+    @Mock private lateinit var logger: MediaTttSenderLogger
     @Mock private lateinit var mediaTttFlags: MediaTttFlags
     @Mock private lateinit var packageManager: PackageManager
     @Mock private lateinit var powerManager: PowerManager

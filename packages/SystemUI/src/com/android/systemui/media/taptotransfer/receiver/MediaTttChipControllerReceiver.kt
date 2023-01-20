@@ -39,7 +39,6 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.taptotransfer.MediaTttFlags
 import com.android.systemui.media.taptotransfer.common.MediaTttIcon
-import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.media.taptotransfer.common.MediaTttUtils
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -64,7 +63,7 @@ import javax.inject.Inject
 open class MediaTttChipControllerReceiver @Inject constructor(
         private val commandQueue: CommandQueue,
         context: Context,
-        @MediaTttReceiverLogger logger: MediaTttLogger<ChipReceiverInfo>,
+        logger: MediaTttReceiverLogger,
         windowManager: WindowManager,
         mainExecutor: DelayableExecutor,
         accessibilityManager: AccessibilityManager,
@@ -78,7 +77,7 @@ open class MediaTttChipControllerReceiver @Inject constructor(
         wakeLockBuilder: WakeLock.Builder,
         systemClock: SystemClock,
         private val rippleController: MediaTttReceiverRippleController,
-) : TemporaryViewDisplayController<ChipReceiverInfo, MediaTttLogger<ChipReceiverInfo>>(
+) : TemporaryViewDisplayController<ChipReceiverInfo, MediaTttReceiverLogger>(
         context,
         logger,
         windowManager,
@@ -172,9 +171,10 @@ open class MediaTttChipControllerReceiver @Inject constructor(
     }
 
     override fun updateView(newInfo: ChipReceiverInfo, currentView: ViewGroup) {
-        var iconInfo = MediaTttUtils.getIconInfoFromPackageName(
-            context, newInfo.routeInfo.clientPackageName, logger
-        )
+        val packageName = newInfo.routeInfo.clientPackageName
+        var iconInfo = MediaTttUtils.getIconInfoFromPackageName(context, packageName) {
+            logger.logPackageNotFound(packageName)
+        }
 
         if (newInfo.appNameOverride != null) {
             iconInfo = iconInfo.copy(

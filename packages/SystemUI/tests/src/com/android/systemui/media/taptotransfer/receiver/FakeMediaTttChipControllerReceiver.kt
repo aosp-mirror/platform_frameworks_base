@@ -24,7 +24,6 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.taptotransfer.MediaTttFlags
-import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -35,7 +34,7 @@ import com.android.systemui.util.wakelock.WakeLock
 class FakeMediaTttChipControllerReceiver(
     commandQueue: CommandQueue,
     context: Context,
-    logger: MediaTttLogger<ChipReceiverInfo>,
+    logger: MediaTttReceiverLogger,
     windowManager: WindowManager,
     mainExecutor: DelayableExecutor,
     accessibilityManager: AccessibilityManager,

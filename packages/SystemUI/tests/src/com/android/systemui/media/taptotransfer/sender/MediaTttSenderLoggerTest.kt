@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.media.taptotransfer.common
+package com.android.systemui.media.taptotransfer.sender
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -22,7 +22,6 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogcatEchoTracker
-import com.android.systemui.temporarydisplay.TemporaryViewInfo
 import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -31,16 +30,17 @@ import org.junit.Test
 import org.mockito.Mockito.mock
 
 @SmallTest
-class MediaTttLoggerTest : SysuiTestCase() {
+class MediaTttSenderLoggerTest : SysuiTestCase() {
 
     private lateinit var buffer: LogBuffer
-    private lateinit var logger: MediaTttLogger<TemporaryViewInfo>
+    private lateinit var logger: MediaTttSenderLogger
 
     @Before
-    fun setUp () {
-        buffer = LogBufferFactory(DumpManager(), mock(LogcatEchoTracker::class.java))
-            .create("buffer", 10)
-        logger = MediaTttLogger(DEVICE_TYPE_TAG, buffer)
+    fun setUp() {
+        buffer =
+            LogBufferFactory(DumpManager(), mock(LogcatEchoTracker::class.java))
+                .create("buffer", 10)
+        logger = MediaTttSenderLogger(buffer)
     }
 
     @Test
@@ -52,10 +52,17 @@ class MediaTttLoggerTest : SysuiTestCase() {
         logger.logStateChange(stateName, id, packageName)
 
         val actualString = getStringFromBuffer()
-        assertThat(actualString).contains(DEVICE_TYPE_TAG)
         assertThat(actualString).contains(stateName)
         assertThat(actualString).contains(id)
         assertThat(actualString).contains(packageName)
+    }
+
+    @Test
+    fun logStateChangeError_hasState() {
+        logger.logStateChangeError(3456)
+
+        val actualString = getStringFromBuffer()
+        assertThat(actualString).contains("3456")
     }
 
     @Test
@@ -86,5 +93,3 @@ class MediaTttLoggerTest : SysuiTestCase() {
         return stringWriter.toString()
     }
 }
-
-private const val DEVICE_TYPE_TAG = "TEST TYPE"
