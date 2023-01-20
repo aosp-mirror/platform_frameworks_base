@@ -568,6 +568,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // What we do when the user double-taps on home
     private int mDoubleTapOnHomeBehavior;
 
+    // Whether to lock the device after the next app transition has finished.
+    private boolean mLockAfterAppTransitionFinished;
+
     // Allowed theater mode wake actions
     private boolean mAllowTheaterModeWakeFromKey;
     private boolean mAllowTheaterModeWakeFromPowerKey;
@@ -1057,11 +1060,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return;
         }
 
-        // Make sure the device locks. Unfortunately, this has the side-effect of briefly revealing
-        // the lock screen before the dream appears. Note that locking is a side-effect of the no
-        // dream action that is executed if we early return above.
-        // TODO(b/261662912): Find a better way to lock the device that doesn't result in jank.
-        lockNow(null);
+        synchronized (mLock) {
+            // Lock the device after the dream transition has finished.
+            mLockAfterAppTransitionFinished = true;
+        }
 
         dreamManagerInternal.requestDream();
     }
@@ -2141,6 +2143,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 handleStartTransitionForKeyguardLw(
                         keyguardGoingAway, false /* keyguardOccludingStarted */,
                         0 /* duration */);
+
+                synchronized (mLock) {
+                    mLockAfterAppTransitionFinished = false;
+                }
+            }
+
+            @Override
+            public void onAppTransitionFinishedLocked(IBinder token) {
+                synchronized (mLock) {
+                    if (!mLockAfterAppTransitionFinished) {
+                        return;
+                    }
+                    mLockAfterAppTransitionFinished = false;
+                }
+
+                lockNow(null);
             }
         });
 
