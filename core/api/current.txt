@@ -27130,6 +27130,39 @@ package android.media.tv {
     method public void onTuned(android.net.Uri);
   }
 
+  public final class TvRecordingInfo implements android.os.Parcelable {
+    ctor public TvRecordingInfo(@NonNull String, long, long, int, @NonNull String, @NonNull String, long, long, @NonNull android.net.Uri, @Nullable android.net.Uri, @NonNull java.util.List<android.media.tv.TvContentRating>, @Nullable android.net.Uri, long, long);
+    method public int describeContents();
+    method @NonNull public android.net.Uri getChannelUri();
+    method @NonNull public java.util.List<android.media.tv.TvContentRating> getContentRatings();
+    method @NonNull public String getDescription();
+    method @NonNull public long getEndPaddingMillis();
+    method @NonNull public String getName();
+    method @Nullable public android.net.Uri getProgramUri();
+    method @IntRange(from=0xffffffff) @NonNull public long getRecordingDurationMillis();
+    method @NonNull public String getRecordingId();
+    method @IntRange(from=0xffffffff) @NonNull public long getRecordingStartTimeMillis();
+    method @Nullable public android.net.Uri getRecordingUri();
+    method @NonNull public int getRepeatDays();
+    method @IntRange(from=0) @NonNull public long getScheduledDurationMillis();
+    method @IntRange(from=0) @NonNull public long getScheduledStartTimeMillis();
+    method @NonNull public long getStartPaddingMillis();
+    method public void setDescription(@NonNull String);
+    method public void setName(@NonNull String);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.TvRecordingInfo> CREATOR;
+    field public static final int FRIDAY = 32; // 0x20
+    field public static final int MONDAY = 2; // 0x2
+    field public static final int RECORDING_ALL = 3; // 0x3
+    field public static final int RECORDING_IN_PROGRESS = 2; // 0x2
+    field public static final int RECORDING_SCHEDULED = 1; // 0x1
+    field public static final int SATURDAY = 64; // 0x40
+    field public static final int SUNDAY = 1; // 0x1
+    field public static final int THURSDAY = 16; // 0x10
+    field public static final int TUESDAY = 4; // 0x4
+    field public static final int WEDNESDAY = 8; // 0x8
+  }
+
   public final class TvTrackInfo implements android.os.Parcelable {
     method public int describeContents();
     method public int getAudioChannelCount();
