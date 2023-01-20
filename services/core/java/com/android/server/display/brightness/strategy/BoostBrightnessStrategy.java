@@ -40,7 +40,7 @@ public class BoostBrightnessStrategy implements DisplayBrightnessStrategy {
         DisplayBrightnessState displayBrightnessState =
                 BrightnessUtils.constructDisplayBrightnessState(BrightnessReason.REASON_BOOST,
                         PowerManager.BRIGHTNESS_MAX,
-                        PowerManager.BRIGHTNESS_MAX);
+                        PowerManager.BRIGHTNESS_MAX, getName());
         return displayBrightnessState;
     }
 

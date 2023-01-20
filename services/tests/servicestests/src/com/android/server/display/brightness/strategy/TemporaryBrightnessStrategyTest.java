@@ -55,6 +55,7 @@ public class TemporaryBrightnessStrategyTest {
                         .setBrightness(temporaryBrightness)
                         .setBrightnessReason(brightnessReason)
                         .setSdrBrightness(temporaryBrightness)
+                        .setDisplayBrightnessStrategyName(mTemporaryBrightnessStrategy.getName())
                         .build();
         DisplayBrightnessState updatedDisplayBrightnessState =
                 mTemporaryBrightnessStrategy.updateBrightness(displayPowerRequest);

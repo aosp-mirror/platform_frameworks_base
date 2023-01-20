@@ -34,7 +34,7 @@ public class ScreenOffBrightnessStrategy implements DisplayBrightnessStrategy {
         // the brightness
         return BrightnessUtils.constructDisplayBrightnessState(BrightnessReason.REASON_SCREEN_OFF,
                 PowerManager.BRIGHTNESS_OFF_FLOAT,
-                PowerManager.BRIGHTNESS_OFF_FLOAT);
+                PowerManager.BRIGHTNESS_OFF_FLOAT, getName());
     }
 
     @Override
