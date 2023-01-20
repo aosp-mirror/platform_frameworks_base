@@ -228,11 +228,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         public void onClick(View v) {
             final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
             final int id = v.getId();
-            if (id == R.id.close_window) {
-                mTaskOperations.closeTask(mTaskToken);
-            } else if (id == R.id.back_button) {
-                mTaskOperations.injectBackKey();
-            } else if (id == R.id.caption_handle) {
+            if (id == R.id.caption_handle) {
                 decoration.createHandleMenu();
             } else if (id == R.id.desktop_button) {
                 mDesktopModeController.ifPresent(c -> c.setDesktopModeActive(true));

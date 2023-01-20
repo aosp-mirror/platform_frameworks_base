@@ -331,8 +331,8 @@
     <!-- Height of button (32dp)  + 2 * margin (5dp each). -->
     <dimen name="freeform_decor_caption_height">42dp</dimen>
 
-    <!-- Width of buttons (64dp) + handle (128dp) + padding (24dp total). -->
-    <dimen name="freeform_decor_caption_width">216dp</dimen>
+    <!-- Width of buttons (32dp each) + padding (128dp total). -->
+    <dimen name="freeform_decor_caption_menu_width">256dp</dimen>
 
     <dimen name="freeform_resize_handle">30dp</dimen>
 
