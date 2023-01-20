@@ -744,6 +744,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         setWindowVisible(isNavBarWindowVisible());
         mView.setBehavior(mBehavior);
         setNavBarMode(mNavBarMode);
+        repositionNavigationBar(mCurrentRotation);
         mView.setUpdateActiveTouchRegionsCallback(
                 () -> mOverviewProxyService.onActiveNavBarRegionChanges(
                         getButtonLocations(
