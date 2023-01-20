@@ -207,6 +207,7 @@ public class AlarmManagerServiceTest {
     private static final String TAG = AlarmManagerServiceTest.class.getSimpleName();
     private static final int SYSTEM_UI_UID = 12345;
     private static final int TEST_CALLING_USER = UserHandle.getUserId(TEST_CALLING_UID);
+    private static final int TEST_CALLING_UID_2 = TEST_CALLING_UID + 1;
 
     private long mAppStandbyWindow;
     private long mAllowWhileIdleWindow;
@@ -3411,10 +3412,40 @@ public class AlarmManagerServiceTest {
             final int type = ((i & 1) == 0) ? ELAPSED_REALTIME : ELAPSED_REALTIME_WAKEUP;
             setTestAlarm(type, mNowElapsedTest + i, getNewMockPendingIntent());
         }
+        for (int i = 0; i < 4; i++) {
+            final int type = ((i & 1) == 0) ? ELAPSED_REALTIME : ELAPSED_REALTIME_WAKEUP;
+            setTestAlarm(
+                    type,
+                    mNowElapsedTest + i,
+                    getNewMockPendingIntent(),
+                    0,
+                    FLAG_STANDALONE,
+                    TEST_CALLING_UID_2);
+        }
         mNowElapsedTest += 100;
         mTestTimer.expire();
 
-        verify(() -> MetricsHelper.pushAlarmBatchDelivered(10, 5));
+        final ArgumentCaptor<int[]> uidsCaptor = ArgumentCaptor.forClass(int[].class);
+        final ArgumentCaptor<int[]> alarmsPerUidCaptor = ArgumentCaptor.forClass(int[].class);
+        final ArgumentCaptor<int[]> wakeupAlarmsPerUidCaptor = ArgumentCaptor.forClass(int[].class);
+
+        verify(() -> MetricsHelper.pushAlarmBatchDelivered(
+                eq(14),
+                eq(7),
+                uidsCaptor.capture(),
+                alarmsPerUidCaptor.capture(),
+                wakeupAlarmsPerUidCaptor.capture()));
+        assertEquals(2, uidsCaptor.getValue().length);
+        assertEquals(2, alarmsPerUidCaptor.getValue().length);
+        assertEquals(2, wakeupAlarmsPerUidCaptor.getValue().length);
+        final int uid1Idx = uidsCaptor.getValue()[0] == TEST_CALLING_UID ? 0 : 1;
+        final int uid2Idx = 1 - uid1Idx;
+        assertEquals(TEST_CALLING_UID, uidsCaptor.getValue()[uid1Idx]);
+        assertEquals(TEST_CALLING_UID_2, uidsCaptor.getValue()[uid2Idx]);
+        assertEquals(10, alarmsPerUidCaptor.getValue()[uid1Idx]);
+        assertEquals(5, wakeupAlarmsPerUidCaptor.getValue()[uid1Idx]);
+        assertEquals(4, alarmsPerUidCaptor.getValue()[uid2Idx]);
+        assertEquals(2, wakeupAlarmsPerUidCaptor.getValue()[uid2Idx]);
     }
 
     @Test
