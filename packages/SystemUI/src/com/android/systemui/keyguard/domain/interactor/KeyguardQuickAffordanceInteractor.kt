@@ -363,6 +363,10 @@ constructor(
                 name = Contract.FlagsTable.FLAG_NAME_CUSTOM_CLOCKS_ENABLED,
                 value = featureFlags.isEnabled(Flags.LOCKSCREEN_CUSTOM_CLOCKS),
             ),
+            KeyguardPickerFlag(
+                name = Contract.FlagsTable.FLAG_NAME_WALLPAPER_FULLSCREEN_PREVIEW,
+                value = featureFlags.isEnabled(Flags.WALLPAPER_FULLSCREEN_PREVIEW),
+            ),
         )
     }
 
