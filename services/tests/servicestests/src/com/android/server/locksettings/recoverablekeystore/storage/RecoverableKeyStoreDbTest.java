@@ -67,7 +67,7 @@ public class RecoverableKeyStoreDbTest {
     public void setUp() {
         Context context = InstrumentationRegistry.getTargetContext();
         mDatabaseFile = context.getDatabasePath(DATABASE_FILE_NAME);
-        mRecoverableKeyStoreDb = RecoverableKeyStoreDb.newInstance(context);
+        mRecoverableKeyStoreDb = RecoverableKeyStoreDb.newInstance(context, 7);
     }
 
     @After
@@ -309,11 +309,47 @@ public class RecoverableKeyStoreDbTest {
         int userId = 42;
         int generationId = 110;
         Long serialNumber = 10L;
+        int badGuessCounter = 3;
 
         mRecoverableKeyStoreDb.setPlatformKeyGenerationId(userId, generationId);
+        mRecoverableKeyStoreDb.setBadRemoteGuessCounter(userId, badGuessCounter);
         mRecoverableKeyStoreDb.setUserSerialNumber(userId, serialNumber);
 
+        assertEquals(badGuessCounter, mRecoverableKeyStoreDb.getBadRemoteGuessCounter(userId));
         assertEquals(generationId, mRecoverableKeyStoreDb.getPlatformKeyGenerationId(userId));
+    }
+
+    @Test
+    public void getRemoteBadGuessCounter_returnsZeroAsDefaultValue() {
+        assertEquals(0, mRecoverableKeyStoreDb.getBadRemoteGuessCounter(42));
+    }
+
+    @Test
+    public void getRemoteBadGuessCounter_returnsStoredValue() {
+        int userId = 42;
+        int userId2 = 44;
+        int badGuessCounter = 3;
+        int badGuessCounter2 = 4;
+
+        mRecoverableKeyStoreDb.setBadRemoteGuessCounter(userId, badGuessCounter);
+        mRecoverableKeyStoreDb.setBadRemoteGuessCounter(userId2, badGuessCounter2);
+
+        assertEquals(badGuessCounter, mRecoverableKeyStoreDb.getBadRemoteGuessCounter(userId));
+        assertEquals(badGuessCounter2, mRecoverableKeyStoreDb.getBadRemoteGuessCounter(userId2));
+    }
+
+    @Test
+    public void getBadRemoteGuessCounter_returnsStoredValue() {
+        int userId = 42;
+        int userId2 = 44;
+        int badGuessCounter = 3;
+        int badGuessCounter2 = 4;
+
+        mRecoverableKeyStoreDb.setBadRemoteGuessCounter(userId, badGuessCounter);
+        mRecoverableKeyStoreDb.setBadRemoteGuessCounter(userId2, badGuessCounter2);
+
+        assertEquals(badGuessCounter, mRecoverableKeyStoreDb.getBadRemoteGuessCounter(userId));
+        assertEquals(badGuessCounter2, mRecoverableKeyStoreDb.getBadRemoteGuessCounter(userId2));
     }
 
     @Test
@@ -321,12 +357,15 @@ public class RecoverableKeyStoreDbTest {
         int userId = 42;
         int generationId = 110;
         Long serialNumber = 10L;
+        int badGuessCounter = 3;
 
         mRecoverableKeyStoreDb.setPlatformKeyGenerationId(userId, generationId);
         mRecoverableKeyStoreDb.setUserSerialNumber(userId, serialNumber);
-        mRecoverableKeyStoreDb.setPlatformKeyGenerationId(userId, generationId + 1);
+        mRecoverableKeyStoreDb.setBadRemoteGuessCounter(userId, badGuessCounter);
 
         assertEquals(serialNumber, mRecoverableKeyStoreDb.getUserSerialNumbers().get(userId));
+        assertEquals(generationId, mRecoverableKeyStoreDb.getPlatformKeyGenerationId(userId));
+        assertEquals(badGuessCounter, mRecoverableKeyStoreDb.getBadRemoteGuessCounter(userId));
     }
 
     @Test
