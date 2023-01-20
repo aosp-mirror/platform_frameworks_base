@@ -6231,6 +6231,15 @@ public class AudioManager {
     @SystemApi
     public static final int DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_MULTI_MODE = 4;
 
+    /**
+     * @hide
+     * A variant of {@link #DEVICE_VOLUME_BEHAVIOR_ABSOLUTE} where the host cannot reliably set
+     * the volume percentage of the audio device. Specifically, {@link #setStreamVolume} will have
+     * no effect, or an unreliable effect.
+     */
+    @SystemApi
+    public static final int DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_ADJUST_ONLY = 5;
+
     /** @hide */
     @IntDef({
             DEVICE_VOLUME_BEHAVIOR_VARIABLE,
@@ -6238,6 +6247,7 @@ public class AudioManager {
             DEVICE_VOLUME_BEHAVIOR_FIXED,
             DEVICE_VOLUME_BEHAVIOR_ABSOLUTE,
             DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_MULTI_MODE,
+            DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_ADJUST_ONLY,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DeviceVolumeBehavior {}
@@ -6250,9 +6260,21 @@ public class AudioManager {
             DEVICE_VOLUME_BEHAVIOR_FIXED,
             DEVICE_VOLUME_BEHAVIOR_ABSOLUTE,
             DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_MULTI_MODE,
+            DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_ADJUST_ONLY,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DeviceVolumeBehaviorState {}
+
+    /**
+     * Variants of absolute volume behavior that are set in {@link AudioDeviceVolumeManager}.
+     * @hide
+     */
+    @IntDef({
+            DEVICE_VOLUME_BEHAVIOR_ABSOLUTE,
+            DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_ADJUST_ONLY,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AbsoluteDeviceVolumeBehavior {}
 
     /**
      * @hide
@@ -6266,6 +6288,7 @@ public class AudioManager {
             case DEVICE_VOLUME_BEHAVIOR_FIXED:
             case DEVICE_VOLUME_BEHAVIOR_ABSOLUTE:
             case DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_MULTI_MODE:
+            case DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_ADJUST_ONLY:
                 return;
             default:
                 throw new IllegalArgumentException("Illegal volume behavior " + volumeBehavior);
@@ -6305,6 +6328,16 @@ public class AudioManager {
 
     /**
      * @hide
+     * Controls whether DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_ADJUST_ONLY may be returned by
+     * getDeviceVolumeBehavior. If this is disabled, DEVICE_VOLUME_BEHAVIOR_FULL is returned
+     * in its place.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public static final long RETURN_DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_ADJUST_ONLY = 240663182L;
+
+    /**
+     * @hide
      * Returns the volume device behavior for the given audio device
      * @param device the audio device
      * @return the volume behavior for the device
@@ -6322,7 +6355,12 @@ public class AudioManager {
         // communicate with service
         final IAudioService service = getService();
         try {
-            return service.getDeviceVolumeBehavior(device);
+            int behavior = service.getDeviceVolumeBehavior(device);
+            if (!CompatChanges.isChangeEnabled(RETURN_DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_ADJUST_ONLY)
+                    && behavior == DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_ADJUST_ONLY) {
+                return AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL;
+            }
+            return behavior;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
