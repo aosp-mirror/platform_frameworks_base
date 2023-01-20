@@ -462,7 +462,7 @@ public final class DreamManagerService extends SystemService {
     }
 
     protected void requestStopDreamFromShell() {
-        stopDreamInternal(true, "stopping dream from shell");
+        stopDreamInternal(false, "stopping dream from shell");
     }
 
     private void stopDreamInternal(boolean immediate, String reason) {
