@@ -29,7 +29,16 @@
 #include <utils/Log.h>
 
 #include <map>
+#include <set>
 #include <string>
+
+/**
+ * Log debug messages about native virtual input devices.
+ * Enable this via "adb shell setprop log.tag.InputController DEBUG"
+ */
+static bool isDebug() {
+    return __android_log_is_loggable(ANDROID_LOG_DEBUG, LOG_TAG, ANDROID_LOG_INFO);
+}
 
 namespace android {
 
@@ -193,6 +202,15 @@ static std::map<int, int> KEY_CODE_MAPPING = {
         {AKEYCODE_NUMPAD_EQUALS, KEY_KPEQUAL},
         {AKEYCODE_NUMPAD_COMMA, KEY_KPCOMMA},
 };
+
+/*
+ * Map from the uinput touchscreen fd to the pointers present in the previous touch events that
+ * hasn't been lifted.
+ * We only allow pointer id to go up to MAX_POINTERS because the maximum slots of virtual
+ * touchscreen is set up with MAX_POINTERS. Note that in other cases Android allows pointer id to go
+ * up to MAX_POINTERS_ID.
+ */
+static std::map<int32_t, std::bitset<MAX_POINTERS>> unreleasedTouches;
 
 /** Creates a new uinput device and assigns a file descriptor. */
 static int openUinput(const char* readableName, jint vendorId, jint productId, const char* phys,
@@ -366,6 +384,12 @@ static int nativeOpenUinputTouchscreen(JNIEnv* env, jobject thiz, jstring name, 
 
 static bool nativeCloseUinput(JNIEnv* env, jobject thiz, jint fd) {
     ioctl(fd, UI_DEV_DESTROY);
+    if (auto touchesOnFd = unreleasedTouches.find(fd); touchesOnFd != unreleasedTouches.end()) {
+        const size_t remainingPointers = touchesOnFd->second.size();
+        unreleasedTouches.erase(touchesOnFd);
+        ALOGW_IF(remainingPointers > 0, "Closing touchscreen %d, erased %zu unreleased pointers.",
+                 fd, remainingPointers);
+    }
     return close(fd);
 }
 
@@ -425,6 +449,69 @@ static bool nativeWriteButtonEvent(JNIEnv* env, jobject thiz, jint fd, jint butt
     return true;
 }
 
+static bool handleTouchUp(int fd, int pointerId) {
+    if (!writeInputEvent(fd, EV_ABS, ABS_MT_TRACKING_ID, static_cast<int32_t>(-1))) {
+        return false;
+    }
+    auto touchesOnFd = unreleasedTouches.find(fd);
+    if (touchesOnFd == unreleasedTouches.end()) {
+        ALOGE("PointerId %d action UP received with no prior events on touchscreen %d.", pointerId,
+              fd);
+        return false;
+    }
+    ALOGD_IF(isDebug(), "Unreleased touches found for touchscreen %d in the map", fd);
+
+    // When a pointer is no longer in touch, remove the pointer id from the corresponding
+    // entry in the unreleased touches map.
+    if (pointerId < 0 || pointerId >= MAX_POINTERS) {
+        ALOGE("Virtual touch event has invalid pointer id %d; value must be between 0 and %zu",
+              pointerId, MAX_POINTERS - 1);
+        return false;
+    }
+    if (!touchesOnFd->second.test(pointerId)) {
+        ALOGE("PointerId %d action UP received with no prior action DOWN on touchscreen %d.",
+              pointerId, fd);
+        return false;
+    }
+    touchesOnFd->second.reset(pointerId);
+    ALOGD_IF(isDebug(), "Pointer %d erased from the touchscreen %d", pointerId, fd);
+
+    // Only sends the BTN UP event when there's no pointers on the touchscreen.
+    if (touchesOnFd->second.none()) {
+        unreleasedTouches.erase(touchesOnFd);
+        if (!writeInputEvent(fd, EV_KEY, BTN_TOUCH, static_cast<int32_t>(UinputAction::RELEASE))) {
+            return false;
+        }
+        ALOGD_IF(isDebug(), "No pointers on touchscreen %d, BTN UP event sent.", fd);
+    }
+    return true;
+}
+
+static bool handleTouchDown(int fd, int pointerId) {
+    // When a new pointer is down on the touchscreen, add the pointer id in the corresponding
+    // entry in the unreleased touches map.
+    auto touchesOnFd = unreleasedTouches.find(fd);
+    if (touchesOnFd == unreleasedTouches.end()) {
+        // Only sends the BTN Down event when the first pointer on the touchscreen is down.
+        if (!writeInputEvent(fd, EV_KEY, BTN_TOUCH, static_cast<int32_t>(UinputAction::PRESS))) {
+            return false;
+        }
+        touchesOnFd = unreleasedTouches.insert({fd, {}}).first;
+        ALOGD_IF(isDebug(), "New touchscreen with fd %d added in the unreleased touches map.", fd);
+    }
+    if (touchesOnFd->second.test(pointerId)) {
+        ALOGE("Repetitive action DOWN event received on a pointer %d that is already down.",
+              pointerId);
+        return false;
+    }
+    touchesOnFd->second.set(pointerId);
+    ALOGD_IF(isDebug(), "Added pointer %d under touchscreen %d in the map", pointerId, fd);
+    if (!writeInputEvent(fd, EV_ABS, ABS_MT_TRACKING_ID, static_cast<int32_t>(pointerId))) {
+        return false;
+    }
+    return true;
+}
+
 static bool nativeWriteTouchEvent(JNIEnv* env, jobject thiz, jint fd, jint pointerId, jint toolType,
                                   jint action, jfloat locationX, jfloat locationY, jfloat pressure,
                                   jfloat majorAxisSize) {
@@ -446,15 +533,10 @@ static bool nativeWriteTouchEvent(JNIEnv* env, jobject thiz, jint fd, jint point
         return false;
     }
     UinputAction uinputAction = actionIterator->second;
-    if (uinputAction == UinputAction::PRESS || uinputAction == UinputAction::RELEASE) {
-        if (!writeInputEvent(fd, EV_KEY, BTN_TOUCH, static_cast<int32_t>(uinputAction))) {
-            return false;
-        }
-        if (!writeInputEvent(fd, EV_ABS, ABS_MT_TRACKING_ID,
-                             static_cast<int32_t>(uinputAction == UinputAction::PRESS ? pointerId
-                                                                                      : -1))) {
-            return false;
-        }
+    if (uinputAction == UinputAction::PRESS && !handleTouchDown(fd, pointerId)) {
+        return false;
+    } else if (uinputAction == UinputAction::RELEASE && !handleTouchUp(fd, pointerId)) {
+        return false;
     }
     if (!writeInputEvent(fd, EV_ABS, ABS_MT_POSITION_X, locationX)) {
         return false;
