@@ -16,60 +16,148 @@
 
 package com.android.server.companion.datatransfer.contextsync;
 
+import android.annotation.Nullable;
 import android.telecom.Call;
 import android.telecom.InCallService;
+import android.telecom.TelecomManager;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.companion.CompanionDeviceConfig;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-/** In-call service to sync call metadata across a user's devices. */
+/**
+ * In-call service to sync call metadata across a user's devices. Note that mute and silence are
+ * global states and apply to all current calls.
+ */
 public class CallMetadataSyncInCallService extends InCallService {
 
+    private static final long NOT_VALID = -1L;
+
     @VisibleForTesting
-    final Set<CrossDeviceCall> mCurrentCalls = new HashSet<>();
+    final Map<Call, CrossDeviceCall> mCurrentCalls = new HashMap<>();
+    final Call.Callback mTelecomCallback = new Call.Callback() {
+        @Override
+        public void onDetailsChanged(Call call, Call.Details details) {
+            mCurrentCalls.get(call).updateCallDetails(details);
+        }
+    };
+    final CallMetadataSyncCallback mCallMetadataSyncCallback = new CallMetadataSyncCallback() {
+        @Override
+        void processCallControlAction(int crossDeviceCallId, int callControlAction) {
+            final CrossDeviceCall crossDeviceCall = getCallForId(crossDeviceCallId,
+                    mCurrentCalls.values());
+            switch (callControlAction) {
+                case android.companion.Telecom.Call.ACCEPT:
+                    if (crossDeviceCall != null) {
+                        crossDeviceCall.doAccept();
+                    }
+                    break;
+                case android.companion.Telecom.Call.REJECT:
+                    if (crossDeviceCall != null) {
+                        crossDeviceCall.doReject();
+                    }
+                    break;
+                case android.companion.Telecom.Call.SILENCE:
+                    doSilence();
+                    break;
+                case android.companion.Telecom.Call.MUTE:
+                    doMute();
+                    break;
+                case android.companion.Telecom.Call.UNMUTE:
+                    doUnmute();
+                    break;
+                case android.companion.Telecom.Call.END:
+                    if (crossDeviceCall != null) {
+                        crossDeviceCall.doEnd();
+                    }
+                    break;
+                case android.companion.Telecom.Call.PUT_ON_HOLD:
+                    if (crossDeviceCall != null) {
+                        crossDeviceCall.doPutOnHold();
+                    }
+                    break;
+                case android.companion.Telecom.Call.TAKE_OFF_HOLD:
+                    if (crossDeviceCall != null) {
+                        crossDeviceCall.doTakeOffHold();
+                    }
+                    break;
+                default:
+            }
+        }
+
+        @Override
+        void requestCrossDeviceSync(int userId) {
+        }
+    };
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mCurrentCalls.addAll(getCalls().stream().map(CrossDeviceCall::new).toList());
+        if (CompanionDeviceConfig.isEnabled(CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
+            mCurrentCalls.putAll(getCalls().stream().collect(Collectors.toMap(call -> call,
+                    call -> new CrossDeviceCall(getPackageManager(), call, getCallAudioState()))));
+        }
+    }
+
+    @Nullable
+    @VisibleForTesting
+    CrossDeviceCall getCallForId(long crossDeviceCallId, Collection<CrossDeviceCall> calls) {
+        if (crossDeviceCallId == NOT_VALID) {
+            return null;
+        }
+        for (CrossDeviceCall crossDeviceCall : calls) {
+            if (crossDeviceCall.getId() == crossDeviceCallId) {
+                return crossDeviceCall;
+            }
+        }
+        return null;
     }
 
     @Override
     public void onCallAdded(Call call) {
-        onCallAdded(new CrossDeviceCall(call));
-    }
-
-    @VisibleForTesting
-    void onCallAdded(CrossDeviceCall call) {
-        mCurrentCalls.add(call);
+        if (CompanionDeviceConfig.isEnabled(CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
+            mCurrentCalls.put(call,
+                    new CrossDeviceCall(getPackageManager(), call, getCallAudioState()));
+        }
     }
 
     @Override
     public void onCallRemoved(Call call) {
-        mCurrentCalls.removeIf(crossDeviceCall -> crossDeviceCall.getCall().equals(call));
+        if (CompanionDeviceConfig.isEnabled(CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
+            mCurrentCalls.remove(call);
+        }
     }
 
-    /** Data holder for a telecom call and additional metadata. */
-    public static final class CrossDeviceCall {
-        private static final AtomicLong sNextId = new AtomicLong(1);
-
-        private final Call mCall;
-        private final long mId;
-
-        public CrossDeviceCall(Call call) {
-            mCall = call;
-            mId = sNextId.getAndIncrement();
+    @Override
+    public void onMuteStateChanged(boolean isMuted) {
+        if (CompanionDeviceConfig.isEnabled(CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
+            mCurrentCalls.values().forEach(call -> call.updateMuted(isMuted));
         }
+    }
 
-        public Call getCall() {
-            return mCall;
+    @Override
+    public void onSilenceRinger() {
+        if (CompanionDeviceConfig.isEnabled(CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
+            mCurrentCalls.values().forEach(call -> call.updateSilencedIfRinging());
         }
+    }
 
-        public long getId() {
-            return mId;
+    private void doMute() {
+        setMuted(/* shouldMute= */ true);
+    }
+
+    private void doUnmute() {
+        setMuted(/* shouldMute= */ false);
+    }
+
+    private void doSilence() {
+        final TelecomManager telecomManager = getSystemService(TelecomManager.class);
+        if (telecomManager != null) {
+            telecomManager.silenceRinger();
         }
     }
 }
