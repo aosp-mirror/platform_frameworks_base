@@ -6703,6 +6703,7 @@ package android.app {
     method public boolean areNotificationsEnabled();
     method public boolean areNotificationsPaused();
     method public boolean canNotifyAsPackage(@NonNull String);
+    method public boolean canSendFullScreenIntent();
     method public void cancel(int);
     method public void cancel(@Nullable String, int);
     method public void cancelAll();
