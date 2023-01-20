@@ -18,6 +18,7 @@ package com.android.wm.shell.splitscreen;
 
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -535,17 +536,11 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Adding MULTIPLE_TASK");
             } else {
-                try {
-                    adapter.getRunner().onAnimationCancelled(false /* isKeyguardOccluded */);
-                    ActivityTaskManager.getService().startActivityFromRecents(taskId, options2);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Error starting remote animation", e);
-                }
+                taskId = INVALID_TASK_ID;
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
                         "Cancel entering split as not supporting multi-instances");
                 Toast.makeText(mContext, R.string.dock_multi_instances_not_supported_text,
                         Toast.LENGTH_SHORT).show();
-                return;
             }
         }
         mStageCoordinator.startIntentAndTaskWithLegacyTransition(pendingIntent, fillInIntent,
@@ -586,17 +581,11 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 fillInIntent2.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Adding MULTIPLE_TASK");
             } else {
-                try {
-                    adapter.getRunner().onAnimationCancelled(false /* isKeyguardOccluded */);
-                    pendingIntent1.send();
-                } catch (RemoteException | PendingIntent.CanceledException e) {
-                    Slog.e(TAG, "Error starting remote animation", e);
-                }
+                pendingIntent2 = null;
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
                         "Cancel entering split as not supporting multi-instances");
                 Toast.makeText(mContext, R.string.dock_multi_instances_not_supported_text,
                         Toast.LENGTH_SHORT).show();
-                return;
             }
         }
         mStageCoordinator.startIntentsWithLegacyTransition(pendingIntent1, fillInIntent1, options1,
