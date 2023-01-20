@@ -128,6 +128,7 @@ import android.app.IAlarmManager;
 import android.app.PendingIntent;
 import android.app.compat.CompatChanges;
 import android.app.role.RoleManager;
+import android.app.tare.EconomyManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -508,7 +509,7 @@ public class AlarmManagerServiceTest {
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
 
         verify(mBatteryManager).isCharging();
-        setTareEnabled(false);
+        setTareEnabled(EconomyManager.ENABLED_MODE_OFF);
         mAppStandbyWindow = mService.mConstants.APP_STANDBY_WINDOW;
         mAllowWhileIdleWindow = mService.mConstants.ALLOW_WHILE_IDLE_WINDOW;
         ArgumentCaptor<AppStandbyInternal.AppIdleStateChangeListener> captor =
@@ -658,10 +659,10 @@ public class AlarmManagerServiceTest {
         mService.mConstants.onPropertiesChanged(mDeviceConfigProperties);
     }
 
-    private void setTareEnabled(boolean enabled) {
-        when(mEconomyManagerInternal.isEnabled(eq(AlarmManagerEconomicPolicy.POLICY_ALARM)))
-                .thenReturn(enabled);
-        mService.mConstants.onTareEnabledStateChanged(enabled);
+    private void setTareEnabled(int enabledMode) {
+        when(mEconomyManagerInternal.getEnabledMode(eq(AlarmManagerEconomicPolicy.POLICY_ALARM)))
+                .thenReturn(enabledMode);
+        mService.mConstants.onTareEnabledModeChanged(enabledMode);
     }
 
     /**
@@ -2091,7 +2092,7 @@ public class AlarmManagerServiceTest {
 
     @Test
     public void tareThrottling() {
-        setTareEnabled(true);
+        setTareEnabled(EconomyManager.ENABLED_MODE_ON);
         final ArgumentCaptor<EconomyManagerInternal.AffordabilityChangeListener> listenerCaptor =
                 ArgumentCaptor.forClass(EconomyManagerInternal.AffordabilityChangeListener.class);
         final ArgumentCaptor<EconomyManagerInternal.ActionBill> billCaptor =
@@ -3418,9 +3419,18 @@ public class AlarmManagerServiceTest {
     }
 
     @Test
-    public void tareEventPushed() throws Exception {
-        setTareEnabled(true);
+    public void tareEventPushed_on() throws Exception {
+        setTareEnabled(EconomyManager.ENABLED_MODE_ON);
+        runTareEventPushed();
+    }
 
+    @Test
+    public void tareEventPushed_shadow() throws Exception {
+        setTareEnabled(EconomyManager.ENABLED_MODE_SHADOW);
+        runTareEventPushed();
+    }
+
+    private void runTareEventPushed() throws Exception {
         for (int i = 0; i < 10; i++) {
             final int type = (i % 2 == 1) ? ELAPSED_REALTIME : ELAPSED_REALTIME_WAKEUP;
             setTestAlarm(type, mNowElapsedTest + i, getNewMockPendingIntent());

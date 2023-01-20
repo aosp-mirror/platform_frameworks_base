@@ -16,6 +16,7 @@
 
 package com.android.server.tare;
 
+import static android.app.tare.EconomyManager.ENABLED_MODE_OFF;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 
 import static com.android.server.tare.EconomicPolicy.REGULATION_BASIC_INCOME;
@@ -1111,7 +1112,7 @@ class Agent {
         final ActionAffordabilityNote note =
                 new ActionAffordabilityNote(bill, listener, economicPolicy);
         if (actionAffordabilityNotes.add(note)) {
-            if (!mIrs.isEnabled()) {
+            if (mIrs.getEnabledMode() == ENABLED_MODE_OFF) {
                 // When TARE isn't enabled, we always say something is affordable. We also don't
                 // want to silently drop affordability change listeners in case TARE becomes enabled
                 // because then clients will be in an ambiguous state.

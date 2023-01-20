@@ -16,10 +16,14 @@
 
 package android.app.tare;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.util.Log;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Provides access to the resource economy service.
@@ -91,10 +95,38 @@ public class EconomyManager {
         }
     }
 
-    public static final String KEY_ENABLE_TARE = "enable_tare";
+
+    public static final int ENABLED_MODE_OFF = 0;
+    public static final int ENABLED_MODE_ON = 1;
+    /**
+     * Go through the motions, tracking events, updating balances and other TARE state values,
+     * but don't use TARE to affect actual device behavior.
+     */
+    public static final int ENABLED_MODE_SHADOW = 2;
+
+    /** @hide */
+    @IntDef(prefix = {"ENABLED_MODE_"}, value = {
+            ENABLED_MODE_OFF,
+            ENABLED_MODE_ON,
+            ENABLED_MODE_SHADOW,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EnabledMode {
+    }
+
+    public static String enabledModeToString(@EnabledMode int mode) {
+        switch (mode) {
+            case ENABLED_MODE_OFF: return "ENABLED_MODE_OFF";
+            case ENABLED_MODE_ON: return "ENABLED_MODE_ON";
+            case ENABLED_MODE_SHADOW: return "ENABLED_MODE_SHADOW";
+            default: return "ENABLED_MODE_" + mode;
+        }
+    }
+
+    public static final String KEY_ENABLE_TARE_MODE = "enable_tare_mode";
     public static final String KEY_ENABLE_POLICY_ALARM = "enable_policy_alarm";
     public static final String KEY_ENABLE_POLICY_JOB_SCHEDULER = "enable_policy_job";
-    public static final boolean DEFAULT_ENABLE_TARE = true;
+    public static final int DEFAULT_ENABLE_TARE_MODE = ENABLED_MODE_ON;
     public static final boolean DEFAULT_ENABLE_POLICY_ALARM = true;
     public static final boolean DEFAULT_ENABLE_POLICY_JOB_SCHEDULER = true;
 
