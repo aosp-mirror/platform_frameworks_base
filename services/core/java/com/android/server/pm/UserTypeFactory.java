@@ -122,8 +122,6 @@ public final class UserTypeFactory {
                 .setMaxAllowedPerParent(1)
                 .setLabel(0)
                 .setDefaultRestrictions(null)
-                .setIsMediaSharedWithParent(true)
-                .setIsCredentialSharableWithParent(true)
                 .setDefaultCrossProfileIntentFilters(getDefaultCloneCrossProfileIntentFilter())
                 .setDefaultUserProperties(new UserProperties.Builder()
                         .setStartWithParent(true)
@@ -135,7 +133,10 @@ public final class UserTypeFactory {
                         .setCrossProfileIntentFilterAccessControl(
                                 UserProperties.CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_SYSTEM)
                         .setCrossProfileIntentResolutionStrategy(UserProperties
-                                .CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY_NO_FILTERING));
+                                .CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY_NO_FILTERING)
+                        .setIsMediaSharedWithParent(true)
+                        .setIsCredentialSharableWithParent(true)
+                );
     }
 
     /**
@@ -167,11 +168,11 @@ public final class UserTypeFactory {
                 .setDefaultRestrictions(getDefaultManagedProfileRestrictions())
                 .setDefaultSecureSettings(getDefaultManagedProfileSecureSettings())
                 .setDefaultCrossProfileIntentFilters(getDefaultManagedCrossProfileIntentFilter())
-                .setIsCredentialSharableWithParent(true)
                 .setDefaultUserProperties(new UserProperties.Builder()
                         .setStartWithParent(true)
                         .setShowInLauncher(UserProperties.SHOW_IN_LAUNCHER_SEPARATE)
-                        .setShowInSettings(UserProperties.SHOW_IN_SETTINGS_SEPARATE));
+                        .setShowInSettings(UserProperties.SHOW_IN_SETTINGS_SEPARATE)
+                        .setIsCredentialSharableWithParent(true));
     }
 
     /**

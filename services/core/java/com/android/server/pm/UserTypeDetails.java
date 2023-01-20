@@ -151,20 +151,6 @@ public final class UserTypeDetails {
     private final @Nullable int[] mDarkThemeBadgeColors;
 
     /**
-     * Denotes if the user shares media with its parent user.
-     *
-     * <p> Default value is false
-     */
-    private final boolean mIsMediaSharedWithParent;
-
-    /**
-     * Denotes if the user shares encryption credentials with its parent user.
-     *
-     * <p> Default value is false
-     */
-    private final boolean mIsCredentialSharableWithParent;
-
-    /**
      * The default {@link UserProperties} for the user type.
      * <p> The uninitialized value of each property is implied by {@link UserProperties.Builder}.
      */
@@ -180,8 +166,6 @@ public final class UserTypeDetails {
             @Nullable Bundle defaultSystemSettings,
             @Nullable Bundle defaultSecureSettings,
             @Nullable List<DefaultCrossProfileIntentFilter> defaultCrossProfileIntentFilters,
-            boolean isMediaSharedWithParent,
-            boolean isCredentialSharableWithParent,
             @NonNull UserProperties defaultUserProperties) {
         this.mName = name;
         this.mEnabled = enabled;
@@ -201,8 +185,6 @@ public final class UserTypeDetails {
         this.mBadgeLabels = badgeLabels;
         this.mBadgeColors = badgeColors;
         this.mDarkThemeBadgeColors = darkThemeBadgeColors;
-        this.mIsMediaSharedWithParent = isMediaSharedWithParent;
-        this.mIsCredentialSharableWithParent = isCredentialSharableWithParent;
         this.mDefaultUserProperties = defaultUserProperties;
     }
 
@@ -307,21 +289,6 @@ public final class UserTypeDetails {
             return getBadgeColor(badgeIndex);
         }
         return mDarkThemeBadgeColors[Math.min(badgeIndex, mDarkThemeBadgeColors.length - 1)];
-    }
-
-    /**
-     * Returns true if the user has shared media with parent user or false otherwise.
-     */
-    public boolean isMediaSharedWithParent() {
-        return mIsMediaSharedWithParent;
-    }
-
-    /**
-     * Returns true if the user has shared encryption credential with parent user or
-     * false otherwise.
-     */
-    public boolean isCredentialSharableWithParent() {
-        return mIsCredentialSharableWithParent;
     }
 
 
@@ -437,8 +404,6 @@ public final class UserTypeDetails {
         private @DrawableRes int mIconBadge = Resources.ID_NULL;
         private @DrawableRes int mBadgePlain = Resources.ID_NULL;
         private @DrawableRes int mBadgeNoBackground = Resources.ID_NULL;
-        private boolean mIsMediaSharedWithParent = false;
-        private boolean mIsCredentialSharableWithParent = false;
         // Default UserProperties cannot be null but for efficiency we don't initialize it now.
         // If it isn't set explicitly, {@link UserProperties.Builder#build()} will be used.
         private @Nullable UserProperties mDefaultUserProperties = null;
@@ -533,24 +498,6 @@ public final class UserTypeDetails {
         }
 
         /**
-         * Sets shared media property for the user.
-         * @param isMediaSharedWithParent the value to be set, true or false
-         */
-        public Builder setIsMediaSharedWithParent(boolean isMediaSharedWithParent) {
-            mIsMediaSharedWithParent = isMediaSharedWithParent;
-            return this;
-        }
-
-        /**
-         * Sets shared media property for the user.
-         * @param isCredentialSharableWithParent  the value to be set, true or false
-         */
-        public Builder setIsCredentialSharableWithParent(boolean isCredentialSharableWithParent) {
-            mIsCredentialSharableWithParent = isCredentialSharableWithParent;
-            return this;
-        }
-
-        /**
          * Sets (replacing if necessary) the default UserProperties object for this user type.
          * Takes a builder, rather than a built object, to efficiently ensure that a fresh copy of
          * properties is stored (since it later might be modified by UserProperties#updateFromXml).
@@ -609,8 +556,6 @@ public final class UserTypeDetails {
                     mDefaultSystemSettings,
                     mDefaultSecureSettings,
                     mDefaultCrossProfileIntentFilters,
-                    mIsMediaSharedWithParent,
-                    mIsCredentialSharableWithParent,
                     getDefaultUserProperties());
         }
 
