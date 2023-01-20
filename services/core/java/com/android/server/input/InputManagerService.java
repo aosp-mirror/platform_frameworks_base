@@ -1450,7 +1450,8 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     private void updateMaximumObscuringOpacityForTouchFromSettings() {
-        final float opacity = InputManager.getInstance().getMaximumObscuringOpacityForTouch();
+        InputManager im = Objects.requireNonNull(mContext.getSystemService(InputManager.class));
+        final float opacity = im.getMaximumObscuringOpacityForTouch();
         if (opacity < 0 || opacity > 1) {
             Log.e(TAG, "Invalid maximum obscuring opacity " + opacity
                     + ", it should be >= 0 and <= 1, rejecting update.");

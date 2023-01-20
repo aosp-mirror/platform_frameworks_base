@@ -102,7 +102,21 @@ public final class InputManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final IInputManager mIm;
 
-    private final boolean mIsStylusPointerIconEnabled;
+    /**
+     * InputManager has historically used its own static getter {@link #getInstance()} that doesn't
+     * provide a context. We provide a Context to the InputManager instance through the
+     * {@link android.app.SystemServiceRegistry}. Methods that need a Context must use
+     * {@link #getContext()} to obtain it.
+     */
+    @Nullable
+    private Context mLateInitContext;
+
+    /**
+     * Whether a PointerIcon is shown for stylus pointers.
+     * Obtain using {@link #isStylusPointerIconEnabled()}.
+     */
+    @Nullable
+    private Boolean mIsStylusPointerIconEnabled = null;
 
     // Guarded by mInputDevicesLock
     private final Object mInputDevicesLock = new Object();
@@ -326,15 +340,6 @@ public final class InputManager {
         } catch (RemoteException ex) {
             Log.w(TAG, "Could not get VelocityTracker strategy: " + ex);
         }
-
-        // TODO(b/266013036): Pass a Context into InputManager constructor.
-        final Context context = ActivityThread.currentApplication();
-        if (context != null) {
-            mIsStylusPointerIconEnabled = context.getResources()
-                    .getBoolean(com.android.internal.R.bool.config_enableStylusPointerIcon);
-        } else {
-            mIsStylusPointerIconEnabled = false;
-        }
     }
 
     /**
@@ -368,22 +373,45 @@ public final class InputManager {
      * Gets an instance of the input manager.
      *
      * @return The input manager instance.
-     *
+     * @deprecated Use {@link Context#getSystemService(Class)} or {@link #getInstance(Context)}
+     * to obtain the InputManager instance.
      * @hide
      */
+    @Deprecated
     @UnsupportedAppUsage
     public static InputManager getInstance() {
+        return getInstance(ActivityThread.currentApplication());
+    }
+
+    /**
+     * Gets an instance of the input manager.
+     *
+     * @return The input manager instance.
+     * @hide
+     */
+    public static InputManager getInstance(Context context) {
         synchronized (InputManager.class) {
             if (sInstance == null) {
                 try {
                     sInstance = new InputManager(IInputManager.Stub
                             .asInterface(ServiceManager.getServiceOrThrow(Context.INPUT_SERVICE)));
+
                 } catch (ServiceNotFoundException e) {
                     throw new IllegalStateException(e);
                 }
             }
+            if (sInstance.mLateInitContext == null) {
+                sInstance.mLateInitContext = context;
+            }
             return sInstance;
         }
+    }
+
+    @NonNull
+    private Context getContext() {
+        return Objects.requireNonNull(mLateInitContext,
+                "A context is required for InputManager. Get the InputManager instance using "
+                        + "Context#getSystemService before calling this method.");
     }
 
     /**
@@ -1188,8 +1216,7 @@ public final class InputManager {
      */
     @FloatRange(from = 0, to = 1)
     public float getMaximumObscuringOpacityForTouch() {
-        Context context = ActivityThread.currentApplication();
-        return Settings.Global.getFloat(context.getContentResolver(),
+        return Settings.Global.getFloat(getContext().getContentResolver(),
                 Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH,
                 DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH);
     }
@@ -1225,8 +1252,7 @@ public final class InputManager {
             throw new IllegalArgumentException(
                     "Maximum obscuring opacity for touch should be >= 0 and <= 1");
         }
-        Context context = ActivityThread.currentApplication();
-        Settings.Global.putFloat(context.getContentResolver(),
+        Settings.Global.putFloat(getContext().getContentResolver(),
                 Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH, opacity);
     }
 
@@ -1422,6 +1448,10 @@ public final class InputManager {
      * stylus pointer, false if there is no pointer icon shown for styluses.
      */
     public boolean isStylusPointerIconEnabled() {
+        if (mIsStylusPointerIconEnabled == null) {
+            mIsStylusPointerIconEnabled = getContext().getResources()
+                    .getBoolean(com.android.internal.R.bool.config_enableStylusPointerIcon);
+        }
         return mIsStylusPointerIconEnabled;
     }
 
@@ -1641,7 +1671,7 @@ public final class InputManager {
     }
 
     private HostUsiVersion findConfigUsiVersionForDisplay(@NonNull Display display) {
-        final Context context = Objects.requireNonNull(ActivityThread.currentApplication());
+        final Context context = getContext();
         final String[] displayUniqueIds = context.getResources().getStringArray(
                 R.array.config_displayUniqueIdArray);
         final int index;
