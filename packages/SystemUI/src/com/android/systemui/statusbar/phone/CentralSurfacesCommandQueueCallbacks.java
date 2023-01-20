@@ -218,7 +218,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             return;
         }
 
-        mNotificationPanelViewController.expandWithoutQs();
+        mNotificationPanelViewController.expandShadeToNotifications();
     }
 
     @Override
