@@ -26,7 +26,5 @@ package {
 android_test {
     name: "VectorDrawableTest",
     srcs: ["**/*.java"],
-    // certificate set as platform to allow testing of @hidden APIs
-    certificate: "platform",
     platform_apis: true,
 }
