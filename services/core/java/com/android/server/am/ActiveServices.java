@@ -206,6 +206,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.am.LowMemDetector.MemFactor;
+import com.android.server.am.ServiceRecord.ShortFgsInfo;
 import com.android.server.pm.KnownPackages;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
@@ -1985,7 +1986,7 @@ public final class ActiveServices {
                             foregroundServiceType == FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
                     final boolean isOldTypeShortFgsAndTimedOut = r.shouldTriggerShortFgsTimeout();
 
-                    if (isOldTypeShortFgs || isNewTypeShortFgs) {
+                    if (r.isForeground && (isOldTypeShortFgs || isNewTypeShortFgs)) {
                         if (DEBUG_SHORT_SERVICE) {
                             Slog.i(TAG_SERVICE, String.format(
                                     "FGS type changing from %x%s to %x: %s",
@@ -2021,10 +2022,8 @@ public final class ActiveServices {
                             } else {
                                 // FGS type is changing from SHORT_SERVICE to another type when
                                 // an app is allowed to start FGS, so this will succeed.
-                                // The timeout will stop -- we actually don't cancel the handler
-                                // events, but they'll be ignored if the service type is not
-                                // SHORT_SERVICE.
-                                // TODO(short-service) Let's actaully cancel the handler events.
+                                // The timeout will stop later, in
+                                // maybeUpdateShortFgsTrackingLocked().
                             }
                         } else {
                             // We catch this case later, in the
@@ -2226,7 +2225,7 @@ public final class ActiveServices {
                     mAm.notifyPackageUse(r.serviceInfo.packageName,
                             PackageManager.NOTIFY_PACKAGE_USE_FOREGROUND_SERVICE);
 
-                    maybeStartShortFgsTimeoutAndUpdateShortFgsInfoLocked(r,
+                    maybeUpdateShortFgsTrackingLocked(r,
                             extendShortServiceTimeout);
                 } else {
                     if (DEBUG_FOREGROUND_SERVICE) {
@@ -3022,11 +3021,17 @@ public final class ActiveServices {
     }
 
     /**
-     * If {@code sr} is of a short-fgs, start a short-FGS timeout.
+     * Update a {@link ServiceRecord}'s {@link ShortFgsInfo} as needed, and also start
+     * a timeout as needed.
+     *
+     * If the {@link ServiceRecord} is not a short-FGS, then we'll stop the timeout and clear
+     * the {@link ShortFgsInfo}.
      */
-    private void maybeStartShortFgsTimeoutAndUpdateShortFgsInfoLocked(ServiceRecord sr,
+    private void maybeUpdateShortFgsTrackingLocked(ServiceRecord sr,
             boolean extendTimeout) {
         if (!sr.isShortFgs()) {
+            sr.clearShortFgsInfo(); // Just in case we have it.
+            unscheduleShortFgsTimeoutLocked(sr);
             return;
         }
         if (DEBUG_SHORT_SERVICE) {
@@ -3035,29 +3040,32 @@ public final class ActiveServices {
 
         if (extendTimeout || !sr.hasShortFgsInfo()) {
             sr.setShortFgsInfo(SystemClock.uptimeMillis());
+
+            // We'll restart the timeout.
+            unscheduleShortFgsTimeoutLocked(sr);
+
+            final Message msg = mAm.mHandler.obtainMessage(
+                    ActivityManagerService.SERVICE_SHORT_FGS_TIMEOUT_MSG, sr);
+            mAm.mHandler.sendMessageAtTime(msg, sr.getShortFgsInfo().getTimeoutTime());
         } else {
             // We only (potentially) update the start command, start count, but not the timeout
             // time.
+            // In this case, we keep the existing timeout running.
             sr.getShortFgsInfo().update();
         }
-        unscheduleShortFgsTimeoutLocked(sr); // Do it just in case
-
-        final Message msg = mAm.mHandler.obtainMessage(
-                ActivityManagerService.SERVICE_SHORT_FGS_TIMEOUT_MSG, sr);
-        mAm.mHandler.sendMessageAtTime(msg, sr.getShortFgsInfo().getTimeoutTime());
     }
 
     /**
      * Stop the timeout for a ServiceRecord, if it's of a short-FGS.
      */
     private void maybeStopShortFgsTimeoutLocked(ServiceRecord sr) {
+        sr.clearShortFgsInfo(); // Always clear, just in case.
         if (!sr.isShortFgs()) {
             return;
         }
         if (DEBUG_SHORT_SERVICE) {
             Slog.i(TAG_SERVICE, "Stop short FGS timeout: " + sr);
         }
-        sr.clearShortFgsInfo();
         unscheduleShortFgsTimeoutLocked(sr);
     }
 
