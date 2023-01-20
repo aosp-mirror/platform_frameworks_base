@@ -17,6 +17,8 @@
 package com.android.server.pm;
 
 import static android.app.ActivityOptions.KEY_SPLASH_SCREEN_THEME;
+import static android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
+import static android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_MUTABLE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
@@ -1143,7 +1145,8 @@ public class LauncherAppsService extends SystemService {
             final int code;
             try {
                 code = mActivityTaskManagerInternal.startActivitiesAsPackage(publisherPackage,
-                        publishedFeatureId, userId, intents, startActivityOptions);
+                        publishedFeatureId, userId, intents,
+                        getActivityOptionsForLauncher(startActivityOptions));
                 if (ActivityManager.isStartResultSuccessful(code)) {
                     return true; // Success
                 } else {
@@ -1156,6 +1159,23 @@ public class LauncherAppsService extends SystemService {
                 }
                 return false;
             }
+        }
+
+        private Bundle getActivityOptionsForLauncher(Bundle startActivityOptions) {
+            // starting a shortcut implies the user's consent, so grant the launchers/senders BAL
+            // privileges (unless the caller explicitly defined the behavior)
+            if (startActivityOptions == null) {
+                return ActivityOptions.makeBasic().setPendingIntentBackgroundActivityStartMode(
+                                MODE_BACKGROUND_ACTIVITY_START_ALLOWED).toBundle();
+            }
+            ActivityOptions activityOptions = ActivityOptions.fromBundle(startActivityOptions);
+            if (activityOptions.getPendingIntentBackgroundActivityStartMode()
+                    == MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED) {
+                // only override if the property was not explicitly set
+                return activityOptions.setPendingIntentBackgroundActivityStartMode(
+                        MODE_BACKGROUND_ACTIVITY_START_ALLOWED).toBundle();
+            }
+            return startActivityOptions;
         }
 
         @Override
@@ -1216,8 +1236,8 @@ public class LauncherAppsService extends SystemService {
             i.setSourceBounds(sourceBounds);
 
             mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage,
-                    callingFeatureId, i, /* resultTo= */ null, Intent.FLAG_ACTIVITY_NEW_TASK, opts,
-                    userId);
+                    callingFeatureId, i, /* resultTo= */ null, Intent.FLAG_ACTIVITY_NEW_TASK,
+                    getActivityOptionsForLauncher(opts), userId);
         }
 
         @Override
@@ -1264,7 +1284,8 @@ public class LauncherAppsService extends SystemService {
 
             mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage,
                     callingFeatureId, launchIntent, /* resultTo= */ null,
-                    Intent.FLAG_ACTIVITY_NEW_TASK, opts, user.getIdentifier());
+                    Intent.FLAG_ACTIVITY_NEW_TASK, getActivityOptionsForLauncher(opts),
+                    user.getIdentifier());
         }
 
         /**
@@ -1347,7 +1368,7 @@ public class LauncherAppsService extends SystemService {
             }
             mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage,
                     callingFeatureId, intent, /* resultTo= */ null, Intent.FLAG_ACTIVITY_NEW_TASK,
-                    opts, user.getIdentifier());
+                    getActivityOptionsForLauncher(opts), user.getIdentifier());
         }
 
         /** Checks if user is a profile of or same as listeningUser.
