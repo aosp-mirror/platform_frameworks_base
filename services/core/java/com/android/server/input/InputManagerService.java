@@ -38,7 +38,9 @@ import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManager.Sensors;
 import android.hardware.SensorPrivacyManagerInternal;
 import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayViewport;
+import android.hardware.input.HostUsiVersion;
 import android.hardware.input.IInputDeviceBatteryListener;
 import android.hardware.input.IInputDeviceBatteryState;
 import android.hardware.input.IInputDevicesChangedListener;
@@ -168,6 +170,7 @@ public class InputManagerService extends IInputManager.Stub
 
     private final Context mContext;
     private final InputManagerHandler mHandler;
+    private DisplayManagerInternal mDisplayManagerInternal;
 
     // Context cache used for loading pointer resources.
     private Context mPointerIconDisplayContext;
@@ -518,6 +521,8 @@ public class InputManagerService extends IInputManager.Stub
         if (DEBUG) {
             Slog.d(TAG, "System ready.");
         }
+
+        mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
 
         synchronized (mLidSwitchLock) {
             mSystemReady = true;
@@ -2252,6 +2257,11 @@ public class InputManagerService extends IInputManager.Stub
         Objects.requireNonNull(listener);
         mKeyboardBacklightController.unregisterKeyboardBacklightListener(listener,
                 Binder.getCallingPid());
+    }
+
+    @Override
+    public HostUsiVersion getHostUsiVersionFromDisplayConfig(int displayId) {
+        return mDisplayManagerInternal.getHostUsiVersion(displayId);
     }
 
     @Override

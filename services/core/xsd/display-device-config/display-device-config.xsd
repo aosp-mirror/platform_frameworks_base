@@ -117,6 +117,11 @@
                 <xs:element type="integer-array" name="screenOffBrightnessSensorValueToLux">
                     <xs:annotation name="final"/>
                 </xs:element>
+                <!-- The version of the Universal Stylus Initiative
+                 (USI, https://universalstylus.org/) protocol supported by the display, if any. -->
+                <xs:element type="usiVersion" name="usiVersion">
+                    <xs:annotation name="final"/>
+                </xs:element>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -501,5 +506,16 @@
         <xs:sequence>
             <xs:element name="item" type="xs:nonNegativeInteger" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="usiVersion">
+        <xs:element name="majorVersion" type="xs:nonNegativeInteger"
+                    minOccurs="1" maxOccurs="1">
+            <xs:annotation name="final"/>
+        </xs:element>
+        <xs:element name="minorVersion" type="xs:nonNegativeInteger"
+                    minOccurs="1" maxOccurs="1">
+            <xs:annotation name="final"/>
+        </xs:element>
     </xs:complexType>
 </xs:schema>

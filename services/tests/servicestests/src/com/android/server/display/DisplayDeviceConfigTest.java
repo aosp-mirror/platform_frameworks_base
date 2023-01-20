@@ -19,6 +19,7 @@ package com.android.server.display;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
@@ -211,6 +212,10 @@ public final class DisplayDeviceConfigTest {
         ));
         assertEquals(new DisplayDeviceConfig.BrightnessThrottlingData(throttlingLevels),
                 mDisplayDeviceConfig.getConcurrentDisplaysBrightnessThrottlingData());
+
+        assertNotNull(mDisplayDeviceConfig.getHostUsiVersion());
+        assertEquals(mDisplayDeviceConfig.getHostUsiVersion().getMajorVersion(), 2);
+        assertEquals(mDisplayDeviceConfig.getHostUsiVersion().getMinorVersion(), 0);
 
         // Todo: Add asserts for BrightnessThrottlingData, DensityMapping,
         // HighBrightnessModeData AmbientLightSensor, RefreshRateLimitations and ProximitySensor.
@@ -570,6 +575,10 @@ public final class DisplayDeviceConfigTest {
                 +       "<item>30</item>\n"
                 +       "<item>40</item>\n"
                 +   "</screenOffBrightnessSensorValueToLux>\n"
+                +   "<usiVersion>\n"
+                +       "<majorVersion>2</majorVersion>\n"
+                +       "<minorVersion>0</minorVersion>\n"
+                +   "</usiVersion>\n"
                 + "</displayConfiguration>\n";
     }
 

@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.companion.virtual.IVirtualDevice;
 import android.graphics.Point;
 import android.hardware.SensorManager;
+import android.hardware.input.HostUsiVersion;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.util.IntArray;
@@ -401,6 +402,14 @@ public abstract class DisplayManagerInternal {
      * Get DisplayPrimaries from SF for a particular display.
      */
     public abstract SurfaceControl.DisplayPrimaries getDisplayNativePrimaries(int displayId);
+
+    /**
+     * Get the version of the Universal Stylus Initiative (USI) Protocol supported by the display.
+     * @param displayId The id of the display.
+     * @return The USI version, or null if not supported
+     */
+    @Nullable
+    public abstract HostUsiVersion getHostUsiVersion(int displayId);
 
     /**
      * Describes the requested power state of the display.
