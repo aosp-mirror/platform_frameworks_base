@@ -27,22 +27,26 @@
           android:top="3dp"
           android:right="3dp"
           android:bottom="3dp">
-        <shape android:shape="oval">
+        <!-- We make the shapes a rounded rectangle instead of an oval so that it can animate -->
+        <!-- properly into an app/dialog. -->
+        <shape android:shape="rectangle">
           <solid android:color="?androidprv:attr/colorSurface"/>
           <size
-              android:width="@dimen/keyguard_affordance_width"
-              android:height="@dimen/keyguard_affordance_height"/>
+              android:width="@dimen/keyguard_affordance_fixed_width"
+              android:height="@dimen/keyguard_affordance_fixed_height"/>
+          <corners android:radius="@dimen/keyguard_affordance_fixed_radius"/>
         </shape>
       </item>
 
       <item>
-        <shape android:shape="oval">
+        <shape android:shape="rectangle">
           <stroke
               android:color="@color/control_primary_text"
               android:width="2dp"/>
           <size
-              android:width="@dimen/keyguard_affordance_width"
-              android:height="@dimen/keyguard_affordance_height"/>
+              android:width="@dimen/keyguard_affordance_fixed_width"
+              android:height="@dimen/keyguard_affordance_fixed_height"/>
+          <corners android:radius="@dimen/keyguard_affordance_fixed_radius"/>
         </shape>
       </item>
     </layer-list>
@@ -55,11 +59,12 @@
           android:top="3dp"
           android:right="3dp"
           android:bottom="3dp">
-        <shape android:shape="oval">
+        <shape android:shape="rectangle">
           <solid android:color="?androidprv:attr/colorSurface"/>
           <size
-              android:width="@dimen/keyguard_affordance_width"
-              android:height="@dimen/keyguard_affordance_height"/>
+              android:width="@dimen/keyguard_affordance_fixed_width"
+              android:height="@dimen/keyguard_affordance_fixed_height"/>
+          <corners android:radius="@dimen/keyguard_affordance_fixed_radius"/>
         </shape>
       </item>
     </layer-list>

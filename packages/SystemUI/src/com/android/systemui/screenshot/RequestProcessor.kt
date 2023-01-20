@@ -19,27 +19,26 @@ package com.android.systemui.screenshot
 import android.graphics.Insets
 import android.util.Log
 import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
-import com.android.internal.util.ScreenshotHelper.HardwareBitmapBundler
-import com.android.internal.util.ScreenshotHelper.ScreenshotRequest
+import com.android.internal.util.ScreenshotRequest
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags.SCREENSHOT_WORK_PROFILE_POLICY
-import java.util.function.Consumer
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.util.function.Consumer
+import javax.inject.Inject
 
 /**
  * Processes a screenshot request sent from {@link ScreenshotHelper}.
  */
 @SysUISingleton
 class RequestProcessor @Inject constructor(
-    private val capture: ImageCapture,
-    private val policy: ScreenshotPolicy,
-    private val flags: FeatureFlags,
-    /** For the Java Async version, to invoke the callback. */
-    @Application private val mainScope: CoroutineScope
+        private val capture: ImageCapture,
+        private val policy: ScreenshotPolicy,
+        private val flags: FeatureFlags,
+        /** For the Java Async version, to invoke the callback. */
+        @Application private val mainScope: CoroutineScope
 ) {
     /**
      * Inspects the incoming request, returning a potentially modified request depending on policy.
@@ -58,7 +57,7 @@ class RequestProcessor @Inject constructor(
         // regardless of the managed profile status.
 
         if (request.type != TAKE_SCREENSHOT_PROVIDED_IMAGE &&
-            flags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)
+                flags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)
         ) {
 
             val info = policy.findPrimaryContent(policy.getDefaultDisplayId())
@@ -66,17 +65,21 @@ class RequestProcessor @Inject constructor(
 
             result = if (policy.isManagedProfile(info.user.identifier)) {
                 val image = capture.captureTask(info.taskId)
-                    ?: error("Task snapshot returned a null Bitmap!")
+                        ?: error("Task snapshot returned a null Bitmap!")
 
                 // Provide the task snapshot as the screenshot
-                ScreenshotRequest(
-                    TAKE_SCREENSHOT_PROVIDED_IMAGE, request.source,
-                    HardwareBitmapBundler.hardwareBitmapToBundle(image),
-                    info.bounds, Insets.NONE, info.taskId, info.user.identifier, info.component
-                )
+                ScreenshotRequest.Builder(TAKE_SCREENSHOT_PROVIDED_IMAGE, request.source)
+                        .setTopComponent(info.component)
+                        .setTaskId(info.taskId)
+                        .setUserId(info.user.identifier)
+                        .setBitmap(image)
+                        .setBoundsOnScreen(info.bounds)
+                        .setInsets(Insets.NONE)
+                        .build()
             } else {
                 // Create a new request of the same type which includes the top component
-                ScreenshotRequest(request.type, request.source, info.component)
+                ScreenshotRequest.Builder(request.type, request.source)
+                        .setTopComponent(info.component).build()
             }
         }
 

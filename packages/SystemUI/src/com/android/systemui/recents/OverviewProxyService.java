@@ -21,7 +21,6 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
-import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_OVERVIEW;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
@@ -44,8 +43,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.graphics.Insets;
-import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
 import android.os.Binder;
@@ -77,6 +74,7 @@ import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.util.ScreenshotHelper;
+import com.android.internal.util.ScreenshotRequest;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -94,7 +92,6 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
-import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -322,18 +319,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
 
         @Override
-        public void handleImageBundleAsScreenshot(Bundle screenImageBundle, Rect locationInScreen,
-                Insets visibleInsets, Task.TaskKey task) {
-            mScreenshotHelper.provideScreenshot(
-                    screenImageBundle,
-                    locationInScreen,
-                    visibleInsets,
-                    task.id,
-                    task.userId,
-                    task.sourceComponent,
-                    SCREENSHOT_OVERVIEW,
-                    mHandler,
-                    null);
+        public void takeScreenshot(ScreenshotRequest request) {
+            mScreenshotHelper.takeScreenshot(request, mHandler, null);
         }
 
         @Override

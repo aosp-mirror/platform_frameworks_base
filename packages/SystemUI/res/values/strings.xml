@@ -2778,6 +2778,12 @@
     <!-- Subtitle for the notification sent when a stylus battery is low. [CHAR LIMIT=none]-->
     <string name="stylus_battery_low_subtitle">Connect your stylus to a charger</string>
 
+    <!-- Title for notification of low stylus battery. [CHAR_LIMIT=NONE] -->
+    <string name="stylus_battery_low">Stylus battery low</string>
+
+    <!-- Label for a lock screen shortcut to start the camera in video mode. [CHAR_LIMIT=16] -->
+    <string name="video_camera">Video camera</string>
+
     <!-- Switch to work profile dialer app for placing a call dialog. -->
     <!-- Text for Switch to work profile dialog's Title. Switch to work profile dialog guide users to make call from work
     profile dialer app as it's not possible to make call from current profile due to an admin policy. [CHAR LIMIT=60] -->
