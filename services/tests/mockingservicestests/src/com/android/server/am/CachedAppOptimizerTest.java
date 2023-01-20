@@ -194,7 +194,7 @@ public final class CachedAppOptimizerTest {
     public void init_withDeviceConfigSetsParameters() {
         // When the DeviceConfig already has a flag value stored (note this test will need to
         // change if the default value changes from false).
-        assertThat(CachedAppOptimizer.DEFAULT_USE_COMPACTION).isFalse();
+        assertThat(CachedAppOptimizer.DEFAULT_USE_COMPACTION).isTrue();
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 CachedAppOptimizer.KEY_USE_COMPACTION, "true", false);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -372,9 +372,8 @@ public final class CachedAppOptimizerTest {
                 CachedAppOptimizer.KEY_USE_COMPACTION, "foobar", false);
         assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
 
-        // Then we set the default.
-        assertThat(mCachedAppOptimizerUnderTest.useCompaction()).isEqualTo(
-                CachedAppOptimizer.DEFAULT_USE_COMPACTION);
+        // Invalid value is mapped to false
+        assertThat(mCachedAppOptimizerUnderTest.useCompaction()).isEqualTo(false);
     }
 
     @Test
