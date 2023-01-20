@@ -35,6 +35,9 @@ import java.util.Set;
 @RunWith(AndroidTestingRunner.class)
 public class CrossDeviceCallTest {
 
+    private static final String CALLER_DISPLAY_NAME = "name";
+    private static final String CONTACT_DISPLAY_NAME = "contact";
+
     @Test
     public void updateCallDetails_uninitialized() {
         final CrossDeviceCall crossDeviceCall = new CrossDeviceCall(
@@ -171,10 +174,123 @@ public class CrossDeviceCallTest {
                         android.companion.Telecom.Call.PUT_ON_HOLD));
     }
 
+    @Test
+    public void getReadableCallerId_enterpriseCall_adminBlocked_ott() {
+        final CrossDeviceCall crossDeviceCall = new CrossDeviceCall(
+                InstrumentationRegistry.getTargetContext().getPackageManager(), /* call= */
+                null, /* callAudioState= */ null);
+        crossDeviceCall.mIsEnterprise = true;
+        crossDeviceCall.mIsOtt = true;
+        crossDeviceCall.updateCallDetails(
+                createCallDetails(Call.STATE_ACTIVE, /* capabilities= */ 0));
+
+        final String result = crossDeviceCall.getReadableCallerId(true);
+
+        assertWithMessage("Wrong caller id").that(result)
+                .isEqualTo(CALLER_DISPLAY_NAME);
+    }
+
+    @Test
+    public void getReadableCallerId_enterpriseCall_adminUnblocked_ott() {
+        final CrossDeviceCall crossDeviceCall = new CrossDeviceCall(
+                InstrumentationRegistry.getTargetContext().getPackageManager(), /* call= */
+                null, /* callAudioState= */ null);
+        crossDeviceCall.mIsEnterprise = true;
+        crossDeviceCall.mIsOtt = true;
+        crossDeviceCall.updateCallDetails(
+                createCallDetails(Call.STATE_ACTIVE, /* capabilities= */ 0));
+
+        final String result = crossDeviceCall.getReadableCallerId(false);
+
+        assertWithMessage("Wrong caller id").that(result)
+                .isEqualTo(CALLER_DISPLAY_NAME);
+    }
+
+    @Test
+    public void getReadableCallerId_enterpriseCall_adminBlocked_pstn() {
+        final CrossDeviceCall crossDeviceCall = new CrossDeviceCall(
+                InstrumentationRegistry.getTargetContext().getPackageManager(), /* call= */
+                null, /* callAudioState= */ null);
+        crossDeviceCall.mIsEnterprise = true;
+        crossDeviceCall.mIsOtt = false;
+        crossDeviceCall.updateCallDetails(
+                createCallDetails(Call.STATE_ACTIVE, /* capabilities= */ 0));
+
+        final String result = crossDeviceCall.getReadableCallerId(true);
+
+        assertWithMessage("Wrong caller id").that(result)
+                .isEqualTo(CALLER_DISPLAY_NAME);
+    }
+
+    @Test
+    public void getReadableCallerId_nonEnterpriseCall_adminBlocked_ott() {
+        final CrossDeviceCall crossDeviceCall = new CrossDeviceCall(
+                InstrumentationRegistry.getTargetContext().getPackageManager(), /* call= */
+                null, /* callAudioState= */ null);
+        crossDeviceCall.mIsEnterprise = false;
+        crossDeviceCall.mIsOtt = true;
+        crossDeviceCall.updateCallDetails(
+                createCallDetails(Call.STATE_ACTIVE, /* capabilities= */ 0));
+
+        final String result = crossDeviceCall.getReadableCallerId(true);
+
+        assertWithMessage("Wrong caller id").that(result)
+                .isEqualTo(CALLER_DISPLAY_NAME);
+    }
+
+    @Test
+    public void getReadableCallerId_nonEnterpriseCall_adminUnblocked_ott() {
+        final CrossDeviceCall crossDeviceCall = new CrossDeviceCall(
+                InstrumentationRegistry.getTargetContext().getPackageManager(), /* call= */
+                null, /* callAudioState= */ null);
+        crossDeviceCall.mIsEnterprise = false;
+        crossDeviceCall.mIsOtt = true;
+        crossDeviceCall.updateCallDetails(
+                createCallDetails(Call.STATE_ACTIVE, /* capabilities= */ 0));
+
+        final String result = crossDeviceCall.getReadableCallerId(false);
+
+        assertWithMessage("Wrong caller id").that(result)
+                .isEqualTo(CALLER_DISPLAY_NAME);
+    }
+
+    @Test
+    public void getReadableCallerId_nonEnterpriseCall_adminBlocked_pstn() {
+        final CrossDeviceCall crossDeviceCall = new CrossDeviceCall(
+                InstrumentationRegistry.getTargetContext().getPackageManager(), /* call= */
+                null, /* callAudioState= */ null);
+        crossDeviceCall.mIsEnterprise = false;
+        crossDeviceCall.mIsOtt = false;
+        crossDeviceCall.updateCallDetails(
+                createCallDetails(Call.STATE_ACTIVE, /* capabilities= */ 0));
+
+        final String result = crossDeviceCall.getReadableCallerId(true);
+
+        assertWithMessage("Wrong caller id").that(result)
+                .isEqualTo(CONTACT_DISPLAY_NAME);
+    }
+
+    @Test
+    public void getReadableCallerId_nonEnterpriseCall_adminUnblocked_pstn() {
+        final CrossDeviceCall crossDeviceCall = new CrossDeviceCall(
+                InstrumentationRegistry.getTargetContext().getPackageManager(), /* call= */
+                null, /* callAudioState= */ null);
+        crossDeviceCall.mIsEnterprise = false;
+        crossDeviceCall.mIsOtt = false;
+        crossDeviceCall.updateCallDetails(
+                createCallDetails(Call.STATE_ACTIVE, /* capabilities= */ 0));
+
+        final String result = crossDeviceCall.getReadableCallerId(false);
+
+        assertWithMessage("Wrong caller id").that(result)
+                .isEqualTo(CONTACT_DISPLAY_NAME);
+    }
+
     private Call.Details createCallDetails(int state, int capabilities) {
         final ParcelableCall.ParcelableCallBuilder parcelableCallBuilder =
                 new ParcelableCall.ParcelableCallBuilder();
-        parcelableCallBuilder.setCallerDisplayName("name");
+        parcelableCallBuilder.setCallerDisplayName(CALLER_DISPLAY_NAME);
+        parcelableCallBuilder.setContactDisplayName(CONTACT_DISPLAY_NAME);
         parcelableCallBuilder.setCapabilities(capabilities);
         parcelableCallBuilder.setState(state);
         parcelableCallBuilder.setConferenceableCallIds(Collections.emptyList());

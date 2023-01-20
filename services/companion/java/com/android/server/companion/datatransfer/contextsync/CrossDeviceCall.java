@@ -45,10 +45,13 @@ public class CrossDeviceCall {
 
     private final long mId;
     private final Call mCall;
+    @VisibleForTesting boolean mIsEnterprise;
+    @VisibleForTesting boolean mIsOtt;
     private String mCallingAppName;
     private byte[] mCallingAppIcon;
     private String mCallerDisplayName;
     private int mStatus = android.companion.Telecom.Call.UNKNOWN_STATUS;
+    private String mContactDisplayName;
     private boolean mIsMuted;
     private final Set<Integer> mControls = new HashSet<>();
 
@@ -58,6 +61,12 @@ public class CrossDeviceCall {
         mCall = call;
         final String callingAppPackageName = call != null
                 ? call.getDetails().getAccountHandle().getComponentName().getPackageName() : null;
+        mIsOtt = call != null
+                && (call.getDetails().getCallCapabilities() & Call.Details.PROPERTY_SELF_MANAGED)
+                == Call.Details.PROPERTY_SELF_MANAGED;
+        mIsEnterprise = call != null
+                && (call.getDetails().getCallProperties() & Call.Details.PROPERTY_ENTERPRISE_CALL)
+                == Call.Details.PROPERTY_ENTERPRISE_CALL;
         try {
             final ApplicationInfo applicationInfo = packageManager
                     .getApplicationInfo(callingAppPackageName,
@@ -133,6 +142,7 @@ public class CrossDeviceCall {
     @VisibleForTesting
     void updateCallDetails(Call.Details callDetails) {
         mCallerDisplayName = callDetails.getCallerDisplayName();
+        mContactDisplayName = callDetails.getContactDisplayName();
         mStatus = convertStateToStatus(callDetails.getState());
         mControls.clear();
         if (mStatus == android.companion.Telecom.Call.RINGING
@@ -198,8 +208,16 @@ public class CrossDeviceCall {
         return mCallingAppIcon;
     }
 
-    public String getReadableCallerId() {
-        return mCallerDisplayName;
+    /**
+     * Get a human-readable "caller id" to display as the origin of the call.
+     *
+     * @param isAdminBlocked whether there is an admin that has blocked contacts over Bluetooth
+     */
+    public String getReadableCallerId(boolean isAdminBlocked) {
+        if (mIsOtt) {
+            return mCallerDisplayName;
+        }
+        return mIsEnterprise && isAdminBlocked ? mCallerDisplayName : mContactDisplayName;
     }
 
     public int getStatus() {
