@@ -3765,6 +3765,9 @@
             {@link android.inputmethodservice.InputMethodService#onFinishInput()}.
         -->
         <attr name="supportsStylusHandwriting" format="boolean" />
+        <!-- Class name of an activity that allows the user to modify the stylus handwriting
+            settings for this service -->
+        <attr name="stylusHandwritingSettingsActivity" format="string" />
 
     </declare-styleable>
 
