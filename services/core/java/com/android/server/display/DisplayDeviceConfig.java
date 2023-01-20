@@ -1322,6 +1322,23 @@ public class DisplayDeviceConfig {
     }
 
     /**
+     * @return Default refresh rate while the device has high brightness mode enabled for HDR.
+     */
+    public int getDefaultRefreshRateInHbmHdr() {
+        return mContext.getResources().getInteger(
+            R.integer.config_defaultRefreshRateInHbmHdr);
+    }
+
+    /**
+     * @return Default refresh rate while the device has high brightness mode enabled because of
+     * high lux.
+     */
+    public int getDefaultRefreshRateInHbmSunlight() {
+        return mContext.getResources().getInteger(
+            R.integer.config_defaultRefreshRateInHbmSunlight);
+    }
+
+    /**
      * @return Default refresh rate in the higher blocking zone of the associated display
      */
     public int getDefaultHighBlockingZoneRefreshRate() {
