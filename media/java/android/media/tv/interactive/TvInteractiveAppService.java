@@ -1219,13 +1219,15 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
-         * Sets the recording info for the specified recording
+         * Sets the recording info for the specified recording.
          *
-         * @hide
+         * @param recordingId The ID of the recording to set the info for. This is provided by the
+         *     TV app in {@link TvInteractiveAppView#notifyRecordingStarted(String)}
+         * @param recordingInfo The {@link TvRecordingInfo} to set to the recording.
          */
         @CallSuper
-        public void setTvRecordingInfo(@NonNull String recordingId,
-                @NonNull TvRecordingInfo recordingInfo) {
+        public void setTvRecordingInfo(
+                @NonNull String recordingId, @NonNull TvRecordingInfo recordingInfo) {
             executeOrPostRunnableOnMainThread(() -> {
                 try {
                     if (DEBUG) {
