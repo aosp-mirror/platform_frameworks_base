@@ -55,7 +55,6 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.VibratorManager;
 import android.provider.Settings;
-import android.provider.Settings.SettingNotFoundException;
 import android.util.DisplayUtils;
 import android.util.Log;
 import android.util.SparseArray;
@@ -122,13 +121,13 @@ public final class InputManager {
     private final Object mInputDevicesLock = new Object();
     private SparseArray<InputDevice> mInputDevices;
     private InputDevicesChangedListener mInputDevicesChangedListener;
-    private final ArrayList<InputDeviceListenerDelegate> mInputDeviceListeners =
-            new ArrayList<InputDeviceListenerDelegate>();
+    private final ArrayList<InputDeviceListenerDelegate> mInputDeviceListeners = new ArrayList<>();
 
     // Guarded by mTabletModeLock
     private final Object mTabletModeLock = new Object();
+    @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
     private TabletModeChangedListener mTabletModeChangedListener;
-    private List<OnTabletModeChangedListenerDelegate> mOnTabletModeChangedListeners;
+    private ArrayList<OnTabletModeChangedListenerDelegate> mOnTabletModeChangedListeners;
 
     private final Object mBatteryListenersLock = new Object();
     // Maps a deviceId whose battery is currently being monitored to an entry containing the
@@ -140,7 +139,7 @@ public final class InputManager {
 
     private final Object mKeyboardBacklightListenerLock = new Object();
     @GuardedBy("mKeyboardBacklightListenerLock")
-    private List<KeyboardBacklightListenerDelegate> mKeyboardBacklightListeners;
+    private ArrayList<KeyboardBacklightListenerDelegate> mKeyboardBacklightListeners;
     @GuardedBy("mKeyboardBacklightListenerLock")
     private IKeyboardBacklightListener mKeyboardBacklightListener;
 
@@ -527,7 +526,7 @@ public final class InputManager {
     /**
      * Enables an InputDevice.
      * <p>
-     * Requires {@link android.Manifest.permission.DISABLE_INPUT_DEVICE}.
+     * Requires {@link android.Manifest.permission#DISABLE_INPUT_DEVICE}.
      * </p>
      *
      * @param id The input device Id.
@@ -546,7 +545,7 @@ public final class InputManager {
     /**
      * Disables an InputDevice.
      * <p>
-     * Requires {@link android.Manifest.permission.DISABLE_INPUT_DEVICE}.
+     * Requires {@link android.Manifest.permission#DISABLE_INPUT_DEVICE}.
      * </p>
      *
      * @param id The input device Id.
@@ -1003,6 +1002,7 @@ public final class InputManager {
      */
     @TestApi
     @NonNull
+    @SuppressWarnings("unchecked")
     @RequiresPermission(Manifest.permission.REMAP_MODIFIER_KEYS)
     public Map<Integer, Integer> getModifierKeyRemapping() {
         try {
@@ -1033,7 +1033,7 @@ public final class InputManager {
      * Sets the TouchCalibration to apply to the specified input device's coordinates.
      * <p>
      * This method may have the side-effect of causing the input device in question
-     * to be reconfigured. Requires {@link android.Manifest.permission.SET_INPUT_CALIBRATION}.
+     * to be reconfigured. Requires {@link android.Manifest.permission#SET_INPUT_CALIBRATION}.
      * </p>
      *
      * @param inputDeviceDescriptor The input device descriptor.
@@ -1149,19 +1149,14 @@ public final class InputManager {
      * @hide
      */
     public int getPointerSpeed(Context context) {
-        int speed = DEFAULT_POINTER_SPEED;
-        try {
-            speed = Settings.System.getInt(context.getContentResolver(),
-                    Settings.System.POINTER_SPEED);
-        } catch (SettingNotFoundException snfe) {
-        }
-        return speed;
+        return Settings.System.getInt(context.getContentResolver(),
+                Settings.System.POINTER_SPEED, DEFAULT_POINTER_SPEED);
     }
 
     /**
      * Sets the mouse pointer speed.
      * <p>
-     * Requires {@link android.Manifest.permission.WRITE_SETTINGS}.
+     * Requires {@link android.Manifest.permission#WRITE_SETTINGS}.
      * </p>
      *
      * @param context The application context.
@@ -1182,7 +1177,7 @@ public final class InputManager {
     /**
      * Changes the mouse pointer speed temporarily, but does not save the setting.
      * <p>
-     * Requires {@link android.Manifest.permission.SET_POINTER_SPEED}.
+     * Requires {@link android.Manifest.permission#SET_POINTER_SPEED}.
      * </p>
      *
      * @param speed The pointer speed as a value between {@link #MIN_POINTER_SPEED} and
@@ -1333,7 +1328,7 @@ public final class InputManager {
      * The synchronization mode determines whether the method blocks while waiting for
      * input injection to proceed.
      * <p>
-     * Requires the {@link android.Manifest.permission.INJECT_EVENTS} permission.
+     * Requires the {@link android.Manifest.permission#INJECT_EVENTS} permission.
      * </p><p>
      * Make sure you correctly set the event time and input source of the event
      * before calling this method.
@@ -1341,9 +1336,9 @@ public final class InputManager {
      *
      * @param event The event to inject.
      * @param mode The synchronization mode.  One of:
-     * {@link android.os.InputEventInjectionSync.NONE},
-     * {@link android.os.InputEventInjectionSync.WAIT_FOR_RESULT}, or
-     * {@link android.os.InputEventInjectionSync.WAIT_FOR_FINISHED}.
+     * {@link android.os.InputEventInjectionSync#NONE},
+     * {@link android.os.InputEventInjectionSync#WAIT_FOR_RESULT}, or
+     * {@link android.os.InputEventInjectionSync#WAIT_FOR_FINISHED}.
      * @param targetUid The uid to target, or {@link android.os.Process#INVALID_UID} to target all
      *                 windows.
      * @return True if input event injection succeeded.
@@ -1373,7 +1368,7 @@ public final class InputManager {
      * The synchronization mode determines whether the method blocks while waiting for
      * input injection to proceed.
      * <p>
-     * Requires the {@link android.Manifest.permission.INJECT_EVENTS} permission.
+     * Requires the {@link android.Manifest.permission#INJECT_EVENTS} permission.
      * </p><p>
      * Make sure you correctly set the event time and input source of the event
      * before calling this method.
@@ -1381,9 +1376,9 @@ public final class InputManager {
      *
      * @param event The event to inject.
      * @param mode The synchronization mode.  One of:
-     * {@link android.os.InputEventInjectionSync.NONE},
-     * {@link android.os.InputEventInjectionSync.WAIT_FOR_RESULT}, or
-     * {@link android.os.InputEventInjectionSync.WAIT_FOR_FINISHED}.
+     * {@link android.os.InputEventInjectionSync#NONE},
+     * {@link android.os.InputEventInjectionSync#WAIT_FOR_RESULT}, or
+     * {@link android.os.InputEventInjectionSync#WAIT_FOR_FINISHED}.
      * @return True if input event injection succeeded.
      *
      * @hide
@@ -1407,7 +1402,8 @@ public final class InputManager {
      * {@link android.view.InputEvent}
      *         {@code null} if the event could not be verified.
      */
-    public @Nullable VerifiedInputEvent verifyInputEvent(@NonNull InputEvent event) {
+    @Nullable
+    public VerifiedInputEvent verifyInputEvent(@NonNull InputEvent event) {
         try {
             return mIm.verifyInputEvent(event);
         } catch (RemoteException ex) {
@@ -1419,7 +1415,7 @@ public final class InputManager {
      * Changes the mouse pointer's icon shape into the specified id.
      *
      * @param iconId The id of the pointer graphic, as a value between
-     * {@link PointerIcon.TYPE_ARROW} and {@link PointerIcon.TYPE_HANDWRITING}.
+     * {@link PointerIcon#TYPE_ARROW} and {@link PointerIcon#TYPE_HANDWRITING}.
      *
      * @hide
      */
@@ -1573,7 +1569,7 @@ public final class InputManager {
      * @param inputPort The port of the input device.
      * @param displayPort The physical port of the associated display.
      * <p>
-     * Requires {@link android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
+     * Requires {@link android.Manifest.permission#ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
@@ -1590,7 +1586,7 @@ public final class InputManager {
      * static association for the cleared input port will be restored.
      * @param inputPort The port of the input device to be cleared.
      * <p>
-     * Requires {@link android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
+     * Requires {@link android.Manifest.permission#ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
@@ -1608,7 +1604,7 @@ public final class InputManager {
      * @param inputPort The port of the input device.
      * @param displayUniqueId The unique id of the associated display.
      * <p>
-     * Requires {@link android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
+     * Requires {@link android.Manifest.permission#ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
@@ -1625,7 +1621,7 @@ public final class InputManager {
      * Removes a runtime association between the input device and display.
      * @param inputPort The port of the input device.
      * <p>
-     * Requires {@link android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
+     * Requires {@link android.Manifest.permission#ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
@@ -1717,9 +1713,9 @@ public final class InputManager {
                 throw ex.rethrowFromSystemServer();
             }
 
-            mInputDevices = new SparseArray<InputDevice>();
-            for (int i = 0; i < ids.length; i++) {
-                mInputDevices.put(ids[i], null);
+            mInputDevices = new SparseArray<>();
+            for (int id : ids) {
+                mInputDevices.put(id, null);
             }
         }
     }
@@ -1791,8 +1787,8 @@ public final class InputManager {
                     + "whenNanos=" + whenNanos + ", inTabletMode=" + inTabletMode);
         }
         synchronized (mTabletModeLock) {
-            final int N = mOnTabletModeChangedListeners.size();
-            for (int i = 0; i < N; i++) {
+            final int numListeners = mOnTabletModeChangedListeners.size();
+            for (int i = 0; i < numListeners; i++) {
                 OnTabletModeChangedListenerDelegate listener =
                         mOnTabletModeChangedListeners.get(i);
                 listener.sendTabletModeChanged(whenNanos, inTabletMode);
@@ -1995,7 +1991,7 @@ public final class InputManager {
             }
             List<LightState> lightStateList = request.getLightStates();
             mIm.setLightStates(deviceId, lightIds,
-                    lightStateList.toArray(new LightState[lightStateList.size()]),
+                    lightStateList.toArray(new LightState[0]),
                     token);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -2102,8 +2098,11 @@ public final class InputManager {
             } else {
                 // The deviceId is already being monitored for battery changes.
                 // Ensure that the listener is not already registered.
-                for (InputDeviceBatteryListenerDelegate delegate : listenersForDevice.mDelegates) {
-                    if (Objects.equals(listener, delegate.mListener)) {
+                final int numDelegates = listenersForDevice.mDelegates.size();
+                for (int i = 0; i < numDelegates; i++) {
+                    InputDeviceBatteryListener registeredListener =
+                            listenersForDevice.mDelegates.get(i).mListener;
+                    if (Objects.equals(listener, registeredListener)) {
                         throw new IllegalArgumentException(
                                 "Attempting to register an InputDeviceBatteryListener that has "
                                         + "already been registered for deviceId: "
@@ -2238,7 +2237,7 @@ public final class InputManager {
      * Changes the touchpad pointer speed temporarily, but does not save the setting.
      *
      * The new speed will only apply to gesture-compatible touchpads.
-     * Requires {@link android.Manifest.permission.SET_POINTER_SPEED}.
+     * Requires {@link android.Manifest.permission#SET_POINTER_SPEED}.
      *
      * @param speed The pointer speed as a value between {@link #MIN_POINTER_SPEED} and
      * {@link #MAX_POINTER_SPEED}, or the default value {@link #DEFAULT_POINTER_SPEED}.
@@ -2428,8 +2427,9 @@ public final class InputManager {
                     throw e.rethrowFromSystemServer();
                 }
             }
-            for (KeyboardBacklightListenerDelegate delegate : mKeyboardBacklightListeners) {
-                if (delegate.mListener == listener) {
+            final int numListeners = mKeyboardBacklightListeners.size();
+            for (int i = 0; i < numListeners; i++) {
+                if (mKeyboardBacklightListeners.get(i).mListener == listener) {
                     throw new IllegalArgumentException("Listener has already been registered!");
                 }
             }
@@ -2602,21 +2602,19 @@ public final class InputManager {
 
         public void sendTabletModeChanged(long whenNanos, boolean inTabletMode) {
             SomeArgs args = SomeArgs.obtain();
-            args.argi1 = (int) (whenNanos & 0xFFFFFFFF);
+            args.argi1 = (int) whenNanos;
             args.argi2 = (int) (whenNanos >> 32);
-            args.arg1 = (Boolean) inTabletMode;
+            args.arg1 = inTabletMode;
             obtainMessage(MSG_TABLET_MODE_CHANGED, args).sendToTarget();
         }
 
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_TABLET_MODE_CHANGED:
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    long whenNanos = (args.argi1 & 0xFFFFFFFFl) | ((long) args.argi2 << 32);
-                    boolean inTabletMode = (boolean) args.arg1;
-                    mListener.onTabletModeChanged(whenNanos, inTabletMode);
-                    break;
+            if (msg.what == MSG_TABLET_MODE_CHANGED) {
+                SomeArgs args = (SomeArgs) msg.obj;
+                long whenNanos = (args.argi1 & 0xFFFFFFFFL) | ((long) args.argi2 << 32);
+                boolean inTabletMode = (boolean) args.arg1;
+                mListener.onTabletModeChanged(whenNanos, inTabletMode);
             }
         }
     }
@@ -2684,8 +2682,10 @@ public final class InputManager {
                 if (entry == null) return;
 
                 entry.mInputDeviceBatteryState = state;
-                for (InputDeviceBatteryListenerDelegate delegate : entry.mDelegates) {
-                    delegate.notifyBatteryStateChanged(entry.mInputDeviceBatteryState);
+                final int numDelegates = entry.mDelegates.size();
+                for (int i = 0; i < numDelegates; i++) {
+                    entry.mDelegates.get(i)
+                            .notifyBatteryStateChanged(entry.mInputDeviceBatteryState);
                 }
             }
         }
@@ -2698,8 +2698,8 @@ public final class InputManager {
         private final int mBrightnessLevel;
         private final int mMaxBrightnessLevel;
 
-        LocalKeyboardBacklightState(int brightnesslevel, int maxBrightnessLevel) {
-            mBrightnessLevel = brightnesslevel;
+        LocalKeyboardBacklightState(int brightnessLevel, int maxBrightnessLevel) {
+            mBrightnessLevel = brightnessLevel;
             mMaxBrightnessLevel = maxBrightnessLevel;
         }
 
@@ -2739,8 +2739,10 @@ public final class InputManager {
                 boolean isTriggeredByKeyPress) {
             synchronized (mKeyboardBacklightListenerLock) {
                 if (mKeyboardBacklightListeners == null) return;
-                for (KeyboardBacklightListenerDelegate delegate : mKeyboardBacklightListeners) {
-                    delegate.notifyKeyboardBacklightChange(deviceId, state, isTriggeredByKeyPress);
+                final int numListeners = mKeyboardBacklightListeners.size();
+                for (int i = 0; i < numListeners; i++) {
+                    mKeyboardBacklightListeners.get(i)
+                            .notifyKeyboardBacklightChange(deviceId, state, isTriggeredByKeyPress);
                 }
             }
         }
