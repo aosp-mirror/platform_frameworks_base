@@ -72,8 +72,7 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
                 new Intent(RecognitionService.SERVICE_INTERFACE).setComponent(serviceName),
                 Context.BIND_AUTO_CREATE
                         | Context.BIND_FOREGROUND_SERVICE
-                        | Context.BIND_INCLUDE_CAPABILITIES
-                        | Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS,
+                        | Context.BIND_INCLUDE_CAPABILITIES,
                 userId,
                 IRecognitionService.Stub::asInterface);
 
