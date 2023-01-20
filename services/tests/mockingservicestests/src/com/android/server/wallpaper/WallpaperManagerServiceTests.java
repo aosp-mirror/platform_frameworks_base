@@ -427,7 +427,8 @@ public class WallpaperManagerServiceTests {
         doReturn(true).when(mService)
                 .bindWallpaperComponentLocked(any(), anyBoolean(), anyBoolean(), any(), any());
         doNothing().when(mService).saveSettingsLocked(wallpaper.userId);
-        doNothing().when(mService).generateCrop(wallpaper);
+        spyOn(mService.mWallpaperCropper);
+        doNothing().when(mService.mWallpaperCropper).generateCrop(wallpaper);
 
         // timestamps of {ACTION_WALLPAPER_CHANGED, onWallpaperColorsChanged}
         final long[] timestamps = new long[2];
