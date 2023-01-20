@@ -44545,6 +44545,7 @@ package android.telephony {
     field public static final int RESULT_SMS_SEND_RETRY_FAILED = 30; // 0x1e
     field public static final int RESULT_SYSTEM_ERROR = 15; // 0xf
     field public static final int RESULT_UNEXPECTED_EVENT_STOP_SENDING = 28; // 0x1c
+    field public static final int RESULT_USER_NOT_ALLOWED = 33; // 0x21
     field public static final int SMS_RP_CAUSE_CALL_BARRING = 10; // 0xa
     field public static final int SMS_RP_CAUSE_CONGESTION = 42; // 0x2a
     field public static final int SMS_RP_CAUSE_DESTINATION_OUT_OF_ORDER = 27; // 0x1b
