@@ -1,7 +1,5 @@
 +packages/SystemUI
--packages/SystemUI/animation/src/com/android/systemui/animation/FontInterpolator.kt
 -packages/SystemUI/animation/src/com/android/systemui/animation/TextAnimator.kt
--packages/SystemUI/animation/src/com/android/systemui/animation/TextInterpolator.kt
 -packages/SystemUI/animation/src/com/android/systemui/animation/ViewHierarchyAnimator.kt
 -packages/SystemUI/checks/src/com/android/internal/systemui/lint/BindServiceViaContextDetector.kt
 -packages/SystemUI/checks/src/com/android/internal/systemui/lint/BroadcastSentViaContextDetector.kt
