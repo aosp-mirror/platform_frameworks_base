@@ -20,6 +20,7 @@ import static android.content.ConfigurationProto.COLOR_MODE;
 import static android.content.ConfigurationProto.DENSITY_DPI;
 import static android.content.ConfigurationProto.FONT_SCALE;
 import static android.content.ConfigurationProto.FONT_WEIGHT_ADJUSTMENT;
+import static android.content.ConfigurationProto.GRAMMATICAL_GENDER;
 import static android.content.ConfigurationProto.HARD_KEYBOARD_HIDDEN;
 import static android.content.ConfigurationProto.KEYBOARD;
 import static android.content.ConfigurationProto.KEYBOARD_HIDDEN;
@@ -167,19 +168,19 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * Constant for grammatical gender: to indicate the terms of address the user
      * preferred in an application is neuter.
      */
-    public static final int GRAMMATICAL_GENDER_NEUTRAL = 2;
+    public static final int GRAMMATICAL_GENDER_NEUTRAL = 1;
 
     /**
      * Constant for grammatical gender: to indicate the terms of address the user
          * preferred in an application is feminine.
      */
-    public static final int GRAMMATICAL_GENDER_FEMININE = 3;
+    public static final int GRAMMATICAL_GENDER_FEMININE = 2;
 
     /**
      * Constant for grammatical gender: to indicate the terms of address the user
      * preferred in an application is masculine.
      */
-    public static final int GRAMMATICAL_GENDER_MASCULINE = 4;
+    public static final int GRAMMATICAL_GENDER_MASCULINE = 3;
 
     /** Constant for {@link #colorMode}: bits that encode whether the screen is wide gamut. */
     public static final int COLOR_MODE_WIDE_COLOR_GAMUT_MASK = 0x3;
@@ -529,15 +530,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if ((diff & ActivityInfo.CONFIG_FONT_WEIGHT_ADJUSTMENT) != 0) {
             list.add("CONFIG_AUTO_BOLD_TEXT");
         }
-        StringBuilder builder = new StringBuilder("{");
-        for (int i = 0, n = list.size(); i < n; i++) {
-            builder.append(list.get(i));
-            if (i != n - 1) {
-                builder.append(", ");
-            }
+        if ((diff & ActivityInfo.CONFIG_GRAMMATICAL_GENDER) != 0) {
+            list.add("CONFIG_GRAMMATICAL_GENDER");
         }
-        builder.append("}");
-        return builder.toString();
+        return "{" + TextUtils.join(", ", list) + "}";
     }
 
     /**
@@ -970,6 +966,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             NATIVE_CONFIG_SMALLEST_SCREEN_SIZE,
             NATIVE_CONFIG_LAYOUTDIR,
             NATIVE_CONFIG_COLOR_MODE,
+            NATIVE_CONFIG_GRAMMATICAL_GENDER,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface NativeConfig {}
@@ -1008,6 +1005,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public static final int NATIVE_CONFIG_LAYOUTDIR = 0x4000;
     /** @hide Native-specific bit mask for COLOR_MODE config ; DO NOT USE UNLESS YOU ARE SURE.*/
     public static final int NATIVE_CONFIG_COLOR_MODE = 0x10000;
+    /** @hide Native-specific bit mask for GRAMMATICAL_GENDER config; DO NOT USE UNLESS YOU
+     * ARE SURE.*/
+    public static final int NATIVE_CONFIG_GRAMMATICAL_GENDER = 0x20000;
 
     /**
      * <p>Construct an invalid Configuration. This state is only suitable for constructing a
@@ -1111,6 +1111,14 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             sb.append(mLocaleList);
         } else {
             sb.append(" ?localeList");
+        }
+        if (mGrammaticalGender != 0) {
+            switch (mGrammaticalGender) {
+                case GRAMMATICAL_GENDER_NEUTRAL: sb.append(" neuter"); break;
+                case GRAMMATICAL_GENDER_FEMININE: sb.append(" feminine"); break;
+                case GRAMMATICAL_GENDER_MASCULINE: sb.append(" masculine"); break;
+                case GRAMMATICAL_GENDER_NOT_SPECIFIED: sb.append(" ?grgend"); break;
+            }
         }
         int layoutDir = (screenLayout&SCREENLAYOUT_LAYOUTDIR_MASK);
         switch (layoutDir) {
@@ -1292,6 +1300,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         protoOutputStream.write(ORIENTATION, orientation);
         protoOutputStream.write(SCREEN_WIDTH_DP, screenWidthDp);
         protoOutputStream.write(SCREEN_HEIGHT_DP, screenHeightDp);
+        protoOutputStream.write(GRAMMATICAL_GENDER, mGrammaticalGender);
         protoOutputStream.end(token);
     }
 
@@ -1453,6 +1462,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                         break;
                     case (int) FONT_WEIGHT_ADJUSTMENT:
                         fontWeightAdjustment = protoInputStream.readInt(FONT_WEIGHT_ADJUSTMENT);
+                        break;
+                    case (int) GRAMMATICAL_GENDER:
+                        mGrammaticalGender = protoInputStream.readInt(GRAMMATICAL_GENDER);
                         break;
                 }
             }
@@ -1839,6 +1851,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if ((mask & ActivityInfo.CONFIG_FONT_WEIGHT_ADJUSTMENT) != 0) {
             fontWeightAdjustment = delta.fontWeightAdjustment;
         }
+        if ((mask & ActivityInfo.CONFIG_GRAMMATICAL_GENDER) != 0) {
+            mGrammaticalGender = delta.mGrammaticalGender;
+        }
     }
 
     /**
@@ -1975,7 +1990,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_FONT_WEIGHT_ADJUSTMENT;
         }
 
-        if (!publicOnly&& mGrammaticalGender != delta.mGrammaticalGender) {
+        if (!publicOnly && mGrammaticalGender != delta.mGrammaticalGender) {
             changed |= ActivityInfo.CONFIG_GRAMMATICAL_GENDER;
         }
         return changed;
@@ -2172,6 +2187,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             if (n != 0) return n;
         }
 
+        n = this.mGrammaticalGender - that.mGrammaticalGender;
+        if (n != 0) return n;
         n = this.touchscreen - that.touchscreen;
         if (n != 0) return n;
         n = this.keyboard - that.keyboard;
@@ -2205,11 +2222,6 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         n = windowConfiguration.compareTo(that.windowConfiguration);
         if (n != 0) return n;
         n = this.fontWeightAdjustment - that.fontWeightAdjustment;
-        if (n != 0) return n;
-        n = this.mGrammaticalGender - that.mGrammaticalGender;
-        if (n != 0) return n;
-
-        // if (n != 0) return n;
         return n;
     }
 
@@ -2480,6 +2492,20 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             if (!resourceQualifier.isEmpty()) {
                 parts.add(resourceQualifier);
             }
+        }
+
+        switch (config.mGrammaticalGender) {
+            case Configuration.GRAMMATICAL_GENDER_NEUTRAL:
+                parts.add("neuter");
+                break;
+            case Configuration.GRAMMATICAL_GENDER_FEMININE:
+                parts.add("feminine");
+                break;
+            case Configuration.GRAMMATICAL_GENDER_MASCULINE:
+                parts.add("masculine");
+                break;
+            default:
+                break;
         }
 
         switch (config.screenLayout & Configuration.SCREENLAYOUT_LAYOUTDIR_MASK) {
@@ -2768,6 +2794,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             delta.locale = change.locale;
         }
 
+        if (base.mGrammaticalGender != change.mGrammaticalGender) {
+            delta.mGrammaticalGender = change.mGrammaticalGender;
+        }
+
         if (base.touchscreen != change.touchscreen) {
             delta.touchscreen = change.touchscreen;
         }
@@ -2881,6 +2911,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     private static final String XML_ATTR_DENSITY = "density";
     private static final String XML_ATTR_APP_BOUNDS = "app_bounds";
     private static final String XML_ATTR_FONT_WEIGHT_ADJUSTMENT = "fontWeightAdjustment";
+    private static final String XML_ATTR_GRAMMATICAL_GENDER = "grammaticalGender";
 
     /**
      * Reads the attributes corresponding to Configuration member fields from the Xml parser.
@@ -2932,6 +2963,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 DENSITY_DPI_UNDEFINED);
         configOut.fontWeightAdjustment = XmlUtils.readIntAttribute(parser,
                 XML_ATTR_FONT_WEIGHT_ADJUSTMENT, FONT_WEIGHT_ADJUSTMENT_UNDEFINED);
+        configOut.mGrammaticalGender = XmlUtils.readIntAttribute(parser,
+                XML_ATTR_GRAMMATICAL_GENDER, GRAMMATICAL_GENDER_NOT_SPECIFIED);
 
         // For persistence, we don't care about assetsSeq and WindowConfiguration, so do not read it
         // out.

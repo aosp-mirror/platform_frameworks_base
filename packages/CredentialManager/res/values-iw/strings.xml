@@ -5,31 +5,25 @@
     <string name="string_cancel" msgid="6369133483981306063">"ביטול"</string>
     <string name="string_continue" msgid="1346732695941131882">"המשך"</string>
     <string name="string_more_options" msgid="7990658711962795124">"אפשרויות נוספות"</string>
-    <string name="string_create_in_another_place" msgid="1033635365843437603">"יצירה במקום אחר"</string>
-    <string name="string_save_to_another_place" msgid="7590325934591079193">"שמירה במקום אחר"</string>
-    <string name="string_use_another_device" msgid="8754514926121520445">"שימוש במכשיר אחר"</string>
-    <string name="string_save_to_another_device" msgid="1959562542075194458">"שמירה במכשיר אחר"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"בטוח יותר להשתמש במפתחות גישה"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"עם מפתחות הגישה לא צריך יותר ליצור או לזכור סיסמאות מורכבות"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"מפתחות גישה הם מפתחות דיגיטליים מוצפנים שניתן ליצור באמצעות טביעת האצבע, זיהוי הפנים או נעילת המסך"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"מפתחות הגישה והסיסמאות נשמרים במנהל הסיסמאות כך שניתן להיכנס לחשבון במכשירים אחרים"</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"צריך לבחור לאן <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
-    <string name="create_your_passkeys" msgid="8901224153607590596">"יצירת מפתחות גישה"</string>
-    <string name="save_your_password" msgid="6597736507991704307">"שמירת הסיסמה שלך"</string>
-    <string name="save_your_sign_in_info" msgid="7213978049817076882">"שמירת פרטי הכניסה שלך"</string>
-    <string name="choose_provider_body" msgid="4384188171872005547">"אפשר לבחור באחד משירותי ניהול הסיסמאות כדי לשמור את הפרטים ולהיכנס לחשבון מהר יותר בפעם הבאה."</string>
+    <string name="choose_provider_title" msgid="8870795677024868108">"בחירת המקום לשמירה של <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
+    <string name="choose_provider_body" msgid="4967074531845147434">"אפשר לבחור באחד משירותי ניהול הסיסמאות כדי לשמור את הפרטים ולהיכנס לחשבון מהר יותר בפעם הבאה"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"ליצור מפתח גישה ל-<xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"לשמור את הסיסמה של <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"לשמור את פרטי הכניסה של <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_description" msgid="5531335144879100664">"אפשר להשתמש ב<xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> של <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> בכל מכשיר. הוא שמור ב<xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> של <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>."</string>
     <string name="passkey" msgid="632353688396759522">"מפתח גישה"</string>
     <string name="password" msgid="6738570945182936667">"סיסמה"</string>
+    <string name="passkeys" msgid="5733880786866559847">"מפתחות גישה"</string>
+    <string name="passwords" msgid="5419394230391253816">"סיסמאות"</string>
     <string name="sign_ins" msgid="4710739369149469208">"פרטי כניסה"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"פרטי הכניסה"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"שמירת <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> ב-"</string>
-    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"ליצור מפתח גישה במכשיר אחר?"</string>
+    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"ליצור מפתח גישה במכשיר אחר?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"להשתמש ב-<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> בכל הכניסות?"</string>
-    <string name="use_provider_for_all_description" msgid="6560593199974037820">"במנהל הסיסמאות הזה יאוחסנו הסיסמאות ומפתחות הגישה שלך, כדי לעזור לך להיכנס לחשבון בקלות."</string>
+    <string name="use_provider_for_all_description" msgid="8466427781848268490">"במנהל הסיסמאות הזה יאוחסנו הסיסמאות ומפתחות הגישה שלך, כדי לעזור לך להיכנס לחשבון בקלות"</string>
     <string name="set_as_default" msgid="4415328591568654603">"הגדרה כברירת מחדל"</string>
     <string name="use_once" msgid="9027366575315399714">"שימוש פעם אחת"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> סיסמאות • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> מפתחות גישה"</string>

@@ -4756,6 +4756,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mTaskChangeNotificationController.notifyTaskFocusChanged(prevTask.mTaskId, false);
             }
             mTaskChangeNotificationController.notifyTaskFocusChanged(task.mTaskId, true);
+            mTaskSupervisor.mRecentTasks.add(task);
         }
 
         applyUpdateLockStateLocked(r);
@@ -6914,6 +6915,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
                 activity.restartProcessIfVisible();
             }
+        }
+
+        /** Sets the task stack listener that gets callbacks when a task stack changes. */
+        @Override
+        public void registerTaskStackListener(ITaskStackListener listener) {
+            ActivityTaskManagerService.this.registerTaskStackListener(listener);
+        }
+
+        /** Unregister a task stack listener so that it stops receiving callbacks. */
+        @Override
+        public void unregisterTaskStackListener(ITaskStackListener listener) {
+            ActivityTaskManagerService.this.unregisterTaskStackListener(listener);
         }
     }
 }

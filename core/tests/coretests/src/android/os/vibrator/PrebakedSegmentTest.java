@@ -25,8 +25,13 @@ import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertThrows;
 
 import android.os.Parcel;
+import android.os.SystemVibrator;
 import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.os.VibratorInfo;
 import android.platform.test.annotations.Presubmit;
+
+import androidx.test.InstrumentationRegistry;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -146,9 +151,149 @@ public class PrebakedSegmentTest {
     }
 
     @Test
+    public void testVibrationFeaturesSupport_idsWithFallback_fallbackEnabled_vibratorSupport() {
+        Vibrator vibrator = createVibratorWithSupportedEffects(
+                VibrationEffect.EFFECT_TICK,
+                VibrationEffect.EFFECT_CLICK,
+                VibrationEffect.EFFECT_DOUBLE_CLICK,
+                VibrationEffect.EFFECT_HEAVY_CLICK);
+
+        assertTrue(createSegmentWithFallback(VibrationEffect.EFFECT_TICK)
+                .areVibrationFeaturesSupported(vibrator));
+        assertTrue(createSegmentWithFallback(VibrationEffect.EFFECT_CLICK)
+                .areVibrationFeaturesSupported(vibrator));
+        assertTrue(createSegmentWithFallback(VibrationEffect.EFFECT_DOUBLE_CLICK)
+                .areVibrationFeaturesSupported(vibrator));
+        assertTrue(createSegmentWithFallback(VibrationEffect.EFFECT_HEAVY_CLICK)
+                .areVibrationFeaturesSupported(vibrator));
+
+    }
+
+    @Test
+    public void testVibrationFeaturesSupport_idsWithFallback_fallbackEnabled_noVibratorSupport() {
+        Vibrator vibrator = createVibratorWithSupportedEffects(new int[0]);
+
+        assertTrue(createSegmentWithFallback(VibrationEffect.EFFECT_TICK)
+                .areVibrationFeaturesSupported(vibrator));
+        assertTrue(createSegmentWithFallback(VibrationEffect.EFFECT_CLICK)
+                .areVibrationFeaturesSupported(vibrator));
+        assertTrue(createSegmentWithFallback(VibrationEffect.EFFECT_DOUBLE_CLICK)
+                .areVibrationFeaturesSupported(vibrator));
+        assertTrue(createSegmentWithFallback(VibrationEffect.EFFECT_HEAVY_CLICK)
+                .areVibrationFeaturesSupported(vibrator));
+    }
+
+    @Test
+    public void testVibrationFeaturesSupport_idsWithFallback_fallbackDisabled_vibratorSupport() {
+        Vibrator vibrator = createVibratorWithSupportedEffects(
+                VibrationEffect.EFFECT_TICK,
+                VibrationEffect.EFFECT_CLICK,
+                VibrationEffect.EFFECT_DOUBLE_CLICK,
+                VibrationEffect.EFFECT_HEAVY_CLICK);
+
+        assertTrue(createSegmentWithoutFallback(VibrationEffect.EFFECT_TICK)
+                .areVibrationFeaturesSupported(vibrator));
+        assertTrue(createSegmentWithoutFallback(VibrationEffect.EFFECT_CLICK)
+                .areVibrationFeaturesSupported(vibrator));
+        assertTrue(createSegmentWithoutFallback(VibrationEffect.EFFECT_DOUBLE_CLICK)
+                .areVibrationFeaturesSupported(vibrator));
+        assertTrue(createSegmentWithoutFallback(VibrationEffect.EFFECT_HEAVY_CLICK)
+                .areVibrationFeaturesSupported(vibrator));
+    }
+
+    @Test
+    public void testVibrationFeaturesSupport_idsWithFallback_fallbackDisabled_noVibratorSupport() {
+        Vibrator vibrator = createVibratorWithSupportedEffects(new int[0]);
+
+        assertFalse(createSegmentWithoutFallback(VibrationEffect.EFFECT_TICK)
+                .areVibrationFeaturesSupported(vibrator));
+        assertFalse(createSegmentWithoutFallback(VibrationEffect.EFFECT_CLICK)
+                .areVibrationFeaturesSupported(vibrator));
+        assertFalse(createSegmentWithoutFallback(VibrationEffect.EFFECT_DOUBLE_CLICK)
+                .areVibrationFeaturesSupported(vibrator));
+        assertFalse(createSegmentWithoutFallback(VibrationEffect.EFFECT_HEAVY_CLICK)
+                .areVibrationFeaturesSupported(vibrator));
+    }
+
+    @Test
+    public void testVibrationFeaturesSupport_idsWithNoFallback_fallbackEnabled_vibratorSupport() {
+        Vibrator vibrator = createVibratorWithSupportedEffects(
+                VibrationEffect.EFFECT_THUD,
+                VibrationEffect.EFFECT_POP,
+                VibrationEffect.EFFECT_TEXTURE_TICK);
+
+        assertTrue(createSegmentWithFallback(VibrationEffect.EFFECT_THUD)
+                .areVibrationFeaturesSupported(vibrator));
+        assertTrue(createSegmentWithFallback(VibrationEffect.EFFECT_POP)
+                .areVibrationFeaturesSupported(vibrator));
+        assertTrue(createSegmentWithFallback(VibrationEffect.EFFECT_TEXTURE_TICK)
+                .areVibrationFeaturesSupported(vibrator));
+    }
+
+    @Test
+    public void testVibrationFeaturesSupport_idsWithNoFallback_fallbackEnabled_noVibratorSupport() {
+        Vibrator vibrator = createVibratorWithSupportedEffects(new int[0]);
+
+        assertFalse(createSegmentWithFallback(VibrationEffect.EFFECT_THUD)
+                .areVibrationFeaturesSupported(vibrator));
+        assertFalse(createSegmentWithFallback(VibrationEffect.EFFECT_POP)
+                .areVibrationFeaturesSupported(vibrator));
+        assertFalse(createSegmentWithFallback(VibrationEffect.EFFECT_TEXTURE_TICK)
+                .areVibrationFeaturesSupported(vibrator));
+    }
+
+    @Test
+    public void testVibrationFeaturesSupport_idsWithNoFallback_fallbackDisabled_vibratorSupport() {
+        Vibrator vibrator = createVibratorWithSupportedEffects(
+                VibrationEffect.EFFECT_THUD,
+                VibrationEffect.EFFECT_POP,
+                VibrationEffect.EFFECT_TEXTURE_TICK);
+
+        assertTrue(createSegmentWithoutFallback(VibrationEffect.EFFECT_THUD)
+                .areVibrationFeaturesSupported(vibrator));
+        assertTrue(createSegmentWithoutFallback(VibrationEffect.EFFECT_POP)
+                .areVibrationFeaturesSupported(vibrator));
+        assertTrue(createSegmentWithoutFallback(VibrationEffect.EFFECT_TEXTURE_TICK)
+                .areVibrationFeaturesSupported(vibrator));
+    }
+
+    @Test
+    public void testVibrationFeaturesSupport_idsWithNoFallback_fallbackDisabled_noVibSupport() {
+        Vibrator vibrator = createVibratorWithSupportedEffects(new int[0]);
+
+        assertFalse(createSegmentWithoutFallback(VibrationEffect.EFFECT_THUD)
+                .areVibrationFeaturesSupported(vibrator));
+        assertFalse(createSegmentWithoutFallback(VibrationEffect.EFFECT_POP)
+                .areVibrationFeaturesSupported(vibrator));
+        assertFalse(createSegmentWithoutFallback(VibrationEffect.EFFECT_TEXTURE_TICK)
+                .areVibrationFeaturesSupported(vibrator));
+    }
+
+    @Test
     public void testIsHapticFeedbackCandidate_prebakedRingtones_notCandidates() {
         assertFalse(new PrebakedSegment(
                 VibrationEffect.RINGTONES[1], true, VibrationEffect.EFFECT_STRENGTH_MEDIUM)
                 .isHapticFeedbackCandidate());
+    }
+
+    private static PrebakedSegment createSegmentWithFallback(int effectId) {
+        // note: arbitrary effect strength being used.
+        return new PrebakedSegment(effectId, true, VibrationEffect.EFFECT_STRENGTH_MEDIUM);
+    }
+
+    private static PrebakedSegment createSegmentWithoutFallback(int effectId) {
+        // note: arbitrary effect strength being used.
+        return new PrebakedSegment(effectId, false, VibrationEffect.EFFECT_STRENGTH_MEDIUM);
+    }
+
+    private static Vibrator createVibratorWithSupportedEffects(int... supportedEffects) {
+        return new SystemVibrator(InstrumentationRegistry.getContext()) {
+            @Override
+            public VibratorInfo getInfo() {
+                return new VibratorInfo.Builder(/* id= */ 1)
+                        .setSupportedEffects(supportedEffects)
+                        .build();
+            }
+        };
     }
 }

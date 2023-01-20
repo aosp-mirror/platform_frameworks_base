@@ -416,10 +416,11 @@ public class ScreenshotController {
         }
 
         boolean showFlash = false;
-        if (!aspectRatiosMatch(screenshot, visibleInsets, screenshotScreenBounds)) {
+        if (screenshotScreenBounds == null
+                || !aspectRatiosMatch(screenshot, visibleInsets, screenshotScreenBounds)) {
             showFlash = true;
             visibleInsets = Insets.NONE;
-            screenshotScreenBounds.set(0, 0, screenshot.getWidth(), screenshot.getHeight());
+            screenshotScreenBounds = new Rect(0, 0, screenshot.getWidth(), screenshot.getHeight());
         }
         mCurrentRequestCallback = requestCallback;
         saveScreenshot(screenshot, finisher, screenshotScreenBounds, visibleInsets, topComponent,
@@ -553,6 +554,10 @@ public class ScreenshotController {
             Log.d(TAG, "adding OnComputeInternalInsetsListener");
         }
         mScreenshotView.getViewTreeObserver().addOnComputeInternalInsetsListener(mScreenshotView);
+        if (DEBUG_WINDOW) {
+            Log.d(TAG, "setContentView: " + mScreenshotView);
+        }
+        setContentView(mScreenshotView);
     }
 
     /**
@@ -634,6 +639,7 @@ public class ScreenshotController {
 
         // The window is focusable by default
         setWindowFocusable(true);
+        mScreenshotView.requestFocus();
 
         // Wait until this window is attached to request because it is
         // the reference used to locate the target window (below).
@@ -691,10 +697,7 @@ public class ScreenshotController {
                     mContext.getDrawable(R.drawable.overlay_badge_background), owner));
         }
         mScreenshotView.setScreenshot(mScreenBitmap, screenInsets);
-        if (DEBUG_WINDOW) {
-            Log.d(TAG, "setContentView: " + mScreenshotView);
-        }
-        setContentView(mScreenshotView);
+
         // ignore system bar insets for the purpose of window layout
         mWindow.getDecorView().setOnApplyWindowInsetsListener(
                 (v, insets) -> WindowInsets.CONSUMED);

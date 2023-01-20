@@ -1489,7 +1489,7 @@ void NativeInputManager::loadAdditionalMouseResources(
             mServiceObj, gServiceClassInfo.getContextForDisplay, displayId));
 
     for (int32_t iconId = static_cast<int32_t>(PointerIconStyle::TYPE_CONTEXT_MENU);
-         iconId <= static_cast<int32_t>(PointerIconStyle::TYPE_GRABBING); ++iconId) {
+         iconId <= static_cast<int32_t>(PointerIconStyle::TYPE_HANDWRITING); ++iconId) {
         const PointerIconStyle pointerIconStyle = static_cast<PointerIconStyle>(iconId);
         PointerIcon pointerIcon;
         loadSystemIconAsSpriteWithPointerIcon(env, displayContext.get(), pointerIconStyle,

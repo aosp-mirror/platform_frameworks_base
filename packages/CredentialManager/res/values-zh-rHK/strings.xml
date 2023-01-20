@@ -5,31 +5,25 @@
     <string name="string_cancel" msgid="6369133483981306063">"取消"</string>
     <string name="string_continue" msgid="1346732695941131882">"繼續"</string>
     <string name="string_more_options" msgid="7990658711962795124">"更多選項"</string>
-    <string name="string_create_in_another_place" msgid="1033635365843437603">"在其他位置建立"</string>
-    <string name="string_save_to_another_place" msgid="7590325934591079193">"儲存至其他位置"</string>
-    <string name="string_use_another_device" msgid="8754514926121520445">"改用其他裝置"</string>
-    <string name="string_save_to_another_device" msgid="1959562542075194458">"儲存至其他裝置"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"使用密鑰確保帳戶安全"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"有了密鑰，您便無需建立或記住複雜的密碼"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"密鑰是您使用指紋、面孔或螢幕鎖定時建立的加密數碼鑰匙"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"密鑰已儲存至密碼管理工具，方便您在其他裝置上登入"</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"選擇「<xliff:g id="CREATETYPES">%1$s</xliff:g>」的位置"</string>
-    <string name="create_your_passkeys" msgid="8901224153607590596">"建立密鑰"</string>
-    <string name="save_your_password" msgid="6597736507991704307">"儲存密碼"</string>
-    <string name="save_your_sign_in_info" msgid="7213978049817076882">"儲存登入資料"</string>
-    <string name="choose_provider_body" msgid="4384188171872005547">"選取密碼管理工具即可儲存自己的資料，縮短下次登入的時間。"</string>
+    <string name="choose_provider_title" msgid="8870795677024868108">"選擇要將<xliff:g id="CREATETYPES">%1$s</xliff:g>存在哪裡"</string>
+    <string name="choose_provider_body" msgid="4967074531845147434">"選取密碼管理工具並儲存資訊，下次就能更快登入"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"要為「<xliff:g id="APPNAME">%1$s</xliff:g>」建立密鑰嗎？"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"要儲存「<xliff:g id="APPNAME">%1$s</xliff:g>」的密碼嗎？"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"要儲存「<xliff:g id="APPNAME">%1$s</xliff:g>」的登入資料嗎？"</string>
-    <string name="choose_create_option_description" msgid="5531335144879100664">"您可以在任何裝置上使用「<xliff:g id="APPDOMAINNAME">%1$s</xliff:g>」<xliff:g id="CREDENTIALTYPES">%2$s</xliff:g>。系統會將此資料儲存至「<xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g>」，供「<xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>」使用"</string>
     <string name="passkey" msgid="632353688396759522">"密鑰"</string>
     <string name="password" msgid="6738570945182936667">"密碼"</string>
+    <string name="passkeys" msgid="5733880786866559847">"密碼金鑰"</string>
+    <string name="passwords" msgid="5419394230391253816">"密碼"</string>
     <string name="sign_ins" msgid="4710739369149469208">"登入資料"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"登入資料"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"將<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>儲存至"</string>
-    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"要在另一部裝置上建立密鑰嗎？"</string>
+    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"要在其他裝置上建立密碼金鑰嗎？"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"要將「<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>」用於所有的登入資料嗎？"</string>
-    <string name="use_provider_for_all_description" msgid="6560593199974037820">"此密碼管理工具將儲存您的密碼和密鑰，協助您輕鬆登入。"</string>
+    <string name="use_provider_for_all_description" msgid="8466427781848268490">"這個密碼管理工具會儲存密碼和密碼金鑰，協助你輕鬆登入"</string>
     <string name="set_as_default" msgid="4415328591568654603">"設定為預設"</string>
     <string name="use_once" msgid="9027366575315399714">"單次使用"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> 個密碼 • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> 個密鑰"</string>

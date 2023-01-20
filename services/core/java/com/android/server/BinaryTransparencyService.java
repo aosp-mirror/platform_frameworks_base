@@ -44,6 +44,13 @@ import android.content.pm.SigningInfo;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
+import android.hardware.biometrics.SensorProperties;
+import android.hardware.biometrics.SensorProperties.ComponentInfo;
+import android.hardware.face.FaceManager;
+import android.hardware.face.FaceSensorProperties;
+import android.hardware.fingerprint.FingerprintManager;
+import android.hardware.fingerprint.FingerprintSensorProperties;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -1067,11 +1074,6 @@ public class BinaryTransparencyService extends SystemService {
         // register a package observer to detect updates to preloads
         mPackageManagerInternal.getPackageList(new PackageManagerInternal.PackageListObserver() {
             @Override
-            public void onPackageAdded(String packageName, int uid) {
-
-            }
-
-            @Override
             public void onPackageChanged(String packageName, int uid) {
                 // check if the updated package is a preloaded app.
                 PackageManager pm = mContext.getPackageManager();
@@ -1086,11 +1088,6 @@ public class BinaryTransparencyService extends SystemService {
                 Slog.d(TAG, "Preload " + packageName + " was updated. Scheduling measurement...");
                 UpdateMeasurementsJobService.scheduleBinaryMeasurements(mContext,
                         BinaryTransparencyService.this);
-            }
-
-            @Override
-            public void onPackageRemoved(String packageName, int uid) {
-
             }
         });
 
@@ -1110,6 +1107,15 @@ public class BinaryTransparencyService extends SystemService {
         if (phase == PHASE_BOOT_COMPLETED) {
             Slog.i(TAG, "Boot completed. Getting VBMeta Digest.");
             getVBMetaDigestInformation();
+
+            // Log to statsd
+            // TODO(b/264061957): For now, biometric system properties are always collected if users
+            //  share usage & diagnostics information. In the future, collect biometric system
+            //  properties only when transparency log verification of the target partitions fails
+            //  (e.g. when the system/vendor partitions have been changed) once the binary
+            //  transparency infrastructure is ready.
+            Slog.i(TAG, "Boot completed. Collecting biometric system properties.");
+            collectBiometricProperties();
 
             // to avoid the risk of holding up boot time, computations to measure APEX, Module, and
             // MBA digests are scheduled here, but only executed when the device is idle and plugged
@@ -1204,6 +1210,141 @@ public class BinaryTransparencyService extends SystemService {
             Slog.d(TAG, TextUtils.formatSimple(
                     "Job %d to measure binaries was scheduled successfully.",
                     DO_BINARY_MEASUREMENTS_JOB_ID));
+        }
+    }
+
+    /**
+     * Convert a {@link FingerprintSensorProperties} sensor type to the corresponding enum to be
+     * logged.
+     *
+     * @param sensorType See {@link FingerprintSensorProperties}
+     * @return The enum to be logged
+     */
+    private int toFingerprintSensorType(@FingerprintSensorProperties.SensorType int sensorType) {
+        switch (sensorType) {
+            case FingerprintSensorProperties.TYPE_REAR:
+                return FrameworkStatsLog
+                        .BIOMETRIC_PROPERTIES_COLLECTED__SENSOR_TYPE__SENSOR_FP_REAR;
+            case FingerprintSensorProperties.TYPE_UDFPS_ULTRASONIC:
+                return FrameworkStatsLog
+                        .BIOMETRIC_PROPERTIES_COLLECTED__SENSOR_TYPE__SENSOR_FP_UDFPS_ULTRASONIC;
+            case FingerprintSensorProperties.TYPE_UDFPS_OPTICAL:
+                return FrameworkStatsLog
+                        .BIOMETRIC_PROPERTIES_COLLECTED__SENSOR_TYPE__SENSOR_FP_UDFPS_OPTICAL;
+            case FingerprintSensorProperties.TYPE_POWER_BUTTON:
+                return FrameworkStatsLog
+                        .BIOMETRIC_PROPERTIES_COLLECTED__SENSOR_TYPE__SENSOR_FP_POWER_BUTTON;
+            case FingerprintSensorProperties.TYPE_HOME_BUTTON:
+                return FrameworkStatsLog
+                        .BIOMETRIC_PROPERTIES_COLLECTED__SENSOR_TYPE__SENSOR_FP_HOME_BUTTON;
+            default:
+                return FrameworkStatsLog
+                        .BIOMETRIC_PROPERTIES_COLLECTED__SENSOR_TYPE__SENSOR_UNKNOWN;
+        }
+    }
+
+    /**
+     * Convert a {@link FaceSensorProperties} sensor type to the corresponding enum to be logged.
+     *
+     * @param sensorType See {@link FaceSensorProperties}
+     * @return The enum to be logged
+     */
+    private int toFaceSensorType(@FaceSensorProperties.SensorType int sensorType) {
+        switch (sensorType) {
+            case FaceSensorProperties.TYPE_RGB:
+                return FrameworkStatsLog
+                        .BIOMETRIC_PROPERTIES_COLLECTED__SENSOR_TYPE__SENSOR_FACE_RGB;
+            case FaceSensorProperties.TYPE_IR:
+                return FrameworkStatsLog
+                        .BIOMETRIC_PROPERTIES_COLLECTED__SENSOR_TYPE__SENSOR_FACE_IR;
+            default:
+                return FrameworkStatsLog
+                        .BIOMETRIC_PROPERTIES_COLLECTED__SENSOR_TYPE__SENSOR_UNKNOWN;
+        }
+    }
+
+    /**
+     * Convert a {@link SensorProperties} sensor strength to the corresponding enum to be logged.
+     *
+     * @param sensorStrength See {@link SensorProperties}
+     * @return The enum to be logged
+     */
+    private int toSensorStrength(@SensorProperties.Strength int sensorStrength) {
+        switch (sensorStrength) {
+            case SensorProperties.STRENGTH_CONVENIENCE:
+                return FrameworkStatsLog
+                        .BIOMETRIC_PROPERTIES_COLLECTED__SENSOR_STRENGTH__STRENGTH_CONVENIENCE;
+            case SensorProperties.STRENGTH_WEAK:
+                return FrameworkStatsLog
+                        .BIOMETRIC_PROPERTIES_COLLECTED__SENSOR_STRENGTH__STRENGTH_WEAK;
+            case SensorProperties.STRENGTH_STRONG:
+                return FrameworkStatsLog
+                        .BIOMETRIC_PROPERTIES_COLLECTED__SENSOR_STRENGTH__STRENGTH_STRONG;
+            default:
+                return FrameworkStatsLog
+                        .BIOMETRIC_PROPERTIES_COLLECTED__SENSOR_STRENGTH__STRENGTH_UNKNOWN;
+        }
+    }
+
+    /**
+     * A helper function to log detailed biometric sensor properties to statsd.
+     *
+     * @param prop The biometric sensor properties to be logged
+     * @param modality The modality of the biometric (e.g. fingerprint, face) to be logged
+     * @param sensorType The specific type of the biometric to be logged
+     */
+    private void logBiometricProperties(SensorProperties prop, int modality, int sensorType) {
+        final int sensorId = prop.getSensorId();
+        final int sensorStrength = toSensorStrength(prop.getSensorStrength());
+
+        // Log data for each component
+        // Note: none of the component info is a device identifier since every device of a given
+        // model and build share the same biometric system info (see b/216195167)
+        for (ComponentInfo componentInfo : prop.getComponentInfo()) {
+            FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_PROPERTIES_COLLECTED,
+                    sensorId,
+                    modality,
+                    sensorType,
+                    sensorStrength,
+                    componentInfo.getComponentId().trim(),
+                    componentInfo.getHardwareVersion().trim(),
+                    componentInfo.getFirmwareVersion().trim(),
+                    componentInfo.getSerialNumber().trim(),
+                    componentInfo.getSoftwareVersion().trim());
+        }
+    }
+
+    private void collectBiometricProperties() {
+        PackageManager pm = mContext.getPackageManager();
+        FingerprintManager fpManager = null;
+        FaceManager faceManager = null;
+        if (pm != null && pm.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+            fpManager = mContext.getSystemService(FingerprintManager.class);
+        }
+        if (pm != null && pm.hasSystemFeature(PackageManager.FEATURE_FACE)) {
+            faceManager = mContext.getSystemService(FaceManager.class);
+        }
+
+        if (fpManager != null) {
+            // Log data for each fingerprint sensor
+            for (FingerprintSensorPropertiesInternal propInternal :
+                    fpManager.getSensorPropertiesInternal()) {
+                final FingerprintSensorProperties prop =
+                        FingerprintSensorProperties.from(propInternal);
+                logBiometricProperties(prop,
+                        FrameworkStatsLog
+                                .BIOMETRIC_PROPERTIES_COLLECTED__MODALITY__MODALITY_FINGERPRINT,
+                        toFingerprintSensorType(prop.getSensorType()));
+            }
+        }
+
+        if (faceManager != null) {
+            // Log data for each face sensor
+            for (FaceSensorProperties prop : faceManager.getSensorProperties()) {
+                logBiometricProperties(prop,
+                        FrameworkStatsLog.BIOMETRIC_PROPERTIES_COLLECTED__MODALITY__MODALITY_FACE,
+                        toFaceSensorType(prop.getSensorType()));
+            }
         }
     }
 

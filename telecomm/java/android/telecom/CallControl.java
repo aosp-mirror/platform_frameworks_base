@@ -21,6 +21,7 @@ import static android.telecom.CallException.TRANSACTION_EXCEPTION_KEY;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.OutcomeReceiver;
@@ -45,7 +46,8 @@ import java.util.concurrent.Executor;
  * {@link OutcomeReceiver#onError} is called and provides a {@link CallException} that details why
  * the operation failed.
  */
-public final class CallControl implements AutoCloseable {
+@SuppressLint("NotCloseable")
+public final class CallControl {
     private static final String TAG = CallControl.class.getSimpleName();
     private static final String INTERFACE_ERROR_MSG = "Call Control is not available";
     private final String mCallId;
@@ -258,17 +260,6 @@ public final class CallControl implements AutoCloseable {
         } else {
             throw new IllegalStateException(INTERFACE_ERROR_MSG);
         }
-    }
-
-    /**
-     * This method should be called after
-     * {@link CallControl#disconnect(DisconnectCause, Executor, OutcomeReceiver)} or
-     * {@link CallControl#rejectCall(Executor, OutcomeReceiver)}
-     * to destroy all references of this object and avoid memory leaks.
-     */
-    @Override
-    public void close() {
-        mRepository.removeCallFromServiceWrapper(mPhoneAccountHandle, mCallId);
     }
 
     /**

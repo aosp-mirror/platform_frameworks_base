@@ -57,6 +57,7 @@ import android.os.RemoteException;
 import android.os.StatFs;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.system.ErrnoException;
@@ -69,11 +70,10 @@ import androidx.test.filters.LargeTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.filters.Suppress;
 
-import com.android.server.pm.test.service.server.R;
 import com.android.internal.content.InstallLocationUtils;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
-import com.android.server.pm.pkg.parsing.ParsingPackage;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
+import com.android.server.pm.test.service.server.R;
 
 import dalvik.system.VMRuntime;
 
@@ -112,6 +112,9 @@ public class PackageManagerTests extends AndroidTestCase {
     private static final int APP_INSTALL_DEVICE = InstallLocationUtils.APP_INSTALL_INTERNAL;
 
     private static final int APP_INSTALL_SDCARD = InstallLocationUtils.APP_INSTALL_EXTERNAL;
+
+    private static final int DEFAULT_INSTALL_FLAGS =
+            PackageManager.INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK;
 
     void failStr(String errMsg) {
         Log.w(TAG, "errMsg=" + errMsg);
@@ -1874,12 +1877,13 @@ public class PackageManagerTests extends AndroidTestCase {
 
     private InstallParams replaceCerts(int apk1, int apk2, boolean cleanUp, boolean fail,
             int retCode) throws Exception {
-        int rFlags = PackageManager.INSTALL_REPLACE_EXISTING;
+        int rFlags = DEFAULT_INSTALL_FLAGS | PackageManager.INSTALL_REPLACE_EXISTING;
         String apk1Name = "install1.apk";
         String apk2Name = "install2.apk";
         var pkg1 = getParsedPackage(apk1Name, apk1);
         try {
-            InstallParams ip = installFromRawResource(apk1Name, apk1, 0, false,
+            InstallParams ip = installFromRawResource(apk1Name, apk1,
+                    DEFAULT_INSTALL_FLAGS, false,
                     false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
             installFromRawResource(apk2Name, apk2, rFlags, false,
                     fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
@@ -1963,7 +1967,7 @@ public class PackageManagerTests extends AndroidTestCase {
         InstallParams ip = replaceCerts(APP1_CERT1, APP1_CERT1_CERT2, false, true,
                 PackageInstaller.STATUS_FAILURE_CONFLICT);
         try {
-            int rFlags = PackageManager.INSTALL_REPLACE_EXISTING;
+            int rFlags = DEFAULT_INSTALL_FLAGS | PackageManager.INSTALL_REPLACE_EXISTING;
             installFromRawResource("install.apk", APP1_CERT1, rFlags, false,
                     false, -1,
                     PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
@@ -2466,7 +2470,8 @@ public class PackageManagerTests extends AndroidTestCase {
         String apk1Name = "install1.apk";
         String apk2Name = "install2.apk";
 
-        final InstallParams ip = installFromRawResource(apk1Name, apk1, 0, false,
+        final InstallParams ip = installFromRawResource(apk1Name, apk1,
+                DEFAULT_INSTALL_FLAGS, false,
                 false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
         try {
             PackageManager pm = mContext.getPackageManager();
@@ -2552,13 +2557,13 @@ public class PackageManagerTests extends AndroidTestCase {
             // Clean up before testing first.
             cleanUpInstall(pkg1.getPackageName());
             cleanUpInstall(pkg2.getPackageName());
-            installFromRawResource(apk1Name, apk1, 0, false, false, -1,
+            installFromRawResource(apk1Name, apk1, DEFAULT_INSTALL_FLAGS, false, false, -1,
                     PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
             if (fail) {
-                installFromRawResource(apk2Name, apk2, 0, false, true, retCode,
+                installFromRawResource(apk2Name, apk2, DEFAULT_INSTALL_FLAGS, false, true, retCode,
                         PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
             } else {
-                installFromRawResource(apk2Name, apk2, 0, false, false, -1,
+                installFromRawResource(apk2Name, apk2, DEFAULT_INSTALL_FLAGS, false, false, -1,
                         PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
                 // TODO: All checkSignatures tests should return the same result regardless of
                 // querying by package name or uid; however if there are any edge cases where
@@ -2638,7 +2643,7 @@ public class PackageManagerTests extends AndroidTestCase {
         InstallParams ip1 = null;
 
         try {
-            ip1 = installFromRawResource(apk1Name, apk1, 0, false,
+            ip1 = installFromRawResource(apk1Name, apk1, DEFAULT_INSTALL_FLAGS, false,
                     false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
             PackageManager pm = mContext.getPackageManager();
             // Delete app2
@@ -2683,9 +2688,10 @@ public class PackageManagerTests extends AndroidTestCase {
         int apk2 = SHARED2_CERT1_CERT2;
         int rapk1 = SHARED1_CERT1;
         boolean fail = true;
+        int flags = DEFAULT_INSTALL_FLAGS | PackageManager.INSTALL_REPLACE_EXISTING;
         int retCode = PackageInstaller.STATUS_FAILURE_CONFLICT;
         checkSharedSignatures(apk1, apk2, false, false, -1, PackageManager.SIGNATURE_MATCH);
-        installFromRawResource("install.apk", rapk1, PackageManager.INSTALL_REPLACE_EXISTING, true,
+        installFromRawResource("install.apk", rapk1, flags, true,
                 fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
     }
 
@@ -2695,9 +2701,10 @@ public class PackageManagerTests extends AndroidTestCase {
         int apk2 = SHARED2_CERT1_CERT2;
         int rapk2 = SHARED2_CERT1;
         boolean fail = true;
+        int flags = DEFAULT_INSTALL_FLAGS | PackageManager.INSTALL_REPLACE_EXISTING;
         int retCode = PackageInstaller.STATUS_FAILURE_CONFLICT;
         checkSharedSignatures(apk1, apk2, false, false, -1, PackageManager.SIGNATURE_MATCH);
-        installFromRawResource("install.apk", rapk2, PackageManager.INSTALL_REPLACE_EXISTING, true,
+        installFromRawResource("install.apk", rapk2, flags, true,
                 fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
     }
 
@@ -2707,9 +2714,10 @@ public class PackageManagerTests extends AndroidTestCase {
         int apk2 = SHARED2_CERT1;
         int rapk1 = SHARED1_CERT2;
         boolean fail = true;
+        int flags = DEFAULT_INSTALL_FLAGS | PackageManager.INSTALL_REPLACE_EXISTING;
         int retCode = PackageInstaller.STATUS_FAILURE_CONFLICT;
         checkSharedSignatures(apk1, apk2, false, false, -1, PackageManager.SIGNATURE_MATCH);
-        installFromRawResource("install.apk", rapk1, PackageManager.INSTALL_REPLACE_EXISTING, true,
+        installFromRawResource("install.apk", rapk1, flags, true,
                 fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
     }
 
@@ -2719,9 +2727,10 @@ public class PackageManagerTests extends AndroidTestCase {
         int apk2 = SHARED2_CERT1;
         int rapk2 = SHARED2_CERT2;
         boolean fail = true;
+        int flags = DEFAULT_INSTALL_FLAGS | PackageManager.INSTALL_REPLACE_EXISTING;
         int retCode = PackageInstaller.STATUS_FAILURE_CONFLICT;
         checkSharedSignatures(apk1, apk2, false, false, -1, PackageManager.SIGNATURE_MATCH);
-        installFromRawResource("install.apk", rapk2, PackageManager.INSTALL_REPLACE_EXISTING, true,
+        installFromRawResource("install.apk", rapk2, flags, true,
                 fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
     }
 
@@ -2731,9 +2740,10 @@ public class PackageManagerTests extends AndroidTestCase {
         int apk2 = SHARED2_CERT1;
         int rapk1 = SHARED1_CERT1_CERT2;
         boolean fail = true;
+        int flags = DEFAULT_INSTALL_FLAGS | PackageManager.INSTALL_REPLACE_EXISTING;
         int retCode = PackageInstaller.STATUS_FAILURE_CONFLICT;
         checkSharedSignatures(apk1, apk2, false, false, -1, PackageManager.SIGNATURE_MATCH);
-        installFromRawResource("install.apk", rapk1, PackageManager.INSTALL_REPLACE_EXISTING, true,
+        installFromRawResource("install.apk", rapk1, flags, true,
                 fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
     }
 
@@ -2743,9 +2753,10 @@ public class PackageManagerTests extends AndroidTestCase {
         int apk2 = SHARED2_CERT1;
         int rapk2 = SHARED2_CERT1_CERT2;
         boolean fail = true;
+        int flags = DEFAULT_INSTALL_FLAGS | PackageManager.INSTALL_REPLACE_EXISTING;
         int retCode = PackageInstaller.STATUS_FAILURE_CONFLICT;
         checkSharedSignatures(apk1, apk2, false, false, -1, PackageManager.SIGNATURE_MATCH);
-        installFromRawResource("install.apk", rapk2, PackageManager.INSTALL_REPLACE_EXISTING, true,
+        installFromRawResource("install.apk", rapk2, flags, true,
                 fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
     }
 
@@ -2993,6 +3004,58 @@ public class PackageManagerTests extends AndroidTestCase {
         ApplicationInfo info = getContext().getApplicationInfo();
         String nonExistentApk = Paths.get(info.dataDir, "non-existent.apk").toString();
         getPm().registerDexModule(nonExistentApk, null);
+    }
+
+    @LargeTest
+    public void testMinInstallableTargetSdkPass() throws Exception {
+        // Test installing a package that meets the minimum installable sdk requirement
+        setMinInstallableTargetSdkFeatureFlags();
+        int flags = PackageManager.INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK;
+        installFromRawResource("install.apk", R.raw.install_target_sdk_23, flags,
+                true, false /* fail */, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+    }
+
+    @LargeTest
+    public void testMinInstallableTargetSdkFail() throws Exception {
+        // Test installing a package that doesn't meet the minimum installable sdk requirement
+        setMinInstallableTargetSdkFeatureFlags();
+        int flags = 0;
+        // Expect install to fail
+        installFromRawResource("install.apk", R.raw.install_target_sdk_22, flags,
+                true, true /* fail */, PackageInstaller.STATUS_FAILURE_INCOMPATIBLE,
+                PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+    }
+
+    @LargeTest
+    public void testMinInstallableTargetSdkBypass() throws Exception {
+        // Test installing a package that doesn't meet the minimum installable sdk requirement
+        setMinInstallableTargetSdkFeatureFlags();
+        int flags = PackageManager.INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK;
+        installFromRawResource("install.apk", R.raw.install_target_sdk_22, flags,
+                true, false /* fail */, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
+    }
+
+    private void setMinInstallableTargetSdkFeatureFlags() {
+        DeviceConfig.setProperty(
+                DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                "MinInstallableTargetSdk__install_block_enabled",
+                "true",
+                false);
+        DeviceConfig.setProperty(
+                DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                "MinInstallableTargetSdk__min_installable_target_sdk",
+                "23",
+                false);
+        DeviceConfig.setProperty(
+                DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                "MinInstallableTargetSdk__install_block_strict_mode_enabled",
+                "true",
+                false);
+        DeviceConfig.setProperty(
+                DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                "MinInstallableTargetSdk__strict_mode_target_sdk",
+                "23",
+                false);
     }
 
     // Copied from com.android.server.pm.InstructionSets because we don't have access to it here.

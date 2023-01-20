@@ -30,6 +30,7 @@ import static com.android.server.inputmethod.InputMethodManagerService.ImeDispla
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.inputmethod.InputMethodManager;
@@ -177,9 +178,28 @@ public class ImeVisibilityStateComputerTest extends InputMethodManagerServiceTes
         assertThat(state.getImeDisplayId()).isEqualTo(FALLBACK_DISPLAY_ID);
     }
 
-    private void initImeTargetWindowState(IBinder windowToken) {
+    @Test
+    public void testComputeState_lastImeRequestedVisible_preserved_When_StateUnChanged() {
+        // Assume the last IME targeted window has requested IME visible
+        final IBinder lastImeTargetWindowToken = new Binder();
+        mInputMethodManagerService.mLastImeTargetWindow = lastImeTargetWindowToken;
+        mComputer.requestImeVisibility(lastImeTargetWindowToken, true);
+        final ImeTargetWindowState lastState = mComputer.getWindowStateOrNull(
+                lastImeTargetWindowToken);
+        assertThat(lastState.isRequestedImeVisible()).isTrue();
+
+        // Verify when focusing the next window with STATE_UNCHANGED flag, the last IME
+        // visibility state will be preserved to the current window state.
+        final ImeTargetWindowState stateWithUnChangedFlag = initImeTargetWindowState(mWindowToken);
+        mComputer.computeState(stateWithUnChangedFlag, true /* allowVisible */);
+        assertThat(stateWithUnChangedFlag.isRequestedImeVisible()).isEqualTo(
+                lastState.isRequestedImeVisible());
+    }
+
+    private ImeTargetWindowState initImeTargetWindowState(IBinder windowToken) {
         final ImeTargetWindowState state = new ImeTargetWindowState(SOFT_INPUT_STATE_UNCHANGED,
                 0, true, true, true);
         mComputer.setWindowState(windowToken, state);
+        return state;
     }
 }

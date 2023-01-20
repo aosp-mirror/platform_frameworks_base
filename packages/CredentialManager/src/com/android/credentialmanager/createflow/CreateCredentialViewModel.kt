@@ -122,6 +122,12 @@ class CreateCredentialViewModel(
     )
   }
 
+  fun onBackPasskeyIntroButtonSelected() {
+    uiState = uiState.copy(
+      currentScreenState = CreateScreenState.PASSKEY_INTRO,
+    )
+  }
+
   fun onEntrySelectedFromMoreOptionScreen(activeEntry: ActiveEntry) {
     uiState = uiState.copy(
       currentScreenState = if (
@@ -141,13 +147,19 @@ class CreateCredentialViewModel(
   }
 
   fun onDisabledProvidersSelected() {
-    credManRepo.onCancel()
+    credManRepo.onSettingLaunchCancel()
     dialogResult.tryEmit(DialogResult(ResultState.LAUNCH_SETTING_CANCELED))
   }
 
   fun onCancel() {
-    credManRepo.onCancel()
+    credManRepo.onUserCancel()
     dialogResult.tryEmit(DialogResult(ResultState.NORMAL_CANCELED))
+  }
+
+  fun onLearnMore() {
+    uiState = uiState.copy(
+      currentScreenState = CreateScreenState.MORE_ABOUT_PASSKEYS_INTRO,
+    )
   }
 
   fun onChangeDefaultSelected() {

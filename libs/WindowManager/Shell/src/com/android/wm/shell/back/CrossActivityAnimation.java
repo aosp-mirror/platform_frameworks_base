@@ -31,11 +31,12 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.RemoteException;
+import android.util.FloatProperty;
+import android.util.TypedValue;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.window.BackEvent;
@@ -43,9 +44,10 @@ import android.window.BackMotionEvent;
 import android.window.BackProgressAnimator;
 import android.window.IOnBackInvokedCallback;
 
+import com.android.internal.dynamicanimation.animation.SpringAnimation;
+import com.android.internal.dynamicanimation.animation.SpringForce;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 
 /** Class that defines cross-activity animation. */
@@ -56,24 +58,40 @@ class CrossActivityAnimation {
      */
     private static final float MIN_WINDOW_SCALE = 0.9f;
 
-    /**
-     * Minimum alpha of the closing/entering window.
-     */
-    private static final float CLOSING_MIN_WINDOW_ALPHA = 0.5f;
-
-    /**
-     * Progress value to fly out closing window and fly in entering window.
-     */
-    private static final float SWITCH_ENTERING_WINDOW_PROGRESS = 0.5f;
-
-    /** Max window translation in the Y axis. */
-    private static final int WINDOW_MAX_DELTA_Y = 160;
-
-    /** Duration of fade in/out entering window. */
-    private static final int FADE_IN_DURATION = 100;
     /** Duration of post animation after gesture committed. */
     private static final int POST_ANIMATION_DURATION = 350;
-    private static final Interpolator INTERPOLATOR = Interpolators.EMPHASIZED;
+    private static final Interpolator INTERPOLATOR = new DecelerateInterpolator();
+    private static final FloatProperty<CrossActivityAnimation> ENTER_PROGRESS_PROP =
+            new FloatProperty<>("enter-alpha") {
+                @Override
+                public void setValue(CrossActivityAnimation anim, float value) {
+                    anim.setEnteringProgress(value);
+                }
+
+                @Override
+                public Float get(CrossActivityAnimation object) {
+                    return object.getEnteringProgress();
+                }
+            };
+    private static final FloatProperty<CrossActivityAnimation> LEAVE_PROGRESS_PROP =
+            new FloatProperty<>("leave-alpha") {
+                @Override
+                public void setValue(CrossActivityAnimation anim, float value) {
+                    anim.setLeavingProgress(value);
+                }
+
+                @Override
+                public Float get(CrossActivityAnimation object) {
+                    return object.getLeavingProgress();
+                }
+            };
+    private static final float MIN_WINDOW_ALPHA = 0.01f;
+    private static final float WINDOW_X_SHIFT_DP = 96;
+    private static final int SCALE_FACTOR = 100;
+    // TODO(b/264710590): Use the progress commit threshold from ViewConfiguration once it exists.
+    private static final float PROGRESS_COMMIT_THRESHOLD = 0.1f;
+    private static final float TARGET_COMMIT_PROGRESS = 0.5f;
+    private static final float ENTER_ALPHA_THRESHOLD = 0.22f;
 
     private final Rect mStartTaskRect = new Rect();
     private final float mCornerRadius;
@@ -84,12 +102,13 @@ class CrossActivityAnimation {
     // The entering window properties.
     private final Rect mEnteringStartRect = new Rect();
     private final RectF mEnteringRect = new RectF();
+    private final SpringAnimation mEnteringProgressSpring;
+    private final SpringAnimation mLeavingProgressSpring;
+    // Max window x-shift in pixels.
+    private final float mWindowXShift;
 
-    private float mCurrentAlpha = 1.0f;
-
-    private float mEnteringMargin = 0;
-    private ValueAnimator mEnteringAnimator;
-    private boolean mEnteringWindowShow = false;
+    private float mEnteringProgress = 0f;
+    private float mLeavingProgress = 0f;
 
     private final PointF mInitialTouchPos = new PointF();
 
@@ -115,14 +134,42 @@ class CrossActivityAnimation {
         mCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context);
         mBackAnimationRunner = new BackAnimationRunner(new Callback(), new Runner());
         mBackground = background;
+        mEnteringProgressSpring = new SpringAnimation(this, ENTER_PROGRESS_PROP);
+        mEnteringProgressSpring.setSpring(new SpringForce()
+                .setStiffness(SpringForce.STIFFNESS_MEDIUM)
+                .setDampingRatio(SpringForce.DAMPING_RATIO_NO_BOUNCY));
+        mLeavingProgressSpring = new SpringAnimation(this, LEAVE_PROGRESS_PROP);
+        mLeavingProgressSpring.setSpring(new SpringForce()
+                .setStiffness(SpringForce.STIFFNESS_MEDIUM)
+                .setDampingRatio(SpringForce.DAMPING_RATIO_NO_BOUNCY));
+        mWindowXShift = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, WINDOW_X_SHIFT_DP,
+                context.getResources().getDisplayMetrics());
     }
 
+    /**
+     * Returns 1 if x >= edge1, 0 if x <= edge0, and a smoothed value between the two.
+     * From https://en.wikipedia.org/wiki/Smoothstep
+     */
+    private static float smoothstep(float edge0, float edge1, float x) {
+        if (x < edge0) return 0;
+        if (x >= edge1) return 1;
+
+        x = (x - edge0) / (edge1 - edge0);
+        return x * x * (3 - 2 * x);
+    }
+
+    /**
+     * Linearly map x from range (a1, a2) to range (b1, b2).
+     */
+    private static float mapLinear(float x, float a1, float a2, float b1, float b2) {
+        return b1 + (x - a1) * (b2 - b1) / (a2 - a1);
+    }
+
+    /**
+     * Linearly map a normalized value from (0, 1) to (min, max).
+     */
     private static float mapRange(float value, float min, float max) {
         return min + (value * (max - min));
-    }
-
-    private float getInterpolatedProgress(float backProgress) {
-        return INTERPOLATOR.getInterpolation(backProgress);
     }
 
     private void startBackAnimation() {
@@ -169,9 +216,6 @@ class CrossActivityAnimation {
         mBackInProgress = false;
         mTransformMatrix.reset();
         mInitialTouchPos.set(0, 0);
-        mEnteringWindowShow = false;
-        mEnteringMargin = 0;
-        mEnteringAnimator = null;
 
         if (mFinishCallback != null) {
             try {
@@ -181,6 +225,10 @@ class CrossActivityAnimation {
             }
             mFinishCallback = null;
         }
+        mEnteringProgressSpring.animateToFinalPosition(0);
+        mEnteringProgressSpring.skipToEnd();
+        mLeavingProgressSpring.animateToFinalPosition(0);
+        mLeavingProgressSpring.skipToEnd();
     }
 
     private void onGestureProgress(@NonNull BackEvent backEvent) {
@@ -190,84 +238,12 @@ class CrossActivityAnimation {
         }
         mTouchPos.set(backEvent.getTouchX(), backEvent.getTouchY());
 
-        if (mEnteringTarget == null || mClosingTarget == null) {
-            return;
-        }
-
-        final float progress = getInterpolatedProgress(backEvent.getProgress());
-        final float touchY = mTouchPos.y;
-
-        final int width = mStartTaskRect.width();
-        final int height = mStartTaskRect.height();
-
-        final float closingScale = mapRange(progress, 1, MIN_WINDOW_SCALE);
-
-        final float closingWidth = closingScale * width;
-        final float closingHeight = (float) height / width * closingWidth;
-
-        // Move the window along the X axis.
-        final float closingLeft = mStartTaskRect.left + (width - closingWidth) / 2;
-
-        // Move the window along the Y axis.
-        final float deltaYRatio = (touchY - mInitialTouchPos.y) / height;
-        final float deltaY = (float) Math.sin(deltaYRatio * Math.PI * 0.5f) * WINDOW_MAX_DELTA_Y;
-        final float closingTop = (height - closingHeight) * 0.5f + deltaY;
-        mClosingRect.set(
-                closingLeft, closingTop, closingLeft + closingWidth, closingTop + closingHeight);
-        mEnteringRect.set(mClosingRect);
-
-        // Switch closing/entering targets while reach to the threshold progress.
-        if (showEnteringWindow(progress > SWITCH_ENTERING_WINDOW_PROGRESS)) {
-            return;
-        }
-
-        // Present windows and update the alpha.
-        mCurrentAlpha = Math.max(mapRange(progress, 1.0f, 0), CLOSING_MIN_WINDOW_ALPHA);
-        mClosingRect.offset(mEnteringMargin, 0);
-        mEnteringRect.offset(mEnteringMargin - width, 0);
-
-        applyTransform(
-                mClosingTarget.leash, mClosingRect, mEnteringWindowShow ? 0.01f : mCurrentAlpha);
-        applyTransform(
-                mEnteringTarget.leash, mEnteringRect, mEnteringWindowShow ? mCurrentAlpha : 0.01f);
-        mTransaction.apply();
-    }
-
-    private boolean showEnteringWindow(boolean show) {
-        if (mEnteringAnimator == null) {
-            mEnteringAnimator = ValueAnimator.ofFloat(1f, 0f).setDuration(FADE_IN_DURATION);
-            mEnteringAnimator.setInterpolator(new AccelerateInterpolator());
-            mEnteringAnimator.addUpdateListener(animation -> {
-                float progress = animation.getAnimatedFraction();
-                final int width = mStartTaskRect.width();
-                mEnteringMargin = width * progress;
-                // We don't animate to 0 or the surface would become invisible and lose focus.
-                final float alpha = progress >= 0.5f ? 0.01f
-                        : mapRange(progress * 2, mCurrentAlpha, 0.01f);
-                mClosingRect.offset(mEnteringMargin, 0);
-                mEnteringRect.offset(mEnteringMargin - width, 0);
-
-                applyTransform(mClosingTarget.leash, mClosingRect, alpha);
-                applyTransform(mEnteringTarget.leash, mEnteringRect, mCurrentAlpha);
-                mTransaction.apply();
-            });
-        }
-
-        if (mEnteringAnimator.isRunning()) {
-            return true;
-        }
-
-        if (mEnteringWindowShow == show) {
-            return false;
-        }
-
-        mEnteringWindowShow = show;
-        if (show) {
-            mEnteringAnimator.start();
-        } else {
-            mEnteringAnimator.reverse();
-        }
-        return true;
+        float progress = backEvent.getProgress();
+        float springProgress = (progress > PROGRESS_COMMIT_THRESHOLD
+                ? mapLinear(progress, 0.1f, 1, TARGET_COMMIT_PROGRESS, 1)
+                : mapLinear(progress, 0, 1f, 0, TARGET_COMMIT_PROGRESS)) * SCALE_FACTOR;
+        mLeavingProgressSpring.animateToFinalPosition(springProgress);
+        mEnteringProgressSpring.animateToFinalPosition(springProgress);
     }
 
     private void onGestureCommitted() {
@@ -275,11 +251,9 @@ class CrossActivityAnimation {
             finishAnimation();
             return;
         }
-
-        // End the fade in animation.
-        if (mEnteringAnimator != null && mEnteringAnimator.isRunning()) {
-            mEnteringAnimator.cancel();
-        }
+        // End the fade animations
+        mLeavingProgressSpring.cancel();
+        mEnteringProgressSpring.cancel();
 
         // We enter phase 2 of the animation, the starting coordinates for phase 2 are the current
         // coordinate of the gesture driven phase.
@@ -309,10 +283,77 @@ class CrossActivityAnimation {
         float top = mapRange(progress, mEnteringStartRect.top, mStartTaskRect.top);
         float width = mapRange(progress, mEnteringStartRect.width(), mStartTaskRect.width());
         float height = mapRange(progress, mEnteringStartRect.height(), mStartTaskRect.height());
-        float alpha = mapRange(progress, mCurrentAlpha, 1.0f);
+        float alpha = mapRange(progress, mEnteringProgress, 1.0f);
 
         mEnteringRect.set(left, top, left + width, top + height);
         applyTransform(mEnteringTarget.leash, mEnteringRect, alpha);
+    }
+
+    private float getEnteringProgress() {
+        return mEnteringProgress * SCALE_FACTOR;
+    }
+
+    private void setEnteringProgress(float value) {
+        mEnteringProgress = value / SCALE_FACTOR;
+        if (mEnteringTarget != null && mEnteringTarget.leash != null) {
+            transformWithProgress(
+                    mEnteringProgress,
+                    Math.max(
+                            smoothstep(ENTER_ALPHA_THRESHOLD, 1, mEnteringProgress),
+                            MIN_WINDOW_ALPHA),  /* alpha */
+                    mEnteringTarget.leash,
+                    mEnteringRect,
+                    -mWindowXShift,
+                    0
+            );
+        }
+    }
+
+    private float getLeavingProgress() {
+        return mLeavingProgress * SCALE_FACTOR;
+    }
+
+    private void setLeavingProgress(float value) {
+        mLeavingProgress = value / SCALE_FACTOR;
+        if (mClosingTarget != null && mClosingTarget.leash != null) {
+            transformWithProgress(
+                    mLeavingProgress,
+                    Math.max(
+                            1 - smoothstep(0, ENTER_ALPHA_THRESHOLD, mLeavingProgress),
+                            MIN_WINDOW_ALPHA),
+                    mClosingTarget.leash,
+                    mClosingRect,
+                    0,
+                    mWindowXShift
+            );
+        }
+    }
+
+    private void transformWithProgress(float progress, float alpha, SurfaceControl surface,
+            RectF targetRect, float deltaXMin, float deltaXMax) {
+        final float touchY = mTouchPos.y;
+
+        final int width = mStartTaskRect.width();
+        final int height = mStartTaskRect.height();
+
+        final float interpolatedProgress = INTERPOLATOR.getInterpolation(progress);
+        final float closingScale = MIN_WINDOW_SCALE
+                + (1 - interpolatedProgress) * (1 - MIN_WINDOW_SCALE);
+        final float closingWidth = closingScale * width;
+        final float closingHeight = (float) height / width * closingWidth;
+
+        // Move the window along the X axis.
+        float closingLeft = mStartTaskRect.left + (width - closingWidth) / 2;
+        closingLeft += mapRange(interpolatedProgress, deltaXMin, deltaXMax);
+
+        // Move the window along the Y axis.
+        final float deltaYRatio = (touchY - mInitialTouchPos.y) / height;
+        final float closingTop = (height - closingHeight) * 0.5f;
+        targetRect.set(
+                closingLeft, closingTop, closingLeft + closingWidth, closingTop + closingHeight);
+
+        applyTransform(surface, targetRect, Math.max(alpha, MIN_WINDOW_ALPHA));
+        mTransaction.apply();
     }
 
     private final class Callback extends IOnBackInvokedCallback.Default {
@@ -330,10 +371,12 @@ class CrossActivityAnimation {
         @Override
         public void onBackCancelled() {
             // End the fade in animation.
-            if (mEnteringAnimator != null && mEnteringAnimator.isRunning()) {
-                mEnteringAnimator.cancel();
-            }
             mProgressAnimator.onBackCancelled(CrossActivityAnimation.this::finishAnimation);
+            mEnteringProgressSpring.cancel();
+            mLeavingProgressSpring.cancel();
+            // TODO (b259608500): Let BackProgressAnimator could play cancel animation.
+            mProgressAnimator.reset();
+            finishAnimation();
         }
 
         @Override

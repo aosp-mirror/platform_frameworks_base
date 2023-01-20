@@ -67,6 +67,9 @@ public final class DeviceStateManagerServiceTest {
             new DeviceState(0, "DEFAULT", 0 /* flags */);
     private static final DeviceState OTHER_DEVICE_STATE =
             new DeviceState(1, "OTHER", 0 /* flags */);
+    private static final DeviceState DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP =
+            new DeviceState(2, "DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP",
+                    DeviceState.FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP /* flags */);
     // A device state that is not reported as being supported for the default test provider.
     private static final DeviceState UNSUPPORTED_DEVICE_STATE =
             new DeviceState(255, "UNSUPPORTED", 0 /* flags */);
@@ -77,6 +80,7 @@ public final class DeviceStateManagerServiceTest {
     private TestDeviceStateProvider mProvider;
     private DeviceStateManagerService mService;
     private TestSystemPropertySetter mSysPropSetter;
+    private WindowProcessController mWindowProcessController;
 
     @Before
     public void setup() {
@@ -88,10 +92,10 @@ public final class DeviceStateManagerServiceTest {
 
         // Necessary to allow us to check for top app process id in tests
         mService.mActivityTaskManagerInternal = mock(ActivityTaskManagerInternal.class);
-        WindowProcessController windowProcessController = mock(WindowProcessController.class);
+        mWindowProcessController = mock(WindowProcessController.class);
         when(mService.mActivityTaskManagerInternal.getTopApp())
-                .thenReturn(windowProcessController);
-        when(windowProcessController.getPid()).thenReturn(FAKE_PROCESS_ID);
+                .thenReturn(mWindowProcessController);
+        when(mWindowProcessController.getPid()).thenReturn(FAKE_PROCESS_ID);
 
         flushHandler(); // Flush the handler to ensure the initial values are committed.
     }
@@ -201,7 +205,7 @@ public final class DeviceStateManagerServiceTest {
                 DEFAULT_DEVICE_STATE.getIdentifier() + ":" + DEFAULT_DEVICE_STATE.getName());
         assertEquals(mService.getBaseState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertThat(mService.getSupportedStates()).asList().containsExactly(DEFAULT_DEVICE_STATE,
-                OTHER_DEVICE_STATE);
+                OTHER_DEVICE_STATE, DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP);
 
         mProvider.notifySupportedDeviceStates(new DeviceState[]{DEFAULT_DEVICE_STATE});
         flushHandler();
@@ -234,10 +238,10 @@ public final class DeviceStateManagerServiceTest {
                 DEFAULT_DEVICE_STATE.getIdentifier() + ":" + DEFAULT_DEVICE_STATE.getName());
         assertEquals(mService.getBaseState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertThat(mService.getSupportedStates()).asList().containsExactly(DEFAULT_DEVICE_STATE,
-                OTHER_DEVICE_STATE);
+                OTHER_DEVICE_STATE, DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP);
 
         mProvider.notifySupportedDeviceStates(new DeviceState[]{DEFAULT_DEVICE_STATE,
-                OTHER_DEVICE_STATE});
+                OTHER_DEVICE_STATE, DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP});
         flushHandler();
 
         // The current committed and requests states do not change because the current state remains
@@ -248,7 +252,7 @@ public final class DeviceStateManagerServiceTest {
                 DEFAULT_DEVICE_STATE.getIdentifier() + ":" + DEFAULT_DEVICE_STATE.getName());
         assertEquals(mService.getBaseState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertThat(mService.getSupportedStates()).asList().containsExactly(DEFAULT_DEVICE_STATE,
-                OTHER_DEVICE_STATE);
+                OTHER_DEVICE_STATE, DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP);
 
         // The callback wasn't notified about a change in supported states as the states have not
         // changed.
@@ -261,7 +265,8 @@ public final class DeviceStateManagerServiceTest {
         assertNotNull(info);
         assertArrayEquals(info.supportedStates,
                 new int[] { DEFAULT_DEVICE_STATE.getIdentifier(),
-                        OTHER_DEVICE_STATE.getIdentifier() });
+                        OTHER_DEVICE_STATE.getIdentifier(),
+                        DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP.getIdentifier()});
         assertEquals(info.baseState, DEFAULT_DEVICE_STATE.getIdentifier());
         assertEquals(info.currentState, DEFAULT_DEVICE_STATE.getIdentifier());
     }
@@ -513,6 +518,54 @@ public final class DeviceStateManagerServiceTest {
                 OTHER_DEVICE_STATE.getIdentifier());
     }
 
+    @Test
+    public void requestState_flagCancelWhenRequesterNotOnTop_onDeviceSleep()
+            throws RemoteException {
+        requestState_flagCancelWhenRequesterNotOnTop_common(
+                // When the device is awake, the state should not change
+                () -> mService.mOverrideRequestScreenObserver.onAwakeStateChanged(true),
+                // When the device is in sleep mode, the state should be canceled
+                () -> mService.mOverrideRequestScreenObserver.onAwakeStateChanged(false)
+        );
+    }
+
+    @Test
+    public void requestState_flagCancelWhenRequesterNotOnTop_onKeyguardShow()
+            throws RemoteException {
+        requestState_flagCancelWhenRequesterNotOnTop_common(
+                // When the keyguard is not showing, the state should not change
+                () -> mService.mOverrideRequestScreenObserver.onKeyguardStateChanged(false),
+                // When the keyguard is showing, the state should be canceled
+                () -> mService.mOverrideRequestScreenObserver.onKeyguardStateChanged(true)
+        );
+    }
+
+    @Test
+    public void requestState_flagCancelWhenRequesterNotOnTop_onTaskStackChanged()
+            throws RemoteException {
+        requestState_flagCancelWhenRequesterNotOnTop_common(
+                // When the app is foreground, the state should not change
+                () -> {
+                    int pid = Binder.getCallingPid();
+                    when(mWindowProcessController.getPid()).thenReturn(pid);
+                    try {
+                        mService.mOverrideRequestTaskStackListener.onTaskStackChanged();
+                    } catch (RemoteException e) {
+                        throw new RuntimeException(e);
+                    }
+                },
+                // When the app is not foreground, the state should change
+                () -> {
+                    when(mWindowProcessController.getPid()).thenReturn(FAKE_PROCESS_ID);
+                    try {
+                        mService.mOverrideRequestTaskStackListener.onTaskStackChanged();
+                    } catch (RemoteException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+        );
+    }
+
     @FlakyTest(bugId = 200332057)
     @Test
     public void requestState_becomesUnsupported() throws RemoteException {
@@ -743,6 +796,84 @@ public final class DeviceStateManagerServiceTest {
         Assert.assertTrue(Arrays.equals(expected, actual));
     }
 
+    /**
+     * Common code to verify the handling of FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP flag.
+     *
+     * The device state with FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP should be automatically canceled
+     * when certain events happen, e.g. when the top activity belongs to another app or when the
+     * device goes into the sleep mode.
+     *
+     * @param noChangeEvent an event that should not trigger auto cancellation of the state.
+     * @param autoCancelEvent an event that should trigger auto cancellation of the state.
+     * @throws RemoteException when the service throws exceptions.
+     */
+    private void requestState_flagCancelWhenRequesterNotOnTop_common(
+            Runnable noChangeEvent,
+            Runnable autoCancelEvent
+    ) throws RemoteException {
+        TestDeviceStateManagerCallback callback = new TestDeviceStateManagerCallback();
+        mService.getBinderService().registerCallback(callback);
+        flushHandler();
+
+        final IBinder token = new Binder();
+        assertEquals(callback.getLastNotifiedStatus(token),
+                TestDeviceStateManagerCallback.STATUS_UNKNOWN);
+
+        mService.getBinderService().requestState(token,
+                DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP.getIdentifier(),
+                0 /* flags */);
+        flushHandler(2 /* count */);
+
+        assertEquals(callback.getLastNotifiedStatus(token),
+                TestDeviceStateManagerCallback.STATUS_ACTIVE);
+
+        // Committed state changes as there is a requested override.
+        assertDeviceStateConditions(
+                DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP,
+                DEFAULT_DEVICE_STATE, /* base state */
+                true /* isOverrideState */);
+
+        noChangeEvent.run();
+        flushHandler();
+        assertEquals(callback.getLastNotifiedStatus(token),
+                TestDeviceStateManagerCallback.STATUS_ACTIVE);
+        assertDeviceStateConditions(
+                DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP,
+                DEFAULT_DEVICE_STATE, /* base state */
+                true /* isOverrideState */);
+
+        autoCancelEvent.run();
+        flushHandler();
+        assertEquals(callback.getLastNotifiedStatus(token),
+                TestDeviceStateManagerCallback.STATUS_CANCELED);
+        assertDeviceStateConditions(DEFAULT_DEVICE_STATE, DEFAULT_DEVICE_STATE,
+                false /* isOverrideState */);
+    }
+
+    /**
+     * Verify that the current device state and base state match the expected values.
+     *
+     * @param state the expected committed state.
+     * @param baseState the expected base state.
+     * @param isOverrideState whether a state override is active.
+     */
+    private void assertDeviceStateConditions(
+            DeviceState state, DeviceState baseState, boolean isOverrideState) {
+        assertEquals(mService.getCommittedState(), Optional.of(state));
+        assertEquals(mService.getBaseState(), Optional.of(baseState));
+        assertEquals(mSysPropSetter.getValue(),
+                state.getIdentifier() + ":" + state.getName());
+        assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(),
+                state.getIdentifier());
+        if (isOverrideState) {
+            // When a state override is active, the committed state should batch the override state.
+            assertEquals(mService.getOverrideState().get(), state);
+        } else {
+            // When there is no state override, the override state should be empty.
+            assertFalse(mService.getOverrideState().isPresent());
+        }
+    }
+
     private static final class TestDeviceStatePolicy extends DeviceStatePolicy {
         private final DeviceStateProvider mProvider;
         private int mLastDeviceStateRequestedToConfigure = INVALID_DEVICE_STATE;
@@ -801,8 +932,10 @@ public final class DeviceStateManagerServiceTest {
     }
 
     private static final class TestDeviceStateProvider implements DeviceStateProvider {
-        private DeviceState[] mSupportedDeviceStates = new DeviceState[]{ DEFAULT_DEVICE_STATE,
-                OTHER_DEVICE_STATE };
+        private DeviceState[] mSupportedDeviceStates = new DeviceState[]{
+                DEFAULT_DEVICE_STATE,
+                OTHER_DEVICE_STATE,
+                DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP};
         private Listener mListener;
 
         @Override

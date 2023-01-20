@@ -43,7 +43,7 @@
     <string name="consent_no" msgid="2640796915611404382">"Nie zezwalaj"</string>
     <string name="consent_back" msgid="2560683030046918882">"Wstecz"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"Czy aplikacjom na urządzeniu &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; przyznać te same uprawnienia co na urządzeniu &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
-    <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;Mogą one obejmować dostęp do Mikrofonu, Aparatu i lokalizacji oraz inne uprawnienia newralgiczne na urządzeniu &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt; &lt;p&gt;Możesz w dowolnym momencie zmienić uprawnienia na urządzeniu &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt;"</string>
+    <string name="permission_sync_summary" msgid="765497944331294275">"Wśród nich mogą być dane dostępu do &lt;strong&gt;Mikrofonu&lt;/strong&gt;, &lt;strong&gt;Aparatu&lt;/strong&gt;, i &lt;strong&gt;Lokalizacji&lt;/strong&gt;, i inne uprawnienia newralgiczne na urządzeniu &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;. &lt;br/&gt;&lt;br/&gt;Możesz w dowolnym momencie zmienić uprawnienia na urządzeniu &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;."</string>
     <string name="vendor_icon_description" msgid="4445875290032225965">"Ikona aplikacji"</string>
     <string name="vendor_header_button_description" msgid="6566660389500630608">"Przycisk – więcej informacji"</string>
     <string name="permission_phone" msgid="2661081078692784919">"Telefon"</string>
@@ -51,26 +51,19 @@
     <string name="permission_contacts" msgid="3858319347208004438">"Kontakty"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"Kalendarz"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"Mikrofon"</string>
-    <!-- no translation found for permission_call_logs (5546761417694586041) -->
-    <skip />
+    <string name="permission_call_logs" msgid="5546761417694586041">"Rejestry połączeń"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Urządzenia w pobliżu"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Zdjęcia i multimedia"</string>
     <string name="permission_notification" msgid="693762568127741203">"Powiadomienia"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Aplikacje"</string>
     <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"Strumieniowanie danych na urządzenia w pobliżu"</string>
-    <!-- no translation found for permission_phone_summary (6684396967861278044) -->
-    <skip />
-    <!-- no translation found for permission_call_logs_summary (6186103394658755022) -->
-    <skip />
-    <!-- no translation found for permission_sms_summary (3508442683678912017) -->
-    <skip />
-    <!-- no translation found for permission_contacts_summary (675861979475628708) -->
-    <skip />
-    <!-- no translation found for permission_calendar_summary (6460000922511766226) -->
-    <skip />
+    <string name="permission_phone_summary" msgid="6684396967861278044">"Może wykonywać i odbierać połączenia"</string>
+    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Może odczytywać i zapisywać rejestr połączeń telefonicznych"</string>
+    <string name="permission_sms_summary" msgid="3508442683678912017">"Może wysyłać i odbierać SMS-y"</string>
+    <string name="permission_contacts_summary" msgid="675861979475628708">"Może uzyskać dostęp do kontaktów"</string>
+    <string name="permission_calendar_summary" msgid="6460000922511766226">"Może uzyskać dostęp do kalendarza"</string>
     <string name="permission_microphone_summary" msgid="4241354865859396558">"Może nagrywać dźwięk przy użyciu mikrofonu"</string>
-    <!-- no translation found for permission_nearby_devices_summary (931940524460876655) -->
-    <skip />
+    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Może znajdować urządzenia w pobliżu, określać ich względne położenie oraz łączyć się z nimi"</string>
     <string name="permission_notification_summary" msgid="884075314530071011">"Może odczytywać wszystkie powiadomienia, w tym informacje takie jak kontakty, wiadomości i zdjęcia"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Odtwarzaj strumieniowo aplikacje z telefonu"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>

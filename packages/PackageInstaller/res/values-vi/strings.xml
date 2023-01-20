@@ -26,6 +26,10 @@
     <string name="install_done" msgid="5987363587661783896">"Ứng dụng đã được cài đặt."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Bạn có muốn cài đặt ứng dụng này không?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Bạn có muốn cập nhật ứng dụng này không?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"Ứng dụng chưa được cài đặt."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Đã chặn cài đặt gói."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Chưa cài đặt được ứng dụng do gói xung đột với một gói hiện có."</string>

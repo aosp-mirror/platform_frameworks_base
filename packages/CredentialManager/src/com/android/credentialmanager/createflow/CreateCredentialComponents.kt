@@ -70,7 +70,7 @@ fun CreateCredentialScreen(
                 when (uiState.currentScreenState) {
                     CreateScreenState.PASSKEY_INTRO -> ConfirmationCard(
                         onConfirm = viewModel::onConfirmIntro,
-                        onCancel = viewModel::onCancel,
+                        onLearnMore = viewModel::onLearnMore,
                     )
                     CreateScreenState.PROVIDER_SELECTION -> ProviderSelectionCard(
                         requestDisplayInfo = uiState.requestDisplayInfo,
@@ -115,7 +115,10 @@ fun CreateCredentialScreen(
                         activeRemoteEntry = uiState.activeEntry?.activeEntryInfo!!,
                         onOptionSelected = viewModel::onEntrySelected,
                         onConfirm = viewModel::onConfirmEntrySelected,
-                        onCancel = viewModel::onCancel,
+                    )
+                    CreateScreenState.MORE_ABOUT_PASSKEYS_INTRO -> MoreAboutPasskeysIntroCard(
+                        onBackPasskeyIntroButtonSelected =
+                        viewModel::onBackPasskeyIntroButtonSelected,
                     )
                 }
             } else if (uiState.selectedEntry != null && !uiState.providerActivityPending) {
@@ -136,7 +139,7 @@ fun CreateCredentialScreen(
 @Composable
 fun ConfirmationCard(
     onConfirm: () -> Unit,
-    onCancel: () -> Unit,
+    onLearnMore: () -> Unit,
 ) {
     ContainerCard() {
         Column() {
@@ -223,8 +226,8 @@ fun ConfirmationCard(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
             ) {
                 ActionButton(
-                    stringResource(R.string.string_cancel),
-                    onClick = onCancel
+                    stringResource(R.string.string_learn_more),
+                    onClick = onLearnMore
                 )
                 ConfirmButton(
                     stringResource(R.string.string_continue),
@@ -396,8 +399,7 @@ fun MoreOptionsSelectionCard(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.smallTopAppBarColors
-                    (containerColor = Color.Transparent),
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 modifier = Modifier.padding(top = 12.dp)
             )
             Divider(
@@ -475,7 +477,8 @@ fun MoreOptionsRowIntroCard(
                 Icons.Outlined.NewReleases,
                 contentDescription = null,
                 modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
-                    .padding(all = 24.dp)
+                    .padding(all = 24.dp),
+                tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
             )
             TextOnSurface(
                 text = stringResource(
@@ -634,14 +637,13 @@ fun ExternalOnlySelectionCard(
     activeRemoteEntry: EntryInfo,
     onOptionSelected: (EntryInfo) -> Unit,
     onConfirm: () -> Unit,
-    onCancel: () -> Unit,
 ) {
     ContainerCard() {
         Column() {
             Icon(
                 painter = painterResource(R.drawable.ic_other_devices),
                 contentDescription = null,
-                tint = Color.Unspecified,
+                tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
                 modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
                     .padding(all = 24.dp).size(32.dp)
             )
@@ -673,13 +675,9 @@ fun ExternalOnlySelectionCard(
                 color = Color.Transparent
             )
             Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.End,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
             ) {
-                ActionButton(
-                    stringResource(R.string.string_cancel),
-                    onClick = onCancel
-                )
                 ConfirmButton(
                     stringResource(R.string.string_continue),
                     onClick = onConfirm
@@ -689,6 +687,92 @@ fun ExternalOnlySelectionCard(
                 thickness = 18.dp,
                 color = Color.Transparent,
                 modifier = Modifier.padding(bottom = 16.dp)
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MoreAboutPasskeysIntroCard(
+    onBackPasskeyIntroButtonSelected: () -> Unit,
+) {
+    ContainerCard() {
+        Column() {
+            TopAppBar(
+                title = {
+                    TextOnSurface(
+                        text =
+                        stringResource(
+                            R.string.more_about_passkeys_title),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = onBackPasskeyIntroButtonSelected
+                    ) {
+                        Icon(
+                            Icons.Filled.ArrowBack,
+                            stringResource(R.string.accessibility_back_arrow_button)
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                modifier = Modifier.padding(top = 12.dp)
+            )
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(start = 24.dp, end = 68.dp)
+            ) {
+                TextOnSurfaceVariant(
+                    text = stringResource(R.string.passwordless_technology_title),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                TextSecondary(
+                    text = stringResource(R.string.passwordless_technology_detail),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Divider(
+                    thickness = 24.dp,
+                    color = Color.Transparent
+                )
+                TextOnSurfaceVariant(
+                    text = stringResource(R.string.public_key_cryptography_title),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                TextSecondary(
+                    text = stringResource(R.string.public_key_cryptography_detail),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Divider(
+                    thickness = 24.dp,
+                    color = Color.Transparent
+                )
+                TextOnSurfaceVariant(
+                    text = stringResource(R.string.improved_account_security_title),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                TextSecondary(
+                    text = stringResource(R.string.improved_account_security_detail),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Divider(
+                    thickness = 24.dp,
+                    color = Color.Transparent
+                )
+                TextOnSurfaceVariant(
+                    text = stringResource(R.string.seamless_transition_title),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                TextSecondary(
+                    text = stringResource(R.string.seamless_transition_detail),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            Divider(
+                thickness = 18.dp,
+                color = Color.Transparent,
+                modifier = Modifier.padding(bottom = 24.dp)
             )
         }
     }
@@ -889,7 +973,8 @@ fun MoreOptionsDisabledProvidersRow(
                 Icon(
                     Icons.Filled.Add,
                     contentDescription = null,
-                    modifier = Modifier.padding(start = 16.dp)
+                    modifier = Modifier.padding(start = 16.dp),
+                    tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
                 )
             },
             label = {
@@ -923,8 +1008,8 @@ fun RemoteEntryRow(
             Icon(
                 painter = painterResource(R.drawable.ic_other_devices),
                 contentDescription = null,
-                tint = Color.Unspecified,
-                modifier = Modifier.padding(start = 18.dp)
+                tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
+                modifier = Modifier.padding(start = 10.dp)
             )
         },
         label = {
@@ -932,7 +1017,7 @@ fun RemoteEntryRow(
                 TextOnSurfaceVariant(
                     text = stringResource(R.string.another_device),
                     style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(start = 16.dp, top = 18.dp, bottom = 18.dp)
+                    modifier = Modifier.padding(start = 10.dp, top = 18.dp, bottom = 18.dp)
                         .align(alignment = Alignment.CenterHorizontally),
                 )
             }

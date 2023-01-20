@@ -5,31 +5,31 @@
     <string name="string_cancel" msgid="6369133483981306063">"Zrušiť"</string>
     <string name="string_continue" msgid="1346732695941131882">"Pokračovať"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Ďalšie možnosti"</string>
-    <string name="string_create_in_another_place" msgid="1033635365843437603">"Vytvoriť inde"</string>
-    <string name="string_save_to_another_place" msgid="7590325934591079193">"Uložiť inde"</string>
-    <string name="string_use_another_device" msgid="8754514926121520445">"Použiť iné zariadenie"</string>
-    <string name="string_save_to_another_device" msgid="1959562542075194458">"Uložiť do iného zariadenia"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Bezpečnejšie s prístupovými kľúčmi"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Ak máte prístupové kľúče, nemusíte vytvárať ani si pamätať zložité heslá"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Prístupové kľúče sú šifrované digitálne kľúče, ktoré môžete vytvoriť odtlačkom prsta, tvárou alebo zámkou obrazovky."</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Ukladajú sa do správcu hesiel, aby ste sa mohli prihlasovať v iných zariadeniach"</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"Vyberte, kam <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
-    <string name="create_your_passkeys" msgid="8901224153607590596">"vytvoriť prístupové kľúče"</string>
-    <string name="save_your_password" msgid="6597736507991704307">"uložiť heslo"</string>
-    <string name="save_your_sign_in_info" msgid="7213978049817076882">"uložiť prihlasovacie údaje"</string>
-    <string name="choose_provider_body" msgid="4384188171872005547">"Vyberte si správcu hesiel, do ktorého sa budú ukladať vaše údaje, aby ste sa nabudúce rýchlejšie prihlásili."</string>
+    <!-- no translation found for choose_provider_title (8870795677024868108) -->
+    <skip />
+    <!-- no translation found for choose_provider_body (4967074531845147434) -->
+    <skip />
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Chcete vytvoriť prístupový kľúč pre aplikáciu <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"Chcete uložiť heslo pre aplikáciu <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Chcete uložiť prihlasovacie údaje pre aplikáciu <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_description" msgid="5531335144879100664">"Pripomíname, že <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> aplikácie <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> môžete používať v ľubovoľnom zariadení. Uchováva sa v službe <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> pre účet <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>."</string>
     <string name="passkey" msgid="632353688396759522">"prístupový kľúč"</string>
     <string name="password" msgid="6738570945182936667">"heslo"</string>
+    <!-- no translation found for passkeys (5733880786866559847) -->
+    <skip />
+    <!-- no translation found for passwords (5419394230391253816) -->
+    <skip />
     <string name="sign_ins" msgid="4710739369149469208">"prihlasovacie údaje"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"prihlasovacie údaje"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"Uložiť <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> do"</string>
-    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"Chcete vytvoriť prístupový kľúč v inom zariadení?"</string>
+    <!-- no translation found for create_passkey_in_other_device_title (9195411122362461390) -->
+    <skip />
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Chcete pre všetky svoje prihlasovacie údaje použiť <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="use_provider_for_all_description" msgid="6560593199974037820">"Tento správca hesiel uchová vaše heslá a prístupové kľúče, aby vám pomohol ľahšie sa prihlasovať."</string>
+    <!-- no translation found for use_provider_for_all_description (8466427781848268490) -->
+    <skip />
     <string name="set_as_default" msgid="4415328591568654603">"Nastaviť ako predvolené"</string>
     <string name="use_once" msgid="9027366575315399714">"Použiť raz"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"Počet hesiel: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> • Počet prístupových kľúčov: <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>

@@ -248,7 +248,9 @@ public class NotificationTest {
 
     @Test
     public void allPendingIntents_containsCustomRemoteViews() {
-        PendingIntent intent = PendingIntent.getActivity(mContext, 0, new Intent("test"), PendingIntent.FLAG_MUTABLE_UNAUDITED);
+        PendingIntent intent = PendingIntent.getActivity(mContext, 0,
+                new Intent("test").setPackage(mContext.getPackageName()),
+                PendingIntent.FLAG_MUTABLE);
 
         RemoteViews contentView = new RemoteViews(mContext.getPackageName(), 0 /* layoutId */);
         contentView.setOnClickPendingIntent(1 /* id */, intent);
@@ -1578,7 +1580,8 @@ public class NotificationTest {
      * Creates a PendingIntent with the given action.
      */
     private PendingIntent createPendingIntent(String action) {
-        return PendingIntent.getActivity(mContext, 0, new Intent(action),
+        return PendingIntent.getActivity(mContext, 0,
+                new Intent(action).setPackage(mContext.getPackageName()),
                 PendingIntent.FLAG_MUTABLE);
     }
 }

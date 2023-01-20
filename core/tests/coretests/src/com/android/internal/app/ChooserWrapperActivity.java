@@ -16,10 +16,6 @@
 
 package com.android.internal.app;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
@@ -34,12 +30,12 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.UserHandle;
 import android.util.Pair;
 import android.util.Size;
 
 import com.android.internal.app.AbstractMultiProfilePagerAdapter.CrossProfileIntentsChecker;
-import com.android.internal.app.AbstractMultiProfilePagerAdapter.MyUserIdProvider;
 import com.android.internal.app.ResolverListAdapter.ResolveInfoPresentationGetter;
 import com.android.internal.app.chooser.DisplayResolveInfo;
 import com.android.internal.app.chooser.TargetInfo;
@@ -132,14 +128,6 @@ public class ChooserWrapperActivity extends ChooserActivity implements IChooserW
     }
 
     @Override
-    protected MyUserIdProvider createMyUserIdProvider() {
-        if (sOverrides.mMyUserIdProvider != null) {
-            return sOverrides.mMyUserIdProvider;
-        }
-        return super.createMyUserIdProvider();
-    }
-
-    @Override
     protected CrossProfileIntentsChecker createCrossProfileIntentsChecker() {
         if (sOverrides.mCrossProfileIntentsChecker != null) {
             return sOverrides.mCrossProfileIntentsChecker;
@@ -155,13 +143,15 @@ public class ChooserWrapperActivity extends ChooserActivity implements IChooserW
         return super.createQuietModeManager();
     }
 
+    // TODO: Remove this and override safelyStartActivityInternal() instead.
     @Override
-    public void safelyStartActivity(com.android.internal.app.chooser.TargetInfo cti) {
+    public void safelyStartActivityAsUser(TargetInfo cti, UserHandle user,
+            @Nullable Bundle options) {
         if (sOverrides.onSafelyStartCallback != null &&
                 sOverrides.onSafelyStartCallback.apply(cti)) {
             return;
         }
-        super.safelyStartActivity(cti);
+        super.safelyStartActivityAsUser(cti, user, options);
     }
 
     @Override
@@ -250,6 +240,14 @@ public class ChooserWrapperActivity extends ChooserActivity implements IChooserW
     @Override
     public UserHandle getCurrentUserHandle() {
         return mMultiProfilePagerAdapter.getCurrentUserHandle();
+    }
+
+    @Override
+    protected UserHandle getTabOwnerUserHandleForLaunch() {
+        if (sOverrides.tabOwnerUserHandleForLaunch == null) {
+            return super.getTabOwnerUserHandleForLaunch();
+        }
+        return sOverrides.tabOwnerUserHandleForLaunch;
     }
 
     @Override

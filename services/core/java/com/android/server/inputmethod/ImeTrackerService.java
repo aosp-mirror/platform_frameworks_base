@@ -59,12 +59,15 @@ public final class ImeTrackerService extends IImeTracker.Stub {
     private static final long TIMEOUT_MS = 10_000;
 
     /** Handler for registering timeouts for live entries. */
-    private final Handler mHandler =
-            new Handler(Looper.myLooper(), null /* callback */, true /* async */);
+    private final Handler mHandler;
 
     /** Singleton instance of the History. */
     @GuardedBy("ImeTrackerService.this")
     private final History mHistory = new History();
+
+    ImeTrackerService(@NonNull Looper looper) {
+        mHandler = new Handler(looper, null /* callback */, true /* async */);
+    }
 
     @NonNull
     @Override

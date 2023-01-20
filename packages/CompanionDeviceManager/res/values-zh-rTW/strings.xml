@@ -43,7 +43,7 @@
     <string name="consent_no" msgid="2640796915611404382">"不允許"</string>
     <string name="consent_back" msgid="2560683030046918882">"返回"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"要讓「<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>」&lt;strong&gt;&lt;/strong&gt;的應用程式沿用在「<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>」&lt;strong&gt;&lt;/strong&gt;上的權限嗎？"</string>
-    <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;這可能包括「<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>」&lt;strong&gt;&lt;/strong&gt;的麥克風、相機和位置資訊存取權和其他機密權限。&lt;/p&gt; &lt;p&gt;你隨時可透過「<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>」&lt;strong&gt;&lt;/strong&gt;的設定變更這些權限。&lt;/p&gt;"</string>
+    <string name="permission_sync_summary" msgid="765497944331294275">"這可能包括 &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; 的&lt;strong&gt;麥克風&lt;/strong&gt;、&lt;strong&gt;相機&lt;/strong&gt;和&lt;strong&gt;位置資訊存取權&lt;/strong&gt;以及機密權限。&lt;br/&gt;&lt;br/&gt;你隨時可透過 &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt; 的「設定」變更這些權限。"</string>
     <string name="vendor_icon_description" msgid="4445875290032225965">"應用程式圖示"</string>
     <string name="vendor_header_button_description" msgid="6566660389500630608">"更多資訊按鈕"</string>
     <string name="permission_phone" msgid="2661081078692784919">"電話"</string>
@@ -51,26 +51,19 @@
     <string name="permission_contacts" msgid="3858319347208004438">"聯絡人"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"日曆"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"麥克風"</string>
-    <!-- no translation found for permission_call_logs (5546761417694586041) -->
-    <skip />
+    <string name="permission_call_logs" msgid="5546761417694586041">"通話記錄"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"鄰近裝置"</string>
     <string name="permission_storage" msgid="6831099350839392343">"相片和媒體"</string>
     <string name="permission_notification" msgid="693762568127741203">"通知"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"應用程式"</string>
     <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"鄰近裝置串流"</string>
-    <!-- no translation found for permission_phone_summary (6684396967861278044) -->
-    <skip />
-    <!-- no translation found for permission_call_logs_summary (6186103394658755022) -->
-    <skip />
-    <!-- no translation found for permission_sms_summary (3508442683678912017) -->
-    <skip />
-    <!-- no translation found for permission_contacts_summary (675861979475628708) -->
-    <skip />
-    <!-- no translation found for permission_calendar_summary (6460000922511766226) -->
-    <skip />
+    <string name="permission_phone_summary" msgid="6684396967861278044">"可撥打及管理通話"</string>
+    <string name="permission_call_logs_summary" msgid="6186103394658755022">"可讀取及寫入通話記錄"</string>
+    <string name="permission_sms_summary" msgid="3508442683678912017">"可傳送及查看簡訊"</string>
+    <string name="permission_contacts_summary" msgid="675861979475628708">"可存取聯絡人"</string>
+    <string name="permission_calendar_summary" msgid="6460000922511766226">"可存取日曆"</string>
     <string name="permission_microphone_summary" msgid="4241354865859396558">"可使用麥克風錄音"</string>
-    <!-- no translation found for permission_nearby_devices_summary (931940524460876655) -->
-    <skip />
+    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"可尋找、連線及判斷鄰近裝置的相對位置"</string>
     <string name="permission_notification_summary" msgid="884075314530071011">"可讀取所有通知，包括聯絡人、訊息和電話等資訊"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"串流傳輸手機應用程式內容"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>

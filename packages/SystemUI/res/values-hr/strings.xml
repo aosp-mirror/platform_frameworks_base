@@ -91,6 +91,8 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Donji rub <xliff:g id="PERCENT">%1$d</xliff:g> posto"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Lijevi rub <xliff:g id="PERCENT">%1$d</xliff:g> posto"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Desni rub <xliff:g id="PERCENT">%1$d</xliff:g> posto"</string>
+    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"Snimke zaslona s poslovnog profila spremaju se u aplikaciju <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Datoteke"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Snimač zaslona"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Obrada snimanja zaslona"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Tekuća obavijest za sesiju snimanja zaslona"</string>
@@ -388,7 +390,7 @@
     <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Kad dijelite, snimate ili emitirate, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ima pristup svemu što je vidljivo na vašem zaslonu ili se reproducira na vašem uređaju. Stoga pazite na zaporke, podatke o plaćanju, poruke i druge osjetljive podatke."</string>
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Kad dijelite, snimate ili emitirate aplikaciju, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ima pristup svemu što se prikazuje ili reproducira u toj aplikaciji. Stoga pazite na zaporke, podatke o plaćanju, poruke i druge osjetljive podatke."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Nastavi"</string>
-    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Dijeljenje ili snimanje pomoću aplikacije"</string>
+    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Dijeljenje ili snimanje aplikacije"</string>
     <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Želite li ovoj aplikaciji omogućiti dijeljenje ili bilježenje?"</string>
     <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Kad dijelite, snimate ili emitirate, ova aplikacija ima pristup svemu što je vidljivo na vašem zaslonu ili se reproducira na vašem uređaju. Stoga pazite na zaporke, podatke o plaćanju, poruke i druge osjetljive podatke."</string>
     <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Kad dijelite, snimate ili emitirate aplikaciju, ova aplikacija ima pristup svemu što se prikazuje ili reproducira u toj aplikaciji. Stoga pazite na zaporke, podatke o plaćanju, poruke i druge osjetljive podatke."</string>
@@ -810,16 +812,15 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Srednja"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Mala"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"Velika"</string>
-    <string name="accessibility_magnification_close" msgid="1099965835844673375">"Zatvori"</string>
+    <!-- no translation found for accessibility_magnification_done (263349129937348512) -->
+    <skip />
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Uredi"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Postavke prozora povećala"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Dodirnite za otvaranje značajki pristupačnosti. Prilagodite ili zamijenite taj gumb u postavkama.\n\n"<annotation id="link">"Pregledajte postavke"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Pomaknite gumb do ruba da biste ga privremeno sakrili"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Poništi"</string>
-    <!-- no translation found for accessibility_floating_button_undo_message_label_text (9017658016426242640) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_undo_message_number_text (4909270290725226075) -->
-    <skip />
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Uklonjen je prečac za <xliff:g id="FEATURE_NAME">%s</xliff:g>"</string>
+    <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{Uklonjen je # prečac}one{Uklonjen je # prečac}few{Uklonjena su # prečaca}other{Uklonjeno je # prečaca}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Premjesti u gornji lijevi kut"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Premjesti u gornji desni kut"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Premjesti u donji lijevi kut"</string>
@@ -884,11 +885,12 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Pustite <xliff:g id="SONG_NAME">%1$s</xliff:g> putem aplikacije <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Poništi"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Približite se radi reprodukcije na uređaju <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Približite se uređaju <xliff:g id="DEVICENAME">%1$s</xliff:g> da biste na njemu reproducirali"</string>
+    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
+    <skip />
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Reproducira se na uređaju <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Nešto nije u redu. Pokušajte ponovo."</string>
-    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
-    <skip />
+    <string name="media_transfer_loading" msgid="5544017127027152422">"Učitavanje"</string>
+    <string name="media_ttt_default_device_type" msgid="4457646436153370169">"tablet"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivno, provjerite aplik."</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nije pronađeno"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrola nije dostupna"</string>
@@ -912,6 +914,7 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Glasnoća"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Zvučnici i zasloni"</string>
+    <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Predloženi uređaji"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Kako emitiranje funkcionira"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Emitiranje"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Osobe u blizini s kompatibilnim Bluetooth uređajima mogu slušati medije koje emitirate"</string>
@@ -1053,5 +1056,8 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Ovaj će se zaslon isključiti"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Rasklopljen sklopivi uređaj"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Okretanje sklopivog uređaja sa svih strana"</string>
-    <string name="stylus_battery_low" msgid="7134370101603167096">"Slaba baterija pisaljke"</string>
+    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
+    <skip />
+    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
+    <skip />
 </resources>

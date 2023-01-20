@@ -5,31 +5,31 @@
     <string name="string_cancel" msgid="6369133483981306063">"Khansela"</string>
     <string name="string_continue" msgid="1346732695941131882">"Qhubeka"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Okunye okungakukhethwa kukho"</string>
-    <string name="string_create_in_another_place" msgid="1033635365843437603">"Sungula kwenye indawo"</string>
-    <string name="string_save_to_another_place" msgid="7590325934591079193">"Londoloza kwenye indawo"</string>
-    <string name="string_use_another_device" msgid="8754514926121520445">"Sebenzisa enye idivayisi"</string>
-    <string name="string_save_to_another_device" msgid="1959562542075194458">"Londoloza kwenye idivayisi"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Iphephe ngokhiye bokudlula"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Ngokhiye wokudlula, awudingi ukusungula noma ukukhumbula amaphasiwedi ayinkimbinkimbi"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Okhiye bokungena bangokhiye bedijithali ababethelwe obasungula usebenzisa isigxivizo somunwe sakho, ubuso, noma ukukhiya isikrini"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Okhiye bokudlula balondolozwa kusiphathi sephasiwedi, ukuze ukwazi ukungena ngemvume kwamanye amadivayisi"</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"Khetha lapho onga-<xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
-    <string name="create_your_passkeys" msgid="8901224153607590596">"sungula okhiye bakho bokudlula"</string>
-    <string name="save_your_password" msgid="6597736507991704307">"Londoloza iphasiwedi yakho"</string>
-    <string name="save_your_sign_in_info" msgid="7213978049817076882">"londoloza ulwazi lwakho lokungena ngemvume"</string>
-    <string name="choose_provider_body" msgid="4384188171872005547">"Khetha isiphathi sephasiwedi ukuze ulondoloze ulwazi lwakho futhi ungene ngemvume ngokushesha ngesikhathi esizayo."</string>
+    <!-- no translation found for choose_provider_title (8870795677024868108) -->
+    <skip />
+    <!-- no translation found for choose_provider_body (4967074531845147434) -->
+    <skip />
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Sungula ukhiye wokudlula we-<xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"Londolozela amaphasiwedi ye-<xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Londoloza ulwazi lokungena lwe-<xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_description" msgid="5531335144879100664">"Ungasebenzisa i-<xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> yakho kunoma iyiphi idivayisi. Ilondolozwe ku-<xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> ye-<xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>"</string>
     <string name="passkey" msgid="632353688396759522">"ukhiye wokudlula"</string>
     <string name="password" msgid="6738570945182936667">"iphasiwedi"</string>
+    <!-- no translation found for passkeys (5733880786866559847) -->
+    <skip />
+    <!-- no translation found for passwords (5419394230391253816) -->
+    <skip />
     <string name="sign_ins" msgid="4710739369149469208">"ukungena ngemvume"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"ulwazi lokungena ngemvume"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"Londoloza i-<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> ku-"</string>
-    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"Sungula ukhiye wokudlula kwenye idivayisi?"</string>
+    <!-- no translation found for create_passkey_in_other_device_title (9195411122362461390) -->
+    <skip />
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Sebenzisa i-<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> kukho konke ukungena kwakho ngemvume?"</string>
-    <string name="use_provider_for_all_description" msgid="6560593199974037820">"Lesi siphathi sephasiwedi sizogcina amaphasiwedi akho nezikhiye zokungena ukuze zikusize ungene ngemvume kalula."</string>
+    <!-- no translation found for use_provider_for_all_description (8466427781848268490) -->
+    <skip />
     <string name="set_as_default" msgid="4415328591568654603">"Setha njengokuzenzakalelayo"</string>
     <string name="use_once" msgid="9027366575315399714">"Sebenzisa kanye"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"Amaphasiwedi angu-<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> • okhiye bokudlula abangu-<xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>

@@ -26,6 +26,10 @@
     <string name="install_done" msgid="5987363587661783896">"已安装应用。"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"要安装此应用吗？"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"要更新此应用吗？"</string>
+    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"未安装应用。"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"系统已禁止安装该软件包。"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"应用未安装：软件包与现有软件包存在冲突。"</string>

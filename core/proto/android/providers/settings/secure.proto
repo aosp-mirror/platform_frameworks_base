@@ -186,6 +186,7 @@ message SecureSettingsProto {
     optional Backup backup = 10;
 
     optional SettingProto bluetooth_on_while_driving = 11 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto bugreport_in_power_menu = 95 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message Camera {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
@@ -696,5 +697,5 @@ message SecureSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 95;
+    // Next tag = 96;
 }

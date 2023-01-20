@@ -21,6 +21,7 @@ import android.app.FragmentTransaction;
 import android.app.ListFragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.LocaleList;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -102,15 +103,21 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
 
     public static LocalePickerWithRegion createLanguagePicker(Context context,
             LocaleSelectedListener listener, boolean translatedOnly) {
-        return createLanguagePicker(context, listener, translatedOnly, null, null);
+        return createLanguagePicker(context, listener, translatedOnly, null, null, null);
     }
 
     public static LocalePickerWithRegion createLanguagePicker(Context context,
-            LocaleSelectedListener listener, boolean translatedOnly, String appPackageName,
-            OnActionExpandListener onActionExpandListener) {
+            LocaleSelectedListener listener, boolean translatedOnly, LocaleList explicitLocales) {
+        return createLanguagePicker(context, listener, translatedOnly, explicitLocales, null, null);
+    }
+
+    /** Creates language picker UI */
+    public static LocalePickerWithRegion createLanguagePicker(Context context,
+            LocaleSelectedListener listener, boolean translatedOnly, LocaleList explicitLocales,
+            String appPackageName, OnActionExpandListener onActionExpandListener) {
         LocaleCollectorBase localePickerController;
         if (TextUtils.isEmpty(appPackageName)) {
-            localePickerController = new SystemLocaleCollector(context);
+            localePickerController = new SystemLocaleCollector(context, explicitLocales);
         } else {
             localePickerController = new AppLocaleCollector(context, appPackageName);
         }

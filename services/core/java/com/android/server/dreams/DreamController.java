@@ -16,9 +16,6 @@
 
 package com.android.server.dreams;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
-
-import android.app.ActivityTaskManager;
 import android.app.BroadcastOptions;
 import android.content.ComponentName;
 import android.content.Context;
@@ -65,7 +62,6 @@ final class DreamController {
     private final Context mContext;
     private final Handler mHandler;
     private final Listener mListener;
-    private final ActivityTaskManager mActivityTaskManager;
 
     private final Intent mDreamingStartedIntent = new Intent(Intent.ACTION_DREAMING_STARTED)
             .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
@@ -93,7 +89,6 @@ final class DreamController {
         mContext = context;
         mHandler = handler;
         mListener = listener;
-        mActivityTaskManager = mContext.getSystemService(ActivityTaskManager.class);
         mCloseNotificationShadeIntent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         mCloseNotificationShadeIntent.putExtra("reason", "dream");
     }
@@ -276,9 +271,6 @@ final class DreamController {
                             null /* receiverPermission */, mDreamingStartedStoppedOptions);
                     mSentStartBroadcast = false;
                 }
-
-                mActivityTaskManager.removeRootTasksWithActivityTypes(
-                        new int[] {ACTIVITY_TYPE_DREAM});
 
                 mListener.onDreamStopped(dream.mToken);
             }

@@ -45,9 +45,10 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
             EmptyStateProvider emptyStateProvider,
             QuietModeManager quietModeManager,
             UserHandle workProfileUserHandle,
+            UserHandle cloneUserHandle,
             int maxTargetsPerRow) {
         super(context, /* currentPage */ 0, emptyStateProvider, quietModeManager,
-                workProfileUserHandle);
+                workProfileUserHandle, cloneUserHandle);
         mItems = new ChooserProfileDescriptor[] {
                 createProfileDescriptor(adapter)
         };
@@ -61,9 +62,10 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
             QuietModeManager quietModeManager,
             @Profile int defaultProfile,
             UserHandle workProfileUserHandle,
+            UserHandle cloneUserHandle,
             int maxTargetsPerRow) {
         super(context, /* currentPage */ defaultProfile, emptyStateProvider,
-                quietModeManager, workProfileUserHandle);
+                quietModeManager, workProfileUserHandle, cloneUserHandle);
         mItems = new ChooserProfileDescriptor[] {
                 createProfileDescriptor(personalAdapter),
                 createProfileDescriptor(workAdapter)
@@ -110,11 +112,12 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
     @Override
     @Nullable
     ChooserListAdapter getListAdapterForUserHandle(UserHandle userHandle) {
-        if (getActiveListAdapter().getUserHandle().equals(userHandle)) {
-            return getActiveListAdapter();
-        } else if (getInactiveListAdapter() != null
-                && getInactiveListAdapter().getUserHandle().equals(userHandle)) {
-            return getInactiveListAdapter();
+        if (getPersonalListAdapter().getUserHandle().equals(userHandle)
+                || userHandle.equals(getCloneUserHandle())) {
+            return getPersonalListAdapter();
+        } else if (getWorkListAdapter() != null
+                && getWorkListAdapter().getUserHandle().equals(userHandle)) {
+            return getWorkListAdapter();
         }
         return null;
     }
@@ -153,13 +156,13 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
     }
 
     @Override
-    public ResolverListAdapter getPersonalListAdapter() {
+    public ChooserListAdapter getPersonalListAdapter() {
         return getAdapterForIndex(PROFILE_PERSONAL).getListAdapter();
     }
 
     @Override
     @Nullable
-    public ResolverListAdapter getWorkListAdapter() {
+    public ChooserListAdapter getWorkListAdapter() {
         return getAdapterForIndex(PROFILE_WORK).getListAdapter();
     }
 

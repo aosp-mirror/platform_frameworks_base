@@ -25,7 +25,7 @@ class FakeNavControllerWrapper : NavControllerWrapper {
     var navigateCalledWith: String? = null
     var navigateBackIsCalled = false
 
-    override fun navigate(route: String) {
+    override fun navigate(route: String, popUpCurrent: Boolean) {
         navigateCalledWith = route
     }
 

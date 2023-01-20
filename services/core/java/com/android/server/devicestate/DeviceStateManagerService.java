@@ -33,6 +33,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.TaskStackListener;
 import android.content.Context;
 import android.hardware.devicestate.DeviceStateInfo;
 import android.hardware.devicestate.DeviceStateManager;
@@ -176,6 +177,12 @@ public final class DeviceStateManagerService extends SystemService {
     @NonNull
     private final SystemPropertySetter mSystemPropertySetter;
 
+    @VisibleForTesting
+    TaskStackListener mOverrideRequestTaskStackListener = new OverrideRequestTaskStackListener();
+    @VisibleForTesting
+    ActivityTaskManagerInternal.ScreenObserver mOverrideRequestScreenObserver =
+            new OverrideRequestScreenObserver();
+
     public DeviceStateManagerService(@NonNull Context context) {
         this(context, DeviceStatePolicy.Provider
                 .fromResources(context.getResources())
@@ -215,6 +222,9 @@ public final class DeviceStateManagerService extends SystemService {
             readStatesAvailableForRequestFromApps();
             mFoldedDeviceStates = readFoldedStates();
         }
+
+        mActivityTaskManagerInternal.registerTaskStackListener(mOverrideRequestTaskStackListener);
+        mActivityTaskManagerInternal.registerScreenObserver(mOverrideRequestScreenObserver);
     }
 
     @VisibleForTesting
@@ -842,9 +852,7 @@ public final class DeviceStateManagerService extends SystemService {
      * @param state state that is being requested.
      */
     private void assertCanRequestDeviceState(int callingPid, int state) {
-        final WindowProcessController topApp = mActivityTaskManagerInternal.getTopApp();
-        if (topApp == null || topApp.getPid() != callingPid
-                || !isStateAvailableForAppRequests(state)) {
+        if (!isTopApp(callingPid) || !isStateAvailableForAppRequests(state)) {
             getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
                     "Permission required to request device state, "
                             + "or the call must come from the top app "
@@ -859,12 +867,16 @@ public final class DeviceStateManagerService extends SystemService {
      * @param callingPid Process ID that is requesting this state change
      */
     private void assertCanControlDeviceState(int callingPid) {
-        final WindowProcessController topApp = mActivityTaskManagerInternal.getTopApp();
-        if (topApp == null || topApp.getPid() != callingPid) {
+        if (!isTopApp(callingPid)) {
             getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
                     "Permission required to request device state, "
                             + "or the call must come from the top app.");
         }
+    }
+
+    private boolean isTopApp(int callingPid) {
+        final WindowProcessController topApp = mActivityTaskManagerInternal.getTopApp();
+        return topApp != null && topApp.getPid() == callingPid;
     }
 
     private boolean isStateAvailableForAppRequests(int state) {
@@ -1182,6 +1194,54 @@ public final class DeviceStateManagerService extends SystemService {
         public int[] getSupportedStateIdentifiers() {
             synchronized (mLock) {
                 return getSupportedStateIdentifiersLocked();
+            }
+        }
+    }
+
+    @GuardedBy("mLock")
+    private boolean shouldCancelOverrideRequestWhenRequesterNotOnTop() {
+        if (mActiveOverride.isEmpty()) {
+            return false;
+        }
+        int identifier = mActiveOverride.get().getRequestedState();
+        DeviceState deviceState = mDeviceStates.get(identifier);
+        return deviceState.hasFlag(DeviceState.FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP);
+    }
+
+    private class OverrideRequestTaskStackListener extends TaskStackListener {
+        @Override
+        public void onTaskStackChanged() throws RemoteException {
+            synchronized (mLock) {
+                if (!shouldCancelOverrideRequestWhenRequesterNotOnTop()) {
+                    return;
+                }
+
+                OverrideRequest request = mActiveOverride.get();
+                if (!isTopApp(request.getPid())) {
+                    mOverrideRequestController.cancelRequest(request);
+                }
+            }
+        }
+    }
+
+    private class OverrideRequestScreenObserver implements
+            ActivityTaskManagerInternal.ScreenObserver {
+
+        @Override
+        public void onAwakeStateChanged(boolean isAwake) {
+            synchronized (mLock) {
+                if (!isAwake && shouldCancelOverrideRequestWhenRequesterNotOnTop()) {
+                    mOverrideRequestController.cancelRequest(mActiveOverride.get());
+                }
+            }
+        }
+
+        @Override
+        public void onKeyguardStateChanged(boolean isShowing) {
+            synchronized (mLock) {
+                if (isShowing && shouldCancelOverrideRequestWhenRequesterNotOnTop()) {
+                    mOverrideRequestController.cancelRequest(mActiveOverride.get());
+                }
             }
         }
     }

@@ -1219,7 +1219,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
 
     @NonNull
     @Override
-    public List<SharedLibrary> getUsesLibraries() {
+    public List<SharedLibrary> getSharedLibraryDependencies() {
         return (List<SharedLibrary>) (List<?>) pkgState.getUsesLibraryInfos();
     }
 

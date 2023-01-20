@@ -190,7 +190,7 @@ public class PackageStateImpl implements PackageState {
         mUsesSdkLibrariesVersionsMajor = pkgState.getUsesSdkLibrariesVersionsMajor();
         mUsesStaticLibraries = pkgState.getUsesStaticLibraries();
         mUsesStaticLibrariesVersions = pkgState.getUsesStaticLibrariesVersions();
-        mUsesLibraries = Collections.unmodifiableList(pkgState.getUsesLibraries());
+        mUsesLibraries = Collections.unmodifiableList(pkgState.getSharedLibraryDependencies());
         mUsesLibraryFiles = Collections.unmodifiableList(pkgState.getUsesLibraryFiles());
         setBoolean(Booleans.FORCE_QUERYABLE_OVERRIDE, pkgState.isForceQueryableOverride());
         setBoolean(Booleans.HIDDEN_UNTIL_INSTALLED, pkgState.isHiddenUntilInstalled());
@@ -693,7 +693,7 @@ public class PackageStateImpl implements PackageState {
     }
 
     @DataClass.Generated.Member
-    public @NonNull List<SharedLibrary> getUsesLibraries() {
+    public @NonNull List<SharedLibrary> getSharedLibraryDependencies() {
         return mUsesLibraries;
     }
 

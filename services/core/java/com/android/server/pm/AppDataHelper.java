@@ -20,6 +20,7 @@ import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
 import static com.android.server.pm.DexOptHelper.useArtService;
 import static com.android.server.pm.PackageManagerService.TAG;
+import static com.android.server.pm.PackageManagerServiceUtils.getPackageManagerLocal;
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 
 import android.annotation.NonNull;
@@ -586,11 +587,14 @@ public class AppDataHelper {
             Slog.wtf(TAG, "Package was null!", new Throwable());
             return;
         }
-        // TODO(b/251903639): Call into ART Service.
-        try {
-            mArtManagerService.clearAppProfiles(pkg);
-        } catch (LegacyDexoptDisabledException e) {
-            throw new RuntimeException(e);
+        if (useArtService()) {
+            destroyAppProfilesWithArtService(pkg);
+        } else {
+            try {
+                mArtManagerService.clearAppProfiles(pkg);
+            } catch (LegacyDexoptDisabledException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -629,13 +633,28 @@ public class AppDataHelper {
     }
 
     private void destroyAppProfilesLeafLIF(AndroidPackage pkg) {
-        // TODO(b/251903639): Call into ART Service.
-        try {
-            mInstaller.destroyAppProfiles(pkg.getPackageName());
-        } catch (LegacyDexoptDisabledException e) {
-            throw new RuntimeException(e);
-        } catch (Installer.InstallerException e) {
-            Slog.w(TAG, String.valueOf(e));
+        if (useArtService()) {
+            destroyAppProfilesWithArtService(pkg);
+        } else {
+            try {
+                mInstaller.destroyAppProfiles(pkg.getPackageName());
+            } catch (LegacyDexoptDisabledException e) {
+                throw new RuntimeException(e);
+            } catch (Installer.InstallerException e) {
+                Slog.w(TAG, String.valueOf(e));
+            }
+        }
+    }
+
+    private void destroyAppProfilesWithArtService(AndroidPackage pkg) {
+        try (PackageManagerLocal.FilteredSnapshot snapshot =
+                        getPackageManagerLocal().withFilteredSnapshot()) {
+            try {
+                DexOptHelper.getArtManagerLocal().clearAppProfiles(snapshot, pkg.getPackageName());
+            } catch (IllegalArgumentException e) {
+                // Package isn't found, but that should only happen due to race.
+                Slog.w(TAG, e);
+            }
         }
     }
 

@@ -29,11 +29,13 @@ import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_MAIN;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_RETURN_HOME;
+import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_DISMISS;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -45,6 +47,8 @@ import android.app.ActivityManager;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.window.WindowContainerToken;
@@ -57,6 +61,7 @@ import androidx.test.filters.SmallTest;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
+import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
@@ -65,6 +70,8 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitLayout;
 import com.android.wm.shell.splitscreen.SplitScreen.SplitScreenListener;
+import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
@@ -98,11 +105,7 @@ public class StageCoordinatorTests extends ShellTestCase {
     @Mock
     private DisplayInsetsController mDisplayInsetsController;
     @Mock
-    private Transitions mTransitions;
-    @Mock
     private TransactionPool mTransactionPool;
-    @Mock
-    private ShellExecutor mMainExecutor;
 
     private final Rect mBounds1 = new Rect(10, 20, 30, 40);
     private final Rect mBounds2 = new Rect(5, 10, 15, 20);
@@ -112,11 +115,16 @@ public class StageCoordinatorTests extends ShellTestCase {
     private SurfaceControl mRootLeash;
     private ActivityManager.RunningTaskInfo mRootTask;
     private StageCoordinator mStageCoordinator;
+    private Transitions mTransitions;
+    private final TestShellExecutor mMainExecutor = new TestShellExecutor();
+    private final ShellExecutor mAnimExecutor = new TestShellExecutor();
+    private final Handler mMainHandler = new Handler(Looper.getMainLooper());
 
     @Before
     @UiThreadTest
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        mTransitions = createTestTransitions();
         mStageCoordinator = spy(new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
                 mTaskOrganizer, mMainStage, mSideStage, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mSplitLayout, mTransitions, mTransactionPool,
@@ -329,7 +337,20 @@ public class StageCoordinatorTests extends ShellTestCase {
 
         mStageCoordinator.onFoldedStateChanged(true);
 
-        verify(mStageCoordinator).onSplitScreenExit();
-        verify(mMainStage).deactivate(any(WindowContainerTransaction.class), eq(false));
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            verify(mTaskOrganizer).startNewTransition(eq(TRANSIT_SPLIT_DISMISS), notNull());
+        } else {
+            verify(mStageCoordinator).onSplitScreenExit();
+            verify(mMainStage).deactivate(any(WindowContainerTransaction.class), eq(false));
+        }
+    }
+
+    private Transitions createTestTransitions() {
+        ShellInit shellInit = new ShellInit(mMainExecutor);
+        final Transitions t = new Transitions(mContext, shellInit, mock(ShellController.class),
+                mTaskOrganizer, mTransactionPool, mock(DisplayController.class), mMainExecutor,
+                mMainHandler, mAnimExecutor);
+        shellInit.init();
+        return t;
     }
 }

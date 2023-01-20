@@ -260,6 +260,8 @@ interface IAudioService {
 
     void setVolumeController(in IVolumeController controller);
 
+    @nullable IVolumeController getVolumeController();
+
     void notifyVolumeControllerVisible(in IVolumeController controller, boolean visible);
 
     boolean isStreamAffectedByRingerMode(int streamType);
@@ -269,6 +271,27 @@ interface IAudioService {
     void disableSafeMediaVolume(String callingPackage);
 
     void lowerVolumeToRs1(String callingPackage);
+
+    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    float getRs2Value();
+
+    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    oneway void setRs2Value(float rs2Value);
+
+    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    float getCsd();
+
+    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    oneway void setCsd(float csd);
+
+    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    oneway void forceUseFrameworkMel(boolean useFrameworkMel);
+
+    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    oneway void forceComputeCsdOnAllDevices(boolean computeCsdOnAllDevices);
+
+    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    boolean isCsdEnabled();
 
     int setHdmiSystemAudioSupported(boolean on);
 

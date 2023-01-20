@@ -21,7 +21,7 @@ import static android.app.ActivityManager.START_ASSISTANT_NOT_ACTIVE_SESSION;
 import static android.app.ActivityManager.START_VOICE_HIDDEN_SESSION;
 import static android.app.ActivityManager.START_VOICE_NOT_ACTIVE_SESSION;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
-import static android.service.voice.VoiceInteractionService.KEY_SHOW_SESSION_ID;
+import static android.service.voice.VoiceInteractionSession.KEY_SHOW_SESSION_ID;
 
 import static com.android.server.policy.PhoneWindowManager.SYSTEM_DIALOG_REASON_ASSIST;
 

@@ -376,7 +376,10 @@ cc_defaults {
         "jni/text/TextShaper.cpp",
     ],
 
-    header_libs: ["android_graphics_jni_headers"],
+    header_libs: [
+        "android_graphics_jni_headers",
+        "libnativewindow_headers",
+    ],
 
     include_dirs: [
         "external/skia/include/private",
@@ -392,10 +395,14 @@ cc_defaults {
         "libbase",
         "libcutils",
         "libharfbuzz_ng",
+        "libimage_io",
+        "libjpeg",
+        "libjpegdecoder",
+        "libjpegencoder",
+        "libjpegrecoverymap",
         "liblog",
         "libminikin",
         "libz",
-        "libjpeg",
     ],
 
     static_libs: [

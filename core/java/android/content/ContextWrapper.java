@@ -1286,8 +1286,8 @@ public class ContextWrapper extends Context {
      * @hide
      */
     @Override
-    public IBinder getIApplicationThreadBinder() {
-        return mBase.getIApplicationThreadBinder();
+    public IBinder getProcessToken() {
+        return mBase.getProcessToken();
     }
 
     /**

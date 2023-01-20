@@ -440,7 +440,8 @@ class UidPermissionPolicy : SchemePolicy() {
                     Log.w(
                         LOG_TAG, "Ignoring permission $permissionName declared in system package" +
                             " $newPackageName: already declared in another system package" +
-                            " $oldPackageName")
+                            " $oldPackageName"
+                    )
                     return@forEachIndexed
                 }
             } else {
@@ -516,15 +517,20 @@ class UidPermissionPolicy : SchemePolicy() {
         if (packageState != null && androidPackage == null) {
             return
         }
-        // TODO: STOPSHIP: We may need to retain permission definitions by disabled system packages
-        //  to retain their permission state.
-
+        val disabledSystemPackage = systemState.disabledSystemPackageStates[packageName]
+            ?.androidPackage
+        // Unlike in the previous implementation, we now also retain permission trees defined by
+        // disabled system packages for consistency with permissions.
         val isPermissionTreeRemoved = systemState.permissionTrees.removeAllIndexed {
             _, permissionTreeName, permissionTree ->
             permissionTree.packageName == packageName && (
                 packageState == null || androidPackage!!.permissions.noneIndexed { _, it ->
                     it.isTree && it.name == permissionTreeName
                 }
+            ) && (
+                disabledSystemPackage?.permissions?.anyIndexed { _, it ->
+                    it.isTree && it.name == permissionTreeName
+                } != true
             )
         }
         if (isPermissionTreeRemoved) {
@@ -538,6 +544,10 @@ class UidPermissionPolicy : SchemePolicy() {
                 packageState == null || androidPackage!!.permissions.noneIndexed { _, it ->
                     !it.isTree && it.name == permissionName
                 }
+            ) && (
+                disabledSystemPackage?.permissions?.anyIndexed { _, it ->
+                    !it.isTree && it.name == permissionName
+                } != true
             )) {
                 // Different from the old implementation where we keep the permission state if the
                 // permission is declared by a disabled system package (ag/15189282), we now
@@ -574,8 +584,14 @@ class UidPermissionPolicy : SchemePolicy() {
     private fun MutateStateScope.trimPermissionStates(appId: Int) {
         val requestedPermissions = IndexedSet<String>()
         forEachPackageInAppId(appId) {
+            // Note that we still trim the permission states requested by disabled system packages.
+            // Because in the previous implementation:
+            // despite revokeSharedUserPermissionsForLeavingPackageInternal() retains permissions
+            // requested by disabled system packages, revokeUnusedSharedUserPermissionsLocked(),
+            // which is call upon app update installation, didn't do such preservation.
+            // Hence, permissions only requested by disabled system packages were still trimmed in
+            // the previous implementation.
             requestedPermissions += it.androidPackage!!.requestedPermissions
-            // TODO: STOPSHIP: Retain permissions requested by disabled system packages.
         }
         newState.userStates.forEachIndexed { _, userId, userState ->
             userState.uidPermissionFlags[appId]?.forEachReversedIndexed { _, permissionName, _ ->

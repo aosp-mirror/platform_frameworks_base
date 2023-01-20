@@ -96,13 +96,13 @@ class AnrHelper {
     void appNotResponding(ProcessRecord anrProcess, TimeoutRecord timeoutRecord) {
         appNotResponding(anrProcess, null /* activityShortComponentName */, null /* aInfo */,
                 null /* parentShortComponentName */, null /* parentProcess */,
-                false /* aboveSystem */, timeoutRecord);
+                false /* aboveSystem */, timeoutRecord, /*isContinuousAnr*/ false);
     }
 
     void appNotResponding(ProcessRecord anrProcess, String activityShortComponentName,
             ApplicationInfo aInfo, String parentShortComponentName,
             WindowProcessController parentProcess, boolean aboveSystem,
-            TimeoutRecord timeoutRecord) {
+            TimeoutRecord timeoutRecord, boolean isContinuousAnr) {
         try {
             timeoutRecord.mLatencyTracker.appNotRespondingStarted();
             final int incomingPid = anrProcess.mPid;
@@ -132,7 +132,7 @@ class AnrHelper {
                 timeoutRecord.mLatencyTracker.anrRecordPlacingOnQueueWithSize(mAnrRecords.size());
                 mAnrRecords.add(new AnrRecord(anrProcess, activityShortComponentName, aInfo,
                         parentShortComponentName, parentProcess, aboveSystem,
-                        mAuxiliaryTaskExecutor, timeoutRecord));
+                        mAuxiliaryTaskExecutor, timeoutRecord, isContinuousAnr));
             }
             startAnrConsumerIfNeeded();
         } finally {
@@ -230,10 +230,12 @@ class AnrHelper {
         final boolean mAboveSystem;
         final ExecutorService mAuxiliaryTaskExecutor;
         final long mTimestamp = SystemClock.uptimeMillis();
+        final boolean mIsContinuousAnr;
         AnrRecord(ProcessRecord anrProcess, String activityShortComponentName,
                 ApplicationInfo aInfo, String parentShortComponentName,
                 WindowProcessController parentProcess, boolean aboveSystem,
-                ExecutorService auxiliaryTaskExecutor, TimeoutRecord timeoutRecord) {
+                ExecutorService auxiliaryTaskExecutor, TimeoutRecord timeoutRecord,
+                boolean isContinuousAnr) {
             mApp = anrProcess;
             mPid = anrProcess.mPid;
             mActivityShortComponentName = activityShortComponentName;
@@ -243,6 +245,7 @@ class AnrHelper {
             mParentProcess = parentProcess;
             mAboveSystem = aboveSystem;
             mAuxiliaryTaskExecutor = auxiliaryTaskExecutor;
+            mIsContinuousAnr = isContinuousAnr;
         }
 
         void appNotResponding(boolean onlyDumpSelf) {
@@ -250,7 +253,8 @@ class AnrHelper {
                 mTimeoutRecord.mLatencyTracker.anrProcessingStarted();
                 mApp.mErrorState.appNotResponding(mActivityShortComponentName, mAppInfo,
                         mParentShortComponentName, mParentProcess, mAboveSystem,
-                        mTimeoutRecord, mAuxiliaryTaskExecutor, onlyDumpSelf);
+                        mTimeoutRecord, mAuxiliaryTaskExecutor, onlyDumpSelf,
+                        mIsContinuousAnr);
             } finally {
                 mTimeoutRecord.mLatencyTracker.anrProcessingEnded();
             }

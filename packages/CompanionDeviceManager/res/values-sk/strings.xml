@@ -43,7 +43,7 @@
     <string name="consent_no" msgid="2640796915611404382">"Nepovoliť"</string>
     <string name="consent_back" msgid="2560683030046918882">"Späť"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"Chcete udeliť aplikáciám v zariadení &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; rovnaké povolenia ako v zariadení &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
-    <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;Môžu zahŕňať prístup k mikrofónu, kamere a polohe a ďalšie citlivé povolenia v zariadení &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt; &lt;p&gt;Tieto povolenia môžete kedykoľvek zmeniť v Nastaveniach v zariadení &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt;"</string>
+    <string name="permission_sync_summary" msgid="765497944331294275">"Môžu zahŕňať prístup k &lt;strong&gt;mikrofónu&lt;/strong&gt;, &lt;strong&gt;kamere&lt;/strong&gt; a &lt;strong&gt;polohe&lt;/strong&gt;, a ďalšie citlivé povolenia v zariadení &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;. &lt;br/&gt;&lt;br/&gt;Tieto povolenia môžete kedykoľvek zmeniť v nastaveniach zariadenia &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;."</string>
     <string name="vendor_icon_description" msgid="4445875290032225965">"Ikona aplikácie"</string>
     <string name="vendor_header_button_description" msgid="6566660389500630608">"Tlačidlo Ďalšie informácie"</string>
     <string name="permission_phone" msgid="2661081078692784919">"Telefón"</string>
@@ -51,26 +51,19 @@
     <string name="permission_contacts" msgid="3858319347208004438">"Kontakty"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"Kalendár"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"Mikrofón"</string>
-    <!-- no translation found for permission_call_logs (5546761417694586041) -->
-    <skip />
+    <string name="permission_call_logs" msgid="5546761417694586041">"Zoznam hovorov"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Zariadenia v okolí"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Fotky a médiá"</string>
     <string name="permission_notification" msgid="693762568127741203">"Upozornenia"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Aplikácie"</string>
     <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"Streamovať do zariad. v okolí"</string>
-    <!-- no translation found for permission_phone_summary (6684396967861278044) -->
-    <skip />
-    <!-- no translation found for permission_call_logs_summary (6186103394658755022) -->
-    <skip />
-    <!-- no translation found for permission_sms_summary (3508442683678912017) -->
-    <skip />
-    <!-- no translation found for permission_contacts_summary (675861979475628708) -->
-    <skip />
-    <!-- no translation found for permission_calendar_summary (6460000922511766226) -->
-    <skip />
+    <string name="permission_phone_summary" msgid="6684396967861278044">"Môže uskutočňovať a spravovať telefonické hovory"</string>
+    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Môže čítať zo zoznamu hovorov telefónu a zapisovať doň"</string>
+    <string name="permission_sms_summary" msgid="3508442683678912017">"Môže odosielať a zobrazovať správy SMS"</string>
+    <string name="permission_contacts_summary" msgid="675861979475628708">"Má prístup k vašim kontaktom"</string>
+    <string name="permission_calendar_summary" msgid="6460000922511766226">"Má prístup k vášmu kalendáru"</string>
     <string name="permission_microphone_summary" msgid="4241354865859396558">"Môže nahrávať zvuk pomocou mikrofónu"</string>
-    <!-- no translation found for permission_nearby_devices_summary (931940524460876655) -->
-    <skip />
+    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Môže vyhľadávať zariadenia v okolí, určovať ich relatívnu pozíciu a pripájať sa k nim"</string>
     <string name="permission_notification_summary" msgid="884075314530071011">"Môže čítať všetky upozornenia vrátane informácií, ako sú kontakty, správy a fotky"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Streamovať aplikácie telefónu"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>

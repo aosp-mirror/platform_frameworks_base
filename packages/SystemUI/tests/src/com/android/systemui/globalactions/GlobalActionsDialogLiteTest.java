@@ -558,8 +558,8 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         UserInfo currentUser = mockCurrentUser(FLAG_ADMIN);
 
         when(mGlobalActionsDialogLite.getCurrentUser()).thenReturn(currentUser);
-        doReturn(1).when(mGlobalSettings)
-                .getIntForUser(Settings.Global.BUGREPORT_IN_POWER_MENU, 0, currentUser.id);
+        when(mGlobalSettings.getIntForUser(Settings.Secure.BUGREPORT_IN_POWER_MENU,
+                0, currentUser.id)).thenReturn(1);
 
         GlobalActionsDialogLite.BugReportAction bugReportAction =
                 mGlobalActionsDialogLite.makeBugReportActionForTesting();
@@ -572,7 +572,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
 
         when(mGlobalActionsDialogLite.getCurrentUser()).thenReturn(currentUser);
         doReturn(1).when(mGlobalSettings)
-                .getIntForUser(Settings.Global.BUGREPORT_IN_POWER_MENU, 0, currentUser.id);
+                .getIntForUser(Settings.Secure.BUGREPORT_IN_POWER_MENU, 0, currentUser.id);
 
         GlobalActionsDialogLite.BugReportAction bugReportAction =
                 mGlobalActionsDialogLite.makeBugReportActionForTesting();

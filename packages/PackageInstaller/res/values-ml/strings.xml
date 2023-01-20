@@ -26,6 +26,10 @@
     <string name="install_done" msgid="5987363587661783896">"ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്‌തു."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"ഈ ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്യണോ?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"ഈ ആപ്പ് അപ്‌ഡേറ്റ് ചെയ്യണോ?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്‌തിട്ടില്ല."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"പാക്കേജ് ഇൻസ്‌റ്റാൾ ചെയ്യുന്നത് ബ്ലോക്ക് ചെയ്‌തു."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"പാക്കേജിന് നിലവിലുള്ള പാക്കേജുമായി പൊരുത്തക്കേടുള്ളതിനാൽ, ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്‌തില്ല."</string>

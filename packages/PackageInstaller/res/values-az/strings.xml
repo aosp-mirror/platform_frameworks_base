@@ -26,6 +26,10 @@
     <string name="install_done" msgid="5987363587661783896">"Tətbiq quraşdırılıb."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Bu tətbiqi quraşdırmaq istəyirsiniz?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Bu tətbiqi güncəlləmək istəyirsiniz?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"Tətbiq quraşdırılmayıb."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Paketin quraşdırılması blok edildi."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Bu paketin mövcud paket ilə ziddiyətinə görə tətbiq quraşdırılmadı."</string>

@@ -36,7 +36,7 @@ import java.security.cert.X509Certificate;
  *
  * @see PackageManager#requestChecksums
  */
-@DataClass(genHiddenConstructor = true)
+@DataClass(genHiddenConstructor = true, genToString = true)
 @DataClass.Suppress({"getChecksum"})
 public final class ApkChecksum implements Parcelable {
     /**
@@ -178,6 +178,20 @@ public final class ApkChecksum implements Parcelable {
 
     @Override
     @DataClass.Generated.Member
+    public String toString() {
+        // You can override field toString logic by defining methods like:
+        // String fieldNameToString() { ... }
+
+        return "ApkChecksum { " +
+                "splitName = " + mSplitName + ", " +
+                "checksum = " + mChecksum + ", " +
+                "installerPackageName = " + mInstallerPackageName + ", " +
+                "installerCertificate = " + java.util.Arrays.toString(mInstallerCertificate) +
+        " }";
+    }
+
+    @Override
+    @DataClass.Generated.Member
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         // You can override field parcelling by defining methods like:
         // void parcelFieldName(Parcel dest, int flags) { ... }
@@ -235,10 +249,10 @@ public final class ApkChecksum implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1619810171079L,
+            time = 1674080488372L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/content/pm/ApkChecksum.java",
-            inputSignatures = "private final @android.annotation.Nullable java.lang.String mSplitName\nprivate final @android.annotation.NonNull android.content.pm.Checksum mChecksum\nprivate final @android.annotation.Nullable java.lang.String mInstallerPackageName\nprivate final @android.annotation.Nullable byte[] mInstallerCertificate\npublic @android.content.pm.Checksum.Type int getType()\npublic @android.annotation.NonNull byte[] getValue()\npublic @android.annotation.Nullable byte[] getInstallerCertificateBytes()\npublic @android.annotation.Nullable java.security.cert.Certificate getInstallerCertificate()\nclass ApkChecksum extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genHiddenConstructor=true)")
+            inputSignatures = "private final @android.annotation.Nullable java.lang.String mSplitName\nprivate final @android.annotation.NonNull android.content.pm.Checksum mChecksum\nprivate final @android.annotation.Nullable java.lang.String mInstallerPackageName\nprivate final @android.annotation.Nullable byte[] mInstallerCertificate\npublic @android.content.pm.Checksum.Type int getType()\npublic @android.annotation.NonNull byte[] getValue()\npublic @android.annotation.Nullable byte[] getInstallerCertificateBytes()\npublic @android.annotation.Nullable java.security.cert.Certificate getInstallerCertificate()\nclass ApkChecksum extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genHiddenConstructor=true, genToString=true)")
     @Deprecated
     private void __metadata() {}
 

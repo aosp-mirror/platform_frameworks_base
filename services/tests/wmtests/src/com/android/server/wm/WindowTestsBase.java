@@ -262,6 +262,12 @@ class WindowTestsBase extends SystemServiceTestsBase {
         // device form factors.
         mAtm.mWindowManager.mLetterboxConfiguration
                 .setIsSplitScreenAspectRatioForUnresizableAppsEnabled(false);
+        // Ensure aspect ratio for al apps isn't overridden on any device target.
+        // {@link com.android.internal.R.bool
+        // .config_letterboxIsDisplayAspectRatioForFixedOrientationLetterboxEnabled}, may be set on
+        // some device form factors.
+        mAtm.mWindowManager.mLetterboxConfiguration
+                .setIsDisplayAspectRatioEnabledForFixedOrientationLetterbox(false);
 
         checkDeviceSpecificOverridesNotApplied();
     }
@@ -276,6 +282,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
         mAtm.mWindowManager.mLetterboxConfiguration.resetIsVerticalReachabilityEnabled();
         mAtm.mWindowManager.mLetterboxConfiguration
                 .resetIsSplitScreenAspectRatioForUnresizableAppsEnabled();
+        mAtm.mWindowManager.mLetterboxConfiguration
+                .resetIsDisplayAspectRatioEnabledForFixedOrientationLetterbox();
     }
 
     /**
@@ -1016,8 +1024,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
         private boolean mOnTop = false;
         private ActivityInfo.WindowLayout mWindowLayout;
         private boolean mVisible = true;
-        private ActivityOptions mLaunchIntoPipOpts;
         private String mRequiredDisplayCategory;
+        private ActivityOptions mActivityOpts;
 
         ActivityBuilder(ActivityTaskManagerService service) {
             mService = service;
@@ -1153,8 +1161,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
-        ActivityBuilder setLaunchIntoPipActivityOptions(ActivityOptions opts) {
-            mLaunchIntoPipOpts = opts;
+        ActivityBuilder setActivityOptions(ActivityOptions opts) {
+            mActivityOpts = opts;
             return this;
         }
 
@@ -1225,8 +1233,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
             }
 
             ActivityOptions options = null;
-            if (mLaunchIntoPipOpts != null) {
-                options = mLaunchIntoPipOpts;
+            if (mActivityOpts != null) {
+                options = mActivityOpts;
             } else if (mLaunchTaskBehind) {
                 options = ActivityOptions.makeTaskLaunchBehind();
             }

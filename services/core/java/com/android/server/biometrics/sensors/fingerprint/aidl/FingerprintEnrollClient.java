@@ -230,6 +230,10 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
                 session.getSession().onPointerDown(pc.pointerId, (int) pc.x, (int) pc.y, pc.minor,
                         pc.major);
             }
+
+            if (getListener() != null) {
+                getListener().onUdfpsPointerDown(getSensorId());
+            }
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to send pointer down", e);
         }
@@ -245,6 +249,10 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
                 session.getSession().onPointerUpWithContext(pc);
             } else {
                 session.getSession().onPointerUp(pc.pointerId);
+            }
+
+            if (getListener() != null) {
+                getListener().onUdfpsPointerUp(getSensorId());
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to send pointer up", e);

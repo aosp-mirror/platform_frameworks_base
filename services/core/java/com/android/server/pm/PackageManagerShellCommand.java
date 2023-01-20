@@ -179,6 +179,7 @@ class PackageManagerShellCommand extends ShellCommand {
             "cancel-bg-dexopt-job", "delete-dexopt", "dump-profiles", "snapshot-profile", "art");
 
     final IPackageManager mInterface;
+    private final PackageManagerInternal mPm;
     final LegacyPermissionManagerInternal mLegacyPermissionManager;
     final PermissionManager mPermissionManager;
     final Context mContext;
@@ -195,6 +196,7 @@ class PackageManagerShellCommand extends ShellCommand {
     PackageManagerShellCommand(@NonNull IPackageManager packageManager,
             @NonNull Context context, @NonNull DomainVerificationShell domainVerificationShell) {
         mInterface = packageManager;
+        mPm = LocalServices.getService(PackageManagerInternal.class);
         mLegacyPermissionManager = LocalServices.getService(LegacyPermissionManagerInternal.class);
         mPermissionManager = context.getSystemService(PermissionManager.class);
         mContext = context;
@@ -1968,9 +1970,10 @@ class PackageManagerShellCommand extends ShellCommand {
         }
     }
 
-    private int runreconcileSecondaryDexFiles() throws RemoteException {
+    private int runreconcileSecondaryDexFiles()
+            throws RemoteException, LegacyDexoptDisabledException {
         String packageName = getNextArg();
-        mInterface.reconcileSecondaryDexFiles(packageName);
+        mPm.legacyReconcileSecondaryDexFiles(packageName);
         return 0;
     }
 
@@ -1979,63 +1982,53 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int runBgDexOpt() throws RemoteException {
-        // TODO(b/251903639): Call into ART Service.
-        try {
-            String opt = getNextOption();
+    private int runBgDexOpt() throws RemoteException, LegacyDexoptDisabledException {
+        String opt = getNextOption();
 
-            if (opt == null) {
-                List<String> packageNames = new ArrayList<>();
-                String arg;
-                while ((arg = getNextArg()) != null) {
-                    packageNames.add(arg);
-                }
-                if (!BackgroundDexOptService.getService().runBackgroundDexoptJob(
-                            packageNames.isEmpty() ? null : packageNames)) {
-                    getOutPrintWriter().println("Failure");
-                    return -1;
-                }
-            } else {
-                String extraArg = getNextArg();
-                if (extraArg != null) {
-                    getErrPrintWriter().println("Invalid argument: " + extraArg);
-                    return -1;
-                }
-
-                switch (opt) {
-                    case "--cancel":
-                        return cancelBgDexOptJob();
-
-                    case "--disable":
-                        BackgroundDexOptService.getService().setDisableJobSchedulerJobs(true);
-                        break;
-
-                    case "--enable":
-                        BackgroundDexOptService.getService().setDisableJobSchedulerJobs(false);
-                        break;
-
-                    default:
-                        getErrPrintWriter().println("Unknown option: " + opt);
-                        return -1;
-                }
+        if (opt == null) {
+            List<String> packageNames = new ArrayList<>();
+            String arg;
+            while ((arg = getNextArg()) != null) {
+                packageNames.add(arg);
+            }
+            if (!BackgroundDexOptService.getService().runBackgroundDexoptJob(
+                        packageNames.isEmpty() ? null : packageNames)) {
+                getOutPrintWriter().println("Failure");
+                return -1;
+            }
+        } else {
+            String extraArg = getNextArg();
+            if (extraArg != null) {
+                getErrPrintWriter().println("Invalid argument: " + extraArg);
+                return -1;
             }
 
-            getOutPrintWriter().println("Success");
-            return 0;
-        } catch (LegacyDexoptDisabledException e) {
-            throw new RuntimeException(e);
+            switch (opt) {
+                case "--cancel":
+                    return cancelBgDexOptJob();
+
+                case "--disable":
+                    BackgroundDexOptService.getService().setDisableJobSchedulerJobs(true);
+                    break;
+
+                case "--enable":
+                    BackgroundDexOptService.getService().setDisableJobSchedulerJobs(false);
+                    break;
+
+                default:
+                    getErrPrintWriter().println("Unknown option: " + opt);
+                    return -1;
+            }
         }
+
+        getOutPrintWriter().println("Success");
+        return 0;
     }
 
-    private int cancelBgDexOptJob() throws RemoteException {
-        // TODO(b/251903639): Call into ART Service.
-        try {
-            BackgroundDexOptService.getService().cancelBackgroundDexoptJob();
-            getOutPrintWriter().println("Success");
-            return 0;
-        } catch (LegacyDexoptDisabledException e) {
-            throw new RuntimeException(e);
-        }
+    private int cancelBgDexOptJob() throws RemoteException, LegacyDexoptDisabledException {
+        BackgroundDexOptService.getService().cancelBackgroundDexoptJob();
+        getOutPrintWriter().println("Success");
+        return 0;
     }
 
     private int runDeleteDexOpt() throws RemoteException {
@@ -2045,8 +2038,7 @@ class PackageManagerShellCommand extends ShellCommand {
             pw.println("Error: no package name");
             return 1;
         }
-        long freedBytes = LocalServices.getService(PackageManagerInternal.class)
-                                  .deleteOatArtifactsOfPackage(packageName);
+        long freedBytes = mPm.deleteOatArtifactsOfPackage(packageName);
         if (freedBytes < 0) {
             pw.println("Error: delete failed");
             return 1;
@@ -2056,7 +2048,7 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int runDumpProfiles() throws RemoteException {
+    private int runDumpProfiles() throws RemoteException, LegacyDexoptDisabledException {
         final PrintWriter pw = getOutPrintWriter();
         boolean dumpClassesAndMethods = false;
 
@@ -2073,7 +2065,7 @@ class PackageManagerShellCommand extends ShellCommand {
         }
 
         String packageName = getNextArg();
-        mInterface.dumpProfiles(packageName, dumpClassesAndMethods);
+        mPm.legacyDumpProfiles(packageName, dumpClassesAndMethods);
         return 0;
     }
 

@@ -1085,27 +1085,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // DPMS.getApplicationLabel() because Context.createPackageContextAsUser() is not mockable.
     }
 
-    /**
-     * TODO(b/174859111): move to automotive-only section
-     * Test for {@link DevicePolicyManager#setDeviceOwner} in headless system user mode.
-     */
-    @Test
-    public void testSetDeviceOwner_headlessSystemUserMode() throws Exception {
-        when(getServices().userManagerForMock.isHeadlessSystemUserMode()).thenReturn(true);
-        setDeviceOwner_headlessSystemUser();
-
-        // Try to set a profile owner on the same user, which should fail.
-        setUpPackageManagerForAdmin(admin2, DpmMockContext.CALLER_UID);
-        dpm.setActiveAdmin(admin2, /* refreshing= */ true, CALLER_USER_HANDLE);
-        assertExpectException(IllegalStateException.class,
-                /* messageRegex= */ "profile owner is already set",
-                () -> dpm.setProfileOwner(admin2, CALLER_USER_HANDLE));
-
-        // DO admin can't be deactivated.
-        dpm.removeActiveAdmin(admin1);
-        assertThat(dpm.isAdminActive(admin1)).isTrue();
-    }
-
     private void setDeviceOwner() throws Exception {
         mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
         mContext.callerPermissions.add(permission.MANAGE_USERS);

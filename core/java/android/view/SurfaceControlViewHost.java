@@ -485,7 +485,6 @@ public class SurfaceControlViewHost {
      * SurfaceControlViewHost was created with an associated hostInputToken.
      *
      * @return Whether the touch stream was transferred.
-     * @hide
      */
     public boolean transferTouchGestureToHost() {
         if (mViewRoot == null) {

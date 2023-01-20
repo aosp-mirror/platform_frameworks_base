@@ -2736,6 +2736,10 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(PermissionPolicyService.class);
         t.traceEnd();
 
+        t.traceBegin("ArtManagerLocal");
+        DexOptHelper.initializeArtManagerLocal(context, mPackageManagerService);
+        t.traceEnd();
+
         t.traceBegin("MakePackageManagerServiceReady");
         mPackageManagerService.systemReady();
         t.traceEnd();
@@ -2768,10 +2772,6 @@ public final class SystemServer implements Dumpable {
 
         t.traceBegin("GameManagerService");
         mSystemServiceManager.startService(GAME_MANAGER_SERVICE_CLASS);
-        t.traceEnd();
-
-        t.traceBegin("ArtManagerLocal");
-        DexOptHelper.initializeArtManagerLocal(context, mPackageManagerService);
         t.traceEnd();
 
         if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_UWB)) {

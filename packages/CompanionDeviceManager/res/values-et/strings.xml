@@ -43,7 +43,7 @@
     <string name="consent_no" msgid="2640796915611404382">"Ära luba"</string>
     <string name="consent_back" msgid="2560683030046918882">"Tagasi"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"Kas anda rakendustele seadmes &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; samad load, mis seadmes &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
-    <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;See võib hõlmata mikrofoni, kaamerat ja juurdepääsu asukohale ning muid tundlikke lube seadmes &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt; &lt;p&gt;Võite neid lube seadme &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt; seadetes igal ajal muuta.&lt;/p&gt;"</string>
+    <string name="permission_sync_summary" msgid="765497944331294275">"See võib hõlmata &lt;strong&gt;mikrofoni&lt;/strong&gt;, &lt;strong&gt;kaamerat&lt;/strong&gt; ja &lt;strong&gt;juurdepääsu asukohale&lt;/strong&gt; ning muid tundlikke lube seadmes &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;. &lt;br/&gt;&lt;br/&gt;Võite neid lube seadme &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt; seadetes igal ajal muuta."</string>
     <string name="vendor_icon_description" msgid="4445875290032225965">"Rakenduse ikoon"</string>
     <string name="vendor_header_button_description" msgid="6566660389500630608">"Nupp Lisateave"</string>
     <string name="permission_phone" msgid="2661081078692784919">"Telefon"</string>
@@ -51,26 +51,19 @@
     <string name="permission_contacts" msgid="3858319347208004438">"Kontaktid"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"Kalender"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"Mikrofon"</string>
-    <!-- no translation found for permission_call_logs (5546761417694586041) -->
-    <skip />
+    <string name="permission_call_logs" msgid="5546761417694586041">"Kõnelogid"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Läheduses olevad seadmed"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Fotod ja meedia"</string>
     <string name="permission_notification" msgid="693762568127741203">"Märguanded"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Rakendused"</string>
     <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"Läheduses olevas seadmes esit."</string>
-    <!-- no translation found for permission_phone_summary (6684396967861278044) -->
-    <skip />
-    <!-- no translation found for permission_call_logs_summary (6186103394658755022) -->
-    <skip />
-    <!-- no translation found for permission_sms_summary (3508442683678912017) -->
-    <skip />
-    <!-- no translation found for permission_contacts_summary (675861979475628708) -->
-    <skip />
-    <!-- no translation found for permission_calendar_summary (6460000922511766226) -->
-    <skip />
+    <string name="permission_phone_summary" msgid="6684396967861278044">"Saab teha ja hallata telefonikõnesid"</string>
+    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Saab telefoni kõnelogi lugeda ja sinna kirjutada"</string>
+    <string name="permission_sms_summary" msgid="3508442683678912017">"Saab saata ja vaadata SMS-sõnumeid"</string>
+    <string name="permission_contacts_summary" msgid="675861979475628708">"Pääseb juurde teie kontaktidele"</string>
+    <string name="permission_calendar_summary" msgid="6460000922511766226">"Pääseb juurde teie kalendrile"</string>
     <string name="permission_microphone_summary" msgid="4241354865859396558">"Saab mikrofoni abil heli salvestada"</string>
-    <!-- no translation found for permission_nearby_devices_summary (931940524460876655) -->
-    <skip />
+    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Leiab läheduses olevaid seadmeid, saab nendega ühenduse luua ja määrata nende suhtelise asendi"</string>
     <string name="permission_notification_summary" msgid="884075314530071011">"Kõikide märguannete, sealhulgas teabe, nagu kontaktid, sõnumid ja fotod, lugemine"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Telefoni rakenduste voogesitamine"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>

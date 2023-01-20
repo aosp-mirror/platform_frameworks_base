@@ -80,7 +80,7 @@ public class SplitAssetDependencyLoader extends SplitDependencyLoader<IllegalArg
 
     private static AssetManager createAssetManagerWithAssets(ApkAssets[] apkAssets) {
         final AssetManager assets = new AssetManager();
-        assets.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        assets.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 Build.VERSION.RESOURCES_SDK_INT);
         assets.setApkAssets(apkAssets, false /*invalidateCaches*/);
         return assets;

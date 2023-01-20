@@ -21,6 +21,7 @@ import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
@@ -65,6 +66,7 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.provider.SeenNotificationsProviderImpl;
 import com.android.systemui.statusbar.notification.collection.provider.VisibilityLocationProviderDelegator;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
+import com.android.systemui.statusbar.notification.collection.render.NotifStats;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -139,6 +141,9 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
 
+    private final SeenNotificationsProviderImpl mSeenNotificationsProvider =
+            new SeenNotificationsProviderImpl();
+
     private NotificationStackScrollLayoutController mController;
 
     @Before
@@ -180,7 +185,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mUiEventLogger,
                 mRemoteInputManager,
                 mVisibilityLocationProviderDelegator,
-                new SeenNotificationsProviderImpl(),
+                mSeenNotificationsProvider,
                 mShadeController,
                 mJankMonitor,
                 mStackLogger,
@@ -233,16 +238,14 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         mController.updateShowEmptyShadeView();
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
                 /* visible= */ true,
-                /* notifVisibleInShade= */ true,
-                /* areSeenNotifsFiltered= */false);
+                /* notifVisibleInShade= */ true);
 
         setupShowEmptyShadeViewState(false);
         reset(mNotificationStackScrollLayout);
         mController.updateShowEmptyShadeView();
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
                 /* visible= */ false,
-                /* notifVisibleInShade= */ true,
-                /* areSeenNotifsFiltered= */false);
+                /* notifVisibleInShade= */ true);
     }
 
     @Test
@@ -255,16 +258,14 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         mController.updateShowEmptyShadeView();
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
                 /* visible= */ true,
-                /* notifVisibleInShade= */ false,
-                /* areSeenNotifsFiltered= */false);
+                /* notifVisibleInShade= */ false);
 
         setupShowEmptyShadeViewState(false);
         reset(mNotificationStackScrollLayout);
         mController.updateShowEmptyShadeView();
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
                 /* visible= */ false,
-                /* notifVisibleInShade= */ false,
-                /* areSeenNotifsFiltered= */false);
+                /* notifVisibleInShade= */ false);
     }
 
     @Test
@@ -283,16 +284,14 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         mController.updateShowEmptyShadeView();
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
                 /* visible= */ true,
-                /* notifVisibleInShade= */ false,
-                /* areSeenNotifsFiltered= */false);
+                /* notifVisibleInShade= */ false);
 
         mController.setQsFullScreen(true);
         reset(mNotificationStackScrollLayout);
         mController.updateShowEmptyShadeView();
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
                 /* visible= */ true,
-                /* notifVisibleInShade= */ false,
-                /* areSeenNotifsFiltered= */false);
+                /* notifVisibleInShade= */ false);
     }
 
     @Test
@@ -398,6 +397,17 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         RemoteInputController.Callback callback = callbackCaptor.getValue();
         callback.onRemoteInputActive(true);
         verify(mNotificationStackScrollLayout).setIsRemoteInputActive(true);
+    }
+
+    @Test
+    public void testSetNotifStats_updatesHasFilteredOutSeenNotifications() {
+        when(mNotifPipelineFlags.getShouldFilterUnseenNotifsOnKeyguard()).thenReturn(true);
+        mSeenNotificationsProvider.setHasFilteredOutSeenNotifications(true);
+        mController.attach(mNotificationStackScrollLayout);
+        mController.getNotifStackController().setNotifStats(NotifStats.getEmpty());
+        verify(mNotificationStackScrollLayout).setHasFilteredOutSeenNotifications(true);
+        verify(mNotificationStackScrollLayout).updateFooter();
+        verify(mNotificationStackScrollLayout).updateEmptyShadeView(anyBoolean(), anyBoolean());
     }
 
     private LogMaker logMatcher(int category, int type) {

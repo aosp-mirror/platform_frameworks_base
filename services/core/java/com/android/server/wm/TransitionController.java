@@ -30,6 +30,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.IApplicationThread;
 import android.app.WindowConfiguration;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
@@ -38,6 +39,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.Slog;
+import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -46,11 +48,13 @@ import android.window.ITransitionPlayer;
 import android.window.RemoteTransition;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
+import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
@@ -119,6 +123,8 @@ class TransitionController {
     boolean mBuildingFinishLayers = false;
 
     private boolean mAnimatingState = false;
+
+    final Handler mLoggerHandler = FgThread.getHandler();
 
     TransitionController(ActivityTaskManagerService atm,
             TaskSnapshotController taskSnapshotController,
@@ -462,9 +468,11 @@ class TransitionController {
                 info = new ActivityManager.RunningTaskInfo();
                 startTask.fillTaskInfo(info);
             }
-            mTransitionPlayer.requestStartTransition(transition.getToken(),
-                    new TransitionRequestInfo(transition.mType, info, remoteTransition,
-                            displayChange));
+            final TransitionRequestInfo request = new TransitionRequestInfo(
+                    transition.mType, info, remoteTransition, displayChange);
+            transition.mLogger.mRequestTimeNs = SystemClock.uptimeNanos();
+            transition.mLogger.mRequest = request;
+            mTransitionPlayer.requestStartTransition(transition.getToken(), request);
             transition.setRemoteTransition(remoteTransition);
         } catch (RemoteException e) {
             Slog.e(TAG, "Error requesting transition", e);
@@ -844,6 +852,66 @@ class TransitionController {
                 }
             }
             return delegate != null;
+        }
+    }
+
+    /**
+     * Data-class to store recorded events/info for a transition. This allows us to defer the
+     * actual logging until the system isn't busy. This also records some common metrics to see
+     * delays at-a-glance.
+     *
+     * Beside `mCreateWallTimeMs`, all times are elapsed times and will all be reported relative
+     * to when the transition was created.
+     */
+    static class Logger {
+        long mCreateWallTimeMs;
+        long mCreateTimeNs;
+        long mRequestTimeNs;
+        long mCollectTimeNs;
+        long mStartTimeNs;
+        long mReadyTimeNs;
+        long mSendTimeNs;
+        long mFinishTimeNs;
+        TransitionRequestInfo mRequest;
+        WindowContainerTransaction mStartWCT;
+        int mSyncId;
+        TransitionInfo mInfo;
+
+        private String buildOnSendLog() {
+            StringBuilder sb = new StringBuilder("Sent Transition #").append(mSyncId)
+                    .append(" createdAt=").append(TimeUtils.logTimeOfDay(mCreateWallTimeMs));
+            if (mRequest != null) {
+                sb.append(" via request=").append(mRequest);
+            }
+            return sb.toString();
+        }
+
+        void logOnSend() {
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "%s", buildOnSendLog());
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "    startWCT=%s", mStartWCT);
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "    info=%s", mInfo);
+        }
+
+        private static String toMsString(long nanos) {
+            return ((double) Math.round((double) nanos / 1000) / 1000) + "ms";
+        }
+
+        private String buildOnFinishLog() {
+            StringBuilder sb = new StringBuilder("Finish Transition #").append(mSyncId)
+                    .append(": created at ").append(TimeUtils.logTimeOfDay(mCreateWallTimeMs));
+            sb.append(" collect-started=").append(toMsString(mCollectTimeNs - mCreateTimeNs));
+            if (mRequestTimeNs != 0) {
+                sb.append(" request-sent=").append(toMsString(mRequestTimeNs - mCreateTimeNs));
+            }
+            sb.append(" started=").append(toMsString(mStartTimeNs - mCreateTimeNs));
+            sb.append(" ready=").append(toMsString(mReadyTimeNs - mCreateTimeNs));
+            sb.append(" sent=").append(toMsString(mSendTimeNs - mCreateTimeNs));
+            sb.append(" finished=").append(toMsString(mFinishTimeNs - mCreateTimeNs));
+            return sb.toString();
+        }
+
+        void logOnFinish() {
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "%s", buildOnFinishLog());
         }
     }
 

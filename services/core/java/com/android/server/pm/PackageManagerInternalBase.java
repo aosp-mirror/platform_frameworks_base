@@ -47,7 +47,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
-import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -708,12 +707,7 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     @Override
     @Deprecated
     public final long deleteOatArtifactsOfPackage(String packageName) {
-        // TODO(b/251903639): Call into ART Service.
-        try {
-            return mService.deleteOatArtifactsOfPackage(snapshot(), packageName);
-        } catch (LegacyDexoptDisabledException e) {
-            throw new RuntimeException(e);
-        }
+        return mService.deleteOatArtifactsOfPackage(snapshot(), packageName);
     }
 
     @Override

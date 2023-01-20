@@ -2322,6 +2322,29 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
+     * Returns {@code true} if this motion event is from a stylus pointer.
+     * @hide
+     */
+    public boolean isStylusPointer() {
+        final int actionIndex = getActionIndex();
+        return isFromSource(InputDevice.SOURCE_STYLUS)
+                && (getToolType(actionIndex) == TOOL_TYPE_STYLUS
+                || getToolType(actionIndex) == TOOL_TYPE_ERASER);
+    }
+
+    /**
+     * Returns {@code true} if this motion event is a hover event, identified by it having an action
+     * of either {@link #ACTION_HOVER_ENTER}, {@link #ACTION_HOVER_MOVE} or
+     * {@link #ACTION_HOVER_EXIT}.
+     * @hide
+     */
+    public boolean isHoverEvent() {
+        return getActionMasked() == ACTION_HOVER_ENTER
+                || getActionMasked() == ACTION_HOVER_EXIT
+                || getActionMasked() == ACTION_HOVER_MOVE;
+    }
+
+    /**
      * Gets the motion event flags.
      *
      * @see #FLAG_WINDOW_IS_OBSCURED

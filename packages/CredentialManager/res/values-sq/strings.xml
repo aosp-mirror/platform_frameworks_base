@@ -5,31 +5,31 @@
     <string name="string_cancel" msgid="6369133483981306063">"Anulo"</string>
     <string name="string_continue" msgid="1346732695941131882">"Vazhdo"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Opsione të tjera"</string>
-    <string name="string_create_in_another_place" msgid="1033635365843437603">"Krijo në një vend tjetër"</string>
-    <string name="string_save_to_another_place" msgid="7590325934591079193">"Ruaj në një vend tjetër"</string>
-    <string name="string_use_another_device" msgid="8754514926121520445">"Përdor një pajisje tjetër"</string>
-    <string name="string_save_to_another_device" msgid="1959562542075194458">"Ruaj në një pajisje tjetër"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Më e sigurt me çelësat e kalimit"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Me çelësat e kalimit, nuk ka nevojë të krijosh ose të mbash mend fjalëkalime të ndërlikuara"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Çelësat e kalimit kanë çelësa dixhitalë të enkriptuar që ti i krijon duke përdorur gjurmën e gishtit, fytyrën ose kyçjen e ekranit"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Ata ruhen te një menaxher fjalëkalimesh, në mënyrë që mund të identifikohesh në pajisje të tjera"</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"Zgjidh se ku të <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
-    <string name="create_your_passkeys" msgid="8901224153607590596">"do t\'i krijosh çelësat e tu të kalimit"</string>
-    <string name="save_your_password" msgid="6597736507991704307">"ruaj fjalëkalimin"</string>
-    <string name="save_your_sign_in_info" msgid="7213978049817076882">"ruaj informacionet e tua të identifikimit"</string>
-    <string name="choose_provider_body" msgid="4384188171872005547">"Zgjidh një menaxher fjalëkalimesh për të ruajtur informacionet e tua dhe për t\'u identifikuar më shpejt herën tjetër."</string>
+    <!-- no translation found for choose_provider_title (8870795677024868108) -->
+    <skip />
+    <!-- no translation found for choose_provider_body (4967074531845147434) -->
+    <skip />
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Të krijohet çelësi i kalimit për <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"Të ruhet fjalëkalimi për <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Të ruhen informacionet e identifikimit për <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_description" msgid="5531335144879100664">"Mund të përdorësh <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> të <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> në çdo pajisje. Ai është i ruajtur te \"<xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g>\" për <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>."</string>
     <string name="passkey" msgid="632353688396759522">"çelësi i kalimit"</string>
     <string name="password" msgid="6738570945182936667">"fjalëkalimi"</string>
+    <!-- no translation found for passkeys (5733880786866559847) -->
+    <skip />
+    <!-- no translation found for passwords (5419394230391253816) -->
+    <skip />
     <string name="sign_ins" msgid="4710739369149469208">"identifikimet"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"informacionet e identifikimit"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"Ruaj <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> te"</string>
-    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"Të krijohet një çelës kalimi në një pajisje tjetër?"</string>
+    <!-- no translation found for create_passkey_in_other_device_title (9195411122362461390) -->
+    <skip />
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Të përdoret <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> për të gjitha identifikimet?"</string>
-    <string name="use_provider_for_all_description" msgid="6560593199974037820">"Ky menaxher i fjalëkalimeve do të ruajë fjalëkalimet dhe çelësat e kalimit për të të ndihmuar të identifikohesh me lehtësi."</string>
+    <!-- no translation found for use_provider_for_all_description (8466427781848268490) -->
+    <skip />
     <string name="set_as_default" msgid="4415328591568654603">"Cakto si parazgjedhje"</string>
     <string name="use_once" msgid="9027366575315399714">"Përdor një herë"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> fjalëkalime • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> çelësa kalimi"</string>

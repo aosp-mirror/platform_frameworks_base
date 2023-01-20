@@ -34,6 +34,7 @@ import android.companion.AssociationInfo;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.IVirtualDeviceActivityListener;
 import android.companion.virtual.IVirtualDeviceIntentInterceptor;
+import android.companion.virtual.IVirtualDeviceSoundEffectListener;
 import android.companion.virtual.VirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceManager.ActivityListener;
 import android.companion.virtual.VirtualDeviceParams;
@@ -119,6 +120,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private final VirtualDeviceParams mParams;
     private final Map<Integer, PowerManager.WakeLock> mPerDisplayWakelocks = new ArrayMap<>();
     private final IVirtualDeviceActivityListener mActivityListener;
+    private final IVirtualDeviceSoundEffectListener mSoundEffectListener;
     @GuardedBy("mVirtualDeviceLock")
     private final Map<IBinder, IntentFilter> mIntentInterceptors = new ArrayMap<>();
     @NonNull
@@ -170,6 +172,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             OnDeviceCloseListener onDeviceCloseListener,
             PendingTrampolineCallback pendingTrampolineCallback,
             IVirtualDeviceActivityListener activityListener,
+            IVirtualDeviceSoundEffectListener soundEffectListener,
             Consumer<ArraySet<Integer>> runningAppsChangedCallback,
             VirtualDeviceParams params) {
         this(
@@ -184,6 +187,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 onDeviceCloseListener,
                 pendingTrampolineCallback,
                 activityListener,
+                soundEffectListener,
                 runningAppsChangedCallback,
                 params);
     }
@@ -201,6 +205,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             OnDeviceCloseListener onDeviceCloseListener,
             PendingTrampolineCallback pendingTrampolineCallback,
             IVirtualDeviceActivityListener activityListener,
+            IVirtualDeviceSoundEffectListener soundEffectListener,
             Consumer<ArraySet<Integer>> runningAppsChangedCallback,
             VirtualDeviceParams params) {
         super(PermissionEnforcer.fromContext(context));
@@ -209,6 +214,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         mAssociationInfo = associationInfo;
         mPendingTrampolineCallback = pendingTrampolineCallback;
         mActivityListener = activityListener;
+        mSoundEffectListener = soundEffectListener;
         mRunningAppsChangedCallback = runningAppsChangedCallback;
         mOwnerUid = ownerUid;
         mDeviceId = deviceId;
@@ -935,6 +941,14 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     void onEnteringPipBlocked(int uid) {
         showToastWhereUidIsRunning(uid, com.android.internal.R.string.vdm_pip_blocked,
                 Toast.LENGTH_LONG, mContext.getMainLooper());
+    }
+
+    void playSoundEffect(int effectType) {
+        try {
+            mSoundEffectListener.onPlaySoundEffect(effectType);
+        } catch (RemoteException exception) {
+            Slog.w(TAG, "Unable to invoke sound effect listener", exception);
+        }
     }
 
     /**

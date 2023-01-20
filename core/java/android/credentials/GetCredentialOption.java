@@ -53,7 +53,7 @@ public final class GetCredentialOption implements Parcelable {
     /**
      * Determines whether the request must only be fulfilled by a system provider.
      */
-    private final boolean mRequireSystemProvider;
+    private final boolean mIsSystemProviderRequired;
 
     /**
      * Returns the requested credential type.
@@ -91,8 +91,8 @@ public final class GetCredentialOption implements Parcelable {
      * Returns true if the request must only be fulfilled by a system provider, and false
      * otherwise.
      */
-    public boolean requireSystemProvider() {
-        return mRequireSystemProvider;
+    public boolean isSystemProviderRequired() {
+        return mIsSystemProviderRequired;
     }
 
     @Override
@@ -100,7 +100,7 @@ public final class GetCredentialOption implements Parcelable {
         dest.writeString8(mType);
         dest.writeBundle(mCredentialRetrievalData);
         dest.writeBundle(mCandidateQueryData);
-        dest.writeBoolean(mRequireSystemProvider);
+        dest.writeBoolean(mIsSystemProviderRequired);
     }
 
     @Override
@@ -114,7 +114,7 @@ public final class GetCredentialOption implements Parcelable {
                 + "type=" + mType
                 + ", requestData=" + mCredentialRetrievalData
                 + ", candidateQueryData=" + mCandidateQueryData
-                + ", requireSystemProvider=" + mRequireSystemProvider
+                + ", isSystemProviderRequired=" + mIsSystemProviderRequired
                 + "}";
     }
 
@@ -125,7 +125,7 @@ public final class GetCredentialOption implements Parcelable {
      * @param credentialRetrievalData the request data
      * @param candidateQueryData      the partial request data that will be sent to the provider
      *                                during the initial credential candidate query stage
-     * @param requireSystemProvider   whether the request must only be fulfilled by a system
+     * @param isSystemProviderRequired   whether the request must only be fulfilled by a system
      *                                provider
      * @throws IllegalArgumentException If type is empty.
      */
@@ -133,20 +133,20 @@ public final class GetCredentialOption implements Parcelable {
             @NonNull String type,
             @NonNull Bundle credentialRetrievalData,
             @NonNull Bundle candidateQueryData,
-            boolean requireSystemProvider) {
+            boolean isSystemProviderRequired) {
         mType = Preconditions.checkStringNotEmpty(type, "type must not be empty");
         mCredentialRetrievalData = requireNonNull(credentialRetrievalData,
                 "requestData must not be null");
         mCandidateQueryData = requireNonNull(candidateQueryData,
                 "candidateQueryData must not be null");
-        mRequireSystemProvider = requireSystemProvider;
+        mIsSystemProviderRequired = isSystemProviderRequired;
     }
 
     private GetCredentialOption(@NonNull Parcel in) {
         String type = in.readString8();
         Bundle data = in.readBundle();
         Bundle candidateQueryData = in.readBundle();
-        boolean requireSystemProvider = in.readBoolean();
+        boolean isSystemProviderRequired = in.readBoolean();
 
         mType = type;
         AnnotationValidations.validate(NonNull.class, null, mType);
@@ -154,7 +154,7 @@ public final class GetCredentialOption implements Parcelable {
         AnnotationValidations.validate(NonNull.class, null, mCredentialRetrievalData);
         mCandidateQueryData = candidateQueryData;
         AnnotationValidations.validate(NonNull.class, null, mCandidateQueryData);
-        mRequireSystemProvider = requireSystemProvider;
+        mIsSystemProviderRequired = isSystemProviderRequired;
     }
 
     public static final @NonNull Parcelable.Creator<GetCredentialOption> CREATOR =

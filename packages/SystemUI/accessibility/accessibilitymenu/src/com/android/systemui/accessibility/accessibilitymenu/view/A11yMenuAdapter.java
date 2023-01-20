@@ -116,7 +116,7 @@ public class A11yMenuAdapter extends BaseAdapter {
         shortcutIconButton.setOnClickListener(
                 (View v) -> {
                     // Handles shortcut click event by AccessibilityMenuService.
-                    // service.handleClick(v);
+                    mService.handleClick(v);
                 });
     }
 

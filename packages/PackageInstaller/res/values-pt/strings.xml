@@ -26,6 +26,10 @@
     <string name="install_done" msgid="5987363587661783896">"App instalado."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Quer instalar esse app?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Quer atualizar esse app?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
+    <skip />
+    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"O app não foi instalado."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"A instalação do pacote foi bloqueada."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Como o pacote tem um conflito com um pacote já existente, o app não foi instalado."</string>

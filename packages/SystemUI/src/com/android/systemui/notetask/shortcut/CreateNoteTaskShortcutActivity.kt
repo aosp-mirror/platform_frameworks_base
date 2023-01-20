@@ -46,7 +46,7 @@ internal class CreateNoteTaskShortcutActivity @Inject constructor() : ComponentA
                 id = SHORTCUT_ID,
                 shortLabel = getString(R.string.note_task_button_label),
                 intent = LaunchNoteTaskActivity.newIntent(context = this),
-                iconResource = R.drawable.ic_note_task_button,
+                iconResource = R.drawable.ic_note_task_shortcut_widget,
             )
         setResult(Activity.RESULT_OK, intent)
 

@@ -14,7 +14,6 @@
 #include "SkColorSpace.h"
 #include "SkEncodedImageFormat.h"
 #include "SkImageInfo.h"
-#include "SkMath.h"
 #include "SkPaint.h"
 #include "SkPixelRef.h"
 #include "SkRect.h"

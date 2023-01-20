@@ -48,9 +48,9 @@ public final class RequestInfo implements Parcelable {
 
     /** Type value for any request that does not require UI. */
     @NonNull public static final String TYPE_UNDEFINED = "android.credentials.ui.TYPE_UNDEFINED";
-    /** Type value for an executeGetCredential request. */
+    /** Type value for a getCredential request. */
     @NonNull public static final String TYPE_GET = "android.credentials.ui.TYPE_GET";
-    /** Type value for an executeCreateCredential request. */
+    /** Type value for a createCredential request. */
     @NonNull public static final String TYPE_CREATE = "android.credentials.ui.TYPE_CREATE";
 
     /** @hide */

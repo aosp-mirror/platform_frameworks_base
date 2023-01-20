@@ -900,6 +900,7 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
                     break;
                 case EnergyConsumerType.MOBILE_RADIO:
                     buckets[EnergyConsumerStats.POWER_BUCKET_MOBILE_RADIO] = true;
+                    buckets[EnergyConsumerStats.POWER_BUCKET_PHONE] = true;
                     break;
                 case EnergyConsumerType.DISPLAY:
                     buckets[EnergyConsumerStats.POWER_BUCKET_SCREEN_ON] = true;

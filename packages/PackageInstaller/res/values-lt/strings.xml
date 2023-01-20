@@ -26,6 +26,8 @@
     <string name="install_done" msgid="5987363587661783896">"Programa įdiegta."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Ar norite įdiegti šią programą?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Ar norite atnaujinti šią programą?"</string>
+    <string name="install_confirm_question_update_owner_changed" msgid="4215696609006069124">"Šios programos naujinius šiuo metu valdo <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g>.\n\nAtnaujinę būsimus naujinius gausite iš <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g>."</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="8778026710268011466">"Šios programos naujinius šiuo metu valdo <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g>.\n\nAr norite įdiegti šį naujinį iš <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g>."</string>
     <string name="install_failed" msgid="5777824004474125469">"Programa neįdiegta."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Paketas užblokuotas ir negali būti įdiegtas."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Programa neįdiegta, nes paketas nesuderinamas su esamu paketu."</string>

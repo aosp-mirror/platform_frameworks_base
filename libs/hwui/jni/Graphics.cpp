@@ -8,13 +8,11 @@
 #include <nativehelper/JNIHelp.h>
 #include "GraphicsJNI.h"
 
-#include "include/private/SkTemplates.h" // SkTAddOffset
 #include "SkBitmap.h"
 #include "SkCanvas.h"
 #include "SkColorSpace.h"
 #include "SkFontMetrics.h"
 #include "SkImageInfo.h"
-#include "SkMath.h"
 #include "SkPixelRef.h"
 #include "SkPoint.h"
 #include "SkRect.h"
@@ -22,6 +20,7 @@
 #include "SkTypes.h"
 #include <cutils/ashmem.h>
 #include <hwui/Canvas.h>
+#include <log/log.h>
 
 using namespace android;
 
@@ -491,7 +490,7 @@ SkRegion* GraphicsJNI::getNativeRegion(JNIEnv* env, jobject region)
 
 void GraphicsJNI::set_metrics(JNIEnv* env, jobject metrics, const SkFontMetrics& skmetrics) {
     if (metrics == nullptr) return;
-    SkASSERT(env->IsInstanceOf(metrics, gFontMetrics_class));
+    LOG_FATAL_IF(!env->IsInstanceOf(metrics, gFontMetrics_class));
     env->SetFloatField(metrics, gFontMetrics_top, SkScalarToFloat(skmetrics.fTop));
     env->SetFloatField(metrics, gFontMetrics_ascent, SkScalarToFloat(skmetrics.fAscent));
     env->SetFloatField(metrics, gFontMetrics_descent, SkScalarToFloat(skmetrics.fDescent));
@@ -505,7 +504,7 @@ int GraphicsJNI::set_metrics_int(JNIEnv* env, jobject metrics, const SkFontMetri
     int leading = SkScalarRoundToInt(skmetrics.fLeading);
 
     if (metrics) {
-        SkASSERT(env->IsInstanceOf(metrics, gFontMetricsInt_class));
+        LOG_FATAL_IF(!env->IsInstanceOf(metrics, gFontMetricsInt_class));
         env->SetIntField(metrics, gFontMetricsInt_top, SkScalarFloorToInt(skmetrics.fTop));
         env->SetIntField(metrics, gFontMetricsInt_ascent, ascent);
         env->SetIntField(metrics, gFontMetricsInt_descent, descent);
@@ -714,7 +713,9 @@ void RecyclingClippingPixelAllocator::copyIfNecessary() {
                 mSkiaBitmap->info().height());
         for (int y = 0; y < rowsToCopy; y++) {
             memcpy(dst, mSkiaBitmap->getAddr(0, y), bytesToCopy);
-            dst = SkTAddOffset<void>(dst, dstRowBytes);
+            // Cast to bytes in order to apply the dstRowBytes offset correctly.
+            dst = reinterpret_cast<void*>(
+                    reinterpret_cast<uint8_t*>(dst) + dstRowBytes);
         }
         recycledPixels->notifyPixelsChanged();
         recycledPixels->unref();

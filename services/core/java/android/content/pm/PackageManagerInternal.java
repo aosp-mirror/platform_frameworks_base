@@ -44,6 +44,7 @@ import android.util.ArraySet;
 import android.util.SparseArray;
 
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.KnownPackages;
 import com.android.server.pm.PackageList;
 import com.android.server.pm.PackageSetting;
@@ -1320,4 +1321,14 @@ public abstract class PackageManagerInternal {
 
     public abstract void setPackageStoppedState(@NonNull String packageName, boolean stopped,
             @UserIdInt int userId);
+
+    /** @deprecated For legacy shell command only. */
+    @Deprecated
+    public abstract void legacyDumpProfiles(@NonNull String packageName,
+            boolean dumpClassesAndMethods) throws LegacyDexoptDisabledException;
+
+    /** @deprecated For legacy shell command only. */
+    @Deprecated
+    public abstract void legacyReconcileSecondaryDexFiles(String packageName)
+            throws LegacyDexoptDisabledException;
 }

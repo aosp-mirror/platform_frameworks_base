@@ -2105,6 +2105,9 @@ int ResTable_config::compare(const ResTable_config& o) const {
         return 1;
     }
 
+    if (grammaticalInflection != o.grammaticalInflection) {
+        return grammaticalInflection < o.grammaticalInflection ? -1 : 1;
+    }
     if (screenType != o.screenType) {
         return (screenType > o.screenType) ? 1 : -1;
     }
@@ -2153,7 +2156,9 @@ int ResTable_config::compareLogical(const ResTable_config& o) const {
     if (diff > 0) {
         return 1;
     }
-
+    if (grammaticalInflection != o.grammaticalInflection) {
+        return grammaticalInflection < o.grammaticalInflection ? -1 : 1;
+    }
     if ((screenLayout & MASK_LAYOUTDIR) != (o.screenLayout & MASK_LAYOUTDIR)) {
         return (screenLayout & MASK_LAYOUTDIR) < (o.screenLayout & MASK_LAYOUTDIR) ? -1 : 1;
     }
@@ -2223,6 +2228,7 @@ int ResTable_config::diff(const ResTable_config& o) const {
     if (uiMode != o.uiMode) diffs |= CONFIG_UI_MODE;
     if (smallestScreenWidthDp != o.smallestScreenWidthDp) diffs |= CONFIG_SMALLEST_SCREEN_SIZE;
     if (screenSizeDp != o.screenSizeDp) diffs |= CONFIG_SCREEN_SIZE;
+    if (grammaticalInflection != o.grammaticalInflection) diffs |= CONFIG_GRAMMATICAL_GENDER;
 
     const int diff = compareLocales(*this, o);
     if (diff) diffs |= CONFIG_LOCALE;
@@ -2286,6 +2292,13 @@ bool ResTable_config::isMoreSpecificThan(const ResTable_config& o) const {
 
         if (diff > 0) {
             return true;
+        }
+    }
+
+    if (grammaticalInflection || o.grammaticalInflection) {
+        if (grammaticalInflection != o.grammaticalInflection) {
+            if (!grammaticalInflection) return false;
+            if (!o.grammaticalInflection) return true;
         }
     }
 
@@ -2553,6 +2566,13 @@ bool ResTable_config::isBetterThan(const ResTable_config& o,
 
         if (isLocaleBetterThan(o, requested)) {
             return true;
+        }
+
+        if (grammaticalInflection || o.grammaticalInflection) {
+            if (grammaticalInflection != o.grammaticalInflection
+                && requested->grammaticalInflection) {
+                return !!grammaticalInflection;
+            }
         }
 
         if (screenLayout || o.screenLayout) {
@@ -2852,6 +2872,10 @@ bool ResTable_config::match(const ResTable_config& settings) const {
                 return false;
             }
         }
+    }
+
+    if (grammaticalInflection && grammaticalInflection != settings.grammaticalInflection) {
+        return false;
     }
 
     if (screenConfig != 0) {
@@ -3266,6 +3290,15 @@ String8 ResTable_config::toString() const {
     }
 
     appendDirLocale(res);
+
+    if ((grammaticalInflection & GRAMMATICAL_INFLECTION_GENDER_MASK) != 0) {
+        if (res.size() > 0) res.append("-");
+        switch (grammaticalInflection & GRAMMATICAL_INFLECTION_GENDER_MASK) {
+            case GRAMMATICAL_GENDER_NEUTER: res.append("neuter"); break;
+            case GRAMMATICAL_GENDER_FEMININE: res.append("feminine"); break;
+            case GRAMMATICAL_GENDER_MASCULINE: res.append("masculine"); break;
+        }
+    }
 
     if ((screenLayout&MASK_LAYOUTDIR) != 0) {
         if (res.size() > 0) res.append("-");

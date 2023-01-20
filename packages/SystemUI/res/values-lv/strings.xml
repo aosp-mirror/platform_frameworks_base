@@ -91,6 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Apakšmala: <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Kreisā mala: <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Labā mala: <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
+    <!-- no translation found for screenshot_work_profile_notification (2812417845875653929) -->
+    <skip />
+    <!-- no translation found for screenshot_default_files_app_name (8721579578575161912) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"Ekrāna ierakstītājs"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Ekrāna ieraksta apstrāde"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Aktīvs paziņojums par ekrāna ierakstīšanas sesiju"</string>
@@ -810,16 +814,15 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Vidējs"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Mazs"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"Liels"</string>
-    <string name="accessibility_magnification_close" msgid="1099965835844673375">"Aizvērt"</string>
+    <!-- no translation found for accessibility_magnification_done (263349129937348512) -->
+    <skip />
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Rediģēt"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Lupas loga iestatījumi"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Atveriet pieejamības funkcijas. Pielāgojiet vai aizstājiet šo pogu iestatījumos.\n\n"<annotation id="link">"Skatīt iestatījumus"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Lai īslaicīgi paslēptu pogu, pārvietojiet to uz malu"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Atsaukt"</string>
-    <!-- no translation found for accessibility_floating_button_undo_message_label_text (9017658016426242640) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_undo_message_number_text (4909270290725226075) -->
-    <skip />
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Noņemts īsinājumtaustiņš <xliff:g id="FEATURE_NAME">%s</xliff:g>"</string>
+    <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{Noņemts # īsinājumtaustiņš}zero{Noņemti # īsinājumtaustiņi}one{Noņemts # īsinājumtaustiņš}other{Noņemti # īsinājumtaustiņi}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Pārvietot augšpusē pa kreisi"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Pārvietot augšpusē pa labi"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Pārvietot apakšpusē pa kreisi"</string>
@@ -884,10 +887,12 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Atskaņojiet failu “<xliff:g id="SONG_NAME">%1$s</xliff:g>” no lietotnes <xliff:g id="APP_LABEL">%2$s</xliff:g>."</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Atsaukt"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Pārvietojiet savu ierīci tuvāk, lai atskaņotu mūziku ierīcē “<xliff:g id="DEVICENAME">%1$s</xliff:g>”."</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Pārvietojieties tuvāk ierīcei “<xliff:g id="DEVICENAME">%1$s</xliff:g>”, lai atskaņotu šeit"</string>
+    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
+    <skip />
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Notiek atskaņošana ierīcē <xliff:g id="DEVICENAME">%1$s</xliff:g>."</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Radās kļūda. Mēģiniet vēlreiz."</string>
-    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <string name="media_transfer_loading" msgid="5544017127027152422">"Notiek ielāde"</string>
+    <!-- no translation found for media_ttt_default_device_type (4457646436153370169) -->
     <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktīva, pārbaudiet lietotni"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Netika atrasta"</string>
@@ -912,6 +917,8 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Skaļums"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Skaļruņi un displeji"</string>
+    <!-- no translation found for media_output_group_title_suggested_device (4157186235837903826) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Kā darbojas apraide"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Apraide"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Tuvumā esošās personas ar saderīgām Bluetooth ierīcēm var klausīties jūsu apraidīto multivides saturu."</string>
@@ -1053,5 +1060,8 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Šis ekrāns tiks izslēgts."</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Salokāma ierīce tiek atlocīta"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Salokāma ierīce tiek apgriezta"</string>
-    <string name="stylus_battery_low" msgid="7134370101603167096">"Zems skārienekrāna pildspalvas akumulatora līmenis"</string>
+    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
+    <skip />
+    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
+    <skip />
 </resources>

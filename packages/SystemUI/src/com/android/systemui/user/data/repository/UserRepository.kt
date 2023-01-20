@@ -174,7 +174,7 @@ constructor(
 
                 val callback =
                     object : UserTracker.Callback {
-                        override fun onUserChanged(newUser: Int, userContext: Context) {
+                        override fun onUserChanging(newUser: Int, userContext: Context) {
                             send()
                         }
 

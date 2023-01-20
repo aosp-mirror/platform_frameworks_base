@@ -16,17 +16,24 @@
 
 package com.android.systemui.media.dialog;
 
+import static android.media.RouteListingPreference.Item.DISABLE_REASON_SUBSCRIPTION_REQUIRED;
+
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
+import android.media.RouteListingPreference;
+import android.os.Build;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
+import androidx.annotation.DoNotInline;
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.widget.CompoundButtonCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -186,6 +193,17 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     mCurrentActivePosition = position;
                     updateFullItemClickListener(v -> onItemClick(v, device));
                     setSingleLineLayout(getItemTitle(device));
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                        && mController.isSubStatusSupported() && device.hasDisabledReason()) {
+                    //update to subtext with device status
+                    setUpDeviceIcon(device);
+                    mSubTitleText.setText(
+                            Api34Impl.composeDisabledReason(device.getDisableReason(), mContext));
+                    updateConnectionFailedStatusIcon();
+                    updateFullItemClickListener(null);
+                    setTwoLineLayout(device, false /* bFocused */, false /* showSeekBar */,
+                            false /* showProgressBar */, true /* showSubtitle */,
+                            true /* showStatus */);
                 } else if (device.getState() == MediaDeviceState.STATE_CONNECTING_FAILED) {
                     setUpDeviceIcon(device);
                     updateConnectionFailedStatusIcon();
@@ -387,6 +405,19 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         void onBind(String groupDividerTitle) {
             mTitleText.setTextColor(mController.getColorItemContent());
             mTitleText.setText(groupDividerTitle);
+        }
+    }
+
+    @RequiresApi(34)
+    private static class Api34Impl {
+        @DoNotInline
+        static String composeDisabledReason(@RouteListingPreference.Item.DisableReason int reason,
+                Context context) {
+            switch(reason) {
+                case DISABLE_REASON_SUBSCRIPTION_REQUIRED:
+                    return context.getString(R.string.media_output_status_require_premium);
+            }
+            return "";
         }
     }
 }

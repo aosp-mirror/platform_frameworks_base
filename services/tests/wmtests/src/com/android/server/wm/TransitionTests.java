@@ -564,20 +564,29 @@ public class TransitionTests extends WindowTestsBase {
         final WindowProcessController delegateProc = mSystemServicesTestRule.addProcess(
                 "pkg.delegate", "proc.delegate", 6000 /* pid */, 6000 /* uid */);
         doReturn(mock(IBinder.class)).when(delegateProc.getThread()).asBinder();
-        final ActivityRecord app = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityRecord app = new ActivityBuilder(mAtm).setCreateTask(true)
+                .setVisible(false).build();
+        final Task task = app.getTask();
+        task.setTaskOrganizer(mock(ITaskOrganizer.class), true /* skipTaskAppeared */);
+        app.setVisibleRequested(true);
         final TransitionController controller = app.mTransitionController;
         final Transition transition = controller.createTransition(TRANSIT_OPEN);
         final RemoteTransition remoteTransition = new RemoteTransition(
                 mock(IRemoteTransition.class));
         remoteTransition.setAppThread(delegateProc.getThread());
-        transition.collectExistenceChange(app.getTask());
-        controller.requestStartTransition(transition, app.getTask(), remoteTransition,
+        transition.collect(app);
+        controller.requestStartTransition(transition, null /* startTask */, remoteTransition,
                 null /* displayChange */);
         testPlayer.startTransition();
+        app.onStartingWindowDrawn();
+        // The task appeared event should be deferred until transition ready.
+        assertFalse(task.taskAppearedReady());
         testPlayer.onTransactionReady(app.getSyncTransaction());
+        assertTrue(task.taskAppearedReady());
         assertTrue(playerProc.isRunningRemoteTransition());
         assertTrue(delegateProc.isRunningRemoteTransition());
         assertTrue(controller.mRemotePlayer.reportRunning(delegateProc.getThread()));
+        assertTrue(app.isVisible());
 
         testPlayer.finish();
         assertFalse(playerProc.isRunningRemoteTransition());
@@ -1114,6 +1123,14 @@ public class TransitionTests extends WindowTestsBase {
 
         assertFalse(activity1.isVisible());
         assertTrue(activity2.isVisible());
+
+        // The abort should still commit visible-requested to visible.
+        final Transition abortTransition = controller.createTransition(TRANSIT_OPEN);
+        abortTransition.collect(activity1);
+        activity1.setVisibleRequested(true);
+        activity1.setVisible(false);
+        abortTransition.abort();
+        assertTrue(activity1.isVisible());
     }
 
     @Test

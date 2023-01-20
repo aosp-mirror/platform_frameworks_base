@@ -1940,6 +1940,12 @@ public final class ActiveServices {
                     ignoreForeground = true;
                 }
 
+                // Whether FGS-BG-start restriction is enabled for this service.
+                final boolean isBgFgsRestrictionEnabledForService = isBgFgsRestrictionEnabled(r);
+
+                // Whether to extend the SHORT_SERVICE time out.
+                boolean extendShortServiceTimeout = false;
+
                 int fgsTypeCheckCode = FGS_TYPE_POLICY_CHECK_UNKNOWN;
                 if (!ignoreForeground) {
                     if (foregroundServiceType == FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
@@ -1955,41 +1961,77 @@ public final class ActiveServices {
                                 "startForeground(SHORT_SERVICE) called on a service that's not"
                                 + " started.");
                     }
-                    // If the service is already an FGS, and the type is changing, then we
-                    // may need to do some extra work here.
-                    if (r.isForeground && (r.foregroundServiceType != foregroundServiceType)) {
-                        // TODO(short-service): Consider transitions:
-                        //   A. Short -> other types:
-                        //     Apply the BG restriction again. Don't just allow it.
-                        //     i.e. unless the app is in a situation where it's allowed to start
-                        //     a FGS, this transition shouldn't be allowed.
-                        //     ... But think about it more, there may be a case this should be
-                        //     allowed.
-                        //
-                        //     If the transition is allowed, stop the timeout.
-                        //     If the transition is _not_ allowed... keep the timeout?
-                        //
-                        //   B. Short -> Short:
-                        //     Allowed, but the timeout won't reset. The original timeout is used.
-                        //   C. Other -> short:
-                        //     This should always be allowed.
-                        //     A timeout should start.
 
-                        // For now, let's just disallow transition from / to SHORT_SERVICE.
-                        final boolean isNewTypeShortFgs =
-                                foregroundServiceType == FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
-                        if (r.isShortFgs() != isNewTypeShortFgs) {
-                            // TODO(short-service): We should (probably) allow it.
-                            throw new IllegalArgumentException(
-                                    "setForeground(): Changing foreground service type from / to "
-                                    + " SHORT_SERVICE is now allowed");
+                    // Side note: If a valid short-service (which has to be "started"), happens to
+                    // also be bound, then we still _will_ apply a timeout, because it still has
+                    // to be stopped.
+
+                    // Calling startForeground on a SHORT_SERVICE will require some additional
+                    // checks.
+                    // A) SHORT_SERVICE -> another type.
+                    //    - This should be allowed only when the app could start another FGS.
+                    //    - When succeed, the timeout should stop.
+                    // B) SHORT_SERVICE -> SHORT_SERVICE
+                    //    - If the app could start an FGS, then this would extend the timeout.
+                    //    - Otherwise, it's basically a no-op.
+                    //    - If it's already timed out, we also throw.
+                    // Also,
+                    // C) another type -> SHORT_SERVICE
+                    //    - This will always be allowed.
+                    //    - Timeout will start.
+
+                    final boolean isOldTypeShortFgs = r.isShortFgs();
+                    final boolean isNewTypeShortFgs =
+                            foregroundServiceType == FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
+                    final boolean isOldTypeShortFgsAndTimedOut = r.shouldTriggerShortFgsTimeout();
+
+                    if (isOldTypeShortFgs || isNewTypeShortFgs) {
+                        if (DEBUG_SHORT_SERVICE) {
+                            Slog.i(TAG_SERVICE, String.format(
+                                    "FGS type changing from %x%s to %x: %s",
+                                    r.foregroundServiceType,
+                                    (isOldTypeShortFgsAndTimedOut ? "(timed out short FGS)" : ""),
+                                    foregroundServiceStartType,
+                                    r.toString()));
                         }
                     }
 
-                    // If a valid short-service (which has to be "started"), happens to
-                    // also be bound, then we still _will_ apply a timeout, because it still has
-                    // to be stopped.
-                    if (r.mStartForegroundCount == 0) {
+                    if (r.isForeground && isOldTypeShortFgs) {
+                        // If we get here, that means startForeground(SHORT_SERVICE) is called again
+                        // on a SHORT_SERVICE FGS.
+
+                        // See if the app could start an FGS or not.
+                        r.mAllowStartForeground = REASON_DENIED;
+                        setFgsRestrictionLocked(r.serviceInfo.packageName, r.app.getPid(),
+                                r.appInfo.uid, r.intent.getIntent(), r, r.userId,
+                                BackgroundStartPrivileges.NONE,
+                                false /* isBindService */);
+
+                        final boolean fgsStartAllowed =
+                                !isBgFgsRestrictionEnabledForService
+                                        || (r.mAllowStartForeground != REASON_DENIED);
+
+                        if (fgsStartAllowed) {
+                            if (isNewTypeShortFgs) {
+                                // Only in this case, we extend the SHORT_SERVICE time out.
+                                extendShortServiceTimeout = true;
+                                if (DEBUG_SHORT_SERVICE) {
+                                    Slog.i(TAG_SERVICE, "Extending SHORT_SERVICE time out: " + r);
+                                }
+                            } else {
+                                // FGS type is changing from SHORT_SERVICE to another type when
+                                // an app is allowed to start FGS, so this will succeed.
+                                // The timeout will stop -- we actually don't cancel the handler
+                                // events, but they'll be ignored if the service type is not
+                                // SHORT_SERVICE.
+                                // TODO(short-service) Let's actaully cancel the handler events.
+                            }
+                        } else {
+                            // We catch this case later, in the
+                            // "if (r.mAllowStartForeground == REASON_DENIED...)" block below.
+                        }
+
+                    } else if (r.mStartForegroundCount == 0) {
                         /*
                         If the service was started with startService(), not
                         startForegroundService(), and if startForeground() isn't called within
@@ -2032,6 +2074,7 @@ public final class ActiveServices {
                                 BackgroundStartPrivileges.NONE,
                                 false /* isBindService */);
                     }
+
                     // If the foreground service is not started from TOP process, do not allow it to
                     // have while-in-use location/camera/microphone access.
                     if (!r.mAllowWhileInUsePermissionInFgs) {
@@ -2041,10 +2084,12 @@ public final class ActiveServices {
                                         + r.shortInstanceName);
                     }
                     logFgsBackgroundStart(r);
-                    if (r.mAllowStartForeground == REASON_DENIED && isBgFgsRestrictionEnabled(r)) {
+                    if (r.mAllowStartForeground == REASON_DENIED
+                            && isBgFgsRestrictionEnabledForService) {
                         final String msg = "Service.startForeground() not allowed due to "
                                 + "mAllowStartForeground false: service "
-                                + r.shortInstanceName;
+                                + r.shortInstanceName
+                                + (isOldTypeShortFgs ? " (Called on SHORT_SERVICE)" : "");
                         Slog.w(TAG, msg);
                         showFgsBgRestrictedNotificationLocked(r);
                         updateServiceForegroundLocked(psr, true);
@@ -2181,11 +2226,8 @@ public final class ActiveServices {
                     mAm.notifyPackageUse(r.serviceInfo.packageName,
                             PackageManager.NOTIFY_PACKAGE_USE_FOREGROUND_SERVICE);
 
-                    // Note, we'll get here if setForeground(SHORT_SERVICE) is called on a
-                    // already short-fgs.
-                    // In that case, because ShortFgsInfo is already set, this method
-                    // will be noop.
-                    maybeStartShortFgsTimeoutAndUpdateShortFgsInfoLocked(r);
+                    maybeStartShortFgsTimeoutAndUpdateShortFgsInfoLocked(r,
+                            extendShortServiceTimeout);
                 } else {
                     if (DEBUG_FOREGROUND_SERVICE) {
                         Slog.d(TAG, "Suppressing startForeground() for FAS " + r);
@@ -2982,17 +3024,21 @@ public final class ActiveServices {
     /**
      * If {@code sr} is of a short-fgs, start a short-FGS timeout.
      */
-    private void maybeStartShortFgsTimeoutAndUpdateShortFgsInfoLocked(ServiceRecord sr) {
+    private void maybeStartShortFgsTimeoutAndUpdateShortFgsInfoLocked(ServiceRecord sr,
+            boolean extendTimeout) {
         if (!sr.isShortFgs()) {
             return;
         }
         if (DEBUG_SHORT_SERVICE) {
             Slog.i(TAG_SERVICE, "Short FGS started: " + sr);
         }
-        if (sr.hasShortFgsInfo()) {
-            sr.getShortFgsInfo().update();
-        } else {
+
+        if (extendTimeout || !sr.hasShortFgsInfo()) {
             sr.setShortFgsInfo(SystemClock.uptimeMillis());
+        } else {
+            // We only (potentially) update the start command, start count, but not the timeout
+            // time.
+            sr.getShortFgsInfo().update();
         }
         unscheduleShortFgsTimeoutLocked(sr); // Do it just in case
 
@@ -7562,7 +7608,8 @@ public final class ActiveServices {
         if (!r.mLoggedInfoAllowStartForeground) {
             final String msg = "Background started FGS: "
                     + ((r.mAllowStartForeground != REASON_DENIED) ? "Allowed " : "Disallowed ")
-                    + r.mInfoAllowStartForeground;
+                    + r.mInfoAllowStartForeground
+                    + (r.isShortFgs() ? " (Called on SHORT_SERVICE)" : "");
             if (r.mAllowStartForeground != REASON_DENIED) {
                 if (ActivityManagerUtils.shouldSamplePackageForAtom(r.packageName,
                         mAm.mConstants.mFgsStartAllowedLogSampleRate)) {

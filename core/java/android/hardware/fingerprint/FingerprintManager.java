@@ -470,6 +470,16 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
          * @param isAcquiredGood whether the fingerprint image was good.
          */
         public void onAcquired(boolean isAcquiredGood){ }
+
+        /**
+         * Called when a pointer down event has occurred.
+         */
+        public void onPointerDown(int sensorId){ }
+
+        /**
+         * Called when a pointer up event has occurred.
+         */
+        public void onPointerUp(int sensorId){ }
     }
 
     /**
@@ -1398,7 +1408,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         if (mAuthenticationCallback != null) {
             mAuthenticationCallback.onAuthenticationAcquired(acquireInfo);
         }
-        if (mEnrollmentCallback != null) {
+        if (mEnrollmentCallback != null && acquireInfo != FINGERPRINT_ACQUIRED_START) {
             mEnrollmentCallback.onAcquired(acquireInfo == FINGERPRINT_ACQUIRED_GOOD);
         }
         final String msg = getAcquiredString(mContext, acquireInfo, vendorCode);
@@ -1454,17 +1464,24 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     private void sendUdfpsPointerDown(int sensorId) {
         if (mAuthenticationCallback == null) {
             Slog.e(TAG, "sendUdfpsPointerDown, callback null");
-            return;
+        } else {
+            mAuthenticationCallback.onUdfpsPointerDown(sensorId);
         }
-        mAuthenticationCallback.onUdfpsPointerDown(sensorId);
+
+        if (mEnrollmentCallback != null) {
+            mEnrollmentCallback.onPointerDown(sensorId);
+        }
     }
 
     private void sendUdfpsPointerUp(int sensorId) {
         if (mAuthenticationCallback == null) {
             Slog.e(TAG, "sendUdfpsPointerUp, callback null");
-            return;
+        } else {
+            mAuthenticationCallback.onUdfpsPointerUp(sensorId);
         }
-        mAuthenticationCallback.onUdfpsPointerUp(sensorId);
+        if (mEnrollmentCallback != null) {
+            mEnrollmentCallback.onPointerUp(sensorId);
+        }
     }
 
     private void sendPowerPressed() {

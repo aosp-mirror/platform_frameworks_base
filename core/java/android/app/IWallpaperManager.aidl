@@ -74,7 +74,8 @@ interface IWallpaperManager {
      * Get the wallpaper for a given user.
      */
     ParcelFileDescriptor getWallpaperWithFeature(String callingPkg, String callingFeatureId,
-            IWallpaperManagerCallback cb, int which, out Bundle outParams, int userId);
+            IWallpaperManagerCallback cb, int which, out Bundle outParams, int userId,
+            boolean getCropped);
 
     /**
      * Retrieve the given user's current wallpaper ID of the given kind.
@@ -94,6 +95,12 @@ interface IWallpaperManager {
      * information about that wallpaper.  Otherwise, if it is a static image, simply return null.
      */
     WallpaperInfo getWallpaperInfoWithFlags(int which, int userId);
+
+    /**
+     * Return a file descriptor for the file that contains metadata about the given user's
+     * wallpaper.
+     */
+    ParcelFileDescriptor getWallpaperInfoFile(int userId);
 
     /**
      * Clear the system wallpaper.

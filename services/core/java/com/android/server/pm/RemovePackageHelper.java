@@ -422,15 +422,18 @@ final class RemovePackageHelper {
             if (instructionSets == null) {
                 throw new IllegalStateException("instructionSet == null");
             }
-            String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
-            for (String codePath : allCodePaths) {
-                for (String dexCodeInstructionSet : dexCodeInstructionSets) {
-                    // TODO(b/251903639): Call into ART Service.
-                    try {
-                        mPm.mInstaller.rmdex(codePath, dexCodeInstructionSet);
-                    } catch (LegacyDexoptDisabledException e) {
-                        throw new RuntimeException(e);
-                    } catch (Installer.InstallerException ignored) {
+            // TODO(b/265813358): ART Service currently doesn't support deleting optimized artifacts
+            // relative to an arbitrary APK path. Skip this and rely on its file GC instead.
+            if (!DexOptHelper.useArtService()) {
+                String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
+                for (String codePath : allCodePaths) {
+                    for (String dexCodeInstructionSet : dexCodeInstructionSets) {
+                        try {
+                            mPm.mInstaller.rmdex(codePath, dexCodeInstructionSet);
+                        } catch (LegacyDexoptDisabledException e) {
+                            throw new RuntimeException(e);
+                        } catch (Installer.InstallerException ignored) {
+                        }
                     }
                 }
             }

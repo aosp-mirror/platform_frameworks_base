@@ -43,7 +43,7 @@
     <string name="consent_no" msgid="2640796915611404382">"অনুমতি দেবেন না"</string>
     <string name="consent_back" msgid="2560683030046918882">"ফিরুন"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"&lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;-এ যে অনুমতি দেওয়া আছে &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt;-এও সেই একই অনুমতি দিতে চান?"</string>
-    <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;এটি &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;-এ হয়ত মাইক্রোফোন, ক্যামেরা এবং লোকেশনের অ্যাক্সেস ও অন্যান্য সংবেদনশীল অনুমতি অন্তর্ভুক্ত করতে পারে।&lt;/p&gt; &lt;p&gt;আপনি যেকোনও সময় &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;-এর \'সেটিংস\' থেকে এইসব অনুমতি পরিবর্তন করতে পারবেন।&lt;/p&gt;"</string>
+    <string name="permission_sync_summary" msgid="765497944331294275">"এর মধ্যে &lt;strong&gt;মাইক্রোফোন&lt;/strong&gt;, &lt;strong&gt;ক্যামেরা&lt;/strong&gt;, ও &lt;strong&gt;লোকেশন সংক্রান্ত অ্যাক্সেস &lt;/strong&gt;, এবং &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;.-এর অন্যান্য সংবেদনশীল অনুমতি অন্তর্ভুক্ত থাকতে পারে &lt;br/&gt;&lt;br/&gt;আপনি যেকোনও সময়&lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;.-এর সেটিংস থেকে এইসব অনুমতি পরিবর্তন করতে পারবেন"</string>
     <string name="vendor_icon_description" msgid="4445875290032225965">"অ্যাপের আইকন"</string>
     <string name="vendor_header_button_description" msgid="6566660389500630608">"আরও তথ্য সংক্রান্ত বোতাম"</string>
     <string name="permission_phone" msgid="2661081078692784919">"ফোন"</string>
@@ -51,26 +51,19 @@
     <string name="permission_contacts" msgid="3858319347208004438">"পরিচিতি"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"ক্যালেন্ডার"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"মাইক্রোফোন"</string>
-    <!-- no translation found for permission_call_logs (5546761417694586041) -->
-    <skip />
+    <string name="permission_call_logs" msgid="5546761417694586041">"কল লগ"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"আশেপাশের ডিভাইস"</string>
     <string name="permission_storage" msgid="6831099350839392343">"ফটো ও মিডিয়া"</string>
     <string name="permission_notification" msgid="693762568127741203">"বিজ্ঞপ্তি"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"অ্যাপ"</string>
     <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"আশেপাশের ডিভাইসে স্ট্রিম করা"</string>
-    <!-- no translation found for permission_phone_summary (6684396967861278044) -->
-    <skip />
-    <!-- no translation found for permission_call_logs_summary (6186103394658755022) -->
-    <skip />
-    <!-- no translation found for permission_sms_summary (3508442683678912017) -->
-    <skip />
-    <!-- no translation found for permission_contacts_summary (675861979475628708) -->
-    <skip />
-    <!-- no translation found for permission_calendar_summary (6460000922511766226) -->
-    <skip />
+    <string name="permission_phone_summary" msgid="6684396967861278044">"ফোন কল করতে ও ম্যানেজ করতে পারবে"</string>
+    <string name="permission_call_logs_summary" msgid="6186103394658755022">"ফোনের কল লগ পড়তে ও লিখতে পারবে"</string>
+    <string name="permission_sms_summary" msgid="3508442683678912017">"এসএমএস মেসেজ পাঠাতে ও দেখতে পারবে"</string>
+    <string name="permission_contacts_summary" msgid="675861979475628708">"আপনার পরিচিতি অ্যাক্সেস করতে পারবে"</string>
+    <string name="permission_calendar_summary" msgid="6460000922511766226">"আপনার ক্যালেন্ডার অ্যাক্সেস করতে পারবে"</string>
     <string name="permission_microphone_summary" msgid="4241354865859396558">"মাইক্রোফোন ব্যবহার করে অডিও রেকর্ড করতে পারবেন"</string>
-    <!-- no translation found for permission_nearby_devices_summary (931940524460876655) -->
-    <skip />
+    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"আশেপাশের ডিভাইস খুঁজে দেখতে, তার সাথে কানেক্ট করতে এবং তার আপেক্ষিক অবস্থান নির্ধারণ করতে পারবে"</string>
     <string name="permission_notification_summary" msgid="884075314530071011">"সব বিজ্ঞপ্তি পড়তে পারবে, যার মধ্যে পরিচিতি, মেসেজ ও ফটোর মতো তথ্য অন্তর্ভুক্ত"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"আপনার ফোনের অ্যাপ স্ট্রিম করুন"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>

@@ -6487,6 +6487,7 @@
     <!-- Allows a regular application to use {@link android.app.Service#startForeground
          Service.startForeground} with the type "fileManagement".
          <p>Protection level: normal|instant
+         @hide
     -->
     <permission android:name="android.permission.FOREGROUND_SERVICE_FILE_MANAGEMENT"
         android:description="@string/permdesc_foregroundServiceFileManagement"
@@ -7048,6 +7049,19 @@
     -->
     <permission android:name="android.permission.QUERY_CLONED_APPS"
                 android:protectionLevel="signature|privileged" />
+
+    <!-- @hide @SystemApi
+         Allows applications to capture bugreport directly without consent dialog when using the
+         bugreporting API on userdebug/eng build.
+         <p>The application still needs to hold {@link android.permission.DUMP} permission and be
+         bugreport-whitelisted to be able to capture a bugreport using the bugreporting API in the
+         first place. Then, when the corresponding app op of this permission is ALLOWED, the
+         bugreport can be captured directly without going through the consent dialog.
+         <p>Protection level: internal|appop
+         <p>Intended to only be used on userdebug/eng build.
+         <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD"
+                android:protectionLevel="internal|appop" />
 
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>

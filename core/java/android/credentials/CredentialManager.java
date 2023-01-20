@@ -63,6 +63,14 @@ public final class CredentialManager {
             "enable_credential_manager";
 
     /**
+     * Flag to enable and disable Credential Description api.
+     *
+     * @hide
+     */
+    private static final String DEVICE_CONFIG_ENABLE_CREDENTIAL_DESC_API =
+            "enable_credential_description_api";
+
+    /**
      * @hide instantiated by ContextImpl.
      */
     public CredentialManager(Context context, ICredentialManager service) {
@@ -82,7 +90,7 @@ public final class CredentialManager {
      * @param executor the callback will take place on this {@link Executor}
      * @param callback the callback invoked when the request succeeds or fails
      */
-    public void executeGetCredential(
+    public void getCredential(
             @NonNull GetCredentialRequest request,
             @NonNull Activity activity,
             @Nullable CancellationSignal cancellationSignal,
@@ -94,7 +102,7 @@ public final class CredentialManager {
         requireNonNull(callback, "callback must not be null");
 
         if (cancellationSignal != null && cancellationSignal.isCanceled()) {
-            Log.w(TAG, "executeGetCredential already canceled");
+            Log.w(TAG, "getCredential already canceled");
             return;
         }
 
@@ -126,7 +134,7 @@ public final class CredentialManager {
      * @param executor the callback will take place on this {@link Executor}
      * @param callback the callback invoked when the request succeeds or fails
      */
-    public void executeCreateCredential(
+    public void createCredential(
             @NonNull CreateCredentialRequest request,
             @NonNull Activity activity,
             @Nullable CancellationSignal cancellationSignal,
@@ -139,7 +147,7 @@ public final class CredentialManager {
         requireNonNull(callback, "callback must not be null");
 
         if (cancellationSignal != null && cancellationSignal.isCanceled()) {
-            Log.w(TAG, "executeCreateCredential already canceled");
+            Log.w(TAG, "createCredential already canceled");
             return;
         }
 
@@ -185,7 +193,7 @@ public final class CredentialManager {
         requireNonNull(callback, "callback must not be null");
 
         if (cancellationSignal != null && cancellationSignal.isCanceled()) {
-            Log.w(TAG, "executeCreateCredential already canceled");
+            Log.w(TAG, "clearCredentialState already canceled");
             return;
         }
 
@@ -292,6 +300,112 @@ public final class CredentialManager {
         return DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_CREDENTIAL, DEVICE_CONFIG_ENABLE_CREDENTIAL_MANAGER,
                 true);
+    }
+
+    /**
+     * Returns whether the credential description api is enabled.
+     *
+     * @hide
+     */
+    public static boolean isCredentialDescriptionApiEnabled() {
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_CREDENTIAL, DEVICE_CONFIG_ENABLE_CREDENTIAL_DESC_API, false);
+    }
+
+    /**
+     *  Registers a {@link CredentialDescription} for an actively provisioned {@link Credential}
+     * a CredentialProvider has. This registry will then be used by
+     * {@link #executeGetCredential(GetCredentialRequest, Activity,
+            * CancellationSignal, Executor, OutcomeReceiver)} to determine where to
+     * fetch the requested {@link Credential} from.
+     *
+     *
+     * @param request the request data
+     * @param cancellationSignal an optional signal that allows for cancelling this call
+     * @param executor the callback will take place on this {@link Executor}
+     * @param callback the callback invoked when the request succeeds or fails
+     *
+     * @throws {@link  UnsupportedOperationException} if the feature has not been enabled.
+     *
+     * @hide
+     */
+    public void registerCredentialDescription(
+            @NonNull RegisterCredentialDescriptionRequest request,
+            @Nullable CancellationSignal cancellationSignal,
+            @CallbackExecutor @NonNull Executor executor,
+            @NonNull OutcomeReceiver<Void, RegisterCredentialDescriptionException> callback) {
+
+        if (!isCredentialDescriptionApiEnabled()) {
+            throw new UnsupportedOperationException("This API is not currently supported.");
+        }
+
+        requireNonNull(executor, "executor must not be null");
+        requireNonNull(callback, "callback must not be null");
+
+        if (cancellationSignal != null && cancellationSignal.isCanceled()) {
+            Log.w(TAG, "executeCreateCredential already canceled");
+            return;
+        }
+
+        ICancellationSignal cancelRemote = null;
+        try {
+            cancelRemote = mService.registerCredentialDescription(request,
+                    new RegisterCredentialDescriptionTransport(executor, callback),
+                    mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+
+        if (cancellationSignal != null && cancelRemote != null) {
+            cancellationSignal.setRemote(cancelRemote);
+        }
+    }
+
+
+    /**
+     *  Unregisters a {@link CredentialDescription} for an actively provisioned {@link Credential}
+     * that has been registered previously.
+     *
+     *
+     * @param request the request data
+     * @param cancellationSignal an optional signal that allows for cancelling this call
+     * @param executor the callback will take place on this {@link Executor}
+     * @param callback the callback invoked when the request succeeds or fails
+     *
+     * @throws {@link  UnsupportedOperationException} if the feature has not been enabled.
+     *
+     * @hide
+     */
+    public void unRegisterCredentialDescription(
+            @NonNull UnregisterCredentialDescriptionRequest request,
+            @Nullable CancellationSignal cancellationSignal,
+            @CallbackExecutor @NonNull Executor executor,
+            @NonNull OutcomeReceiver<Void, UnregisterCredentialDescriptionException> callback) {
+
+        if (!isCredentialDescriptionApiEnabled()) {
+            throw new UnsupportedOperationException("This API is not currently supported.");
+        }
+
+        requireNonNull(executor, "executor must not be null");
+        requireNonNull(callback, "callback must not be null");
+
+        if (cancellationSignal != null && cancellationSignal.isCanceled()) {
+            Log.w(TAG, "executeCreateCredential already canceled");
+            return;
+        }
+
+        ICancellationSignal cancelRemote = null;
+        try {
+            cancelRemote = mService.unRegisterCredentialDescription(request,
+                    new UnregisterCredentialDescriptionTransport(executor, callback),
+                    mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+
+        if (cancellationSignal != null && cancelRemote != null) {
+            cancellationSignal.setRemote(cancelRemote);
+        }
     }
 
     private static class GetCredentialTransport extends IGetCredentialCallback.Stub {
@@ -453,6 +567,56 @@ public final class CredentialManager {
         public void onError(String errorType, String message) {
             mExecutor.execute(
                     () -> mCallback.onError(new SetEnabledProvidersException(errorType, message)));
+        }
+    }
+
+    private static class RegisterCredentialDescriptionTransport
+            extends IRegisterCredentialDescriptionCallback.Stub {
+
+        private final Executor mExecutor;
+        private final OutcomeReceiver<Void, RegisterCredentialDescriptionException> mCallback;
+
+        private RegisterCredentialDescriptionTransport(Executor executor,
+                OutcomeReceiver<Void, RegisterCredentialDescriptionException> callback) {
+            mExecutor = executor;
+            mCallback = callback;
+        }
+
+        @Override
+        public void onResponse() {
+            mCallback.onResult(null);
+        }
+
+        @Override
+        public void onError(String errorCode, String message) {
+            mExecutor.execute(
+                    () -> mCallback.onError(new RegisterCredentialDescriptionException(errorCode,
+                            message)));
+        }
+    }
+
+    private static class UnregisterCredentialDescriptionTransport
+            extends IUnregisterCredentialDescriptionCallback.Stub {
+
+        private final Executor mExecutor;
+        private final OutcomeReceiver<Void, UnregisterCredentialDescriptionException> mCallback;
+
+        private UnregisterCredentialDescriptionTransport(Executor executor,
+                OutcomeReceiver<Void, UnregisterCredentialDescriptionException> callback) {
+            mExecutor = executor;
+            mCallback = callback;
+        }
+
+        @Override
+        public void onResponse() {
+            mCallback.onResult(null);
+        }
+
+        @Override
+        public void onError(String errorCode, String message) {
+            mExecutor.execute(
+                    () -> mCallback.onError(new UnregisterCredentialDescriptionException(errorCode,
+                            message)));
         }
     }
 }
