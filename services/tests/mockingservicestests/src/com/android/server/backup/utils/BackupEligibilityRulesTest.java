@@ -58,7 +58,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidJUnit4.class)
 public class BackupEligibilityRulesTest {
     private static final String CUSTOM_BACKUP_AGENT_NAME = "custom.backup.agent";
-    private static final String TEST_PACKAGE_NAME = "com.android.frameworks.servicestests";
+    private static final String TEST_PACKAGE_NAME = "com.android.frameworks.mockingservicestests";
 
     private static final Signature SIGNATURE_1 = generateSignature((byte) 1);
     private static final Signature SIGNATURE_2 = generateSignature((byte) 2);
