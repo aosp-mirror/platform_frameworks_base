@@ -30,10 +30,6 @@
     <!-- Margin on the left side of the carrier text on Keyguard -->
     <dimen name="keyguard_carrier_text_margin">24dp</dimen>
 
-    <!-- The width/height of the phone/camera/unlock icon on keyguard. -->
-    <dimen name="keyguard_affordance_height">80dp</dimen>
-    <dimen name="keyguard_affordance_width">120dp</dimen>
-
     <!-- Screen pinning request width -->
     <dimen name="screen_pinning_request_width">400dp</dimen>
     <!-- Screen pinning request bottom button circle widths -->
