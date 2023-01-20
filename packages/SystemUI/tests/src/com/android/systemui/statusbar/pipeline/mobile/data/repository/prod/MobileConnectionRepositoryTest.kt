@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 import android.content.Intent
 import android.os.UserHandle
 import android.provider.Settings
+import android.telephony.CarrierConfigManager.KEY_INFLATE_SIGNAL_STRENGTH_BOOL
 import android.telephony.CellSignalStrengthCdma
 import android.telephony.NetworkRegistrationInfo
 import android.telephony.ServiceState
@@ -59,6 +60,9 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameMode
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.OverrideNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.UnknownNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SystemUiCarrierConfig
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SystemUiCarrierConfigTest.Companion.configWithOverride
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SystemUiCarrierConfigTest.Companion.createTestConfig
 import com.android.systemui.statusbar.pipeline.mobile.data.model.toNetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository.Companion.DEFAULT_NUM_LEVELS
@@ -100,6 +104,11 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     private val scope = CoroutineScope(IMMEDIATE)
     private val mobileMappings = FakeMobileMappingsProxy()
     private val globalSettings = FakeSettings()
+    private val systemUiCarrierConfig =
+        SystemUiCarrierConfig(
+            SUB_1_ID,
+            createTestConfig(),
+        )
 
     @Before
     fun setUp() {
@@ -117,6 +126,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
                 SEP,
                 telephonyManager,
                 globalSettings,
+                systemUiCarrierConfig,
                 fakeBroadcastDispatcher,
                 connectionsRepo.globalMobileDataSettingChangedEvent,
                 mobileMappings,
@@ -621,6 +631,29 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
             getTelephonyCallbackForType<ServiceStateListener>().onServiceStateChanged(serviceState)
             assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun `number of levels - uses carrier config`() =
+        runBlocking(IMMEDIATE) {
+            var latest: Int? = null
+            val job = underTest.numberOfLevels.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isEqualTo(DEFAULT_NUM_LEVELS)
+
+            systemUiCarrierConfig.processNewCarrierConfig(
+                configWithOverride(KEY_INFLATE_SIGNAL_STRENGTH_BOOL, true)
+            )
+
+            assertThat(latest).isEqualTo(DEFAULT_NUM_LEVELS + 1)
+
+            systemUiCarrierConfig.processNewCarrierConfig(
+                configWithOverride(KEY_INFLATE_SIGNAL_STRENGTH_BOOL, false)
+            )
+
+            assertThat(latest).isEqualTo(DEFAULT_NUM_LEVELS)
 
             job.cancel()
         }

@@ -44,8 +44,10 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameMode
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.OverrideNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.UnknownNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SystemUiCarrierConfig
 import com.android.systemui.statusbar.pipeline.mobile.data.model.toDataConnectionType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.toNetworkNameModel
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.CarrierConfigRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository.Companion.DEFAULT_NUM_LEVELS
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
@@ -63,7 +65,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
@@ -82,6 +84,7 @@ class MobileConnectionRepositoryImpl(
     networkNameSeparator: String,
     private val telephonyManager: TelephonyManager,
     private val globalSettings: GlobalSettings,
+    systemUiCarrierConfig: SystemUiCarrierConfig,
     broadcastDispatcher: BroadcastDispatcher,
     globalMobileDataSettingChangedEvent: Flow<Unit>,
     mobileMappingsProxy: MobileMappingsProxy,
@@ -216,10 +219,15 @@ class MobileConnectionRepositoryImpl(
             .stateIn(scope, SharingStarted.WhileSubscribed(), state)
     }
 
-    // This will become variable based on [CarrierConfigManager.KEY_INFLATE_SIGNAL_STRENGTH_BOOL]
-    // once it's wired up inside of [CarrierConfigTracker].
-    override val numberOfLevels: StateFlow<Int> =
-        flowOf(DEFAULT_NUM_LEVELS)
+    override val numberOfLevels =
+        systemUiCarrierConfig.shouldInflateSignalStrength
+            .map { shouldInflate ->
+                if (shouldInflate) {
+                    DEFAULT_NUM_LEVELS + 1
+                } else {
+                    DEFAULT_NUM_LEVELS
+                }
+            }
             .stateIn(scope, SharingStarted.WhileSubscribed(), DEFAULT_NUM_LEVELS)
 
     /** Produces whenever the mobile data setting changes for this subId */
@@ -300,6 +308,7 @@ class MobileConnectionRepositoryImpl(
         private val telephonyManager: TelephonyManager,
         private val logger: ConnectivityPipelineLogger,
         private val globalSettings: GlobalSettings,
+        private val carrierConfigRepository: CarrierConfigRepository,
         private val mobileMappingsProxy: MobileMappingsProxy,
         @Background private val bgDispatcher: CoroutineDispatcher,
         @Application private val scope: CoroutineScope,
@@ -318,6 +327,7 @@ class MobileConnectionRepositoryImpl(
                 networkNameSeparator,
                 telephonyManager.createForSubscriptionId(subId),
                 globalSettings,
+                carrierConfigRepository.getOrCreateConfigForSubId(subId),
                 broadcastDispatcher,
                 globalMobileDataSettingChangedEvent,
                 mobileMappingsProxy,

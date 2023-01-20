@@ -231,6 +231,15 @@ constructor(
         )
     }
 
+    fun logCarrierConfigChanged(subId: Int) {
+        buffer.log(
+            SB_LOGGING_TAG,
+            LogLevel.INFO,
+            { int1 = subId },
+            { "onCarrierConfigChanged: subId=$int1" },
+        )
+    }
+
     companion object {
         const val SB_LOGGING_TAG = "SbConnectivity"
 

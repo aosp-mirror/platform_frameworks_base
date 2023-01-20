@@ -39,6 +39,7 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.CarrierConfigRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Factory.Companion.tableBufferLogName
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
@@ -80,6 +81,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     private lateinit var carrierMergedFactory: CarrierMergedConnectionRepository.Factory
     private lateinit var fullConnectionFactory: FullMobileConnectionRepository.Factory
     private lateinit var wifiRepository: FakeWifiRepository
+    private lateinit var carrierConfigRepository: CarrierConfigRepository
     @Mock private lateinit var connectivityManager: ConnectivityManager
     @Mock private lateinit var subscriptionManager: SubscriptionManager
     @Mock private lateinit var telephonyManager: TelephonyManager
@@ -119,6 +121,15 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
         wifiRepository = FakeWifiRepository()
 
+        carrierConfigRepository =
+            CarrierConfigRepository(
+                fakeBroadcastDispatcher,
+                mock(),
+                mock(),
+                logger,
+                scope,
+            )
+
         connectionFactory =
             MobileConnectionRepositoryImpl.Factory(
                 fakeBroadcastDispatcher,
@@ -129,6 +140,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                 logger = logger,
                 mobileMappingsProxy = mobileMappings,
                 scope = scope,
+                carrierConfigRepository = carrierConfigRepository,
             )
         carrierMergedFactory =
             CarrierMergedConnectionRepository.Factory(
