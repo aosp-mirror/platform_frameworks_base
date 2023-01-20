@@ -978,6 +978,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
     public void publish() {
         ServiceManager.addService(Context.APP_OPS_SERVICE, asBinder());
         LocalServices.addService(AppOpsManagerInternal.class, mAppOpsManagerInternal);
+        LocalServices.addService(AppOpsManagerLocal.class, new AppOpsManagerLocalImpl());
     }
 
     /** Handler for work when packages are removed or updated */
@@ -6135,6 +6136,15 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
 
         void destroy() {
             mToken.unlinkToDeath(this, 0);
+        }
+    }
+
+    private final class AppOpsManagerLocalImpl implements AppOpsManagerLocal {
+        @Override
+        public boolean isUidInForeground(int uid) {
+            synchronized (AppOpsService.this) {
+                return mUidStateTracker.isUidInForeground(uid);
+            }
         }
     }
 
