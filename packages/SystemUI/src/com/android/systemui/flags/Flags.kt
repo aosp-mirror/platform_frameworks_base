@@ -463,6 +463,16 @@ object Flags {
     val WM_ENABLE_PREDICTIVE_BACK_BOUNCER_ANIM =
         unreleasedFlag(1206, "persist.wm.debug.predictive_back_bouncer_anim", teamfood = true)
 
+    // TODO(b/238475428): Tracking Bug
+    @JvmField
+    val WM_SHADE_ALLOW_BACK_GESTURE =
+        unreleasedFlag(1207, "persist.wm.debug.shade_allow_back_gesture", teamfood = false)
+
+    // TODO(b/238475428): Tracking Bug
+    @JvmField
+    val WM_SHADE_ANIMATE_BACK_GESTURE =
+        unreleasedFlag(1208, "persist.wm.debug.shade_animate_back_gesture", teamfood = true)
+
     // 1300 - screenshots
     // TODO(b/254513155): Tracking Bug
     @JvmField
