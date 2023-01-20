@@ -17,6 +17,7 @@
 package com.android.systemui.settings.dagger;
 
 import android.app.ActivityManager;
+import android.app.IActivityManager;
 import android.content.Context;
 import android.os.Handler;
 import android.os.UserManager;
@@ -57,11 +58,13 @@ public abstract class MultiUserUtilsModule {
     static UserTracker provideUserTracker(
             Context context,
             UserManager userManager,
+            IActivityManager iActivityManager,
             DumpManager dumpManager,
             @Background Handler handler
     ) {
         int startingUser = ActivityManager.getCurrentUser();
-        UserTrackerImpl tracker = new UserTrackerImpl(context, userManager, dumpManager, handler);
+        UserTrackerImpl tracker = new UserTrackerImpl(context, userManager, iActivityManager,
+                dumpManager, handler);
         tracker.initialize(startingUser);
         return tracker;
     }

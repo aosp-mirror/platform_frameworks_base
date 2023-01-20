@@ -2950,15 +2950,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     }
                 }
                 if (doTrim) {
-                    if (!isFirstBoot()) {
-                        try {
-                            ActivityManager.getService().showBootMessage(
-                                    mContext.getResources().getString(
-                                            R.string.android_upgrading_fstrim),
-                                    true);
-                        } catch (RemoteException e) {
-                        }
-                    }
                     sm.runMaintenance();
                 }
             } else {
@@ -5430,9 +5421,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                             String loadingPkgDexCodeIsa = InstructionSets.getDexCodeInstructionSet(
                                     VMRuntime.getInstructionSet(loadingPkgAbi));
                             if (!loaderIsa.equals(loadingPkgDexCodeIsa)) {
-                                // TODO(b/251903639): Make this crash to surface this problem
-                                // better.
-                                Slog.w(PackageManagerService.TAG,
+                                // TODO(b/251903639): We make this a wtf to surface any situations
+                                // where this argument doesn't correspond to our expectations. Later
+                                // it should be turned into an IllegalArgumentException, when we can
+                                // assume it's the caller that's wrong rather than us.
+                                Log.wtf(TAG,
                                         "Invalid loaderIsa in notifyDexLoad call from "
                                                 + loadingPackageName + ", uid " + callingUid
                                                 + ": expected " + loadingPkgDexCodeIsa + ", got "

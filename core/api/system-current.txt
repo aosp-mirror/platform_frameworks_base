@@ -1278,6 +1278,7 @@ package android.app.admin {
     field public static final int STATUS_DEVICE_ADMIN_NOT_SUPPORTED = 13; // 0xd
     field public static final int STATUS_HAS_DEVICE_OWNER = 1; // 0x1
     field public static final int STATUS_HAS_PAIRED = 8; // 0x8
+    field public static final int STATUS_HEADLESS_SYSTEM_USER_MODE_NOT_SUPPORTED = 16; // 0x10
     field public static final int STATUS_MANAGED_USERS_NOT_SUPPORTED = 9; // 0x9
     field public static final int STATUS_NONSYSTEM_USER_EXISTS = 5; // 0x5
     field public static final int STATUS_NOT_SYSTEM_USER = 7; // 0x7
@@ -3269,6 +3270,7 @@ package android.content {
     field public static final String SYSTEM_CONFIG_SERVICE = "system_config";
     field public static final String SYSTEM_UPDATE_SERVICE = "system_update";
     field public static final String TETHERING_SERVICE = "tethering";
+    field public static final String TIME_MANAGER_SERVICE = "time_manager";
     field public static final String TRANSLATION_MANAGER_SERVICE = "translation";
     field public static final String UI_TRANSLATION_SERVICE = "ui_translation";
     field public static final String UWB_SERVICE = "uwb";

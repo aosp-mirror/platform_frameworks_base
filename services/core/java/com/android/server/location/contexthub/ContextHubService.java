@@ -1155,6 +1155,34 @@ public class ContextHubService extends IContextHubService.Stub {
         return nanoappIds;
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    /**
+     * Puts the context hub in and out of test mode. Test mode is a clean state
+     * where tests can be executed in the same environment. If enable is true,
+     * this will enable test mode by unloading all nanoapps. If enable is false,
+     * this will disable test mode and reverse the actions of enabling test mode
+     * by loading all preloaded nanoapps. This puts CHRE in a normal state.
+     *
+     * This should only be used for a test environment, either through a
+     * @TestApi or development tools. This should not be used in a production
+     * environment.
+     *
+     * @param enable If true, put the context hub in test mode. If false, disable
+     *               test mode.
+     * @return       If true, the operation was successful; false otherwise.
+     */
+    @Override
+    public boolean setTestMode(boolean enable) {
+        super.setTestMode_enforcePermission();
+        boolean status = mContextHubWrapper.setTestMode(enable);
+
+        // Query nanoapps to update service state after test mode state change.
+        for (int contextHubId: mDefaultClientMap.keySet()) {
+            queryNanoAppsInternal(contextHubId);
+        }
+        return status;
+    }
+
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;

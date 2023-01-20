@@ -236,6 +236,9 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
 
     @Override
     public FullScreenIntentDecision getFullScreenIntentDecision(NotificationEntry entry) {
+        if (mFlags.disableFsi()) {
+            return FullScreenIntentDecision.NO_FSI_DISABLED;
+        }
         if (entry.getSbn().getNotification().fullScreenIntent == null) {
             return FullScreenIntentDecision.NO_FULL_SCREEN_INTENT;
         }
@@ -325,6 +328,9 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         final int uid = entry.getSbn().getUid();
         final String packageName = entry.getSbn().getPackageName();
         switch (decision) {
+            case NO_FSI_DISABLED:
+                mLogger.logNoFullscreen(entry, "Disabled");
+                return;
             case NO_FULL_SCREEN_INTENT:
                 return;
             case NO_FSI_SUPPRESSED_BY_DND:

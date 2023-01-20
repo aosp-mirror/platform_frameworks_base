@@ -64,6 +64,10 @@ object Flags {
     // TODO(b/259130119): Tracking Bug
     val FSI_ON_DND_UPDATE = unreleasedFlag(259130119, "fsi_on_dnd_update", teamfood = true)
 
+    // TODO(b/265804648): Tracking Bug
+    @JvmField
+    val DISABLE_FSI = unreleasedFlag(265804648, "disable_fsi")
+
     // TODO(b/254512538): Tracking Bug
     val INSTANT_VOICE_REPLY = unreleasedFlag(111, "instant_voice_reply", teamfood = true)
 
@@ -533,6 +537,13 @@ object Flags {
     @JvmField
     val OUTPUT_SWITCHER_SHOW_API_ENABLED =
         unreleasedFlag(2503, "output_switcher_show_api_enabled", teamfood = true)
+
+    // 2700 - unfold transitions
+    // TODO(b/265764985): Tracking Bug
+    @Keep
+    @JvmField
+    val ENABLE_DARK_VIGNETTE_WHEN_FOLDING =
+        unreleasedFlag(2700, "enable_dark_vignette_when_folding")
 
     // TODO(b259590361): Tracking bug
     val EXPERIMENTAL_FLAG = unreleasedFlag(2, "exp_flag_release")

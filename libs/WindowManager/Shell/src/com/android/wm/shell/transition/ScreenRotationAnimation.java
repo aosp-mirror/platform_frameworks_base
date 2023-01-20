@@ -21,7 +21,7 @@ import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFA
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_JUMPCUT;
 import static android.view.WindowManagerPolicyConstants.SCREEN_FREEZE_LAYER_BASE;
 
-import static com.android.wm.shell.transition.DefaultTransitionHandler.startSurfaceAnimation;
+import static com.android.wm.shell.transition.DefaultTransitionHandler.buildSurfaceAnimation;
 import static com.android.wm.shell.transition.Transitions.TAG;
 
 import android.animation.Animator;
@@ -244,11 +244,11 @@ class ScreenRotationAnimation {
     }
 
     /**
-     * Returns true if animating.
+     * Returns true if any animations were added to `animations`.
      */
-    public boolean startAnimation(@NonNull ArrayList<Animator> animations,
+    boolean buildAnimation(@NonNull ArrayList<Animator> animations,
             @NonNull Runnable finishCallback, float animationScale,
-            @NonNull ShellExecutor mainExecutor, @NonNull ShellExecutor animExecutor) {
+            @NonNull ShellExecutor mainExecutor) {
         if (mScreenshotLayer == null) {
             // Can't do animation.
             return false;
@@ -311,13 +311,11 @@ class ScreenRotationAnimation {
             mRotateAlphaAnimation.restrictDuration(MAX_ANIMATION_DURATION);
             mRotateAlphaAnimation.scaleCurrentDuration(animationScale);
 
-            startScreenshotAlphaAnimation(animations, finishCallback, mainExecutor,
-                    animExecutor);
-            startDisplayRotation(animations, finishCallback, mainExecutor, animExecutor);
+            buildScreenshotAlphaAnimation(animations, finishCallback, mainExecutor);
+            startDisplayRotation(animations, finishCallback, mainExecutor);
         } else {
-            startDisplayRotation(animations, finishCallback, mainExecutor, animExecutor);
-            startScreenshotRotationAnimation(animations, finishCallback, mainExecutor,
-                    animExecutor);
+            startDisplayRotation(animations, finishCallback, mainExecutor);
+            startScreenshotRotationAnimation(animations, finishCallback, mainExecutor);
             //startColorAnimation(mTransaction, animationScale);
         }
 
@@ -325,27 +323,24 @@ class ScreenRotationAnimation {
     }
 
     private void startDisplayRotation(@NonNull ArrayList<Animator> animations,
-            @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor,
-            @NonNull ShellExecutor animExecutor) {
-        startSurfaceAnimation(animations, mRotateEnterAnimation, mSurfaceControl, finishCallback,
-                mTransactionPool, mainExecutor, animExecutor, null /* position */,
-                0 /* cornerRadius */, null /* clipRect */);
+            @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor) {
+        buildSurfaceAnimation(animations, mRotateEnterAnimation, mSurfaceControl, finishCallback,
+                mTransactionPool, mainExecutor, null /* position */, 0 /* cornerRadius */,
+                null /* clipRect */);
     }
 
     private void startScreenshotRotationAnimation(@NonNull ArrayList<Animator> animations,
-            @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor,
-            @NonNull ShellExecutor animExecutor) {
-        startSurfaceAnimation(animations, mRotateExitAnimation, mAnimLeash, finishCallback,
-                mTransactionPool, mainExecutor, animExecutor, null /* position */,
-                0 /* cornerRadius */, null /* clipRect */);
+            @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor) {
+        buildSurfaceAnimation(animations, mRotateExitAnimation, mAnimLeash, finishCallback,
+                mTransactionPool, mainExecutor, null /* position */, 0 /* cornerRadius */,
+                null /* clipRect */);
     }
 
-    private void startScreenshotAlphaAnimation(@NonNull ArrayList<Animator> animations,
-            @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor,
-            @NonNull ShellExecutor animExecutor) {
-        startSurfaceAnimation(animations, mRotateAlphaAnimation, mAnimLeash, finishCallback,
-                mTransactionPool, mainExecutor, animExecutor, null /* position */,
-                0 /* cornerRadius */, null /* clipRect */);
+    private void buildScreenshotAlphaAnimation(@NonNull ArrayList<Animator> animations,
+            @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor) {
+        buildSurfaceAnimation(animations, mRotateAlphaAnimation, mAnimLeash, finishCallback,
+                mTransactionPool, mainExecutor, null /* position */, 0 /* cornerRadius */,
+                null /* clipRect */);
     }
 
     private void startColorAnimation(float animationScale, @NonNull ShellExecutor animExecutor) {

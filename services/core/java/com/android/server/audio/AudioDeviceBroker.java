@@ -1718,8 +1718,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
                 mBrokerEventWakeLock.acquire(BROKER_WAKELOCK_TIMEOUT_MS);
             } catch (Exception e) {
                 Log.e(TAG, "Exception acquiring wakelock", e);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
-            Binder.restoreCallingIdentity(identity);
         }
 
         if (MESSAGES_MUTE_MUSIC.contains(msg)) {

@@ -262,6 +262,12 @@ class WindowTestsBase extends SystemServiceTestsBase {
         // device form factors.
         mAtm.mWindowManager.mLetterboxConfiguration
                 .setIsSplitScreenAspectRatioForUnresizableAppsEnabled(false);
+        // Ensure aspect ratio for al apps isn't overridden on any device target.
+        // {@link com.android.internal.R.bool
+        // .config_letterboxIsDisplayAspectRatioForFixedOrientationLetterboxEnabled}, may be set on
+        // some device form factors.
+        mAtm.mWindowManager.mLetterboxConfiguration
+                .setIsDisplayAspectRatioEnabledForFixedOrientationLetterbox(false);
 
         checkDeviceSpecificOverridesNotApplied();
     }
@@ -276,6 +282,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
         mAtm.mWindowManager.mLetterboxConfiguration.resetIsVerticalReachabilityEnabled();
         mAtm.mWindowManager.mLetterboxConfiguration
                 .resetIsSplitScreenAspectRatioForUnresizableAppsEnabled();
+        mAtm.mWindowManager.mLetterboxConfiguration
+                .resetIsDisplayAspectRatioEnabledForFixedOrientationLetterbox();
     }
 
     /**

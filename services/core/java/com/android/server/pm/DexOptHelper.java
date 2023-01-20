@@ -57,7 +57,11 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.util.FrameworkStatsLog;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalManagerRegistry;
+import com.android.server.LocalServices;
+import com.android.server.PinnerService;
 import com.android.server.art.ArtManagerLocal;
 import com.android.server.art.DexUseManagerLocal;
 import com.android.server.art.ReasonMapping;
@@ -844,6 +848,26 @@ public final class DexOptHelper {
     }
 
     /**
+     * Dumps the dexopt state for the given package, or all packages if it is null.
+     */
+    public static void dumpDexoptState(
+            @NonNull IndentingPrintWriter ipw, @Nullable String packageName) {
+        try (PackageManagerLocal.FilteredSnapshot snapshot =
+                        getPackageManagerLocal().withFilteredSnapshot()) {
+            if (packageName != null) {
+                try {
+                    DexOptHelper.getArtManagerLocal().dumpPackage(ipw, snapshot, packageName);
+                } catch (IllegalArgumentException e) {
+                    // Package isn't found, but that should only happen due to race.
+                    ipw.println(e);
+                }
+            } else {
+                DexOptHelper.getArtManagerLocal().dump(ipw, snapshot);
+            }
+        }
+    }
+
+    /**
      * Returns the module names of the APEXes that contribute to bootclasspath.
      */
     private static List<String> getBcpApexes() {
@@ -948,6 +972,35 @@ public final class DexOptHelper {
             synchronized (mPm.mLock) {
                 mPm.getPackageUsage().maybeWriteAsync(mPm.mSettings.getPackagesLocked());
                 mPm.mCompilerStats.maybeWriteAsync();
+            }
+
+            if (result.getReason().equals(ReasonMapping.REASON_INACTIVE)) {
+                for (DexoptResult.PackageDexoptResult pkgRes : result.getPackageDexoptResults()) {
+                    if (pkgRes.getStatus() == DexoptResult.DEXOPT_PERFORMED) {
+                        long pkgSizeBytes = 0;
+                        long pkgSizeBeforeBytes = 0;
+                        for (DexoptResult.DexContainerFileDexoptResult dexRes :
+                                pkgRes.getDexContainerFileDexoptResults()) {
+                            long dexContainerSize = new File(dexRes.getDexContainerFile()).length();
+                            pkgSizeBytes += dexRes.getSizeBytes() + dexContainerSize;
+                            pkgSizeBeforeBytes += dexRes.getSizeBeforeBytes() + dexContainerSize;
+                        }
+                        FrameworkStatsLog.write(FrameworkStatsLog.APP_DOWNGRADED,
+                                pkgRes.getPackageName(), pkgSizeBeforeBytes, pkgSizeBytes,
+                                false /* aggressive */);
+                    }
+                }
+            }
+
+            var updatedPackages = new ArraySet<String>();
+            for (DexoptResult.PackageDexoptResult pkgRes : result.getPackageDexoptResults()) {
+                if (pkgRes.hasUpdatedArtifacts()) {
+                    updatedPackages.add(pkgRes.getPackageName());
+                }
+            }
+            if (!updatedPackages.isEmpty()) {
+                LocalServices.getService(PinnerService.class)
+                        .update(updatedPackages, false /* force */);
             }
         }
     }

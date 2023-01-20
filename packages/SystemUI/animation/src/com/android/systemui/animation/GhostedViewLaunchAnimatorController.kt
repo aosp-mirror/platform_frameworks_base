@@ -26,6 +26,7 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.InsetDrawable
 import android.graphics.drawable.LayerDrawable
+import android.graphics.drawable.StateListDrawable
 import android.util.Log
 import android.view.GhostView
 import android.view.View
@@ -35,6 +36,7 @@ import android.widget.FrameLayout
 import com.android.internal.jank.InteractionJankMonitor
 import java.util.LinkedList
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 private const val TAG = "GhostedViewLaunchAnimatorController"
 
@@ -49,7 +51,9 @@ private const val TAG = "GhostedViewLaunchAnimatorController"
  * Note: Avoid instantiating this directly and call [ActivityLaunchAnimator.Controller.fromView]
  * whenever possible instead.
  */
-open class GhostedViewLaunchAnimatorController @JvmOverloads constructor(
+open class GhostedViewLaunchAnimatorController
+@JvmOverloads
+constructor(
     /** The view that will be ghosted and from which the background will be extracted. */
     private val ghostedView: View,
 
@@ -145,7 +149,8 @@ open class GhostedViewLaunchAnimatorController @JvmOverloads constructor(
         val gradient = findGradientDrawable(drawable) ?: return 0f
 
         // TODO(b/184121838): Support more than symmetric top & bottom radius.
-        return gradient.cornerRadii?.get(CORNER_RADIUS_TOP_INDEX) ?: gradient.cornerRadius
+        val radius = gradient.cornerRadii?.get(CORNER_RADIUS_TOP_INDEX) ?: gradient.cornerRadius
+        return radius * ghostedView.scaleX
     }
 
     /** Return the current bottom corner radius of the background. */
@@ -154,7 +159,8 @@ open class GhostedViewLaunchAnimatorController @JvmOverloads constructor(
         val gradient = findGradientDrawable(drawable) ?: return 0f
 
         // TODO(b/184121838): Support more than symmetric top & bottom radius.
-        return gradient.cornerRadii?.get(CORNER_RADIUS_BOTTOM_INDEX) ?: gradient.cornerRadius
+        val radius = gradient.cornerRadii?.get(CORNER_RADIUS_BOTTOM_INDEX) ?: gradient.cornerRadius
+        return radius * ghostedView.scaleX
     }
 
     override fun createAnimatorState(): LaunchAnimator.State {
@@ -173,9 +179,13 @@ open class GhostedViewLaunchAnimatorController @JvmOverloads constructor(
         ghostedView.getLocationOnScreen(ghostedViewLocation)
         val insets = backgroundInsets
         state.top = ghostedViewLocation[1] + insets.top
-        state.bottom = ghostedViewLocation[1] + ghostedView.height - insets.bottom
+        state.bottom =
+            ghostedViewLocation[1] + (ghostedView.height * ghostedView.scaleY).roundToInt() -
+                insets.bottom
         state.left = ghostedViewLocation[0] + insets.left
-        state.right = ghostedViewLocation[0] + ghostedView.width - insets.right
+        state.right =
+            ghostedViewLocation[0] + (ghostedView.width * ghostedView.scaleX).roundToInt() -
+                insets.right
     }
 
     override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
@@ -339,6 +349,10 @@ open class GhostedViewLaunchAnimatorController @JvmOverloads constructor(
                         return maybeGradient
                     }
                 }
+            }
+
+            if (drawable is StateListDrawable) {
+                return findGradientDrawable(drawable.current)
             }
 
             return null

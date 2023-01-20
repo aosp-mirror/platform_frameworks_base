@@ -18,6 +18,7 @@ package android.view;
 
 import static org.junit.Assert.assertEquals;
 
+import android.hardware.input.HostUsiVersion;
 import android.os.Parcel;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -57,6 +58,8 @@ public class InputDeviceTest {
         assertEquals(device.getKeyboardLanguageTag(), outDevice.getKeyboardLanguageTag());
         assertEquals(device.getKeyboardLayoutType(), outDevice.getKeyboardLayoutType());
         assertEquals(device.getMotionRanges().size(), outDevice.getMotionRanges().size());
+        assertEquals(device.getHostUsiVersion(), outDevice.getHostUsiVersion());
+        assertEquals(device.getAssociatedDisplayId(), outDevice.getAssociatedDisplayId());
 
         KeyCharacterMap keyCharacterMap = device.getKeyCharacterMap();
         KeyCharacterMap outKeyCharacterMap = outDevice.getKeyCharacterMap();
@@ -88,7 +91,7 @@ public class InputDeviceTest {
                 .setHasBattery(true)
                 .setKeyboardLanguageTag("en-US")
                 .setKeyboardLayoutType("qwerty")
-                .setSupportsUsi(true);
+                .setUsiVersion(new HostUsiVersion(2, 0));
 
         for (int i = 0; i < 30; i++) {
             deviceBuilder.addMotionRange(

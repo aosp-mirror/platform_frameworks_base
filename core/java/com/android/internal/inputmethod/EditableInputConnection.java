@@ -44,6 +44,7 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.HandwritingGesture;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InsertGesture;
+import android.view.inputmethod.InsertModeGesture;
 import android.view.inputmethod.JoinOrSplitGesture;
 import android.view.inputmethod.PreviewableHandwritingGesture;
 import android.view.inputmethod.RemoveSpaceGesture;
@@ -314,6 +315,8 @@ public final class EditableInputConnection extends BaseInputConnection
             result = mTextView.performHandwritingRemoveSpaceGesture((RemoveSpaceGesture) gesture);
         } else if (gesture instanceof JoinOrSplitGesture) {
             result = mTextView.performHandwritingJoinOrSplitGesture((JoinOrSplitGesture) gesture);
+        } else if (gesture instanceof InsertModeGesture) {
+            result = mTextView.performHandwritingInsertModeGesture((InsertModeGesture) gesture);
         } else {
             result = HANDWRITING_GESTURE_RESULT_UNSUPPORTED;
         }

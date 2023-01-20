@@ -89,6 +89,7 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.LocaleList;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.Process;
@@ -1105,7 +1106,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             new SoftInputShowHideHistory();
 
     @NonNull
-    private final ImeTrackerService mImeTrackerService = new ImeTrackerService();
+    private final ImeTrackerService mImeTrackerService;
 
     class SettingsObserver extends ContentObserver {
         int mUserId;
@@ -1662,6 +1663,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                                 true /* allowIo */);
         thread.start();
         mHandler = Handler.createAsync(thread.getLooper(), this);
+        mImeTrackerService = new ImeTrackerService(serviceThreadForTesting != null
+                ? serviceThreadForTesting.getLooper() : Looper.getMainLooper());
         // Note: SettingsObserver doesn't register observers in its constructor.
         mSettingsObserver = new SettingsObserver(mHandler);
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
@@ -4613,7 +4616,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 info.requestWindowName, info.imeControlTargetName, info.imeLayerTargetName,
                 info.imeSurfaceParentName));
 
-        mImeTrackerService.onImmsUpdate(statsToken.mBinder, info.requestWindowName);
+        if (statsToken != null) {
+            mImeTrackerService.onImmsUpdate(statsToken.mBinder, info.requestWindowName);
+        }
     }
 
     @BinderThread
@@ -4655,13 +4660,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @VisibleForTesting
-    ImeVisibilityStateComputer getVisibilityStateComputer() {
-        return mVisibilityStateComputer;
-    }
-
-    @VisibleForTesting
     ImeVisibilityApplier getVisibilityApplier() {
-        return mVisibilityApplier;
+        synchronized (ImfLock.class) {
+            return mVisibilityApplier;
+        }
     }
 
     @GuardedBy("ImfLock.class")

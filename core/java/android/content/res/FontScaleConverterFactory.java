@@ -42,7 +42,7 @@ public class FontScaleConverterFactory {
                         /* fromSp= */
                         new float[] {   8f,   10f,   12f,   14f,   18f,   20f,   24f,   30f,  100},
                         /* toDp=   */
-                        new float[] { 9.2f, 11.5f, 13.8f, 16.1f, 20.7f,   23f, 27.6f, 34.5f,  115})
+                        new float[] { 9.2f, 11.5f, 13.8f, 16.4f, 19.8f, 21.8f, 25.2f,   30f,  100})
         );
 
         put(
@@ -51,7 +51,7 @@ public class FontScaleConverterFactory {
                         /* fromSp= */
                         new float[] {   8f,   10f,   12f,   14f,   18f,   20f,   24f,   30f,  100},
                         /* toDp=   */
-                        new float[] {10.4f,   13f, 15.6f, 18.2f, 23.4f,   26f, 31.2f,   39f,  130})
+                        new float[] {10.4f,   13f, 15.6f, 18.8f, 21.6f, 23.6f, 26.4f,   30f,  100})
         );
 
         put(
@@ -60,7 +60,7 @@ public class FontScaleConverterFactory {
                         /* fromSp= */
                         new float[] {   8f,   10f,   12f,   14f,   18f,   20f,   24f,   30f,  100},
                         /* toDp=   */
-                        new float[] {  12f,   15f,   18f,   21f,   27f,   30f,   36f,   45f,  150})
+                        new float[] {  12f,   15f,   18f,   22f,   24f,   26f,   28f,   30f,  100})
         );
 
         put(
@@ -69,7 +69,7 @@ public class FontScaleConverterFactory {
                         /* fromSp= */
                         new float[] {   8f,   10f,   12f,   14f,   18f,   20f,   24f,   30f,  100},
                         /* toDp=   */
-                        new float[] {14.4f,   18f, 21.6f, 25.2f, 32.4f,   36f, 43.2f,   54f,  180})
+                        new float[] {14.4f,   18f, 21.6f, 24.4f, 27.6f, 30.8f, 32.8f, 34.8f,  100})
         );
 
         put(
@@ -78,7 +78,7 @@ public class FontScaleConverterFactory {
                         /* fromSp= */
                         new float[] {   8f,   10f,   12f,   14f,   18f,   20f,   24f,   30f,  100},
                         /* toDp=   */
-                        new float[] {  16f,   20f,   24f,   28f,   36f,   40f,   48f,   60f,  200})
+                        new float[] {  16f,   20f,   24f,   26f,   30f,   34f,   36f,   38f,  100})
         );
 
     }

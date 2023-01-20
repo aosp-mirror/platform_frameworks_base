@@ -1074,11 +1074,6 @@ public class BinaryTransparencyService extends SystemService {
         // register a package observer to detect updates to preloads
         mPackageManagerInternal.getPackageList(new PackageManagerInternal.PackageListObserver() {
             @Override
-            public void onPackageAdded(String packageName, int uid) {
-
-            }
-
-            @Override
             public void onPackageChanged(String packageName, int uid) {
                 // check if the updated package is a preloaded app.
                 PackageManager pm = mContext.getPackageManager();
@@ -1093,11 +1088,6 @@ public class BinaryTransparencyService extends SystemService {
                 Slog.d(TAG, "Preload " + packageName + " was updated. Scheduling measurement...");
                 UpdateMeasurementsJobService.scheduleBinaryMeasurements(mContext,
                         BinaryTransparencyService.this);
-            }
-
-            @Override
-            public void onPackageRemoved(String packageName, int uid) {
-
             }
         });
 

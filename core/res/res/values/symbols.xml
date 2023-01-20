@@ -328,6 +328,7 @@
   <java-symbol type="bool" name="config_use_strict_phone_number_comparation_for_kazakhstan" />
   <java-symbol type="integer" name="config_phonenumber_compare_min_match" />
   <java-symbol type="bool" name="config_single_volume" />
+  <java-symbol type="bool" name="config_volume_down_to_enter_silent" />
   <java-symbol type="bool" name="config_voice_capable" />
   <java-symbol type="bool" name="config_requireCallCapableAccountForHandle" />
   <java-symbol type="bool" name="config_user_notification_of_restrictied_mobile_access" />
@@ -4442,6 +4443,7 @@
   <java-symbol type="bool" name="config_letterboxIsEducationEnabled" />
   <java-symbol type="dimen" name="config_letterboxDefaultMinAspectRatioForUnresizableApps" />
   <java-symbol type="bool" name="config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled" />
+  <java-symbol type="bool" name="config_letterboxIsDisplayAspectRatioForFixedOrientationLetterboxEnabled" />
   <java-symbol type="bool" name="config_isCompatFakeFocusEnabled" />
   <java-symbol type="bool" name="config_isWindowManagerCameraCompatTreatmentEnabled" />
   <java-symbol type="bool" name="config_isCameraCompatControlForStretchedIssuesEnabled" />
@@ -4779,6 +4781,7 @@
   <java-symbol type="array" name="config_mainBuiltInDisplayWaterfallCutout" />
   <java-symbol type="array" name="config_secondaryBuiltInDisplayWaterfallCutout" />
   <java-symbol type="array" name="config_waterfallCutoutArray" />
+  <java-symbol type="array" name="config_displayUsiVersionArray" />
 
   <java-symbol type="fraction" name="global_actions_vertical_padding_percentage" />
   <java-symbol type="fraction" name="global_actions_horizontal_padding_percentage" />
@@ -4809,6 +4812,8 @@
   <java-symbol type="string" name="config_systemGameService" />
 
   <java-symbol type="string" name="config_supervisedUserCreationPackage"/>
+
+  <java-symbol type="bool" name="config_enableStylusPointerIcon" />
 
   <java-symbol type="bool" name="config_enableSafetyCenter" />
 

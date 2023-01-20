@@ -559,7 +559,8 @@ public final class AudioPlaybackConfiguration implements Parcelable {
 
     /**
      * @hide
-     * Return whether this player's output is spatialized
+     * Return whether this player's output is being processed by the spatializer effect backing
+     * the {@link android.media.Spatializer} implementation.
      * @return true if spatialized, false if not or playback hasn't started
      */
     @SystemApi
@@ -588,7 +589,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
      *     the definitions for the <code>CHANNEL_OUT_*</code> values used for the mask's bitfield
      */
     @SystemApi
-    public int getChannelMask() {
+    public @AudioFormat.ChannelOut int getChannelMask() {
         synchronized (mUpdateablePropLock) {
             return (AudioFormat.convertNativeChannelMaskToOutMask(mFormatInfo.mNativeChannelMask));
         }

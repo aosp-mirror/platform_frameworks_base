@@ -445,7 +445,6 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                 backgroundColorForTransition = getTransitionBackgroundColorIfSet(info, change, a,
                         backgroundColorForTransition);
 
-                boolean delayedEdgeExtension = false;
                 if (!isTask && a.hasExtension()) {
                     if (!Transitions.isOpeningType(change.getMode())) {
                         // Can screenshot now (before startTransaction is applied)
@@ -455,7 +454,6 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                         // may not be visible or ready yet.
                         postStartTransactionCallbacks
                                 .add(t -> edgeExtendWindow(change, a, t, finishTransaction));
-                        delayedEdgeExtension = true;
                     }
                 }
 
@@ -464,19 +462,9 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                         : new Rect(change.getEndAbsBounds());
                 clipRect.offsetTo(0, 0);
 
-                if (delayedEdgeExtension) {
-                    // If the edge extension needs to happen after the startTransition has been
-                    // applied, then we want to only start the animation after the edge extension
-                    // postStartTransaction callback has been run
-                    postStartTransactionCallbacks.add(t ->
-                            startSurfaceAnimation(animations, a, change.getLeash(), onAnimFinish,
-                                    mTransactionPool, mMainExecutor, mAnimExecutor,
-                                    change.getEndRelOffset(), cornerRadius, clipRect));
-                } else {
-                    startSurfaceAnimation(animations, a, change.getLeash(), onAnimFinish,
-                            mTransactionPool, mMainExecutor, mAnimExecutor,
-                            change.getEndRelOffset(), cornerRadius, clipRect);
-                }
+                buildSurfaceAnimation(animations, a, change.getLeash(), onAnimFinish,
+                        mTransactionPool, mMainExecutor, change.getEndRelOffset(), cornerRadius,
+                        clipRect);
 
                 if (info.getAnimationOptions() != null) {
                     attachThumbnail(animations, onAnimFinish, change, info.getAnimationOptions(),
@@ -490,19 +478,25 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     startTransaction, finishTransaction);
         }
 
-        // postStartTransactionCallbacks require that the start transaction is already
-        // applied to run otherwise they may result in flickers and UI inconsistencies.
-        boolean waitForStartTransactionApply = postStartTransactionCallbacks.size() > 0;
-        startTransaction.apply(waitForStartTransactionApply);
-
-        // Run tasks that require startTransaction to already be applied
-        for (Consumer<SurfaceControl.Transaction> postStartTransactionCallback :
-                postStartTransactionCallbacks) {
-            final SurfaceControl.Transaction t = mTransactionPool.acquire();
-            postStartTransactionCallback.accept(t);
-            t.apply();
-            mTransactionPool.release(t);
+        if (postStartTransactionCallbacks.size() > 0) {
+            // postStartTransactionCallbacks require that the start transaction is already
+            // applied to run otherwise they may result in flickers and UI inconsistencies.
+            startTransaction.apply(true /* sync */);
+            // startTransaction is empty now, so fill it with the edge-extension setup
+            for (Consumer<SurfaceControl.Transaction> postStartTransactionCallback :
+                    postStartTransactionCallbacks) {
+                postStartTransactionCallback.accept(startTransaction);
+            }
         }
+        startTransaction.apply();
+
+        // now start animations. they are started on another thread, so we have to post them
+        // *after* applying the startTransaction
+        mAnimExecutor.execute(() -> {
+            for (int i = 0; i < animations.size(); ++i) {
+                animations.get(i).start();
+            }
+        });
 
         mRotator.cleanUp(finishTransaction);
         TransitionMetrics.getInstance().reportAnimationStart(transition);
@@ -539,8 +533,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             animations.removeAll(animGroupStore);
             onAnimFinish.run();
         };
-        anim.startAnimation(animGroup, finishCallback, mTransitionAnimationScaleSetting,
-                mMainExecutor, mAnimExecutor);
+        anim.buildAnimation(animGroup, finishCallback, mTransitionAnimationScaleSetting,
+                mMainExecutor);
         for (int i = animGroup.size() - 1; i >= 0; i--) {
             final Animator animator = animGroup.get(i);
             animGroupStore.add(animator);
@@ -633,11 +627,12 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         return a;
     }
 
-    static void startSurfaceAnimation(@NonNull ArrayList<Animator> animations,
+    /** Builds an animator for the surface and adds it to the `animations` list. */
+    static void buildSurfaceAnimation(@NonNull ArrayList<Animator> animations,
             @NonNull Animation anim, @NonNull SurfaceControl leash,
             @NonNull Runnable finishCallback, @NonNull TransactionPool pool,
-            @NonNull ShellExecutor mainExecutor, @NonNull ShellExecutor animExecutor,
-            @Nullable Point position, float cornerRadius, @Nullable Rect clipRect) {
+            @NonNull ShellExecutor mainExecutor, @Nullable Point position, float cornerRadius,
+            @Nullable Rect clipRect) {
         final SurfaceControl.Transaction transaction = pool.acquire();
         final ValueAnimator va = ValueAnimator.ofFloat(0f, 1f);
         final Transformation transformation = new Transformation();
@@ -691,7 +686,6 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             }
         });
         animations.add(va);
-        animExecutor.execute(va::start);
     }
 
     private void attachThumbnail(@NonNull ArrayList<Animator> animations,
@@ -745,9 +739,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         };
         a.restrictDuration(MAX_ANIMATION_DURATION);
         a.scaleCurrentDuration(mTransitionAnimationScaleSetting);
-        startSurfaceAnimation(animations, a, wt.getSurface(), finisher, mTransactionPool,
-                mMainExecutor, mAnimExecutor, change.getEndRelOffset(),
-                cornerRadius, change.getEndAbsBounds());
+        buildSurfaceAnimation(animations, a, wt.getSurface(), finisher, mTransactionPool,
+                mMainExecutor, change.getEndRelOffset(), cornerRadius, change.getEndAbsBounds());
     }
 
     private void attachThumbnailAnimation(@NonNull ArrayList<Animator> animations,
@@ -770,9 +763,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         };
         a.restrictDuration(MAX_ANIMATION_DURATION);
         a.scaleCurrentDuration(mTransitionAnimationScaleSetting);
-        startSurfaceAnimation(animations, a, wt.getSurface(), finisher, mTransactionPool,
-                mMainExecutor, mAnimExecutor, change.getEndRelOffset(),
-                cornerRadius, change.getEndAbsBounds());
+        buildSurfaceAnimation(animations, a, wt.getSurface(), finisher, mTransactionPool,
+                mMainExecutor, change.getEndRelOffset(), cornerRadius, change.getEndAbsBounds());
     }
 
     private static int getWallpaperTransitType(TransitionInfo info) {

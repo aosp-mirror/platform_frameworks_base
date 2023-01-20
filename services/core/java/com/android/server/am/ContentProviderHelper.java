@@ -83,11 +83,13 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.TimeoutRecord;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.RescueParty;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.sdksandbox.SdkSandboxManagerLocal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -124,13 +126,6 @@ public class ContentProviderHelper {
     ContentProviderHolder getContentProvider(IApplicationThread caller, String callingPackage,
             String name, int userId, boolean stable) {
         mService.enforceNotIsolatedCaller("getContentProvider");
-        if (Process.isSdkSandboxUid(Binder.getCallingUid())) {
-            // TODO(b/226318628): for sdk sandbox processes only allow accessing CPs registered by
-            //  the WebView apk.
-            Slog.w(TAG, "Sdk sandbox process " + Binder.getCallingUid()
-                    + " is accessing content provider " + name
-                    + ". This access will most likely be blocked in the future");
-        }
         if (caller == null) {
             String msg = "null IApplicationThread when getting content provider " + name;
             Slog.w(TAG, msg);
@@ -255,6 +250,7 @@ public class ContentProviderHelper {
                 if (r != null && cpr.canRunHere(r)) {
                     checkAssociationAndPermissionLocked(r, cpi, callingUid, userId, checkCrossUser,
                             cpr.name.flattenToShortString(), startTime);
+                    enforceContentProviderRestrictionsForSdkSandbox(cpi);
 
                     // This provider has been published or is in the process
                     // of being published...  but it is also allowed to run
@@ -447,6 +443,7 @@ public class ContentProviderHelper {
                     // info and allow the caller to instantiate it.  Only do
                     // this if the provider is the same user as the caller's
                     // process, or can run as root (so can be in any process).
+                    enforceContentProviderRestrictionsForSdkSandbox(cpi);
                     return cpr.newHolder(null, true);
                 }
 
@@ -589,6 +586,8 @@ public class ContentProviderHelper {
                 // Return a holder instance even if we are waiting for the publishing of the
                 // provider, client will check for the holder.provider to see if it needs to wait
                 // for it.
+                //todo(b/265965249) Need to perform cleanup before calling enforce method here
+                enforceContentProviderRestrictionsForSdkSandbox(cpi);
                 return cpr.newHolder(conn, false);
             }
         }
@@ -650,6 +649,7 @@ public class ContentProviderHelper {
                     + " caller=" + callerName + "/" + Binder.getCallingUid());
             return null;
         }
+        enforceContentProviderRestrictionsForSdkSandbox(cpi);
         return cpr.newHolder(conn, false);
     }
 
@@ -1230,6 +1230,7 @@ public class ContentProviderHelper {
             appName = r.toString();
         }
 
+        enforceContentProviderRestrictionsForSdkSandbox(cpi);
         return checkContentProviderPermission(cpi, callingPid, Binder.getCallingUid(),
                 userId, checkUser, appName);
     }
@@ -1995,6 +1996,26 @@ public class ContentProviderHelper {
 
         if (!printedAnything) {
             pw.println("  (nothing)");
+        }
+    }
+
+    // Binder.clearCallingIdentity() shouldn't be called before this method
+    // as Binder should have its original callingUid for the check
+    private void enforceContentProviderRestrictionsForSdkSandbox(ProviderInfo cpi) {
+        if (!Process.isSdkSandboxUid(Binder.getCallingUid())) {
+            return;
+        }
+        final SdkSandboxManagerLocal sdkSandboxManagerLocal =
+                LocalManagerRegistry.getManager(SdkSandboxManagerLocal.class);
+        if (sdkSandboxManagerLocal == null) {
+            throw new IllegalStateException("SdkSandboxManagerLocal not found "
+                    + "when checking whether SDK sandbox uid may "
+                    + "access the contentprovider.");
+        }
+        if (!sdkSandboxManagerLocal
+                .canAccessContentProviderFromSdkSandbox(cpi)) {
+            throw new SecurityException(
+                    "SDK sandbox uid may not access contentprovider " + cpi.name);
         }
     }
 

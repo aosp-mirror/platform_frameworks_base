@@ -566,6 +566,8 @@ public class TransitionTests extends WindowTestsBase {
         doReturn(mock(IBinder.class)).when(delegateProc.getThread()).asBinder();
         final ActivityRecord app = new ActivityBuilder(mAtm).setCreateTask(true)
                 .setVisible(false).build();
+        final Task task = app.getTask();
+        task.setTaskOrganizer(mock(ITaskOrganizer.class), true /* skipTaskAppeared */);
         app.setVisibleRequested(true);
         final TransitionController controller = app.mTransitionController;
         final Transition transition = controller.createTransition(TRANSIT_OPEN);
@@ -576,7 +578,11 @@ public class TransitionTests extends WindowTestsBase {
         controller.requestStartTransition(transition, null /* startTask */, remoteTransition,
                 null /* displayChange */);
         testPlayer.startTransition();
+        app.onStartingWindowDrawn();
+        // The task appeared event should be deferred until transition ready.
+        assertFalse(task.taskAppearedReady());
         testPlayer.onTransactionReady(app.getSyncTransaction());
+        assertTrue(task.taskAppearedReady());
         assertTrue(playerProc.isRunningRemoteTransition());
         assertTrue(delegateProc.isRunningRemoteTransition());
         assertTrue(controller.mRemotePlayer.reportRunning(delegateProc.getThread()));

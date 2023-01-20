@@ -152,7 +152,7 @@ class GetCredentialViewModel(private val credManRepo: CredentialManagerRepo) : V
   }
 
   fun onCancel() {
-    credManRepo.onCancel()
+    credManRepo.onUserCancel()
     dialogResult.tryEmit(DialogResult(ResultState.NORMAL_CANCELED))
   }
 }

@@ -7412,6 +7412,7 @@ package android.app.admin {
     method public void dump(android.util.Printer, String);
     method public android.content.pm.ActivityInfo getActivityInfo();
     method @NonNull public android.content.ComponentName getComponent();
+    method public int getHeadlessDeviceOwnerMode();
     method public String getPackageName();
     method public String getReceiverName();
     method public String getTagForPolicy(int);
@@ -7423,6 +7424,8 @@ package android.app.admin {
     method public boolean usesPolicy(int);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.DeviceAdminInfo> CREATOR;
+    field public static final int HEADLESS_DEVICE_OWNER_MODE_AFFILIATED = 1; // 0x1
+    field public static final int HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED = 0; // 0x0
     field public static final int USES_ENCRYPTED_STORAGE = 7; // 0x7
     field public static final int USES_POLICY_DISABLE_CAMERA = 8; // 0x8
     field public static final int USES_POLICY_DISABLE_KEYGUARD_FEATURES = 9; // 0x9
@@ -19278,10 +19281,20 @@ package android.hardware.fingerprint {
 
 package android.hardware.input {
 
+  public final class HostUsiVersion implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getMajorVersion();
+    method public int getMinorVersion();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.input.HostUsiVersion> CREATOR;
+  }
+
   public final class InputManager {
+    method @Nullable public android.hardware.input.HostUsiVersion getHostUsiVersion(@NonNull android.view.Display);
     method @Nullable public android.view.InputDevice getInputDevice(int);
     method public int[] getInputDeviceIds();
     method @FloatRange(from=0, to=1) public float getMaximumObscuringOpacityForTouch();
+    method public boolean isStylusPointerIconEnabled();
     method public void registerInputDeviceListener(android.hardware.input.InputManager.InputDeviceListener, android.os.Handler);
     method public void unregisterInputDeviceListener(android.hardware.input.InputManager.InputDeviceListener);
     method @Nullable public android.view.VerifiedInputEvent verifyInputEvent(@NonNull android.view.InputEvent);
@@ -40592,7 +40605,6 @@ package android.service.voice {
     method public void setDisabledShowContext(int);
     method public final void setUiHints(@NonNull android.os.Bundle);
     method public void showSession(android.os.Bundle, int);
-    field public static final String KEY_SHOW_SESSION_ID = "android.service.voice.SHOW_SESSION_ID";
     field public static final String SERVICE_INTERFACE = "android.service.voice.VoiceInteractionService";
     field public static final String SERVICE_META_DATA = "android.voice_interaction";
   }
@@ -40653,6 +40665,7 @@ package android.service.voice {
     method public void startAssistantActivity(android.content.Intent);
     method public void startVoiceActivity(android.content.Intent);
     method public final void unregisterVisibleActivityCallback(@NonNull android.service.voice.VoiceInteractionSession.VisibleActivityCallback);
+    field public static final String KEY_SHOW_SESSION_ID = "android.service.voice.SHOW_SESSION_ID";
     field public static final int SHOW_SOURCE_ACTIVITY = 16; // 0x10
     field public static final int SHOW_SOURCE_APPLICATION = 8; // 0x8
     field public static final int SHOW_SOURCE_ASSIST_GESTURE = 4; // 0x4
@@ -44893,6 +44906,7 @@ package android.telephony {
     method public int getCardIdForDefaultEuicc();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) @WorkerThread public android.os.PersistableBundle getCarrierConfig();
     method public int getCarrierIdFromSimMccMnc();
+    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void getCarrierRestrictionStatus(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public android.telephony.CellLocation getCellLocation();
     method public int getDataActivity();
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.READ_BASIC_PHONE_STATE}) public int getDataNetworkType();
@@ -45052,6 +45066,10 @@ package android.telephony {
     field public static final int CALL_STATE_OFFHOOK = 2; // 0x2
     field public static final int CALL_STATE_RINGING = 1; // 0x1
     field public static final String CAPABILITY_SLICING_CONFIG_SUPPORTED = "CAPABILITY_SLICING_CONFIG_SUPPORTED";
+    field public static final int CARRIER_RESTRICTION_STATUS_NOT_RESTRICTED = 1; // 0x1
+    field public static final int CARRIER_RESTRICTION_STATUS_RESTRICTED = 2; // 0x2
+    field public static final int CARRIER_RESTRICTION_STATUS_RESTRICTED_TO_CALLER = 3; // 0x3
+    field public static final int CARRIER_RESTRICTION_STATUS_UNKNOWN = 0; // 0x0
     field public static final int CDMA_ROAMING_MODE_AFFILIATED = 1; // 0x1
     field public static final int CDMA_ROAMING_MODE_ANY = 2; // 0x2
     field public static final int CDMA_ROAMING_MODE_HOME = 0; // 0x0
@@ -50824,6 +50842,7 @@ package android.view {
     field public static final int TYPE_GRAB = 1020; // 0x3fc
     field public static final int TYPE_GRABBING = 1021; // 0x3fd
     field public static final int TYPE_HAND = 1002; // 0x3ea
+    field public static final int TYPE_HANDWRITING = 1022; // 0x3fe
     field public static final int TYPE_HELP = 1003; // 0x3eb
     field public static final int TYPE_HORIZONTAL_DOUBLE_ARROW = 1014; // 0x3f6
     field public static final int TYPE_NO_DROP = 1012; // 0x3f4
@@ -51042,6 +51061,7 @@ package android.view {
     method public void relayout(int, int);
     method public void release();
     method public void setView(@NonNull android.view.View, int, int);
+    method public boolean transferTouchGestureToHost();
   }
 
   public static final class SurfaceControlViewHost.SurfacePackage implements android.os.Parcelable {

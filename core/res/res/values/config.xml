@@ -2003,6 +2003,9 @@
          STREAM_MUSIC as if it's on TV platform. -->
     <bool name="config_single_volume">false</bool>
 
+    <!-- Volume policy -->
+    <bool name="config_volume_down_to_enter_silent">false</bool>
+
     <!-- The number of volume steps for the notification stream -->
     <integer name="config_audio_notif_vol_steps">7</integer>
 
@@ -5414,6 +5417,9 @@
     <!-- Whether using split screen aspect ratio as a default aspect ratio for unresizable apps. -->
     <bool name="config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled">false</bool>
 
+    <!-- Whether using display aspect ratio as a default aspect ratio for all letterboxed apps. -->
+    <bool name="config_letterboxIsDisplayAspectRatioForFixedOrientationLetterboxEnabled">false</bool>
+
     <!-- Whether the specific behaviour for translucent activities letterboxing is enabled.
          TODO(b/255532890) Enable when ignoreOrientationRequest is set -->
     <bool name="config_letterboxIsEnabledForTranslucentActivities">false</bool>
@@ -5802,6 +5808,7 @@
            - config_roundedCornerDrawableArray (config in SystemUI resource)
            - config_roundedCornerTopDrawableArray (config in SystemUI resource)
            - config_roundedCornerBottomDrawableArray (config in SystemUI resource)
+           - config_displayUsiVersionArray
 
          Leave this array empty for single display device and the system will load the default main
          built-in related configs.
@@ -5941,6 +5948,10 @@
          That button will fire an intent targeted for this package with the mentioned action.
          When this resource is empty, that button will not be shown. -->
     <string name="config_supervisedUserCreationPackage" translatable="false"></string>
+
+    <!-- Flag indicating whether the show Stylus pointer icon.
+     If set, a pointer icon will be shown over the location of a stylus pointer.-->
+    <bool name="config_enableStylusPointerIcon">false</bool>
 
     <!-- Determines whether SafetyCenter feature is enabled. -->
     <bool name="config_enableSafetyCenter">true</bool>
@@ -6159,5 +6170,22 @@
         Connect Migration permissions. The digest should be computed over the DER encoding of the
         trusted certificate using the SHA-256 digest algorithm. -->
     <string-array name="config_healthConnectMigrationKnownSigners">
+    </string-array>
+
+    <!-- The Universal Stylus Initiative (USI) protocol version supported by each display.
+         (@see https://universalstylus.org/).
+
+         The i-th value in this array corresponds to the supported USI version of the i-th display
+         listed in config_displayUniqueIdArray. On a single-display device, the
+         config_displayUniqueIdArray may be empty, in which case the only value in this array should
+         be the USI version for the main built-in display.
+
+         If the display does not support USI, the version value should be an empty string. If the
+         display supports USI, the version must be in the following format:
+           "<major-version>.<minor-version>"
+
+         For example, "", "1.0", and "2.0" are valid values. -->
+    <string-array name="config_displayUsiVersionArray" translatable="false">
+        <item>""</item>
     </string-array>
 </resources>

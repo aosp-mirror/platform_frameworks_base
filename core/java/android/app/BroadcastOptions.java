@@ -909,12 +909,41 @@ public class BroadcastOptions extends ComponentOptions {
     /**
      * Clear the {@link BundleMerger} object that was previously set using
      * {@link #setDeliveryGroupExtrasMerger(BundleMerger)}.
-     *
      * @hide
      */
     public void clearDeliveryGroupExtrasMerger() {
         mDeliveryGroupExtrasMerger = null;
     }
+
+    /**
+     * Set PendingIntent activity is allowed to be started in the background if the caller
+     * can start background activities.
+     *
+     * @deprecated use #setPendingIntentBackgroundActivityStartMode(int) to set the full range
+     * of states
+     * @hide
+     */
+    @SystemApi
+    @Override
+    @Deprecated public void setPendingIntentBackgroundActivityLaunchAllowed(boolean allowed) {
+        super.setPendingIntentBackgroundActivityLaunchAllowed(allowed);
+    }
+
+    /**
+     * Get PendingIntent activity is allowed to be started in the background if the caller can start
+     * background activities.
+     *
+     * @deprecated use {@link #getPendingIntentBackgroundActivityStartMode()} since for apps
+     * targeting {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or higher this value might
+     * not match the actual behavior if the value was not explicitly set.
+     * @hide
+     */
+    @SystemApi
+    @Override
+    @Deprecated public boolean isPendingIntentBackgroundActivityLaunchAllowed() {
+        return super.isPendingIntentBackgroundActivityLaunchAllowed();
+    }
+
 
     /**
      * Sets the mode for allowing or denying the senders privileges to start background activities
@@ -924,7 +953,6 @@ public class BroadcastOptions extends ComponentOptions {
      * methods. A privileged sender of a PendingIntent should only grant
      * MODE_BACKGROUND_ACTIVITY_START_ALLOWED if the PendingIntent is from a trusted source and/or
      * executed on behalf the user.
-     *
      * @hide
      */
     @SystemApi
@@ -933,6 +961,19 @@ public class BroadcastOptions extends ComponentOptions {
     public BroadcastOptions setPendingIntentBackgroundActivityStartMode(int state) {
         super.setPendingIntentBackgroundActivityStartMode(state);
         return this;
+    }
+
+    /**
+     * Gets the mode for allowing or denying the senders privileges to start background activities
+     * to the PendingIntent.
+     *
+     * @see #setPendingIntentBackgroundActivityStartMode(int)
+     * @hide
+     */
+    @SystemApi
+    @Override // to narrow down the return type
+    public @BackgroundActivityStartMode int getPendingIntentBackgroundActivityStartMode() {
+        return super.getPendingIntentBackgroundActivityStartMode();
     }
 
     /**

@@ -5854,7 +5854,7 @@ public abstract class Context {
     public static final String SECURE_ELEMENT_SERVICE = "secure_element";
 
     /**
-     * Use with {@link #getSystemService(String)} to retrieve an
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.app.timedetector.TimeDetector}.
      * @hide
      *
@@ -5863,7 +5863,7 @@ public abstract class Context {
     public static final String TIME_DETECTOR_SERVICE = "time_detector";
 
     /**
-     * Use with {@link #getSystemService(String)} to retrieve an
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.app.timezonedetector.TimeZoneDetector}.
      * @hide
      *
@@ -5872,12 +5872,14 @@ public abstract class Context {
     public static final String TIME_ZONE_DETECTOR_SERVICE = "time_zone_detector";
 
     /**
-     * Use with {@link #getSystemService(String)} to retrieve an {@link TimeManager}.
+     * Use with {@link #getSystemService(String)} to retrieve a {@link TimeManager}.
      * @hide
      *
      * @see #getSystemService(String)
      */
-    public static final String TIME_MANAGER = "time_manager";
+    @SystemApi
+    @SuppressLint("ServiceName")
+    public static final String TIME_MANAGER_SERVICE = "time_manager";
 
     /**
      * Binder service name for {@link AppBindingService}.
@@ -7527,14 +7529,12 @@ public abstract class Context {
     }
 
     /**
-     * Get the binder object associated with the IApplicationThread of this Context.
-     *
-     * This can be used by a mainline module to uniquely identify a specific app process.
+     * Used by a mainline module to uniquely identify a specific app process.
      * @hide
      */
     @NonNull
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public IBinder getIApplicationThreadBinder() {
+    public IBinder getProcessToken() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 

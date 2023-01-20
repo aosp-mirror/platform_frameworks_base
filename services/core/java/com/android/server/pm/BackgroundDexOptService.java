@@ -331,6 +331,7 @@ public final class BackgroundDexOptService {
     /** Adds listener for package update */
     public void addPackagesUpdatedListener(PackagesUpdatedListener listener)
             throws LegacyDexoptDisabledException {
+        // TODO(b/251903639): Evaluate whether this needs to support ART Service or not.
         Installer.checkLegacyDexoptDisabled();
         synchronized (mLock) {
             mPackagesUpdatedListeners.add(listener);
@@ -629,6 +630,8 @@ public final class BackgroundDexOptService {
 
     /** Gets the size of a package. */
     private long getPackageSize(@NonNull Computer snapshot, String pkg) {
+        // TODO(b/251903639): Make this in line with the calculation in
+        // `DexOptHelper.DexoptDoneHandler`.
         PackageInfo info = snapshot.getPackageInfo(pkg, 0, UserHandle.USER_SYSTEM);
         long size = 0;
         if (info != null && info.applicationInfo != null) {
@@ -723,6 +726,8 @@ public final class BackgroundDexOptService {
             return optimizePackages(pkgs, lowStorageThreshold, updatedPackages, isPostBootUpdate);
         } finally {
             // Always let the pinner service know about changes.
+            // TODO(b/251903639): ART Service does this for all dexopts, while the code below only
+            // runs for background jobs. We should try to make them behave the same.
             notifyPinService(updatedPackages);
             // Only notify IORap the primary dex opt, because we don't want to
             // invalidate traces unnecessary due to b/161633001 and that it's
