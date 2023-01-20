@@ -29,19 +29,11 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.runBlocking
 
 /**
- * The config used to load the App List.
- */
-data class AppListConfig(
-    val userId: Int,
-    val showInstantApps: Boolean,
-)
-
-/**
  * The repository to load the App List data.
  */
 internal interface AppListRepository {
     /** Loads the list of [ApplicationInfo]. */
-    suspend fun loadApps(config: AppListConfig): List<ApplicationInfo>
+    suspend fun loadApps(userId: Int, showInstantApps: Boolean): List<ApplicationInfo>
 
     /** Gets the flow of predicate that could used to filter system app. */
     fun showSystemPredicate(
@@ -50,7 +42,7 @@ internal interface AppListRepository {
     ): Flow<(app: ApplicationInfo) -> Boolean>
 
     /** Gets the system app package names. */
-    fun getSystemPackageNamesBlocking(config: AppListConfig): Set<String>
+    fun getSystemPackageNamesBlocking(userId: Int, showInstantApps: Boolean): Set<String>
 }
 
 /**
@@ -59,15 +51,21 @@ internal interface AppListRepository {
 object AppListRepositoryUtil {
     /** Gets the system app package names. */
     @JvmStatic
-    fun getSystemPackageNames(context: Context, config: AppListConfig): Set<String> {
-        return AppListRepositoryImpl(context).getSystemPackageNamesBlocking(config)
-    }
+    fun getSystemPackageNames(
+        context: Context,
+        userId: Int,
+        showInstantApps: Boolean,
+    ): Set<String> =
+        AppListRepositoryImpl(context).getSystemPackageNamesBlocking(userId, showInstantApps)
 }
 
 internal class AppListRepositoryImpl(private val context: Context) : AppListRepository {
     private val packageManager = context.packageManager
 
-    override suspend fun loadApps(config: AppListConfig): List<ApplicationInfo> = coroutineScope {
+    override suspend fun loadApps(
+        userId: Int,
+        showInstantApps: Boolean,
+    ): List<ApplicationInfo> = coroutineScope {
         val hiddenSystemModulesDeferred = async {
             packageManager.getInstalledModules(0)
                 .filter { it.isHidden }
@@ -82,12 +80,12 @@ internal class AppListRepositoryImpl(private val context: Context) : AppListRepo
                 PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS).toLong()
         )
         val installedApplicationsAsUser =
-            packageManager.getInstalledApplicationsAsUser(flags, config.userId)
+            packageManager.getInstalledApplicationsAsUser(flags, userId)
 
         val hiddenSystemModules = hiddenSystemModulesDeferred.await()
         val hideWhenDisabledPackages = hideWhenDisabledPackagesDeferred.await()
         installedApplicationsAsUser.filter { app ->
-            app.isInAppList(config.showInstantApps, hiddenSystemModules, hideWhenDisabledPackages)
+            app.isInAppList(showInstantApps, hiddenSystemModules, hideWhenDisabledPackages)
         }
     }
 
@@ -97,18 +95,17 @@ internal class AppListRepositoryImpl(private val context: Context) : AppListRepo
     ): Flow<(app: ApplicationInfo) -> Boolean> =
         userIdFlow.combine(showSystemFlow, ::showSystemPredicate)
 
-    override fun getSystemPackageNamesBlocking(config: AppListConfig) = runBlocking {
-        getSystemPackageNames(config)
-    }
+    override fun getSystemPackageNamesBlocking(userId: Int, showInstantApps: Boolean) =
+        runBlocking { getSystemPackageNames(userId, showInstantApps) }
 
-    private suspend fun getSystemPackageNames(config: AppListConfig): Set<String> =
-            coroutineScope {
-                val loadAppsDeferred = async { loadApps(config) }
-                val homeOrLauncherPackages = loadHomeOrLauncherPackages(config.userId)
-                val showSystemPredicate =
-                        { app: ApplicationInfo -> isSystemApp(app, homeOrLauncherPackages) }
-                loadAppsDeferred.await().filter(showSystemPredicate).map { it.packageName }.toSet()
-            }
+    private suspend fun getSystemPackageNames(userId: Int, showInstantApps: Boolean): Set<String> =
+        coroutineScope {
+            val loadAppsDeferred = async { loadApps(userId, showInstantApps) }
+            val homeOrLauncherPackages = loadHomeOrLauncherPackages(userId)
+            val showSystemPredicate =
+                { app: ApplicationInfo -> isSystemApp(app, homeOrLauncherPackages) }
+            loadAppsDeferred.await().filter(showSystemPredicate).map { it.packageName }.toSet()
+        }
 
     private suspend fun showSystemPredicate(
         userId: Int,
