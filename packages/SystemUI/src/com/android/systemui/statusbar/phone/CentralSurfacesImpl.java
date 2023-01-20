@@ -865,6 +865,11 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         wiredChargingRippleController.registerCallbacks();
 
         mLightRevealScrimViewModelLazy = lightRevealScrimViewModelLazy;
+
+        // Based on teamfood flag, turn predictive back dispatch on at runtime.
+        if (mFeatureFlags.isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_SYSUI)) {
+            mContext.getApplicationInfo().setEnableOnBackInvokedCallback(true);
+        }
     }
 
     @Override
@@ -978,11 +983,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
         // Lastly, call to the icon policy to install/update all the icons.
         mIconPolicy.init();
-
-        // Based on teamfood flag, turn predictive back dispatch on at runtime.
-        if (mFeatureFlags.isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_SYSUI)) {
-            mContext.getApplicationInfo().setEnableOnBackInvokedCallback(true);
-        }
 
         mKeyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
@@ -1395,6 +1395,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         // Things that mean we're not swiping to dismiss the keyguard, and should ignore this
         // expansion:
         // - Keyguard isn't even visible.
+        // - We're swiping on the bouncer, not the lockscreen.
         // - Keyguard is occluded. Expansion changes here are the shade being expanded over the
         //   occluding activity.
         // - Keyguard is visible, but can't be dismissed (swiping up will show PIN/password prompt).
@@ -1404,6 +1405,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         // - QS is expanded and we're swiping - swiping up now will hide QS, not dismiss the
         //   keyguard.
         if (!isKeyguardShowing()
+                || mStatusBarKeyguardViewManager.primaryBouncerIsOrWillBeShowing()
                 || isOccluded()
                 || !mKeyguardStateController.canDismissLockScreen()
                 || mKeyguardViewMediator.isAnySimPinSecure()

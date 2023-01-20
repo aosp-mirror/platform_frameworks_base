@@ -31,6 +31,10 @@ public interface NotificationInterruptStateProvider {
      */
     enum FullScreenIntentDecision {
         /**
+         * Full screen intents are disabled.
+         */
+        NO_FSI_DISABLED(false),
+        /**
          * No full screen intent included, so there is nothing to show.
          */
         NO_FULL_SCREEN_INTENT(false),

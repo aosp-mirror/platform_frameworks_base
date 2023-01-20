@@ -21,6 +21,7 @@ import android.database.ContentObserver
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
+import android.os.Trace
 import android.provider.Settings
 
 /**
@@ -51,14 +52,21 @@ class LogcatEchoTrackerDebug private constructor(private val contentResolver: Co
         }
     }
 
+    private fun clearCache() {
+        Trace.beginSection("LogcatEchoTrackerDebug#clearCache")
+        cachedBufferLevels.clear()
+        Trace.endSection()
+    }
+
     private fun attach(mainLooper: Looper) {
+        Trace.beginSection("LogcatEchoTrackerDebug#attach")
         contentResolver.registerContentObserver(
             Settings.Global.getUriFor(BUFFER_PATH),
             true,
             object : ContentObserver(Handler(mainLooper)) {
                 override fun onChange(selfChange: Boolean, uri: Uri?) {
                     super.onChange(selfChange, uri)
-                    cachedBufferLevels.clear()
+                    clearCache()
                 }
             }
         )
@@ -69,10 +77,11 @@ class LogcatEchoTrackerDebug private constructor(private val contentResolver: Co
             object : ContentObserver(Handler(mainLooper)) {
                 override fun onChange(selfChange: Boolean, uri: Uri?) {
                     super.onChange(selfChange, uri)
-                    cachedTagLevels.clear()
+                    clearCache()
                 }
             }
         )
+        Trace.endSection()
     }
 
     /** Whether [bufferName] should echo messages of [level] or higher to logcat. */
@@ -97,9 +106,12 @@ class LogcatEchoTrackerDebug private constructor(private val contentResolver: Co
 
     private fun readSetting(path: String): LogLevel {
         return try {
+            Trace.beginSection("LogcatEchoTrackerDebug#readSetting")
             parseProp(Settings.Global.getString(contentResolver, path))
         } catch (_: Settings.SettingNotFoundException) {
             DEFAULT_LEVEL
+        } finally {
+            Trace.endSection()
         }
     }
 

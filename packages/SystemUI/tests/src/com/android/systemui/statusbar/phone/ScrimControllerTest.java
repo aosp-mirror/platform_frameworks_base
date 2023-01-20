@@ -630,6 +630,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void transitionToUnlocked() {
+        mScrimController.setClipsQsScrim(false);
         mScrimController.setRawPanelExpansionFraction(0f);
         mScrimController.transitionTo(ScrimState.UNLOCKED);
         finishAnimationsImmediately();
@@ -645,14 +646,21 @@ public class ScrimControllerTest extends SysuiTestCase {
         ));
 
         // Back scrim should be visible after start dragging
-        mScrimController.setRawPanelExpansionFraction(0.3f);
+        mScrimController.setRawPanelExpansionFraction(0.29f);
         assertScrimAlpha(Map.of(
                 mScrimInFront, TRANSPARENT,
                 mNotificationsScrim, TRANSPARENT,
                 mScrimBehind, SEMI_TRANSPARENT));
 
+        // Back scrim should be opaque at 30%
+        mScrimController.setRawPanelExpansionFraction(0.3f);
+        assertScrimAlpha(Map.of(
+                mScrimInFront, TRANSPARENT,
+                mNotificationsScrim, TRANSPARENT,
+                mScrimBehind, OPAQUE));
+
         // Then, notification scrim should fade in
-        mScrimController.setRawPanelExpansionFraction(0.7f);
+        mScrimController.setRawPanelExpansionFraction(0.31f);
         assertScrimAlpha(Map.of(
                 mScrimInFront, TRANSPARENT,
                 mNotificationsScrim, SEMI_TRANSPARENT,
