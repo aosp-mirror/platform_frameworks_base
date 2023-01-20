@@ -38,6 +38,7 @@ import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -166,6 +167,8 @@ public class ScreenshotView extends FrameLayout implements
 
     private final ArrayList<OverlayActionChip> mSmartChips = new ArrayList<>();
     private PendingInteraction mPendingInteraction;
+    // Should only be set/used if the SCREENSHOT_METADATA flag is set.
+    private ScreenshotData mScreenshotData;
 
     private final InteractionJankMonitor mInteractionJankMonitor;
     private long mDefaultTimeoutOfTimeoutHandler;
@@ -468,6 +471,13 @@ public class ScreenshotView extends FrameLayout implements
 
     void setScreenshot(Bitmap bitmap, Insets screenInsets) {
         mScreenshotPreview.setImageDrawable(createScreenDrawable(mResources, bitmap, screenInsets));
+    }
+
+    void setScreenshot(ScreenshotData screenshot) {
+        mScreenshotData = screenshot;
+        setScreenshot(screenshot.getBitmap(), screenshot.getInsets());
+        mScreenshotPreview.setImageDrawable(createScreenDrawable(mResources, screenshot.getBitmap(),
+                screenshot.getInsets()));
     }
 
     void setPackageName(String packageName) {
@@ -808,9 +818,17 @@ public class ScreenshotView extends FrameLayout implements
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SHARE_TAPPED, 0, mPackageName);
             if (mFlags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY)) {
                 prepareSharedTransition();
-                mActionExecutor.launchIntentAsync(
-                        ActionIntentCreator.INSTANCE.createShareIntent(
-                                imageData.uri, imageData.subject),
+
+                Intent shareIntent;
+                if (mFlags.isEnabled(Flags.SCREENSHOT_METADATA) && mScreenshotData != null
+                        && mScreenshotData.getContextUrl() != null) {
+                    shareIntent = ActionIntentCreator.INSTANCE.createShareIntentWithExtraText(
+                            imageData.uri, mScreenshotData.getContextUrl().toString());
+                } else {
+                    shareIntent = ActionIntentCreator.INSTANCE.createShareIntentWithSubject(
+                            imageData.uri, imageData.subject);
+                }
+                mActionExecutor.launchIntentAsync(shareIntent,
                         imageData.shareTransition.get().bundle,
                         imageData.owner.getIdentifier(), false);
             } else {
@@ -1112,6 +1130,7 @@ public class ScreenshotView extends FrameLayout implements
         mQuickShareChip = null;
         setAlpha(1);
         mScreenshotStatic.setAlpha(1);
+        mScreenshotData = null;
     }
 
     private void startSharedTransition(ActionTransition transition) {
