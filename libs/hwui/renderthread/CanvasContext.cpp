@@ -1021,6 +1021,10 @@ void CanvasContext::sendLoadResetHint() {
     mHintSessionWrapper.sendLoadResetHint();
 }
 
+void CanvasContext::sendLoadIncreaseHint() {
+    mHintSessionWrapper.sendLoadIncreaseHint();
+}
+
 void CanvasContext::setSyncDelayDuration(nsecs_t duration) {
     mSyncDelayDuration = duration;
 }
