@@ -17,8 +17,6 @@
 package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 
 import android.content.Intent
-import android.os.UserHandle
-import android.provider.Settings
 import android.telephony.CarrierConfigManager.KEY_INFLATE_SIGNAL_STRENGTH_BOOL
 import android.telephony.CellSignalStrengthCdma
 import android.telephony.NetworkRegistrationInfo
@@ -74,7 +72,6 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -103,7 +100,6 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     private val scope = CoroutineScope(IMMEDIATE)
     private val mobileMappings = FakeMobileMappingsProxy()
-    private val globalSettings = FakeSettings()
     private val systemUiCarrierConfig =
         SystemUiCarrierConfig(
             SUB_1_ID,
@@ -113,7 +109,6 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        globalSettings.userId = UserHandle.USER_ALL
         whenever(telephonyManager.subscriptionId).thenReturn(SUB_1_ID)
 
         connectionsRepo = FakeMobileConnectionsRepository(mobileMappings, tableLogger)
@@ -125,10 +120,8 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
                 DEFAULT_NAME,
                 SEP,
                 telephonyManager,
-                globalSettings,
                 systemUiCarrierConfig,
                 fakeBroadcastDispatcher,
-                connectionsRepo.globalMobileDataSettingChangedEvent,
                 mobileMappings,
                 IMMEDIATE,
                 logger,
@@ -362,52 +355,26 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     @Test
     fun dataEnabled_initial_false() =
         runBlocking(IMMEDIATE) {
-            whenever(telephonyManager.isDataConnectionAllowed).thenReturn(true)
-
-            assertThat(underTest.dataEnabled.value).isFalse()
-        }
-
-    @Test
-    fun dataEnabled_isEnabled_true() =
-        runBlocking(IMMEDIATE) {
-            whenever(telephonyManager.isDataConnectionAllowed).thenReturn(true)
-            val job = underTest.dataEnabled.launchIn(this)
-
-            assertThat(underTest.dataEnabled.value).isTrue()
-
-            job.cancel()
-        }
-
-    @Test
-    fun dataEnabled_isDisabled() =
-        runBlocking(IMMEDIATE) {
             whenever(telephonyManager.isDataConnectionAllowed).thenReturn(false)
-            val job = underTest.dataEnabled.launchIn(this)
 
             assertThat(underTest.dataEnabled.value).isFalse()
-
-            job.cancel()
         }
 
     @Test
-    fun isDataConnectionAllowed_subIdSettingUpdate_valueUpdated() =
+    fun `is data enabled - tracks telephony callback`() =
         runBlocking(IMMEDIATE) {
-            val subIdSettingName = "${Settings.Global.MOBILE_DATA}$SUB_1_ID"
-
             var latest: Boolean? = null
             val job = underTest.dataEnabled.onEach { latest = it }.launchIn(this)
 
-            // We don't read the setting directly, we query telephony when changes happen
             whenever(telephonyManager.isDataConnectionAllowed).thenReturn(false)
-            globalSettings.putInt(subIdSettingName, 0)
-            assertThat(latest).isFalse()
+            assertThat(underTest.dataEnabled.value).isFalse()
 
-            whenever(telephonyManager.isDataConnectionAllowed).thenReturn(true)
-            globalSettings.putInt(subIdSettingName, 1)
+            val callback = getTelephonyCallbackForType<TelephonyCallback.DataEnabledListener>()
+
+            callback.onDataEnabledChanged(true, 1)
             assertThat(latest).isTrue()
 
-            whenever(telephonyManager.isDataConnectionAllowed).thenReturn(false)
-            globalSettings.putInt(subIdSettingName, 0)
+            callback.onDataEnabledChanged(false, 1)
             assertThat(latest).isFalse()
 
             job.cancel()

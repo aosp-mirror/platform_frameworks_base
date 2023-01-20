@@ -40,7 +40,6 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.kotlinArgumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
@@ -85,7 +84,6 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
     @Mock private lateinit var demoModeController: DemoModeController
     @Mock private lateinit var dumpManager: DumpManager
 
-    private val globalSettings = FakeSettings()
     private val fakeNetworkEventsFlow = MutableStateFlow<FakeNetworkEventModel?>(null)
     private val mobileMappings = FakeMobileMappingsProxy()
 
@@ -118,7 +116,6 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
                 logger,
                 mobileMappings,
                 fakeBroadcastDispatcher,
-                globalSettings,
                 context,
                 IMMEDIATE,
                 scope,

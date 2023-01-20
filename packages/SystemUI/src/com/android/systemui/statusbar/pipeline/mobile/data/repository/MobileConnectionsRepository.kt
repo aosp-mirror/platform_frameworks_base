@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
-import android.provider.Settings
 import android.telephony.CarrierConfigManager
 import android.telephony.SubscriptionManager
 import com.android.settingslib.SignalIcon.MobileIconGroup
@@ -52,9 +51,6 @@ interface MobileConnectionsRepository {
 
     /** Get or create a repository for the line of service for the given subscription ID */
     fun getRepoForSubId(subId: Int): MobileConnectionRepository
-
-    /** Observe changes to the [Settings.Global.MOBILE_DATA] setting */
-    val globalMobileDataSettingChangedEvent: Flow<Unit>
 
     /**
      * [Config] is an object that tracks relevant configuration flags for a given subscription ID.

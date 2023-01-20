@@ -19,14 +19,12 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.IntentFilter
-import android.database.ContentObserver
 import android.net.ConnectivityManager
 import android.net.ConnectivityManager.NetworkCallback
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED
 import android.net.NetworkCapabilities.TRANSPORT_CELLULAR
-import android.provider.Settings.Global.MOBILE_DATA
 import android.telephony.CarrierConfigManager
 import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
@@ -54,7 +52,6 @@ import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import com.android.systemui.util.kotlin.pairwise
-import com.android.systemui.util.settings.GlobalSettings
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -87,7 +84,6 @@ constructor(
     private val logger: ConnectivityPipelineLogger,
     mobileMappingsProxy: MobileMappingsProxy,
     broadcastDispatcher: BroadcastDispatcher,
-    private val globalSettings: GlobalSettings,
     private val context: Context,
     @Background private val bgDispatcher: CoroutineDispatcher,
     @Application private val scope: CoroutineScope,
@@ -222,29 +218,6 @@ constructor(
             ?: createRepositoryForSubId(subId).also { subIdRepositoryCache[subId] = it }
     }
 
-    /**
-     * In single-SIM devices, the [MOBILE_DATA] setting is phone-wide. For multi-SIM, the individual
-     * connection repositories also observe the URI for [MOBILE_DATA] + subId.
-     */
-    override val globalMobileDataSettingChangedEvent: Flow<Unit> =
-        conflatedCallbackFlow {
-                val observer =
-                    object : ContentObserver(null) {
-                        override fun onChange(selfChange: Boolean) {
-                            trySend(Unit)
-                        }
-                    }
-
-                globalSettings.registerContentObserver(
-                    globalSettings.getUriFor(MOBILE_DATA),
-                    true,
-                    observer
-                )
-
-                awaitClose { context.contentResolver.unregisterContentObserver(observer) }
-            }
-            .logInputChange(logger, "globalMobileDataSettingChangedEvent")
-
     @SuppressLint("MissingPermission")
     override val defaultMobileNetworkConnectivity: StateFlow<MobileConnectivityModel> =
         conflatedCallbackFlow {
@@ -315,7 +288,6 @@ constructor(
             isCarrierMerged(subId),
             defaultNetworkName,
             networkNameSeparator,
-            globalMobileDataSettingChangedEvent,
         )
     }
 

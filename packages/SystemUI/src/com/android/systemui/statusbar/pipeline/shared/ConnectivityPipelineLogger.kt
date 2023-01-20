@@ -240,6 +240,18 @@ constructor(
         )
     }
 
+    fun logOnDataEnabledChanged(enabled: Boolean, subId: Int) {
+        buffer.log(
+            SB_LOGGING_TAG,
+            LogLevel.INFO,
+            {
+                int1 = subId
+                bool1 = enabled
+            },
+            { "onDataEnabledChanged: subId=$int1 enabled=$bool1" },
+        )
+    }
+
     companion object {
         const val SB_LOGGING_TAG = "SbConnectivity"
 

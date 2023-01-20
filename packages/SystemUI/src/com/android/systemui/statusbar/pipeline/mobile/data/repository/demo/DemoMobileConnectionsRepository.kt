@@ -185,8 +185,6 @@ constructor(
         return CacheContainer(repo, lastMobileState = null)
     }
 
-    override val globalMobileDataSettingChangedEvent = MutableStateFlow(Unit)
-
     fun startProcessingCommands() {
         mobileDemoCommandJob =
             scope.launch {

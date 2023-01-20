@@ -26,7 +26,6 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConn
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -50,7 +49,6 @@ class FullMobileConnectionRepository(
     override val tableLogBuffer: TableLogBuffer,
     private val defaultNetworkName: NetworkNameModel,
     private val networkNameSeparator: String,
-    private val globalMobileDataSettingChangedEvent: Flow<Unit>,
     @Application scope: CoroutineScope,
     private val mobileRepoFactory: MobileConnectionRepositoryImpl.Factory,
     private val carrierMergedRepoFactory: CarrierMergedConnectionRepository.Factory,
@@ -84,7 +82,6 @@ class FullMobileConnectionRepository(
             tableLogBuffer,
             defaultNetworkName,
             networkNameSeparator,
-            globalMobileDataSettingChangedEvent,
         )
     }
 
@@ -150,7 +147,6 @@ class FullMobileConnectionRepository(
             startingIsCarrierMerged: Boolean,
             defaultNetworkName: NetworkNameModel,
             networkNameSeparator: String,
-            globalMobileDataSettingChangedEvent: Flow<Unit>,
         ): FullMobileConnectionRepository {
             val mobileLogger =
                 logFactory.getOrCreate(tableBufferLogName(subId), MOBILE_CONNECTION_BUFFER_SIZE)
@@ -161,7 +157,6 @@ class FullMobileConnectionRepository(
                 mobileLogger,
                 defaultNetworkName,
                 networkNameSeparator,
-                globalMobileDataSettingChangedEvent,
                 scope,
                 mobileRepoFactory,
                 carrierMergedRepoFactory,
