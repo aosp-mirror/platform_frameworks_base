@@ -23,9 +23,11 @@ import android.view.View
 import com.android.internal.logging.UiEventLogger
 import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.systemui.CoreStartable
+import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.taptotransfer.MediaTttFlags
 import com.android.systemui.media.taptotransfer.common.MediaTttUtils
 import com.android.systemui.statusbar.CommandQueue
@@ -34,6 +36,7 @@ import com.android.systemui.temporarydisplay.ViewPriority
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import com.android.systemui.temporarydisplay.chipbar.ChipbarEndItem
 import com.android.systemui.temporarydisplay.chipbar.ChipbarInfo
+import java.io.PrintWriter
 import javax.inject.Inject
 
 /**
@@ -47,14 +50,14 @@ constructor(
     private val chipbarCoordinator: ChipbarCoordinator,
     private val commandQueue: CommandQueue,
     private val context: Context,
+    private val dumpManager: DumpManager,
     private val logger: MediaTttSenderLogger,
     private val mediaTttFlags: MediaTttFlags,
     private val uiEventLogger: MediaTttSenderUiEventLogger,
-) : CoreStartable {
+) : CoreStartable, Dumpable {
 
     private var displayedState: ChipStateSender? = null
     // A map to store current chip state per id.
-    // TODO(b/265455911): Log whenever we add or remove from the store.
     private var stateMap: MutableMap<String, ChipStateSender> = mutableMapOf()
 
     private val commandQueueCallbacks =
@@ -75,6 +78,7 @@ constructor(
     override fun start() {
         if (mediaTttFlags.isMediaTttEnabled()) {
             commandQueue.addCallback(commandQueueCallbacks)
+            dumpManager.registerNormalDumpable(this)
         }
     }
 
@@ -104,12 +108,13 @@ constructor(
         uiEventLogger.logSenderStateChange(chipState)
 
         if (chipState == ChipStateSender.FAR_FROM_RECEIVER) {
+            val removalReason = ChipStateSender.FAR_FROM_RECEIVER.name
+
             // No need to store the state since it is the default state
-            removeIdFromStore(routeInfo.id)
+            removeIdFromStore(routeInfo.id, reason = removalReason)
             // Return early if we're not displaying a chip anyway
             val currentDisplayedState = displayedState ?: return
 
-            val removalReason = ChipStateSender.FAR_FROM_RECEIVER.name
             if (
                 currentDisplayedState.transferStatus == TransferStatus.IN_PROGRESS ||
                     currentDisplayedState.transferStatus == TransferStatus.SUCCEEDED
@@ -127,6 +132,7 @@ constructor(
             chipbarCoordinator.removeView(routeInfo.id, removalReason)
         } else {
             stateMap[routeInfo.id] = chipState
+            logger.logStateMap(stateMap)
             displayedState = chipState
             chipbarCoordinator.registerListener(displayListener)
             chipbarCoordinator.displayView(
@@ -232,12 +238,19 @@ constructor(
     }
 
     private val displayListener =
-        TemporaryViewDisplayController.Listener { id -> removeIdFromStore(id) }
+        TemporaryViewDisplayController.Listener { id, reason -> removeIdFromStore(id, reason) }
 
-    private fun removeIdFromStore(id: String) {
+    private fun removeIdFromStore(id: String, reason: String) {
+        logger.logStateMapRemoval(id, reason)
         stateMap.remove(id)
+        logger.logStateMap(stateMap)
         if (stateMap.isEmpty()) {
             chipbarCoordinator.unregisterListener(displayListener)
         }
+    }
+
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
+        pw.println("Current sender states:")
+        pw.println(stateMap.toString())
     }
 }

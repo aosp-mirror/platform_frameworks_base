@@ -161,6 +161,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 chipbarCoordinator,
                 commandQueue,
                 context,
+                dumpManager,
                 logger,
                 mediaTttFlags,
                 uiEventLogger,
@@ -179,6 +180,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 chipbarCoordinator,
                 commandQueue,
                 context,
+                dumpManager,
                 logger,
                 mediaTttFlags,
                 uiEventLogger,
@@ -540,6 +542,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         val viewCaptor = ArgumentCaptor.forClass(View::class.java)
         verify(windowManager).addView(viewCaptor.capture(), any())
         verify(windowManager).removeView(viewCaptor.value)
+        verify(logger).logStateMapRemoval(eq(DEFAULT_ID), any())
     }
 
     @Test
@@ -932,6 +935,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 mockChipbarCoordinator,
                 commandQueue,
                 context,
+                dumpManager,
                 logger,
                 mediaTttFlags,
                 uiEventLogger,
@@ -958,6 +962,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 mockChipbarCoordinator,
                 commandQueue,
                 context,
+                dumpManager,
                 logger,
                 mediaTttFlags,
                 uiEventLogger,
@@ -975,9 +980,10 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         verify(mockChipbarCoordinator).registerListener(capture(listenerCaptor))
 
         // WHEN the listener is notified that the view has been removed
-        listenerCaptor.value.onInfoPermanentlyRemoved(DEFAULT_ID)
+        listenerCaptor.value.onInfoPermanentlyRemoved(DEFAULT_ID, "reason")
 
         // THEN the media coordinator unregisters the listener
+        verify(logger).logStateMapRemoval(DEFAULT_ID, "reason")
         verify(mockChipbarCoordinator).unregisterListener(listenerCaptor.value)
     }
 
@@ -989,6 +995,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 mockChipbarCoordinator,
                 commandQueue,
                 context,
+                dumpManager,
                 logger,
                 mediaTttFlags,
                 uiEventLogger,
@@ -1006,7 +1013,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         verify(mockChipbarCoordinator).registerListener(capture(listenerCaptor))
 
         // WHEN the listener is notified that a different view has been removed
-        listenerCaptor.value.onInfoPermanentlyRemoved("differentViewId")
+        listenerCaptor.value.onInfoPermanentlyRemoved("differentViewId", "reason")
 
         // THEN the media coordinator doesn't unregister the listener
         verify(mockChipbarCoordinator, never()).unregisterListener(listenerCaptor.value)
@@ -1020,6 +1027,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 mockChipbarCoordinator,
                 commandQueue,
                 context,
+                dumpManager,
                 logger,
                 mediaTttFlags,
                 uiEventLogger,
@@ -1055,6 +1063,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 mockChipbarCoordinator,
                 commandQueue,
                 context,
+                dumpManager,
                 logger,
                 mediaTttFlags,
                 uiEventLogger,
@@ -1084,10 +1093,11 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         verify(mockChipbarCoordinator, atLeast(1)).registerListener(capture(listenerCaptor))
 
         // THEN one of them is removed
-        listenerCaptor.value.onInfoPermanentlyRemoved("route1")
+        listenerCaptor.value.onInfoPermanentlyRemoved("route1", "reason")
 
         // THEN the media coordinator doesn't unregister the listener (since route2 is still active)
         verify(mockChipbarCoordinator, never()).unregisterListener(listenerCaptor.value)
+        verify(logger).logStateMapRemoval("route1", "reason")
     }
 
     private fun getChipbarView(): ViewGroup {

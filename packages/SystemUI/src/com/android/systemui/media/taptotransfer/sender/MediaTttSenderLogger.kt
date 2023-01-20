@@ -85,6 +85,29 @@ constructor(
         )
     }
 
+    /** Logs the current contents of the state map. */
+    fun logStateMap(map: Map<String, ChipStateSender>) {
+        buffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            { str1 = map.toString() },
+            { "Current sender states: $str1" }
+        )
+    }
+
+    /** Logs that [id] has been removed from the state map due to [reason]. */
+    fun logStateMapRemoval(id: String, reason: String) {
+        buffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = id
+                str2 = reason
+            },
+            { "State removal: id=$str1 reason=$str2" }
+        )
+    }
+
     companion object {
         private const val TAG = "MediaTttSender"
     }
