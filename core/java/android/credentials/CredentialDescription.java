@@ -17,6 +17,7 @@
 package android.credentials;
 
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.service.credentials.CredentialEntry;
@@ -32,6 +33,7 @@ import java.util.Objects;
  * Represents the type and contained data fields of a {@link Credential}.
  * @hide
  */
+@TestApi
 public final class CredentialDescription implements Parcelable {
 
     /**

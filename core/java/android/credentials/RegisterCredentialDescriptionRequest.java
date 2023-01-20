@@ -19,6 +19,7 @@ package android.credentials;
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -36,6 +37,7 @@ import java.util.List;
  *
  * @hide
  */
+@TestApi
 public final class RegisterCredentialDescriptionRequest implements Parcelable {
 
     public static final String FLATTENED_REQUEST_STRING_KEY = "flattened_request_string";
