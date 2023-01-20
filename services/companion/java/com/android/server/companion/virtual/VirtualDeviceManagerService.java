@@ -176,6 +176,11 @@ public class VirtualDeviceManagerService extends SystemService {
     @VisibleForTesting
     void notifyRunningAppsChanged(int deviceId, ArraySet<Integer> uids) {
         synchronized (mVirtualDeviceManagerLock) {
+            if (!mVirtualDevices.contains(deviceId)) {
+                Slog.e(TAG, "notifyRunningAppsChanged called for unknown deviceId:" + deviceId
+                        + " (maybe it was recently closed?)");
+                return;
+            }
             mAppsOnVirtualDevices.put(deviceId, uids);
         }
         mLocalService.onAppsOnVirtualDeviceChanged();
