@@ -203,6 +203,7 @@ class TestDisplayContent extends DisplayContent {
             }
 
             final int displayId = SystemServicesTestRule.sNextDisplayId++;
+            mInfo.displayId = displayId;
             final Display display = new Display(DisplayManagerGlobal.getInstance(), displayId,
                     mInfo, DEFAULT_DISPLAY_ADJUSTMENTS);
             final TestDisplayContent newDisplay = createInternal(display);
