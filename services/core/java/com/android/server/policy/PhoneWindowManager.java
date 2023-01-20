@@ -664,7 +664,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     dispatchMediaKeyRepeatWithWakeLock((KeyEvent)msg.obj);
                     break;
                 case MSG_DISPATCH_SHOW_RECENTS:
-                    showRecents();
+                    showRecentApps(false);
                     break;
                 case MSG_DISPATCH_SHOW_GLOBAL_ACTIONS:
                     showGlobalActionsInternal();
@@ -2927,7 +2927,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             case KeyEvent.KEYCODE_RECENT_APPS:
                 if (down && repeatCount == 0) {
-                    showRecents();
+                    showRecentApps(false /* triggeredFromAltTab */);
                 }
                 return key_consumed;
             case KeyEvent.KEYCODE_APP_SWITCH:
@@ -3110,22 +3110,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             case KeyEvent.KEYCODE_TAB:
-                if (down) {
-                    if (event.isMetaPressed()) {
-                        if (!keyguardOn && isUserSetupComplete()) {
-                            showRecents();
+                if (down && event.isMetaPressed()) {
+                    if (!keyguardOn && isUserSetupComplete()) {
+                        showRecentApps(false);
+                        return key_consumed;
+                    }
+                } else if (down && repeatCount == 0) {
+                    // Display task switcher for ALT-TAB.
+                    if (mRecentAppsHeldModifiers == 0 && !keyguardOn && isUserSetupComplete()) {
+                        final int shiftlessModifiers =
+                                event.getModifiers() & ~KeyEvent.META_SHIFT_MASK;
+                        if (KeyEvent.metaStateHasModifiers(
+                                shiftlessModifiers, KeyEvent.META_ALT_ON)) {
+                            mRecentAppsHeldModifiers = shiftlessModifiers;
+                            showRecentApps(true);
                             return key_consumed;
-                        }
-                    } else {
-                        // Display task switcher for ALT-TAB.
-                        if (mRecentAppsHeldModifiers == 0 && !keyguardOn && isUserSetupComplete()) {
-                            final int modifiers = event.getModifiers();
-                            if (KeyEvent.metaStateHasModifiers(modifiers, KeyEvent.META_ALT_ON)) {
-                                mRecentAppsHeldModifiers = modifiers;
-                                showRecentsFromAltTab(KeyEvent.metaStateHasModifiers(modifiers,
-                                        KeyEvent.META_SHIFT_ON));
-                                return key_consumed;
-                            }
                         }
                     }
                 }
@@ -3662,19 +3661,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mHandler.obtainMessage(MSG_DISPATCH_SHOW_RECENTS).sendToTarget();
     }
 
-    private void showRecents() {
+    private void showRecentApps(boolean triggeredFromAltTab) {
         mPreloadedRecentApps = false; // preloading no longer needs to be canceled
         StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
         if (statusbar != null) {
-            statusbar.showRecentApps(false /* triggeredFromAltTab */, false /* forward */);
-        }
-    }
-
-    private void showRecentsFromAltTab(boolean forward) {
-        mPreloadedRecentApps = false; // preloading no longer needs to be canceled
-        StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
-        if (statusbar != null) {
-            statusbar.showRecentApps(true /* triggeredFromAltTab */, forward);
+            statusbar.showRecentApps(triggeredFromAltTab);
         }
     }
 
