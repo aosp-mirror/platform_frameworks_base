@@ -45,7 +45,7 @@ message UsbDeviceManagerProto {
 message UsbHandlerProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    /* Same as android.hardware.usb.gadget.V1_0.GadgetFunction.* */
+    /* Same as android.hardware.usb.gadget.GadgetFunction.* */
     enum Function {
         FUNCTION_ADB = 1;
         FUNCTION_ACCESSORY = 2;
@@ -54,6 +54,7 @@ message UsbHandlerProto {
         FUNCTION_PTP = 16;
         FUNCTION_RNDIS = 32;
         FUNCTION_AUDIO_SOURCE = 64;
+        FUNCTION_UVC = 128;
     }
 
     repeated Function current_functions = 1;

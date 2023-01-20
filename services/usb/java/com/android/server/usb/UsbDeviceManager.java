@@ -44,7 +44,6 @@ import android.debug.AdbManagerInternal;
 import android.debug.AdbNotifications;
 import android.debug.AdbTransportType;
 import android.debug.IAdbTransport;
-import android.hardware.usb.IUsbOperationInternal;
 import android.hardware.usb.ParcelableUsbPort;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbConfiguration;
@@ -57,7 +56,6 @@ import android.hardware.usb.UsbPortStatus;
 import android.hardware.usb.gadget.V1_0.GadgetFunction;
 import android.hardware.usb.gadget.V1_0.Status;
 import android.hardware.usb.gadget.V1_2.UsbSpeed;
-import android.hidl.manager.V1_0.IServiceManager;
 import android.hidl.manager.V1_0.IServiceNotification;
 import android.os.BatteryManager;
 import android.os.Environment;
@@ -1351,6 +1349,9 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                         || (mCurrentFunctions == UsbManager.FUNCTION_NCM)) {
                     titleRes = com.android.internal.R.string.usb_tether_notification_title;
                     id = SystemMessage.NOTE_USB_TETHER;
+                } else if (mCurrentFunctions == UsbManager.FUNCTION_UVC) {
+                    titleRes = com.android.internal.R.string.usb_uvc_notification_title;
+                    id = SystemMessage.NOTE_USB_UVC;
                 } else if (mCurrentFunctions == UsbManager.FUNCTION_ACCESSORY) {
                     titleRes = com.android.internal.R.string.usb_accessory_notification_title;
                     id = SystemMessage.NOTE_USB_ACCESSORY;
@@ -2403,6 +2404,9 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             MetricsLogger.action(mContext, MetricsEvent.ACTION_USB_CONFIG_RNDIS);
         } else if (functions == UsbManager.FUNCTION_ACCESSORY) {
             MetricsLogger.action(mContext, MetricsEvent.ACTION_USB_CONFIG_ACCESSORY);
+        } else if (functions == UsbManager.FUNCTION_UVC) {
+            // MetricsLogger.action(mContext, MetricsEvent.ACTION_USB_CONFIG_UVC);
+            // TODO: Add MetricsEvent for UVC?
         }
         mHandler.sendMessage(MSG_SET_CURRENT_FUNCTIONS, functions, operationId);
     }

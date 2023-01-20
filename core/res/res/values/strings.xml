@@ -3699,6 +3699,8 @@
     <string name="usb_tether_notification_title">USB tethering turned on</string>
     <!-- USB_PREFERENCES: Notification for when the user connects the phone to a computer via USB in MIDI mode.  This is the title -->
     <string name="usb_midi_notification_title">MIDI via USB turned on</string>
+    <!-- USB_PREFERENCES: Notification for when the user connects the phone to a computer via USB in UVC mode.  This is the title -->
+    <string name="usb_uvc_notification_title">Device connected as Webcam</string>
     <!-- USB_PREFERENCES: Notification for when a USB accessory is attached.  This is the title -->
     <string name="usb_accessory_notification_title">USB accessory connected</string>
     <!-- See USB_PREFERENCES. This is the message. -->

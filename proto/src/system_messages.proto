@@ -306,6 +306,10 @@ message SystemMessage {
     // Package: android
     NOTE_BT_APM_NOTIFICATION = 74;
 
+    // Inform that USB is configured as a Universal Video Class gadget
+    // Package: android
+    NOTE_USB_UVC = 75;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release
