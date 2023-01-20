@@ -16,9 +16,6 @@
 
 package com.android.server.vcn;
 
-import static android.telephony.CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED;
-import static android.telephony.CarrierConfigManager.EXTRA_SLOT_INDEX;
-import static android.telephony.CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX;
 import static android.telephony.SubscriptionManager.INVALID_SIM_SLOT_INDEX;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 import static android.telephony.TelephonyManager.ACTION_MULTI_SIM_CONFIG_CHANGED;
@@ -48,7 +45,6 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.server.vcn.util.PersistableBundleUtils;
 import com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import java.util.ArrayList;
@@ -109,6 +105,12 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
 
     @NonNull private TelephonySubscriptionSnapshot mCurrentSnapshot;
 
+    @NonNull
+    private final CarrierConfigManager.CarrierConfigChangeListener mCarrierConfigChangeListener =
+            (int logicalSlotIndex, int subscriptionId, int carrierId, int specificCarrierId) ->
+                    handleActionCarrierConfigChanged(logicalSlotIndex, subscriptionId);
+
+
     public TelephonySubscriptionTracker(
             @NonNull Context context,
             @NonNull Handler handler,
@@ -149,13 +151,14 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
     public void register() {
         final HandlerExecutor executor = new HandlerExecutor(mHandler);
         final IntentFilter filter = new IntentFilter();
-        filter.addAction(ACTION_CARRIER_CONFIG_CHANGED);
         filter.addAction(ACTION_MULTI_SIM_CONFIG_CHANGED);
 
         mContext.registerReceiver(this, filter, null, mHandler);
         mSubscriptionManager.addOnSubscriptionsChangedListener(
                 executor, mSubscriptionChangedListener);
         mTelephonyManager.registerTelephonyCallback(executor, mActiveDataSubIdListener);
+        mCarrierConfigManager.registerCarrierConfigChangeListener(executor,
+                mCarrierConfigChangeListener);
 
         registerCarrierPrivilegesCallbacks();
     }
@@ -197,6 +200,7 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
         mContext.unregisterReceiver(this);
         mSubscriptionManager.removeOnSubscriptionsChangedListener(mSubscriptionChangedListener);
         mTelephonyManager.unregisterTelephonyCallback(mActiveDataSubIdListener);
+        mCarrierConfigManager.unregisterCarrierConfigChangeListener(mCarrierConfigChangeListener);
 
         unregisterCarrierPrivilegesCallbacks();
     }
@@ -273,7 +277,7 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
     }
 
     /**
-     * Broadcast receiver for ACTION_CARRIER_CONFIG_CHANGED
+     * Broadcast receiver for ACTION_MULTI_SIM_CONFIG_CHANGED
      *
      * <p>The broadcast receiver is registered with mHandler, so callbacks & broadcasts are all
      * serialized on mHandler, avoiding the need for locking.
@@ -281,9 +285,6 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         switch (intent.getAction()) {
-            case ACTION_CARRIER_CONFIG_CHANGED:
-                handleActionCarrierConfigChanged(context, intent);
-                break;
             case ACTION_MULTI_SIM_CONFIG_CHANGED:
                 handleActionMultiSimConfigChanged(context, intent);
                 break;
@@ -310,26 +311,21 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
         handleSubscriptionsChanged();
     }
 
-    private void handleActionCarrierConfigChanged(Context context, Intent intent) {
-        // Accept sticky broadcasts; if CARRIER_CONFIG_CHANGED was previously broadcast and it
-        // already was for an identified carrier, we can stop waiting for initial load to complete
-        final int subId = intent.getIntExtra(EXTRA_SUBSCRIPTION_INDEX, INVALID_SUBSCRIPTION_ID);
-        final int slotId = intent.getIntExtra(EXTRA_SLOT_INDEX, INVALID_SIM_SLOT_INDEX);
-
+    private void handleActionCarrierConfigChanged(int slotId, int subId) {
         if (slotId == INVALID_SIM_SLOT_INDEX) {
             return;
         }
 
         if (SubscriptionManager.isValidSubscriptionId(subId)) {
-            final PersistableBundle carrierConfig = mCarrierConfigManager.getConfigForSubId(subId);
+            // Get only configs as needed to save memory.
+            final PersistableBundle carrierConfig = mCarrierConfigManager.getConfigForSubId(subId,
+                    VcnManager.VCN_RELATED_CARRIER_CONFIG_KEYS);
             if (mDeps.isConfigForIdentifiedCarrier(carrierConfig)) {
                 mReadySubIdsBySlotId.put(slotId, subId);
 
-                final PersistableBundle minimized =
-                        PersistableBundleUtils.minimizeBundle(
-                                carrierConfig, VcnManager.VCN_RELATED_CARRIER_CONFIG_KEYS);
-                if (minimized != null) {
-                    mSubIdToCarrierConfigMap.put(subId, new PersistableBundleWrapper(minimized));
+                if (!carrierConfig.isEmpty()) {
+                    mSubIdToCarrierConfigMap.put(subId,
+                            new PersistableBundleWrapper(carrierConfig));
                 }
                 handleSubscriptionsChanged();
             }
