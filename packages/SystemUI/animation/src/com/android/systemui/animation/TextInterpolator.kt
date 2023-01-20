@@ -122,6 +122,9 @@ class TextInterpolator(
             shapeText(value)
         }
 
+    var shapedText: String = ""
+        private set
+
     init {
         // shapeText needs to be called after all members are initialized.
         shapeText(layout)
@@ -484,10 +487,12 @@ class TextInterpolator(
         layout: Layout,
         paint: TextPaint
     ): List<List<PositionedGlyphs>> {
+        var text = StringBuilder()
         val out = mutableListOf<List<PositionedGlyphs>>()
         for (lineNo in 0 until layout.lineCount) { // Shape all lines.
             val lineStart = layout.getLineStart(lineNo)
-            var count = layout.getLineEnd(lineNo) - lineStart
+            val lineEnd = layout.getLineEnd(lineNo)
+            var count = lineEnd - lineStart
             // Do not render the last character in the line if it's a newline and unprintable
             val last = lineStart + count - 1
             if (last > lineStart && last < layout.text.length && layout.text[last] == '\n') {
@@ -500,7 +505,13 @@ class TextInterpolator(
                 runs.add(glyphs)
             }
             out.add(runs)
+
+            if (lineNo > 0) {
+                text.append("\n")
+            }
+            text.append(layout.text.substring(lineStart, lineEnd))
         }
+        shapedText = text.toString()
         return out
     }
 }
