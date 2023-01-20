@@ -9534,7 +9534,7 @@ public final class Settings {
         /**
          * Indicates whether "seen" notifications should be suppressed from the lockscreen.
          * <p>
-         * Type: int (0 for false, 1 for true)
+         * Type: int (0 for unset, 1 for true, 2 for false)
          *
          * @hide
          */

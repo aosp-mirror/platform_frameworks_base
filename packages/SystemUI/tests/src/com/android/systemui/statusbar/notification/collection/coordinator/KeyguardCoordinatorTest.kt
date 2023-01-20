@@ -321,7 +321,7 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
         val testDispatcher = UnconfinedTestDispatcher()
         val testScope = TestScope(testDispatcher)
         val fakeSettings = FakeSettings().apply {
-            putBool(Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS, true)
+            putInt(Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS, 1)
         }
         val seenNotificationsProvider = SeenNotificationsProviderImpl()
         val keyguardCoordinator =
@@ -372,14 +372,14 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
 
         var showOnlyUnseenNotifsOnKeyguardSetting: Boolean
             get() =
-                fakeSettings.getBoolForUser(
+                fakeSettings.getIntForUser(
                     Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
                     UserHandle.USER_CURRENT,
-                )
+                ) == 1
             set(value) {
-                fakeSettings.putBoolForUser(
+                fakeSettings.putIntForUser(
                     Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
-                    value,
+                    if (value) 1 else 2,
                     UserHandle.USER_CURRENT,
                 )
             }
