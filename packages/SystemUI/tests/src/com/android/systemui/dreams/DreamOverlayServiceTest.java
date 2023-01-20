@@ -234,6 +234,32 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     }
 
     @Test
+    public void testOnEndDream() throws RemoteException {
+        final IBinder proxy = mService.onBind(new Intent());
+        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+
+        // Inform the overlay service of dream starting.
+        overlay.startDream(mWindowParams, mDreamOverlayCallback,
+                LOW_LIGHT_COMPONENT.flattenToString(), false /*shouldShowComplication*/);
+        mMainExecutor.runAllReady();
+
+        // Verify view added.
+        verify(mWindowManager).addView(mViewCaptor.capture(), any());
+
+        // Service destroyed.
+        mService.onEndDream();
+        mMainExecutor.runAllReady();
+
+        // Verify view removed.
+        verify(mWindowManager).removeView(mViewCaptor.getValue());
+
+        // Verify state correctly set.
+        verify(mStateController).setOverlayActive(false);
+        verify(mStateController).setLowLightActive(false);
+        verify(mStateController).setEntryAnimationsFinished(false);
+    }
+
+    @Test
     public void testDestroy() throws RemoteException {
         final IBinder proxy = mService.onBind(new Intent());
         final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
