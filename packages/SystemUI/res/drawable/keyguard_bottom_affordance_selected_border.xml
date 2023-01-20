@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
-* Copyright 2021, The Android Open Source Project
+* Copyright 2023, The Android Open Source Project
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -16,13 +16,16 @@
 * limitations under the License.
 */
 -->
-<shape
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
-    android:shape="rectangle">
-  <solid android:color="?androidprv:attr/colorSurface"/>
-  <size
-      android:width="@dimen/keyguard_affordance_fixed_width"
-      android:height="@dimen/keyguard_affordance_fixed_height"/>
-  <corners android:radius="@dimen/keyguard_affordance_fixed_radius" />
-</shape>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <item android:state_selected="true">
+    <shape android:shape="oval">
+      <stroke
+          android:color="@color/control_primary_text"
+          android:width="2dp"/>
+      <size
+          android:width="@dimen/keyguard_affordance_fixed_width"
+          android:height="@dimen/keyguard_affordance_fixed_height"/>
+    </shape>
+  </item>
+</selector>
