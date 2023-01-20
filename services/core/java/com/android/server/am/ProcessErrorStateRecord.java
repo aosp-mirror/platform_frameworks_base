@@ -49,6 +49,7 @@ import android.util.SparseBooleanArray;
 import com.android.internal.annotations.CompositeRWLock;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.expresslog.Counter;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.TimeoutRecord;
 import com.android.internal.os.anr.AnrLatencyTracker;
@@ -260,6 +261,28 @@ class ProcessErrorStateRecord {
         mDialogController = new ErrorDialogController(app);
     }
 
+    @GuardedBy("mService")
+    boolean skipAnrLocked(String annotation) {
+        // PowerManager.reboot() can block for a long time, so ignore ANRs while shutting down.
+        if (mService.mAtmInternal.isShuttingDown()) {
+            Slog.i(TAG, "During shutdown skipping ANR: " + this + " " + annotation);
+            return true;
+        } else if (isNotResponding()) {
+            Slog.i(TAG, "Skipping duplicate ANR: " + this + " " + annotation);
+            return true;
+        } else if (isCrashing()) {
+            Slog.i(TAG, "Crashing app skipping ANR: " + this + " " + annotation);
+            return true;
+        } else if (mApp.isKilledByAm()) {
+            Slog.i(TAG, "App already killed by AM skipping ANR: " + this + " " + annotation);
+            return true;
+        } else if (mApp.isKilled()) {
+            Slog.i(TAG, "Skipping died app ANR: " + this + " " + annotation);
+            return true;
+        }
+        return false;
+    }
+
     void appNotResponding(String activityShortComponentName, ApplicationInfo aInfo,
             String parentShortComponentName, WindowProcessController parentProcess,
             boolean aboveSystem, TimeoutRecord timeoutRecord,
@@ -303,26 +326,10 @@ class ProcessErrorStateRecord {
             // Store annotation here as instance above will not be hit on all paths.
             setAnrAnnotation(annotation);
 
-            // PowerManager.reboot() can block for a long time, so ignore ANRs while shutting down.
-            if (mService.mAtmInternal.isShuttingDown()) {
-                Slog.i(TAG, "During shutdown skipping ANR: " + this + " " + annotation);
+            Counter.logIncrement("stability_anr.value_total_anrs");
+            if (skipAnrLocked(annotation)) {
                 latencyTracker.anrSkippedProcessErrorStateRecordAppNotResponding();
-                return;
-            } else if (isNotResponding()) {
-                Slog.i(TAG, "Skipping duplicate ANR: " + this + " " + annotation);
-                latencyTracker.anrSkippedProcessErrorStateRecordAppNotResponding();
-                return;
-            } else if (isCrashing()) {
-                Slog.i(TAG, "Crashing app skipping ANR: " + this + " " + annotation);
-                latencyTracker.anrSkippedProcessErrorStateRecordAppNotResponding();
-                return;
-            } else if (mApp.isKilledByAm()) {
-                Slog.i(TAG, "App already killed by AM skipping ANR: " + this + " " + annotation);
-                latencyTracker.anrSkippedProcessErrorStateRecordAppNotResponding();
-                return;
-            } else if (mApp.isKilled()) {
-                Slog.i(TAG, "Skipping died app ANR: " + this + " " + annotation);
-                latencyTracker.anrSkippedProcessErrorStateRecordAppNotResponding();
+                Counter.logIncrement("stability_anr.value_skipped_anrs");
                 return;
             }
 
