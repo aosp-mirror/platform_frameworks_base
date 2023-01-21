@@ -2974,7 +2974,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (density == mInitialDisplayDensity) {
             density = 0;
         }
-        mWmService.mDisplayWindowSettings.setForcedDensity(this, density, userId);
+        mWmService.mDisplayWindowSettings.setForcedDensity(getDisplayInfo(), density, userId);
     }
 
     /** @param mode {@link #FORCE_SCALING_MODE_AUTO} or {@link #FORCE_SCALING_MODE_DISABLED}. */

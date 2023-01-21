@@ -72,7 +72,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.telecom.TelecomManager;
 import android.text.TextUtils;
@@ -1477,7 +1476,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         final String chooserClassName = AccessibilityButtonChooserActivity.class.getName();
         intent.setClassName(CHOOSER_PACKAGE_NAME, chooserClassName);
-        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+        mContext.startActivityAsUser(intent, mUserTracker.getUserHandle());
         return true;
     }
 

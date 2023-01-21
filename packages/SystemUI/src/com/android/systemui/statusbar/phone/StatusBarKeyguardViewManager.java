@@ -1147,7 +1147,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             if (hideImmediately) {
                 mStatusBarStateController.setLeaveOpenOnKeyguardHide(false);
             } else {
-                mNotificationPanelViewController.expandWithoutQs();
+                mNotificationPanelViewController.expandShadeToNotifications();
             }
         }
         return;

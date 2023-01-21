@@ -19,7 +19,6 @@ package com.android.systemui.util.settings
 
 import android.annotation.UserIdInt
 import android.database.ContentObserver
-import android.os.UserHandle
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -29,8 +28,8 @@ object SettingsProxyExt {
 
     /** Returns a flow of [Unit] that is invoked each time that content is updated. */
     fun SettingsProxy.observerFlow(
+        @UserIdInt userId: Int,
         vararg names: String,
-        @UserIdInt userId: Int = UserHandle.USER_CURRENT,
     ): Flow<Unit> {
         return conflatedCallbackFlow {
             val observer =

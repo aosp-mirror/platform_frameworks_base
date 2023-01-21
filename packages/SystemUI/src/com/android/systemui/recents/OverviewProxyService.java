@@ -308,7 +308,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                         intent.setClassName(CHOOSER_PACKAGE_NAME, chooserClassName);
                         intent.addFlags(
                                 Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+                        mContext.startActivityAsUser(intent, mUserTracker.getUserHandle());
                     });
         }
 

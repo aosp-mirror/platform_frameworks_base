@@ -48,6 +48,7 @@ class FakeMediaTttChipControllerReceiver(
     viewUtil: ViewUtil,
     wakeLockBuilder: WakeLock.Builder,
     systemClock: SystemClock,
+    rippleController: MediaTttReceiverRippleController,
 ) :
     MediaTttChipControllerReceiver(
         commandQueue,
@@ -65,6 +66,7 @@ class FakeMediaTttChipControllerReceiver(
         viewUtil,
         wakeLockBuilder,
         systemClock,
+        rippleController,
     ) {
     override fun animateViewOut(view: ViewGroup, removalReason: String?, onAnimationEnd: Runnable) {
         // Just bypass the animation in tests

@@ -60,6 +60,7 @@ import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.settings.SecureSettings
 
 private const val TAG = "UdfpsControllerOverlay"
 
@@ -89,6 +90,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         private val keyguardStateController: KeyguardStateController,
         private val unlockedScreenOffAnimationController: UnlockedScreenOffAnimationController,
         private var udfpsDisplayModeProvider: UdfpsDisplayModeProvider,
+        private val secureSettings: SecureSettings,
         val requestId: Long,
         @ShowReason val requestReason: Int,
         private val controllerCallback: IUdfpsOverlayControllerCallback,
@@ -131,7 +133,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
     /** A helper if the [requestReason] was due to enrollment. */
     val enrollHelper: UdfpsEnrollHelper? =
         if (requestReason.isEnrollmentReason() && !shouldRemoveEnrollmentUi()) {
-            UdfpsEnrollHelper(context, fingerprintManager, requestReason)
+            UdfpsEnrollHelper(context, fingerprintManager, secureSettings, requestReason)
         } else {
             null
         }
