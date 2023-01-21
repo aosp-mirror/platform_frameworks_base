@@ -252,6 +252,13 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void tryToLaunchMediaApplication_nullIntent_skip() {
+        mMediaOutputController.tryToLaunchMediaApplication();
+
+        verify(mCb, never()).dismissDialog();
+    }
+
+    @Test
     public void onDevicesUpdated_unregistersNearbyDevicesCallback() throws RemoteException {
         mMediaOutputController.start(mCb);
 
