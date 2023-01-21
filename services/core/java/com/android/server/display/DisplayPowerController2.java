@@ -327,7 +327,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     private float[] mNitsRange;
 
     private final HighBrightnessModeController mHbmController;
-    private final HighBrightnessModeMetadata mHighBrightnessModeMetadata;
 
     private final BrightnessThrottler mBrightnessThrottler;
 
@@ -416,7 +415,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             DisplayPowerCallbacks callbacks, Handler handler,
             SensorManager sensorManager, DisplayBlanker blanker, LogicalDisplay logicalDisplay,
             BrightnessTracker brightnessTracker, BrightnessSetting brightnessSetting,
-            Runnable onBrightnessChangeRunnable, HighBrightnessModeMetadata hbmMetadata) {
+            Runnable onBrightnessChangeRunnable) {
 
         mInjector = injector != null ? injector : new Injector();
         mClock = mInjector.getClock();
@@ -432,7 +431,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         mDisplayPowerProximityStateController = mInjector.getDisplayPowerProximityStateController(
                 mWakelockController, mDisplayDeviceConfig, mHandler.getLooper(),
                 () -> updatePowerState(), mDisplayId, mSensorManager);
-        mHighBrightnessModeMetadata = hbmMetadata;
         mDisplayStateController = new DisplayStateController(mDisplayPowerProximityStateController);
         mTag = "DisplayPowerController2[" + mDisplayId + "]";
 
@@ -683,7 +681,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
      * Make sure DisplayManagerService.mSyncRoot lock is held when this is called
      */
     @Override
-    public void onDisplayChanged(HighBrightnessModeMetadata hbmMetadata) {
+    public void onDisplayChanged() {
         final DisplayDevice device = mLogicalDisplay.getPrimaryDisplayDeviceLocked();
         if (device == null) {
             Slog.wtf(mTag, "Display Device is null in DisplayPowerController2 for display: "
@@ -697,7 +695,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         final boolean isEnabled = mLogicalDisplay.isEnabledLocked();
         final boolean isInTransition = mLogicalDisplay.isInTransitionLocked();
-
         mHandler.post(() -> {
             boolean changed = false;
             if (mDisplayDevice != device) {
@@ -706,7 +703,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 mUniqueDisplayId = uniqueId;
                 mDisplayStatsId = mUniqueDisplayId.hashCode();
                 mDisplayDeviceConfig = config;
-                loadFromDisplayDeviceConfig(token, info, hbmMetadata);
+                loadFromDisplayDeviceConfig(token, info);
                 mDisplayPowerProximityStateController.notifyDisplayDeviceChanged(config);
 
                 // Since the underlying display-device changed, we really don't know the
@@ -753,8 +750,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         }
     }
 
-    private void loadFromDisplayDeviceConfig(IBinder token, DisplayDeviceInfo info,
-                                             HighBrightnessModeMetadata hbmMetadata) {
+    private void loadFromDisplayDeviceConfig(IBinder token, DisplayDeviceInfo info) {
         // All properties that depend on the associated DisplayDevice and the DDC must be
         // updated here.
         loadBrightnessRampRates();
@@ -766,7 +762,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                     mBrightnessRampIncreaseMaxTimeMillis,
                     mBrightnessRampDecreaseMaxTimeMillis);
         }
-        mHbmController.setHighBrightnessModeMetadata(hbmMetadata);
         mHbmController.resetHbmData(info.width, info.height, token, info.uniqueId,
                 mDisplayDeviceConfig.getHighBrightnessModeData(),
                 new HighBrightnessModeController.HdrBrightnessDeviceConfig() {
@@ -1723,7 +1718,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                     if (mAutomaticBrightnessController != null) {
                         mAutomaticBrightnessController.update();
                     }
-                }, mHighBrightnessModeMetadata, mContext);
+                }, mContext);
     }
 
     private BrightnessThrottler createBrightnessThrottlerLocked() {
