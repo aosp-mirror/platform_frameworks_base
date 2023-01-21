@@ -29,6 +29,7 @@ import com.android.systemui.dreams.DreamOverlayNotificationCountProvider;
 import com.android.systemui.dreams.DreamOverlayService;
 import com.android.systemui.dreams.complication.dagger.RegisteredComplicationsModule;
 import com.android.systemui.dreams.dreamcomplication.dagger.ComplicationComponent;
+import com.android.systemui.dreams.touch.scrim.dagger.ScrimModule;
 
 import dagger.Module;
 import dagger.Provides;
@@ -44,6 +45,7 @@ import javax.inject.Named;
 @Module(includes = {
             RegisteredComplicationsModule.class,
             LowLightDreamModule.class,
+            ScrimModule.class
         },
         subcomponents = {
             ComplicationComponent.class,

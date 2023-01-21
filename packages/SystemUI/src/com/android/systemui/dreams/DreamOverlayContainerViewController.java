@@ -37,8 +37,10 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.complication.ComplicationHostViewController;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayModule;
+import com.android.systemui.dreams.touch.scrim.BouncerlessScrimController;
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor;
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
+import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -85,6 +87,22 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
     private long mJitterStartTimeMillis;
 
     private boolean mBouncerAnimating;
+    private boolean mWakingUpFromSwipe;
+
+    private final BouncerlessScrimController mBouncerlessScrimController;
+
+    private final BouncerlessScrimController.Callback mBouncerlessExpansionCallback =
+            new BouncerlessScrimController.Callback() {
+        @Override
+        public void onExpansion(ShadeExpansionChangeEvent event) {
+            updateTransitionState(event.getFraction());
+        }
+
+        @Override
+        public void onWakeup() {
+            mWakingUpFromSwipe = true;
+        }
+    };
 
     private final PrimaryBouncerExpansionCallback
             mBouncerExpansionCallback =
@@ -143,7 +161,8 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
             @Named(DreamOverlayModule.MILLIS_UNTIL_FULL_JITTER) long millisUntilFullJitter,
             PrimaryBouncerCallbackInteractor primaryBouncerCallbackInteractor,
             DreamOverlayAnimationsController animationsController,
-            DreamOverlayStateController stateController) {
+            DreamOverlayStateController stateController,
+            BouncerlessScrimController bouncerlessScrimController) {
         super(containerView);
         mDreamOverlayContentView = contentView;
         mStatusBarViewController = statusBarViewController;
@@ -151,6 +170,9 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
         mBlurUtils = blurUtils;
         mDreamOverlayAnimationsController = animationsController;
         mStateController = stateController;
+
+        mBouncerlessScrimController = bouncerlessScrimController;
+        mBouncerlessScrimController.addCallback(mBouncerlessExpansionCallback);
 
         mComplicationHostViewController = complicationHostViewController;
         mDreamOverlayMaxTranslationY = resources.getDimensionPixelSize(
@@ -177,6 +199,7 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
 
     @Override
     protected void onViewAttached() {
+        mWakingUpFromSwipe = false;
         mJitterStartTimeMillis = System.currentTimeMillis();
         mHandler.postDelayed(this::updateBurnInOffsets, mBurnInProtectionUpdateInterval);
         final KeyguardBouncer bouncer = mStatusBarKeyguardViewManager.getPrimaryBouncer();
@@ -266,6 +289,13 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
      */
     public void wakeUp(@NonNull Runnable onAnimationEnd,
             @NonNull DelayableExecutor callbackExecutor) {
+        // When swiping causes wakeup, do not run any animations as the dream should exit as soon
+        // as possible.
+        if (mWakingUpFromSwipe) {
+            onAnimationEnd.run();
+            return;
+        }
+
         mDreamOverlayAnimationsController.wakeUp(onAnimationEnd, callbackExecutor);
     }
 }
