@@ -665,7 +665,7 @@
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Pantaila blokeatua"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Beroegi egoteagatik itzali da"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"Ohi bezala ari da funtzionatzen telefonoa orain.\nInformazio gehiago lortzeko, sakatu hau."</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefonoa gehiegi berotu da, eta itzali egin da tenperatura jaisteko. Orain, ohiko moduan dabil.\n\nBerotzearen zergati posibleak:\n	• Baliabide asko behar dituzten aplikazioak erabiltzea (adib., jokoak, bideoak edo nabigazio-aplikazioak).\n	• Fitxategi handiak deskargatu edo kargatzea.\n	• Telefonoa giro beroetan erabiltzea."</string>
+    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefonoa gehiegi berotu da, eta itzali egin da tenperatura jaisteko. Orain, ohiko moduan dabil.\n\nBerotzearen zergati posibleak:\n	• Baliabide asko behar dituzten aplikazioak erabiltzea (adib., bideojokoak, bideoak edo nabigazio-aplikazioak).\n	• Fitxategi handiak deskargatu edo kargatzea.\n	• Telefonoa giro beroetan erabiltzea."</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Ikusi zaintzeko urratsak"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Berotzen ari da telefonoa"</string>
     <string name="high_temp_notif_message" msgid="1277346543068257549">"Eginbide batzuk ezingo dira erabili telefonoa hoztu arte.\nInformazio gehiago lortzeko, sakatu hau."</string>
