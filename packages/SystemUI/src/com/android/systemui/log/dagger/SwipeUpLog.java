@@ -27,10 +27,10 @@ import javax.inject.Qualifier;
 
 /**
  * A {@link LogBuffer} for
- * {@link com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureLogger}.
+ * {@link com.android.systemui.statusbar.gesture.SwipeUpGestureLogger}.
  */
 @Qualifier
 @Documented
 @Retention(RUNTIME)
-public @interface SwipeStatusBarAwayLog {
+public @interface SwipeUpLog {
 }

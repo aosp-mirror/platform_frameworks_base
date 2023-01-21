@@ -30,6 +30,7 @@ import com.android.systemui.media.taptotransfer.MediaTttFlags
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.media.taptotransfer.common.MediaTttUtils
 import com.android.systemui.statusbar.CommandQueue
+import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
 import com.android.systemui.temporarydisplay.ViewPriority
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import com.android.systemui.temporarydisplay.chipbar.ChipbarEndItem
@@ -54,6 +55,7 @@ constructor(
 
     private var displayedState: ChipStateSender? = null
     // A map to store current chip state per id.
+    // TODO(b/265455911): Log whenever we add or remove from the store.
     private var stateMap: MutableMap<String, ChipStateSender> = mutableMapOf()
 
     private val commandQueueCallbacks =
@@ -102,10 +104,9 @@ constructor(
         }
         uiEventLogger.logSenderStateChange(chipState)
 
-        stateMap.put(routeInfo.id, chipState)
         if (chipState == ChipStateSender.FAR_FROM_RECEIVER) {
             // No need to store the state since it is the default state
-            stateMap.remove(routeInfo.id)
+            removeIdFromStore(routeInfo.id)
             // Return early if we're not displaying a chip anyway
             val currentDisplayedState = displayedState ?: return
 
@@ -126,7 +127,9 @@ constructor(
             displayedState = null
             chipbarCoordinator.removeView(routeInfo.id, removalReason)
         } else {
+            stateMap[routeInfo.id] = chipState
             displayedState = chipState
+            chipbarCoordinator.registerListener(displayListener)
             chipbarCoordinator.displayView(
                 createChipbarInfo(
                     chipState,
@@ -135,7 +138,7 @@ constructor(
                     context,
                     logger,
                 )
-            ) { stateMap.remove(routeInfo.id) }
+            )
         }
     }
 
@@ -182,6 +185,7 @@ constructor(
                     }
                 },
             vibrationEffect = chipStateSender.transferStatus.vibrationEffect,
+            allowSwipeToDismiss = true,
             windowTitle = MediaTttUtils.WINDOW_TITLE_SENDER,
             wakeReason = MediaTttUtils.WAKE_REASON_SENDER,
             timeoutMs = chipStateSender.timeout,
@@ -224,5 +228,15 @@ constructor(
             Text.Resource(R.string.media_transfer_undo),
             onClickListener,
         )
+    }
+
+    private val displayListener =
+        TemporaryViewDisplayController.Listener { id -> removeIdFromStore(id) }
+
+    private fun removeIdFromStore(id: String) {
+        stateMap.remove(id)
+        if (stateMap.isEmpty()) {
+            chipbarCoordinator.unregisterListener(displayListener)
+        }
     }
 }

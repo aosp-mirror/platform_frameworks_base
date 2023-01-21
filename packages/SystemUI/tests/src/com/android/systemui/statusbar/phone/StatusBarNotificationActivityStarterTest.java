@@ -33,6 +33,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -59,6 +60,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.ShadeControllerImpl;
@@ -139,6 +141,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     private ActivityLaunchAnimator mActivityLaunchAnimator;
     @Mock
     private InteractionJankMonitor mJankMonitor;
+    @Mock
+    private UserTracker mUserTracker;
     private final FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
     private ExpandableNotificationRow mNotificationRow;
     private ExpandableNotificationRow mBubbleNotificationRow;
@@ -183,6 +187,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         when(mVisibilityProvider.obtain(any(NotificationEntry.class), anyBoolean()))
                 .thenAnswer(invocation -> NotificationVisibility.obtain(
                         invocation.<NotificationEntry>getArgument(0).getKey(), 0, 1, false));
+        when(mUserTracker.getUserHandle()).thenReturn(
+                UserHandle.of(ActivityManager.getCurrentUser()));
 
         HeadsUpManagerPhone headsUpManager = mock(HeadsUpManagerPhone.class);
         NotificationLaunchAnimatorControllerProvider notificationAnimationProvider =
@@ -222,7 +228,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         mActivityLaunchAnimator,
                         notificationAnimationProvider,
                         mock(LaunchFullScreenIntentProvider.class),
-                        mock(FeatureFlags.class)
+                        mock(FeatureFlags.class),
+                        mUserTracker
                 );
 
         // set up dismissKeyguardThenExecute to synchronously invoke the OnDismissAction arg

@@ -301,10 +301,13 @@ class ActivityLaunchAnimator(
 
     interface Callback {
         /** Whether we are currently on the keyguard or not. */
-        fun isOnKeyguard(): Boolean
+        @JvmDefault fun isOnKeyguard(): Boolean = false
 
         /** Hide the keyguard and animate using [runner]. */
-        fun hideKeyguardWithAnimation(runner: IRemoteAnimationRunner)
+        @JvmDefault
+        fun hideKeyguardWithAnimation(runner: IRemoteAnimationRunner) {
+            throw UnsupportedOperationException()
+        }
 
         /* Get the background color of [task]. */
         fun getBackgroundColor(task: TaskInfo): Int

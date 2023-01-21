@@ -51,6 +51,11 @@ public abstract class DreamOverlayService extends Service {
         }
 
         @Override
+        public void endDream() {
+            onEndDream();
+        }
+
+        @Override
         public void wakeUp() {
             onWakeUp(() -> {
                 try {
@@ -83,13 +88,22 @@ public abstract class DreamOverlayService extends Service {
 
     /**
      * This method is overridden by implementations to handle when the dream has been requested
-     * to wakeup. This allows any overlay animations to run.
+     * to wakeup. This allows any overlay animations to run. By default, the method will invoke
+     * the callback immediately.
      *
      * @param onCompleteCallback The callback to trigger to notify the dream service that the
      *                           overlay has completed waking up.
      * @hide
      */
     public void onWakeUp(@NonNull Runnable onCompleteCallback) {
+        onCompleteCallback.run();
+    }
+
+    /**
+     * This method is overridden by implementations to handle when the dream has ended. There may
+     * be earlier signals leading up to this step, such as @{@link #onWakeUp(Runnable)}.
+     */
+    public void onEndDream() {
     }
 
     /**

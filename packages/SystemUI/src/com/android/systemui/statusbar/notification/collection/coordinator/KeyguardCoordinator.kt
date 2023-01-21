@@ -114,10 +114,10 @@ constructor(
             .onStart { emit(Unit) }
             // for each change, lookup the new value
             .map {
-                secureSettings.getBoolForUser(
+                secureSettings.getIntForUser(
                     Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
                     UserHandle.USER_CURRENT,
-                )
+                ) == 1
             }
             // perform lookups on the bg thread pool
             .flowOn(bgDispatcher)
