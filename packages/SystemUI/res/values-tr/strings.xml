@@ -821,7 +821,7 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g> uygulamasından <xliff:g id="ARTIST_NAME">%2$s</xliff:g>, <xliff:g id="SONG_NAME">%1$s</xliff:g> şarkısını çal"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="APP_LABEL">%2$s</xliff:g> uygulamasından <xliff:g id="SONG_NAME">%1$s</xliff:g> şarkısını çal"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Geri al"</string>
-    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> cihazında çalmak için yaklaşın"</string>
+    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> cihazında oynatmak için yaklaşın"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Burada oynatmak için <xliff:g id="DEVICENAME">%1$s</xliff:g> cihazına yaklaşın"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> cihazında oynatılıyor"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Bir sorun oldu. Tekrar deneyin."</string>
