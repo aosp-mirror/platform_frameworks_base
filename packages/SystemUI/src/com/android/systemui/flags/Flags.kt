@@ -65,8 +65,7 @@ object Flags {
     val FSI_ON_DND_UPDATE = unreleasedFlag(259130119, "fsi_on_dnd_update", teamfood = true)
 
     // TODO(b/265804648): Tracking Bug
-    @JvmField
-    val DISABLE_FSI = unreleasedFlag(265804648, "disable_fsi")
+    @JvmField val DISABLE_FSI = unreleasedFlag(265804648, "disable_fsi")
 
     // TODO(b/254512538): Tracking Bug
     val INSTANT_VOICE_REPLY = unreleasedFlag(111, "instant_voice_reply", teamfood = true)
@@ -220,6 +219,15 @@ object Flags {
     @JvmField
     val WALLPAPER_FULLSCREEN_PREVIEW =
         unreleasedFlag(227, "wallpaper_fullscreen_preview", teamfood = true)
+
+    /** Whether the long-press gesture to open wallpaper picker is enabled. */
+    // TODO(b/266242192): Tracking Bug
+    @JvmField
+    val LOCK_SCREEN_LONG_PRESS_ENABLED =
+        unreleasedFlag(
+            228,
+            "lock_screen_long_press_enabled",
+        )
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
@@ -570,6 +578,5 @@ object Flags {
 
     // 2600 - keyboard shortcut
     // TODO(b/259352579): Tracking Bug
-    @JvmField
-    val SHORTCUT_LIST_SEARCH_LAYOUT = unreleasedFlag(2600, "shortcut_list_search_layout")
+    @JvmField val SHORTCUT_LIST_SEARCH_LAYOUT = unreleasedFlag(2600, "shortcut_list_search_layout")
 }

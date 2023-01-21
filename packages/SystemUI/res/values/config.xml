@@ -824,4 +824,8 @@
         <item>bottom_end:wallet</item>
     </string-array>
 
+    <!-- Package name for the app that implements the wallpaper picker. -->
+    <string name="config_wallpaperPickerPackage" translatable="false">
+        com.android.wallpaper
+    </string>
 </resources>

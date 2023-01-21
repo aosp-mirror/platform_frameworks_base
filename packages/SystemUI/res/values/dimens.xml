@@ -1648,4 +1648,10 @@
     <dimen name="rear_display_animation_height">200dp</dimen>
     <dimen name="rear_display_title_top_padding">24dp</dimen>
     <dimen name="rear_display_title_bottom_padding">16dp</dimen>
+
+    <!--
+    Vertical distance between the pointer and the popup menu that shows up on the lock screen when
+    it is long-pressed.
+    -->
+    <dimen name="keyguard_long_press_settings_popup_vertical_offset">96dp</dimen>
 </resources>

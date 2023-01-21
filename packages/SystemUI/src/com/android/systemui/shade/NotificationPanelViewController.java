@@ -140,12 +140,15 @@ import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
+import com.android.systemui.keyguard.ui.binder.KeyguardLongPressViewBinder;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel;
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToOccludedTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel;
@@ -243,6 +246,7 @@ import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
+import kotlin.Unit;
 import kotlinx.coroutines.CoroutineDispatcher;
 
 @CentralSurfacesComponent.CentralSurfacesScope
@@ -698,6 +702,7 @@ public final class NotificationPanelViewController implements Dumpable {
     private LockscreenToOccludedTransitionViewModel mLockscreenToOccludedTransitionViewModel;
 
     private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
+    private final KeyguardInteractor mKeyguardInteractor;
     private CoroutineDispatcher mMainDispatcher;
     private boolean mIsOcclusionTransitionRunning = false;
     private int mDreamingToLockscreenTransitionTranslationY;
@@ -827,7 +832,9 @@ public final class NotificationPanelViewController implements Dumpable {
             LockscreenToOccludedTransitionViewModel lockscreenToOccludedTransitionViewModel,
             @Main CoroutineDispatcher mainDispatcher,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            KeyguardLongPressViewModel keyguardLongPressViewModel,
+            KeyguardInteractor keyguardInteractor) {
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
             public void onKeyguardFadingAwayChanged() {
@@ -848,6 +855,7 @@ public final class NotificationPanelViewController implements Dumpable {
         mGoneToDreamingTransitionViewModel = goneToDreamingTransitionViewModel;
         mLockscreenToOccludedTransitionViewModel = lockscreenToOccludedTransitionViewModel;
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
+        mKeyguardInteractor = keyguardInteractor;
         mView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View v) {
@@ -1000,6 +1008,14 @@ public final class NotificationPanelViewController implements Dumpable {
         updateUserSwitcherFlags();
         mKeyguardBottomAreaViewModel = keyguardBottomAreaViewModel;
         mKeyguardBottomAreaInteractor = keyguardBottomAreaInteractor;
+        KeyguardLongPressViewBinder.bind(
+                mView.requireViewById(R.id.keyguard_long_press),
+                keyguardLongPressViewModel,
+                () -> {
+                    onEmptySpaceClick();
+                    return Unit.INSTANCE;
+                },
+                mFalsingManager);
         onFinishInflate();
         keyguardUnlockAnimationController.addKeyguardUnlockAnimationListener(
                 new KeyguardUnlockAnimationController.KeyguardUnlockAnimationListener() {
@@ -3129,6 +3145,7 @@ public final class NotificationPanelViewController implements Dumpable {
                     mQsClipBottom,
                     radius,
                     qsVisible && !mSplitShadeEnabled);
+            mKeyguardInteractor.setQuickSettingsVisible(mQsVisible);
         }
         // The padding on this area is large enough that we can use a cheaper clipping strategy
         mKeyguardStatusViewController.setClipBounds(clipStatusView ? mLastQsClipBounds : null);
