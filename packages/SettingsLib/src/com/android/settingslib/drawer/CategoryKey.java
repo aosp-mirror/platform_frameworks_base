@@ -30,6 +30,8 @@ public final class CategoryKey {
     public static final String CATEGORY_APPS = "com.android.settings.category.ia.apps";
     public static final String CATEGORY_APPS_DEFAULT =
             "com.android.settings.category.ia.apps.default";
+    public static final String CATEGORY_SPECIAL_APP_ACCESS =
+            "com.android.settings.category.ia.special_app_access";
     public static final String CATEGORY_BATTERY = "com.android.settings.category.ia.battery";
     public static final String CATEGORY_DISPLAY = "com.android.settings.category.ia.display";
     public static final String CATEGORY_SOUND = "com.android.settings.category.ia.sound";

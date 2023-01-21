@@ -759,6 +759,7 @@ package android.content {
     method public int getUserId();
     method public void setAutofillOptions(@Nullable android.content.AutofillOptions);
     method public void setContentCaptureOptions(@Nullable android.content.ContentCaptureOptions);
+    method public void updateDeviceId(int);
     field public static final String ATTENTION_SERVICE = "attention";
     field public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "content_capture";
     field public static final String DEVICE_IDLE_CONTROLLER = "deviceidle";
@@ -945,6 +946,13 @@ package android.content.pm {
     field public String userType;
   }
 
+  public final class UserProperties implements android.os.Parcelable {
+    method public int getShowInLauncher();
+    field public static final int SHOW_IN_LAUNCHER_NO = 2; // 0x2
+    field public static final int SHOW_IN_LAUNCHER_SEPARATE = 1; // 0x1
+    field public static final int SHOW_IN_LAUNCHER_WITH_PARENT = 0; // 0x0
+  }
+
 }
 
 package android.content.res {
@@ -970,6 +978,59 @@ package android.content.rollback {
     method @RequiresPermission(android.Manifest.permission.TEST_MANAGE_ROLLBACKS) public void expireRollbackForPackage(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.TEST_MANAGE_ROLLBACKS) public void reloadPersistedData();
     field public static final String PROPERTY_ROLLBACK_LIFETIME_MILLIS = "rollback_lifetime_in_millis";
+  }
+
+}
+
+package android.credentials {
+
+  public final class CredentialDescription implements android.os.Parcelable {
+    ctor public CredentialDescription(@NonNull String, @NonNull String, @NonNull java.util.List<android.service.credentials.CredentialEntry>);
+    method public int describeContents();
+    method @NonNull public java.util.List<android.service.credentials.CredentialEntry> getCredentialEntries();
+    method @NonNull public String getFlattenedRequestString();
+    method @NonNull public String getType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.CredentialDescription> CREATOR;
+  }
+
+  public final class CredentialManager {
+    method public void registerCredentialDescription(@NonNull android.credentials.RegisterCredentialDescriptionRequest, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.credentials.RegisterCredentialDescriptionException>);
+    method public void unRegisterCredentialDescription(@NonNull android.credentials.UnregisterCredentialDescriptionRequest, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.credentials.UnregisterCredentialDescriptionException>);
+  }
+
+  public class RegisterCredentialDescriptionException extends java.lang.Exception {
+    ctor public RegisterCredentialDescriptionException(@NonNull String, @Nullable String);
+    ctor public RegisterCredentialDescriptionException(@NonNull String, @Nullable String, @Nullable Throwable);
+    ctor public RegisterCredentialDescriptionException(@NonNull String, @Nullable Throwable);
+    ctor public RegisterCredentialDescriptionException(@NonNull String);
+    field @NonNull public final String errorType;
+  }
+
+  public final class RegisterCredentialDescriptionRequest implements android.os.Parcelable {
+    ctor public RegisterCredentialDescriptionRequest(@NonNull android.credentials.CredentialDescription);
+    ctor public RegisterCredentialDescriptionRequest(@NonNull java.util.List<android.credentials.CredentialDescription>);
+    method public int describeContents();
+    method @NonNull public java.util.List<android.credentials.CredentialDescription> getCredentialDescriptions();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.RegisterCredentialDescriptionRequest> CREATOR;
+    field public static final String FLATTENED_REQUEST_STRING_KEY = "flattened_request_string";
+  }
+
+  public class UnregisterCredentialDescriptionException extends java.lang.Exception {
+    ctor public UnregisterCredentialDescriptionException(@NonNull String, @Nullable String);
+    ctor public UnregisterCredentialDescriptionException(@NonNull String, @Nullable String, @Nullable Throwable);
+    ctor public UnregisterCredentialDescriptionException(@NonNull String, @Nullable Throwable);
+    ctor public UnregisterCredentialDescriptionException(@NonNull String);
+    field @NonNull public final String errorType;
+  }
+
+  public final class UnregisterCredentialDescriptionRequest implements android.os.Parcelable {
+    ctor public UnregisterCredentialDescriptionRequest(@NonNull android.credentials.CredentialDescription);
+    method public int describeContents();
+    method @NonNull public android.credentials.CredentialDescription getCredentialDescription();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.UnregisterCredentialDescriptionRequest> CREATOR;
   }
 
 }
@@ -2570,6 +2631,7 @@ package android.service.dreams {
   public abstract class DreamOverlayService extends android.app.Service {
     ctor public DreamOverlayService();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public void onEndDream();
     method public abstract void onStartDream(@NonNull android.view.WindowManager.LayoutParams);
     method public final void requestExit();
     method public final boolean shouldShowComplications();
@@ -3366,6 +3428,7 @@ package android.view.inputmethod {
   }
 
   public final class InputMethodInfo implements android.os.Parcelable {
+    ctor public InputMethodInfo(@NonNull String, @NonNull String, @NonNull CharSequence, @NonNull String, boolean, @NonNull String);
     ctor public InputMethodInfo(@NonNull String, @NonNull String, @NonNull CharSequence, @NonNull String, int);
   }
 

@@ -53,6 +53,7 @@ import android.widget.Switch;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.R;
+import com.android.systemui.util.settings.SecureSettings;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -66,6 +67,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     private final Context mContext;
     private final AccessibilityManager mAccessibilityManager;
     private final WindowManager mWindowManager;
+    private final SecureSettings mSecureSettings;
 
     private final Runnable mWindowInsetChangeRunnable;
     private final SfVsyncFrameCallbackProvider mSfVsyncFrameProvider;
@@ -110,14 +112,15 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
 
     @VisibleForTesting
     WindowMagnificationSettings(Context context, WindowMagnificationSettingsCallback callback,
-            SfVsyncFrameCallbackProvider sfVsyncFrameProvider) {
+            SfVsyncFrameCallbackProvider sfVsyncFrameProvider, SecureSettings secureSettings) {
         mContext = context;
         mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
         mWindowManager = mContext.getSystemService(WindowManager.class);
         mSfVsyncFrameProvider = sfVsyncFrameProvider;
         mCallback = callback;
+        mSecureSettings = secureSettings;
 
-        mAllowDiagonalScrolling = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+        mAllowDiagonalScrolling = mSecureSettings.getIntForUser(
                 Settings.Secure.ACCESSIBILITY_ALLOW_DIAGONAL_SCROLLING, 0,
                 UserHandle.USER_CURRENT) == 1;
 
@@ -133,7 +136,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             float scale = progress * A11Y_CHANGE_SCALE_DIFFERENCE + A11Y_SCALE_MIN_VALUE;
-            Settings.Secure.putFloatForUser(mContext.getContentResolver(),
+            mSecureSettings.putFloatForUser(
                     Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, scale,
                     UserHandle.USER_CURRENT);
             mCallback.onMagnifierScale(scale);
@@ -388,7 +391,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mZoomSeekbar = mSettingView.findViewById(R.id.magnifier_zoom_seekbar);
         mZoomSeekbar.setOnSeekBarChangeListener(new ZoomSeekbarChangeListener());
 
-        float scale = Settings.Secure.getFloatForUser(mContext.getContentResolver(),
+        float scale = mSecureSettings.getFloatForUser(
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, 0,
                 UserHandle.USER_CURRENT);
         setSeekbarProgress(scale);
@@ -510,11 +513,11 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     }
 
     private void toggleDiagonalScrolling() {
-        boolean enabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+        boolean enabled = mSecureSettings.getIntForUser(
                 Settings.Secure.ACCESSIBILITY_ALLOW_DIAGONAL_SCROLLING, 0,
                 UserHandle.USER_CURRENT) == 1;
 
-        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+        mSecureSettings.putIntForUser(
                 Settings.Secure.ACCESSIBILITY_ALLOW_DIAGONAL_SCROLLING, enabled ? 0 : 1,
                 UserHandle.USER_CURRENT);
 

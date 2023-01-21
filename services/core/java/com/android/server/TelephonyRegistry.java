@@ -3976,66 +3976,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
-    /**
-     * Returns a string representation of the radio technology (network type)
-     * currently in use on the device.
-     * @param type for which network type is returned
-     * @return the name of the radio technology
-     *
-     */
-    private String getNetworkTypeName(@Annotation.NetworkType int type) {
-        switch (type) {
-            case TelephonyManager.NETWORK_TYPE_GPRS:
-                return "GPRS";
-            case TelephonyManager.NETWORK_TYPE_EDGE:
-                return "EDGE";
-            case TelephonyManager.NETWORK_TYPE_UMTS:
-                return "UMTS";
-            case TelephonyManager.NETWORK_TYPE_HSDPA:
-                return "HSDPA";
-            case TelephonyManager.NETWORK_TYPE_HSUPA:
-                return "HSUPA";
-            case TelephonyManager.NETWORK_TYPE_HSPA:
-                return "HSPA";
-            case TelephonyManager.NETWORK_TYPE_CDMA:
-                return "CDMA";
-            case TelephonyManager.NETWORK_TYPE_EVDO_0:
-                return "CDMA - EvDo rev. 0";
-            case TelephonyManager.NETWORK_TYPE_EVDO_A:
-                return "CDMA - EvDo rev. A";
-            case TelephonyManager.NETWORK_TYPE_EVDO_B:
-                return "CDMA - EvDo rev. B";
-            case TelephonyManager.NETWORK_TYPE_1xRTT:
-                return "CDMA - 1xRTT";
-            case TelephonyManager.NETWORK_TYPE_LTE:
-                return "LTE";
-            case TelephonyManager.NETWORK_TYPE_EHRPD:
-                return "CDMA - eHRPD";
-            case TelephonyManager.NETWORK_TYPE_IDEN:
-                return "iDEN";
-            case TelephonyManager.NETWORK_TYPE_HSPAP:
-                return "HSPA+";
-            case TelephonyManager.NETWORK_TYPE_GSM:
-                return "GSM";
-            case TelephonyManager.NETWORK_TYPE_TD_SCDMA:
-                return "TD_SCDMA";
-            case TelephonyManager.NETWORK_TYPE_IWLAN:
-                return "IWLAN";
-
-            //TODO: This network type is marked as hidden because it is not a
-            // true network type and we are looking to remove it completely from the available list
-            // of network types.  Since this method is only used for logging, in the event that this
-            // network type is selected, the log will read as "Unknown."
-            //case TelephonyManager.NETWORK_TYPE_LTE_CA:
-            //    return "LTE_CA";
-
-            case TelephonyManager.NETWORK_TYPE_NR:
-                return "NR";
-            default:
-                return "UNKNOWN";
-        }
-    }
-
     /** Returns a new PreciseCallState object with default values. */
     private static PreciseCallState createPreciseCallState() {
         return new PreciseCallState(PreciseCallState.PRECISE_CALL_STATE_NOT_VALID,

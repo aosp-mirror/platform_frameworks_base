@@ -112,6 +112,7 @@ public:
     void stopDrawing();
     void notifyFramePending();
     void notifyCallbackPending();
+    void notifyExpensiveFrame();
 
     void dumpProfileInfo(int fd, int dumpFlags);
     // Not exported, only used for testing

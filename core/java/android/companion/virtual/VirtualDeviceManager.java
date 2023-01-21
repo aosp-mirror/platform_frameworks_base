@@ -361,8 +361,12 @@ public final class VirtualDeviceManager {
         private final Context mContext;
         private final IVirtualDeviceManager mService;
         private final IVirtualDevice mVirtualDevice;
+        private final Object mActivityListenersLock = new Object();
+        @GuardedBy("mActivityListenersLock")
         private final ArrayMap<ActivityListener, ActivityListenerDelegate> mActivityListeners =
                 new ArrayMap<>();
+        private final Object mIntentInterceptorListenersLock = new Object();
+        @GuardedBy("mIntentInterceptorListenersLock")
         private final ArrayMap<IntentInterceptorCallback,
                      VirtualIntentInterceptorDelegate> mIntentInterceptorListeners =
                 new ArrayMap<>();
@@ -377,9 +381,11 @@ public final class VirtualDeviceManager {
                     public void onTopActivityChanged(int displayId, ComponentName topActivity) {
                         final long token = Binder.clearCallingIdentity();
                         try {
-                            for (int i = 0; i < mActivityListeners.size(); i++) {
-                                mActivityListeners.valueAt(i)
-                                        .onTopActivityChanged(displayId, topActivity);
+                            synchronized (mActivityListenersLock) {
+                                for (int i = 0; i < mActivityListeners.size(); i++) {
+                                    mActivityListeners.valueAt(i)
+                                            .onTopActivityChanged(displayId, topActivity);
+                                }
                             }
                         } finally {
                             Binder.restoreCallingIdentity(token);
@@ -390,8 +396,10 @@ public final class VirtualDeviceManager {
                     public void onDisplayEmpty(int displayId) {
                         final long token = Binder.clearCallingIdentity();
                         try {
-                            for (int i = 0; i < mActivityListeners.size(); i++) {
-                                mActivityListeners.valueAt(i).onDisplayEmpty(displayId);
+                            synchronized (mActivityListenersLock) {
+                                for (int i = 0; i < mActivityListeners.size(); i++) {
+                                    mActivityListeners.valueAt(i).onDisplayEmpty(displayId);
+                                }
                             }
                         } finally {
                             Binder.restoreCallingIdentity(token);
@@ -960,7 +968,11 @@ public final class VirtualDeviceManager {
          */
         public void addActivityListener(
                 @CallbackExecutor @NonNull Executor executor, @NonNull ActivityListener listener) {
-            mActivityListeners.put(listener, new ActivityListenerDelegate(listener, executor));
+            final ActivityListenerDelegate delegate = new ActivityListenerDelegate(
+                    Objects.requireNonNull(listener), Objects.requireNonNull(executor));
+            synchronized (mActivityListenersLock) {
+                mActivityListeners.put(listener, delegate);
+            }
         }
 
         /**
@@ -971,7 +983,9 @@ public final class VirtualDeviceManager {
          * @see #addActivityListener(Executor, ActivityListener)
          */
         public void removeActivityListener(@NonNull ActivityListener listener) {
-            mActivityListeners.remove(listener);
+            synchronized (mActivityListenersLock) {
+                mActivityListeners.remove(Objects.requireNonNull(listener));
+            }
         }
 
         /**
@@ -999,7 +1013,7 @@ public final class VirtualDeviceManager {
          */
         public void removeSoundEffectListener(@NonNull SoundEffectListener soundEffectListener) {
             synchronized (mSoundEffectListenersLock) {
-                mSoundEffectListeners.remove(soundEffectListener);
+                mSoundEffectListeners.remove(Objects.requireNonNull(soundEffectListener));
             }
         }
 
@@ -1029,7 +1043,9 @@ public final class VirtualDeviceManager {
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
-            mIntentInterceptorListeners.put(interceptorCallback, delegate);
+            synchronized (mIntentInterceptorListenersLock) {
+                mIntentInterceptorListeners.put(interceptorCallback, delegate);
+            }
         }
 
         /**
@@ -1040,14 +1056,17 @@ public final class VirtualDeviceManager {
         public void unregisterIntentInterceptor(
                     @NonNull IntentInterceptorCallback interceptorCallback) {
             Objects.requireNonNull(interceptorCallback);
-            final VirtualIntentInterceptorDelegate delegate =
-                    mIntentInterceptorListeners.get(interceptorCallback);
-            try {
-                mVirtualDevice.unregisterIntentInterceptor(delegate);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
+            final VirtualIntentInterceptorDelegate delegate;
+            synchronized (mIntentInterceptorListenersLock) {
+                delegate = mIntentInterceptorListeners.remove(interceptorCallback);
             }
-            mIntentInterceptorListeners.remove(interceptorCallback);
+            if (delegate != null) {
+                try {
+                    mVirtualDevice.unregisterIntentInterceptor(delegate);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
         }
     }
 

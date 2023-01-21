@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.log.dagger;
+package com.android.server.companion.datatransfer.contextsync;
 
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+/** Callback for call metadata syncing. */
+public abstract class CallMetadataSyncCallback {
 
-import com.android.systemui.plugins.log.LogBuffer;
+    abstract void processCallControlAction(int crossDeviceCallId, int callControlAction);
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-
-import javax.inject.Qualifier;
-
-/**
- * A {@link LogBuffer} for
- * {@link com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureLogger}.
- */
-@Qualifier
-@Documented
-@Retention(RUNTIME)
-public @interface SwipeStatusBarAwayLog {
+    abstract void requestCrossDeviceSync(int userId);
 }

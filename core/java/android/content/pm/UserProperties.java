@@ -19,6 +19,8 @@ package android.content.pm;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Slog;
@@ -36,7 +38,10 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Class holding the properties of a user that derive mostly from its user type.
+ *
+ * @hide
  */
+@SystemApi
 public final class UserProperties implements Parcelable {
     private static final String LOG_TAG = UserProperties.class.getSimpleName();
 
@@ -52,6 +57,10 @@ public final class UserProperties implements Parcelable {
             "crossProfileIntentFilterAccessControl";
     private static final String ATTR_CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY =
             "crossProfileIntentResolutionStrategy";
+    private static final String ATTR_MEDIA_SHARED_WITH_PARENT =
+            "mediaSharedWithParent";
+    private static final String ATTR_CREDENTIAL_SHARABLE_WITH_PARENT =
+            "credentialSharableWithParent";
 
     /** Index values of each property (to indicate whether they are present in this object). */
     @IntDef(prefix = "INDEX_", value = {
@@ -62,7 +71,9 @@ public final class UserProperties implements Parcelable {
             INDEX_USE_PARENTS_CONTACTS,
             INDEX_UPDATE_CROSS_PROFILE_INTENT_FILTERS_ON_OTA,
             INDEX_CROSS_PROFILE_INTENT_FILTER_ACCESS_CONTROL,
-            INDEX_CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY
+            INDEX_CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY,
+            INDEX_MEDIA_SHARED_WITH_PARENT,
+            INDEX_CREDENTIAL_SHARABLE_WITH_PARENT
     })
     @Retention(RetentionPolicy.SOURCE)
     private @interface PropertyIndex {
@@ -75,6 +86,8 @@ public final class UserProperties implements Parcelable {
     private static final int INDEX_UPDATE_CROSS_PROFILE_INTENT_FILTERS_ON_OTA = 5;
     private static final int INDEX_CROSS_PROFILE_INTENT_FILTER_ACCESS_CONTROL = 6;
     private static final int INDEX_CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY = 7;
+    private static final int INDEX_MEDIA_SHARED_WITH_PARENT = 8;
+    private static final int INDEX_CREDENTIAL_SHARABLE_WITH_PARENT = 9;
     /** A bit set, mapping each PropertyIndex to whether it is present (1) or absent (0). */
     private long mPropertiesPresent = 0;
 
@@ -95,16 +108,22 @@ public final class UserProperties implements Parcelable {
      * Suggests that the launcher should show this user's apps in the main tab.
      * That is, either this user is a full user, so its apps should be presented accordingly, or, if
      * this user is a profile, then its apps should be shown alongside its parent's apps.
+     * @hide
      */
+    @TestApi
     public static final int SHOW_IN_LAUNCHER_WITH_PARENT = 0;
     /**
      * Suggests that the launcher should show this user's apps, but separately from the apps of this
      * user's parent.
+     * @hide
      */
+    @TestApi
     public static final int SHOW_IN_LAUNCHER_SEPARATE = 1;
     /**
      * Suggests that the launcher should not show this user.
+     * @hide
      */
+    @TestApi
     public static final int SHOW_IN_LAUNCHER_NO = 2;
 
     /**
@@ -304,6 +323,8 @@ public final class UserProperties implements Parcelable {
         }
         // Add items that have no permission requirements at all.
         setShowInLauncher(orig.getShowInLauncher());
+        setIsMediaSharedWithParent(orig.getIsMediaSharedWithParent());
+        setIsCredentialSharableWithParent(orig.getIsCredentialSharableWithParent());
     }
 
     /**
@@ -337,7 +358,9 @@ public final class UserProperties implements Parcelable {
      *    and {@link #SHOW_IN_LAUNCHER_NO}.
      *
      * @return whether, and how, a profile should be shown in the Launcher.
+     * @hide
      */
+    @TestApi
     public @ShowInLauncher int getShowInLauncher() {
         if (isPresent(INDEX_SHOW_IN_LAUNCHER)) return mShowInLauncher;
         if (mDefaultProperties != null) return mDefaultProperties.mShowInLauncher;
@@ -463,12 +486,44 @@ public final class UserProperties implements Parcelable {
         throw new SecurityException("You don't have permission to query "
                 + "updateCrossProfileIntentFiltersOnOTA");
     }
-
     /** @hide */
     public void setUpdateCrossProfileIntentFiltersOnOTA(boolean val) {
         this.mUpdateCrossProfileIntentFiltersOnOTA = val;
         setPresent(INDEX_UPDATE_CROSS_PROFILE_INTENT_FILTERS_ON_OTA);
     }
+
+    /**
+     * Returns whether a profile shares media with its parent user.
+     * This only applies for users that have parents (i.e. for profiles).
+     */
+    public boolean getIsMediaSharedWithParent() {
+        if (isPresent(INDEX_MEDIA_SHARED_WITH_PARENT)) return mMediaSharedWithParent;
+        if (mDefaultProperties != null) return mDefaultProperties.mMediaSharedWithParent;
+        throw new SecurityException("You don't have permission to query isMediaSharedWithParent");
+    }
+    /** @hide */
+    public void setIsMediaSharedWithParent(boolean val) {
+        this.mMediaSharedWithParent = val;
+        setPresent(INDEX_MEDIA_SHARED_WITH_PARENT);
+    }
+    private boolean mMediaSharedWithParent;
+
+    /**
+     * Returns whether a profile can have shared lockscreen credential with its parent user.
+     * This only applies for users that have parents (i.e. for profiles).
+     */
+    public boolean getIsCredentialSharableWithParent() {
+        if (isPresent(INDEX_CREDENTIAL_SHARABLE_WITH_PARENT)) return mCredentialSharableWithParent;
+        if (mDefaultProperties != null) return mDefaultProperties.mCredentialSharableWithParent;
+        throw new SecurityException(
+                "You don't have permission to query isCredentialSharableWithParent");
+    }
+    /** @hide */
+    public void setIsCredentialSharableWithParent(boolean val) {
+        this.mCredentialSharableWithParent = val;
+        setPresent(INDEX_CREDENTIAL_SHARABLE_WITH_PARENT);
+    }
+    private boolean mCredentialSharableWithParent;
 
     /*
      Indicate if {@link com.android.server.pm.CrossProfileIntentFilter}s need to be updated during
@@ -550,6 +605,8 @@ public final class UserProperties implements Parcelable {
                 + getCrossProfileIntentFilterAccessControl()
                 + ", mCrossProfileIntentResolutionStrategy="
                 + getCrossProfileIntentResolutionStrategy()
+                + ", mMediaSharedWithParent=" + getIsMediaSharedWithParent()
+                + ", mCredentialSharableWithParent=" + getIsCredentialSharableWithParent()
                 + "}";
     }
 
@@ -572,6 +629,9 @@ public final class UserProperties implements Parcelable {
                 + getCrossProfileIntentFilterAccessControl());
         pw.println(prefix + "    mCrossProfileIntentResolutionStrategy="
                 + getCrossProfileIntentResolutionStrategy());
+        pw.println(prefix + "    mMediaSharedWithParent=" + getIsMediaSharedWithParent());
+        pw.println(prefix + "    mCredentialSharableWithParent="
+                + getIsCredentialSharableWithParent());
     }
 
     /**
@@ -629,6 +689,12 @@ public final class UserProperties implements Parcelable {
                 case ATTR_CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY:
                     setCrossProfileIntentResolutionStrategy(parser.getAttributeInt(i));
                     break;
+                case ATTR_MEDIA_SHARED_WITH_PARENT:
+                    setIsMediaSharedWithParent(parser.getAttributeBoolean(i));
+                    break;
+                case ATTR_CREDENTIAL_SHARABLE_WITH_PARENT:
+                    setIsCredentialSharableWithParent(parser.getAttributeBoolean(i));
+                    break;
                 default:
                     Slog.w(LOG_TAG, "Skipping unknown property " + attributeName);
             }
@@ -676,6 +742,14 @@ public final class UserProperties implements Parcelable {
             serializer.attributeInt(null, ATTR_CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY,
                     mCrossProfileIntentResolutionStrategy);
         }
+        if (isPresent(INDEX_MEDIA_SHARED_WITH_PARENT)) {
+            serializer.attributeBoolean(null, ATTR_MEDIA_SHARED_WITH_PARENT,
+                    mMediaSharedWithParent);
+        }
+        if (isPresent(INDEX_CREDENTIAL_SHARABLE_WITH_PARENT)) {
+            serializer.attributeBoolean(null, ATTR_CREDENTIAL_SHARABLE_WITH_PARENT,
+                    mCredentialSharableWithParent);
+        }
     }
 
     // For use only with an object that has already had any permission-lacking fields stripped out.
@@ -690,6 +764,8 @@ public final class UserProperties implements Parcelable {
         dest.writeBoolean(mUpdateCrossProfileIntentFiltersOnOTA);
         dest.writeInt(mCrossProfileIntentFilterAccessControl);
         dest.writeInt(mCrossProfileIntentResolutionStrategy);
+        dest.writeBoolean(mMediaSharedWithParent);
+        dest.writeBoolean(mCredentialSharableWithParent);
     }
 
     /**
@@ -708,6 +784,8 @@ public final class UserProperties implements Parcelable {
         mUpdateCrossProfileIntentFiltersOnOTA = source.readBoolean();
         mCrossProfileIntentFilterAccessControl = source.readInt();
         mCrossProfileIntentResolutionStrategy = source.readInt();
+        mMediaSharedWithParent = source.readBoolean();
+        mCredentialSharableWithParent = source.readBoolean();
     }
 
     @Override
@@ -743,6 +821,8 @@ public final class UserProperties implements Parcelable {
                 CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_ALL;
         private @CrossProfileIntentResolutionStrategy int mCrossProfileIntentResolutionStrategy =
                 CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY_DEFAULT;
+        private boolean mMediaSharedWithParent = false;
+        private boolean mCredentialSharableWithParent = false;
 
         public Builder setShowInLauncher(@ShowInLauncher int showInLauncher) {
             mShowInLauncher = showInLauncher;
@@ -794,6 +874,16 @@ public final class UserProperties implements Parcelable {
             return this;
         }
 
+        public Builder setIsMediaSharedWithParent(boolean mediaSharedWithParent) {
+            mMediaSharedWithParent = mediaSharedWithParent;
+            return this;
+        }
+
+        public Builder setIsCredentialSharableWithParent(boolean credentialSharableWithParent) {
+            mCredentialSharableWithParent = credentialSharableWithParent;
+            return this;
+        }
+
         /** Builds a UserProperties object with *all* values populated. */
         public UserProperties build() {
             return new UserProperties(
@@ -804,7 +894,9 @@ public final class UserProperties implements Parcelable {
                     mUseParentsContacts,
                     mUpdateCrossProfileIntentFiltersOnOTA,
                     mCrossProfileIntentFilterAccessControl,
-                    mCrossProfileIntentResolutionStrategy);
+                    mCrossProfileIntentResolutionStrategy,
+                    mMediaSharedWithParent,
+                    mCredentialSharableWithParent);
         }
     } // end Builder
 
@@ -816,7 +908,9 @@ public final class UserProperties implements Parcelable {
             @InheritDevicePolicy int inheritDevicePolicy,
             boolean useParentsContacts, boolean updateCrossProfileIntentFiltersOnOTA,
             @CrossProfileIntentFilterAccessControlLevel int crossProfileIntentFilterAccessControl,
-            @CrossProfileIntentResolutionStrategy int crossProfileIntentResolutionStrategy) {
+            @CrossProfileIntentResolutionStrategy int crossProfileIntentResolutionStrategy,
+            boolean mediaSharedWithParent,
+            boolean credentialSharableWithParent) {
 
         mDefaultProperties = null;
         setShowInLauncher(showInLauncher);
@@ -827,5 +921,7 @@ public final class UserProperties implements Parcelable {
         setUpdateCrossProfileIntentFiltersOnOTA(updateCrossProfileIntentFiltersOnOTA);
         setCrossProfileIntentFilterAccessControl(crossProfileIntentFilterAccessControl);
         setCrossProfileIntentResolutionStrategy(crossProfileIntentResolutionStrategy);
+        setIsMediaSharedWithParent(mediaSharedWithParent);
+        setIsCredentialSharableWithParent(credentialSharableWithParent);
     }
 }

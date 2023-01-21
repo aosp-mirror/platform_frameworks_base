@@ -57,6 +57,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
 import android.content.pm.UserInfo;
+import android.content.pm.UserProperties;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
@@ -87,7 +88,6 @@ import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.RescueParty;
 import com.android.server.pm.UserManagerInternal;
-import com.android.server.pm.UserManagerService;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.sdksandbox.SdkSandboxManagerLocal;
 
@@ -186,7 +186,7 @@ public class ContentProviderHelper {
 
             checkTime(startTime, "getContentProviderImpl: getProviderByName");
 
-            UserManagerService userManagerService = UserManagerService.getInstance();
+            UserManagerInternal umInternal = LocalServices.getService(UserManagerInternal.class);
 
             /*
              For clone user profile and allowed authority, skipping finding provider and redirecting
@@ -196,8 +196,10 @@ public class ContentProviderHelper {
              used and redirect to owner user's MediaProvider.
              */
             //todo(b/236121588) MediaProvider should not be installed in clone profile.
-            if (!isAuthorityRedirectedForCloneProfile(name)
-                    || !userManagerService.isMediaSharedWithParent(userId)) {
+            final UserProperties userProps = umInternal.getUserProperties(userId);
+            final boolean isMediaSharedWithParent =
+                    userProps != null && userProps.getIsMediaSharedWithParent();
+            if (!isAuthorityRedirectedForCloneProfile(name) || !isMediaSharedWithParent) {
                 // First check if this content provider has been published...
                 cpr = mProviderMap.getProviderByName(name, userId);
             }
@@ -215,9 +217,7 @@ public class ContentProviderHelper {
                         userId = UserHandle.USER_SYSTEM;
                         checkCrossUser = false;
                     } else if (isAuthorityRedirectedForCloneProfile(name)) {
-                        if (userManagerService.isMediaSharedWithParent(userId)) {
-                            UserManagerInternal umInternal = LocalServices.getService(
-                                    UserManagerInternal.class);
+                        if (isMediaSharedWithParent) {
                             userId = umInternal.getProfileParentId(userId);
                             checkCrossUser = false;
                         }

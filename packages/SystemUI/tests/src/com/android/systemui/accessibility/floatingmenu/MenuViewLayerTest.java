@@ -22,7 +22,6 @@ import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.systemBars;
 
-import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_COMPONENT_NAME;
 import static com.android.systemui.accessibility.floatingmenu.MenuViewLayer.LayerIndex;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -54,6 +53,7 @@ import android.view.accessibility.AccessibilityManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.After;
 import org.junit.Before;
@@ -100,6 +100,9 @@ public class MenuViewLayerTest extends SysuiTestCase {
     private IAccessibilityFloatingMenu mFloatingMenu;
 
     @Mock
+    private SecureSettings mSecureSettings;
+
+    @Mock
     private WindowManager mStubWindowManager;
 
     @Mock
@@ -114,7 +117,7 @@ public class MenuViewLayerTest extends SysuiTestCase {
         doReturn(mWindowMetrics).when(mStubWindowManager).getCurrentWindowMetrics();
 
         mMenuViewLayer = new MenuViewLayer(mContext, mStubWindowManager, mStubAccessibilityManager,
-                mFloatingMenu);
+                mFloatingMenu, mSecureSettings);
         mMenuView = (MenuView) mMenuViewLayer.getChildAt(LayerIndex.MENU_VIEW);
         mMenuAnimationController = mMenuView.getMenuAnimationController();
 
@@ -170,16 +173,10 @@ public class MenuViewLayerTest extends SysuiTestCase {
 
     @Test
     public void tiggerDismissMenuAction_matchA11yButtonTargetsResult() {
-        Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
-                MAGNIFICATION_COMPONENT_NAME.flattenToString(), UserHandle.USER_CURRENT);
-
         mMenuViewLayer.mDismissMenuAction.run();
-        final String value =
-                Settings.Secure.getStringForUser(mContext.getContentResolver(),
-                        Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, UserHandle.USER_CURRENT);
-
-        assertThat(value).isEqualTo("");
+        verify(mSecureSettings).putStringForUser(
+                Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, /* value= */ "",
+                UserHandle.USER_CURRENT);
     }
 
     @Test

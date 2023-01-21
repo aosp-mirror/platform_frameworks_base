@@ -45,13 +45,18 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import com.android.systemui.temporarydisplay.chipbar.ChipbarInfo
 import com.android.systemui.temporarydisplay.chipbar.ChipbarLogger
 import com.android.systemui.temporarydisplay.chipbar.FakeChipbarCoordinator
+import com.android.systemui.temporarydisplay.chipbar.SwipeChipbarAwayGestureHandler
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.util.view.ViewUtil
 import com.android.systemui.util.wakelock.WakeLockFake
@@ -61,6 +66,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
+import org.mockito.Mockito.atLeast
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
@@ -93,6 +99,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
     @Mock private lateinit var viewUtil: ViewUtil
     @Mock private lateinit var windowManager: WindowManager
     @Mock private lateinit var vibratorHelper: VibratorHelper
+    @Mock private lateinit var swipeHandler: SwipeChipbarAwayGestureHandler
     private lateinit var fakeWakeLockBuilder: WakeLockFake.Builder
     private lateinit var fakeWakeLock: WakeLockFake
     private lateinit var chipbarCoordinator: ChipbarCoordinator
@@ -143,6 +150,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 powerManager,
                 falsingManager,
                 falsingCollector,
+                swipeHandler,
                 viewUtil,
                 vibratorHelper,
                 fakeWakeLockBuilder,
@@ -161,9 +169,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
             )
         underTest.start()
 
-        val callbackCaptor = ArgumentCaptor.forClass(CommandQueue.Callbacks::class.java)
-        verify(commandQueue).addCallback(callbackCaptor.capture())
-        commandQueueCallback = callbackCaptor.value!!
+        setCommandQueueCallback()
     }
 
     @Test
@@ -920,6 +926,172 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         verify(windowManager).removeView(any())
     }
 
+    @Test
+    fun newState_viewListenerRegistered() {
+        val mockChipbarCoordinator = mock<ChipbarCoordinator>()
+        underTest =
+            MediaTttSenderCoordinator(
+                mockChipbarCoordinator,
+                commandQueue,
+                context,
+                logger,
+                mediaTttFlags,
+                uiEventLogger,
+            )
+        underTest.start()
+        // Re-set the command queue callback since we've created a new [MediaTttSenderCoordinator]
+        // with a new callback.
+        setCommandQueueCallback()
+
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST,
+            routeInfo,
+            null,
+        )
+
+        verify(mockChipbarCoordinator).registerListener(any())
+    }
+
+    @Test
+    fun onInfoPermanentlyRemoved_viewListenerUnregistered() {
+        val mockChipbarCoordinator = mock<ChipbarCoordinator>()
+        underTest =
+            MediaTttSenderCoordinator(
+                mockChipbarCoordinator,
+                commandQueue,
+                context,
+                logger,
+                mediaTttFlags,
+                uiEventLogger,
+            )
+        underTest.start()
+        setCommandQueueCallback()
+
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST,
+            routeInfo,
+            null,
+        )
+
+        val listenerCaptor = argumentCaptor<TemporaryViewDisplayController.Listener>()
+        verify(mockChipbarCoordinator).registerListener(capture(listenerCaptor))
+
+        // WHEN the listener is notified that the view has been removed
+        listenerCaptor.value.onInfoPermanentlyRemoved(DEFAULT_ID)
+
+        // THEN the media coordinator unregisters the listener
+        verify(mockChipbarCoordinator).unregisterListener(listenerCaptor.value)
+    }
+
+    @Test
+    fun onInfoPermanentlyRemoved_wrongId_viewListenerNotUnregistered() {
+        val mockChipbarCoordinator = mock<ChipbarCoordinator>()
+        underTest =
+            MediaTttSenderCoordinator(
+                mockChipbarCoordinator,
+                commandQueue,
+                context,
+                logger,
+                mediaTttFlags,
+                uiEventLogger,
+            )
+        underTest.start()
+        setCommandQueueCallback()
+
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST,
+            routeInfo,
+            null,
+        )
+
+        val listenerCaptor = argumentCaptor<TemporaryViewDisplayController.Listener>()
+        verify(mockChipbarCoordinator).registerListener(capture(listenerCaptor))
+
+        // WHEN the listener is notified that a different view has been removed
+        listenerCaptor.value.onInfoPermanentlyRemoved("differentViewId")
+
+        // THEN the media coordinator doesn't unregister the listener
+        verify(mockChipbarCoordinator, never()).unregisterListener(listenerCaptor.value)
+    }
+
+    @Test
+    fun farFromReceiverState_viewListenerUnregistered() {
+        val mockChipbarCoordinator = mock<ChipbarCoordinator>()
+        underTest =
+            MediaTttSenderCoordinator(
+                mockChipbarCoordinator,
+                commandQueue,
+                context,
+                logger,
+                mediaTttFlags,
+                uiEventLogger,
+            )
+        underTest.start()
+        setCommandQueueCallback()
+
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST,
+            routeInfo,
+            null,
+        )
+
+        val listenerCaptor = argumentCaptor<TemporaryViewDisplayController.Listener>()
+        verify(mockChipbarCoordinator).registerListener(capture(listenerCaptor))
+
+        // WHEN we go to the FAR_FROM_RECEIVER state
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
+            routeInfo,
+            null
+        )
+
+        // THEN the media coordinator unregisters the listener
+        verify(mockChipbarCoordinator).unregisterListener(listenerCaptor.value)
+    }
+
+    @Test
+    fun statesWithDifferentIds_onInfoPermanentlyRemovedForOneId_viewListenerNotUnregistered() {
+        val mockChipbarCoordinator = mock<ChipbarCoordinator>()
+        underTest =
+            MediaTttSenderCoordinator(
+                mockChipbarCoordinator,
+                commandQueue,
+                context,
+                logger,
+                mediaTttFlags,
+                uiEventLogger,
+            )
+        underTest.start()
+        setCommandQueueCallback()
+
+        // WHEN there are two different media transfers with different IDs
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST,
+            MediaRoute2Info.Builder("route1", OTHER_DEVICE_NAME)
+                .addFeature("feature")
+                .setClientPackageName(PACKAGE_NAME)
+                .build(),
+            null,
+        )
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST,
+            MediaRoute2Info.Builder("route2", OTHER_DEVICE_NAME)
+                .addFeature("feature")
+                .setClientPackageName(PACKAGE_NAME)
+                .build(),
+            null,
+        )
+
+        val listenerCaptor = argumentCaptor<TemporaryViewDisplayController.Listener>()
+        verify(mockChipbarCoordinator, atLeast(1)).registerListener(capture(listenerCaptor))
+
+        // THEN one of them is removed
+        listenerCaptor.value.onInfoPermanentlyRemoved("route1")
+
+        // THEN the media coordinator doesn't unregister the listener (since route2 is still active)
+        verify(mockChipbarCoordinator, never()).unregisterListener(listenerCaptor.value)
+    }
+
     private fun getChipbarView(): ViewGroup {
         val viewCaptor = ArgumentCaptor.forClass(View::class.java)
         verify(windowManager).addView(viewCaptor.capture(), any())
@@ -960,8 +1132,16 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
             null
         )
     }
+
+    private fun setCommandQueueCallback() {
+        val callbackCaptor = argumentCaptor<CommandQueue.Callbacks>()
+        verify(commandQueue).addCallback(capture(callbackCaptor))
+        commandQueueCallback = callbackCaptor.value
+        reset(commandQueue)
+    }
 }
 
+private const val DEFAULT_ID = "defaultId"
 private const val APP_NAME = "Fake app name"
 private const val OTHER_DEVICE_NAME = "My Tablet"
 private const val BLANK_DEVICE_NAME = " "
@@ -969,13 +1149,13 @@ private const val PACKAGE_NAME = "com.android.systemui"
 private const val TIMEOUT = 10000
 
 private val routeInfo =
-    MediaRoute2Info.Builder("id", OTHER_DEVICE_NAME)
+    MediaRoute2Info.Builder(DEFAULT_ID, OTHER_DEVICE_NAME)
         .addFeature("feature")
         .setClientPackageName(PACKAGE_NAME)
         .build()
 
 private val routeInfoWithBlankDeviceName =
-    MediaRoute2Info.Builder("id", BLANK_DEVICE_NAME)
+    MediaRoute2Info.Builder(DEFAULT_ID, BLANK_DEVICE_NAME)
         .addFeature("feature")
         .setClientPackageName(PACKAGE_NAME)
         .build()

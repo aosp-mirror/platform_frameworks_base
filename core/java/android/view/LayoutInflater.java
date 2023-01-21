@@ -640,6 +640,10 @@ public abstract class LayoutInflater {
             mConstructorArgs[0] = inflaterContext;
             View result = root;
 
+            if (root != null && root.getViewRootImpl() != null) {
+                root.getViewRootImpl().notifyRendererOfExpensiveFrame();
+            }
+
             try {
                 advanceToRootNode(parser);
                 final String name = parser.getName();
@@ -661,6 +665,10 @@ public abstract class LayoutInflater {
                 } else {
                     // Temp is the root view that was found in the xml
                     final View temp = createViewFromTag(root, name, inflaterContext, attrs);
+
+                    if (root == null && temp != null && temp.getViewRootImpl() != null) {
+                        temp.getViewRootImpl().notifyRendererOfExpensiveFrame();
+                    }
 
                     ViewGroup.LayoutParams params = null;
 

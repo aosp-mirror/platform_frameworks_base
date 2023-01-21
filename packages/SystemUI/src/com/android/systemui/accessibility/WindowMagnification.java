@@ -41,6 +41,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.util.settings.SecureSettings;
 
 import java.io.PrintWriter;
 
@@ -74,15 +75,18 @@ public class WindowMagnification implements CoreStartable, WindowMagnifierCallba
         private final Handler mHandler;
         private final WindowMagnifierCallback mWindowMagnifierCallback;
         private final SysUiState mSysUiState;
+        private final SecureSettings mSecureSettings;
 
         ControllerSupplier(Context context, Handler handler,
                 WindowMagnifierCallback windowMagnifierCallback,
-                DisplayManager displayManager, SysUiState sysUiState) {
+                DisplayManager displayManager, SysUiState sysUiState,
+                SecureSettings secureSettings) {
             super(displayManager);
             mContext = context;
             mHandler = handler;
             mWindowMagnifierCallback = windowMagnifierCallback;
             mSysUiState = sysUiState;
+            mSecureSettings = secureSettings;
         }
 
         @Override
@@ -99,7 +103,8 @@ public class WindowMagnification implements CoreStartable, WindowMagnifierCallba
                     new SurfaceControl.Transaction(),
                     mWindowMagnifierCallback,
                     mSysUiState,
-                    WindowManagerGlobal::getWindowSession);
+                    WindowManagerGlobal::getWindowSession,
+                    mSecureSettings);
         }
     }
 
@@ -109,7 +114,8 @@ public class WindowMagnification implements CoreStartable, WindowMagnifierCallba
     @Inject
     public WindowMagnification(Context context, @Main Handler mainHandler,
             CommandQueue commandQueue, ModeSwitchesController modeSwitchesController,
-            SysUiState sysUiState, OverviewProxyService overviewProxyService) {
+            SysUiState sysUiState, OverviewProxyService overviewProxyService,
+            SecureSettings secureSettings) {
         mContext = context;
         mHandler = mainHandler;
         mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
@@ -118,7 +124,8 @@ public class WindowMagnification implements CoreStartable, WindowMagnifierCallba
         mSysUiState = sysUiState;
         mOverviewProxyService = overviewProxyService;
         mMagnificationControllerSupplier = new ControllerSupplier(context,
-                mHandler, this, context.getSystemService(DisplayManager.class), sysUiState);
+                mHandler, this, context.getSystemService(DisplayManager.class), sysUiState,
+                secureSettings);
     }
 
     @Override

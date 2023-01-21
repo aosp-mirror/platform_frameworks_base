@@ -1331,7 +1331,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         mHideAnimation = AnimationUtils.loadAnimation(mContext,
                 com.android.internal.R.anim.lock_screen_behind_enter);
 
-        mWorkLockController = new WorkLockActivityController(mContext);
+        mWorkLockController = new WorkLockActivityController(mContext, mUserTracker);
     }
 
     @Override

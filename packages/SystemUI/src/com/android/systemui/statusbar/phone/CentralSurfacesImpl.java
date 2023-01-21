@@ -178,6 +178,7 @@ import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.scrim.ScrimView;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
 import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.NotificationPanelViewController;
@@ -507,6 +508,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private final MessageRouter mMessageRouter;
     private final WallpaperManager mWallpaperManager;
+    private final UserTracker mUserTracker;
 
     private CentralSurfacesComponent mCentralSurfacesComponent;
 
@@ -750,7 +752,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             IDreamManager dreamManager,
             Lazy<CameraLauncher> cameraLauncherLazy,
             Lazy<LightRevealScrimViewModel> lightRevealScrimViewModelLazy,
-            AlternateBouncerInteractor alternateBouncerInteractor
+            AlternateBouncerInteractor alternateBouncerInteractor,
+            UserTracker userTracker
     ) {
         mContext = context;
         mNotificationsController = notificationsController;
@@ -830,6 +833,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mJankMonitor = jankMonitor;
         mCameraLauncherLazy = cameraLauncherLazy;
         mAlternateBouncerInteractor = alternateBouncerInteractor;
+        mUserTracker = userTracker;
 
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mStartingSurfaceOptional = startingSurfaceOptional;
@@ -4155,7 +4159,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 Log.wtf(TAG, "WallpaperManager not supported");
                 return;
             }
-            WallpaperInfo info = mWallpaperManager.getWallpaperInfoForUser(UserHandle.USER_CURRENT);
+            WallpaperInfo info = mWallpaperManager.getWallpaperInfoForUser(
+                    mUserTracker.getUserId());
             mWallpaperController.onWallpaperInfoUpdated(info);
 
             final boolean deviceSupportsAodWallpaper = mContext.getResources().getBoolean(
@@ -4379,6 +4384,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 return new UserHandle(UserHandle.myUserId());
             }
         }
-        return UserHandle.CURRENT;
+        return mUserTracker.getUserHandle();
     }
 }

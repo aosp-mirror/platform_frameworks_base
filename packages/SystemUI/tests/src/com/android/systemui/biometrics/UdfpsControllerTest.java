@@ -98,6 +98,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.Execution;
 import com.android.systemui.util.concurrency.FakeExecution;
 import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.time.SystemClock;
 
@@ -209,6 +210,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private SessionTracker mSessionTracker;
     @Mock
     private AlternateBouncerInteractor mAlternateBouncerInteractor;
+    @Mock
+    private SecureSettings mSecureSettings;
 
     // Capture listeners so that they can be used to send events
     @Captor
@@ -302,7 +305,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mUnlockedScreenOffAnimationController, mSystemUIDialogManager, mLatencyTracker,
                 mActivityLaunchAnimator, alternateTouchProvider, mBiometricExecutor,
                 mPrimaryBouncerInteractor, mSinglePointerTouchProcessor, mSessionTracker,
-                mAlternateBouncerInteractor);
+                mAlternateBouncerInteractor, mSecureSettings);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
         verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());

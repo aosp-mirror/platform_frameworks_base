@@ -297,7 +297,7 @@ public final class NavBarHelper implements
 
     private void updateAssistantAvailability() {
         boolean assistantAvailableForUser = mAssistManagerLazy.get()
-                .getAssistInfoForUser(UserHandle.USER_CURRENT) != null;
+                .getAssistInfoForUser(mUserTracker.getUserId()) != null;
         boolean longPressDefault = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_assistLongPressHomeEnabledDefault);
         mLongPressHomeEnabled = Settings.Secure.getIntForUser(mContentResolver,

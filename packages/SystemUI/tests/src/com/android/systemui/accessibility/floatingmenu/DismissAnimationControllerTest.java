@@ -16,6 +16,7 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -27,6 +28,7 @@ import android.view.accessibility.AccessibilityManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.util.settings.SecureSettings;
 import com.android.wm.shell.bubbles.DismissView;
 
 import org.junit.Before;
@@ -54,7 +56,8 @@ public class DismissAnimationControllerTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         final WindowManager stubWindowManager = mContext.getSystemService(WindowManager.class);
-        final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager);
+        final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager,
+                mock(SecureSettings.class));
         final MenuViewAppearance stubMenuViewAppearance = new MenuViewAppearance(mContext,
                 stubWindowManager);
         final MenuView stubMenuView = new MenuView(mContext, stubMenuViewModel,

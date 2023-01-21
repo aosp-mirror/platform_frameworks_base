@@ -41,6 +41,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.PendingIntent;
@@ -59,6 +60,7 @@ import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -107,6 +109,8 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     UiEventLoggerFake mUiEventLoggerFake;
     @Mock
     PendingIntent mPendingIntent;
+    @Mock
+    UserTracker mUserTracker;
 
     private NotificationInterruptStateProviderImpl mNotifInterruptionStateProvider;
 
@@ -114,6 +118,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         when(mFlags.fullScreenIntentRequiresKeyguard()).thenReturn(false);
+        when(mUserTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
 
         mUiEventLoggerFake = new UiEventLoggerFake();
 
@@ -131,7 +136,8 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
                         mMockHandler,
                         mFlags,
                         mKeyguardNotificationVisibilityProvider,
-                        mUiEventLoggerFake);
+                        mUiEventLoggerFake,
+                        mUserTracker);
         mNotifInterruptionStateProvider.mUseHeadsUp = true;
     }
 

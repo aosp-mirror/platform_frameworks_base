@@ -3271,11 +3271,16 @@ class Task extends TaskFragment {
         // We intend to let organizer manage task visibility but it doesn't
         // have enough information until we finish shell transitions.
         // In the mean time we do an easy fix here.
-        final boolean show = isVisible() || isAnimating(TRANSITION | PARENTS | CHILDREN);
+        final boolean visible = isVisible();
+        final boolean show = visible || isAnimating(TRANSITION | PARENTS | CHILDREN);
         if (mSurfaceControl != null) {
             if (show != mLastSurfaceShowing) {
                 t.setVisibility(mSurfaceControl, show);
             }
+        }
+        // Only show the overlay if the task has other visible children
+        if (mOverlayHost != null) {
+            mOverlayHost.setVisibility(t, visible);
         }
         mLastSurfaceShowing = show;
     }

@@ -490,9 +490,11 @@ MediaEvent::~MediaEvent() {
 }
 
 void MediaEvent::finalize() {
-    if (mAvHandleRefCnt == 0 && mFilterClient != nullptr) {
-        mFilterClient->releaseAvHandle(
-                mAvHandle, mDataIdRefCnt == 0 ? mDataId : 0);
+    if (mAvHandleRefCnt == 0) {
+        if (mFilterClient != nullptr) {
+            mFilterClient->releaseAvHandle(
+                    mAvHandle, mDataIdRefCnt == 0 ? mDataId : 0);
+        }
         native_handle_close(mAvHandle);
     }
 }

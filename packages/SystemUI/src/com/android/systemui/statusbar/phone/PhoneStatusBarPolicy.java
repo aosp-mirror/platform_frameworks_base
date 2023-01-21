@@ -35,7 +35,6 @@ import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings.Global;
 import android.service.notification.ZenModeConfig;
@@ -58,6 +57,7 @@ import com.android.systemui.privacy.logging.PrivacyLogger;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
 import com.android.systemui.screenrecord.RecordingController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
@@ -136,6 +136,7 @@ public class PhoneStatusBarPolicy
     private final UserInfoController mUserInfoController;
     private final IActivityManager mIActivityManager;
     private final UserManager mUserManager;
+    private final UserTracker mUserTracker;
     private final DevicePolicyManager mDevicePolicyManager;
     private final StatusBarIconController mIconController;
     private final CommandQueue mCommandQueue;
@@ -176,7 +177,7 @@ public class PhoneStatusBarPolicy
             KeyguardStateController keyguardStateController,
             LocationController locationController,
             SensorPrivacyController sensorPrivacyController, IActivityManager iActivityManager,
-            AlarmManager alarmManager, UserManager userManager,
+            AlarmManager alarmManager, UserManager userManager, UserTracker userTracker,
             DevicePolicyManager devicePolicyManager, RecordingController recordingController,
             @Nullable TelecomManager telecomManager, @DisplayId int displayId,
             @Main SharedPreferences sharedPreferences, DateFormatUtil dateFormatUtil,
@@ -196,6 +197,7 @@ public class PhoneStatusBarPolicy
         mUserInfoController = userInfoController;
         mIActivityManager = iActivityManager;
         mUserManager = userManager;
+        mUserTracker = userTracker;
         mDevicePolicyManager = devicePolicyManager;
         mRotationLockController = rotationLockController;
         mDataSaver = dataSaverController;
@@ -366,7 +368,7 @@ public class PhoneStatusBarPolicy
     }
 
     private void updateAlarm() {
-        final AlarmClockInfo alarm = mAlarmManager.getNextAlarmClock(UserHandle.USER_CURRENT);
+        final AlarmClockInfo alarm = mAlarmManager.getNextAlarmClock(mUserTracker.getUserId());
         final boolean hasAlarm = alarm != null && alarm.getTriggerTime() > 0;
         int zen = mZenController.getZen();
         final boolean zenNone = zen == Global.ZEN_MODE_NO_INTERRUPTIONS;

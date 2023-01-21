@@ -76,6 +76,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.R;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.util.settings.SecureSettings;
 
 import java.io.PrintWriter;
 import java.text.NumberFormat;
@@ -230,7 +231,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             SurfaceControl.Transaction transaction,
             @NonNull WindowMagnifierCallback callback,
             SysUiState sysUiState,
-            @NonNull Supplier<IWindowSession> globalWindowSessionSupplier) {
+            @NonNull Supplier<IWindowSession> globalWindowSessionSupplier,
+            SecureSettings secureSettings) {
         mContext = context;
         mHandler = handler;
         mAnimationController = animationController;
@@ -249,7 +251,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mWindowBounds = new Rect(mWm.getCurrentWindowMetrics().getBounds());
 
         mResources = mContext.getResources();
-        mScale = Settings.Secure.getFloatForUser(mContext.getContentResolver(),
+        mScale = secureSettings.getFloatForUser(
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
                 mResources.getInteger(R.integer.magnification_default_scale),
                 UserHandle.USER_CURRENT);
@@ -274,7 +276,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
 
         mWindowMagnificationSettings =
                 new WindowMagnificationSettings(mContext, mWindowMagnificationSettingsCallback,
-                        mSfVsyncFrameProvider);
+                        mSfVsyncFrameProvider, secureSettings);
 
         // Initialize listeners.
         mMirrorViewRunnable = () -> {

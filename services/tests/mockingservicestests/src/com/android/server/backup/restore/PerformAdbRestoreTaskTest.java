@@ -25,7 +25,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.frameworks.servicestests.R;
+import com.android.frameworks.mockingservicestests.R;
 
 import org.junit.Before;
 import org.junit.Test;
