@@ -191,15 +191,12 @@ public class LogModule {
                 false /* systrace */);
     }
 
-    /**
-     * Provides a logging buffer for logs related to swiping away the status bar while in immersive
-     * mode. See {@link com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureLogger}.
-     */
+    /** Provides a logging buffer for logs related to swipe up gestures. */
     @Provides
     @SysUISingleton
-    @SwipeStatusBarAwayLog
-    public static LogBuffer provideSwipeAwayGestureLogBuffer(LogBufferFactory factory) {
-        return factory.create("SwipeStatusBarAwayLog", 30);
+    @SwipeUpLog
+    public static LogBuffer provideSwipeUpLogBuffer(LogBufferFactory factory) {
+        return factory.create("SwipeUpLog", 30);
     }
 
     /**

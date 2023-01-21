@@ -24,6 +24,7 @@ import android.service.dreams.IDreamManager;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptLogger;
@@ -48,7 +49,8 @@ public class TestableNotificationInterruptStateProviderImpl
             Handler mainHandler,
             NotifPipelineFlags flags,
             KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider,
-            UiEventLogger uiEventLogger) {
+            UiEventLogger uiEventLogger,
+            UserTracker userTracker) {
         super(contentResolver,
                 powerManager,
                 dreamManager,
@@ -61,7 +63,8 @@ public class TestableNotificationInterruptStateProviderImpl
                 mainHandler,
                 flags,
                 keyguardNotificationVisibilityProvider,
-                uiEventLogger);
+                uiEventLogger,
+                userTracker);
         mUseHeadsUp = true;
     }
 }

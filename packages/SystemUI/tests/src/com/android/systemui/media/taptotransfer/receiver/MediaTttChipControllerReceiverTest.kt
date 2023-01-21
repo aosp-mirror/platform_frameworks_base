@@ -85,6 +85,8 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     private lateinit var windowManager: WindowManager
     @Mock
     private lateinit var commandQueue: CommandQueue
+    @Mock
+    private lateinit var rippleController: MediaTttReceiverRippleController
     private lateinit var commandQueueCallback: CommandQueue.Callbacks
     private lateinit var fakeAppIconDrawable: Drawable
     private lateinit var uiEventLoggerFake: UiEventLoggerFake
@@ -134,6 +136,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
             viewUtil,
             fakeWakeLockBuilder,
             fakeClock,
+            rippleController,
         )
         controllerReceiver.start()
 
@@ -163,6 +166,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
             viewUtil,
             fakeWakeLockBuilder,
             fakeClock,
+            rippleController,
         )
         controllerReceiver.start()
 

@@ -53,6 +53,7 @@ import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -99,6 +100,7 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     @Mock private lateinit var unlockedScreenOffAnimationController:
             UnlockedScreenOffAnimationController
     @Mock private lateinit var udfpsDisplayMode: UdfpsDisplayModeProvider
+    @Mock private lateinit var secureSettings: SecureSettings
     @Mock private lateinit var controllerCallback: IUdfpsOverlayControllerCallback
     @Mock private lateinit var udfpsController: UdfpsController
     @Mock private lateinit var udfpsView: UdfpsView
@@ -139,8 +141,8 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
             statusBarStateController, shadeExpansionStateManager, statusBarKeyguardViewManager,
             keyguardUpdateMonitor, dialogManager, dumpManager, transitionController,
             configurationController, keyguardStateController,
-            unlockedScreenOffAnimationController, udfpsDisplayMode, REQUEST_ID, reason,
-            controllerCallback, onTouch, activityLaunchAnimator, featureFlags,
+            unlockedScreenOffAnimationController, udfpsDisplayMode, secureSettings, REQUEST_ID,
+            reason, controllerCallback, onTouch, activityLaunchAnimator, featureFlags,
             primaryBouncerInteractor, alternateBouncerInteractor, isDebuggable,
         )
         block()

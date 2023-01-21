@@ -36,8 +36,8 @@ typealias GlyphCallback = (TextAnimator.PositionedGlyph, Float) -> Unit
  * Currently this class can provide text style animation for text weight and text size. For example
  * the simple view that draws text with animating text size is like as follows:
  *
- * <pre>
- * <code>
+ * <pre> <code>
+ * ```
  *     class SimpleTextAnimation : View {
  *         @JvmOverloads constructor(...)
  *
@@ -53,83 +53,63 @@ typealias GlyphCallback = (TextAnimator.PositionedGlyph, Float) -> Unit
  *             animator.setTextStyle(-1 /* unchanged weight */, sizePx, animate)
  *         }
  *     }
- * </code>
- * </pre>
+ * ```
+ * </code> </pre>
  */
-class TextAnimator(
-    layout: Layout,
-    private val invalidateCallback: () -> Unit
-) {
+class TextAnimator(layout: Layout, private val invalidateCallback: () -> Unit) {
     // Following two members are for mutable for testing purposes.
     public var textInterpolator: TextInterpolator = TextInterpolator(layout)
-    public var animator: ValueAnimator = ValueAnimator.ofFloat(1f).apply {
-        duration = DEFAULT_ANIMATION_DURATION
-        addUpdateListener {
-            textInterpolator.progress = it.animatedValue as Float
-            invalidateCallback()
-        }
-        addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator?) {
-                textInterpolator.rebase()
+    public var animator: ValueAnimator =
+        ValueAnimator.ofFloat(1f).apply {
+            duration = DEFAULT_ANIMATION_DURATION
+            addUpdateListener {
+                textInterpolator.progress = it.animatedValue as Float
+                invalidateCallback()
             }
-            override fun onAnimationCancel(animation: Animator?) = textInterpolator.rebase()
-        })
-    }
+            addListener(
+                object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator?) {
+                        textInterpolator.rebase()
+                    }
+                    override fun onAnimationCancel(animation: Animator?) = textInterpolator.rebase()
+                }
+            )
+        }
 
     sealed class PositionedGlyph {
 
-        /**
-         * Mutable X coordinate of the glyph position relative from drawing offset.
-         */
+        /** Mutable X coordinate of the glyph position relative from drawing offset. */
         var x: Float = 0f
 
-        /**
-         * Mutable Y coordinate of the glyph position relative from the baseline.
-         */
+        /** Mutable Y coordinate of the glyph position relative from the baseline. */
         var y: Float = 0f
 
-        /**
-         * The current line of text being drawn, in a multi-line TextView.
-         */
+        /** The current line of text being drawn, in a multi-line TextView. */
         var lineNo: Int = 0
 
-        /**
-         * Mutable text size of the glyph in pixels.
-         */
+        /** Mutable text size of the glyph in pixels. */
         var textSize: Float = 0f
 
-        /**
-         * Mutable color of the glyph.
-         */
+        /** Mutable color of the glyph. */
         var color: Int = 0
 
-        /**
-         * Immutable character offset in the text that the current font run start.
-         */
+        /** Immutable character offset in the text that the current font run start. */
         abstract var runStart: Int
             protected set
 
-        /**
-         * Immutable run length of the font run.
-         */
+        /** Immutable run length of the font run. */
         abstract var runLength: Int
             protected set
 
-        /**
-         * Immutable glyph index of the font run.
-         */
+        /** Immutable glyph index of the font run. */
         abstract var glyphIndex: Int
             protected set
 
-        /**
-         * Immutable font instance for this font run.
-         */
+        /** Immutable font instance for this font run. */
         abstract var font: Font
             protected set
 
-        /**
-         * Immutable glyph ID for this glyph.
-         */
+        /** Immutable glyph ID for this glyph. */
         abstract var glyphId: Int
             protected set
     }
@@ -147,20 +127,18 @@ class TextAnimator(
     /**
      * GlyphFilter applied just before drawing to canvas for tweaking positions and text size.
      *
-     * This callback is called for each glyphs just before drawing the glyphs. This function will
-     * be called with the intrinsic position, size, color, glyph ID and font instance. You can
-     * mutate the position, size and color for tweaking animations.
-     * Do not keep the reference of passed glyph object. The interpolator reuses that object for
-     * avoiding object allocations.
+     * This callback is called for each glyphs just before drawing the glyphs. This function will be
+     * called with the intrinsic position, size, color, glyph ID and font instance. You can mutate
+     * the position, size and color for tweaking animations. Do not keep the reference of passed
+     * glyph object. The interpolator reuses that object for avoiding object allocations.
      *
-     * Details:
-     * The text is drawn with font run units. The font run is a text segment that draws with the
-     * same font. The {@code runStart} and {@code runLimit} is a range of the font run in the text
-     * that current glyph is in. Once the font run is determined, the system will convert characters
-     * into glyph IDs. The {@code glyphId} is the glyph identifier in the font and
-     * {@code glyphIndex} is the offset of the converted glyph array. Please note that the
-     * {@code glyphIndex} is not a character index, because the character will not be converted to
-     * glyph one-by-one. If there are ligatures including emoji sequence, etc, the glyph ID may be
+     * Details: The text is drawn with font run units. The font run is a text segment that draws
+     * with the same font. The {@code runStart} and {@code runLimit} is a range of the font run in
+     * the text that current glyph is in. Once the font run is determined, the system will convert
+     * characters into glyph IDs. The {@code glyphId} is the glyph identifier in the font and {@code
+     * glyphIndex} is the offset of the converted glyph array. Please note that the {@code
+     * glyphIndex} is not a character index, because the character will not be converted to glyph
+     * one-by-one. If there are ligatures including emoji sequence, etc, the glyph ID may be
      * composed from multiple characters.
      *
      * Here is an example of font runs: "fin. 終わり"
@@ -193,7 +171,9 @@ class TextAnimator(
      */
     var glyphFilter: GlyphCallback?
         get() = textInterpolator.glyphFilter
-        set(value) { textInterpolator.glyphFilter = value }
+        set(value) {
+            textInterpolator.glyphFilter = value
+        }
 
     fun draw(c: Canvas) = textInterpolator.draw(c)
 
@@ -208,7 +188,7 @@ class TextAnimator(
      * @param weight an optional text weight.
      * @param textSize an optional font size.
      * @param colors an optional colors array that must be the same size as numLines passed to
-     *  the TextInterpolator
+     *               the TextInterpolator
      * @param animate an optional boolean indicating true for showing style transition as animation,
      *                false for immediate style transition. True by default.
      * @param duration an optional animation duration in milliseconds. This is ignored if animate is
@@ -237,10 +217,11 @@ class TextAnimator(
         if (weight >= 0) {
             // Paint#setFontVariationSettings creates Typeface instance from scratch. To reduce the
             // memory impact, cache the typeface result.
-            textInterpolator.targetPaint.typeface = typefaceCache.getOrElse(weight) {
-                textInterpolator.targetPaint.fontVariationSettings = "'$TAG_WGHT' $weight"
-                textInterpolator.targetPaint.typeface
-            }
+            textInterpolator.targetPaint.typeface =
+                typefaceCache.getOrElse(weight) {
+                    textInterpolator.targetPaint.fontVariationSettings = "'$TAG_WGHT' $weight"
+                    textInterpolator.targetPaint.typeface
+                }
         }
         if (color != null) {
             textInterpolator.targetPaint.color = color
@@ -249,22 +230,24 @@ class TextAnimator(
 
         if (animate) {
             animator.startDelay = delay
-            animator.duration = if (duration == -1L) {
-                DEFAULT_ANIMATION_DURATION
-            } else {
-                duration
-            }
+            animator.duration =
+                if (duration == -1L) {
+                    DEFAULT_ANIMATION_DURATION
+                } else {
+                    duration
+                }
             interpolator?.let { animator.interpolator = it }
             if (onAnimationEnd != null) {
-                val listener = object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator?) {
-                        onAnimationEnd.run()
-                        animator.removeListener(this)
+                val listener =
+                    object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator?) {
+                            onAnimationEnd.run()
+                            animator.removeListener(this)
+                        }
+                        override fun onAnimationCancel(animation: Animator?) {
+                            animator.removeListener(this)
+                        }
                     }
-                    override fun onAnimationCancel(animation: Animator?) {
-                        animator.removeListener(this)
-                    }
-                }
                 animator.addListener(listener)
             }
             animator.start()

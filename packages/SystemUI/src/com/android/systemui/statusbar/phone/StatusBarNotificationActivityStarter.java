@@ -53,6 +53,7 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.NotificationClickNotifier;
@@ -118,6 +119,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
     private final NotificationPanelViewController mNotificationPanel;
     private final ActivityLaunchAnimator mActivityLaunchAnimator;
     private final NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
+    private final UserTracker mUserTracker;
     private final OnUserInteractionCallback mOnUserInteractionCallback;
 
     private boolean mIsCollapsingToShowActivityOverLockscreen;
@@ -153,7 +155,8 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             ActivityLaunchAnimator activityLaunchAnimator,
             NotificationLaunchAnimatorControllerProvider notificationAnimationProvider,
             LaunchFullScreenIntentProvider launchFullScreenIntentProvider,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags,
+            UserTracker userTracker) {
         mContext = context;
         mMainThreadHandler = mainThreadHandler;
         mUiBgExecutor = uiBgExecutor;
@@ -184,6 +187,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
         mNotificationPanel = panel;
         mActivityLaunchAnimator = activityLaunchAnimator;
         mNotificationAnimationProvider = notificationAnimationProvider;
+        mUserTracker = userTracker;
 
         launchFullScreenIntentProvider.registerListener(entry -> launchFullScreenIntent(entry));
     }
@@ -518,7 +522,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
                             intent.getPackage(),
                             (adapter) -> tsb.startActivities(
                                     getActivityOptions(mCentralSurfaces.getDisplayId(), adapter),
-                                    UserHandle.CURRENT));
+                                    mUserTracker.getUserHandle()));
                 });
                 return true;
             }
