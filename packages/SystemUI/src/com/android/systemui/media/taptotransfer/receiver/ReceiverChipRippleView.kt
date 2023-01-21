@@ -33,14 +33,14 @@ class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleVi
     private var isStarted: Boolean
 
     init {
-        setupShader(RippleShader.RippleShape.ELLIPSE)
+        setupShader(RippleShader.RippleShape.CIRCLE)
         setRippleFill(true)
         setSparkleStrength(0f)
-        duration = 3000L
         isStarted = false
     }
 
     fun expandRipple(onAnimationEnd: Runnable? = null) {
+        duration = DEFAULT_DURATION
         isStarted = true
         super.startRipple(onAnimationEnd)
     }
@@ -50,6 +50,7 @@ class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleVi
         if (!isStarted) {
             return // Ignore if ripple is not started yet.
         }
+        duration = DEFAULT_DURATION
         // Reset all listeners to animator.
         animator.removeAllListeners()
         animator.addListener(object : AnimatorListenerAdapter() {
@@ -74,6 +75,7 @@ class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleVi
         setRippleFill(false)
 
         val startingPercentage = calculateStartingPercentage(newHeight)
+        animator.duration = EXPAND_TO_FULL_DURATION
         animator.addUpdateListener { updateListener ->
             val now = updateListener.currentPlayTime
             val progress = updateListener.animatedValue as Float
@@ -99,5 +101,10 @@ class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleVi
         val ratio = rippleShader.currentHeight / newHeight
         val remainingPercentage = (1 - ratio).toDouble().pow(1 / 3.toDouble()).toFloat()
         return 1 - remainingPercentage
+    }
+
+    companion object {
+        const val DEFAULT_DURATION = 333L
+        const val EXPAND_TO_FULL_DURATION = 1000L
     }
 }

@@ -27,7 +27,6 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.util.function.Consumer;
@@ -36,7 +35,6 @@ import java.util.function.Consumer;
  */
 class WallpaperDisplayHelper {
 
-    @VisibleForTesting
     static final class DisplayData {
         int mWidth = -1;
         int mHeight = -1;

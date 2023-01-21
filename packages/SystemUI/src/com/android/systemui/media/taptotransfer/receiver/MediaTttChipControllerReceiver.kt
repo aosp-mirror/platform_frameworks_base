@@ -31,7 +31,6 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import com.android.internal.widget.CachingIconView
-import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.ui.binder.TintedIconViewBinder
@@ -78,6 +77,7 @@ open class MediaTttChipControllerReceiver @Inject constructor(
         private val viewUtil: ViewUtil,
         wakeLockBuilder: WakeLock.Builder,
         systemClock: SystemClock,
+        private val rippleController: MediaTttReceiverRippleController,
 ) : TemporaryViewDisplayController<ChipReceiverInfo, MediaTttLogger<ChipReceiverInfo>>(
         context,
         logger,
@@ -113,9 +113,6 @@ open class MediaTttChipControllerReceiver @Inject constructor(
             )
         }
     }
-
-    private var maxRippleWidth: Float = 0f
-    private var maxRippleHeight: Float = 0f
 
     private fun updateMediaTapToTransferReceiverDisplay(
         @StatusBarManager.MediaTransferReceiverState displayState: Int,
@@ -206,36 +203,40 @@ open class MediaTttChipControllerReceiver @Inject constructor(
 
     override fun animateViewIn(view: ViewGroup) {
         val appIconView = view.getAppIconView()
-        appIconView.animate()
-                .translationYBy(-1 * getTranslationAmount().toFloat())
-                .setDuration(ICON_TRANSLATION_ANIM_DURATION)
-                .start()
-        appIconView.animate()
-                .alpha(1f)
-                .setDuration(ICON_ALPHA_ANIM_DURATION)
-                .start()
+        val iconRippleView: ReceiverChipRippleView = view.requireViewById(R.id.icon_glow_ripple)
+        val rippleView: ReceiverChipRippleView = view.requireViewById(R.id.ripple)
+        animateViewTranslationAndFade(appIconView, -1 * getTranslationAmount(), 1f)
+        animateViewTranslationAndFade(iconRippleView, -1 * getTranslationAmount(), 1f)
         // Using withEndAction{} doesn't apply a11y focus when screen is unlocked.
         appIconView.postOnAnimation { view.requestAccessibilityFocus() }
-        expandRipple(view.requireViewById(R.id.ripple))
+        rippleController.expandToInProgressState(rippleView, iconRippleView)
     }
 
     override fun animateViewOut(view: ViewGroup, removalReason: String?, onAnimationEnd: Runnable) {
         val appIconView = view.getAppIconView()
-        appIconView.animate()
-                .translationYBy(getTranslationAmount().toFloat())
-                .setDuration(ICON_TRANSLATION_ANIM_DURATION)
-                .start()
-        appIconView.animate()
-                .alpha(0f)
-                .setDuration(ICON_ALPHA_ANIM_DURATION)
-                .start()
-
+        val iconRippleView: ReceiverChipRippleView = view.requireViewById(R.id.icon_glow_ripple)
         val rippleView: ReceiverChipRippleView = view.requireViewById(R.id.ripple)
         if (removalReason == ChipStateReceiver.TRANSFER_TO_RECEIVER_SUCCEEDED.name &&
                 mediaTttFlags.isMediaTttReceiverSuccessRippleEnabled()) {
-            expandRippleToFull(rippleView, onAnimationEnd)
+            rippleController.expandToSuccessState(rippleView, onAnimationEnd)
+            animateViewTranslationAndFade(
+                iconRippleView,
+                -1 * getTranslationAmount(),
+                0f,
+                translationDuration = ICON_TRANSLATION_SUCCEEDED_DURATION,
+                alphaDuration = ICON_TRANSLATION_SUCCEEDED_DURATION,
+            )
+            animateViewTranslationAndFade(
+                appIconView,
+                -1 * getTranslationAmount(),
+                0f,
+                translationDuration = ICON_TRANSLATION_SUCCEEDED_DURATION,
+                alphaDuration = ICON_TRANSLATION_SUCCEEDED_DURATION,
+            )
         } else {
-            rippleView.collapseRipple(onAnimationEnd)
+            rippleController.collapseRipple(rippleView, onAnimationEnd)
+            animateViewTranslationAndFade(iconRippleView, getTranslationAmount(), 0f)
+            animateViewTranslationAndFade(appIconView, getTranslationAmount(), 0f)
         }
     }
 
@@ -245,73 +246,40 @@ open class MediaTttChipControllerReceiver @Inject constructor(
         viewUtil.setRectToViewWindowLocation(view.getAppIconView(), outRect)
     }
 
+    /** Animation of view translation and fading. */
+    private fun animateViewTranslationAndFade(
+        view: View,
+        translationYBy: Float,
+        alphaEndValue: Float,
+        translationDuration: Long = ICON_TRANSLATION_ANIM_DURATION,
+        alphaDuration: Long = ICON_ALPHA_ANIM_DURATION,
+    ) {
+        view.animate()
+            .translationYBy(translationYBy)
+            .setDuration(translationDuration)
+            .start()
+        view.animate()
+            .alpha(alphaEndValue)
+            .setDuration(alphaDuration)
+            .start()
+    }
+
     /** Returns the amount that the chip will be translated by in its intro animation. */
-    private fun getTranslationAmount(): Int {
-        return context.resources.getDimensionPixelSize(R.dimen.media_ttt_receiver_vert_translation)
-    }
-
-    private fun expandRipple(rippleView: ReceiverChipRippleView) {
-        if (rippleView.rippleInProgress()) {
-            // Skip if ripple is still playing
-            return
-        }
-
-        // In case the device orientation changes, we need to reset the layout.
-        rippleView.addOnLayoutChangeListener (
-            View.OnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
-                if (v == null) return@OnLayoutChangeListener
-
-                val layoutChangedRippleView = v as ReceiverChipRippleView
-                layoutRipple(layoutChangedRippleView)
-                layoutChangedRippleView.invalidate()
-            }
-        )
-        rippleView.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
-            override fun onViewDetachedFromWindow(view: View?) {}
-
-            override fun onViewAttachedToWindow(view: View?) {
-                if (view == null) {
-                    return
-                }
-                val attachedRippleView = view as ReceiverChipRippleView
-                layoutRipple(attachedRippleView)
-                attachedRippleView.expandRipple()
-                attachedRippleView.removeOnAttachStateChangeListener(this)
-            }
-        })
-    }
-
-    private fun layoutRipple(rippleView: ReceiverChipRippleView, isFullScreen: Boolean = false) {
-        val windowBounds = windowManager.currentWindowMetrics.bounds
-        val height = windowBounds.height().toFloat()
-        val width = windowBounds.width().toFloat()
-
-        if (isFullScreen) {
-            maxRippleHeight = height * 2f
-            maxRippleWidth = width * 2f
-        } else {
-            maxRippleHeight = height / 2f
-            maxRippleWidth = width / 2f
-        }
-        rippleView.setMaxSize(maxRippleWidth, maxRippleHeight)
-        // Center the ripple on the bottom of the screen in the middle.
-        rippleView.setCenter(width * 0.5f, height)
-        val color = Utils.getColorAttrDefaultColor(context, R.attr.wallpaperTextColorAccent)
-        rippleView.setColor(color, 70)
+    private fun getTranslationAmount(): Float {
+        return rippleController.getRippleSize() * 0.5f -
+            rippleController.getReceiverIconSize()
     }
 
     private fun View.getAppIconView(): CachingIconView {
         return this.requireViewById(R.id.app_icon)
     }
 
-    private fun expandRippleToFull(rippleView: ReceiverChipRippleView, onAnimationEnd: Runnable?) {
-        layoutRipple(rippleView, true)
-        rippleView.expandToFull(maxRippleHeight, onAnimationEnd)
+    companion object {
+        private const val ICON_TRANSLATION_ANIM_DURATION = 500L
+        private const val ICON_TRANSLATION_SUCCEEDED_DURATION = 167L
+        private val ICON_ALPHA_ANIM_DURATION = 5.frames
     }
 }
-
-val ICON_TRANSLATION_ANIM_DURATION = 30.frames
-val ICON_ALPHA_ANIM_DURATION = 5.frames
 
 data class ChipReceiverInfo(
     val routeInfo: MediaRoute2Info,

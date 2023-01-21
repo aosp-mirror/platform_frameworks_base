@@ -70,7 +70,7 @@ public class DreamActivity extends Activity {
 
     @Override
     public void onDestroy() {
-        if (mCallback != null) {
+        if (mCallback != null && !isFinishing()) {
             mCallback.onActivityDestroyed();
         }
 

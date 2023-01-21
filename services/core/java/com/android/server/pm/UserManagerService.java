@@ -262,7 +262,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     // We need to keep process uid within Integer.MAX_VALUE.
     @VisibleForTesting
-    static final int MAX_USER_ID = Integer.MAX_VALUE / UserHandle.PER_USER_RANGE;
+    static final int MAX_USER_ID = UserHandle.MAX_SECONDARY_USER_ID;
 
     // Max size of the queue of recently removed users
     @VisibleForTesting
@@ -1775,28 +1775,6 @@ public class UserManagerService extends IUserManager.Stub {
                 return userInfo.isProfile() ? userInfo.userType : "";
             }
             return null;
-        }
-    }
-
-    @Override
-    public boolean isMediaSharedWithParent(@UserIdInt int userId) {
-        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId,
-                "isMediaSharedWithParent");
-        synchronized (mUsersLock) {
-            UserTypeDetails userTypeDetails = getUserTypeDetailsNoChecks(userId);
-            return userTypeDetails != null ? userTypeDetails.isProfile()
-                    && userTypeDetails.isMediaSharedWithParent() : false;
-        }
-    }
-
-    @Override
-    public boolean isCredentialSharableWithParent(@UserIdInt int userId) {
-        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId,
-                "isCredentialSharableWithParent");
-        synchronized (mUsersLock) {
-            UserTypeDetails userTypeDetails = getUserTypeDetailsNoChecks(userId);
-            return userTypeDetails != null && userTypeDetails.isProfile()
-                    && userTypeDetails.isCredentialSharableWithParent();
         }
     }
 

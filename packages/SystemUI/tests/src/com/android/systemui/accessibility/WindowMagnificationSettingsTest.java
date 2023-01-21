@@ -38,6 +38,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.After;
 import org.junit.Before;
@@ -61,6 +62,8 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
     @Mock
     private SfVsyncFrameCallbackProvider mSfVsyncFrameProvider;
     @Mock
+    private SecureSettings mSecureSettings;
+    @Mock
     private WindowMagnificationSettingsCallback mWindowMagnificationSettingsCallback;
     private TestableWindowManager mWindowManager;
     private WindowMagnificationSettings mWindowMagnificationSettings;
@@ -77,7 +80,8 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
         mContext.addMockSystemService(Context.ACCESSIBILITY_SERVICE, mAccessibilityManager);
 
         mWindowMagnificationSettings = new WindowMagnificationSettings(mContext,
-                mWindowMagnificationSettingsCallback, mSfVsyncFrameProvider);
+                mWindowMagnificationSettingsCallback, mSfVsyncFrameProvider,
+                mSecureSettings);
 
         mSettingView = mWindowMagnificationSettings.getSettingView();
     }

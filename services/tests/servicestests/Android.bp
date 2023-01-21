@@ -60,7 +60,6 @@ android_test {
         "truth-prebuilt",
         "junit",
         "junit-params",
-        "platform-compat-test-rules",
         "ActivityContext",
         "coretests-aidl",
     ],

@@ -1095,13 +1095,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // (ACTION_DATE_CHANGED), or when manual clock adjustment is made
                 // (ACTION_TIME_CHANGED)
                 updateSystemUpdateFreezePeriodsRecord(/* saveIfChanged */ true);
-                final int userId = getManagedUserId(mUserManager.getMainUser().getIdentifier());
+                final int userId = getManagedUserId(getMainUserId());
                 if (userId >= 0) {
                     updatePersonalAppsSuspension(userId, mUserManager.isUserUnlocked(userId));
                 }
             } else if (ACTION_PROFILE_OFF_DEADLINE.equals(action)) {
                 Slogf.i(LOG_TAG, "Profile off deadline alarm was triggered");
-                final int userId = getManagedUserId(mUserManager.getMainUser().getIdentifier());
+                final int userId = getManagedUserId(getMainUserId());
                 if (userId >= 0) {
                     updatePersonalAppsSuspension(userId, mUserManager.isUserUnlocked(userId));
                 } else {
@@ -8877,6 +8877,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             return getDeviceOwnerUserIdUncheckedLocked();
         }
+    }
+
+    private @UserIdInt int getMainUserId() {
+        UserHandle mainUser = mUserManager.getMainUser();
+        if (mainUser == null) {
+            Slogf.d(LOG_TAG, "getMainUserId(): no main user, returning USER_SYSTEM");
+            return UserHandle.USER_SYSTEM;
+        }
+        return mainUser.getIdentifier();
     }
 
     // TODO(b/240562946): Remove api as owner name is not used.

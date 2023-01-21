@@ -1139,6 +1139,14 @@ public class SubscriptionManager {
      */
     public static final String USER_HANDLE = SimInfo.COLUMN_USER_HANDLE;
 
+    /**
+     * TelephonyProvider column name for satellite enabled.
+     * By default, it's disabled.
+     * <P>Type: INTEGER (int)</P>
+     * @hide
+     */
+    public static final String SATELLITE_ENABLED = SimInfo.COLUMN_SATELLITE_ENABLED;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"USAGE_SETTING_"},
@@ -2672,10 +2680,10 @@ public class SubscriptionManager {
      * @param columnName Column name in subscription database.
      *
      * @return Value in string format associated with {@code subscriptionId} and {@code columnName}
-     * from the database.
+     * from the database. Empty string if the {@code subscriptionId} is invalid (for backward
+     * compatible).
      *
-     * @throws IllegalArgumentException if {@code subscriptionId} is invalid, or the field is not
-     * exposed.
+     * @throws IllegalArgumentException if the field is not exposed.
      *
      * @see android.provider.Telephony.SimInfo for all the columns.
      *

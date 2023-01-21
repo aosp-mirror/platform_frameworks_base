@@ -740,10 +740,6 @@ double SkiaCanvas::drawAnimatedImage(AnimatedImageDrawable* imgDrawable) {
     return imgDrawable->drawStaging(mCanvas);
 }
 
-void SkiaCanvas::drawLottie(LottieDrawable* lottieDrawable) {
-    lottieDrawable->drawStaging(mCanvas);
-}
-
 void SkiaCanvas::drawVectorDrawable(VectorDrawableRoot* vectorDrawable) {
     vectorDrawable->drawStaging(this);
 }

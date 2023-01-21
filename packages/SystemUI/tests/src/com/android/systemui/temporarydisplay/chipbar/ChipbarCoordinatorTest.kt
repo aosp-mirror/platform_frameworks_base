@@ -20,6 +20,7 @@ import android.os.PowerManager
 import android.os.VibrationEffect
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -43,6 +44,8 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.temporarydisplay.ViewPriority
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.util.view.ViewUtil
@@ -54,6 +57,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
@@ -74,6 +78,7 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
     @Mock private lateinit var falsingCollector: FalsingCollector
     @Mock private lateinit var viewUtil: ViewUtil
     @Mock private lateinit var vibratorHelper: VibratorHelper
+    @Mock private lateinit var swipeGestureHandler: SwipeChipbarAwayGestureHandler
     private lateinit var fakeWakeLockBuilder: WakeLockFake.Builder
     private lateinit var fakeWakeLock: WakeLockFake
     private lateinit var fakeClock: FakeSystemClock
@@ -106,6 +111,7 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
                 powerManager,
                 falsingManager,
                 falsingCollector,
+                swipeGestureHandler,
                 viewUtil,
                 vibratorHelper,
                 fakeWakeLockBuilder,
@@ -430,17 +436,101 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
         verify(logger).logViewUpdate(eq(WINDOW_TITLE), eq("new title text"), any())
     }
 
+    @Test
+    fun swipeToDismiss_false_neverListensForGesture() {
+        underTest.displayView(
+            createChipbarInfo(
+                Icon.Resource(R.drawable.ic_cake, contentDescription = null),
+                Text.Loaded("title text"),
+                endItem = ChipbarEndItem.Loading,
+                allowSwipeToDismiss = false,
+            )
+        )
+
+        verify(swipeGestureHandler, never()).addOnGestureDetectedCallback(any(), any())
+    }
+
+    @Test
+    fun swipeToDismiss_true_listensForGesture() {
+        underTest.displayView(
+            createChipbarInfo(
+                Icon.Resource(R.drawable.ic_cake, contentDescription = null),
+                Text.Loaded("title text"),
+                endItem = ChipbarEndItem.Loading,
+                allowSwipeToDismiss = true,
+            )
+        )
+
+        verify(swipeGestureHandler).addOnGestureDetectedCallback(any(), any())
+    }
+
+    @Test
+    fun swipeToDismiss_swipeOccurs_viewDismissed() {
+        underTest.displayView(
+            createChipbarInfo(
+                Icon.Resource(R.drawable.ic_cake, contentDescription = null),
+                Text.Loaded("title text"),
+                endItem = ChipbarEndItem.Loading,
+                allowSwipeToDismiss = true,
+            )
+        )
+        val view = getChipbarView()
+
+        val callbackCaptor = argumentCaptor<(MotionEvent) -> Unit>()
+        verify(swipeGestureHandler).addOnGestureDetectedCallback(any(), capture(callbackCaptor))
+
+        callbackCaptor.value.invoke(MotionEvent.obtain(0L, 0L, 0, 0f, 0f, 0))
+
+        verify(windowManager).removeView(view)
+    }
+
+    @Test
+    fun swipeToDismiss_viewUpdatedToFalse_swipeOccurs_viewNotDismissed() {
+        underTest.displayView(
+            createChipbarInfo(
+                Icon.Resource(R.drawable.ic_cake, contentDescription = null),
+                Text.Loaded("title text"),
+                endItem = ChipbarEndItem.Loading,
+                allowSwipeToDismiss = true,
+            )
+        )
+        val view = getChipbarView()
+        val callbackCaptor = argumentCaptor<(MotionEvent) -> Unit>()
+        verify(swipeGestureHandler).addOnGestureDetectedCallback(any(), capture(callbackCaptor))
+
+        // WHEN the view is updated to not allow swipe-to-dismiss
+        underTest.displayView(
+            createChipbarInfo(
+                Icon.Resource(R.drawable.ic_cake, contentDescription = null),
+                Text.Loaded("title text"),
+                endItem = ChipbarEndItem.Loading,
+                allowSwipeToDismiss = false,
+            )
+        )
+
+        // THEN the callback is removed
+        verify(swipeGestureHandler).removeOnGestureDetectedCallback(any())
+
+        // And WHEN the old callback is invoked
+        callbackCaptor.value.invoke(MotionEvent.obtain(0L, 0L, 0, 0f, 0f, 0))
+
+        // THEN it is ignored and view isn't removed
+        verify(windowManager, never()).removeView(view)
+    }
+
     private fun createChipbarInfo(
         startIcon: Icon,
         text: Text,
         endItem: ChipbarEndItem?,
         vibrationEffect: VibrationEffect? = null,
+        allowSwipeToDismiss: Boolean = false,
     ): ChipbarInfo {
         return ChipbarInfo(
             TintedIcon(startIcon, tintAttr = null),
             text,
             endItem,
             vibrationEffect,
+            allowSwipeToDismiss,
             windowTitle = WINDOW_TITLE,
             wakeReason = WAKE_REASON,
             timeoutMs = TIMEOUT,

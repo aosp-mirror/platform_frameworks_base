@@ -23,6 +23,7 @@ import androidx.annotation.MainThread;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.settings.UserTracker;
 
 import javax.inject.Inject;
 
@@ -48,8 +49,8 @@ public class AccessibilityButtonTargetsObserver extends
     }
 
     @Inject
-    public AccessibilityButtonTargetsObserver(Context context) {
-        super(context, Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS);
+    public AccessibilityButtonTargetsObserver(Context context, UserTracker userTracker) {
+        super(context, userTracker, Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS);
     }
 
     @Override

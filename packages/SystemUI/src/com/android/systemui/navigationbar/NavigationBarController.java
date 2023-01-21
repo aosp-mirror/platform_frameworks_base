@@ -24,7 +24,6 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler.DEBUG_MISSING_GESTURE_TAG;
 import static com.android.systemui.shared.recents.utilities.Utilities.isTablet;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -63,8 +62,8 @@ import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.statusbar.phone.LightBarController;
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.util.settings.SecureSettings;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
 
@@ -87,6 +86,7 @@ public class NavigationBarController implements
     private final Handler mHandler;
     private final NavigationBarComponent.Factory mNavigationBarComponentFactory;
     private FeatureFlags mFeatureFlags;
+    private final SecureSettings mSecureSettings;
     private final DisplayManager mDisplayManager;
     private final TaskbarDelegate mTaskbarDelegate;
     private int mNavMode;
@@ -118,11 +118,13 @@ public class NavigationBarController implements
             TaskStackChangeListeners taskStackChangeListeners,
             Optional<Pip> pipOptional,
             Optional<BackAnimation> backAnimation,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags,
+            SecureSettings secureSettings) {
         mContext = context;
         mHandler = mainHandler;
         mNavigationBarComponentFactory = navigationBarComponentFactory;
         mFeatureFlags = featureFlags;
+        mSecureSettings = secureSettings;
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
         commandQueue.addCallback(this);
         configurationController.addCallback(this);
@@ -192,8 +194,7 @@ public class NavigationBarController implements
     }
 
     private void updateAccessibilityButtonModeIfNeeded() {
-        ContentResolver contentResolver = mContext.getContentResolver();
-        final int mode = Settings.Secure.getIntForUser(contentResolver,
+        final int mode = mSecureSettings.getIntForUser(
                 Settings.Secure.ACCESSIBILITY_BUTTON_MODE,
                 ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR, UserHandle.USER_CURRENT);
 
@@ -207,14 +208,14 @@ public class NavigationBarController implements
         // force update to ACCESSIBILITY_BUTTON_MODE_GESTURE.
         if (QuickStepContract.isGesturalMode(mNavMode)
                 && mode == ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR) {
-            Settings.Secure.putIntForUser(contentResolver,
+            mSecureSettings.putIntForUser(
                     Settings.Secure.ACCESSIBILITY_BUTTON_MODE, ACCESSIBILITY_BUTTON_MODE_GESTURE,
                     UserHandle.USER_CURRENT);
             // ACCESSIBILITY_BUTTON_MODE_GESTURE is incompatible under non gestural mode. Need to
             // force update to ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR.
         } else if (!QuickStepContract.isGesturalMode(mNavMode)
                 && mode == ACCESSIBILITY_BUTTON_MODE_GESTURE) {
-            Settings.Secure.putIntForUser(contentResolver,
+            mSecureSettings.putIntForUser(
                     Settings.Secure.ACCESSIBILITY_BUTTON_MODE,
                     ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR, UserHandle.USER_CURRENT);
         }

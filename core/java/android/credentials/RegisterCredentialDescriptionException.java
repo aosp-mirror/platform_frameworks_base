@@ -18,6 +18,7 @@ package android.credentials;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.os.CancellationSignal;
 import android.os.OutcomeReceiver;
 
@@ -32,6 +33,7 @@ import java.util.concurrent.Executor;
  *
  * @hide
  */
+@TestApi
 public class RegisterCredentialDescriptionException extends Exception {
 
     @NonNull public final String errorType;

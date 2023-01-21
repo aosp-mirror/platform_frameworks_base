@@ -31,7 +31,6 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
@@ -55,6 +54,7 @@ import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.qs.QSPanelController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeController;
@@ -99,6 +99,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     private final Optional<Vibrator> mVibratorOptional;
     private final DisableFlagsLogger mDisableFlagsLogger;
     private final int mDisplayId;
+    private final UserTracker mUserTracker;
     private final boolean mVibrateOnOpening;
     private final VibrationEffect mCameraLaunchGestureVibrationEffect;
     private final SystemBarAttributesListener mSystemBarAttributesListener;
@@ -133,7 +134,8 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             DisableFlagsLogger disableFlagsLogger,
             @DisplayId int displayId,
             SystemBarAttributesListener systemBarAttributesListener,
-            Lazy<CameraLauncher> cameraLauncherLazy) {
+            Lazy<CameraLauncher> cameraLauncherLazy,
+            UserTracker userTracker) {
         mCentralSurfaces = centralSurfaces;
         mContext = context;
         mShadeController = shadeController;
@@ -157,6 +159,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         mDisableFlagsLogger = disableFlagsLogger;
         mDisplayId = displayId;
         mCameraLauncherLazy = cameraLauncherLazy;
+        mUserTracker = userTracker;
 
         mVibrateOnOpening = resources.getBoolean(R.bool.config_vibrateOnIconAnimation);
         mCameraLaunchGestureVibrationEffect = getCameraGestureVibrationEffect(
@@ -215,7 +218,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             return;
         }
 
-        mNotificationPanelViewController.expandWithoutQs();
+        mNotificationPanelViewController.expandShadeToNotifications();
     }
 
     @Override
@@ -375,7 +378,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             mCentralSurfaces.startActivityDismissingKeyguard(cameraIntent,
                     false /* onlyProvisioned */, true /* dismissShade */,
                     true /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */, 0,
-                    null /* animationController */, UserHandle.CURRENT);
+                    null /* animationController */, mUserTracker.getUserHandle());
         } else {
             if (!mCentralSurfaces.isDeviceInteractive()) {
                 // Avoid flickering of the scrim when we instant launch the camera and the bouncer
@@ -432,7 +435,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             mCentralSurfaces.startActivityDismissingKeyguard(emergencyIntent,
                     false /* onlyProvisioned */, true /* dismissShade */,
                     true /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */, 0,
-                    null /* animationController */, UserHandle.CURRENT);
+                    null /* animationController */, mUserTracker.getUserHandle());
             return;
         }
 
@@ -447,7 +450,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
                 mStatusBarKeyguardViewManager.reset(true /* hide */);
             }
-            mContext.startActivityAsUser(emergencyIntent, UserHandle.CURRENT);
+            mContext.startActivityAsUser(emergencyIntent, mUserTracker.getUserHandle());
             return;
         }
         // We need to defer the emergency action launch until the screen comes on, since otherwise

@@ -249,7 +249,7 @@ class RollbackStore {
         targetDir.mkdirs();
         File targetFile = new File(targetDir, sourceFile.getName());
 
-        boolean fallbackToCopy = !isLinkPossible(sourceFile, targetFile);
+        boolean fallbackToCopy = !isLinkPossible(sourceFile, targetDir);
         if (!fallbackToCopy) {
             try {
                 // Create a hard link to avoid copy

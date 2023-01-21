@@ -629,9 +629,19 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             RemoteAnimationAdapter adapter, InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (options1 == null) options1 = new Bundle();
+        if (pendingIntent2 == null) {
+            // Launching a solo task.
+            ActivityOptions activityOptions = ActivityOptions.fromBundle(options1);
+            activityOptions.update(ActivityOptions.makeRemoteAnimation(adapter));
+            options1 = activityOptions.toBundle();
+            addActivityOptions(options1, null /* launchTarget */);
+            wct.sendPendingIntent(pendingIntent1, fillInIntent1, options1);
+            mSyncQueue.queue(wct);
+            return;
+        }
+
         addActivityOptions(options1, mSideStage);
         wct.sendPendingIntent(pendingIntent1, fillInIntent1, options1);
-
         startWithLegacyTransition(wct, pendingIntent2, fillInIntent2, options2, splitPosition,
                 splitRatio, adapter, instanceId);
     }
@@ -666,9 +676,19 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (options1 == null) options1 = new Bundle();
+        if (taskId == INVALID_TASK_ID) {
+            // Launching a solo task.
+            ActivityOptions activityOptions = ActivityOptions.fromBundle(options1);
+            activityOptions.update(ActivityOptions.makeRemoteAnimation(adapter));
+            options1 = activityOptions.toBundle();
+            addActivityOptions(options1, null /* launchTarget */);
+            wct.startShortcut(mContext.getPackageName(), shortcutInfo, options1);
+            mSyncQueue.queue(wct);
+            return;
+        }
+
         addActivityOptions(options1, mSideStage);
         wct.startShortcut(mContext.getPackageName(), shortcutInfo, options1);
-
         startWithLegacyTransition(wct, taskId, options2, splitPosition, splitRatio, adapter,
                 instanceId);
     }

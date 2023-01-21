@@ -55,8 +55,8 @@ import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.LightBarController;
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.util.settings.SecureSettings;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
 
@@ -109,7 +109,8 @@ public class NavigationBarControllerTest extends SysuiTestCase {
                         TaskStackChangeListeners.getTestInstance(),
                         Optional.of(mock(Pip.class)),
                         Optional.of(mock(BackAnimation.class)),
-                        mock(FeatureFlags.class)));
+                        mock(FeatureFlags.class),
+                        mock(SecureSettings.class)));
         initializeNavigationBars();
         mMockitoSession = mockitoSession().mockStatic(Utilities.class).startMocking();
     }

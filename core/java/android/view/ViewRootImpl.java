@@ -2334,6 +2334,18 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    /**
+     * Notifies the HardwareRenderer of an expensive upcoming frame, to
+     * allow better handling of power and scheduling requirements.
+     *
+     * @hide
+     */
+    void notifyRendererOfExpensiveFrame() {
+        if (mAttachInfo.mThreadedRenderer != null) {
+            mAttachInfo.mThreadedRenderer.notifyExpensiveFrame();
+        }
+    }
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     void scheduleTraversals() {
         if (!mTraversalScheduled) {

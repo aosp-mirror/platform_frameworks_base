@@ -594,6 +594,13 @@ public final class ThreadedRenderer extends HardwareRenderer {
         }
     }
 
+    @Override
+    public void notifyExpensiveFrame() {
+        if (isEnabled()) {
+            super.notifyExpensiveFrame();
+        }
+    }
+
     /**
      * Updates the light position based on the position of the window.
      *

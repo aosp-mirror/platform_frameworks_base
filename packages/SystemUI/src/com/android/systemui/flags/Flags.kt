@@ -217,6 +217,11 @@ object Flags {
     val ENABLE_WALLET_CONTEXTUAL_LOYALTY_CARDS =
         unreleasedFlag(226, "enable_wallet_contextual_loyalty_cards", teamfood = false)
 
+    // TODO(b/242908637): Tracking Bug
+    @JvmField
+    val WALLPAPER_FULLSCREEN_PREVIEW =
+        unreleasedFlag(227, "wallpaper_fullscreen_preview", teamfood = true)
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")
@@ -230,7 +235,8 @@ object Flags {
 
     // TODO(b/258517050): Clean up after the feature is launched.
     @JvmField
-    val SMARTSPACE_DATE_WEATHER_DECOUPLED = unreleasedFlag(403, "smartspace_date_weather_decoupled")
+    val SMARTSPACE_DATE_WEATHER_DECOUPLED =
+        sysPropBooleanFlag(403, "persist.sysui.ss.dw_decoupled", default = false)
 
     // 500 - quick settings
 
@@ -344,6 +350,10 @@ object Flags {
     // TODO(b/263512203): Tracking Bug
     val MEDIA_EXPLICIT_INDICATOR = unreleasedFlag(911, "media_explicit_indicator", teamfood = true)
 
+    // TODO(b/265813373): Tracking Bug
+    val MEDIA_TAP_TO_TRANSFER_DISMISS_GESTURE =
+        unreleasedFlag(912, "media_ttt_dismiss_gesture", teamfood = true)
+
     // 1000 - dock
     val SIMULATE_DOCK_THROUGH_CHARGING = releasedFlag(1000, "simulate_dock_through_charging")
 
@@ -357,7 +367,7 @@ object Flags {
     @Keep
     @JvmField
     val WM_ENABLE_SHELL_TRANSITIONS =
-        sysPropBooleanFlag(1100, "persist.wm.debug.shell_transit", default = false)
+        sysPropBooleanFlag(1100, "persist.wm.debug.shell_transit", default = true)
 
     // TODO(b/254513207): Tracking Bug
     @Keep
@@ -458,6 +468,16 @@ object Flags {
     @JvmField
     val WM_ENABLE_PREDICTIVE_BACK_BOUNCER_ANIM =
         unreleasedFlag(1206, "persist.wm.debug.predictive_back_bouncer_anim", teamfood = true)
+
+    // TODO(b/238475428): Tracking Bug
+    @JvmField
+    val WM_SHADE_ALLOW_BACK_GESTURE =
+        unreleasedFlag(1207, "persist.wm.debug.shade_allow_back_gesture", teamfood = false)
+
+    // TODO(b/238475428): Tracking Bug
+    @JvmField
+    val WM_SHADE_ANIMATE_BACK_GESTURE =
+        unreleasedFlag(1208, "persist.wm.debug.shade_animate_back_gesture", teamfood = true)
 
     // 1300 - screenshots
     // TODO(b/254513155): Tracking Bug

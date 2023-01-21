@@ -1488,6 +1488,7 @@ package android {
     field public static final int strokeLineJoin = 16843788; // 0x101040c
     field public static final int strokeMiterLimit = 16843789; // 0x101040d
     field public static final int strokeWidth = 16843783; // 0x1010407
+    field public static final int stylusHandwritingSettingsActivity;
     field public static final int subMenuArrow = 16844019; // 0x10104f3
     field public static final int submitBackground = 16843912; // 0x1010488
     field public static final int subtitle = 16843473; // 0x10102d1
@@ -12878,16 +12879,6 @@ package android.content.pm {
     method public boolean hasPastSigningCertificates();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.SigningInfo> CREATOR;
-  }
-
-  public final class UserProperties implements android.os.Parcelable {
-    method public int describeContents();
-    method public int getShowInLauncher();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.UserProperties> CREATOR;
-    field public static final int SHOW_IN_LAUNCHER_NO = 2; // 0x2
-    field public static final int SHOW_IN_LAUNCHER_SEPARATE = 1; // 0x1
-    field public static final int SHOW_IN_LAUNCHER_WITH_PARENT = 0; // 0x0
   }
 
   public final class VersionedPackage implements android.os.Parcelable {
@@ -33224,7 +33215,6 @@ package android.os {
     method public android.os.UserHandle getUserForSerialNumber(long);
     method @NonNull @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.CREATE_USERS", "android.permission.QUERY_USERS", android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED}) public String getUserName();
     method public java.util.List<android.os.UserHandle> getUserProfiles();
-    method @NonNull @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.QUERY_USERS", "android.permission.INTERACT_ACROSS_USERS"}, conditional=true) public android.content.pm.UserProperties getUserProperties(@NonNull android.os.UserHandle);
     method public android.os.Bundle getUserRestrictions();
     method @RequiresPermission(anyOf={"android.permission.MANAGE_USERS", "android.permission.INTERACT_ACROSS_USERS"}, conditional=true) public android.os.Bundle getUserRestrictions(android.os.UserHandle);
     method public boolean hasUserRestriction(String);
@@ -35375,7 +35365,7 @@ package android.provider {
   }
 
   public static final class ContactsContract.CommonDataKinds.Email implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
-    method public static CharSequence getTypeLabel(android.content.res.Resources, int, CharSequence);
+    method public static CharSequence getTypeLabel(android.content.res.Resources, int, @Nullable CharSequence);
     method public static int getTypeLabelResource(int);
     field public static final String ADDRESS = "data1";
     field public static final android.net.Uri CONTENT_FILTER_URI;
@@ -35396,7 +35386,7 @@ package android.provider {
   }
 
   public static final class ContactsContract.CommonDataKinds.Event implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
-    method public static CharSequence getTypeLabel(android.content.res.Resources, int, CharSequence);
+    method public static CharSequence getTypeLabel(android.content.res.Resources, int, @Nullable CharSequence);
     method public static int getTypeResource(Integer);
     field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_event";
     field public static final String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
@@ -35429,7 +35419,7 @@ package android.provider {
   public static final class ContactsContract.CommonDataKinds.Im implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
     method public static CharSequence getProtocolLabel(android.content.res.Resources, int, CharSequence);
     method public static int getProtocolLabelResource(int);
-    method public static CharSequence getTypeLabel(android.content.res.Resources, int, CharSequence);
+    method public static CharSequence getTypeLabel(android.content.res.Resources, int, @Nullable CharSequence);
     method public static int getTypeLabelResource(int);
     field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/im";
     field public static final String CUSTOM_PROTOCOL = "data6";
@@ -35475,7 +35465,7 @@ package android.provider {
   }
 
   public static final class ContactsContract.CommonDataKinds.Organization implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
-    method public static CharSequence getTypeLabel(android.content.res.Resources, int, CharSequence);
+    method public static CharSequence getTypeLabel(android.content.res.Resources, int, @Nullable CharSequence);
     method public static int getTypeLabelResource(int);
     field public static final String COMPANY = "data1";
     field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/organization";
@@ -35494,7 +35484,7 @@ package android.provider {
   }
 
   public static final class ContactsContract.CommonDataKinds.Phone implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
-    method public static CharSequence getTypeLabel(android.content.res.Resources, int, CharSequence);
+    method public static CharSequence getTypeLabel(android.content.res.Resources, int, @Nullable CharSequence);
     method public static int getTypeLabelResource(int);
     field public static final android.net.Uri CONTENT_FILTER_URI;
     field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/phone_v2";
@@ -35541,7 +35531,7 @@ package android.provider {
   }
 
   public static final class ContactsContract.CommonDataKinds.Relation implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
-    method public static CharSequence getTypeLabel(android.content.res.Resources, int, CharSequence);
+    method public static CharSequence getTypeLabel(android.content.res.Resources, int, @Nullable CharSequence);
     method public static int getTypeLabelResource(int);
     field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/relation";
     field public static final String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
@@ -35565,7 +35555,7 @@ package android.provider {
   }
 
   public static final class ContactsContract.CommonDataKinds.SipAddress implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
-    method public static CharSequence getTypeLabel(android.content.res.Resources, int, CharSequence);
+    method public static CharSequence getTypeLabel(android.content.res.Resources, int, @Nullable CharSequence);
     method public static int getTypeLabelResource(int);
     field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/sip_address";
     field public static final String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
@@ -35596,7 +35586,7 @@ package android.provider {
   }
 
   public static final class ContactsContract.CommonDataKinds.StructuredPostal implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
-    method public static CharSequence getTypeLabel(android.content.res.Resources, int, CharSequence);
+    method public static CharSequence getTypeLabel(android.content.res.Resources, int, @Nullable CharSequence);
     method public static int getTypeLabelResource(int);
     field public static final String CITY = "data7";
     field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/postal-address_v2";
@@ -44545,6 +44535,7 @@ package android.telephony {
     field public static final int RESULT_SMS_SEND_RETRY_FAILED = 30; // 0x1e
     field public static final int RESULT_SYSTEM_ERROR = 15; // 0xf
     field public static final int RESULT_UNEXPECTED_EVENT_STOP_SENDING = 28; // 0x1c
+    field public static final int RESULT_USER_NOT_ALLOWED = 33; // 0x21
     field public static final int SMS_RP_CAUSE_CALL_BARRING = 10; // 0xa
     field public static final int SMS_RP_CAUSE_CONGESTION = 42; // 0x2a
     field public static final int SMS_RP_CAUSE_DESTINATION_OUT_OF_ORDER = 27; // 0x1b
@@ -52961,10 +52952,10 @@ package android.view {
     method public void onRestrictedCaptionAreaChanged(android.graphics.Rect);
   }
 
-  public final class WindowAnimationFrameStats extends android.view.FrameStats implements android.os.Parcelable {
-    method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.view.WindowAnimationFrameStats> CREATOR;
+  @Deprecated public final class WindowAnimationFrameStats extends android.view.FrameStats implements android.os.Parcelable {
+    method @Deprecated public int describeContents();
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.view.WindowAnimationFrameStats> CREATOR;
   }
 
   public final class WindowContentFrameStats extends android.view.FrameStats implements android.os.Parcelable {
@@ -54927,6 +54918,7 @@ package android.view.inputmethod {
   public final class InputMethodInfo implements android.os.Parcelable {
     ctor public InputMethodInfo(android.content.Context, android.content.pm.ResolveInfo) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     ctor public InputMethodInfo(String, String, CharSequence, String);
+    method @Nullable public android.content.Intent createStylusHandwritingSettingsActivityIntent();
     method public int describeContents();
     method public void dump(android.util.Printer, String);
     method public android.content.ComponentName getComponent();
@@ -54945,6 +54937,7 @@ package android.view.inputmethod {
     method public boolean supportsStylusHandwriting();
     method public boolean suppressesSpellChecker();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final String ACTION_STYLUS_HANDWRITING_SETTINGS = "android.view.inputmethod.action.STYLUS_HANDWRITING_SETTINGS";
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.InputMethodInfo> CREATOR;
   }
 

@@ -6241,7 +6241,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     public void handleTapOutsideFocusInsideSelf() {
-        final DisplayContent displayContent = getDisplayContent();
         mWmService.moveDisplayToTopInternal(getDisplayId());
         mWmService.handleTaskFocusChange(getTask(), mActivityRecord);
     }

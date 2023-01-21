@@ -86,7 +86,7 @@ public class SystemBackupAgent extends BackupAgentHelper {
 
     private static final Set<String> sEligibleForMultiUser = Sets.newArraySet(
             PERMISSION_HELPER, NOTIFICATION_HELPER, SYNC_SETTINGS_HELPER, APP_LOCALES_HELPER,
-            ACCOUNT_MANAGER_HELPER);
+            ACCOUNT_MANAGER_HELPER, USAGE_STATS_HELPER);
 
     private int mUserId = UserHandle.USER_SYSTEM;
 
@@ -100,7 +100,7 @@ public class SystemBackupAgent extends BackupAgentHelper {
         addHelper(PREFERRED_HELPER, new PreferredActivityBackupHelper(mUserId));
         addHelper(NOTIFICATION_HELPER, new NotificationBackupHelper(mUserId));
         addHelper(PERMISSION_HELPER, new PermissionBackupHelper(mUserId));
-        addHelper(USAGE_STATS_HELPER, new UsageStatsBackupHelper(this));
+        addHelper(USAGE_STATS_HELPER, new UsageStatsBackupHelper(mUserId));
         addHelper(SHORTCUT_MANAGER_HELPER, new ShortcutBackupHelper());
         addHelper(ACCOUNT_MANAGER_HELPER, new AccountManagerBackupHelper(mUserId));
         addHelper(SLICES_HELPER, new SliceBackupHelper(this));
