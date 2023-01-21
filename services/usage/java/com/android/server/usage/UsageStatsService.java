@@ -433,11 +433,9 @@ public class UsageStatsService extends SystemService implements
     private void onUserUnlocked(int userId) {
         // fetch the installed packages outside the lock so it doesn't block package manager.
         final HashMap<String, Long> installedPackages = getInstalledPackages(userId);
-        // delay updating of package mappings for user 0 since their data is not likely to be stale.
-        // this also makes it less likely for restored data to be erased on unexpected reboots.
-        if (userId == UserHandle.USER_SYSTEM) {
-            UsageStatsIdleService.scheduleUpdateMappingsJob(getContext());
-        }
+
+        UsageStatsIdleService.scheduleUpdateMappingsJob(getContext(), userId);
+
         final boolean deleteObsoleteData = shouldDeleteObsoleteData(UserHandle.of(userId));
         synchronized (mLock) {
             // This should be safe to add this early. Other than reportEventOrAddToQueue and
@@ -1261,8 +1259,8 @@ public class UsageStatsService extends SystemService implements
         }
         mAppStandby.onUserRemoved(userId);
         // Cancel any scheduled jobs for this user since the user is being removed.
-        UsageStatsIdleService.cancelJob(getContext(), userId);
-        UsageStatsIdleService.cancelUpdateMappingsJob(getContext());
+        UsageStatsIdleService.cancelPruneJob(getContext(), userId);
+        UsageStatsIdleService.cancelUpdateMappingsJob(getContext(), userId);
     }
 
     /**
@@ -1300,7 +1298,7 @@ public class UsageStatsService extends SystemService implements
 
         // Schedule a job to prune any data related to this package.
         if (tokenRemoved != PackagesTokenData.UNASSIGNED_TOKEN) {
-            UsageStatsIdleService.scheduleJob(getContext(), userId);
+            UsageStatsIdleService.schedulePruneJob(getContext(), userId);
         }
     }
 
@@ -1325,19 +1323,19 @@ public class UsageStatsService extends SystemService implements
     /**
      * Called by the Binder stub.
      */
-    private boolean updatePackageMappingsData() {
+    private boolean updatePackageMappingsData(@UserIdInt int userId) {
         // don't update the mappings if a profile user is defined
-        if (!shouldDeleteObsoleteData(UserHandle.SYSTEM)) {
+        if (!shouldDeleteObsoleteData(UserHandle.of(userId))) {
             return true; // return true so job scheduler doesn't reschedule the job
         }
         // fetch the installed packages outside the lock so it doesn't block package manager.
-        final HashMap<String, Long> installedPkgs = getInstalledPackages(UserHandle.USER_SYSTEM);
+        final HashMap<String, Long> installedPkgs = getInstalledPackages(userId);
         synchronized (mLock) {
-            if (!mUserUnlockedStates.contains(UserHandle.USER_SYSTEM)) {
+            if (!mUserUnlockedStates.contains(userId)) {
                 return false; // user is no longer unlocked
             }
 
-            final UserUsageStatsService userService = mUserState.get(UserHandle.USER_SYSTEM);
+            final UserUsageStatsService userService = mUserState.get(userId);
             if (userService == null) {
                 return false; // user was stopped or removed
             }
@@ -3055,44 +3053,35 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
-        public byte[] getBackupPayload(int user, String key) {
-            if (!mUserUnlockedStates.contains(user)) {
-                Slog.w(TAG, "Failed to get backup payload for locked user " + user);
+        public byte[] getBackupPayload(@UserIdInt int userId, String key) {
+            if (!mUserUnlockedStates.contains(userId)) {
+                Slog.w(TAG, "Failed to get backup payload for locked user " + userId);
                 return null;
             }
             synchronized (mLock) {
-                // Check to ensure that only user 0's data is b/r for now
-                // Note: if backup and restore is enabled for users other than the system user, the
-                // #onUserUnlocked logic, specifically when the update mappings job is scheduled via
-                // UsageStatsIdleService.scheduleUpdateMappingsJob, will have to be updated.
-                if (user == UserHandle.USER_SYSTEM) {
-                    final UserUsageStatsService userStats = getUserUsageStatsServiceLocked(user);
-                    if (userStats == null) {
-                        return null; // user was stopped or removed
-                    }
-                    return userStats.getBackupPayload(key);
-                } else {
-                    return null;
+                final UserUsageStatsService userStats = getUserUsageStatsServiceLocked(userId);
+                if (userStats == null) {
+                    return null; // user was stopped or removed
                 }
+                Slog.i(TAG, "Returning backup payload for u=" + userId);
+                return userStats.getBackupPayload(key);
             }
         }
 
         @Override
-        public void applyRestoredPayload(int user, String key, byte[] payload) {
+        public void applyRestoredPayload(@UserIdInt int userId, String key, byte[] payload) {
             synchronized (mLock) {
-                if (!mUserUnlockedStates.contains(user)) {
-                    Slog.w(TAG, "Failed to apply restored payload for locked user " + user);
+                if (!mUserUnlockedStates.contains(userId)) {
+                    Slog.w(TAG, "Failed to apply restored payload for locked user " + userId);
                     return;
                 }
 
-                if (user == UserHandle.USER_SYSTEM) {
-                    final UserUsageStatsService userStats = getUserUsageStatsServiceLocked(user);
-                    if (userStats == null) {
-                        return; // user was stopped or removed
-                    }
-                    final Set<String> restoredApps = userStats.applyRestoredPayload(key, payload);
-                    mAppStandby.restoreAppsToRare(restoredApps, user);
+                final UserUsageStatsService userStats = getUserUsageStatsServiceLocked(userId);
+                if (userStats == null) {
+                    return; // user was stopped or removed
                 }
+                final Set<String> restoredApps = userStats.applyRestoredPayload(key, payload);
+                mAppStandby.restoreAppsToRare(restoredApps, userId);
             }
         }
 
@@ -3165,8 +3154,8 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
-        public boolean updatePackageMappingsData() {
-            return UsageStatsService.this.updatePackageMappingsData();
+        public boolean updatePackageMappingsData(@UserIdInt int userId) {
+            return UsageStatsService.this.updatePackageMappingsData(userId);
         }
 
         /**
