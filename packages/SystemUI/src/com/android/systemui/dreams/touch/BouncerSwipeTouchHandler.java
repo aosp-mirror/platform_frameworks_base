@@ -36,11 +36,12 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
+import com.android.systemui.dreams.touch.scrim.ScrimController;
+import com.android.systemui.dreams.touch.scrim.ScrimManager;
 import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import java.util.Optional;
@@ -78,7 +79,8 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final float mBouncerZoneScreenPercentage;
 
-    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    private final ScrimManager mScrimManager;
+    private ScrimController mCurrentScrimController;
     private float mCurrentExpansion;
     private final Optional<CentralSurfaces> mCentralSurfaces;
 
@@ -90,6 +92,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
     private final DisplayMetrics mDisplayMetrics;
 
     private Boolean mCapture;
+    private Boolean mExpanded;
 
     private boolean mBouncerInitiallyShowing;
 
@@ -100,6 +103,17 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
     private VelocityTrackerFactory mVelocityTrackerFactory;
 
     private final UiEventLogger mUiEventLogger;
+
+    private final ScrimManager.Callback mScrimManagerCallback = new ScrimManager.Callback() {
+        @Override
+        public void onScrimControllerChanged(ScrimController controller) {
+            if (mCurrentScrimController != null) {
+                mCurrentScrimController.reset();
+            }
+
+            mCurrentScrimController = controller;
+        }
+    };
 
     private final GestureDetector.OnGestureListener mOnGestureListener =
             new GestureDetector.SimpleOnGestureListener() {
@@ -115,8 +129,10 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                                 .orElse(false);
 
                         if (mCapture) {
+                            // reset expanding
+                            mExpanded = false;
                             // Since the user is dragging the bouncer up, set scrimmed to false.
-                            mStatusBarKeyguardViewManager.showPrimaryBouncer(false);
+                            mCurrentScrimController.show();
                         }
                     }
 
@@ -157,10 +173,10 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
         ShadeExpansionChangeEvent event =
                 new ShadeExpansionChangeEvent(
                         /* fraction= */ mCurrentExpansion,
-                        /* expanded= */ false,
+                        /* expanded= */ mExpanded,
                         /* tracking= */ true,
                         /* dragDownPxAmount= */ dragDownAmount);
-        mStatusBarKeyguardViewManager.onPanelExpansionChanged(event);
+        mCurrentScrimController.expand(event);
     }
 
 
@@ -187,7 +203,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
     @Inject
     public BouncerSwipeTouchHandler(
             DisplayMetrics displayMetrics,
-            StatusBarKeyguardViewManager statusBarKeyguardViewManager,
+            ScrimManager scrimManager,
             Optional<CentralSurfaces> centralSurfaces,
             NotificationShadeWindowController notificationShadeWindowController,
             ValueAnimatorCreator valueAnimatorCreator,
@@ -200,7 +216,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
             UiEventLogger uiEventLogger) {
         mDisplayMetrics = displayMetrics;
         mCentralSurfaces = centralSurfaces;
-        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
+        mScrimManager = scrimManager;
         mNotificationShadeWindowController = notificationShadeWindowController;
         mBouncerZoneScreenPercentage = swipeRegionPercentage;
         mFlingAnimationUtils = flingAnimationUtils;
@@ -234,9 +250,12 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
         mTouchSession = session;
         mVelocityTracker.clear();
         mNotificationShadeWindowController.setForcePluginOpen(true, this);
+        mScrimManager.addCallback(mScrimManagerCallback);
+        mCurrentScrimController = mScrimManager.getCurrentController();
 
         session.registerCallback(() -> {
             mVelocityTracker.recycle();
+            mScrimManager.removeCallback(mScrimManagerCallback);
             mCapture = null;
             mNotificationShadeWindowController.setForcePluginOpen(false, this);
         });
@@ -273,9 +292,10 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                 final float velocityVector =
                         (float) Math.hypot(horizontalVelocity, verticalVelocity);
 
-                final float expansion = flingRevealsOverlay(verticalVelocity, velocityVector)
-                        ? KeyguardBouncerConstants.EXPANSION_HIDDEN
-                        : KeyguardBouncerConstants.EXPANSION_VISIBLE;
+                mExpanded = !flingRevealsOverlay(verticalVelocity, velocityVector);
+                final float expansion = mExpanded
+                        ? KeyguardBouncerConstants.EXPANSION_VISIBLE
+                        : KeyguardBouncerConstants.EXPANSION_HIDDEN;
 
                 // Log the swiping up to show Bouncer event.
                 if (!mBouncerInitiallyShowing
@@ -286,7 +306,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                 flingToExpansion(verticalVelocity, expansion);
 
                 if (expansion == KeyguardBouncerConstants.EXPANSION_HIDDEN) {
-                    mStatusBarKeyguardViewManager.reset(false);
+                    mCurrentScrimController.reset();
                 }
                 break;
             default:
