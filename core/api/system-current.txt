@@ -8767,6 +8767,7 @@ package android.media.tv.tuner.frontend {
     field public static final int TYPE_DVBC = 4; // 0x4
     field public static final int TYPE_DVBS = 5; // 0x5
     field public static final int TYPE_DVBT = 6; // 0x6
+    field public static final int TYPE_IPTV = 11; // 0xb
     field public static final int TYPE_ISDBS = 7; // 0x7
     field public static final int TYPE_ISDBS3 = 8; // 0x8
     field public static final int TYPE_ISDBT = 9; // 0x9
@@ -8875,6 +8876,60 @@ package android.media.tv.tuner.frontend {
     field public static final int FRONTEND_STATUS_READINESS_UNDEFINED = 0; // 0x0
     field public static final int FRONTEND_STATUS_READINESS_UNSTABLE = 2; // 0x2
     field public static final int FRONTEND_STATUS_READINESS_UNSUPPORTED = 4; // 0x4
+  }
+
+  public class IptvFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
+    ctor public IptvFrontendSettings(@NonNull byte[], @NonNull byte[], int, int, @NonNull android.media.tv.tuner.frontend.IptvFrontendSettingsFec, int, int, long, @NonNull String);
+    method @NonNull public static android.media.tv.tuner.frontend.IptvFrontendSettings.Builder builder();
+    method @IntRange(from=0) public long getBitrate();
+    method @NonNull public String getContentUrl();
+    method @NonNull @Size(min=4, max=16) public byte[] getDstIpAddress();
+    method public int getDstPort();
+    method @Nullable public android.media.tv.tuner.frontend.IptvFrontendSettingsFec getFec();
+    method public int getIgmp();
+    method public int getProtocol();
+    method @NonNull @Size(min=4, max=16) public byte[] getSrcIpAddress();
+    method public int getSrcPort();
+    method public int getType();
+    field public static final int IGMP_UNDEFINED = 0; // 0x0
+    field public static final int IGMP_V1 = 1; // 0x1
+    field public static final int IGMP_V2 = 2; // 0x2
+    field public static final int IGMP_V3 = 4; // 0x4
+    field public static final int PROTOCOL_RTP = 2; // 0x2
+    field public static final int PROTOCOL_UDP = 1; // 0x1
+    field public static final int PROTOCOL_UNDEFINED = 0; // 0x0
+  }
+
+  public static final class IptvFrontendSettings.Builder {
+    method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettings build();
+    method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettings.Builder setBitrate(@IntRange(from=0) long);
+    method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettings.Builder setContentUrl(@NonNull String);
+    method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettings.Builder setDstIpAddress(@NonNull byte[]);
+    method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettings.Builder setDstPort(int);
+    method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettings.Builder setFec(@Nullable android.media.tv.tuner.frontend.IptvFrontendSettingsFec);
+    method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettings.Builder setIgmp(int);
+    method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettings.Builder setProtocol(int);
+    method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettings.Builder setSrcIpAddress(@NonNull byte[]);
+    method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettings.Builder setSrcPort(int);
+  }
+
+  public class IptvFrontendSettingsFec {
+    ctor public IptvFrontendSettingsFec(int, int, int);
+    method @NonNull public static android.media.tv.tuner.frontend.IptvFrontendSettingsFec.Builder builder();
+    method @IntRange(from=0) public int getFecColNum();
+    method @IntRange(from=0) public int getFecRowNum();
+    method public int getFecType();
+    field public static final int FEC_TYPE_COLUMN = 1; // 0x1
+    field public static final int FEC_TYPE_COLUMN_ROW = 4; // 0x4
+    field public static final int FEC_TYPE_ROW = 2; // 0x2
+    field public static final int FEC_TYPE_UNDEFINED = 0; // 0x0
+  }
+
+  public static final class IptvFrontendSettingsFec.Builder {
+    method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettingsFec build();
+    method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettingsFec.Builder setFecColNum(@IntRange(from=0) int);
+    method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettingsFec.Builder setFecRowNum(@IntRange(from=0) int);
+    method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettingsFec.Builder setFecType(int);
   }
 
   public class Isdbs3FrontendCapabilities extends android.media.tv.tuner.frontend.FrontendCapabilities {
