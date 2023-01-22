@@ -23,8 +23,11 @@ import android.content.Context;
 import android.credentials.Credential;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.ProviderPendingIntentResponse;
+import android.os.ICancellationSignal;
+import android.os.RemoteException;
 import android.service.credentials.CredentialEntry;
 import android.service.credentials.CredentialProviderInfo;
+import android.util.Log;
 import android.util.Pair;
 
 import java.util.UUID;
@@ -49,6 +52,7 @@ public abstract class ProviderSession<T, R>
     @NonNull protected Status mStatus = Status.NOT_STARTED;
     @NonNull protected final ProviderInternalCallback mCallbacks;
     @Nullable protected Credential mFinalCredentialResponse;
+    @Nullable protected ICancellationSignal mProviderCancellationSignal;
     @NonNull protected final T mProviderRequest;
     @Nullable protected R mProviderResponse;
     @NonNull protected Boolean mProviderResponseSet = false;
@@ -149,6 +153,18 @@ public abstract class ProviderSession<T, R>
 
     public Credential getFinalCredentialResponse() {
         return  mFinalCredentialResponse;
+    }
+
+    /** Propagates cancellation signal to the remote provider service. */
+    public void cancelProviderRemoteSession() {
+        try {
+            if (mProviderCancellationSignal != null) {
+                mProviderCancellationSignal.cancel();
+            }
+            setStatus(Status.CANCELED);
+        } catch (RemoteException e) {
+            Log.i(TAG, "Issue while cancelling provider session: " + e.getMessage());
+        }
     }
 
     protected void setStatus(@NonNull Status status) {

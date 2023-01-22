@@ -110,7 +110,7 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
      * @param callback the callback to be used to send back the provider response to the
      *                 {@link ProviderGetSession} class that maintains provider state
      */
-    public void onBeginGetCredential(@NonNull BeginGetCredentialRequest request,
+    public ICancellationSignal onBeginGetCredential(@NonNull BeginGetCredentialRequest request,
             ProviderCallbacks<BeginGetCredentialResponse> callback) {
         Log.i(TAG, "In onGetCredentials in RemoteCredentialService");
         AtomicReference<ICancellationSignal> cancellationSink = new AtomicReference<>();
@@ -149,6 +149,8 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
         futureRef.set(connectThenExecute);
         connectThenExecute.whenComplete((result, error) -> Handler.getMain().post(() ->
                 handleExecutionResponse(result, error, cancellationSink, callback)));
+
+        return cancellationSink.get();
     }
 
     /** Main entry point to be called for executing a beginCreateCredential call on the remote
@@ -157,7 +159,7 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
      * @param callback the callback to be used to send back the provider response to the
      *                 {@link ProviderCreateSession} class that maintains provider state
      */
-    public void onCreateCredential(@NonNull BeginCreateCredentialRequest request,
+    public ICancellationSignal onCreateCredential(@NonNull BeginCreateCredentialRequest request,
             ProviderCallbacks<BeginCreateCredentialResponse> callback) {
         Log.i(TAG, "In onCreateCredential in RemoteCredentialService");
         AtomicReference<ICancellationSignal> cancellationSink = new AtomicReference<>();
@@ -196,6 +198,8 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
         futureRef.set(connectThenExecute);
         connectThenExecute.whenComplete((result, error) -> Handler.getMain().post(() ->
                 handleExecutionResponse(result, error, cancellationSink, callback)));
+
+        return cancellationSink.get();
     }
 
     /** Main entry point to be called for executing a clearCredentialState call on the remote
@@ -204,7 +208,7 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
      * @param callback the callback to be used to send back the provider response to the
      *                 {@link ProviderClearSession} class that maintains provider state
      */
-    public void onClearCredentialState(@NonNull ClearCredentialStateRequest request,
+    public ICancellationSignal onClearCredentialState(@NonNull ClearCredentialStateRequest request,
             ProviderCallbacks<Void> callback) {
         Log.i(TAG, "In onClearCredentialState in RemoteCredentialService");
         AtomicReference<ICancellationSignal> cancellationSink = new AtomicReference<>();
@@ -243,6 +247,8 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
         futureRef.set(connectThenExecute);
         connectThenExecute.whenComplete((result, error) -> Handler.getMain().post(() ->
                 handleExecutionResponse(result, error, cancellationSink, callback)));
+
+        return cancellationSink.get();
     }
 
     private <T> void handleExecutionResponse(T result,
