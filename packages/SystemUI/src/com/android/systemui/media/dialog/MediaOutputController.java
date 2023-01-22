@@ -382,6 +382,15 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         return mContext.getPackageManager().getLaunchIntentForPackage(mPackageName);
     }
 
+    void tryToLaunchMediaApplication() {
+        Intent launchIntent = getAppLaunchIntent();
+        if (launchIntent != null) {
+            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            mCallback.dismissDialog();
+            mContext.startActivity(launchIntent);
+        }
+    }
+
     CharSequence getHeaderTitle() {
         if (mMediaController != null) {
             final MediaMetadata metadata = mMediaController.getMetadata();
