@@ -226,7 +226,7 @@ public final class MediaQualityStatus implements Parcelable {
         public Builder(
                 @NonNull String imsCallSessionId,
                 @MediaSessionType int mediaSessionType,
-                int transportType) {
+                @TransportType int transportType) {
             mImsCallSessionId = imsCallSessionId;
             mMediaSessionType = mediaSessionType;
             mTransportType = transportType;
