@@ -130,4 +130,29 @@ public class NotificationRecordLoggerTest extends UiServiceTestCase {
         p.r.getSbn().getNotification().flags |= FLAG_FOREGROUND_SERVICE;
         assertTrue(NotificationRecordLogger.isForegroundService(p.r));
     }
+
+
+    @Test
+    public void testIsNonDismissible_hasFlagNoDismiss_shouldReturnTrue() {
+        // Given: a notification pair's notification has flag FLAG_NO_DISMISS
+        NotificationRecordLogger.NotificationRecordPair p = getNotificationRecordPair(
+                0, null);
+        p.r.getNotification().flags |= Notification.FLAG_NO_DISMISS;
+
+        // When: check the value of isNonDismissible()
+        // Then: should return true
+        assertTrue(NotificationRecordLogger.isNonDismissible(p.r));
+    }
+
+    @Test
+    public void testIsNonDismissible_noFlagNoDismiss_shouldReturnFalse() {
+        // Given: a notification pair's notification doesn't have flag FLAG_NO_DISMISS
+        NotificationRecordLogger.NotificationRecordPair p = getNotificationRecordPair(
+                0, null);
+        p.r.getNotification().flags &= ~Notification.FLAG_NO_DISMISS;
+
+        // When: check the value of isNonDismissible()
+        // Then: should return false
+        assertFalse(NotificationRecordLogger.isNonDismissible(p.r));
+    }
 }

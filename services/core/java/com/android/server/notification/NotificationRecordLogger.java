@@ -473,4 +473,15 @@ public interface NotificationRecordLogger {
         }
         return (r.getSbn().getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
     }
+
+    /**
+     * @param r NotificationRecord
+     * @return Whether the notification is a non-dismissible notification.
+     */
+    static boolean isNonDismissible(@NonNull NotificationRecord r) {
+        if (r.getSbn() == null || r.getSbn().getNotification() == null) {
+            return false;
+        }
+        return (r.getNotification().flags & Notification.FLAG_NO_DISMISS) != 0;
+    }
 }
