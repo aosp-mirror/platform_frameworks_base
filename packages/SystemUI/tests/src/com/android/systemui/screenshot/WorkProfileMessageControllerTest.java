@@ -65,7 +65,7 @@ public class WorkProfileMessageControllerTest {
     @Mock
     private Context mContext;
     @Mock
-    private WorkProfileMessageController.WorkProfileMessageDisplay mMessageDisplay;
+    private MessageContainerController mMessageDisplay;
     @Mock
     private Drawable mActivityIcon;
     @Mock

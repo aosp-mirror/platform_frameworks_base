@@ -40,10 +40,10 @@ constructor(
 ) {
 
     /**
-     * Determine if a message should be shown to the user, send message details to messageDisplay if
-     * appropriate.
+     * Determine if a message should be shown to the user, send message details to
+     * MessageContainerController if appropriate.
      */
-    fun onScreenshotTaken(userHandle: UserHandle, messageDisplay: WorkProfileMessageDisplay) {
+    fun onScreenshotTaken(userHandle: UserHandle, messageContainer: MessageContainerController) {
         if (userManager.isManagedProfile(userHandle.identifier) && !messageAlreadyDismissed()) {
             var badgedIcon: Drawable? = null
             var label: CharSequence? = null
@@ -65,7 +65,9 @@ constructor(
             val badgedLabel =
                 packageManager.getUserBadgedLabel(label ?: defaultFileAppName(), userHandle)
 
-            messageDisplay.showWorkProfileMessage(badgedLabel, badgedIcon) { onMessageDismissed() }
+            messageContainer.showWorkProfileMessage(badgedLabel, badgedIcon) {
+                onMessageDismissed()
+            }
         }
     }
 
@@ -88,15 +90,6 @@ constructor(
         )
 
     private fun defaultFileAppName() = context.getString(R.string.screenshot_default_files_app_name)
-
-    /** UI that can show work profile messages (ScreenshotView in practice) */
-    interface WorkProfileMessageDisplay {
-        /**
-         * Show the given message and icon, calling onDismiss if the user explicitly dismisses the
-         * message.
-         */
-        fun showWorkProfileMessage(text: CharSequence, icon: Drawable?, onDismiss: Runnable)
-    }
 
     companion object {
         const val TAG = "WorkProfileMessageCtrl"
