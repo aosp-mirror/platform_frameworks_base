@@ -405,10 +405,11 @@ interface IAudioService {
 
     oneway void setRttEnabled(in boolean rttEnabled);
 
-    @EnforcePermission("MODIFY_AUDIO_ROUTING")
+    @EnforcePermission(anyOf = {"MODIFY_AUDIO_ROUTING", "MODIFY_AUDIO_SYSTEM_SETTINGS"})
     void setDeviceVolumeBehavior(in AudioDeviceAttributes device,
              in int deviceVolumeBehavior, in String pkgName);
 
+    @EnforcePermission(anyOf = {"MODIFY_AUDIO_ROUTING", "QUERY_AUDIO_STATE", "MODIFY_AUDIO_SYSTEM_SETTINGS"})
     int getDeviceVolumeBehavior(in AudioDeviceAttributes device);
 
     // WARNING: read warning at top of file, new methods that need to be used by native

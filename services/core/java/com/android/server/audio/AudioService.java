@@ -7006,20 +7006,21 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     /**
      * @see AudioManager#setDeviceVolumeBehavior(AudioDeviceAttributes, int)
      * @param device the audio device to be affected
      * @param deviceVolumeBehavior one of the device behaviors
      */
+    @android.annotation.EnforcePermission(anyOf =
+            {"MODIFY_AUDIO_ROUTING", "MODIFY_AUDIO_SYSTEM_SETTINGS"})
     public void setDeviceVolumeBehavior(@NonNull AudioDeviceAttributes device,
             @AudioManager.DeviceVolumeBehavior int deviceVolumeBehavior, @Nullable String pkgName) {
         // verify permissions
-        // verify arguments
         super.setDeviceVolumeBehavior_enforcePermission();
-
+        // verify arguments
         Objects.requireNonNull(device);
         AudioManager.enforceValidVolumeBehavior(deviceVolumeBehavior);
+
         sVolumeLogger.enqueue(new EventLogger.StringEvent("setDeviceVolumeBehavior: dev:"
                 + AudioSystem.getOutputDeviceName(device.getInternalType()) + " addr:"
                 + device.getAddress() + " behavior:"
@@ -7090,11 +7091,14 @@ public class AudioService extends IAudioService.Stub
      * @param device the audio output device type
      * @return the volume behavior for the device
      */
+    @android.annotation.EnforcePermission(anyOf =
+            {"MODIFY_AUDIO_ROUTING", "QUERY_AUDIO_STATE", "MODIFY_AUDIO_SYSTEM_SETTINGS"})
     public @AudioManager.DeviceVolumeBehavior
     int getDeviceVolumeBehavior(@NonNull AudioDeviceAttributes device) {
-        Objects.requireNonNull(device);
         // verify permissions
-        enforceQueryStateOrModifyRoutingPermission();
+        super.getDeviceVolumeBehavior_enforcePermission();
+        // verify parameters
+        Objects.requireNonNull(device);
 
         return getDeviceVolumeBehaviorInt(device);
     }

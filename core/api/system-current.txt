@@ -6669,7 +6669,7 @@ package android.media {
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static java.util.List<android.media.audiopolicy.AudioVolumeGroup> getAudioVolumeGroups();
     method @NonNull @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION) public android.media.AudioRecord getCallDownlinkExtractionAudioRecord(@NonNull android.media.AudioFormat);
     method @NonNull @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION) public android.media.AudioTrack getCallUplinkInjectionAudioTrack(@NonNull android.media.AudioFormat);
-    method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, "android.permission.QUERY_AUDIO_STATE"}) public int getDeviceVolumeBehavior(@NonNull android.media.AudioDeviceAttributes);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, "android.permission.QUERY_AUDIO_STATE", android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS}) public int getDeviceVolumeBehavior(@NonNull android.media.AudioDeviceAttributes);
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, "android.permission.QUERY_AUDIO_STATE"}) public java.util.List<android.media.AudioDeviceAttributes> getDevicesForAttributes(@NonNull android.media.AudioAttributes);
     method @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public int getLastAudibleStreamVolume(int);
     method @IntRange(from=0) public long getMaxAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo);
@@ -6708,7 +6708,7 @@ package android.media {
     method public void setAudioServerStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.AudioServerStateCallback);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setBluetoothVariableLatencyEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean setDeviceAsNonDefaultForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy, @NonNull android.media.AudioDeviceAttributes);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setDeviceVolumeBehavior(@NonNull android.media.AudioDeviceAttributes, int);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS}) public void setDeviceVolumeBehavior(@NonNull android.media.AudioDeviceAttributes, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setFocusRequestResult(@NonNull android.media.AudioFocusInfo, int, @NonNull android.media.audiopolicy.AudioPolicy);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean setPreferredDeviceForCapturePreset(int, @NonNull android.media.AudioDeviceAttributes);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean setPreferredDeviceForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy, @NonNull android.media.AudioDeviceAttributes);
