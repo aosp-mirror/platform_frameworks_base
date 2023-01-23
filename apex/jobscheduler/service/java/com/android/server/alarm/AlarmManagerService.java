@@ -5379,9 +5379,7 @@ public class AlarmManagerService extends SystemService {
 
         @Override
         public void unblockAllUnrestrictedAlarms() {
-            // Called when:
-            // 1. Power exemption list changes,
-            // 2. User FAS feature is disabled.
+            // Called when the power exemption list changes.
             synchronized (mLock) {
                 sendAllUnrestrictedPendingBackgroundAlarmsLocked();
             }
