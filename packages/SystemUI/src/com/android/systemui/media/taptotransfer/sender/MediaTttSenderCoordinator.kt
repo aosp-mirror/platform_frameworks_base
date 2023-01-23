@@ -108,13 +108,10 @@ constructor(
         uiEventLogger.logSenderStateChange(chipState)
 
         if (chipState == ChipStateSender.FAR_FROM_RECEIVER) {
-            val removalReason = ChipStateSender.FAR_FROM_RECEIVER.name
-
-            // No need to store the state since it is the default state
-            removeIdFromStore(routeInfo.id, reason = removalReason)
             // Return early if we're not displaying a chip anyway
             val currentDisplayedState = displayedState ?: return
 
+            val removalReason = ChipStateSender.FAR_FROM_RECEIVER.name
             if (
                 currentDisplayedState.transferStatus == TransferStatus.IN_PROGRESS ||
                     currentDisplayedState.transferStatus == TransferStatus.SUCCEEDED
@@ -128,6 +125,8 @@ constructor(
                 return
             }
 
+            // No need to store the state since it is the default state
+            removeIdFromStore(routeInfo.id, reason = removalReason)
             displayedState = null
             chipbarCoordinator.removeView(routeInfo.id, removalReason)
         } else {

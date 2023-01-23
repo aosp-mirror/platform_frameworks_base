@@ -742,6 +742,99 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         verify(windowManager, never()).addView(any(), any())
     }
 
+    /** Regression test for b/266217596. */
+    @Test
+    fun toReceiver_triggeredThenFar_thenSucceeded_updatesToSucceeded() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED,
+            routeInfo,
+            null,
+        )
+
+        // WHEN a FAR command comes in
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
+            routeInfo,
+            null,
+        )
+
+        // THEN it is ignored and the chipbar is stilled displayed
+        val chipbarView = getChipbarView()
+        assertThat(chipbarView.getChipText())
+            .isEqualTo(ChipStateSender.TRANSFER_TO_RECEIVER_TRIGGERED.getExpectedStateText())
+        assertThat(chipbarView.getLoadingIcon().visibility).isEqualTo(View.VISIBLE)
+        verify(windowManager, never()).removeView(any())
+
+        // WHEN a SUCCEEDED command comes in
+        val succeededRouteInfo =
+            MediaRoute2Info.Builder(DEFAULT_ID, "Tablet Succeeded")
+                .addFeature("feature")
+                .setClientPackageName(PACKAGE_NAME)
+                .build()
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
+            succeededRouteInfo,
+            /* undoCallback= */ object : IUndoMediaTransferCallback.Stub() {
+                override fun onUndoTriggered() {}
+            },
+        )
+
+        // THEN it is *not* marked as an invalid transition and the chipbar updates to the succeeded
+        // state. (The "invalid transition" would be FAR => SUCCEEDED.)
+        assertThat(chipbarView.getChipText())
+            .isEqualTo(
+                ChipStateSender.TRANSFER_TO_RECEIVER_SUCCEEDED.getExpectedStateText(
+                    "Tablet Succeeded"
+                )
+            )
+        assertThat(chipbarView.getLoadingIcon().visibility).isEqualTo(View.GONE)
+        assertThat(chipbarView.getUndoButton().visibility).isEqualTo(View.VISIBLE)
+    }
+
+    /** Regression test for b/266217596. */
+    @Test
+    fun toThisDevice_triggeredThenFar_thenSucceeded_updatesToSucceeded() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED,
+            routeInfo,
+            null,
+        )
+
+        // WHEN a FAR command comes in
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
+            routeInfo,
+            null,
+        )
+
+        // THEN it is ignored and the chipbar is stilled displayed
+        val chipbarView = getChipbarView()
+        assertThat(chipbarView.getChipText())
+            .isEqualTo(ChipStateSender.TRANSFER_TO_THIS_DEVICE_TRIGGERED.getExpectedStateText())
+        assertThat(chipbarView.getLoadingIcon().visibility).isEqualTo(View.VISIBLE)
+        verify(windowManager, never()).removeView(any())
+
+        // WHEN a SUCCEEDED command comes in
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
+            routeInfo,
+            /* undoCallback= */ object : IUndoMediaTransferCallback.Stub() {
+                override fun onUndoTriggered() {}
+            },
+        )
+
+        // THEN it is *not* marked as an invalid transition and the chipbar updates to the succeeded
+        // state. (The "invalid transition" would be FAR => SUCCEEDED.)
+        assertThat(chipbarView.getChipText())
+            .isEqualTo(
+                ChipStateSender.TRANSFER_TO_THIS_DEVICE_SUCCEEDED.getExpectedStateText(
+                    "Tablet Succeeded"
+                )
+            )
+        assertThat(chipbarView.getLoadingIcon().visibility).isEqualTo(View.GONE)
+        assertThat(chipbarView.getUndoButton().visibility).isEqualTo(View.VISIBLE)
+    }
+
     @Test
     fun receivesNewStateFromCommandQueue_isLogged() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
@@ -1117,8 +1210,10 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
 
     private fun ViewGroup.getUndoButton(): View = this.requireViewById(R.id.end_button)
 
-    private fun ChipStateSender.getExpectedStateText(): String? {
-        return this.getChipTextString(context, OTHER_DEVICE_NAME).loadText(context)
+    private fun ChipStateSender.getExpectedStateText(
+        otherDeviceName: String = OTHER_DEVICE_NAME,
+    ): String? {
+        return this.getChipTextString(context, otherDeviceName).loadText(context)
     }
 
     // display receiver triggered state helper method to make sure we start from a valid state
