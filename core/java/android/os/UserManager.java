@@ -5170,7 +5170,7 @@ public class UserManager {
      * @return true if the user shares media with its parent user, false otherwise.
      *
      * @deprecated use {@link #getUserProperties(UserHandle)} with
-     *            {@link UserProperties#getIsMediaSharedWithParent()} instead.
+     *            {@link UserProperties#isMediaSharedWithParent()} instead.
      * @hide
      */
     @SystemApi
@@ -5183,7 +5183,7 @@ public class UserManager {
     @SuppressAutoDoc
     public boolean isMediaSharedWithParent() {
         try {
-            return getUserProperties(UserHandle.of(mUserId)).getIsMediaSharedWithParent();
+            return getUserProperties(UserHandle.of(mUserId)).isMediaSharedWithParent();
         } catch (IllegalArgumentException e) {
             // If the user doesn't exist, return false (for historical reasons)
             return false;
@@ -5197,7 +5197,7 @@ public class UserManager {
      * and will always return false for any other user type.
      *
      * @deprecated use {@link #getUserProperties(UserHandle)} with
-     *            {@link UserProperties#getIsMediaSharedWithParent()} instead.
+     *            {@link UserProperties#isCredentialShareableWithParent()} instead.
      * @hide
      */
     @SystemApi
@@ -5210,7 +5210,7 @@ public class UserManager {
     @SuppressAutoDoc
     public boolean isCredentialSharableWithParent() {
         try {
-            return getUserProperties(UserHandle.of(mUserId)).getIsCredentialSharableWithParent();
+            return getUserProperties(UserHandle.of(mUserId)).isCredentialShareableWithParent();
         } catch (IllegalArgumentException e) {
             // If the user doesn't exist, return false (for historical reasons)
             return false;

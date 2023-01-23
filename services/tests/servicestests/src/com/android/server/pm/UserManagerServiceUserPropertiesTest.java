@@ -64,8 +64,8 @@ public class UserManagerServiceUserPropertiesTest {
                 .setUseParentsContacts(false)
                 .setCrossProfileIntentFilterAccessControl(10)
                 .setCrossProfileIntentResolutionStrategy(0)
-                .setIsMediaSharedWithParent(false)
-                .setIsCredentialSharableWithParent(true)
+                .setMediaSharedWithParent(false)
+                .setCredentialShareableWithParent(true)
                 .build();
         final UserProperties actualProps = new UserProperties(defaultProps);
         actualProps.setShowInLauncher(14);
@@ -74,8 +74,8 @@ public class UserManagerServiceUserPropertiesTest {
         actualProps.setUseParentsContacts(true);
         actualProps.setCrossProfileIntentFilterAccessControl(20);
         actualProps.setCrossProfileIntentResolutionStrategy(1);
-        actualProps.setIsMediaSharedWithParent(true);
-        actualProps.setIsCredentialSharableWithParent(false);
+        actualProps.setMediaSharedWithParent(true);
+        actualProps.setCredentialShareableWithParent(false);
 
         // Write the properties to xml.
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -115,7 +115,7 @@ public class UserManagerServiceUserPropertiesTest {
                 .setStartWithParent(true)
                 .setShowInSettings(3452)
                 .setInheritDevicePolicy(1732)
-                .setIsMediaSharedWithParent(true)
+                .setMediaSharedWithParent(true)
                 .build();
         final UserProperties orig = new UserProperties(defaultProps);
         orig.setShowInLauncher(2841);
@@ -174,10 +174,10 @@ public class UserManagerServiceUserPropertiesTest {
 
         // Items with no permission requirements.
         assertEqualGetterOrThrows(orig::getShowInLauncher, copy::getShowInLauncher, true);
-        assertEqualGetterOrThrows(orig::getIsMediaSharedWithParent,
-                copy::getIsMediaSharedWithParent, true);
-        assertEqualGetterOrThrows(orig::getIsCredentialSharableWithParent,
-                copy::getIsCredentialSharableWithParent, true);
+        assertEqualGetterOrThrows(orig::isMediaSharedWithParent,
+                copy::isMediaSharedWithParent, true);
+        assertEqualGetterOrThrows(orig::isCredentialShareableWithParent,
+                copy::isCredentialShareableWithParent, true);
     }
 
     /**
@@ -223,9 +223,9 @@ public class UserManagerServiceUserPropertiesTest {
                 .isEqualTo(actual.getCrossProfileIntentFilterAccessControl());
         assertThat(expected.getCrossProfileIntentResolutionStrategy())
                 .isEqualTo(actual.getCrossProfileIntentResolutionStrategy());
-        assertThat(expected.getIsMediaSharedWithParent())
-                .isEqualTo(actual.getIsMediaSharedWithParent());
-        assertThat(expected.getIsCredentialSharableWithParent())
-                .isEqualTo(actual.getIsCredentialSharableWithParent());
+        assertThat(expected.isMediaSharedWithParent())
+                .isEqualTo(actual.isMediaSharedWithParent());
+        assertThat(expected.isCredentialShareableWithParent())
+                .isEqualTo(actual.isCredentialShareableWithParent());
     }
 }
