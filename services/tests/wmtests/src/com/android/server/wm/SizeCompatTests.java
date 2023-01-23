@@ -2603,6 +2603,133 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    public void testIsHorizontalReachabilityEnabled_splitScreen_false() {
+        mAtm.mDevEnableNonResizableMultiWindow = true;
+        setUpDisplaySizeWithApp(2800, 1000);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mWm.mLetterboxConfiguration.setIsHorizontalReachabilityEnabled(true);
+        final TestSplitOrganizer organizer =
+                new TestSplitOrganizer(mAtm, mActivity.getDisplayContent());
+
+        // Unresizable portrait-only activity.
+        prepareUnresizable(mActivity, 1.1f, SCREEN_ORIENTATION_PORTRAIT);
+
+        // Move activity to split screen which takes half of the screen.
+        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false , "test");
+        organizer.mPrimary.setBounds(0, 0, 1400, 1000);
+        assertEquals(WINDOWING_MODE_MULTI_WINDOW, mTask.getWindowingMode());
+        assertEquals(WINDOWING_MODE_MULTI_WINDOW, mActivity.getWindowingMode());
+
+        // Horizontal reachability is disabled because the app is in split screen.
+        assertFalse(mActivity.mLetterboxUiController.isHorizontalReachabilityEnabled());
+    }
+
+    @Test
+    public void testIsVerticalReachabilityEnabled_splitScreen_false() {
+        mAtm.mDevEnableNonResizableMultiWindow = true;
+        setUpDisplaySizeWithApp(1000, 2800);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mWm.mLetterboxConfiguration.setIsVerticalReachabilityEnabled(true);
+        final TestSplitOrganizer organizer =
+                new TestSplitOrganizer(mAtm, mActivity.getDisplayContent());
+
+        // Unresizable landscape-only activity.
+        prepareUnresizable(mActivity, 1.1f, SCREEN_ORIENTATION_LANDSCAPE);
+
+        // Move activity to split screen which takes half of the screen.
+        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false , "test");
+        organizer.mPrimary.setBounds(0, 0, 1000, 1400);
+        assertEquals(WINDOWING_MODE_MULTI_WINDOW, mTask.getWindowingMode());
+        assertEquals(WINDOWING_MODE_MULTI_WINDOW, mActivity.getWindowingMode());
+
+        // Vertical reachability is disabled because the app is in split screen.
+        assertFalse(mActivity.mLetterboxUiController.isVerticalReachabilityEnabled());
+    }
+
+    @Test
+    public void testIsVerticalReachabilityEnabled_doesNotMatchParentWidth_false() {
+        setUpDisplaySizeWithApp(1000, 2800);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mWm.mLetterboxConfiguration.setIsVerticalReachabilityEnabled(true);
+
+        // Unresizable landscape-only activity.
+        prepareUnresizable(mActivity, 1.1f, SCREEN_ORIENTATION_LANDSCAPE);
+
+        // Rotate to put activity in size compat mode.
+        rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
+
+        // Activity now in size compat mode.
+        assertTrue(mActivity.inSizeCompatMode());
+
+        // Vertical reachability is disabled because the app does not match parent width
+        assertNotEquals(mActivity.getBounds().width(), mActivity.mDisplayContent.getBounds()
+                .width());
+        assertFalse(mActivity.mLetterboxUiController.isVerticalReachabilityEnabled());
+    }
+
+    @Test
+    public void testIsHorizontalReachabilityEnabled_doesNotMatchParentHeight_false() {
+        setUpDisplaySizeWithApp(2800, 1000);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mWm.mLetterboxConfiguration.setIsHorizontalReachabilityEnabled(true);
+
+        // Unresizable portrait-only activity.
+        prepareUnresizable(mActivity, 1.1f, SCREEN_ORIENTATION_PORTRAIT);
+
+        // Rotate to put activity in size compat mode.
+        rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
+
+        // Activity now in size compat mode.
+        assertTrue(mActivity.inSizeCompatMode());
+
+        // Horizontal reachability is disabled because the app does not match parent height
+        assertNotEquals(mActivity.getBounds().height(), mActivity.mDisplayContent.getBounds()
+                .height());
+        assertFalse(mActivity.mLetterboxUiController.isHorizontalReachabilityEnabled());
+    }
+
+    @Test
+    public void testIsHorizontalReachabilityEnabled_inSizeCompatMode_matchesParentHeight_true() {
+        setUpDisplaySizeWithApp(1800, 2200);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mWm.mLetterboxConfiguration.setIsHorizontalReachabilityEnabled(true);
+
+        // Unresizable portrait-only activity.
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+
+        // Rotate to put activity in size compat mode.
+        rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
+
+        // Activity now in size compat mode.
+        assertTrue(mActivity.inSizeCompatMode());
+
+        // Horizontal reachability is enabled because the app matches parent height
+        assertEquals(mActivity.getBounds().height(), mActivity.mDisplayContent.getBounds()
+                .height());
+        assertTrue(mActivity.mLetterboxUiController.isHorizontalReachabilityEnabled());
+    }
+
+    @Test
+    public void testIsVerticalReachabilityEnabled_inSizeCompatMode_matchesParentWidth_true() {
+        setUpDisplaySizeWithApp(2200, 1800);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mWm.mLetterboxConfiguration.setIsVerticalReachabilityEnabled(true);
+
+        // Unresizable landscape-only activity.
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_LANDSCAPE);
+
+        // Rotate to put activity in size compat mode.
+        rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
+
+        // Activity now in size compat mode.
+        assertTrue(mActivity.inSizeCompatMode());
+
+        // Vertical reachability is enabled because the app matches parent width
+        assertEquals(mActivity.getBounds().width(), mActivity.mDisplayContent.getBounds().width());
+        assertTrue(mActivity.mLetterboxUiController.isVerticalReachabilityEnabled());
+    }
+
+    @Test
     public void testLetterboxDetailsForStatusBar_noLetterbox() {
         setUpDisplaySizeWithApp(2800, 1000);
         addStatusBar(mActivity.mDisplayContent);
