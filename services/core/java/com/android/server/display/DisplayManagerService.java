@@ -258,7 +258,7 @@ public final class DisplayManagerService extends SystemService {
             mDisplayWindowPolicyControllers = new SparseArray<>();
 
     /**
-     *  Map of every internal primary display device {@link HighBrightnessModeMetadata}s indexed by
+     *  Map of every display device {@link HighBrightnessModeMetadata}s indexed by
      *  {@link DisplayDevice#mUniqueId}.
      */
     public final ArrayMap<String, HighBrightnessModeMetadata> mHighBrightnessModeMetadataMap =
@@ -1525,6 +1525,7 @@ public final class DisplayManagerService extends SystemService {
         final int displayId = display.getDisplayIdLocked();
         final boolean isDefault = displayId == Display.DEFAULT_DISPLAY;
         configureColorModeLocked(display, device);
+
         if (!mAreUserDisabledHdrTypesAllowed) {
             display.setUserDisabledHdrTypes(mUserDisabledHdrTypes);
         }
@@ -2636,16 +2637,12 @@ public final class DisplayManagerService extends SystemService {
         mLogicalDisplayMapper.forEachLocked(this::addDisplayPowerControllerLocked);
     }
 
-    private HighBrightnessModeMetadata getHighBrightnessModeMetadata(LogicalDisplay display) {
+    @VisibleForTesting
+    HighBrightnessModeMetadata getHighBrightnessModeMetadata(LogicalDisplay display) {
         final DisplayDevice device = display.getPrimaryDisplayDeviceLocked();
         if (device == null) {
             Slog.wtf(TAG, "Display Device is null in DisplayPowerController for display: "
                     + display.getDisplayIdLocked());
-            return null;
-        }
-
-        // HBM brightness mode is only applicable to internal physical displays.
-        if (display.getDisplayInfoLocked().type != Display.TYPE_INTERNAL) {
             return null;
         }
 
@@ -2673,7 +2670,7 @@ public final class DisplayManagerService extends SystemService {
         final BrightnessSetting brightnessSetting = new BrightnessSetting(mPersistentDataStore,
                 display, mSyncRoot);
 
-        // If display is internal and has a HighBrightnessModeMetadata mapping, use that.
+        // If display already has a HighBrightnessModeMetadata mapping, use that.
         // Or create a new one and use that.
         // We also need to pass a mapping of the HighBrightnessModeTimeInfoMap to
         // displayPowerController, so the hbm info can be correctly associated
