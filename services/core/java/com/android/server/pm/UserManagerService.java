@@ -23,6 +23,15 @@ import static android.os.UserManager.DISALLOW_USER_SWITCH;
 import static android.os.UserManager.SYSTEM_USER_MODE_EMULATION_PROPERTY;
 import static android.os.UserManager.USER_OPERATION_ERROR_UNKNOWN;
 
+import static com.android.server.pm.UserJourneyLogger.ERROR_CODE_ABORTED;
+import static com.android.server.pm.UserJourneyLogger.ERROR_CODE_UNSPECIFIED;
+import static com.android.server.pm.UserJourneyLogger.ERROR_CODE_USER_ALREADY_AN_ADMIN;
+import static com.android.server.pm.UserJourneyLogger.ERROR_CODE_USER_IS_NOT_AN_ADMIN;
+import static com.android.server.pm.UserJourneyLogger.USER_JOURNEY_GRANT_ADMIN;
+import static com.android.server.pm.UserJourneyLogger.USER_JOURNEY_REVOKE_ADMIN;
+import static com.android.server.pm.UserJourneyLogger.USER_JOURNEY_USER_CREATE;
+import static com.android.server.pm.UserJourneyLogger.USER_JOURNEY_USER_REMOVE;
+
 import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -162,7 +171,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -518,6 +526,8 @@ public class UserManagerService extends IUserManager.Stub {
 
     @GuardedBy("mUserLifecycleListeners")
     private final ArrayList<UserLifecycleListener> mUserLifecycleListeners = new ArrayList<>();
+
+    private final UserJourneyLogger mUserJourneyLogger = new UserJourneyLogger();
 
     private final LockPatternUtils mLockPatternUtils;
 
@@ -1580,45 +1590,56 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public void setUserAdmin(@UserIdInt int userId) {
         checkManageUserAndAcrossUsersFullPermission("set user admin");
-        final long sessionId = logGrantAdminJourneyBegin(userId);
+        mUserJourneyLogger.logUserJourneyBegin(userId, USER_JOURNEY_GRANT_ADMIN);
         UserInfo info;
         synchronized (mPackagesLock) {
             synchronized (mUsersLock) {
                 info = getUserInfoLU(userId);
             }
-            if (info == null || info.isAdmin()) {
-                // Exit if no user found with that id, or the user is already an Admin.
-                logUserJourneyError(sessionId,
-                        FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__GRANT_ADMIN,
-                        userId);
+            if (info == null) {
+                // Exit if no user found with that id,
+                mUserJourneyLogger.logNullUserJourneyError(USER_JOURNEY_GRANT_ADMIN,
+                        getCurrentUserId(), userId, /* userType */ "", /* userFlags */ -1);
+                return;
+            } else if (info.isAdmin()) {
+                // Exit if the user is already an Admin.
+                mUserJourneyLogger.logUserJourneyFinishWithError(userId, info,
+                        USER_JOURNEY_GRANT_ADMIN, ERROR_CODE_USER_ALREADY_AN_ADMIN);
                 return;
             }
             info.flags ^= UserInfo.FLAG_ADMIN;
             writeUserLP(getUserDataLU(info.id));
         }
-        logGrantAdminJourneyFinish(sessionId, userId, info.userType, info.flags);
+        mUserJourneyLogger.logUserJourneyFinishWithError(userId, info,
+                USER_JOURNEY_GRANT_ADMIN, ERROR_CODE_UNSPECIFIED);
     }
 
     @Override
     public void revokeUserAdmin(@UserIdInt int userId) {
         checkManageUserAndAcrossUsersFullPermission("revoke admin privileges");
-        final long sessionId = logRevokeAdminJourneyBegin(userId);
+        mUserJourneyLogger.logUserJourneyBegin(userId, USER_JOURNEY_REVOKE_ADMIN);
         UserData user;
         synchronized (mPackagesLock) {
             synchronized (mUsersLock) {
                 user = getUserDataLU(userId);
-                if (user == null || !user.info.isAdmin()) {
-                    // Exit if no user found with that id, or the user is not an Admin.
-                    logUserJourneyError(sessionId, FrameworkStatsLog
-                                    .USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__REVOKE_ADMIN,
-                            userId);
+                if (user == null) {
+                    // Exit if no user found with that id
+                    mUserJourneyLogger.logNullUserJourneyError(
+                            USER_JOURNEY_REVOKE_ADMIN,
+                            getCurrentUserId(), userId, "", -1);
+                    return;
+                } else if (!user.info.isAdmin()) {
+                    // Exit if no user is not an Admin.
+                    mUserJourneyLogger.logUserJourneyFinishWithError(getCurrentUserId(), user.info,
+                            USER_JOURNEY_REVOKE_ADMIN, ERROR_CODE_USER_IS_NOT_AN_ADMIN);
                     return;
                 }
                 user.info.flags ^= UserInfo.FLAG_ADMIN;
                 writeUserLP(user);
             }
         }
-        logRevokeAdminJourneyFinish(sessionId, userId, user.info.userType, user.info.flags);
+        mUserJourneyLogger.logUserJourneyFinishWithError(userId, user.info,
+                USER_JOURNEY_REVOKE_ADMIN, ERROR_CODE_UNSPECIFIED);
     }
 
     /**
@@ -4717,16 +4738,20 @@ public class UserManagerService extends IUserManager.Stub {
         final int noneUserId = -1;
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
         t.traceBegin("createUser-" + flags);
-        final long sessionId = logUserCreateJourneyBegin(noneUserId);
+        mUserJourneyLogger.logUserJourneyBegin(noneUserId, USER_JOURNEY_USER_CREATE);
         UserInfo newUser = null;
         try {
             newUser = createUserInternalUncheckedNoTracing(name, userType, flags, parentId,
                         preCreate, disallowedPackages, t, token);
             return newUser;
         } finally {
-            logUserCreateJourneyFinish(sessionId,
-                    newUser != null ? newUser.id : noneUserId, userType, flags,
-                    newUser != null);
+            if (newUser != null) {
+                mUserJourneyLogger.logUserCreateJourneyFinish(getCurrentUserId(), newUser);
+            } else {
+                mUserJourneyLogger.logNullUserJourneyError(
+                        USER_JOURNEY_USER_CREATE,
+                        getCurrentUserId(), noneUserId, userType, flags);
+            }
             t.traceEnd();
         }
     }
@@ -5215,137 +5240,6 @@ public class UserManagerService extends IUserManager.Stub {
                 && !userTypeDetails.getName().equals(UserManager.USER_TYPE_FULL_RESTRICTED);
     }
 
-    private long logUserCreateJourneyBegin(@UserIdInt int userId) {
-        return logUserJourneyBegin(
-                FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_CREATE,
-                userId);
-    }
-
-    private void logUserCreateJourneyFinish(long sessionId, @UserIdInt int userId, String userType,
-            @UserInfoFlag int flags, boolean finish) {
-        logUserJourneyFinish(sessionId,
-                FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_CREATE,
-                userId, userType, flags, finish);
-    }
-
-    private long logUserRemoveJourneyBegin(@UserIdInt int userId) {
-        return logUserJourneyBegin(
-                FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_REMOVE,
-                userId);
-    }
-
-    private void logUserRemoveJourneyFinish(long sessionId, @UserIdInt int userId, String userType,
-            @UserInfoFlag int flags, boolean finish) {
-        logUserJourneyFinish(sessionId,
-                FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_REMOVE,
-                userId, userType, flags, finish);
-    }
-
-    private long logGrantAdminJourneyBegin(@UserIdInt int userId) {
-        return logUserJourneyBegin(
-                FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__GRANT_ADMIN,
-                userId);
-    }
-
-    private void logGrantAdminJourneyFinish(long sessionId, @UserIdInt int userId, String userType,
-            @UserInfoFlag int flags) {
-        logUserJourneyFinish(sessionId,
-                FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__GRANT_ADMIN,
-                userId, userType, flags, true);
-    }
-
-    private long logRevokeAdminJourneyBegin(@UserIdInt int userId) {
-        return logUserJourneyBegin(
-                FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__REVOKE_ADMIN,
-                userId);
-    }
-
-    private void logRevokeAdminJourneyFinish(long sessionId, @UserIdInt int userId, String userType,
-            @UserInfoFlag int flags) {
-        logUserJourneyFinish(sessionId,
-                FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__REVOKE_ADMIN,
-                userId, userType, flags, true);
-    }
-
-    private void logUserJourneyFinish(long sessionId, int journey, @UserIdInt int userId,
-            String userType, @UserInfoFlag int flags, boolean finish) {
-
-        // log the journey atom with the user metadata
-        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED, sessionId,
-                journey, /* origin_user= */ getCurrentUserId(), userId,
-                UserManager.getUserTypeForStatsd(userType), flags);
-
-        int event;
-        switch (journey) {
-            case FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_CREATE:
-                event = FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__CREATE_USER;
-                break;
-            case FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_REMOVE:
-                event = FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__REMOVE_USER;
-                break;
-            case FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__GRANT_ADMIN:
-                event = FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__GRANT_ADMIN;
-                break;
-            case FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__REVOKE_ADMIN:
-                event = FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__REVOKE_ADMIN;
-                break;
-            default:
-                throw new IllegalArgumentException("Journey " + journey + " not expected.");
-        }
-        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED, sessionId, userId,
-                event,
-                finish ? FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__FINISH
-                        : FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__NONE);
-    }
-
-    private long logUserJourneyBegin(int journey, @UserIdInt int userId) {
-        final long sessionId = ThreadLocalRandom.current().nextLong(1, Long.MAX_VALUE);
-
-        // log the event atom to indicate the event start
-        int event;
-        switch (journey) {
-            case FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_CREATE:
-                event = FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__CREATE_USER;
-                break;
-            case FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_REMOVE:
-                event = FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__REMOVE_USER;
-                break;
-            case FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__GRANT_ADMIN:
-                event = FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__GRANT_ADMIN;
-                break;
-            case FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__REVOKE_ADMIN:
-                event = FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__REVOKE_ADMIN;
-                break;
-            default:
-                throw new IllegalArgumentException("Journey " + journey + " not expected.");
-        }
-
-        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED, sessionId, userId,
-                event, FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__BEGIN);
-        return sessionId;
-    }
-
-    private void logUserJourneyError(long sessionId, int journey, @UserIdInt int userId) {
-
-        // log the journey atom with the user metadata
-        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED, sessionId,
-                journey, /* origin_user= */ getCurrentUserId(), userId);
-
-        int event;
-        switch (journey) {
-            case FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__GRANT_ADMIN:
-                event = FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__GRANT_ADMIN;
-                break;
-            case FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__REVOKE_ADMIN:
-                event = FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__REVOKE_ADMIN;
-                break;
-            default:
-                throw new IllegalArgumentException("Journey " + journey + " not expected.");
-        }
-        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED, sessionId, userId,
-                event, FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__ERROR);
-    }
-
     /** Register callbacks for statsd pulled atoms. */
     private void registerStatsCallbacks() {
         final StatsManager statsManager = mContext.getSystemService(StatsManager.class);
@@ -5369,7 +5263,8 @@ public class UserManagerService extends IUserManager.Stub {
             if (size > 1) {
                 for (int idx = 0; idx < size; idx++) {
                     final UserInfo user = users.get(idx);
-                    final int userTypeStandard = UserManager.getUserTypeForStatsd(user.userType);
+                    final int userTypeStandard = mUserJourneyLogger
+                            .getUserTypeForStatsd(user.userType);
                     final String userTypeCustom = (userTypeStandard == FrameworkStatsLog
                             .USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__TYPE_UNKNOWN)
                             ?
@@ -5637,7 +5532,7 @@ public class UserManagerService extends IUserManager.Stub {
                 writeUserLP(userData);
             }
 
-            final long sessionId = logUserRemoveJourneyBegin(userId);
+            mUserJourneyLogger.logUserJourneyBegin(userId, USER_JOURNEY_USER_REMOVE);
 
             try {
                 mAppOpsService.removeUser(userId);
@@ -5659,13 +5554,15 @@ public class UserManagerService extends IUserManager.Stub {
                             @Override
                             public void userStopped(int userIdParam) {
                                 finishRemoveUser(userIdParam);
-                                logUserRemoveJourneyFinish(sessionId, userIdParam,
-                                        userData.info.userType, userData.info.flags, true);
+                                mUserJourneyLogger.logUserJourneyFinishWithError(userIdParam,
+                                        userData.info, USER_JOURNEY_USER_REMOVE,
+                                        ERROR_CODE_UNSPECIFIED);
                             }
                             @Override
                             public void userStopAborted(int userIdParam) {
-                                logUserRemoveJourneyFinish(sessionId, userIdParam,
-                                        userData.info.userType, userData.info.flags, false);
+                                mUserJourneyLogger.logUserJourneyFinishWithError(userIdParam,
+                                        userData.info, USER_JOURNEY_USER_REMOVE,
+                                        ERROR_CODE_ABORTED);
                             }
                         });
             } catch (RemoteException e) {
@@ -7282,9 +7179,9 @@ public class UserManagerService extends IUserManager.Stub {
                 final UserInfo userInfo = getUserInfo(userIds[i]);
                 if (userInfo == null) {
                     // Not possible because the input user ids should all be valid
-                    userTypes[i] = UserManager.getUserTypeForStatsd("");
+                    userTypes[i] = mUserJourneyLogger.getUserTypeForStatsd("");
                 } else {
-                    userTypes[i] = UserManager.getUserTypeForStatsd(userInfo.userType);
+                    userTypes[i] = mUserJourneyLogger.getUserTypeForStatsd(userInfo.userType);
                 }
             }
             return userTypes;
@@ -7519,6 +7416,13 @@ public class UserManagerService extends IUserManager.Stub {
     public boolean canSwitchToHeadlessSystemUser() {
         return Resources.getSystem()
                 .getBoolean(R.bool.config_canSwitchToHeadlessSystemUser);
+    }
+
+    /**
+     * Returns instance of {@link com.android.server.pm.UserJourneyLogger}.
+     */
+    public UserJourneyLogger getUserJourneyLogger() {
+        return mUserJourneyLogger;
     }
 
 }
