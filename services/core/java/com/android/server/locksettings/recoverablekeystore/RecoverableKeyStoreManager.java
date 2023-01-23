@@ -965,6 +965,35 @@ public class RecoverableKeyStoreManager {
         }
     }
 
+    /**
+     * Starts a session to verify lock screen credentials provided by a remote device.
+     */
+    public void startRemoteLockscreenValidation() {
+        checkVerifyRemoteLockscreenPermission();
+        // TODO(b/254335492): Create session in memory
+        return;
+    }
+
+    /**
+     * Verifies encrypted credentials guess from a remote device.
+     */
+    public void validateRemoteLockscreen(@NonNull byte[] encryptedCredential) {
+        checkVerifyRemoteLockscreenPermission();
+        // TODO(b/254335492): Decrypt and verify credentials
+        return;
+    }
+
+    private void checkVerifyRemoteLockscreenPermission() {
+        // TODO(b/254335492): Check new system permission
+        mContext.enforceCallingOrSelfPermission(
+                Manifest.permission.RECOVER_KEYSTORE,
+                "Caller " + Binder.getCallingUid()
+                        + " doesn't have verifyRemoteLockscreen permission.");
+        int userId = UserHandle.getCallingUserId();
+        int uid = Binder.getCallingUid();
+        mCleanupManager.registerRecoveryAgent(userId, uid);
+    }
+
     private void checkRecoverKeyStorePermission() {
         mContext.enforceCallingOrSelfPermission(
                 Manifest.permission.RECOVER_KEYSTORE,
