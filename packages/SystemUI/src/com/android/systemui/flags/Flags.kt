@@ -65,8 +65,7 @@ object Flags {
     val FSI_ON_DND_UPDATE = unreleasedFlag(259130119, "fsi_on_dnd_update", teamfood = true)
 
     // TODO(b/265804648): Tracking Bug
-    @JvmField
-    val DISABLE_FSI = unreleasedFlag(265804648, "disable_fsi")
+    @JvmField val DISABLE_FSI = unreleasedFlag(265804648, "disable_fsi")
 
     // TODO(b/254512538): Tracking Bug
     val INSTANT_VOICE_REPLY = unreleasedFlag(111, "instant_voice_reply", teamfood = true)
@@ -225,7 +224,6 @@ object Flags {
     // TODO(b/254513100): Tracking Bug
     val SMARTSPACE_SHARED_ELEMENT_TRANSITION_ENABLED =
         releasedFlag(401, "smartspace_shared_element_transition_enabled")
-    val SMARTSPACE = resourceBooleanFlag(402, R.bool.flag_smartspace, "smartspace")
 
     // TODO(b/258517050): Clean up after the feature is launched.
     @JvmField
@@ -554,6 +552,5 @@ object Flags {
 
     // 2600 - keyboard shortcut
     // TODO(b/259352579): Tracking Bug
-    @JvmField
-    val SHORTCUT_LIST_SEARCH_LAYOUT = unreleasedFlag(2600, "shortcut_list_search_layout")
+    @JvmField val SHORTCUT_LIST_SEARCH_LAYOUT = unreleasedFlag(2600, "shortcut_list_search_layout")
 }

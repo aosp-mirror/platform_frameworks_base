@@ -33,8 +33,6 @@
     <!-- Whether to show chipbar UI whenever the device is unlocked by ActiveUnlock. -->
     <bool name="flag_active_unlock_chipbar">true</bool>
 
-    <bool name="flag_smartspace">false</bool>
-
     <!--  Whether the user switcher chip shows in the status bar. When true, the multi user
       avatar will no longer show on the lockscreen -->
     <bool name="flag_user_switcher_chip">false</bool>
