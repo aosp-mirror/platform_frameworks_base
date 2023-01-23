@@ -56,7 +56,6 @@ constructor(
     private val uiEventLogger: MediaTttSenderUiEventLogger,
 ) : CoreStartable, Dumpable {
 
-    private var displayedState: ChipStateSender? = null
     // A map to store current chip state per id.
     private var stateMap: MutableMap<String, ChipStateSender> = mutableMapOf()
 
@@ -96,11 +95,11 @@ constructor(
             return
         }
 
-        val currentState = stateMap[routeInfo.id]
-        if (!ChipStateSender.isValidStateTransition(currentState, chipState)) {
+        val currentStateForId: ChipStateSender? = stateMap[routeInfo.id]
+        if (!ChipStateSender.isValidStateTransition(currentStateForId, chipState)) {
             // ChipStateSender.FAR_FROM_RECEIVER is the default state when there is no state.
             logger.logInvalidStateTransitionError(
-                currentState = currentState?.name ?: ChipStateSender.FAR_FROM_RECEIVER.name,
+                currentState = currentStateForId?.name ?: ChipStateSender.FAR_FROM_RECEIVER.name,
                 chipState.name
             )
             return
@@ -108,31 +107,29 @@ constructor(
         uiEventLogger.logSenderStateChange(chipState)
 
         if (chipState == ChipStateSender.FAR_FROM_RECEIVER) {
-            // Return early if we're not displaying a chip anyway
-            val currentDisplayedState = displayedState ?: return
+            // Return early if we're not displaying a chip for this ID anyway
+            if (currentStateForId == null) return
 
             val removalReason = ChipStateSender.FAR_FROM_RECEIVER.name
             if (
-                currentDisplayedState.transferStatus == TransferStatus.IN_PROGRESS ||
-                    currentDisplayedState.transferStatus == TransferStatus.SUCCEEDED
+                currentStateForId.transferStatus == TransferStatus.IN_PROGRESS ||
+                    currentStateForId.transferStatus == TransferStatus.SUCCEEDED
             ) {
                 // Don't remove the chip if we're in progress or succeeded, since the user should
                 // still be able to see the status of the transfer.
                 logger.logRemovalBypass(
                     removalReason,
-                    bypassReason = "transferStatus=${currentDisplayedState.transferStatus.name}"
+                    bypassReason = "transferStatus=${currentStateForId.transferStatus.name}"
                 )
                 return
             }
 
             // No need to store the state since it is the default state
             removeIdFromStore(routeInfo.id, reason = removalReason)
-            displayedState = null
             chipbarCoordinator.removeView(routeInfo.id, removalReason)
         } else {
             stateMap[routeInfo.id] = chipState
             logger.logStateMap(stateMap)
-            displayedState = chipState
             chipbarCoordinator.registerListener(displayListener)
             chipbarCoordinator.displayView(
                 createChipbarInfo(

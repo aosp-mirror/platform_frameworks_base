@@ -1193,6 +1193,168 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         verify(logger).logStateMapRemoval("route1", "reason")
     }
 
+    /** Regression test for b/266218672. */
+    @Test
+    fun twoIdsDisplayed_oldIdIsFar_viewStillDisplayed() {
+        // WHEN there are two different media transfers with different IDs
+        val route1 =
+            MediaRoute2Info.Builder("route1", OTHER_DEVICE_NAME)
+                .addFeature("feature")
+                .setClientPackageName(PACKAGE_NAME)
+                .build()
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST,
+            route1,
+            null,
+        )
+        verify(windowManager).addView(any(), any())
+        reset(windowManager)
+
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
+            MediaRoute2Info.Builder("route2", "Route 2 name")
+                .addFeature("feature")
+                .setClientPackageName(PACKAGE_NAME)
+                .build(),
+            null,
+        )
+        val newView = getChipbarView()
+
+        // WHEN there's a FAR event for the earlier one
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
+            route1,
+            null,
+        )
+
+        // THEN it's ignored and the more recent one is still displayed
+        assertThat(newView.getChipText())
+            .isEqualTo(
+                ChipStateSender.ALMOST_CLOSE_TO_START_CAST.getExpectedStateText("Route 2 name")
+            )
+    }
+
+    /** Regression test for b/266218672. */
+    @Test
+    fun receiverSucceededThenTimedOut_internalStateResetAndCanDisplayAlmostCloseToEnd() {
+        displayReceiverTriggered()
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
+            routeInfo,
+            null,
+        )
+
+        fakeClock.advanceTime(TIMEOUT + 1L)
+        verify(windowManager).removeView(any())
+
+        reset(windowManager)
+
+        // WHEN we try to show ALMOST_CLOSE_TO_END
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST,
+            routeInfo,
+            null,
+        )
+
+        // THEN it succeeds
+        val chipbarView = getChipbarView()
+        assertThat(chipbarView.getChipText())
+            .isEqualTo(ChipStateSender.ALMOST_CLOSE_TO_END_CAST.getExpectedStateText())
+    }
+
+    /** Regression test for b/266218672. */
+    @Test
+    fun receiverSucceededThenTimedOut_internalStateResetAndCanDisplayReceiverTriggered() {
+        displayReceiverTriggered()
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
+            routeInfo,
+            null,
+        )
+
+        fakeClock.advanceTime(TIMEOUT + 1L)
+        verify(windowManager).removeView(any())
+
+        reset(windowManager)
+
+        // WHEN we try to show RECEIVER_TRIGGERED
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED,
+            routeInfo,
+            null,
+        )
+
+        // THEN it succeeds
+        val chipbarView = getChipbarView()
+        assertThat(chipbarView.getChipText())
+            .isEqualTo(ChipStateSender.TRANSFER_TO_RECEIVER_TRIGGERED.getExpectedStateText())
+        assertThat(chipbarView.getLoadingIcon().visibility).isEqualTo(View.VISIBLE)
+    }
+
+    /** Regression test for b/266218672. */
+    @Test
+    fun toThisDeviceSucceededThenTimedOut_internalStateResetAndCanDisplayAlmostCloseToStart() {
+        displayThisDeviceTriggered()
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
+            routeInfo,
+            null,
+        )
+
+        fakeClock.advanceTime(TIMEOUT + 1L)
+        verify(windowManager).removeView(any())
+
+        reset(windowManager)
+
+        // WHEN we try to show ALMOST_CLOSE_TO_START
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
+            routeInfo,
+            null,
+        )
+
+        // THEN it succeeds
+        val chipbarView = getChipbarView()
+        assertThat(chipbarView.getChipText())
+            .isEqualTo(ChipStateSender.ALMOST_CLOSE_TO_START_CAST.getExpectedStateText())
+    }
+
+    /** Regression test for b/266218672. */
+    @Test
+    fun toThisDeviceSucceededThenTimedOut_internalStateResetAndCanDisplayThisDeviceTriggered() {
+        displayThisDeviceTriggered()
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
+            routeInfo,
+            null,
+        )
+
+        fakeClock.advanceTime(TIMEOUT + 1L)
+        verify(windowManager).removeView(any())
+
+        reset(windowManager)
+
+        // WHEN we try to show THIS_DEVICE_TRIGGERED
+        val newRouteInfo =
+            MediaRoute2Info.Builder(DEFAULT_ID, "New Name")
+                .addFeature("feature")
+                .setClientPackageName(PACKAGE_NAME)
+                .build()
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED,
+            newRouteInfo,
+            null,
+        )
+
+        // THEN it succeeds
+        val chipbarView = getChipbarView()
+        assertThat(chipbarView.getChipText())
+            .isEqualTo(
+                ChipStateSender.TRANSFER_TO_THIS_DEVICE_TRIGGERED.getExpectedStateText("New Name")
+            )
+        assertThat(chipbarView.getLoadingIcon().visibility).isEqualTo(View.VISIBLE)
+    }
+
     private fun getChipbarView(): ViewGroup {
         val viewCaptor = ArgumentCaptor.forClass(View::class.java)
         verify(windowManager).addView(viewCaptor.capture(), any())
