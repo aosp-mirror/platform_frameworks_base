@@ -1839,7 +1839,7 @@ public class OomAdjuster {
                     // For short FGS.
                     adjType = "fg-service-short";
                     // We use MEDIUM_APP_ADJ + 1 so we can tell apart EJ
-                    // (which uses MEDIUM_APP_ADJ + 1)
+                    // (which uses MEDIUM_APP_ADJ + 2)
                     // from short-FGS.
                     // (We use +1 and +2, not +0 and +1, to be consistent with the following
                     // RECENT_FOREGROUND_APP_ADJ tweak)
@@ -2254,6 +2254,14 @@ public class OomAdjuster {
                                         && adj >= (lbAdj = PERCEPTIBLE_LOW_APP_ADJ)) {
                                     newAdj = PERCEPTIBLE_LOW_APP_ADJ;
                                 } else if ((cr.flags & Context.BIND_ALMOST_PERCEPTIBLE) != 0
+                                        && (cr.flags & Context.BIND_NOT_FOREGROUND) == 0
+                                        && clientAdj < PERCEPTIBLE_APP_ADJ
+                                        && adj >= (lbAdj = PERCEPTIBLE_APP_ADJ)) {
+                                    // This is for user-initiated jobs.
+                                    // We use APP_ADJ + 1 here, so we can tell them apart from FGS.
+                                    newAdj = PERCEPTIBLE_APP_ADJ + 1;
+                                } else if ((cr.flags & Context.BIND_ALMOST_PERCEPTIBLE) != 0
+                                        && (cr.flags & Context.BIND_NOT_FOREGROUND) != 0
                                         && clientAdj < PERCEPTIBLE_APP_ADJ
                                         && adj >= (lbAdj = (PERCEPTIBLE_MEDIUM_APP_ADJ + 2))) {
                                     // This is for expedited jobs.
