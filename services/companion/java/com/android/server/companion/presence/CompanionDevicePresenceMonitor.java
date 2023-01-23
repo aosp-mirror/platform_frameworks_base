@@ -164,6 +164,12 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
 
     @Override
     public void onBluetoothCompanionDeviceDisconnected(int associationId) {
+        // If disconnected device is also a BLE device, skip the 2-minute timer and mark it as gone.
+        boolean isConnectableBleDevice = mNearbyBleDevices.remove(associationId);
+        if (DEBUG && isConnectableBleDevice) {
+            Log.d(TAG, "Bluetooth device disconnect was detected."
+                    + " Pre-emptively marking the BLE device as lost.");
+        }
         onDeviceGone(mConnectedBtDevices, associationId, /* sourceLoggingTag */ "bt");
     }
 
