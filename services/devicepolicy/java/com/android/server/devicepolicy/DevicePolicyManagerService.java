@@ -740,6 +740,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final String KEEP_PROFILES_RUNNING_FLAG = "enable_keep_profiles_running";
     private static final boolean DEFAULT_KEEP_PROFILES_RUNNING_FLAG = false;
 
+    private static final String ENABLE_WORK_PROFILE_TELEPHONY_FLAG =
+            "enable_work_profile_telephony";
+    private static final boolean DEFAULT_WORK_PROFILE_TELEPHONY_FLAG = false;
+
     // TODO(b/261999445) remove the flag after rollout.
     private static final String HEADLESS_FLAG = "headless";
     private static final boolean DEFAULT_HEADLESS_FLAG = true;
@@ -3100,7 +3104,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 onLockSettingsReady();
                 loadAdminDataAsync();
                 mOwners.systemReady();
-                applyManagedSubscriptionsPolicyIfRequired();
+                if (isWorkProfileTelephonyFlagEnabled()) {
+                    applyManagedSubscriptionsPolicyIfRequired();
+                }
                 break;
             case SystemService.PHASE_ACTIVITY_MANAGER_READY:
                 synchronized (getLockObject()) {
@@ -7014,8 +7020,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         mLockSettingsInternal.refreshStrongAuthTimeout(parentId);
 
-        clearManagedSubscriptionsPolicy();
-
+        if (isWorkProfileTelephonyFlagEnabled()) {
+            clearManagedSubscriptionsPolicy();
+        }
         Slogf.i(LOG_TAG, "Cleaning up device-wide policies done.");
     }
 
@@ -10128,6 +10135,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             synchronized (mSubscriptionsChangedListenerLock) {
                 pw.println("Subscription changed listener : " + mSubscriptionsChangedListener);
             }
+            pw.println(
+                    "Flag enable_work_profile_telephony : " + isWorkProfileTelephonyFlagEnabled());
+
             mHandler.post(() -> handleDump(pw));
             dumpResources(pw);
         }
@@ -20100,6 +20110,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 DEFAULT_KEEP_PROFILES_RUNNING_FLAG);
     }
 
+    private static boolean isWorkProfileTelephonyFlagEnabled() {
+        return DeviceConfig.getBoolean(
+                NAMESPACE_DEVICE_POLICY_MANAGER,
+                ENABLE_WORK_PROFILE_TELEPHONY_FLAG,
+                DEFAULT_WORK_PROFILE_TELEPHONY_FLAG);
+    }
+
     @Override
     public void setMtePolicy(int flags) {
         final Set<Integer> allowedModes =
@@ -20180,10 +20197,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public ManagedSubscriptionsPolicy getManagedSubscriptionsPolicy() {
-        synchronized (getLockObject()) {
-            ActiveAdmin admin = getProfileOwnerOfOrganizationOwnedDeviceLocked();
-            if (admin != null && admin.mManagedSubscriptionsPolicy != null) {
-                return admin.mManagedSubscriptionsPolicy;
+        if (isWorkProfileTelephonyFlagEnabled()) {
+            synchronized (getLockObject()) {
+                ActiveAdmin admin = getProfileOwnerOfOrganizationOwnedDeviceLocked();
+                if (admin != null && admin.mManagedSubscriptionsPolicy != null) {
+                    return admin.mManagedSubscriptionsPolicy;
+                }
             }
         }
         return new ManagedSubscriptionsPolicy(
@@ -20192,9 +20211,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void setManagedSubscriptionsPolicy(ManagedSubscriptionsPolicy policy) {
+        if (!isWorkProfileTelephonyFlagEnabled()) {
+            throw new UnsupportedOperationException("This api is not enabled");
+        }
         CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(isProfileOwnerOfOrganizationOwnedDevice(caller),
-                "This policy can only be set by a profile owner on an organization-owned device.");
+                "This policy can only be set by a profile owner on an organization-owned "
+                        + "device.");
 
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getProfileOwnerLocked(caller.getUserId());
