@@ -4559,7 +4559,7 @@ public final class ActivityThread extends ClientTransactionHandler
                     ActivityManager.getService());
             if (!service.isUiContext()) { // WindowProviderService is a UI Context.
                 VirtualDeviceManager vdm = context.getSystemService(VirtualDeviceManager.class);
-                if (mLastReportedDeviceId == Context.DEVICE_ID_DEFAULT
+                if (mLastReportedDeviceId == VirtualDeviceManager.DEVICE_ID_DEFAULT
                         || vdm.isValidVirtualDeviceId(mLastReportedDeviceId)) {
                     service.updateDeviceId(mLastReportedDeviceId);
                 }
@@ -6087,7 +6087,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
     private void updateDeviceIdForNonUIContexts(int deviceId) {
         // Invalid device id is treated as a no-op.
-        if (deviceId == Context.DEVICE_ID_INVALID) {
+        if (deviceId == VirtualDeviceManager.DEVICE_ID_INVALID) {
             return;
         }
         if (deviceId == mLastReportedDeviceId) {
