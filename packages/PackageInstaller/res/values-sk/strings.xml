@@ -26,10 +26,8 @@
     <string name="install_done" msgid="5987363587661783896">"Aplikácia bola nainštalovaná."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Chcete túto aplikáciu nainštalovať?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Chcete túto aplikáciu aktualizovať?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_changed" msgid="4215696609006069124">"Aktualizácie tejto aplikácie momentálne spravuje vlastník <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g>.\n\nPo aktualizovaní budete namiesto toho získavať budúce aplikácie od vlastníka <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g>."</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="8778026710268011466">"Aktualizácie tejto aplikácie momentálne spravuje vlastník <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g>.\n\nChcete túto aktualizáciu nainštalovať od vlastníka <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g>?"</string>
     <string name="install_failed" msgid="5777824004474125469">"Aplikácia nebola nainštalovaná."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Inštalácia balíka bola zablokovaná."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Aplikácia sa nenainštalovala, pretože balík je v konflikte s existujúcim balíkom."</string>

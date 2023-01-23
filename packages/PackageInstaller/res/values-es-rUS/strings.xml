@@ -26,10 +26,8 @@
     <string name="install_done" msgid="5987363587661783896">"Se instaló la app."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"¿Deseas instalar esta app?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"¿Deseas actualizar esta app?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_changed" msgid="4215696609006069124">"En este momento, las actualizaciones de esta app están administradas por <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g>.\n\nSi continúas con la actualización, recibirás actualizaciones futuras de <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g>."</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="8778026710268011466">"En este momento, las actualizaciones de esta app están administradas por <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g>.\n\n¿Quieres instalar esta actualización de <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g>?"</string>
     <string name="install_failed" msgid="5777824004474125469">"No se instaló la app."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Se bloqueó el paquete para impedir la instalación."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"No se instaló la app debido a un conflicto con un paquete."</string>

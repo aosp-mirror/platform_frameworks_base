@@ -26,10 +26,8 @@
     <string name="install_done" msgid="5987363587661783896">"Imesakinisha programu."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Ungependa kusakinisha programu hii?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Ungependa kusasisha programu hii?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_changed" msgid="4215696609006069124">"Masasisho ya programu hii kwa sasa yanadhibitiwa na <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g>.\n\nKwa kusasisha, utapata masasisho yajayo kutoka kwa <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g> badala yake."</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="8778026710268011466">"Masasisho ya programu hii kwa sasa yanasimamiwa na <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g>\n\nJe, ungependa kusakinisha sasisho hili kutoka kwa <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g>."</string>
     <string name="install_failed" msgid="5777824004474125469">"Imeshindwa kusakinisha programu."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Kifurushi kimezuiwa kisisakinishwe."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Programu haikusakinishwa kwa sababu kifurushi kinakinzana na kifurushi kingine kilichopo."</string>

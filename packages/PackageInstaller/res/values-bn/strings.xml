@@ -26,10 +26,8 @@
     <string name="install_done" msgid="5987363587661783896">"অ্যাপটি ইনস্টল করা হয়ে গেছে।"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"আপনি কি এই অ্যাপটি ইনস্টল করতে চান?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"আপনি কি এই অ্যাপটি আপডেট করতে চান?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_changed" msgid="4215696609006069124">"এই অ্যাপের আপডেট বর্তমানে <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g> ম্যানেজ করছেন।\n\nআপডেট করা হলে, আপনি পরিবর্তে <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g>-এর থেকে ভবিষ্যতের আপডেট পাবেন।"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="8778026710268011466">"বর্তমানে <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g> এই অ্যাপের আপডেট ম্যানেজ করছেন।\n\n<xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g> থেকে আসা এই আপডেট ইনস্টল করতে চান।"</string>
     <string name="install_failed" msgid="5777824004474125469">"অ্যাপটি ইনস্টল করা হয়নি।"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ইনস্টল হওয়া থেকে প্যাকেজটিকে ব্লক করা হয়েছে।"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"আগে থেকেই থাকা একটি প্যাকেজের সাথে প্যাকেজটির সমস্যা সৃষ্টি হওয়ায় অ্যাপটি ইনস্টল করা যায়নি।"</string>
