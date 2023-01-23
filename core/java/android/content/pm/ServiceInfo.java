@@ -388,7 +388,7 @@ public class ServiceInfo extends ComponentInfo
      *
      * <ul>
      *     <li>
-     *         The type has a 1 minute timeout.
+     *         The type has a 3 minute timeout.
      *         A foreground service of this type must be stopped within the timeout by
      *         {@link android.app.Service#stopSelf),
      *         or {@link android.content.Context#stopService).
