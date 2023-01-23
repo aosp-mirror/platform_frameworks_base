@@ -30,6 +30,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
+import android.view.View.ACCESSIBILITY_LIVE_REGION_ASSERTIVE
 import com.android.internal.widget.CachingIconView
 import com.android.systemui.R
 import com.android.systemui.common.shared.model.ContentDescription
@@ -198,6 +199,7 @@ open class MediaTttChipControllerReceiver @Inject constructor(
 
         val iconView = currentView.getAppIconView()
         iconView.setPadding(iconPadding, iconPadding, iconPadding, iconPadding)
+        iconView.accessibilityLiveRegion = ACCESSIBILITY_LIVE_REGION_ASSERTIVE
         TintedIconViewBinder.bind(iconInfo.toTintedIcon(), iconView)
     }
 
@@ -207,8 +209,6 @@ open class MediaTttChipControllerReceiver @Inject constructor(
         val rippleView: ReceiverChipRippleView = view.requireViewById(R.id.ripple)
         animateViewTranslationAndFade(appIconView, -1 * getTranslationAmount(), 1f)
         animateViewTranslationAndFade(iconRippleView, -1 * getTranslationAmount(), 1f)
-        // Using withEndAction{} doesn't apply a11y focus when screen is unlocked.
-        appIconView.postOnAnimation { view.requestAccessibilityFocus() }
         rippleController.expandToInProgressState(rippleView, iconRippleView)
     }
 
