@@ -5,10 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"გაუქმება"</string>
     <string name="string_continue" msgid="1346732695941131882">"გაგრძელება"</string>
     <string name="string_more_options" msgid="7990658711962795124">"სხვა ვარიანტები"</string>
+    <string name="string_learn_more" msgid="4541600451688392447">"შეიტყვეთ მეტი"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"უფრო უსაფრთხოა წვდომის გასაღების შემთხვევაში"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"წვდომის გასაღებების დახმარებით აღარ მოგიწევთ რთული პაროლების შექმნა და დამახსოვრება"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"წვდომის გასაღებები დაშიფრული ციფრული გასაღებებია, რომლებსაც თქვენი თითის ანაბეჭდით, სახით ან ეკრანის დაბლოკვით ქმნით"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"ისინი შეინახება პაროლების მმართველში, რათა სხვა მოწყობილობებიდან შესვლაც შეძლოთ"</string>
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"დამატებითი ინფორმაცია წვდომის გასაღებების შესახებ"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"უპაროლო ტექნოლოგია"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"წვდომის გასაღებები საშუალებას გაძლევთ, სისტემაში შეხვიდეთ პაროლის გარეშე. უბრალოდ, ვინაობის დასადასტურებლად და წვდომის გასაღების შესაქმნელად უნდა გამოიყენოთ თითის ანაბეჭდი, სახით ამოცნობა, PIN-კოდი, ან განბლოკვის გრაფიკული გასაღები."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"საჯარო გასაღების კრიპტოგრაფია"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"FIDO-ს ალიანსისა (Google, Apple, Microsoft და ა.შ.) და W3C-ის სტანდარტების შესაბამისად, წვდომის გასაღებები იყენებს კრიპტოგრაფიულ გასაღებების წყვილს. მომხ. სახ. და სიმბ. სტრიქ. განსხვავებით, რომელთაც პაროლ. ვიყენებთ, რამდენიმე პირადი/საჯარო გას. იქმნება აპის ან ვებსაიტისთვის. პირადი გასაღები უსაფრთხოდ ინახება მოწყობილობაზე ან პაროლ. მმართველში და ის ადასტურებს თქვენს ვინაობას. საჯარო გას. ზიარდება აპისა და ვებ. სერვერის მეშვეობით. შესაბ. გასაღებებით შეგიძლიათ მაშინვე დარეგისტ. და სისტ. შეხვიდეთ."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"ანგარიშის გაუმჯობესებული უსაფრთხოება"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"თითოეული გასაღები დაკავშირებულია მხოლოდ აპთან ან ვებსაიტთან, რომელთათვისაც ის შეიქმნა, ამიტომაც შემთხვევით ვერასდროს შეხვალთ თაღლითურ აპში თუ ვებსაიტზე. ამასთანავე, სერვერები ინახავს მხოლოდ საჯარო გასაღებებს, რაც ართულებს გატეხვის ალბათობას."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"დაუბრკოლებელი გადასვლა"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"უპაროლო მომავალში პაროლები კვლავ ხელმისაწვდომი იქნება, წვდომის გასაღებებთან ერთად."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"აირჩიეთ სად შეინახოთ თქვენი <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"აირჩიეთ პაროლების მმართველი თქვენი ინფორმაციის შესანახად, რომ მომავალში უფრო სწრაფად შეხვიდეთ."</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"შექმნით წვდომის გასაღებს <xliff:g id="APPNAME">%1$s</xliff:g> აპისთვის?"</string>
