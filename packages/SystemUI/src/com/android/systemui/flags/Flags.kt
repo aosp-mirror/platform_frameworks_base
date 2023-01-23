@@ -354,6 +354,9 @@ object Flags {
     val MEDIA_TAP_TO_TRANSFER_DISMISS_GESTURE =
         unreleasedFlag(912, "media_ttt_dismiss_gesture", teamfood = true)
 
+    // TODO(b/266157412): Tracking Bug
+    val MEDIA_RETAIN_SESSIONS = unreleasedFlag(913, "media_retain_sessions")
+
     // 1000 - dock
     val SIMULATE_DOCK_THROUGH_CHARGING = releasedFlag(1000, "simulate_dock_through_charging")
 
