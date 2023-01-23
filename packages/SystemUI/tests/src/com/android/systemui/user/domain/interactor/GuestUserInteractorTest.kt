@@ -204,10 +204,12 @@ class GuestUserInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `exit - last non-guest was removed - returns to system`() =
+    fun `exit - last non-guest was removed - returns to main user`() =
         runBlocking(IMMEDIATE) {
             val removedUserId = 310
+            val mainUserId = 10
             repository.lastSelectedNonGuestUserId = removedUserId
+            repository.mainUserId = mainUserId
             repository.setSelectedUserInfo(GUEST_USER_INFO)
 
             underTest.exit(
@@ -221,7 +223,7 @@ class GuestUserInteractorTest : SysuiTestCase() {
 
             verify(manager, never()).markGuestForDeletion(anyInt())
             verify(manager, never()).removeUser(anyInt())
-            verify(switchUser).invoke(UserHandle.USER_SYSTEM)
+            verify(switchUser).invoke(mainUserId)
         }
 
     @Test

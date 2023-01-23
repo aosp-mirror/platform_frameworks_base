@@ -76,6 +76,9 @@ interface UserRepository {
     /** Whether user switching is currently in progress. */
     val userSwitchingInProgress: Flow<Boolean>
 
+    /** User ID of the main user. */
+    val mainUserId: Int
+
     /** User ID of the last non-guest selected user. */
     val lastSelectedNonGuestUserId: Int
 
@@ -130,7 +133,9 @@ constructor(
     private val _selectedUserInfo = MutableStateFlow<UserInfo?>(null)
     override val selectedUserInfo: Flow<UserInfo> = _selectedUserInfo.filterNotNull()
 
-    override var lastSelectedNonGuestUserId: Int = UserHandle.USER_SYSTEM
+    override var mainUserId: Int = UserHandle.USER_NULL
+        private set
+    override var lastSelectedNonGuestUserId: Int = UserHandle.USER_NULL
         private set
 
     override val isGuestUserAutoCreated: Boolean =
@@ -171,6 +176,11 @@ constructor(
                         .sortedBy { it.creationTime }
                         // The guest user is always last, regardless of creation time.
                         .sortedBy { it.isGuest }
+            }
+
+            if (mainUserId == UserHandle.USER_NULL) {
+                val mainUser = withContext(backgroundDispatcher) { manager.mainUser }
+                mainUser?.let { mainUserId = it.identifier }
             }
         }
     }

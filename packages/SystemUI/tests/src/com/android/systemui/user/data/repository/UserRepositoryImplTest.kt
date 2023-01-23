@@ -128,6 +128,11 @@ class UserRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun refreshUsers() = runSelfCancelingTest {
+        val mainUserId = 10
+        val mainUser = mock(UserHandle::class.java)
+        whenever(manager.mainUser).thenReturn(mainUser)
+        whenever(mainUser.identifier).thenReturn(mainUserId)
+
         underTest = create(this)
         val initialExpectedValue =
             setUpUsers(
@@ -166,6 +171,7 @@ class UserRepositoryImplTest : SysuiTestCase() {
         assertThat(selectedUserInfo).isEqualTo(thirdExpectedValue[1])
         assertThat(selectedUserInfo?.isGuest).isTrue()
         assertThat(underTest.lastSelectedNonGuestUserId).isEqualTo(selectedNonGuestUserId)
+        assertThat(underTest.mainUserId).isEqualTo(mainUserId)
     }
 
     @Test
