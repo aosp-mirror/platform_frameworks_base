@@ -103,6 +103,7 @@ import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.ResumeActivityItem;
 import android.companion.virtual.VirtualDeviceManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -1228,7 +1229,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
     int getDeviceIdForDisplayId(int displayId) {
         if (displayId == DEFAULT_DISPLAY || displayId == INVALID_DISPLAY)  {
-            return VirtualDeviceManager.DEVICE_ID_DEFAULT;
+            return Context.DEVICE_ID_DEFAULT;
         }
         if (mVirtualDeviceManager == null) {
             mVirtualDeviceManager =

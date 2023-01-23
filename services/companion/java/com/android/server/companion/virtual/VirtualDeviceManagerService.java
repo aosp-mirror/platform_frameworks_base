@@ -85,7 +85,7 @@ public class VirtualDeviceManagerService extends SystemService {
     private final PendingTrampolineMap mPendingTrampolines = new PendingTrampolineMap(mHandler);
 
     private static AtomicInteger sNextUniqueIndex = new AtomicInteger(
-            VirtualDeviceManager.DEVICE_ID_DEFAULT + 1);
+            Context.DEVICE_ID_DEFAULT + 1);
 
     /**
      * Mapping from device IDs to virtual devices.
@@ -332,7 +332,7 @@ public class VirtualDeviceManagerService extends SystemService {
         @Override // Binder call
         public int getDeviceIdForDisplayId(int displayId) {
             if (displayId == Display.INVALID_DISPLAY || displayId == Display.DEFAULT_DISPLAY) {
-                return VirtualDeviceManager.DEVICE_ID_DEFAULT;
+                return Context.DEVICE_ID_DEFAULT;
             }
             synchronized (mVirtualDeviceManagerLock) {
                 for (int i = 0; i < mVirtualDevices.size(); i++) {
@@ -342,7 +342,7 @@ public class VirtualDeviceManagerService extends SystemService {
                     }
                 }
             }
-            return VirtualDeviceManager.DEVICE_ID_DEFAULT;
+            return Context.DEVICE_ID_DEFAULT;
         }
 
         // Binder call
