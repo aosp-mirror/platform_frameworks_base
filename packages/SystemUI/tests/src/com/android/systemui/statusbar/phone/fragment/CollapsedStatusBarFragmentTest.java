@@ -58,7 +58,6 @@ import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DisableFlagsLogger;
 import com.android.systemui.statusbar.OperatorNameViewController;
-import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
@@ -92,7 +91,6 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     private StatusBarLocationPublisher mLocationPublisher;
     // Set in instantiate()
     private StatusBarIconController mStatusBarIconController;
-    private NetworkController mNetworkController;
     private KeyguardStateController mKeyguardStateController;
 
     private final CommandQueue mCommandQueue = mock(CommandQueue.class);
@@ -424,7 +422,6 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         mAnimationScheduler = mock(SystemStatusAnimationScheduler.class);
         mLocationPublisher = mock(StatusBarLocationPublisher.class);
         mStatusBarIconController = mock(StatusBarIconController.class);
-        mNetworkController = mock(NetworkController.class);
         mStatusBarStateController = mock(StatusBarStateController.class);
         mKeyguardStateController = mock(KeyguardStateController.class);
         mOperatorNameViewController = mock(OperatorNameViewController.class);
@@ -448,7 +445,6 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mStatusBarHideIconsForBouncerManager,
                 mKeyguardStateController,
                 mNotificationPanelViewController,
-                mNetworkController,
                 mStatusBarStateController,
                 mCommandQueue,
                 mCarrierConfigTracker,
