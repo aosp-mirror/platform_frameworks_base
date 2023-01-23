@@ -183,7 +183,7 @@
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Колдонуучу: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Айрым демейки параметрлер туураланды"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Демейки маанилер коюлган жок"</string>
-    <string name="tts_settings" msgid="8130616705989351312">"Кеп синтезаторунун жөндөөлөрү"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"Кеп синтезаторунун параметрлери"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Кеп синтезатору"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Кеп ылдамдыгы"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Текст айтылчу ылдамдык"</string>
@@ -229,9 +229,9 @@
     <string name="development_settings_enable" msgid="4285094651288242183">"Иштеп чыгуучунун параметрлерин иштетүү"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Колдонмо өндүрүү мүмкүнчүлүктөрүн орнотуу"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"Бул колдонуучуга өнүктүүрүүчү мүмкүнчүлүктөрү берилген эмес."</string>
-    <string name="vpn_settings_not_available" msgid="2894137119965668920">"Бул колдонуучу VPN жөндөөлөрүн колдоно албайт"</string>
-    <string name="tethering_settings_not_available" msgid="266821736434699780">"Бул колдонуучу модем режиминин жөндөөлөрүн өзгөртө албайт"</string>
-    <string name="apn_settings_not_available" msgid="1147111671403342300">"Бул колдонуучу мүмкүндүк алуу түйүнүнүн аталышынын жөндөөлөрүн колдоно албайт"</string>
+    <string name="vpn_settings_not_available" msgid="2894137119965668920">"Бул колдонуучу VPN параметрлерин колдоно албайт"</string>
+    <string name="tethering_settings_not_available" msgid="266821736434699780">"Бул колдонуучу модем режиминин параметрлерин өзгөртө албайт"</string>
+    <string name="apn_settings_not_available" msgid="1147111671403342300">"Бул колдонуучу мүмкүндүк алуу түйүнүнүн аталышынын параметрлерин колдоно албайт"</string>
     <string name="enable_adb" msgid="8072776357237289039">"USB аркылуу мүчүлүштүктөрдү аныктоо"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB компьютерге сайылганда мүчүлүштүктөрдү оңдоо режими иштейт"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB аркылуу мүчүлүштүктөрдү аныктоо уруксатын артка кайтаруу"</string>
@@ -332,7 +332,7 @@
     <string name="adb_warning_message" msgid="8145270656419669221">"USB-жөндөө - өндүрүү максатында гана  түзүлгөн. Аны компүтериңиз менен түзмөгүңүздүн ортосунда берилиштерди алмашуу, түзмөгүңүзгө колдонмолорду эскертүүсүз орнотуу жана лог берилиштерин окуу үчүн колдонсоңуз болот."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"Мүчүлүштүктөрдү Wi-Fi аркылуу оңдоого уруксат бересизби?"</string>
     <string name="adbwifi_warning_message" msgid="8005936574322702388">"Мүчүлүштүктөрдү Wi-Fi аркылуу аныктоо – өндүрүү максатында гана түзүлгөн. Аны компьютериңиз менен түзмөгүңүздүн ортосунда маалыматты алмашуу, колдонмолорду түзмөгүңүзгө эскертүүсүз орнотуу жана маалыматтар таржымалын окуу үчүн колдонсоңуз болот."</string>
-    <string name="adb_keys_warning_message" msgid="2968555274488101220">"Сиз мурун USB жөндөөлөрүнө уруксат берген бардык компүтерлердин жеткиси жокко чыгарылсынбы?"</string>
+    <string name="adb_keys_warning_message" msgid="2968555274488101220">"Сиз мурун USB параметрлерине уруксат берген бардык компүтерлердин жеткиси жокко чыгарылсынбы?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Параметрлерди өзгөртүү"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Бул орнотуулар өндүрүүчүлөр үчүн гана берилген. Булар түзмөгүңүздүн колдонмолорун бузулушуна же туура эмес иштешине алып келиши мүмкүн."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Орнотулуучу колдонмону текшерүү"</string>
@@ -429,7 +429,7 @@
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Иштеген жок. Күйгүзүү үчүн басып коюңуз."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"Иштеп турат. Өчүрүү үчүн басып коюңуз."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Көшүү режиминдеги колдонмонун абалы:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
-    <string name="transcode_settings_title" msgid="2581975870429850549">"Медиа файлдарды транскоддоо жөндөөлөрү"</string>
+    <string name="transcode_settings_title" msgid="2581975870429850549">"Медиа файлдарды транскоддоо параметрлери"</string>
     <string name="transcode_user_control" msgid="6176368544817731314">"Демейки жүргүзүлгөн транскоддоону өзгөртүп коюу"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"Транскоддоо жүргүзүүнү иштетүү"</string>
     <string name="transcode_default" msgid="3784803084573509491">"Колдонмолордо заманбап форматтар колдоого алынат"</string>
