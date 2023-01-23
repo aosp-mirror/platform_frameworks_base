@@ -228,9 +228,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.APP_AUTO_RESTRICTION_ENABLED,
                 GlobalSettingsProto.App.AUTO_RESTRICTION_ENABLED);
         dumpSetting(s, p,
-                Settings.Global.FORCED_APP_STANDBY_ENABLED,
-                GlobalSettingsProto.App.FORCED_APP_STANDBY_ENABLED);
-        dumpSetting(s, p,
                 Settings.Global.FORCED_APP_STANDBY_FOR_SMALL_BATTERY_ENABLED,
                 GlobalSettingsProto.App.FORCED_APP_STANDBY_FOR_SMALL_BATTERY_ENABLED);
         p.end(appToken);
