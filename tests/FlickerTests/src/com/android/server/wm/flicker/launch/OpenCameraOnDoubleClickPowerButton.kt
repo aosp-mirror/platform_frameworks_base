@@ -17,8 +17,8 @@
 package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.Postsubmit
-import android.platform.test.annotations.RequiresDevice
 import android.view.KeyEvent
+import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
@@ -139,6 +139,12 @@ class OpenCameraOnDoubleClickPowerButton(flicker: FlickerTest) :
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+
+    @Postsubmit
+    @Test
+    override fun navBarWindowIsVisibleAtStartAndEnd() {
+        super.navBarWindowIsVisibleAtStartAndEnd()
+    }
 
     companion object {
         /**
