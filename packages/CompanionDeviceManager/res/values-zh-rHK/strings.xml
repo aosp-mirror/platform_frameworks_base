@@ -57,13 +57,13 @@
     <string name="permission_notification" msgid="693762568127741203">"通知"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"應用程式"</string>
     <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"附近的裝置串流"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"可撥打及管理通話"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"可讀取及寫入通話記錄"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"可傳送及查看簡訊"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"可存取聯絡人"</string>
+    <string name="permission_phone_summary" msgid="6684396967861278044">"可撥打電話和管理通話"</string>
+    <string name="permission_call_logs_summary" msgid="6186103394658755022">"可讀取及寫入手機通話記錄"</string>
+    <string name="permission_sms_summary" msgid="3508442683678912017">"可傳送及查看短訊"</string>
+    <string name="permission_contacts_summary" msgid="675861979475628708">"可存取通訊錄"</string>
     <string name="permission_calendar_summary" msgid="6460000922511766226">"可存取日曆"</string>
     <string name="permission_microphone_summary" msgid="4241354865859396558">"可使用麥克風錄音"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"可尋找、連線及判斷鄰近裝置的相對位置"</string>
+    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"可尋找、連接及判斷附近裝置的相對位置"</string>
     <string name="permission_notification_summary" msgid="884075314530071011">"可以讀取所有通知，包括聯絡人、訊息和電話等資訊"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"串流播放手機應用程式內容"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
