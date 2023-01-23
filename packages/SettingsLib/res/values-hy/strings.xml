@@ -173,7 +173,7 @@
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Օգտատեր՝ <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Որոշ կանխադրված կարգավորումներ կան"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Կանխադրված կարգավորումներ չկան"</string>
-    <string name="tts_settings" msgid="8130616705989351312">"Տեքստի հնչեցման կարգավորումներ"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"Տեքստի հնչեցման կարգա­վորումներ"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Տեքստի հնչեցում"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Խոսքի արագությունը"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Տեքստի արտասանման արագությունը"</string>
