@@ -532,8 +532,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"ఆటోమేటిక్"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"శబ్దం లేదా వైబ్రేషన్‌లు ఏవీ లేవు"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"శబ్దం లేదా వైబ్రేషన్ లేదు, సంభాషణ విభాగం దిగువన కనిపిస్తుంది"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"ఫోన్ సెట్టింగ్‌ల ఆధారంగా రింగ్ లేదా వైబ్రేట్ కావచ్చు"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ఫోన్ సెట్టింగ్‌ల ఆధారంగా రింగ్ లేదా వైబ్రేట్ కావచ్చు. <xliff:g id="APP_NAME">%1$s</xliff:g> నుండి సంభాషణలు ఆటోమేటిక్‌గా బబుల్‌గా కనిపిస్తాయి."</string>
+    <string name="notification_channel_summary_default" msgid="777294388712200605">"పరికర సెట్టింగ్‌ల ఆధారంగా రింగ్ లేదా వైబ్రేట్ కావచ్చు"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"పరికర సెట్టింగ్‌ల ఆధారంగా రింగ్ లేదా వైబ్రేట్ కావచ్చు. <xliff:g id="APP_NAME">%1$s</xliff:g> నుండి సంభాషణలు ఆటోమేటిక్‌గా బబుల్‌లో కనిపిస్తాయి."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ఈ నోటిఫికేషన్ వచ్చినప్పుడు శబ్దం చేయాలా లేదా వైబ్రేట్ చేయాలా అనేది నిర్ణయించడానికి సిస్టమ్‌కు అనుమతి ఇవ్వండి"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;స్టేటస్:&lt;/b&gt; ఆటోమేటిక్ సెట్టింగ్‌కు ప్రోమోట్ చేయబడింది"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;స్టేటస్:&lt;/b&gt; నిశ్శబ్దం స్థాయికి తగ్గించబడింది"</string>
@@ -852,8 +852,7 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="APP_LABEL">%2$s</xliff:g> నుండి <xliff:g id="SONG_NAME">%1$s</xliff:g>‌ను ప్లే చేయండి"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"చర్య రద్దు"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g>‌లో ప్లే చేయడానికి దగ్గరగా వెళ్లండి"</string>
-    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
-    <skip />
+    <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"ఇక్కడ ఆడటానికి, <xliff:g id="DEVICENAME">%1$s</xliff:g>‌కు దగ్గరగా వెళ్లండి"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g>లో ప్లే అవుతోంది"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"ఏదో తప్పు జరిగింది. మళ్లీ ట్రై చేయండి."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"లోడ్ అవుతోంది"</string>
@@ -1019,8 +1018,12 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ఈ స్క్రీన్ ఆఫ్ అవుతుంది"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"మడవగల పరికరం విప్పబడుతోంది"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"మడవగల పరికరం చుట్టూ తిప్పబడుతోంది"</string>
-    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
-    <skip />
-    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
-    <skip />
+    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> బ్యాటరీ మిగిలి ఉంది"</string>
+    <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"మీ స్టైలస్‌ను ఛార్జర్‌కి కనెక్ట్ చేయండి"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"తక్కువ స్టైలస్ బ్యాటరీ"</string>
+    <string name="video_camera" msgid="7654002575156149298">"వీడియో కెమెరా"</string>
+    <string name="call_from_work_profile_title" msgid="6991157106804289643">"ఈ ప్రొఫైల్ నుండి కాల్ చేయడం సాధ్యపడలేదు"</string>
+    <string name="call_from_work_profile_text" msgid="3458704745640229638">"మీ వర్క్ పాలసీ, మిమ్మల్ని వర్క్ ప్రొఫైల్ నుండి మాత్రమే ఫోన్ కాల్స్ చేయడానికి అనుమతిస్తుంది"</string>
+    <string name="call_from_work_profile_action" msgid="2937701298133010724">"వర్క్ ప్రొఫైల్‌కు మారండి"</string>
+    <string name="call_from_work_profile_close" msgid="7927067108901068098">"మూసివేయండి"</string>
 </resources>

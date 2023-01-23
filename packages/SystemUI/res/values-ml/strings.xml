@@ -532,8 +532,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"സ്വയമേവ"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"ശബ്ദമോ വൈബ്രേഷനോ ഇല്ല"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ശബ്‌ദമോ വൈബ്രേഷനോ ഇല്ല, സംഭാഷണ വിഭാഗത്തിന് താഴെയായി ദൃശ്യമാകും"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"ഫോൺ ക്രമീകരണം അടിസ്ഥാനമാക്കി റിംഗ്/വൈബ്രേറ്റ് ചെയ്യും"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ഫോൺ ക്രമീകരണം അടിസ്ഥാനമാക്കി റിംഗ്/വൈബ്രേറ്റ് ചെയ്‌തേക്കാം. <xliff:g id="APP_NAME">%1$s</xliff:g>-ൽ നിന്നുള്ള സംഭാഷണങ്ങൾ ഡിഫോൾട്ടായി ബബിൾ ചെയ്യുന്നു."</string>
+    <string name="notification_channel_summary_default" msgid="777294388712200605">"ഉപകരണ ക്രമീകരണം അടിസ്ഥാനമാക്കി റിംഗ് ചെയ്യും അല്ലെങ്കിൽ വൈബ്രേറ്റ് ചെയ്യും"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"ഉപകരണ ക്രമീകരണം അടിസ്ഥാനമാക്കി റിംഗ് ചെയ്യും അല്ലെങ്കിൽ വൈബ്രേറ്റ് ചെയ്യും. <xliff:g id="APP_NAME">%1$s</xliff:g> എന്ന ആപ്പിൽ നിന്നുള്ള സംഭാഷണങ്ങൾ ഡിഫോൾട്ടായി ബബിൾ ചെയ്യുന്നു."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ഈ അറിയിപ്പ് വരുമ്പോൾ ശബ്‌ദിക്കുകയാണോ വൈബ്രേറ്റ് ചെയ്യുകയാണോ വേണ്ടതെന്ന് നിർണ്ണയിക്കാൻ സിസ്‌റ്റത്തെ അനുവദിക്കുക"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;നില:&lt;/b&gt; ഡിഫോൾട്ടാക്കി പ്രമോട്ട് ചെയ്‌തു"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;നില:&lt;/b&gt; നിശബ്‌ദമാക്കി തരം താഴ്ത്തി"</string>
@@ -852,8 +852,7 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="SONG_NAME">%1$s</xliff:g> എന്ന ഗാനം <xliff:g id="APP_LABEL">%2$s</xliff:g> ആപ്പിൽ പ്ലേ ചെയ്യുക"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"പഴയപടിയാക്കുക"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> എന്നതിൽ പ്ലേ ചെയ്യാൻ അടുത്തേക്ക് നീക്കുക"</string>
-    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
-    <skip />
+    <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"ഇവിടെ പ്ലേ ചെയ്യാൻ <xliff:g id="DEVICENAME">%1$s</xliff:g> എന്നതിനടുത്തേക്ക് നീക്കുക"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> എന്നതിൽ പ്ലേ ചെയ്യുന്നു"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"എന്തോ കുഴപ്പമുണ്ടായി. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"ലോഡ് ചെയ്യുന്നു"</string>
@@ -1019,8 +1018,12 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ഈ സ്ക്രീൻ ഓഫാകും"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ഫോൾഡ് ചെയ്യാവുന്ന ഉപകരണം അൺഫോൾഡ് ആകുന്നു"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ഫോൾഡ് ചെയ്യാവുന്ന ഉപകരണം, കറങ്ങുന്ന വിധത്തിൽ ഫ്ലിപ്പ് ആകുന്നു"</string>
-    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
-    <skip />
-    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
-    <skip />
+    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> ബാറ്ററി ചാർജ് ശേഷിക്കുന്നു"</string>
+    <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"നിങ്ങളുടെ സ്റ്റൈലസ് ചാർജറുമായി കണക്റ്റ് ചെയ്യുക"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"സ്റ്റൈലസിന്റെ ബാറ്ററി ചാർജ് കുറവാണ്"</string>
+    <string name="video_camera" msgid="7654002575156149298">"വീഡിയോ ക്യാമറ"</string>
+    <string name="call_from_work_profile_title" msgid="6991157106804289643">"ഈ പ്രൊഫൈലിൽ നിന്ന് കോൾ ചെയ്യാനാകില്ല"</string>
+    <string name="call_from_work_profile_text" msgid="3458704745640229638">"ഔദ്യോഗിക പ്രൊഫൈലിൽ നിന്ന് മാത്രം ഫോൺ കോളുകൾ ചെയ്യാനാണ് നിങ്ങളുടെ ഔദ്യോഗിക നയം അനുവദിക്കുന്നത്"</string>
+    <string name="call_from_work_profile_action" msgid="2937701298133010724">"ഔദ്യോഗിക പ്രൊഫൈലിലേക്ക് മാറുക"</string>
+    <string name="call_from_work_profile_close" msgid="7927067108901068098">"അടയ്ക്കുക"</string>
 </resources>

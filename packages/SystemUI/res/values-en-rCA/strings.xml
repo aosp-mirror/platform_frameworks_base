@@ -532,8 +532,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automatic"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"No sound or vibration"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"No sound or vibration and appears lower in conversation section"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"May ring or vibrate based on phone settings"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"May ring or vibrate based on phone settings. Conversations from <xliff:g id="APP_NAME">%1$s</xliff:g> bubble by default."</string>
+    <string name="notification_channel_summary_default" msgid="777294388712200605">"May ring or vibrate based on device settings"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"May ring or vibrate based on device settings. Conversations from <xliff:g id="APP_NAME">%1$s</xliff:g> bubble by default."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Have the system determine if this notification should make sound or vibration"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Status:&lt;/b&gt; Promoted to Default"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Status:&lt;/b&gt; Demoted to Silent"</string>
@@ -1020,4 +1020,10 @@
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Foldable device being flipped around"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> battery remaining"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Connect your stylus to a charger"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Stylus battery low"</string>
+    <string name="video_camera" msgid="7654002575156149298">"Video camera"</string>
+    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Can\'t call from this profile"</string>
+    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Your work policy allows you to make phone calls only from the work profile"</string>
+    <string name="call_from_work_profile_action" msgid="2937701298133010724">"Switch to work profile"</string>
+    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Close"</string>
 </resources>
