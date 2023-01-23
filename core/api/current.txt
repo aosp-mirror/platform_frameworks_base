@@ -9338,6 +9338,8 @@ package android.companion.virtual {
 
   public final class VirtualDeviceManager {
     method @NonNull public java.util.List<android.companion.virtual.VirtualDevice> getVirtualDevices();
+    field public static final int DEVICE_ID_DEFAULT = 0; // 0x0
+    field public static final int DEVICE_ID_INVALID = -1; // 0xffffffff
   }
 
 }
@@ -10104,8 +10106,6 @@ package android.content {
     field public static final int CONTEXT_RESTRICTED = 4; // 0x4
     field public static final String CREDENTIAL_SERVICE = "credential";
     field public static final String CROSS_PROFILE_APPS_SERVICE = "crossprofileapps";
-    field public static final int DEVICE_ID_DEFAULT = 0; // 0x0
-    field public static final int DEVICE_ID_INVALID = -1; // 0xffffffff
     field public static final String DEVICE_LOCK_SERVICE = "device_lock";
     field public static final String DEVICE_POLICY_SERVICE = "device_policy";
     field public static final String DISPLAY_HASH_SERVICE = "display_hash";

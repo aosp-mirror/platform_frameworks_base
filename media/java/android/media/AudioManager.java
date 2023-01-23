@@ -16,9 +16,9 @@
 
 package android.media;
 
+import static android.companion.virtual.VirtualDeviceManager.DEVICE_ID_DEFAULT;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
-import static android.content.Context.DEVICE_ID_DEFAULT;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;

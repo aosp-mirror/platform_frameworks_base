@@ -134,15 +134,6 @@ public abstract class Context {
     @VisibleForTesting
     public static final long OVERRIDABLE_COMPONENT_CALLBACKS = 193247900L;
 
-    /**
-     * The default device ID, which is the ID of the primary (non-virtual) device.
-     */
-    public static final int DEVICE_ID_DEFAULT = 0;
-    /**
-     * Invalid device ID.
-     */
-    public static final int DEVICE_ID_INVALID = -1;
-
     /** @hide */
     @IntDef(flag = true, prefix = { "MODE_" }, value = {
             MODE_PRIVATE,
@@ -6993,7 +6984,7 @@ public abstract class Context {
      * <p>
      * Applications that run on virtual devices may use this method to access the default device
      * capabilities and functionality (by passing
-     * {@link Context#DEVICE_ID_DEFAULT}. Similarly,
+     * {@link android.companion.virtual.VirtualDeviceManager#DEVICE_ID_DEFAULT}. Similarly,
      * applications running on the default device may access the functionality of virtual devices.
      * </p>
      * <p>
@@ -7361,7 +7352,7 @@ public abstract class Context {
      * determine whether they are running on a virtual device and identify that device.
      *
      * The device ID of the host device is
-     * {@link Context#DEVICE_ID_DEFAULT}
+     * {@link android.companion.virtual.VirtualDeviceManager#DEVICE_ID_DEFAULT}
      *
      * <p>
      * If the underlying device ID is changed by the system, for example, when an

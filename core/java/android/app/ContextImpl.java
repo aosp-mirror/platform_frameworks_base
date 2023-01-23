@@ -244,7 +244,7 @@ class ContextImpl extends Context {
     @UnsupportedAppUsage
     private @NonNull Resources mResources;
     private @Nullable Display mDisplay; // may be null if invalid display or not initialized yet.
-    private int mDeviceId = Context.DEVICE_ID_DEFAULT;
+    private int mDeviceId = VirtualDeviceManager.DEVICE_ID_DEFAULT;
 
     /**
      * If set to {@code true} the resources for this context will be configured for mDisplay which
@@ -2756,7 +2756,7 @@ class ContextImpl extends Context {
 
     @Override
     public @NonNull Context createDeviceContext(int deviceId) {
-        if (deviceId != Context.DEVICE_ID_DEFAULT) {
+        if (deviceId != VirtualDeviceManager.DEVICE_ID_DEFAULT) {
             VirtualDeviceManager vdm = getSystemService(VirtualDeviceManager.class);
             if (!vdm.isValidVirtualDeviceId(deviceId)) {
                 throw new IllegalArgumentException(
@@ -3036,7 +3036,7 @@ class ContextImpl extends Context {
 
     @Override
     public void updateDeviceId(int updatedDeviceId) {
-        if (updatedDeviceId != Context.DEVICE_ID_DEFAULT) {
+        if (updatedDeviceId != VirtualDeviceManager.DEVICE_ID_DEFAULT) {
             VirtualDeviceManager vdm = getSystemService(VirtualDeviceManager.class);
             if (!vdm.isValidVirtualDeviceId(updatedDeviceId)) {
                 throw new IllegalArgumentException(

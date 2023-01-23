@@ -98,6 +98,16 @@ public final class VirtualDeviceManager {
                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_FOCUS;
 
     /**
+     * The default device ID, which is the ID of the primary (non-virtual) device.
+     */
+    public static final int DEVICE_ID_DEFAULT = 0;
+
+    /**
+     * Invalid device ID.
+     */
+    public static final int DEVICE_ID_INVALID = -1;
+
+    /**
      * Broadcast Action: A Virtual Device was removed.
      *
      * <p class="note">This is a protected intent that can only be sent by the system.</p>
@@ -240,7 +250,7 @@ public final class VirtualDeviceManager {
     public int getDeviceIdForDisplayId(int displayId) {
         if (mService == null) {
             Log.w(TAG, "Failed to retrieve virtual devices; no virtual device manager service.");
-            return Context.DEVICE_ID_DEFAULT;
+            return DEVICE_ID_DEFAULT;
         }
         try {
             return mService.getDeviceIdForDisplayId(displayId);
@@ -251,7 +261,7 @@ public final class VirtualDeviceManager {
 
     /**
      * Checks whether the passed {@code deviceId} is a valid virtual device ID or not.
-     * {@link Context#DEVICE_ID_DEFAULT} is not valid as it is the ID of the default
+     * {@link VirtualDeviceManager#DEVICE_ID_DEFAULT} is not valid as it is the ID of the default
      * device which is not a virtual device. {@code deviceId} must correspond to a virtual device
      * created by {@link VirtualDeviceManager#createVirtualDevice(int, VirtualDeviceParams)}.
      *
