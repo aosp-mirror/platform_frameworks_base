@@ -104,7 +104,7 @@ object Flags {
         unreleasedFlag(174148361, "notification_inline_reply_animation", teamfood = true)
 
     val FILTER_UNSEEN_NOTIFS_ON_KEYGUARD =
-        unreleasedFlag(254647461, "filter_unseen_notifs_on_keyguard", teamfood = true)
+        releasedFlag(254647461, "filter_unseen_notifs_on_keyguard", teamfood = true)
 
     // TODO(b/263414400): Tracking Bug
     @JvmField
