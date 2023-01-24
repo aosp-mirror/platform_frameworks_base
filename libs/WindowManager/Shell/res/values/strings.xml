@@ -193,6 +193,23 @@
     <!-- Accessibility description of the letterbox education toast expand to dialog button. [CHAR LIMIT=NONE] -->
     <string name="letterbox_education_expand_button_description">Expand for more information.</string>
 
+    <!-- The title of the restart confirmation dialog. [CHAR LIMIT=NONE] -->
+    <string name="letterbox_restart_dialog_title">Restart for a better view?</string>
+
+    <!-- The description of the restart confirmation dialog. [CHAR LIMIT=NONE] -->
+    <string name="letterbox_restart_dialog_description">You can restart the app so it looks better on
+        your screen, but you may lose your progress or any unsaved changes
+    </string>
+
+    <!-- Button text for dismissing the restart confirmation dialog. [CHAR LIMIT=20] -->
+    <string name="letterbox_restart_cancel">Cancel</string>
+
+    <!-- Button text for dismissing the restart confirmation dialog. [CHAR LIMIT=20] -->
+    <string name="letterbox_restart_restart">Restart</string>
+
+    <!-- Checkbox text for asking to not show the restart confirmation dialog again. [CHAR LIMIT=NONE] -->
+    <string name="letterbox_restart_dialog_checkbox_title">Don\u2019t show again</string>
+
     <!-- Freeform window caption strings -->
     <!-- Accessibility text for the maximize window button [CHAR LIMIT=NONE] -->
     <string name="maximize_button_text">Maximize</string>
