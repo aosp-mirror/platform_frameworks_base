@@ -7542,6 +7542,7 @@ package android.app.admin {
     method public boolean getBluetoothContactSharingDisabled(@NonNull android.content.ComponentName);
     method public boolean getCameraDisabled(@Nullable android.content.ComponentName);
     method @Deprecated @Nullable public String getCertInstallerPackage(@NonNull android.content.ComponentName) throws java.lang.SecurityException;
+    method @Nullable public android.app.admin.PackagePolicy getCredentialManagerPolicy();
     method @Deprecated @Nullable public java.util.Set<java.lang.String> getCrossProfileCalendarPackages(@NonNull android.content.ComponentName);
     method @Deprecated public boolean getCrossProfileCallerIdDisabled(@NonNull android.content.ComponentName);
     method @Deprecated public boolean getCrossProfileContactsSearchDisabled(@NonNull android.content.ComponentName);
@@ -7694,6 +7695,7 @@ package android.app.admin {
     method @Deprecated public void setCertInstallerPackage(@NonNull android.content.ComponentName, @Nullable String) throws java.lang.SecurityException;
     method public void setCommonCriteriaModeEnabled(@NonNull android.content.ComponentName, boolean);
     method public void setConfiguredNetworksLockdownState(@NonNull android.content.ComponentName, boolean);
+    method public void setCredentialManagerPolicy(@Nullable android.app.admin.PackagePolicy);
     method @Deprecated public void setCrossProfileCalendarPackages(@NonNull android.content.ComponentName, @Nullable java.util.Set<java.lang.String>);
     method @Deprecated public void setCrossProfileCallerIdDisabled(@NonNull android.content.ComponentName, boolean);
     method @Deprecated public void setCrossProfileContactsSearchDisabled(@NonNull android.content.ComponentName, boolean);
