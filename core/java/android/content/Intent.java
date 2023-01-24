@@ -5737,7 +5737,7 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public static final String EXTRA_CHOOSER_CUSTOM_ACTIONS =
-            "android.intent.extra.EXTRA_CHOOSER_CUSTOM_ACTIONS";
+            "android.intent.extra.CHOOSER_CUSTOM_ACTIONS";
 
     /**
      * Optional argument to be used with {@link #ACTION_CHOOSER}.
@@ -5748,7 +5748,7 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public static final String EXTRA_CHOOSER_PAYLOAD_RESELECTION_ACTION =
-            "android.intent.extra.EXTRA_CHOOSER_PAYLOAD_RESELECTION_ACTION";
+            "android.intent.extra.CHOOSER_PAYLOAD_RESELECTION_ACTION";
 
     /**
      * An {@code ArrayList} of {@code String} annotations describing content for
