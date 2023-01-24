@@ -9689,11 +9689,15 @@ package android.net.wifi.nl80211 {
     method public int getMin5gRssiDbm();
     method public int getMin6gRssiDbm();
     method @NonNull public java.util.List<android.net.wifi.nl80211.PnoNetwork> getPnoNetworks();
+    method public int getScanIntervalMultiplier();
+    method public int getScanIterations();
     method public void setIntervalMillis(long);
     method public void setMin2gRssiDbm(int);
     method public void setMin5gRssiDbm(int);
     method public void setMin6gRssiDbm(int);
     method public void setPnoNetworks(@NonNull java.util.List<android.net.wifi.nl80211.PnoNetwork>);
+    method public void setScanIntervalMultiplier(int);
+    method public void setScanIterations(int);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.nl80211.PnoSettings> CREATOR;
   }
