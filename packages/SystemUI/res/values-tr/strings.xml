@@ -824,7 +824,7 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> cihazında oynatmak için yaklaşın"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Burada oynatmak için <xliff:g id="DEVICENAME">%1$s</xliff:g> cihazına yaklaşın"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> cihazında oynatılıyor"</string>
-    <string name="media_transfer_failed" msgid="7955354964610603723">"Bir sorun oldu. Tekrar deneyin."</string>
+    <string name="media_transfer_failed" msgid="7955354964610603723">"Bir hata oluştu. Tekrar deneyin."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Devre dışı, uygulamaya bakın"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Bulunamadı"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrol kullanılamıyor"</string>

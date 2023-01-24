@@ -394,7 +394,7 @@
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Саясаттарды карап көрүү"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Башкаруу элементтерин көрүү"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"Бул түзмөк <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> уюмуна таандык.\n\nАдминистраторуңуз бул түзмөктөгү жөндөөлөрдү, корпоративдик ресурстарды пайдалануу мүмкүнчүлүгүн берген параметрлерди жана колдонмолорду, түзмөгүңүзгө байланыштуу маалыматтарды (мисалы, түзмөгүңүздүн жайгашкан жери сыяктуу) көзөмөлдөп башкара алат.\n\nТолугураак маалымат алуу үчүн IT администраторуңузга кайрылыңыз."</string>
-    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> бул түзмөк менен байланышкан маалыматты көрүп, колдонмолорду башкарып, анын жөндөөлөрүн өзгөртө алат.\n\nЭгер суроолоруңуз болсо, <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g> уюмуна кайрылыңыз."</string>
+    <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> бул түзмөк менен байланышкан маалыматты көрүп, колдонмолорду башкарып, анын параметрлерин өзгөртө алат.\n\nЭгер суроолоруңуз болсо, <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g> уюмуна кайрылыңыз."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"Бул түзмөк уюмуңузга таандык.\n\nАдминистраторуңуз бул түзмөктөгү жөндөөлөрдү, корпоративдик ресурстарды пайдалануу мүмкүнчүлүгүн берген параметрлерди жана колдонмолорду, түзмөгүңүзгө байланыштуу маалыматтарды (мисалы, түзмөгүңүздүн жайгашкан жери сыяктуу) көзөмөлдөп башкара алат.\n\nТолугураак маалымат алуу үчүн IT администраторуңузга кайрылыңыз."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Ишканаңыз бул түзмөккө тастыктоочу борборду орнотту. Коопсуз тармагыңыздын трафиги көзөмөлдөнүп же өзгөртүлүшү мүмкүн."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Ишканаңыз жумуш профилиңизге тастыктоочу борборду орнотту. Коопсуз тармагыңыздын трафиги көзөмөлдөнүп же өзгөртүлүшү мүмкүн."</string>
@@ -411,7 +411,7 @@
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Ишеним агенти кулпусун ачты"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="accessibility_volume_settings" msgid="1458961116951564784">"Добуштун жөндөөлөрү"</string>
+    <string name="accessibility_volume_settings" msgid="1458961116951564784">"Добуштун параметрлери"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Автоматтык коштомо жазуулар"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Коштомо жазуулар кеңеши"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Коштомо жазуулардын үстүнө коюу"</string>
@@ -782,7 +782,7 @@
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Бардык башкаруу элементтери өчүрүлдү"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Өзгөртүүлөр сакталган жок"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Башка колдонмолорду көрүү"</string>
-    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Башкаруу элементтери жүктөлгөн жок. <xliff:g id="APP">%s</xliff:g> колдонмосуна өтүп, колдонмонун жөндөөлөрү өзгөрбөгөнүн текшериңиз."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Башкаруу элементтери жүктөлгөн жок. <xliff:g id="APP">%s</xliff:g> колдонмосуна өтүп, колдонмонун параметрлери өзгөрбөгөнүн текшериңиз."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Шайкеш башкаруу элементтери жеткиликсиз"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Башка"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Түзмөктү башкаруу элементтерине кошуу"</string>
@@ -828,7 +828,7 @@
     <string name="controls_error_timeout" msgid="794197289772728958">"Жигерсиз. Колдонмону текшериңиз"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Табылган жок"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Башкара албайсыз"</string>
-    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> түзмөгүн пайдалана албайсыз. Аны <xliff:g id="APPLICATION">%2$s</xliff:g> колдонмосунан башкарууга мүмкүн же мүмкүн эместигин, ошондой эле колдонмонун жөндөөлөрүнүн өзгөрүлбөгөнүн текшериңиз."</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> түзмөгүн пайдалана албайсыз. Аны <xliff:g id="APPLICATION">%2$s</xliff:g> колдонмосунан башкарууга мүмкүн же мүмкүн эместигин, ошондой эле колдонмонун параметрлеринин өзгөрүлбөгөнүн текшериңиз."</string>
     <string name="controls_open_app" msgid="483650971094300141">"Колдонмону ачуу"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Абалы жүктөлгөн жок"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Ката, кайталап көрүңүз"</string>

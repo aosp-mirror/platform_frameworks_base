@@ -829,7 +829,7 @@
     <string name="media_transfer_undo" msgid="1895606387620728736">"Desfazer"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Aproxime os dispositivos para tocar a mídia neste: <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Fique perto do dispositivo <xliff:g id="DEVICENAME">%1$s</xliff:g> para abrir a mídia aqui"</string>
-    <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Mídia aberta no dispositivo <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
+    <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Tocando no dispositivo <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Algo deu errado. Tente novamente."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inativo, verifique o app"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Não encontrado"</string>
