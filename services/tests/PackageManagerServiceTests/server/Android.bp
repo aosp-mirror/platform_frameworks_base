@@ -32,7 +32,6 @@ android_test {
         "services.people",
         "services.usage",
         "guava",
-        "guava-android-testlib",
         "androidx.test.core",
         "androidx.test.ext.truth",
         "androidx.test.runner",
