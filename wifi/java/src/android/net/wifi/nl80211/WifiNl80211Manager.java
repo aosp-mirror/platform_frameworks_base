@@ -1169,7 +1169,7 @@ public class WifiNl80211Manager {
             case IWifiScannerImpl.SCAN_STATUS_FAILED_ABORT:
                 return WifiScanner.REASON_ABORT;
             case IWifiScannerImpl.SCAN_STATUS_FAILED_NODEV:
-                return WifiScanner.REASON_NO_DEV;
+                return WifiScanner.REASON_NO_DEVICE;
             case IWifiScannerImpl.SCAN_STATUS_FAILED_INVALID_ARGS:
                 return WifiScanner.REASON_INVALID_ARGS;
             case IWifiScannerImpl.SCAN_STATUS_FAILED_GENERIC:
