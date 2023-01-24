@@ -240,8 +240,10 @@ class CredentialManagerRepo(
                             "Elisa Beckett", Instant.ofEpochSecond(500L)
                         ),
                     )
-                ).setAuthenticationEntry(
-                    GetTestUtils.newAuthenticationEntry(context, "key2", "subkey-1")
+                ).setAuthenticationEntries(
+            listOf<Entry>(
+                    GetTestUtils.newAuthenticationEntry(context, "key2", "subkey-1"),
+            )
                 ).setActionChips(
                     listOf(
                         GetTestUtils.newActionEntry(
@@ -268,8 +270,10 @@ class CredentialManagerRepo(
                             Instant.ofEpochSecond(11000L)
                         ),
                     )
-                ).setAuthenticationEntry(
-                    GetTestUtils.newAuthenticationEntry(context, "key2", "subkey-1")
+                ).setAuthenticationEntries(
+                     listOf<Entry>(
+                    GetTestUtils.newAuthenticationEntry(context, "key2", "subkey-1"),
+                     )
                 ).setActionChips(
                     listOf(
                         GetTestUtils.newActionEntry(

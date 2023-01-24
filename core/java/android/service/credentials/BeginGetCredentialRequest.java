@@ -51,7 +51,7 @@ public final class BeginGetCredentialRequest implements Parcelable {
      *
      * This request does not reveal sensitive parameters. Complete list of parameters
      * is retrieved through the {@link PendingIntent} set on each {@link CredentialEntry}
-     * on {@link CredentialsResponseContent} set on {@link BeginGetCredentialResponse},
+     * on {@link BeginGetCredentialResponse} set on {@link BeginGetCredentialResponse},
      * when the user selects one of these entries.
      */
     @NonNull private final List<BeginGetCredentialOption> mBeginGetCredentialOptions;

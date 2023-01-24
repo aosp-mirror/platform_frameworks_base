@@ -170,8 +170,9 @@ private fun toProviderDisplayInfo(
     val authenticationEntryList = mutableListOf<AuthenticationEntryInfo>()
     val remoteEntryList = mutableListOf<RemoteEntryInfo>()
     providerInfoList.forEach { providerInfo ->
-        if (providerInfo.authenticationEntry != null) {
-            authenticationEntryList.add(providerInfo.authenticationEntry)
+        if (providerInfo.authenticationEntryList != null &&
+          !providerInfo.authenticationEntryList.isEmpty()) {
+            authenticationEntryList.add(providerInfo.authenticationEntryList[0])
         }
         if (providerInfo.remoteEntry != null) {
             remoteEntryList.add(providerInfo.remoteEntry)
@@ -190,9 +191,9 @@ private fun toProviderDisplayInfo(
             }
         }
     }
-    // There can only be at most one remote entry
-    // TODO: fail elegantly
-    Preconditions.checkState(remoteEntryList.size <= 1)
+  // There can only be at most one remote entry
+  // TODO: fail elegantly
+  Preconditions.checkState(remoteEntryList.size <= 1)
 
     // Compose sortedUserNameToCredentialEntryList
     val comparator = CredentialEntryInfoComparatorByTypeThenTimestamp()
@@ -241,7 +242,8 @@ private fun toGetScreenState(
     var remoteInfo: RemoteEntryInfo? = null
     providerInfoList.forEach { providerInfo ->
         if (providerInfo.credentialEntryList.isNotEmpty() ||
-            providerInfo.authenticationEntry != null) {
+                (providerInfo.authenticationEntryList != null &&
+                !providerInfo.authenticationEntryList.isEmpty())) {
             noLocalAccount = false
         }
         // TODO: handle the error situation that if multiple remoteInfos exists

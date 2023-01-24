@@ -21,6 +21,10 @@ import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.util.Preconditions;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -28,70 +32,44 @@ import java.util.Objects;
  * data to be shown on the account selector UI.
  */
 public final class BeginGetCredentialResponse implements Parcelable {
-    /** Content to be used for the UI. */
-    private final @Nullable CredentialsResponseContent mCredentialsResponseContent;
+    /** List of credential entries to be displayed on the UI. */
+    private final @NonNull List<CredentialEntry> mCredentialEntries;
 
-    /**
-     * Authentication action that must be launched and completed before showing any content
-     * from the provider.
-     */
-    private final @Nullable Action mAuthenticationAction;
+    /** List of authentication entries to be displayed on the UI. */
+    private final @NonNull List<Action> mAuthenticationEntries;
 
-    /**
-     * Creates a {@link BeginGetCredentialResponse} instance with an authentication
-     * {@link Action} set. Providers must use this method when no content can be shown
-     * before authentication.
-     *
-     * <p> When the user selects this {@code authenticationAction}, the system invokes the
-     * corresponding {@code pendingIntent}. Once the authentication flow is complete,
-     * the {@link android.app.Activity} result should be set
-     * to {@link android.app.Activity#RESULT_OK} and the
-     * {@link CredentialProviderService#EXTRA_CREDENTIALS_RESPONSE_CONTENT} extra should be set
-     * with a fully populated {@link CredentialsResponseContent} object.
-     * the authentication action activity is launched, and the user is authenticated, providers
-     * should create another response with {@link CredentialsResponseContent} using
-     * {@code createWithDisplayContent}, and add that response to the result of the authentication
-     * activity.
-     *
-     * @throws NullPointerException If {@code authenticationAction} is null.
-     */
-    public static @NonNull BeginGetCredentialResponse createWithAuthentication(
-            @NonNull Action authenticationAction) {
-        Objects.requireNonNull(authenticationAction,
-                "authenticationAction must not be null");
-        return new BeginGetCredentialResponse(null, authenticationAction);
-    }
+    /** List of provider actions to be displayed on the UI. */
+    private final @NonNull List<Action> mActions;
 
-    /**
-     * Creates a {@link BeginGetCredentialRequest} instance with content to be shown on the UI.
-     * Providers must use this method when there is content to be shown without top level
-     * authentication required, including credential entries, action entries or a remote entry,
-     *
-     * @throws NullPointerException If {@code credentialsResponseContent} is null.
-     */
-    public static @NonNull BeginGetCredentialResponse createWithResponseContent(
-            @NonNull CredentialsResponseContent credentialsResponseContent) {
-        Objects.requireNonNull(credentialsResponseContent,
-                "credentialsResponseContent must not be null");
-        return new BeginGetCredentialResponse(credentialsResponseContent, null);
-    }
+    /** Remote credential entry to get the response from a different device. */
+    private final @Nullable CredentialEntry mRemoteCredentialEntry;
 
-    private BeginGetCredentialResponse(@Nullable CredentialsResponseContent
-            credentialsResponseContent,
-            @Nullable Action authenticationAction) {
-        mCredentialsResponseContent = credentialsResponseContent;
-        mAuthenticationAction = authenticationAction;
+    private BeginGetCredentialResponse(@NonNull List<CredentialEntry> credentialEntries,
+            @NonNull List<Action> authenticationEntries, @NonNull List<Action> actions,
+            @Nullable CredentialEntry remoteCredentialEntry) {
+        mCredentialEntries = new ArrayList<>(credentialEntries);
+        mAuthenticationEntries = new ArrayList<>(authenticationEntries);
+        mActions = new ArrayList<>(actions);
+        mRemoteCredentialEntry = remoteCredentialEntry;
     }
 
     private BeginGetCredentialResponse(@NonNull Parcel in) {
-        mCredentialsResponseContent = in.readTypedObject(CredentialsResponseContent.CREATOR);
-        mAuthenticationAction = in.readTypedObject(Action.CREATOR);
+        List<CredentialEntry> credentialEntries = new ArrayList<>();
+        in.readTypedList(credentialEntries, CredentialEntry.CREATOR);
+        mCredentialEntries = credentialEntries;
+        List<Action> authenticationEntries = new ArrayList<>();
+        in.readTypedList(authenticationEntries, Action.CREATOR);
+        mAuthenticationEntries = authenticationEntries;
+        List<Action> actions = new ArrayList<>();
+        in.readTypedList(actions, Action.CREATOR);
+        mActions = actions;
+        mRemoteCredentialEntry = in.readTypedObject(CredentialEntry.CREATOR);
     }
 
     public static final @NonNull Creator<BeginGetCredentialResponse> CREATOR =
             new Creator<BeginGetCredentialResponse>() {
                 @Override
-                public BeginGetCredentialResponse createFromParcel(Parcel in) {
+                public BeginGetCredentialResponse createFromParcel(@NonNull Parcel in) {
                     return new BeginGetCredentialResponse(in);
                 }
 
@@ -108,23 +86,175 @@ public final class BeginGetCredentialResponse implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeTypedObject(mCredentialsResponseContent, flags);
-        dest.writeTypedObject(mAuthenticationAction, flags);
+        dest.writeTypedList(mCredentialEntries, flags);
+        dest.writeTypedList(mAuthenticationEntries, flags);
+        dest.writeTypedList(mActions, flags);
+        dest.writeTypedObject(mRemoteCredentialEntry, flags);
     }
 
     /**
-     * If this response represents a top level authentication action, returns the authentication
-     * action to be invoked before any other content can be shown to the user.
+     * Returns the list of credential entries to be displayed on the UI.
      */
-    public @Nullable Action getAuthenticationAction() {
-        return mAuthenticationAction;
+    public @NonNull List<CredentialEntry> getCredentialEntries() {
+        return mCredentialEntries;
     }
 
     /**
-     * Returns the actual content to be displayed on the selector, if this response does not
-     * require any top level authentication.
+     * Returns the list of authentication entries to be displayed on the UI.
      */
-    public @Nullable CredentialsResponseContent getCredentialsResponseContent() {
-        return mCredentialsResponseContent;
+    public @NonNull List<Action> getAuthenticationActions() {
+        return mAuthenticationEntries;
+    }
+
+    /**
+     * Returns the list of actions to be displayed on the UI.
+     */
+    public @NonNull List<Action> getActions() {
+        return mActions;
+    }
+
+    /**
+     * Returns the remote credential entry to be displayed on the UI.
+     */
+    public @Nullable CredentialEntry getRemoteCredentialEntry() {
+        return mRemoteCredentialEntry;
+    }
+
+    /**
+     * Builds an instance of {@link BeginGetCredentialResponse}.
+     */
+    public static final class Builder {
+        private List<CredentialEntry> mCredentialEntries = new ArrayList<>();
+
+        private List<Action> mAuthenticationEntries = new ArrayList<>();
+        private List<Action> mActions = new ArrayList<>();
+        private CredentialEntry mRemoteCredentialEntry;
+
+        /**
+         * Sets a remote credential entry to be shown on the UI. Provider must set this if they
+         * wish to get the credential from a different device.
+         *
+         * <p> When constructing the {@link CredentialEntry} object, the {@code pendingIntent}
+         * must be set such that it leads to an activity that can provide UI to fulfill the request
+         * on a remote device. When user selects this {@code remoteCredentialEntry}, the system will
+         * invoke the {@code pendingIntent} set on the {@link CredentialEntry}.
+         *
+         * <p> Once the remote credential flow is complete, the {@link android.app.Activity}
+         * result should be set to {@link android.app.Activity#RESULT_OK} and an extra with the
+         * {@link CredentialProviderService#EXTRA_GET_CREDENTIAL_RESPONSE} key should be populated
+         * with a {@link android.credentials.Credential} object.
+         */
+        public @NonNull Builder setRemoteCredentialEntry(@Nullable CredentialEntry
+                remoteCredentialEntry) {
+            mRemoteCredentialEntry = remoteCredentialEntry;
+            return this;
+        }
+
+        /**
+         * Adds a {@link CredentialEntry} to the list of entries to be displayed on
+         * the UI.
+         *
+         * @throws NullPointerException If the {@code credentialEntry} is null.
+         */
+        public @NonNull Builder addCredentialEntry(@NonNull CredentialEntry credentialEntry) {
+            mCredentialEntries.add(Objects.requireNonNull(credentialEntry));
+            return this;
+        }
+
+        /**
+         * Add an authentication entry to be shown on the UI. Providers must set this entry if
+         * the corresponding account is locked and no underlying credentials can be returned.
+         *
+         * <p> When the user selects this {@code authenticationAction}, the system invokes the
+         * corresponding {@code pendingIntent}.
+         * Once the authentication action activity is launched, and the user is authenticated,
+         * providers should create another response with {@link BeginGetCredentialResponse} using
+         * this time adding the unlocked credentials in the form of {@link CredentialEntry}'s.
+         *
+         * <p>The new response object must be set on the authentication activity's
+         * result. The result code should be set to {@link android.app.Activity#RESULT_OK} and
+         * the {@link CredentialProviderService#EXTRA_BEGIN_GET_CREDENTIAL_RESPONSE} extra
+         * should be set with the new fully populated {@link BeginGetCredentialResponse} object.
+         *
+         * @throws NullPointerException If {@code authenticationAction} is null.
+         */
+        public @NonNull Builder addAuthenticationAction(@NonNull Action authenticationAction) {
+            mAuthenticationEntries.add(Objects.requireNonNull(authenticationAction));
+            return this;
+        }
+
+        /**
+         * Adds an {@link Action} to the list of actions to be displayed on
+         * the UI.
+         *
+         * <p> An {@code action} must be used for independent user actions,
+         * such as opening the app, intenting directly into a certain app activity etc. The
+         * {@code pendingIntent} set with the {@code action} must invoke the corresponding
+         * activity.
+         *
+         * @throws NullPointerException If {@code action} is null.
+         */
+        public @NonNull Builder addAction(@NonNull Action action) {
+            mActions.add(Objects.requireNonNull(action, "action must not be null"));
+            return this;
+        }
+
+        /**
+         * Sets the list of actions to be displayed on the UI.
+         *
+         * @throws NullPointerException If {@code actions} is null, or any of its elements
+         *                              is null.
+         */
+        public @NonNull Builder setActions(@NonNull List<Action> actions) {
+            mActions = Preconditions.checkCollectionElementsNotNull(actions,
+                    "actions");
+            return this;
+        }
+
+        /**
+         * Sets the list of credential entries to be displayed on the
+         * account selector UI.
+         *
+         * @throws NullPointerException If {@code credentialEntries} is null, or any of its
+         *                              elements is null.
+         */
+        public @NonNull Builder setCredentialEntries(
+                @NonNull List<CredentialEntry> credentialEntries) {
+            mCredentialEntries = Preconditions.checkCollectionElementsNotNull(
+                    credentialEntries,
+                    "credentialEntries");
+            return this;
+        }
+
+        /**
+         * Sets the list of authentication entries to be displayed on the
+         * account selector UI.
+         *
+         * @throws NullPointerException If {@code authenticationEntries} is null, or any of its
+         *                              elements is null.
+         */
+        public @NonNull Builder setAuthenticationActions(
+                @NonNull List<Action> authenticationActions) {
+            mAuthenticationEntries = Preconditions.checkCollectionElementsNotNull(
+                    authenticationActions,
+                    "authenticationActions");
+            return this;
+        }
+
+        /**
+         * Builds a {@link BeginGetCredentialResponse} instance.
+         *
+         * @throws IllegalStateException if {@code credentialEntries}, {@code actions}
+         *                               and {@code remoteCredentialEntry} are all null or empty.
+         */
+        public @NonNull BeginGetCredentialResponse build() {
+            if (mCredentialEntries.isEmpty() && mActions.isEmpty()
+                    && mRemoteCredentialEntry == null && mAuthenticationEntries.isEmpty()) {
+                throw new IllegalStateException("must set either an authentication, "
+                        + "credential, action or remote entry");
+            }
+            return new BeginGetCredentialResponse(mCredentialEntries, mAuthenticationEntries,
+                    mActions, mRemoteCredentialEntry);
+        }
     }
 }

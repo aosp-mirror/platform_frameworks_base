@@ -147,12 +147,11 @@ class GetFlowUtils {
                         credentialEntryList = getCredentialOptionInfoList(
                             it.providerFlattenedComponentName, it.credentialEntries, context
                         ),
-                        authenticationEntry = getAuthenticationEntry(
-                            it.providerFlattenedComponentName,
-                            providerLabel,
-                            providerIcon,
-                            it.authenticationEntry
-                        ),
+                        authenticationEntryList = getAuthenticationEntryList(
+                                                it.providerFlattenedComponentName,
+                                                providerLabel,
+                                                providerIcon,
+                                                it.authenticationEntries),
                         remoteEntry = getRemoteEntry(
                             it.providerFlattenedComponentName,
                             it.remoteEntry
@@ -256,18 +255,19 @@ class GetFlowUtils {
             }
         }
 
-        private fun getAuthenticationEntry(
+        private fun getAuthenticationEntryList(
             providerId: String,
             providerDisplayName: String,
             providerIcon: Drawable,
-            authEntry: Entry?,
-        ): AuthenticationEntryInfo? {
-            if (authEntry == null) {
-                return null
-            }
+            authEntryList: List<Entry>,
+        ): List<AuthenticationEntryInfo> {
+            if (authEntryList.isEmpty()) {
+                return listOf()
+      }
+            val authEntry = authEntryList[0]
             val structuredAuthEntry =
-                AuthenticationAction.fromSlice(authEntry.slice) ?: return null
-            return AuthenticationEntryInfo(
+                AuthenticationAction.fromSlice(authEntry.slice) ?: return listOf()
+            return listOf(AuthenticationEntryInfo(
                 providerId = providerId,
                 entryKey = authEntry.key,
                 entrySubkey = authEntry.subkey,
@@ -275,7 +275,7 @@ class GetFlowUtils {
                 fillInIntent = authEntry.frameworkExtrasIntent,
                 title = providerDisplayName,
                 icon = providerIcon,
-            )
+            ))
         }
 
         private fun getRemoteEntry(providerId: String, remoteEntry: Entry?): RemoteEntryInfo? {

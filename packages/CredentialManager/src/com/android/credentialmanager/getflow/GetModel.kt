@@ -32,7 +32,7 @@ data class ProviderInfo(
   val icon: Drawable,
   val displayName: String,
   val credentialEntryList: List<CredentialEntryInfo>,
-  val authenticationEntry: AuthenticationEntryInfo?,
+  val authenticationEntryList: List<AuthenticationEntryInfo>,
   val remoteEntry: RemoteEntryInfo?,
   val actionEntryList: List<ActionEntryInfo>,
 )
