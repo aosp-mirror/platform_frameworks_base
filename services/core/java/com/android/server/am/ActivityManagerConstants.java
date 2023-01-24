@@ -951,7 +951,7 @@ final class ActivityManagerConstants extends ContentObserver {
             "short_fgs_timeout_duration";
 
     /** @see #KEY_SHORT_FGS_TIMEOUT_DURATION */
-    static final long DEFAULT_SHORT_FGS_TIMEOUT_DURATION = 60_000;
+    static final long DEFAULT_SHORT_FGS_TIMEOUT_DURATION = 3 * 60_000;
 
     /** @see #KEY_SHORT_FGS_TIMEOUT_DURATION */
     public volatile long mShortFgsTimeoutDuration = DEFAULT_SHORT_FGS_TIMEOUT_DURATION;
