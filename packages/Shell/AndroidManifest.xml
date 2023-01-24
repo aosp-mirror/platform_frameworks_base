@@ -369,6 +369,9 @@
     <!-- Permission needed to test wallpapers supporting ambient mode -->
     <uses-permission android:name="android.permission.AMBIENT_WALLPAPER" />
 
+    <!-- Permission needed to test wallpaper read methods -->
+    <uses-permission android:name="android.permission.READ_WALLPAPER_INTERNAL" />
+
     <!-- Permission required to test ContentResolver caching. -->
     <uses-permission android:name="android.permission.CACHE_CONTENT" />
 
