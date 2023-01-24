@@ -17,8 +17,15 @@
 
 package com.android.systemui.controls.panels
 
+/**
+ * Repository for keeping track of which packages the panel has authorized to show control panels
+ * (embedded activity).
+ */
 interface AuthorizedPanelsRepository {
+
+    /** A set of package names that the user has previously authorized to show panels. */
     fun getAuthorizedPanels(): Set<String>
 
+    /** Adds [packageNames] to the set of packages that the user has authorized to show panels. */
     fun addAuthorizedPanels(packageNames: Set<String>)
 }
