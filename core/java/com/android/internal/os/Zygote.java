@@ -1328,6 +1328,15 @@ public final class Zygote {
             level = MEMORY_TAG_LEVEL_NONE;
         }
 
+        // If we requested "sync" mode for the whole platform, upgrade mode for apps that enable
+        // MTE.
+        // This makes debugging a lot easier.
+        if (level == MEMORY_TAG_LEVEL_ASYNC
+                && (Build.IS_USERDEBUG || Build.IS_ENG)
+                && "sync".equals(SystemProperties.get("persist.arm64.memtag.default"))) {
+            level = MEMORY_TAG_LEVEL_SYNC;
+        }
+
         return level;
     }
 
