@@ -72,29 +72,32 @@ final class IRemoteInputConnectionInvoker {
      * callback.
      */
     private static final class IntResultReceiver extends ResultReceiver {
-        @NonNull
+        @Nullable
         private IntConsumer mConsumer;
-        @NonNull
+        @Nullable
         private Executor mExecutor;
 
         IntResultReceiver(@NonNull Executor executor, @NonNull IntConsumer consumer) {
             super(null);
+            Objects.requireNonNull(executor);
+            Objects.requireNonNull(consumer);
             mExecutor = executor;
             mConsumer = consumer;
         }
 
         @Override
         protected void onReceiveResult(int resultCode, Bundle resultData) {
-            if (mExecutor != null && mConsumer != null) {
-                mExecutor.execute(() -> mConsumer.accept(resultCode));
-                // provide callback only once.
-                clear();
+            final Executor executor;
+            final IntConsumer consumer;
+            synchronized (this) {
+                executor = mExecutor;
+                consumer = mConsumer;
+                mExecutor = null;
+                mConsumer = null;
             }
-        }
-
-        private void clear() {
-            mExecutor = null;
-            mConsumer = null;
+            if (executor != null && consumer != null) {
+                executor.execute(() -> consumer.accept(resultCode));
+            }
         }
     };
 
