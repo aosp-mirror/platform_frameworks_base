@@ -1112,6 +1112,7 @@ public class PackageManagerSettingsTests {
                 false /*allowInstall*/,
                 false /*instantApp*/,
                 false /*virtualPreload*/,
+                false /* stopped */,
                 UserManagerService.getInstance(),
                 null /*usesSdkLibraries*/,
                 null /*usesSdkLibrariesVersions*/,
@@ -1156,6 +1157,7 @@ public class PackageManagerSettingsTests {
                 true /*allowInstall*/,
                 false /*instantApp*/,
                 false /*virtualPreload*/,
+                false /* stopped */,
                 UserManagerService.getInstance(),
                 null /*usesSdkLibraries*/,
                 null /*usesSdkLibrariesVersions*/,
@@ -1200,6 +1202,7 @@ public class PackageManagerSettingsTests {
                 false /*allowInstall*/,
                 false /*instantApp*/,
                 false /*virtualPreload*/,
+                false /* stopped */,
                 UserManagerService.getInstance(),
                 null /*usesSdkLibraries*/,
                 null /*usesSdkLibrariesVersions*/,
@@ -1245,6 +1248,7 @@ public class PackageManagerSettingsTests {
                 false /*allowInstall*/,
                 false /*instantApp*/,
                 false /*virtualPreload*/,
+                false /* stopped */,
                 UserManagerService.getInstance(),
                 null /*usesSdkLibraries*/,
                 null /*usesSdkLibrariesVersions*/,
@@ -1265,6 +1269,48 @@ public class PackageManagerSettingsTests {
         assertThat(testPkgSetting01.getVersionCode(), is(UPDATED_VERSION_CODE));
         final PackageUserState userState = testPkgSetting01.readUserState(0);
         verifyUserState(userState, false /*notLaunched*/, false /*stopped*/, true /*installed*/);
+    }
+
+    /** Create a new stopped system PackageSetting */
+    @Test
+    public void testCreateNewSetting05() {
+        final PackageSetting testPkgSetting01 = Settings.createNewSetting(
+                PACKAGE_NAME,
+                null /*originalPkg*/,
+                null /*disabledPkg*/,
+                null /*realPkgName*/,
+                null /*sharedUser*/,
+                UPDATED_CODE_PATH /*codePath*/,
+                null /*legacyNativeLibraryPath*/,
+                "arm64-v8a" /*primaryCpuAbi*/,
+                "armeabi" /*secondaryCpuAbi*/,
+                UPDATED_VERSION_CODE /*versionCode*/,
+                ApplicationInfo.FLAG_SYSTEM /*pkgFlags*/,
+                0 /*pkgPrivateFlags*/,
+                UserHandle.SYSTEM /*installUser*/,
+                false /*allowInstall*/,
+                false /*instantApp*/,
+                false /*virtualPreload*/,
+                true /* stopped */,
+                UserManagerService.getInstance(),
+                null /*usesSdkLibraries*/,
+                null /*usesSdkLibrariesVersions*/,
+                null /*usesStaticLibraries*/,
+                null /*usesStaticLibrariesVersions*/,
+                null /*mimeGroups*/,
+                UUID.randomUUID());
+        assertThat(testPkgSetting01.getAppId(), is(0));
+        assertThat(testPkgSetting01.getPath(), is(UPDATED_CODE_PATH));
+        assertThat(testPkgSetting01.getPackageName(), is(PACKAGE_NAME));
+        assertThat(testPkgSetting01.getFlags(), is(ApplicationInfo.FLAG_SYSTEM));
+        assertThat(testPkgSetting01.getPrivateFlags(), is(0));
+        assertThat(testPkgSetting01.getPrimaryCpuAbi(), is("arm64-v8a"));
+        assertThat(testPkgSetting01.getPrimaryCpuAbiLegacy(), is("arm64-v8a"));
+        assertThat(testPkgSetting01.getSecondaryCpuAbi(), is("armeabi"));
+        assertThat(testPkgSetting01.getSecondaryCpuAbiLegacy(), is("armeabi"));
+        assertThat(testPkgSetting01.getVersionCode(), is(UPDATED_VERSION_CODE));
+        final PackageUserState userState = testPkgSetting01.readUserState(0);
+        verifyUserState(userState, false /*notLaunched*/, true /*stopped*/, true /*installed*/);
     }
 
     @Test

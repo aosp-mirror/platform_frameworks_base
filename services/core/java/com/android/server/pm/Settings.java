@@ -1041,7 +1041,7 @@ public final class Settings implements Watchable, Snappable {
             File codePath, String legacyNativeLibraryPath, String primaryCpuAbi,
             String secondaryCpuAbi, long versionCode, int pkgFlags, int pkgPrivateFlags,
             UserHandle installUser, boolean allowInstall, boolean instantApp,
-            boolean virtualPreload, UserManagerService userManager,
+            boolean virtualPreload, boolean isStoppedSystemApp, UserManagerService userManager,
             String[] usesSdkLibraries, long[] usesSdkLibrariesVersions,
             String[] usesStaticLibraries, long[] usesStaticLibrariesVersions,
             Set<String> mimeGroupNames, @NonNull UUID domainSetId) {
@@ -1068,6 +1068,9 @@ public final class Settings implements Watchable, Snappable {
             pkgSetting.setFlags(pkgFlags)
                     .setPrivateFlags(pkgPrivateFlags);
         } else {
+            int installUserId = installUser != null ? installUser.getIdentifier()
+                    : UserHandle.USER_SYSTEM;
+
             pkgSetting = new PackageSetting(pkgName, realPkgName, codePath,
                     legacyNativeLibraryPath, primaryCpuAbi, secondaryCpuAbi,
                     null /*cpuAbiOverrideString*/, versionCode, pkgFlags, pkgPrivateFlags,
@@ -1086,8 +1089,6 @@ public final class Settings implements Watchable, Snappable {
                     Slog.i(PackageManagerService.TAG, "Stopping package " + pkgName, e);
                 }
                 List<UserInfo> users = getAllUsers(userManager);
-                int installUserId = installUser != null ? installUser.getIdentifier()
-                        : UserHandle.USER_SYSTEM;
                 if (users != null && allowInstall) {
                     for (UserInfo user : users) {
                         // By default we consider this app to be installed
@@ -1126,6 +1127,13 @@ public final class Settings implements Watchable, Snappable {
                         );
                     }
                 }
+            } else if (isStoppedSystemApp) {
+                if (DEBUG_STOPPED) {
+                    RuntimeException e = new RuntimeException("here");
+                    e.fillInStackTrace();
+                    Slog.i(PackageManagerService.TAG, "Stopping system package " + pkgName, e);
+                }
+                pkgSetting.setStopped(true, installUserId);
             }
             if (sharedUser != null) {
                 pkgSetting.setAppId(sharedUser.mAppId);

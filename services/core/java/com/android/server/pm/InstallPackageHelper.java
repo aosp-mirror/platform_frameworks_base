@@ -70,6 +70,7 @@ import static com.android.server.pm.PackageManagerService.SCAN_AS_ODM;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_OEM;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_PRIVILEGED;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_PRODUCT;
+import static com.android.server.pm.PackageManagerService.SCAN_AS_STOPPED_SYSTEM_APP;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_SYSTEM;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_SYSTEM_EXT;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_VENDOR;
@@ -4212,6 +4213,18 @@ final class InstallPackageHelper {
                                 + pkgSetting.getVersionCode()
                                 + "; new: " + parsedPackage.getPath() + " @ "
                                 + parsedPackage.getPath());
+            }
+        }
+
+        // A new application appeared on /system, and we are seeing it for the first time.
+        // Its also not updated as we don't have a copy of it on /data. So, scan it in a
+        // STOPPED state. Ignore if it's an APEX package since stopped state does not affect them.
+        final boolean isApexPkg = (scanFlags & SCAN_AS_APEX) != 0;
+        if (mPm.mShouldStopSystemPackagesByDefault && scanSystemPartition
+                && !pkgAlreadyExists && !isApexPkg) {
+            String packageName = parsedPackage.getPackageName();
+            if (!mPm.mInitialNonStoppedSystemPackages.contains(packageName)) {
+                scanFlags |= SCAN_AS_STOPPED_SYSTEM_APP;
             }
         }
 
