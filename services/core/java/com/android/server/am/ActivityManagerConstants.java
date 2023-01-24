@@ -783,7 +783,7 @@ final class ActivityManagerConstants extends ContentObserver {
             "no_kill_cached_processes_post_boot_completed_duration_millis";
 
     /** @see mEnforceReceiverExportedFlagRequirement */
-    private static final boolean DEFAULT_ENFORCE_RECEIVER_EXPORTED_FLAG_REQUIREMENT = false;
+    private static final boolean DEFAULT_ENFORCE_RECEIVER_EXPORTED_FLAG_REQUIREMENT = true;
 
     /** @see #mNoKillCachedProcessesUntilBootCompleted */
     private static final boolean DEFAULT_NO_KILL_CACHED_PROCESSES_UNTIL_BOOT_COMPLETED = true;
