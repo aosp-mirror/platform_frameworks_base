@@ -46,6 +46,7 @@ import com.android.server.input.InputManagerInternal;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
@@ -78,6 +79,14 @@ class InputController {
     @Retention(RetentionPolicy.SOURCE)
     @interface PhysType {
     }
+
+    /**
+     * The maximum length of a device name (in bytes in UTF-8 encoding).
+     *
+     * This limitation comes directly from uinput.
+     * See also UINPUT_MAX_NAME_SIZE in linux/uinput.h
+     */
+    private static final int DEVICE_NAME_MAX_LENGTH = 80;
 
     final Object mLock;
 
@@ -312,6 +321,34 @@ class InputController {
         }
     }
 
+    /**
+     * Validates a device name by checking length and whether a device with the same name
+     * already exists. Throws exceptions if the validation fails.
+     * @param deviceName The name of the device to be validated
+     * @throws DeviceCreationException if {@code deviceName} is not valid.
+     */
+    private void validateDeviceName(String deviceName) throws DeviceCreationException {
+        // Comparison is greater or equal because the device name must fit into a const char*
+        // including the \0-terminator. Therefore the actual number of bytes that can be used
+        // for device name is DEVICE_NAME_MAX_LENGTH - 1
+        if (deviceName.getBytes(StandardCharsets.UTF_8).length >= DEVICE_NAME_MAX_LENGTH) {
+            throw new DeviceCreationException(
+                    "Input device name exceeds maximum length of " + DEVICE_NAME_MAX_LENGTH
+                            + "bytes: " + deviceName);
+        }
+
+        synchronized (mLock) {
+            InputDeviceDescriptor[] values = mInputDeviceDescriptors.values().toArray(
+                    new InputDeviceDescriptor[0]);
+            for (InputDeviceDescriptor value : values) {
+                if (value.mName.equals(deviceName)) {
+                    throw new DeviceCreationException(
+                            "Input device name already in use: " + deviceName);
+                }
+            }
+        }
+    }
+
     private static String createPhys(@PhysType String type) {
         return String.format("virtual%s:%d", type, sNextPhysId.getAndIncrement());
     }
@@ -451,10 +488,10 @@ class InputController {
 
     @VisibleForTesting
     void addDeviceForTesting(IBinder deviceToken, int fd, int type, int displayId, String phys,
-            int inputDeviceId) {
+            String deviceName, int inputDeviceId) {
         synchronized (mLock) {
             mInputDeviceDescriptors.put(deviceToken, new InputDeviceDescriptor(fd, () -> {
-            }, type, displayId, phys, inputDeviceId));
+            }, type, displayId, phys, deviceName, inputDeviceId));
         }
     }
 
@@ -565,6 +602,9 @@ class InputController {
         private final @Type int mType;
         private final int mDisplayId;
         private final String mPhys;
+        // The name given to this device by the client. Enforced to be unique within
+        // InputController.
+        private final String mName;
         // The input device id that was associated to the device by the InputReader on device
         // creation.
         private final int mInputDeviceId;
@@ -572,12 +612,13 @@ class InputController {
         private final long mCreationOrderNumber;
 
         InputDeviceDescriptor(int fd, IBinder.DeathRecipient deathRecipient, @Type int type,
-                int displayId, String phys, int inputDeviceId) {
+                int displayId, String phys, String name, int inputDeviceId) {
             mFd = fd;
             mDeathRecipient = deathRecipient;
             mType = type;
             mDisplayId = displayId;
             mPhys = phys;
+            mName = name;
             mInputDeviceId = inputDeviceId;
             mCreationOrderNumber = sNextCreationOrderNumber.getAndIncrement();
         }
@@ -733,6 +774,7 @@ class InputController {
                     "Virtual device creation should happen on an auxiliary thread (e.g. binder "
                             + "thread) and not from the handler's thread.");
         }
+        validateDeviceName(deviceName);
 
         final int fd;
         final BinderDeathRecipient binderDeathRecipient;
@@ -769,7 +811,7 @@ class InputController {
         synchronized (mLock) {
             mInputDeviceDescriptors.put(deviceToken,
                     new InputDeviceDescriptor(fd, binderDeathRecipient, type, displayId, phys,
-                            inputDeviceId));
+                            deviceName, inputDeviceId));
         }
     }
 
