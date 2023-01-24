@@ -858,6 +858,32 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void faceUnlockDoesNotRunWhenDeviceIsGoingToSleepWithAssistantVisible() {
+        mKeyguardUpdateMonitor.setKeyguardShowing(true, true);
+        mKeyguardUpdateMonitor.setAssistantVisible(true);
+
+        verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt(), anyBoolean());
+        mTestableLooper.processAllMessages();
+        clearInvocations(mFaceManager);
+
+        // Device going to sleep while assistant is visible
+        mKeyguardUpdateMonitor.handleStartedGoingToSleep(0);
+        mKeyguardUpdateMonitor.handleFinishedGoingToSleep(0);
+        mTestableLooper.moveTimeForward(DEFAULT_CANCEL_SIGNAL_TIMEOUT);
+        mTestableLooper.processAllMessages();
+
+        mKeyguardUpdateMonitor.handleKeyguardReset();
+
+        assertThat(mKeyguardUpdateMonitor.isFaceDetectionRunning()).isFalse();
+        verify(mFaceManager, never()).authenticate(any(),
+                any(),
+                any(),
+                any(),
+                anyInt(),
+                anyBoolean());
+    }
+
+    @Test
     public void testIgnoresAuth_whenTrustAgentOnKeyguard_withoutBypass() {
         mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
         mTestableLooper.processAllMessages();
