@@ -26,10 +26,8 @@
     <string name="install_done" msgid="5987363587661783896">"এপ্ ইনষ্টল কৰা হ’ল।"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"আপুনি এই এপ্‌টো ইনষ্টল কৰিবলৈ বিচাৰেনে?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"আপুনি এই এপ্‌টো আপডে’ট কৰিবলৈ বিচাৰেনে?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_changed" msgid="4215696609006069124">"এই এপ্‌টোৰ আপডে’টসমূহ বৰ্তমান <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g>এ পৰিচালনা কৰি আছে।\n\nআপডে’ট কৰিলে, আপুনি ইয়াৰ পৰিবৰ্তে <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g>ৰ পৰা ভৱিষ্যত আপডে’টসমূহ পাব।"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="8778026710268011466">"এই এপ্‌টোৰ আপডে’টসমূহ বৰ্তমান <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g>এ পৰিচালনা কৰি আছে।\n\nআপুনি <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g>ৰ পৰা অহা এই আপডে’টটো ইনষ্টল কৰিব বিচাৰেনে?"</string>
     <string name="install_failed" msgid="5777824004474125469">"এপ্ ইনষ্টল কৰা হোৱা নাই।"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"পেকেজটোৰ ইনষ্টল অৱৰোধ কৰা হৈছে।"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"এপ্‌টো ইনষ্টল কৰিব পৰা নগ\'ল কাৰণ ইয়াৰ সৈতে আগৰে পৰা থকা এটা পেকেজৰ সংঘাত হৈছে।"</string>
