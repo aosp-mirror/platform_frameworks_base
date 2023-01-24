@@ -24,7 +24,6 @@ import android.content.IntentFilter
 import android.hardware.display.DisplayManager
 import android.os.Bundle
 import android.os.IBinder
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.SurfaceControlViewHost
 import android.view.View
@@ -65,6 +64,11 @@ constructor(
     val hostToken: IBinder? = bundle.getBinder(KEY_HOST_TOKEN)
     private val width: Int = bundle.getInt(KEY_VIEW_WIDTH)
     private val height: Int = bundle.getInt(KEY_VIEW_HEIGHT)
+    private val shouldHighlightSelectedAffordance: Boolean =
+        bundle.getBoolean(
+            KeyguardQuickAffordancePreviewConstants.KEY_HIGHLIGHT_QUICK_AFFORDANCES,
+            false,
+        )
 
     private var host: SurfaceControlViewHost
 
@@ -82,6 +86,7 @@ constructor(
                 bundle.getString(
                     KeyguardQuickAffordancePreviewConstants.KEY_INITIALLY_SELECTED_SLOT_ID,
                 ),
+            shouldHighlightSelectedAffordance = shouldHighlightSelectedAffordance,
         )
         runBlocking(mainDispatcher) {
             host =
@@ -154,8 +159,7 @@ constructor(
             bottomAreaView,
             FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                Gravity.BOTTOM,
+                FrameLayout.LayoutParams.MATCH_PARENT,
             ),
         )
     }
@@ -195,7 +199,13 @@ constructor(
             ?.events
             ?.onTargetRegionChanged(KeyguardClockSwitch.getLargeClockRegion(parentView))
         clockView?.let { parentView.removeView(it) }
-        clockView = clockController.clock?.largeClock?.view?.apply { parentView.addView(this) }
+        clockView =
+            clockController.clock?.largeClock?.view?.apply {
+                if (shouldHighlightSelectedAffordance) {
+                    alpha = DIM_ALPHA
+                }
+                parentView.addView(this)
+            }
     }
 
     companion object {
@@ -203,5 +213,7 @@ constructor(
         private const val KEY_VIEW_WIDTH = "width"
         private const val KEY_VIEW_HEIGHT = "height"
         private const val KEY_DISPLAY_ID = "display_id"
+
+        private const val DIM_ALPHA = 0.3f
     }
 }
