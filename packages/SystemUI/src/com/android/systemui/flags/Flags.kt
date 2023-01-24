@@ -493,6 +493,9 @@ object Flags {
     val SCREENSHOT_WORK_PROFILE_POLICY =
         unreleasedFlag(1301, "screenshot_work_profile_policy", teamfood = true)
 
+    // TODO(b/264916608): Tracking Bug
+    @JvmField val SCREENSHOT_METADATA = unreleasedFlag(1302, "screenshot_metadata")
+
     // 1400 - columbus
     // TODO(b/254512756): Tracking Bug
     val QUICK_TAP_IN_PCC = releasedFlag(1400, "quick_tap_in_pcc")

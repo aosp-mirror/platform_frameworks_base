@@ -73,6 +73,30 @@ class RequestProcessorTest {
         assertThat(result).isEqualTo(request)
     }
 
+    /** Tests the Java-compatible function wrapper, ensures callback is invoked. */
+    @Test
+    fun testProcessAsync_ScreenshotData() {
+        flags.set(Flags.SCREENSHOT_WORK_PROFILE_POLICY, false)
+
+        val request = ScreenshotData.fromRequest(
+            ScreenshotRequest.Builder(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_CHORD).build())
+        val processor = RequestProcessor(imageCapture, policy, flags, scope)
+
+        var result: ScreenshotData? = null
+        var callbackCount = 0
+        val callback: (ScreenshotData) -> Unit = { processedRequest: ScreenshotData ->
+            result = processedRequest
+            callbackCount++
+        }
+
+        // runs synchronously, using Unconfined Dispatcher
+        processor.processAsync(request, callback)
+
+        // Callback invoked once returning the same request (no changes)
+        assertThat(callbackCount).isEqualTo(1)
+        assertThat(result).isEqualTo(request)
+    }
+
     @Test
     fun testFullScreenshot_workProfilePolicyDisabled() = runBlocking {
         flags.set(Flags.SCREENSHOT_WORK_PROFILE_POLICY, false)
@@ -85,6 +109,11 @@ class RequestProcessorTest {
 
         // No changes
         assertThat(processedRequest).isEqualTo(request)
+
+        val screenshotData = ScreenshotData.fromRequest(request)
+        val processedData = processor.process(screenshotData)
+
+        assertThat(processedData).isEqualTo(screenshotData)
     }
 
     @Test
@@ -108,6 +137,13 @@ class RequestProcessorTest {
         assertThat(processedRequest.type).isEqualTo(TAKE_SCREENSHOT_FULLSCREEN)
         assertThat(processedRequest.source).isEqualTo(SCREENSHOT_OTHER)
         assertThat(processedRequest.topComponent).isEqualTo(component)
+
+        val processedData = processor.process(ScreenshotData.fromRequest(request))
+
+        // Request has topComponent added, but otherwise unchanged.
+        assertThat(processedData.type).isEqualTo(TAKE_SCREENSHOT_FULLSCREEN)
+        assertThat(processedData.source).isEqualTo(SCREENSHOT_OTHER)
+        assertThat(processedData.topComponent).isEqualTo(component)
     }
 
     @Test
@@ -140,6 +176,18 @@ class RequestProcessorTest {
         assertThat(imageCapture.requestedTaskId).isEqualTo(TASK_ID)
         assertThat(processedRequest.userId).isEqualTo(USER_ID)
         assertThat(processedRequest.topComponent).isEqualTo(component)
+
+        val processedData = processor.process(ScreenshotData.fromRequest(request))
+
+        // Expect a task snapshot is taken, overriding the full screen mode
+        assertThat(processedData.type).isEqualTo(TAKE_SCREENSHOT_PROVIDED_IMAGE)
+        assertThat(processedData.bitmap).isEqualTo(bitmap)
+        assertThat(processedData.screenBounds).isEqualTo(bounds)
+        assertThat(processedData.insets).isEqualTo(Insets.NONE)
+        assertThat(processedData.taskId).isEqualTo(TASK_ID)
+        assertThat(imageCapture.requestedTaskId).isEqualTo(TASK_ID)
+        assertThat(processedRequest.userId).isEqualTo(USER_ID)
+        assertThat(processedRequest.topComponent).isEqualTo(component)
     }
 
     @Test
@@ -165,6 +213,11 @@ class RequestProcessorTest {
 
         // No changes
         assertThat(processedRequest).isEqualTo(request)
+
+        val screenshotData = ScreenshotData.fromRequest(request)
+        val processedData = processor.process(screenshotData)
+
+        assertThat(processedData).isEqualTo(screenshotData)
     }
 
     @Test
@@ -192,6 +245,11 @@ class RequestProcessorTest {
 
         // No changes
         assertThat(processedRequest).isEqualTo(request)
+
+        val screenshotData = ScreenshotData.fromRequest(request)
+        val processedData = processor.process(screenshotData)
+
+        assertThat(processedData).isEqualTo(screenshotData)
     }
 
     @Test
@@ -220,6 +278,11 @@ class RequestProcessorTest {
 
         // Work profile, but already a task snapshot, so no changes
         assertThat(processedRequest).isEqualTo(request)
+
+        val screenshotData = ScreenshotData.fromRequest(request)
+        val processedData = processor.process(screenshotData)
+
+        assertThat(processedData).isEqualTo(screenshotData)
     }
 
     private fun makeHardwareBitmap(width: Int, height: Int): Bitmap {
