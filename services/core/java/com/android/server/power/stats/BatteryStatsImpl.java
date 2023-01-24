@@ -3926,8 +3926,6 @@ public class BatteryStatsImpl extends BatteryStats {
 
         private boolean mHasHistoryStepDetails;
 
-        private int mLastHistoryStepLevel;
-
         /**
          * Total time (in milliseconds) spent executing in user code.
          */
@@ -3956,11 +3954,6 @@ public class BatteryStatsImpl extends BatteryStats {
 
         @Override
         public HistoryStepDetails getHistoryStepDetails() {
-            if (mBatteryLevel >= mLastHistoryStepLevel && mHasHistoryStepDetails) {
-                mLastHistoryStepLevel = mBatteryLevel;
-                return null;
-            }
-
             // Perform a CPU update right after we do this collection, so we have started
             // collecting good data for the next step.
             requestImmediateCpuUpdate();
@@ -3989,7 +3982,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 mLastStepStatIrqTimeMs = mCurStepStatIrqTimeMs;
                 mLastStepStatSoftIrqTimeMs = mCurStepStatSoftIrqTimeMs;
                 mLastStepStatIdleTimeMs = mCurStepStatIdleTimeMs;
-                mDetails.clear();
+                return null;
             } else {
                 if (DEBUG) {
                     Slog.d(TAG, "Step stats last: user=" + mLastStepCpuUserTimeMs + " sys="
@@ -4058,12 +4051,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 mLastStepStatIrqTimeMs = mCurStepStatIrqTimeMs;
                 mLastStepStatSoftIrqTimeMs = mCurStepStatSoftIrqTimeMs;
                 mLastStepStatIdleTimeMs = mCurStepStatIdleTimeMs;
+                return mDetails;
             }
-
-            mHasHistoryStepDetails = mBatteryLevel <= mLastHistoryStepLevel;
-            mLastHistoryStepLevel = mBatteryLevel;
-
-            return mDetails;
         }
 
         public void addCpuStats(int totalUTimeMs, int totalSTimeMs, int statUserTimeMs,
@@ -4083,6 +4072,7 @@ public class BatteryStatsImpl extends BatteryStats {
             mCurStepStatIrqTimeMs += statIrqTimeMs;
             mCurStepStatSoftIrqTimeMs += statSoftIrqTimeMs;
             mCurStepStatIdleTimeMs += statIdleTimeMs;
+            mHasHistoryStepDetails = true;
         }
 
         @Override

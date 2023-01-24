@@ -115,9 +115,11 @@ public class BatteryStatsHistory {
     static final int STATE_BATTERY_HEALTH_SHIFT = 26;
     static final int STATE_BATTERY_PLUG_MASK = 0x00000003;
     static final int STATE_BATTERY_PLUG_SHIFT = 24;
+
     // We use the low bit of the battery state int to indicate that we have full details
     // from a battery level change.
-    static final int BATTERY_DELTA_LEVEL_FLAG = 0x00000001;
+    static final int BATTERY_LEVEL_DETAILS_FLAG = 0x00000001;
+
     // Flag in history tag index: indicates that this is the first occurrence of this tag,
     // therefore the tag value is written in the parcel
     static final int TAG_FIRST_OCCURRENCE_FLAG = 0x8000;
@@ -1385,8 +1387,17 @@ public class BatteryStatsHistory {
 
         if (dataSize == 0) {
             // The history is currently empty; we need it to start with a time stamp.
-            cur.currentTime = mClock.currentTimeMillis();
-            writeHistoryItem(elapsedRealtimeMs, uptimeMs, cur, HistoryItem.CMD_RESET);
+            HistoryItem copy = new HistoryItem();
+            copy.setTo(cur);
+            copy.currentTime = mClock.currentTimeMillis();
+            copy.wakelockTag = null;
+            copy.wakeReasonTag = null;
+            copy.eventCode = HistoryItem.EVENT_NONE;
+            copy.eventTag = null;
+            copy.tagsFirstOccurrence = false;
+            copy.energyConsumerDetails = null;
+            copy.cpuUsageDetails = null;
+            writeHistoryItem(elapsedRealtimeMs, uptimeMs, copy, HistoryItem.CMD_RESET);
         }
         writeHistoryItem(elapsedRealtimeMs, uptimeMs, cur, HistoryItem.CMD_UPDATE);
     }
@@ -1516,10 +1527,19 @@ public class BatteryStatsHistory {
             deltaTimeToken = (int) deltaTime;
         }
         int firstToken = deltaTimeToken | (cur.states & BatteryStatsHistory.DELTA_STATE_MASK);
-        final int includeStepDetails = mLastHistoryStepLevel > cur.batteryLevel
-                ? BatteryStatsHistory.BATTERY_DELTA_LEVEL_FLAG : 0;
-        mLastHistoryStepLevel = cur.batteryLevel;
-        final int batteryLevelInt = buildBatteryLevelInt(cur) | includeStepDetails;
+        int batteryLevelInt = buildBatteryLevelInt(cur);
+
+        if (cur.batteryLevel < mLastHistoryStepLevel || mLastHistoryStepLevel == 0) {
+            cur.stepDetails = mStepDetailsCalculator.getHistoryStepDetails();
+            if (cur.stepDetails != null) {
+                batteryLevelInt |= BatteryStatsHistory.BATTERY_LEVEL_DETAILS_FLAG;
+                mLastHistoryStepLevel = cur.batteryLevel;
+            }
+        } else {
+            cur.stepDetails = null;
+            mLastHistoryStepLevel = cur.batteryLevel;
+        }
+
         final boolean batteryLevelIntChanged = batteryLevelInt != lastBatteryLevelInt;
         if (batteryLevelIntChanged) {
             firstToken |= BatteryStatsHistory.DELTA_BATTERY_LEVEL_FLAG;
@@ -1652,8 +1672,7 @@ public class BatteryStatsHistory {
             }
         }
 
-        cur.stepDetails = mStepDetailsCalculator.getHistoryStepDetails();
-        if (includeStepDetails != 0) {
+        if (cur.stepDetails != null) {
             cur.stepDetails.writeToParcel(dest);
         }
 

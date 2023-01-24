@@ -937,14 +937,13 @@ public class BatteryStatsNoteTest extends TestCase {
         HistoryItem item;
 
         assertThat(item = iterator.next()).isNotNull();
+        assertEquals(HistoryItem.CMD_RESET, item.cmd);
+        assertEquals(HistoryItem.EVENT_NONE, item.eventCode);
+
+        assertThat(item = iterator.next()).isNotNull();
         assertEquals(HistoryItem.EVENT_ALARM_START, item.eventCode);
         assertEquals("foo", item.eventTag.string);
         assertEquals(UID, item.eventTag.uid);
-
-        // TODO(narayan): Figure out why this event is written to the history buffer. See
-        // test below where it is being interspersed between multiple START events too.
-        assertThat(item = iterator.next()).isNotNull();
-        assertEquals(HistoryItem.EVENT_NONE, item.eventCode);
 
         assertThat(item = iterator.next()).isNotNull();
         assertEquals(HistoryItem.EVENT_ALARM_FINISH, item.eventCode);
@@ -977,12 +976,13 @@ public class BatteryStatsNoteTest extends TestCase {
         HistoryItem item;
 
         assertThat(item = iterator.next()).isNotNull();
+        assertEquals(HistoryItem.CMD_RESET, item.cmd);
+        assertEquals(HistoryItem.EVENT_NONE, item.eventCode);
+
+        assertThat(item = iterator.next()).isNotNull();
         assertEquals(HistoryItem.EVENT_ALARM_START, item.eventCode);
         assertEquals("foo", item.eventTag.string);
         assertEquals(100, item.eventTag.uid);
-
-        assertThat(item = iterator.next()).isNotNull();
-        assertEquals(HistoryItem.EVENT_NONE, item.eventCode);
 
         assertThat(item = iterator.next()).isNotNull();
         assertEquals(HistoryItem.EVENT_ALARM_START, item.eventCode);
