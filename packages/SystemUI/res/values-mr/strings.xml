@@ -91,10 +91,8 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"खालील सीमेपासून <xliff:g id="PERCENT">%1$d</xliff:g> टक्के"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"डाव्या सीमेपासून <xliff:g id="PERCENT">%1$d</xliff:g> टक्के"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"उजव्या सीमेपासून <xliff:g id="PERCENT">%1$d</xliff:g> टक्के"</string>
-    <!-- no translation found for screenshot_work_profile_notification (2812417845875653929) -->
-    <skip />
-    <!-- no translation found for screenshot_default_files_app_name (8721579578575161912) -->
-    <skip />
+    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"ऑफिससंबंधित स्क्रीनशॉट <xliff:g id="APP">%1$s</xliff:g> अ‍ॅपमध्ये सेव्ह केले आहेत"</string>
+    <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"फाइल"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"स्क्रीन रेकॉर्डर"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"स्क्रीन रेकॉर्डिंग प्रोसेस सुरू"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"स्क्रीन रेकॉर्ड सत्रासाठी सुरू असलेली सूचना"</string>
@@ -545,8 +543,10 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"ऑटोमॅटिक"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"आवाज किंवा व्हायब्रेशन नाही"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"आवाज किंवा व्हायब्रेशन नाही आणि संभाषण विभागात सर्वात तळाशी दिसते"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"फोन सेटिंग्जनुसार फोन रिंग किंवा व्हायब्रेट होऊ शकतो"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"फोन सेटिंग्जच्या आधारावर रिंग किंवा व्हायब्रेट होऊ शकतो. <xliff:g id="APP_NAME">%1$s</xliff:g> मधील संभाषणे बाय डीफॉल्ट बबल होतात."</string>
+    <!-- no translation found for notification_channel_summary_default (777294388712200605) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_default_with_bubbles (3482483084451555344) -->
+    <skip />
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ही सूचना मिळाल्‍यावर आवाज व्‍हावा की व्हायब्रेशन व्‍हावे ते सिस्‍टममध्ये नमूद करा"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;स्थिती&lt;/b&gt; ही डीफॉल्ट म्हणून प्रमोट केली गेली"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;स्थिती&lt;/b&gt; ला सायलंट म्हणून डीमोट केले गेले"</string>
@@ -887,13 +887,11 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="APP_LABEL">%2$s</xliff:g> मध्ये <xliff:g id="SONG_NAME">%1$s</xliff:g> प्ले करा"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"पहिल्यासारखे करा"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> वर प्ले करण्यासाठी जवळ जा"</string>
-    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
-    <skip />
+    <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"येथे प्ले करण्यासाठी, <xliff:g id="DEVICENAME">%1$s</xliff:g> च्या जवळ जा"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> वर प्ले होत आहे"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"काहीतरी चूक झाली. पुन्हा प्रयत्न करा."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"लोड करत आहे"</string>
-    <!-- no translation found for media_ttt_default_device_type (4457646436153370169) -->
-    <skip />
+    <string name="media_ttt_default_device_type" msgid="4457646436153370169">"टॅबलेट"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"निष्क्रिय, ॲप तपासा"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"आढळले नाही"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"नियंत्रण उपलब्ध नाही"</string>
@@ -917,7 +915,8 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"व्हॉल्यूम"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"स्पीकर आणि डिस्प्ले"</string>
-    <!-- no translation found for media_output_group_title_suggested_device (4157186235837903826) -->
+    <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"सुचवलेली डिव्हाइस"</string>
+    <!-- no translation found for media_output_status_require_premium (5691200962588753380) -->
     <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ब्रॉडकास्टिंग कसे काम करते"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ब्रॉडकास्ट करा"</string>
@@ -1060,8 +1059,17 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ही स्क्रीन बंद होईल"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"फोल्ड करता येण्यासारखे डिव्हाइस अनफोल्ड केले जात आहे"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"फोल्ड करता येण्यासारखे डिव्हाइस आजूबाजूला फ्लिप केले जात आहे"</string>
-    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
+    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> बॅटरी शिल्लक आहे"</string>
+    <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"तुमचे स्टायलस चार्जरशी कनेक्ट करा"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"स्टायलस बॅटरी कमी आहे"</string>
+    <!-- no translation found for video_camera (7654002575156149298) -->
     <skip />
-    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
+    <!-- no translation found for call_from_work_profile_title (6991157106804289643) -->
+    <skip />
+    <!-- no translation found for call_from_work_profile_text (3458704745640229638) -->
+    <skip />
+    <!-- no translation found for call_from_work_profile_action (2937701298133010724) -->
+    <skip />
+    <!-- no translation found for call_from_work_profile_close (7927067108901068098) -->
     <skip />
 </resources>

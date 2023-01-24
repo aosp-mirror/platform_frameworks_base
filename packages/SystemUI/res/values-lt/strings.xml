@@ -91,10 +91,8 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Apatinė riba – <xliff:g id="PERCENT">%1$d</xliff:g> proc."</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Kairioji riba – <xliff:g id="PERCENT">%1$d</xliff:g> proc."</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Dešinioji riba – <xliff:g id="PERCENT">%1$d</xliff:g> proc."</string>
-    <!-- no translation found for screenshot_work_profile_notification (2812417845875653929) -->
-    <skip />
-    <!-- no translation found for screenshot_default_files_app_name (8721579578575161912) -->
-    <skip />
+    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"Ekrano kopijos, užfiksuotos naudojantis darbo profiliu, išsaugomos programoje „<xliff:g id="APP">%1$s</xliff:g>“"</string>
+    <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Failai"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Ekrano vaizdo įrašytuvas"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Apdorojam. ekrano vaizdo įraš."</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Šiuo metu rodomas ekrano įrašymo sesijos pranešimas"</string>
@@ -545,8 +543,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automatinis"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Neskamba ir nevibruoja"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Neskamba, nevibruoja ir rodoma apatinėje pokalbių skilties dalyje"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Gali skambėti arba vibruoti, atsižvelgiant į telefono nustatymus"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Gali skambėti arba vibruoti, atsižvelgiant į telefono nustatymus. Pokalbiai iš „<xliff:g id="APP_NAME">%1$s</xliff:g>“ debesėlio pagal numatytuosius nustatymus."</string>
+    <string name="notification_channel_summary_default" msgid="777294388712200605">"Gali skambėti arba vibruoti, atsižvelgiant į įrenginio nustatymus"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Gali skambėti arba vibruoti, atsižvelgiant į įrenginio nustatymus. Pokalbiai iš „<xliff:g id="APP_NAME">%1$s</xliff:g>“ debesėlio pagal numatytuosius nustatymus."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Nustatykite, kad sistema aptiktų, ar šis pranešimas turi skambėti, ar vibruoti"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Būsena:&lt;/b&gt; pakeista į numatytąjį lygį"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Būsena:&lt;/b&gt; pakeista į begarsį lygį"</string>
@@ -814,8 +812,7 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Vidutinis"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Mažas"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"Didelis"</string>
-    <!-- no translation found for accessibility_magnification_done (263349129937348512) -->
-    <skip />
+    <string name="accessibility_magnification_done" msgid="263349129937348512">"Atlikta"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Redaguoti"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Didinimo lango nustatymai"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Palietę atidarykite pritaikymo neįgaliesiems funkcijas. Tinkinkite arba pakeiskite šį mygtuką nustatymuose.\n\n"<annotation id="link">"Žr. nustatymus"</annotation></string>
@@ -887,13 +884,11 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Leisti „<xliff:g id="SONG_NAME">%1$s</xliff:g>“ iš „<xliff:g id="APP_LABEL">%2$s</xliff:g>“"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Anuliuoti"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Prieikite arčiau, kad galėtumėte leisti įrenginyje „<xliff:g id="DEVICENAME">%1$s</xliff:g>“"</string>
-    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
-    <skip />
+    <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"Jei norite leisti čia, eikite arčiau įrenginio „<xliff:g id="DEVICENAME">%1$s</xliff:g>“"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Leidžiama įrenginyje „<xliff:g id="DEVICENAME">%1$s</xliff:g>“"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Kažkas ne taip. Bandykite dar kartą."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"Įkeliama"</string>
-    <!-- no translation found for media_ttt_default_device_type (4457646436153370169) -->
-    <skip />
+    <string name="media_ttt_default_device_type" msgid="4457646436153370169">"planšetinis kompiuteris"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktyvu, patikrinkite progr."</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nerasta"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Valdiklis nepasiekiamas"</string>
@@ -917,8 +912,8 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Garsumas"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Garsiakalbiai ir ekranai"</string>
-    <!-- no translation found for media_output_group_title_suggested_device (4157186235837903826) -->
-    <skip />
+    <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Siūlomi įrenginiai"</string>
+    <string name="media_output_status_require_premium" msgid="5691200962588753380">"Reikalinga mokama paskyra"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Kaip veikia transliacija"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Transliacija"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Netoliese esantys žmonės, turintys suderinamus „Bluetooth“ įrenginius, gali klausyti jūsų transliuojamos medijos"</string>
@@ -1062,4 +1057,10 @@
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Lankstomasis įrenginys apverčiamas"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Liko akumuliatoriaus įkrovos: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Prijunkite rašiklį prie kroviklio"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Senka rašiklio akumuliatorius"</string>
+    <string name="video_camera" msgid="7654002575156149298">"Vaizdo kamera"</string>
+    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Negalima skambinti iš šio profilio"</string>
+    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Pagal jūsų darbo politiką galite skambinti telefonu tik iš darbo profilio"</string>
+    <string name="call_from_work_profile_action" msgid="2937701298133010724">"Perjungti į darbo profilį"</string>
+    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Uždaryti"</string>
 </resources>

@@ -543,8 +543,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automática"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Sem som ou vibração"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Sem som ou vibração e aparece na parte inferior na secção de conversas."</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Pode tocar ou vibrar com base nas definições do telemóvel."</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Pode tocar ou vibrar com base nas definições do telemóvel. As conversas da app <xliff:g id="APP_NAME">%1$s</xliff:g> aparecem como um balão por predefinição."</string>
+    <string name="notification_channel_summary_default" msgid="777294388712200605">"Pode tocar ou vibrar com base nas definições do dispositivo"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Pode tocar ou vibrar com base nas definições do dispositivo. As conversas da app <xliff:g id="APP_NAME">%1$s</xliff:g> aparecem como um balão por predefinição."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Faça com que o sistema determine se esta notificação deve emitir um som ou uma vibração"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Estado:&lt;/b&gt; promovida para Predefinida"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Estado:&lt;/b&gt; despromovida para Silenciosa"</string>
@@ -812,8 +812,7 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Médio"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Pequeno"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"Grande"</string>
-    <!-- no translation found for accessibility_magnification_done (263349129937348512) -->
-    <skip />
+    <string name="accessibility_magnification_done" msgid="263349129937348512">"Concluir"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Editar"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Definições da janela da lupa"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Toque para abrir funcionalidades de acessibilidade. Personal. ou substitua botão em Defin.\n\n"<annotation id="link">"Ver defin."</annotation></string>
@@ -885,8 +884,7 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Reproduzir <xliff:g id="SONG_NAME">%1$s</xliff:g> a partir da app <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Anular"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Aproxime-se para reproduzir no dispositivo <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
-    <skip />
+    <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"Para reproduzir aqui, aproxime-se do <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"A reproduzir no dispositivo <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Algo correu mal. Tente novamente."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"A carregar"</string>
@@ -915,6 +913,7 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Altifalantes e ecrãs"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Dispositivos sugeridos"</string>
+    <string name="media_output_status_require_premium" msgid="5691200962588753380">"Requer uma conta premium"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Como funciona a transmissão"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Transmissão"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"As pessoas próximas de si com dispositivos Bluetooth compatíveis podem ouvir o conteúdo multimédia que está a transmitir"</string>
@@ -1058,4 +1057,10 @@
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Dispositivo dobrável a ser virado ao contrário"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> de bateria restante"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Ligue a caneta stylus a um carregador"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Bateria da caneta stylus fraca"</string>
+    <string name="video_camera" msgid="7654002575156149298">"Câmara de vídeo"</string>
+    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Não é possível ligar a partir deste perfil"</string>
+    <string name="call_from_work_profile_text" msgid="3458704745640229638">"A sua Política de Trabalho só lhe permite fazer chamadas telefónicas a partir do perfil de trabalho"</string>
+    <string name="call_from_work_profile_action" msgid="2937701298133010724">"Mudar para perfil de trabalho"</string>
+    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Fechar"</string>
 </resources>
