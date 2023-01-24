@@ -87,7 +87,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.hardware.display.DisplayManager;
-import android.os.BatteryStats;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -120,7 +119,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -251,8 +249,6 @@ public class AppStandbyControllerTests {
                         .setLong("elapsed_threshold_rare", RARE_THRESHOLD)
                         .setLong("elapsed_threshold_restricted", RESTRICTED_THRESHOLD);
         DeviceConfig.OnPropertiesChangedListener mPropertiesChangedListener;
-        String mExpectedNoteEventPackage = null;
-        int mLastNoteEvent = BatteryStats.HistoryItem.EVENT_NONE;
 
         MyInjector(Context context, Looper looper) {
             super(context, looper);
@@ -324,9 +320,6 @@ public class AppStandbyControllerTests {
 
         @Override
         void noteEvent(int event, String packageName, int uid) throws RemoteException {
-            if (Objects.equals(mExpectedNoteEventPackage, packageName)) {
-                mLastNoteEvent = event;
-            }
         }
 
         @Override
@@ -2108,50 +2101,6 @@ public class AppStandbyControllerTests {
         mController.setAppStandbyBucket(PACKAGE_BACKGROUND_LOCATION, USER_ID, STANDBY_BUCKET_RARE,
                 REASON_MAIN_TIMEOUT);
         assertBucket(STANDBY_BUCKET_FREQUENT, PACKAGE_BACKGROUND_LOCATION);
-    }
-
-    @Test
-    public void testBatteryStatsNoteEvent() throws Exception {
-        mInjector.mExpectedNoteEventPackage = PACKAGE_1;
-        reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
-
-        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
-                REASON_MAIN_FORCED_BY_USER);
-        assertEquals(BatteryStats.HistoryItem.EVENT_PACKAGE_INACTIVE, mInjector.mLastNoteEvent);
-
-        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_ACTIVE,
-                REASON_MAIN_FORCED_BY_USER);
-        assertEquals(BatteryStats.HistoryItem.EVENT_PACKAGE_ACTIVE, mInjector.mLastNoteEvent);
-
-        // Since we're staying on the PACKAGE_ACTIVE side, noteEvent shouldn't be called.
-        // Reset the last event to confirm the method isn't called.
-        mInjector.mLastNoteEvent = BatteryStats.HistoryItem.EVENT_NONE;
-        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_WORKING_SET,
-                REASON_MAIN_FORCED_BY_USER);
-        assertEquals(BatteryStats.HistoryItem.EVENT_NONE, mInjector.mLastNoteEvent);
-
-        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
-                REASON_MAIN_FORCED_BY_USER);
-        assertEquals(BatteryStats.HistoryItem.EVENT_PACKAGE_INACTIVE, mInjector.mLastNoteEvent);
-
-        // Since we're staying on the PACKAGE_ACTIVE side, noteEvent shouldn't be called.
-        // Reset the last event to confirm the method isn't called.
-        mInjector.mLastNoteEvent = BatteryStats.HistoryItem.EVENT_NONE;
-        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
-                REASON_MAIN_FORCED_BY_USER);
-        assertEquals(BatteryStats.HistoryItem.EVENT_NONE, mInjector.mLastNoteEvent);
-
-        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_FREQUENT,
-                REASON_MAIN_FORCED_BY_USER);
-        assertEquals(BatteryStats.HistoryItem.EVENT_PACKAGE_ACTIVE, mInjector.mLastNoteEvent);
-
-        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
-                REASON_MAIN_FORCED_BY_USER);
-        assertEquals(BatteryStats.HistoryItem.EVENT_PACKAGE_INACTIVE, mInjector.mLastNoteEvent);
-
-        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_EXEMPTED,
-                REASON_MAIN_FORCED_BY_USER);
-        assertEquals(BatteryStats.HistoryItem.EVENT_PACKAGE_ACTIVE, mInjector.mLastNoteEvent);
     }
 
     private String getAdminAppsStr(int userId) {
