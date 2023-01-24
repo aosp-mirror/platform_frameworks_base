@@ -46,6 +46,14 @@ package com.android.server.am {
 
 }
 
+package com.android.server.appop {
+
+  public interface AppOpsManagerLocal {
+    method public boolean isUidInForeground(int);
+  }
+
+}
+
 package com.android.server.pm {
 
   public interface PackageManagerLocal {

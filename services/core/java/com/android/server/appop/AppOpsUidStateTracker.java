@@ -89,6 +89,11 @@ interface AppOpsUidStateTracker {
     int getUidState(int uid);
 
     /**
+     * Determines if the uid is in foreground.
+     */
+    boolean isUidInForeground(int uid);
+
+    /**
      * Given a uid, code, and mode, resolve any foregroundness to MODE_IGNORED or MODE_ALLOWED
      */
     int evalMode(int uid, int code, int mode);
