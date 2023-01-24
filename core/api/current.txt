@@ -20908,6 +20908,7 @@ package android.media {
     method public void adjustStreamVolume(int, int, int);
     method public void adjustSuggestedStreamVolume(int, int, int);
     method public void adjustVolume(int, int);
+    method public void adjustVolumeGroupVolume(int, int, int);
     method public void clearCommunicationDevice();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS) public boolean clearPreferredMixerAttributes(@NonNull android.media.AudioAttributes, @NonNull android.media.AudioDeviceInfo);
     method public void dispatchMediaKeyEvent(android.view.KeyEvent);
@@ -20938,6 +20939,7 @@ package android.media {
     method public float getStreamVolumeDb(int, int, int);
     method @NonNull public java.util.List<android.media.AudioMixerAttributes> getSupportedMixerAttributes(@NonNull android.media.AudioDeviceInfo);
     method @Deprecated public int getVibrateSetting(int);
+    method public int getVolumeGroupIdForAttributes(@NonNull android.media.AudioAttributes);
     method @Deprecated public boolean isBluetoothA2dpOn();
     method public boolean isBluetoothScoAvailableOffCall();
     method @Deprecated public boolean isBluetoothScoOn();
@@ -20951,6 +20953,7 @@ package android.media {
     method public boolean isStreamMute(int);
     method public boolean isSurroundFormatEnabled(int);
     method public boolean isVolumeFixed();
+    method public boolean isVolumeGroupMuted(int);
     method @Deprecated public boolean isWiredHeadsetOn();
     method public void loadSoundEffects();
     method public void playSoundEffect(int);

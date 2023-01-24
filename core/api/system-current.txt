@@ -6680,6 +6680,7 @@ package android.media {
     method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, "android.permission.QUERY_AUDIO_STATE"}) public int getDeviceVolumeBehavior(@NonNull android.media.AudioDeviceAttributes);
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, "android.permission.QUERY_AUDIO_STATE"}) public java.util.List<android.media.AudioDeviceAttributes> getDevicesForAttributes(@NonNull android.media.AudioAttributes);
     method @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public int getLastAudibleStreamVolume(int);
+    method @IntRange(from=0) @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public int getLastAudibleVolumeGroupVolume(int);
     method @IntRange(from=0) public long getMaxAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo);
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getMaxVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getMinVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
@@ -6689,6 +6690,9 @@ package android.media {
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public java.util.List<android.media.AudioDeviceAttributes> getPreferredDevicesForCapturePreset(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public java.util.List<android.media.AudioDeviceAttributes> getPreferredDevicesForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int[] getSupportedSystemUsages();
+    method @IntRange(from=0) @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS, android.Manifest.permission.MODIFY_AUDIO_ROUTING}) public int getVolumeGroupMaxVolumeIndex(int);
+    method @IntRange(from=0) @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS, android.Manifest.permission.MODIFY_AUDIO_ROUTING}) public int getVolumeGroupMinVolumeIndex(int);
+    method @IntRange(from=0) @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS, android.Manifest.permission.MODIFY_AUDIO_ROUTING}) public int getVolumeGroupVolumeIndex(int);
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
     method public boolean isAudioServerRunning();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean isBluetoothVariableLatencyEnabled();
@@ -6722,6 +6726,7 @@ package android.media {
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean setPreferredDeviceForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy, @NonNull android.media.AudioDeviceAttributes);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean setPreferredDevicesForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy, @NonNull java.util.List<android.media.AudioDeviceAttributes>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setSupportedSystemUsages(@NonNull int[]);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS, android.Manifest.permission.MODIFY_AUDIO_ROUTING}) public void setVolumeGroupVolumeIndex(int, int, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setVolumeIndexForAttributes(@NonNull android.media.AudioAttributes, int, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean supportsBluetoothVariableLatency();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void unregisterAudioPolicy(@NonNull android.media.audiopolicy.AudioPolicy);
@@ -7128,6 +7133,7 @@ package android.media.audiopolicy {
     method public int describeContents();
     method @NonNull public android.media.AudioAttributes getAudioAttributes();
     method public int getId();
+    method @NonNull public String getName();
     method public boolean supportsAudioAttributes(@NonNull android.media.AudioAttributes);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.audiopolicy.AudioProductStrategy> CREATOR;
