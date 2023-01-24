@@ -121,6 +121,16 @@ public final class UserTypeFactory {
                 .setBaseType(FLAG_PROFILE)
                 .setMaxAllowedPerParent(1)
                 .setLabel(0)
+                .setIconBadge(com.android.internal.R.drawable.ic_clone_icon_badge)
+                .setBadgePlain(com.android.internal.R.drawable.ic_clone_badge)
+                // Clone doesn't use BadgeNoBackground, so just set to BadgePlain as a placeholder.
+                .setBadgeNoBackground(com.android.internal.R.drawable.ic_clone_badge)
+                .setBadgeLabels(
+                        com.android.internal.R.string.clone_profile_label_badge)
+                .setBadgeColors(
+                        com.android.internal.R.color.system_neutral2_800)
+                .setDarkThemeBadgeColors(
+                        com.android.internal.R.color.system_neutral2_900)
                 .setDefaultRestrictions(null)
                 .setIsMediaSharedWithParent(true)
                 .setIsCredentialSharableWithParent(true)
