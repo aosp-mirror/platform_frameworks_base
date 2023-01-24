@@ -263,11 +263,11 @@ public final class GnssTimeUpdateService extends Binder {
         long gnssUnixEpochTimeMillis = locationTime.getUnixEpochTimeMillis();
         long elapsedRealtimeMs = locationTime.getElapsedRealtimeNanos() / 1_000_000L;
 
-        UnixEpochTime timeSignal = new UnixEpochTime(elapsedRealtimeMs, gnssUnixEpochTimeMillis);
-        mLastSuggestedGnssTime = timeSignal;
+        UnixEpochTime unixEpochTime = new UnixEpochTime(elapsedRealtimeMs, gnssUnixEpochTimeMillis);
+        mLastSuggestedGnssTime = unixEpochTime;
 
-        GnssTimeSuggestion timeSuggestion = new GnssTimeSuggestion(timeSignal);
-        mTimeDetectorInternal.suggestGnssTime(timeSuggestion);
+        GnssTimeSuggestion suggestion = new GnssTimeSuggestion(unixEpochTime);
+        mTimeDetectorInternal.suggestGnssTime(suggestion);
     }
 
     @Override

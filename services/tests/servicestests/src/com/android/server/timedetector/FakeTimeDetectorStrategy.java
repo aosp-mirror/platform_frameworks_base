@@ -48,17 +48,17 @@ public class FakeTimeDetectorStrategy implements TimeDetectorStrategy {
     }
 
     @Override
-    public void suggestTelephonyTime(TelephonyTimeSuggestion timeSuggestion) {
+    public void suggestTelephonyTime(TelephonyTimeSuggestion suggestion) {
     }
 
     @Override
-    public boolean suggestManualTime(@UserIdInt int userId, ManualTimeSuggestion timeSuggestion,
+    public boolean suggestManualTime(@UserIdInt int userId, ManualTimeSuggestion suggestion,
             boolean bypassUserPolicyChecks) {
         return true;
     }
 
     @Override
-    public void suggestNetworkTime(NetworkTimeSuggestion timeSuggestion) {
+    public void suggestNetworkTime(NetworkTimeSuggestion suggestion) {
     }
 
     @Override
@@ -71,11 +71,11 @@ public class FakeTimeDetectorStrategy implements TimeDetectorStrategy {
     }
 
     @Override
-    public void suggestGnssTime(GnssTimeSuggestion timeSuggestion) {
+    public void suggestGnssTime(GnssTimeSuggestion suggestion) {
     }
 
     @Override
-    public void suggestExternalTime(ExternalTimeSuggestion timeSuggestion) {
+    public void suggestExternalTime(ExternalTimeSuggestion suggestion) {
     }
 
     @Override

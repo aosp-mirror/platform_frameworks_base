@@ -72,24 +72,24 @@ public class TimeDetectorInternalImpl implements TimeDetectorInternal {
     }
 
     @Override
-    public boolean setManualTimeForDpm(@NonNull ManualTimeSuggestion timeSignal) {
-        Objects.requireNonNull(timeSignal);
+    public boolean setManualTimeForDpm(@NonNull ManualTimeSuggestion suggestion) {
+        Objects.requireNonNull(suggestion);
 
         int userId = mCurrentUserIdentityInjector.getCurrentUserId();
-        return mTimeDetectorStrategy.suggestManualTime(userId, timeSignal, false);
+        return mTimeDetectorStrategy.suggestManualTime(userId, suggestion, false);
     }
 
     @Override
-    public void suggestNetworkTime(@NonNull NetworkTimeSuggestion timeSignal) {
-        Objects.requireNonNull(timeSignal);
+    public void suggestNetworkTime(@NonNull NetworkTimeSuggestion suggestion) {
+        Objects.requireNonNull(suggestion);
 
-        mHandler.post(() -> mTimeDetectorStrategy.suggestNetworkTime(timeSignal));
+        mHandler.post(() -> mTimeDetectorStrategy.suggestNetworkTime(suggestion));
     }
 
     @Override
-    public void suggestGnssTime(@NonNull GnssTimeSuggestion timeSignal) {
-        Objects.requireNonNull(timeSignal);
+    public void suggestGnssTime(@NonNull GnssTimeSuggestion suggestion) {
+        Objects.requireNonNull(suggestion);
 
-        mHandler.post(() -> mTimeDetectorStrategy.suggestGnssTime(timeSignal));
+        mHandler.post(() -> mTimeDetectorStrategy.suggestGnssTime(suggestion));
     }
 }
