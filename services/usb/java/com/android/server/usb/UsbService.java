@@ -16,6 +16,8 @@
 
 package com.android.server.usb;
 
+import static android.hardware.usb.DisplayPortAltModeInfo.DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN;
+import static android.hardware.usb.DisplayPortAltModeInfo.LINK_TRAINING_STATUS_UNKNOWN;
 import static android.hardware.usb.UsbOperationInternal.USB_OPERATION_ERROR_INTERNAL;
 import static android.hardware.usb.UsbPortStatus.DATA_ROLE_DEVICE;
 import static android.hardware.usb.UsbPortStatus.DATA_ROLE_HOST;
@@ -1188,11 +1190,11 @@ public class UsbService extends IUsbManager.Stub {
                 final String portId = args[1];
                 if (mPortManager != null) {
                     mPortManager.simulateDisplayPortAltModeInfo(portId,
-                            DisplayPortAltModeInfo.DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN,
-                            DisplayPortAltModeInfo.DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN,
+                            DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN,
+                            DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN,
                             0,
                             false,
-                            0,
+                            LINK_TRAINING_STATUS_UNKNOWN,
                             pw);
                     pw.println();
                     mPortManager.dump(new DualDumpOutputStream(new IndentingPrintWriter(pw, "  ")),
@@ -1271,7 +1273,7 @@ public class UsbService extends IUsbManager.Stub {
                 pw.println("    <cable>: type DisplayPortAltModeStatus");
                 pw.println("    <num-lanes>: type int, expected 0, 2, or 4");
                 pw.println("    <hpd>: type boolean, expected true or false");
-                pw.println("    <link-training-status>: type int with range [0,2]");
+                pw.println("    <link-training-status>: type LinkTrainingStatus");
                 pw.println("  dumpsys usb reset-displayport-status \"matrix\"");
                 pw.println("reset-displayport-status can also be used in order to set");
                 pw.println("the DisplayPortInfo to default values.");

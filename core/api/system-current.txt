@@ -5798,14 +5798,19 @@ package android.hardware.usb {
   public final class DisplayPortAltModeInfo implements android.os.Parcelable {
     method public int describeContents();
     method public int getCableStatus();
+    method public int getLinkTrainingStatus();
     method public int getNumberOfLanes();
     method public int getPartnerSinkStatus();
+    method public boolean isHotPlugDetectActive();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.usb.DisplayPortAltModeInfo> CREATOR;
     field public static final int DISPLAYPORT_ALT_MODE_STATUS_CAPABLE = 2; // 0x2
     field public static final int DISPLAYPORT_ALT_MODE_STATUS_ENABLED = 3; // 0x3
     field public static final int DISPLAYPORT_ALT_MODE_STATUS_NOT_CAPABLE = 1; // 0x1
     field public static final int DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN = 0; // 0x0
+    field public static final int LINK_TRAINING_STATUS_FAILURE = 2; // 0x2
+    field public static final int LINK_TRAINING_STATUS_SUCCESS = 1; // 0x1
+    field public static final int LINK_TRAINING_STATUS_UNKNOWN = 0; // 0x0
   }
 
   public class UsbDeviceConnection {
