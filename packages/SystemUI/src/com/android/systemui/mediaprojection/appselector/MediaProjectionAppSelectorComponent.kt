@@ -24,9 +24,11 @@ import com.android.launcher3.icons.IconFactory
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.media.MediaProjectionAppSelectorActivity
 import com.android.systemui.media.MediaProjectionAppSelectorActivity.Companion.EXTRA_HOST_APP_USER_HANDLE
+import com.android.systemui.mediaprojection.appselector.data.ActivityTaskManagerLabelLoader
 import com.android.systemui.mediaprojection.appselector.data.ActivityTaskManagerThumbnailLoader
 import com.android.systemui.mediaprojection.appselector.data.AppIconLoader
 import com.android.systemui.mediaprojection.appselector.data.IconLoaderLibAppIconLoader
+import com.android.systemui.mediaprojection.appselector.data.RecentTaskLabelLoader
 import com.android.systemui.mediaprojection.appselector.data.RecentTaskListProvider
 import com.android.systemui.mediaprojection.appselector.data.RecentTaskThumbnailLoader
 import com.android.systemui.mediaprojection.appselector.data.ShellRecentTaskListProvider
@@ -43,7 +45,6 @@ import dagger.Provides
 import dagger.Subcomponent
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
-import java.lang.IllegalArgumentException
 import javax.inject.Qualifier
 import javax.inject.Scope
 import kotlinx.coroutines.CoroutineScope
@@ -69,9 +70,10 @@ interface MediaProjectionModule {
     ): Activity
 }
 
-/** Scoped values for [MediaProjectionAppSelectorComponent].
- *  We create a scope for the activity so certain dependencies like [TaskPreviewSizeProvider]
- *  could be reused. */
+/**
+ * Scoped values for [MediaProjectionAppSelectorComponent]. We create a scope for the activity so
+ * certain dependencies like [TaskPreviewSizeProvider] could be reused.
+ */
 @Module
 interface MediaProjectionAppSelectorModule {
 
@@ -80,6 +82,10 @@ interface MediaProjectionAppSelectorModule {
     fun bindRecentTaskThumbnailLoader(
         impl: ActivityTaskManagerThumbnailLoader
     ): RecentTaskThumbnailLoader
+
+    @Binds
+    @MediaProjectionAppSelectorScope
+    fun bindRecentTaskLabelLoader(impl: ActivityTaskManagerLabelLoader): RecentTaskLabelLoader
 
     @Binds
     @MediaProjectionAppSelectorScope
@@ -125,8 +131,10 @@ interface MediaProjectionAppSelectorModule {
                 activity.intent.extras
                     ?: error("MediaProjectionAppSelectorActivity should be launched with extras")
             return extras.getParcelable(EXTRA_HOST_APP_USER_HANDLE)
-                ?: error("MediaProjectionAppSelectorActivity should be provided with " +
-                        "$EXTRA_HOST_APP_USER_HANDLE extra")
+                ?: error(
+                    "MediaProjectionAppSelectorActivity should be provided with " +
+                        "$EXTRA_HOST_APP_USER_HANDLE extra"
+                )
         }
 
         @Provides fun bindIconFactory(context: Context): IconFactory = IconFactory.obtain(context)
@@ -146,9 +154,7 @@ interface MediaProjectionAppSelectorComponent {
     /** Generates [MediaProjectionAppSelectorComponent]. */
     @Subcomponent.Factory
     interface Factory {
-        /**
-         * Create a factory to inject the activity into the graph
-         */
+        /** Create a factory to inject the activity into the graph */
         fun create(
             @BindsInstance activity: MediaProjectionAppSelectorActivity,
             @BindsInstance view: MediaProjectionAppSelectorView,
