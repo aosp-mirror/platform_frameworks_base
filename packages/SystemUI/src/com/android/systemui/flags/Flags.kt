@@ -104,7 +104,7 @@ object Flags {
         unreleasedFlag(174148361, "notification_inline_reply_animation", teamfood = true)
 
     val FILTER_UNSEEN_NOTIFS_ON_KEYGUARD =
-        unreleasedFlag(254647461, "filter_unseen_notifs_on_keyguard", teamfood = true)
+        releasedFlag(254647461, "filter_unseen_notifs_on_keyguard", teamfood = true)
 
     // TODO(b/263414400): Tracking Bug
     @JvmField
@@ -354,6 +354,9 @@ object Flags {
     // TODO(b/265813373): Tracking Bug
     val MEDIA_TAP_TO_TRANSFER_DISMISS_GESTURE =
         unreleasedFlag(912, "media_ttt_dismiss_gesture", teamfood = true)
+
+    // TODO(b/266157412): Tracking Bug
+    val MEDIA_RETAIN_SESSIONS = unreleasedFlag(913, "media_retain_sessions")
 
     // 1000 - dock
     val SIMULATE_DOCK_THROUGH_CHARGING = releasedFlag(1000, "simulate_dock_through_charging")

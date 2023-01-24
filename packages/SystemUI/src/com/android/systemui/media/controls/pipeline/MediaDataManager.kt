@@ -303,6 +303,7 @@ class MediaDataManager(
         mediaTimeoutListener.stateCallback = { key: String, state: PlaybackState ->
             updateState(key, state)
         }
+        mediaTimeoutListener.sessionCallback = { key: String -> onSessionDestroyed(key) }
         mediaResumeListener.setManager(this)
         mediaDataFilter.mediaDataManager = this
 
@@ -1289,43 +1290,104 @@ class MediaDataManager(
 
     fun onNotificationRemoved(key: String) {
         Assert.isMainThread()
-        val removed = mediaEntries.remove(key)
-        if (useMediaResumption && removed?.resumeAction != null && removed.isLocalSession()) {
-            Log.d(TAG, "Not removing $key because resumable")
-            // Move to resume key (aka package name) if that key doesn't already exist.
-            val resumeAction = getResumeMediaAction(removed.resumeAction!!)
-            val updated =
-                removed.copy(
-                    token = null,
-                    actions = listOf(resumeAction),
-                    semanticActions = MediaButton(playOrPause = resumeAction),
-                    actionsToShowInCompact = listOf(0),
-                    active = false,
-                    resumption = true,
-                    isPlaying = false,
-                    isClearable = true
-                )
-            val pkg = removed.packageName
-            val migrate = mediaEntries.put(pkg, updated) == null
-            // Notify listeners of "new" controls when migrating or removed and update when not
-            if (migrate) {
-                notifyMediaDataLoaded(pkg, key, updated)
-            } else {
-                // Since packageName is used for the key of the resumption controls, it is
-                // possible that another notification has already been reused for the resumption
-                // controls of this package. In this case, rather than renaming this player as
-                // packageName, just remove it and then send a update to the existing resumption
-                // controls.
-                notifyMediaDataRemoved(key)
-                notifyMediaDataLoaded(pkg, pkg, updated)
-            }
-            logger.logActiveConvertedToResume(updated.appUid, pkg, updated.instanceId)
-            return
-        }
-        if (removed != null) {
+        val removed = mediaEntries.remove(key) ?: return
+
+        if (useMediaResumption && removed.resumeAction != null && removed.isLocalSession()) {
+            convertToResumePlayer(removed)
+        } else if (mediaFlags.isRetainingPlayersEnabled()) {
+            handlePossibleRemoval(removed, notificationRemoved = true)
+        } else {
             notifyMediaDataRemoved(key)
             logger.logMediaRemoved(removed.appUid, removed.packageName, removed.instanceId)
         }
+    }
+
+    private fun onSessionDestroyed(key: String) {
+        if (!mediaFlags.isRetainingPlayersEnabled()) return
+
+        if (DEBUG) Log.d(TAG, "session destroyed for $key")
+        val entry = mediaEntries.remove(key) ?: return
+        // Clear token since the session is no longer valid
+        val updated = entry.copy(token = null)
+        handlePossibleRemoval(updated)
+    }
+
+    /**
+     * Convert to resume state if the player is no longer valid and active, then notify listeners
+     * that the data was updated. Does not convert to resume state if the player is still valid, or
+     * if it was removed before becoming inactive. (Assumes that [removed] was removed from
+     * [mediaEntries] before this function was called)
+     */
+    private fun handlePossibleRemoval(removed: MediaData, notificationRemoved: Boolean = false) {
+        val key = removed.notificationKey!!
+        val hasSession = removed.token != null
+        if (hasSession && removed.semanticActions != null) {
+            // The app was using session actions, and the session is still valid: keep player
+            if (DEBUG) Log.d(TAG, "Notification removed but using session actions $key")
+            mediaEntries.put(key, removed)
+            notifyMediaDataLoaded(key, key, removed)
+        } else if (!notificationRemoved && removed.semanticActions == null) {
+            // The app was using notification actions, and notif wasn't removed yet: keep player
+            if (DEBUG) Log.d(TAG, "Session destroyed but using notification actions $key")
+            mediaEntries.put(key, removed)
+            notifyMediaDataLoaded(key, key, removed)
+        } else if (removed.active) {
+            // This player was still active - it didn't last long enough to time out: remove
+            if (DEBUG) Log.d(TAG, "Removing still-active player $key")
+            notifyMediaDataRemoved(key)
+            logger.logMediaRemoved(removed.appUid, removed.packageName, removed.instanceId)
+        } else {
+            // Convert to resume
+            if (DEBUG) {
+                Log.d(
+                    TAG,
+                    "Notification ($notificationRemoved) and/or session " +
+                        "($hasSession) gone for inactive player $key"
+                )
+            }
+            convertToResumePlayer(removed)
+        }
+    }
+
+    /** Set the given [MediaData] as a resume state player and notify listeners */
+    private fun convertToResumePlayer(data: MediaData) {
+        val key = data.notificationKey!!
+        if (DEBUG) Log.d(TAG, "Converting $key to resume")
+        // Move to resume key (aka package name) if that key doesn't already exist.
+        val resumeAction = data.resumeAction?.let { getResumeMediaAction(it) }
+        val actions = resumeAction?.let { listOf(resumeAction) } ?: emptyList()
+        val launcherIntent =
+            context.packageManager.getLaunchIntentForPackage(data.packageName)?.let {
+                PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE)
+            }
+        val updated =
+            data.copy(
+                token = null,
+                actions = actions,
+                semanticActions = MediaButton(playOrPause = resumeAction),
+                actionsToShowInCompact = listOf(0),
+                active = false,
+                resumption = true,
+                isPlaying = false,
+                isClearable = true,
+                clickIntent = launcherIntent,
+            )
+        val pkg = data.packageName
+        val migrate = mediaEntries.put(pkg, updated) == null
+        // Notify listeners of "new" controls when migrating or removed and update when not
+        Log.d(TAG, "migrating? $migrate from $key -> $pkg")
+        if (migrate) {
+            notifyMediaDataLoaded(key = pkg, oldKey = key, info = updated)
+        } else {
+            // Since packageName is used for the key of the resumption controls, it is
+            // possible that another notification has already been reused for the resumption
+            // controls of this package. In this case, rather than renaming this player as
+            // packageName, just remove it and then send a update to the existing resumption
+            // controls.
+            notifyMediaDataRemoved(key)
+            notifyMediaDataLoaded(key = pkg, oldKey = pkg, info = updated)
+        }
+        logger.logActiveConvertedToResume(updated.appUid, pkg, updated.instanceId)
     }
 
     fun setMediaResumptionEnabled(isEnabled: Boolean) {

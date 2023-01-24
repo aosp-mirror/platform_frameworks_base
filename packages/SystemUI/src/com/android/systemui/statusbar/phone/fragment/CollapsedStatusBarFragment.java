@@ -24,7 +24,6 @@ import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedul
 import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.SHOWING_PERSISTENT_DOT;
 
 import android.animation.Animator;
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.Fragment;
@@ -59,9 +58,6 @@ import com.android.systemui.statusbar.DisableFlagsLogger.DisableState;
 import com.android.systemui.statusbar.OperatorNameView;
 import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.connectivity.IconState;
-import com.android.systemui.statusbar.connectivity.NetworkController;
-import com.android.systemui.statusbar.connectivity.SignalCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
@@ -75,7 +71,6 @@ import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentCom
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent.Startable;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallListener;
-import com.android.systemui.statusbar.policy.EncryptionHelper;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.CarrierConfigTracker.CarrierConfigChangedListener;
@@ -110,7 +105,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private final StatusBarStateController mStatusBarStateController;
     private final KeyguardStateController mKeyguardStateController;
     private final NotificationPanelViewController mNotificationPanelViewController;
-    private final NetworkController mNetworkController;
     private LinearLayout mEndSideContent;
     private View mClockView;
     private View mOngoingCallChip;
@@ -138,13 +132,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     private List<String> mBlockedIcons = new ArrayList<>();
     private Map<Startable, Startable.State> mStartableStates = new ArrayMap<>();
-
-    private SignalCallback mSignalCallback = new SignalCallback() {
-        @Override
-        public void setIsAirplaneMode(@NonNull IconState icon) {
-            mCommandQueue.recomputeDisableFlags(getContext().getDisplayId(), true /* animate */);
-        }
-    };
 
     private final OngoingCallListener mOngoingCallListener = new OngoingCallListener() {
         @Override
@@ -191,7 +178,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
             KeyguardStateController keyguardStateController,
             NotificationPanelViewController notificationPanelViewController,
-            NetworkController networkController,
             StatusBarStateController statusBarStateController,
             CommandQueue commandQueue,
             CarrierConfigTracker carrierConfigTracker,
@@ -213,7 +199,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mDarkIconManagerFactory = darkIconManagerFactory;
         mKeyguardStateController = keyguardStateController;
         mNotificationPanelViewController = notificationPanelViewController;
-        mNetworkController = networkController;
         mStatusBarStateController = statusBarStateController;
         mCommandQueue = commandQueue;
         mCarrierConfigTracker = carrierConfigTracker;
@@ -261,7 +246,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mOngoingCallChip = mStatusBar.findViewById(R.id.ongoing_call_chip);
         showEndSideContent(false);
         showClock(false);
-        initEmergencyCryptkeeperText();
         initOperatorName();
         initNotificationIconArea();
         mSystemEventAnimator =
@@ -340,9 +324,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public void onDestroyView() {
         super.onDestroyView();
         mStatusBarIconController.removeIconGroup(mDarkIconManager);
-        if (mNetworkController.hasEmergencyCryptKeeperText()) {
-            mNetworkController.removeCallback(mSignalCallback);
-        }
         mCarrierConfigTracker.removeCallback(mCarrierConfigCallback);
         mCarrierConfigTracker.removeDataSubscriptionChangedListener(mDefaultDataListener);
 
@@ -442,15 +423,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             state |= DISABLE_NOTIFICATION_ICONS;
             state |= DISABLE_SYSTEM_INFO;
             state |= DISABLE_CLOCK;
-        }
-
-        if (mNetworkController != null && EncryptionHelper.IS_DATA_ENCRYPTED) {
-            if (mNetworkController.hasEmergencyCryptKeeperText()) {
-                state |= DISABLE_NOTIFICATION_ICONS;
-            }
-            if (!mNetworkController.isRadioOn()) {
-                state |= DISABLE_SYSTEM_INFO;
-            }
         }
 
         if (mOngoingCallController.hasOngoingCall()) {
@@ -617,19 +589,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                     .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN)
                     .setStartDelay(mKeyguardStateController.getKeyguardFadingAwayDelay())
                     .start();
-        }
-    }
-
-    private void initEmergencyCryptkeeperText() {
-        View emergencyViewStub = mStatusBar.findViewById(R.id.emergency_cryptkeeper_text);
-        if (mNetworkController.hasEmergencyCryptKeeperText()) {
-            if (emergencyViewStub != null) {
-                ((ViewStub) emergencyViewStub).inflate();
-            }
-            mNetworkController.addCallback(mSignalCallback);
-        } else if (emergencyViewStub != null) {
-            ViewGroup parent = (ViewGroup) emergencyViewStub.getParent();
-            parent.removeView(emergencyViewStub);
         }
     }
 
