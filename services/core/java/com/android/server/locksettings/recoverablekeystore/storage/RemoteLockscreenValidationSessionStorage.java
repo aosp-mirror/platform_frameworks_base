@@ -17,9 +17,17 @@
 package com.android.server.locksettings.recoverablekeystore.storage;
 
 import android.annotation.Nullable;
+import android.os.SystemClock;
+import android.text.format.DateUtils;
+import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.locksettings.recoverablekeystore.SecureBox;
+
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 
 /**
  * Memory based storage for keyPair used to send encrypted credentials from a remote device.
@@ -28,8 +36,12 @@ import java.security.KeyPair;
  */
 public class RemoteLockscreenValidationSessionStorage {
 
-    private final SparseArray<LockScreenVerificationSession> mSessionsByUserId =
-            new SparseArray<>();
+    private static final long SESSION_TIMEOUT_MILLIS = 10L * DateUtils.MINUTE_IN_MILLIS;
+    private static final String TAG = "RemoteLockscreenValidation";
+
+    @VisibleForTesting
+    final SparseArray<LockscreenVerificationSession> mSessionsByUserId =
+            new SparseArray<>(0);
 
     /**
      * Returns session for given user or null.
@@ -40,50 +52,111 @@ public class RemoteLockscreenValidationSessionStorage {
      * @hide
      */
     @Nullable
-    public LockScreenVerificationSession get(int userId) {
-        return mSessionsByUserId.get(userId);
+    public LockscreenVerificationSession get(int userId) {
+        synchronized (mSessionsByUserId) {
+            return mSessionsByUserId.get(userId);
+        }
     }
 
     /**
-     * Creates a new session to verify lockscreen credentials guess.
+     * Creates a new session to verify credentials guess.
      *
      * Session will be automatically removed after 10 minutes of inactivity.
      * @param userId The user id
      *
      * @hide
      */
-    public LockScreenVerificationSession startSession(int userId) {
-        if (mSessionsByUserId.get(userId) != null) {
-            mSessionsByUserId.remove(userId);
+    public LockscreenVerificationSession startSession(int userId) {
+        synchronized (mSessionsByUserId) {
+            if (mSessionsByUserId.get(userId) != null) {
+                mSessionsByUserId.delete(userId);
+            }
+
+            KeyPair newKeyPair;
+            try {
+                newKeyPair = SecureBox.genKeyPair();
+            } catch (NoSuchAlgorithmException e) {
+                // impossible
+                throw new RuntimeException(e);
+            }
+            LockscreenVerificationSession newSession =
+                    new LockscreenVerificationSession(newKeyPair, SystemClock.elapsedRealtime());
+            mSessionsByUserId.put(userId, newSession);
+            return newSession;
         }
-        LockScreenVerificationSession newSession = null;
-        // TODO(b/254335492): Schedule a task to remove session.
-        mSessionsByUserId.put(userId, newSession);
-        return newSession;
     }
 
     /**
      * Deletes session for a user.
      */
-    public void remove(int userId) {
-        mSessionsByUserId.remove(userId);
+    public void finishSession(int userId) {
+        synchronized (mSessionsByUserId) {
+            mSessionsByUserId.delete(userId);
+        }
     }
 
     /**
-     * Holder for keypair used by remote lock screen validation.
+     * Creates a task which deletes expired sessions.
+     */
+    public Runnable getLockscreenValidationCleanupTask() {
+        return new LockscreenValidationCleanupTask();
+    }
+
+    /**
+     * Holder for KeyPair used by remote lock screen validation.
      *
      * @hide
      */
-    public static class LockScreenVerificationSession {
+    public class LockscreenVerificationSession {
         private final KeyPair mKeyPair;
-        private final long mSessionStartTimeMillis;
+        private final long mElapsedStartTime;
 
         /**
          * @hide
          */
-        public LockScreenVerificationSession(KeyPair keyPair, long sessionStartTimeMillis) {
+        LockscreenVerificationSession(KeyPair keyPair, long elapsedStartTime) {
             mKeyPair = keyPair;
-            mSessionStartTimeMillis = sessionStartTimeMillis;
+            mElapsedStartTime = elapsedStartTime;
+        }
+
+        /**
+         * Returns SecureBox key pair.
+         */
+        public KeyPair getKeyPair() {
+            return mKeyPair;
+        }
+
+        /**
+         * Time when the session started.
+         */
+        private long getElapsedStartTimeMillis() {
+            return mElapsedStartTime;
         }
     }
+
+    private class LockscreenValidationCleanupTask implements Runnable {
+        @Override
+        public void run() {
+            try {
+                synchronized (mSessionsByUserId) {
+                    ArrayList<Integer> keysToRemove = new ArrayList<>();
+                    for (int i = 0; i < mSessionsByUserId.size(); i++) {
+                        long now = SystemClock.elapsedRealtime();
+                        long startTime = mSessionsByUserId.valueAt(i).getElapsedStartTimeMillis();
+                        if (now - startTime > SESSION_TIMEOUT_MILLIS) {
+                            int userId = mSessionsByUserId.keyAt(i);
+                            keysToRemove.add(userId);
+                        }
+                    }
+                    for (Integer userId : keysToRemove) {
+                        mSessionsByUserId.delete(userId);
+                    }
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Unexpected exception thrown during LockscreenValidationCleanupTask", e);
+            }
+        }
+
+    }
+
 }
