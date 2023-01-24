@@ -219,7 +219,7 @@ cc_library_shared {
                 "android_security_Scrypt.cpp",
                 "com_android_internal_content_om_OverlayConfig.cpp",
                 "com_android_internal_content_om_OverlayManagerImpl.cpp",
-                "com_android_internal_expresslog_Counter.cpp",
+                "com_android_internal_expresslog_Utils.cpp",
                 "com_android_internal_net_NetworkUtilsInternal.cpp",
                 "com_android_internal_os_ClassLoaderFactory.cpp",
                 "com_android_internal_os_FuseAppLoop.cpp",
