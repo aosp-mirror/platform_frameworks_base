@@ -198,7 +198,7 @@ public class ContentProviderHelper {
             //todo(b/236121588) MediaProvider should not be installed in clone profile.
             final UserProperties userProps = umInternal.getUserProperties(userId);
             final boolean isMediaSharedWithParent =
-                    userProps != null && userProps.getIsMediaSharedWithParent();
+                    userProps != null && userProps.isMediaSharedWithParent();
             if (!isAuthorityRedirectedForCloneProfile(name) || !isMediaSharedWithParent) {
                 // First check if this content provider has been published...
                 cpr = mProviderMap.getProviderByName(name, userId);

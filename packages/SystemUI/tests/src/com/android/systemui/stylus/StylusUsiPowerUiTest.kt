@@ -36,7 +36,6 @@ import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertEquals
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -79,7 +78,7 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
         whenever(inputManager.inputDeviceIds).thenReturn(intArrayOf())
         whenever(inputManager.getInputDevice(0)).thenReturn(btStylusDevice)
         whenever(btStylusDevice.supportsSource(InputDevice.SOURCE_STYLUS)).thenReturn(true)
-        // whenever(btStylusDevice.bluetoothAddress).thenReturn("SO:ME:AD:DR:ES")
+        whenever(btStylusDevice.bluetoothAddress).thenReturn("SO:ME:AD:DR:ES")
 
         stylusUsiPowerUi = StylusUsiPowerUI(contextSpy, notificationManager, inputManager, handler)
         broadcastReceiver = stylusUsiPowerUi.receiver
@@ -179,7 +178,6 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("TODO(b/257936830): get bt address once input api available")
     fun refresh_hasConnectedBluetoothStylus_cancelsNotification() {
         whenever(inputManager.inputDeviceIds).thenReturn(intArrayOf(0))
 
@@ -189,7 +187,6 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("TODO(b/257936830): get bt address once input api available")
     fun refresh_hasConnectedBluetoothStylus_existingNotification_cancelsNotification() {
         stylusUsiPowerUi.updateBatteryState(0, FixedCapacityBatteryState(0.1f))
         whenever(inputManager.inputDeviceIds).thenReturn(intArrayOf(0))

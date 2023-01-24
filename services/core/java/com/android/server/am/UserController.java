@@ -2907,7 +2907,7 @@ class UserController implements Handler.Callback {
             return false;
         }
         final UserProperties properties = getUserProperties(userId);
-        if (properties == null || !properties.getIsCredentialSharableWithParent()) {
+        if (properties == null || !properties.isCredentialShareableWithParent()) {
             return false;
         }
         if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {

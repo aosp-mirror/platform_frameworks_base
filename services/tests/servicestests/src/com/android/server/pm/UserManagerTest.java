@@ -188,10 +188,10 @@ public final class UserManagerTest {
                 cloneUserProperties::getCrossProfileIntentFilterAccessControl);
         assertThrows(SecurityException.class,
                 cloneUserProperties::getCrossProfileIntentResolutionStrategy);
-        assertThat(typeProps.getIsMediaSharedWithParent())
-                .isEqualTo(cloneUserProperties.getIsMediaSharedWithParent());
-        assertThat(typeProps.getIsCredentialSharableWithParent())
-                .isEqualTo(cloneUserProperties.getIsCredentialSharableWithParent());
+        assertThat(typeProps.isMediaSharedWithParent())
+                .isEqualTo(cloneUserProperties.isMediaSharedWithParent());
+        assertThat(typeProps.isCredentialShareableWithParent())
+                .isEqualTo(cloneUserProperties.isCredentialShareableWithParent());
 
         // Verify clone user parent
         assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
@@ -842,8 +842,8 @@ public final class UserManagerTest {
         assertThrows(SecurityException.class, userProps::getCrossProfileIntentResolutionStrategy);
         assertThrows(SecurityException.class, userProps::getStartWithParent);
         assertThrows(SecurityException.class, userProps::getInheritDevicePolicy);
-        assertThat(userProps.getIsMediaSharedWithParent()).isFalse();
-        assertThat(userProps.getIsCredentialSharableWithParent()).isTrue();
+        assertThat(userProps.isMediaSharedWithParent()).isFalse();
+        assertThat(userProps.isCredentialShareableWithParent()).isTrue();
     }
 
     // Make sure only max managed profiles can be created

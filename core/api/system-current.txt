@@ -3910,8 +3910,8 @@ package android.content.pm {
 
   public final class UserProperties implements android.os.Parcelable {
     method public int describeContents();
-    method public boolean getIsCredentialSharableWithParent();
-    method public boolean getIsMediaSharedWithParent();
+    method public boolean isCredentialShareableWithParent();
+    method public boolean isMediaSharedWithParent();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.UserProperties> CREATOR;
   }

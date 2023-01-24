@@ -71,6 +71,12 @@ constructor(
      */
     lateinit var stateCallback: (String, PlaybackState) -> Unit
 
+    /**
+     * Callback representing that the [MediaSession] for an active control has been destroyed
+     * @param key Media control unique identifier
+     */
+    lateinit var sessionCallback: (String) -> Unit
+
     init {
         statusBarStateController.addCallback(
             object : StatusBarStateController.StateListener {
@@ -211,6 +217,7 @@ constructor(
             } else {
                 // For active controls, if the session is destroyed, clean up everything since we
                 // will need to recreate it if this key is updated later
+                sessionCallback.invoke(key)
                 destroy()
             }
         }

@@ -95,17 +95,13 @@ HintSessionWrapper::~HintSessionWrapper() {
     }
 }
 
-bool HintSessionWrapper::useHintSession() {
-    if (!Properties::useHintManager || !Properties::isDrawingEnabled()) return false;
-    if (mHintSession) return true;
-    // If session does not exist, create it;
-    // this defers session creation until we try to actually use it.
-    if (!mSessionValid) return false;
-    return init();
-}
-
 bool HintSessionWrapper::init() {
-    if (mUiThreadId < 0 || mRenderThreadId < 0) return false;
+    // If it already exists, broke last time we tried this, shouldn't be running, or
+    // has bad argument values, don't even bother
+    if (mHintSession != nullptr || !mSessionValid || !Properties::useHintManager ||
+        !Properties::isDrawingEnabled() || mUiThreadId < 0 || mRenderThreadId < 0) {
+        return false;
+    }
 
     // Assume that if we return before the end, it broke
     mSessionValid = false;
@@ -130,7 +126,7 @@ bool HintSessionWrapper::init() {
 }
 
 void HintSessionWrapper::updateTargetWorkDuration(long targetWorkDurationNanos) {
-    if (!useHintSession()) return;
+    if (mHintSession == nullptr) return;
     targetWorkDurationNanos = targetWorkDurationNanos * Properties::targetCpuTimePercentage / 100;
     if (targetWorkDurationNanos != mLastTargetWorkDuration &&
         targetWorkDurationNanos > kSanityCheckLowerBound &&
@@ -142,7 +138,7 @@ void HintSessionWrapper::updateTargetWorkDuration(long targetWorkDurationNanos) 
 }
 
 void HintSessionWrapper::reportActualWorkDuration(long actualDurationNanos) {
-    if (!useHintSession()) return;
+    if (mHintSession == nullptr) return;
     if (actualDurationNanos > kSanityCheckLowerBound &&
         actualDurationNanos < kSanityCheckUpperBound) {
         gAPH_reportActualWorkDurationFn(mHintSession, actualDurationNanos);
@@ -150,7 +146,7 @@ void HintSessionWrapper::reportActualWorkDuration(long actualDurationNanos) {
 }
 
 void HintSessionWrapper::sendLoadResetHint() {
-    if (!useHintSession()) return;
+    if (mHintSession == nullptr) return;
     nsecs_t now = systemTime();
     if (now - mLastFrameNotification > kResetHintTimeout) {
         gAPH_sendHintFn(mHintSession, static_cast<int>(SessionHint::CPU_LOAD_RESET));
@@ -159,7 +155,7 @@ void HintSessionWrapper::sendLoadResetHint() {
 }
 
 void HintSessionWrapper::sendLoadIncreaseHint() {
-    if (!useHintSession()) return;
+    if (mHintSession == nullptr) return;
     gAPH_sendHintFn(mHintSession, static_cast<int>(SessionHint::CPU_LOAD_UP));
 }
 

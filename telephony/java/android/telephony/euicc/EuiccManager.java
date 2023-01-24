@@ -1570,8 +1570,8 @@ public class EuiccManager {
 
     /**
      * Returns whether the passing portIndex is available.
-     * A port is available if it is active without enabled profile on it or
-     * calling app has carrier privilege over the profile installed on the selected port.
+     * A port is available if it is active without an enabled profile on it or calling app can
+     * activate a new profile on the selected port without any user interaction.
      * Always returns false if the cardId is a physical card.
      *
      * @param portIndex is an enumeration of the ports available on the UICC.

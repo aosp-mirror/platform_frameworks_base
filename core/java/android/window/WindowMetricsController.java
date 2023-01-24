@@ -41,6 +41,7 @@ import android.view.WindowMetrics;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * A controller to handle {@link android.view.WindowMetrics} related APIs, which are
@@ -53,6 +54,9 @@ import java.util.Set;
  * @hide
  */
 public final class WindowMetricsController {
+    // TODO(b/151908239): Remove and always enable this if it is stable.
+    private static final boolean LAZY_WINDOW_INSETS = android.os.SystemProperties.getBoolean(
+            "persist.wm.debug.win_metrics_lazy_insets", false);
     private final Context mContext;
 
     public WindowMetricsController(@NonNull Context context) {
@@ -92,16 +96,11 @@ public final class WindowMetricsController {
             windowingMode = winConfig.getWindowingMode();
         }
         final IBinder token = Context.getToken(mContext);
-        final WindowInsets windowInsets = getWindowInsetsFromServerForCurrentDisplay(token,
-                bounds, isScreenRound, windowingMode);
-        return new WindowMetrics(bounds, windowInsets, density);
-    }
-
-    private WindowInsets getWindowInsetsFromServerForCurrentDisplay(
-            IBinder token, Rect bounds, boolean isScreenRound,
-            @WindowConfiguration.WindowingMode int windowingMode) {
-        return getWindowInsetsFromServerForDisplay(mContext.getDisplayId(), token, bounds,
-                isScreenRound, windowingMode);
+        final Supplier<WindowInsets> insetsSupplier = () -> getWindowInsetsFromServerForDisplay(
+                mContext.getDisplayId(), token, bounds, isScreenRound, windowingMode);
+        return LAZY_WINDOW_INSETS
+                ? new WindowMetrics(new Rect(bounds), insetsSupplier, density)
+                : new WindowMetrics(new Rect(bounds), insetsSupplier.get(), density);
     }
 
     /**

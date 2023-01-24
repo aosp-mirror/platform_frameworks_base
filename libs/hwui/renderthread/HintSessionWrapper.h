@@ -34,10 +34,9 @@ public:
     void reportActualWorkDuration(long actualDurationNanos);
     void sendLoadResetHint();
     void sendLoadIncreaseHint();
+    bool init();
 
 private:
-    bool useHintSession();
-    bool init();
     APerformanceHintSession* mHintSession = nullptr;
 
     nsecs_t mLastFrameNotification = 0;
