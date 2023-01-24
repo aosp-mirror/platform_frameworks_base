@@ -4876,4 +4876,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         transaction.apply();
         transaction.close();
     }
+
+    @Override
+    public void setCurrentUserFocusAppearance(int strokeWidth, int color) {
+        synchronized (mLock) {
+            getCurrentUserStateLocked().setFocusAppearanceLocked(strokeWidth, color);
+        }
+    }
 }

@@ -43,6 +43,7 @@ import android.view.accessibility.AccessibilityWindowInfo;
 
 import androidx.annotation.Nullable;
 
+import com.android.internal.R;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.util.Arrays;
@@ -63,6 +64,11 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     private int mDisplayId;
     private List<AccessibilityServiceInfo> mInstalledAndEnabledServices;
 
+    /** The stroke width of the focus rectangle in pixels */
+    private int mFocusStrokeWidth;
+    /** The color of the focus rectangle */
+    private int mFocusColor;
+
     ProxyAccessibilityServiceConnection(
             Context context,
             ComponentName componentName,
@@ -77,6 +83,10 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
                 /* systemActionPerformer= */ null, awm, /* activityTaskManagerService= */ null);
         mDisplayId = displayId;
         setDisplayTypes(DISPLAY_TYPE_PROXY);
+        mFocusStrokeWidth = mContext.getResources().getDimensionPixelSize(
+                R.dimen.accessibility_focus_highlight_stroke_width);
+        mFocusColor = mContext.getResources().getColor(
+                R.color.accessibility_focus_highlight_color);
     }
 
     /**
@@ -200,6 +210,48 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
         // proxy connections.
         displayWindows.put(mDisplayId, allWindows.get(mDisplayId, Collections.emptyList()));
         return displayWindows;
+    }
+
+    @Override
+    public void setFocusAppearance(int strokeWidth, int color) {
+        synchronized (mLock) {
+            if (!hasRightsToCurrentUserLocked()) {
+                return;
+            }
+
+            if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
+                return;
+            }
+
+            if (getFocusStrokeWidthLocked() == strokeWidth && getFocusColorLocked() == color) {
+                return;
+            }
+
+            mFocusStrokeWidth = strokeWidth;
+            mFocusColor = color;
+            // Sets the appearance data in the A11yUserState for now, since the A11yManagers are not
+            // separated.
+            // TODO(254545943): Separate proxy and non-proxy states so the focus appearance on the
+            // phone is not affected by the appearance of a proxy-ed app.
+            mSystemSupport.setCurrentUserFocusAppearance(mFocusStrokeWidth, mFocusColor);
+            mSystemSupport.onClientChangeLocked(false);
+        }
+    }
+
+    /**
+     * Gets the stroke width of the focus rectangle.
+     * @return The stroke width.
+     */
+    public int getFocusStrokeWidthLocked() {
+        return mFocusStrokeWidth;
+    }
+
+    /**
+     * Gets the color of the focus rectangle.
+     * @return The color.
+     */
+    public int getFocusColorLocked() {
+        return mFocusColor;
     }
 
     @Override
