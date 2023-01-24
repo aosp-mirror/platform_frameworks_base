@@ -62,6 +62,7 @@ import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.text.TextUtils;
 import android.util.PackageUtils;
 import android.util.Slog;
@@ -131,6 +132,10 @@ public class BinaryTransparencyService extends SystemService {
     // used for indicating newly installed MBAs that are updated (but unused currently)
     static final int MBA_STATUS_UPDATED_NEW_INSTALL = 4;
 
+    @VisibleForTesting
+    static final String KEY_ENABLE_BIOMETRIC_PROPERTY_VERIFICATION =
+            "enable_biometric_property_verification";
+
     private static final boolean DEBUG = false;     // toggle this for local debug
 
     private final Context mContext;
@@ -138,6 +143,7 @@ public class BinaryTransparencyService extends SystemService {
     // the system time (in ms) the last measurement was taken
     private long mMeasurementsLastRecordedMs;
     private PackageManagerInternal mPackageManagerInternal;
+    private BiometricLogger mBiometricLogger;
 
     /**
      * Guards whether or not measurements of MBA to be performed. When this change is enabled,
@@ -1049,13 +1055,56 @@ public class BinaryTransparencyService extends SystemService {
     }
     private final BinaryTransparencyServiceImpl mServiceImpl;
 
+    /**
+     * A wrapper of {@link FrameworkStatsLog} for easier testing
+     */
+    @VisibleForTesting
+    public static class BiometricLogger {
+        private static final String TAG = "BiometricLogger";
+
+        private static final BiometricLogger sInstance = new BiometricLogger();
+
+        private BiometricLogger() {}
+
+        public static BiometricLogger getInstance() {
+            return sInstance;
+        }
+
+        /**
+         * A wrapper of {@link FrameworkStatsLog}
+         *
+         * @param sensorId The sensorId of the biometric to be logged
+         * @param modality The modality of the biometric
+         * @param sensorType The sensor type of the biometric
+         * @param sensorStrength The sensor strength of the biometric
+         * @param componentId The component Id of a component of the biometric
+         * @param hardwareVersion The hardware version of a component of the biometric
+         * @param firmwareVersion The firmware version of a component of the biometric
+         * @param serialNumber The serial number of a component of the biometric
+         * @param softwareVersion The software version of a component of the biometric
+         */
+        public void logStats(int sensorId, int modality, int sensorType, int sensorStrength,
+                String componentId, String hardwareVersion, String firmwareVersion,
+                String serialNumber, String softwareVersion) {
+            FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_PROPERTIES_COLLECTED,
+                    sensorId, modality, sensorType, sensorStrength, componentId, hardwareVersion,
+                    firmwareVersion, serialNumber, softwareVersion);
+        }
+    }
+
     public BinaryTransparencyService(Context context) {
+        this(context, BiometricLogger.getInstance());
+    }
+
+    @VisibleForTesting
+    BinaryTransparencyService(Context context, BiometricLogger biometricLogger) {
         super(context);
         mContext = context;
         mServiceImpl = new BinaryTransparencyServiceImpl();
         mVbmetaDigest = VBMETA_DIGEST_UNINITIALIZED;
         mMeasurementsLastRecordedMs = 0;
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
+        mBiometricLogger = biometricLogger;
     }
 
     /**
@@ -1301,7 +1350,7 @@ public class BinaryTransparencyService extends SystemService {
         // Note: none of the component info is a device identifier since every device of a given
         // model and build share the same biometric system info (see b/216195167)
         for (ComponentInfo componentInfo : prop.getComponentInfo()) {
-            FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_PROPERTIES_COLLECTED,
+            mBiometricLogger.logStats(
                     sensorId,
                     modality,
                     sensorType,
@@ -1314,7 +1363,19 @@ public class BinaryTransparencyService extends SystemService {
         }
     }
 
-    private void collectBiometricProperties() {
+    @VisibleForTesting
+    void collectBiometricProperties() {
+        // Check the flag to determine whether biometric property verification is enabled. It's
+        // disabled by default.
+        if (!DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_BIOMETRICS,
+                KEY_ENABLE_BIOMETRIC_PROPERTY_VERIFICATION, false)) {
+            if (DEBUG) {
+                Slog.d(TAG, "Do not collect/verify biometric properties. Feature disabled by "
+                        + "DeviceConfig");
+            }
+            return;
+        }
+
         PackageManager pm = mContext.getPackageManager();
         FingerprintManager fpManager = null;
         FaceManager faceManager = null;
