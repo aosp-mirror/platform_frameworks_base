@@ -5,10 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"ยกเลิก"</string>
     <string name="string_continue" msgid="1346732695941131882">"ต่อไป"</string>
     <string name="string_more_options" msgid="7990658711962795124">"ตัวเลือกเพิ่มเติม"</string>
+    <string name="string_learn_more" msgid="4541600451688392447">"ดูข้อมูลเพิ่มเติม"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"ปลอดภัยขึ้นด้วยพาสคีย์"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"พาสคีย์ช่วยให้คุณไม่ต้องสร้างหรือจำรหัสผ่านที่ซับซ้อน"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"พาสคีย์คือกุญแจดิจิทัลที่เข้ารหัสซึ่งคุณสร้างโดยใช้ลายนิ้วมือ ใบหน้า หรือการล็อกหน้าจอ"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"ข้อมูลนี้จะบันทึกอยู่ในเครื่องมือจัดการรหัสผ่านเพื่อให้คุณลงชื่อเข้าใช้ในอุปกรณ์อื่นๆ ได้"</string>
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"ข้อมูลเพิ่มเติมเกี่ยวกับพาสคีย์"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"เทคโนโลยีที่ไม่ต้องใช้รหัสผ่าน"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"พาสคีย์ช่วยให้คุณลงชื่อเข้าใช้ได้โดยไม่ต้องใช้รหัสผ่าน ใช้เพียงแค่ลายนิ้วมือ, การจดจำใบหน้า, PIN หรือรูปแบบการลากเส้นในการยืนยันตัวตนและสร้างพาสคีย์"</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"วิทยาการเข้ารหัสคีย์สาธารณะ"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"พาสคีย์ใช้คู่คีย์การเข้ารหัสตามมาตรฐานของ FIDO Alliance (เช่น Google, Apple, Microsoft และอื่นๆ) และ W3C คู่คีย์สาธารณะและคีย์ส่วนตัวจะสร้างขึ้นสำหรับแอปหรือเว็บไซต์ที่ใช้งานคีย์ดังกล่าวต่างจากชื่อผู้ใช้และชุดอักขระที่ใช้เป็นรหัสผ่าน โดยระบบจะจัดเก็บคีย์ส่วนตัวไว้ในอุปกรณ์หรือเครื่องมือจัดการรหัสผ่านและใช้คีย์ดังกล่าวเพื่อยืนยันตัวตน ส่วนคีย์สาธารณะจะแชร์กับเซิร์ฟเวอร์ของแอปหรือเว็บไซต์ ลงทะเบียนและลงชื่อเข้าใช้ได้ทันทีด้วยคีย์ที่สอดคล้องกัน"</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"ความปลอดภัยของบัญชีที่เพิ่มมากขึ้น"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"คีย์ที่สร้างขึ้นแต่ละคีย์จะลิงก์กับแอปหรือเว็บไซต์ที่ใช้งานคีย์ดังกล่าวเท่านั้น ดังนั้นจึงไม่มีการลงชื่อเข้าใช้แอปเว็บไซต์ที่เป็นการฉ้อโกงโดยไม่ตั้งใจเกิดขึ้น นอกจากนี้ เซิร์ฟเวอร์จะบันทึกเฉพาะคีย์สาธารณะ จึงทำให้แฮ็กได้ยากขึ้น"</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"การเปลี่ยนผ่านอย่างราบรื่น"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"ในขณะที่เราก้าวไปสู่อนาคตที่ไม่ต้องใช้รหัสผ่านนั้น รหัสผ่านจะยังคงใช้ได้อยู่ควบคู่ไปกับการเปลี่ยนไปใช้พาสคีย์"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"เลือกว่าต้องการบันทึก<xliff:g id="CREATETYPES">%1$s</xliff:g>ไว้ที่ใด"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"เลือกเครื่องมือจัดการรหัสผ่านเพื่อบันทึกข้อมูลและลงชื่อเข้าใช้เร็วขึ้นในครั้งถัดไป"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"สร้างพาสคีย์สำหรับ <xliff:g id="APPNAME">%1$s</xliff:g> ไหม"</string>

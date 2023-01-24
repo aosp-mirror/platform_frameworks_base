@@ -5,10 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Odustani"</string>
     <string name="string_continue" msgid="1346732695941131882">"Nastavi"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Više opcija"</string>
+    <string name="string_learn_more" msgid="4541600451688392447">"Saznajte više"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Sigurniji s pristupnim ključevima"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Uz pristupne ključeve ne trebate izrađivati ili pamtiti složene zaporke"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Pristupni ključevi šifrirani su digitalni ključevi koje izrađujete pomoću svojeg otiska prsta, lica ili zaključavanja zaslona"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Spremaju se u upravitelju zaporki kako biste se mogli prijaviti na drugim uređajima"</string>
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Više informacija o pristupnim ključevima"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Tehnologija bez upotrebe zaporke"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Pristupni ključevi omogućuju prijavu bez upotrebe zaporki. Treba vam samo otisak prsta, prepoznavanje lica, PIN ili uzorak pokreta prstom da biste potvrdili svoj identitet i izradili pristupni ključ."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Kriptografija javnog ključa"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Na temelju saveza FIDO (koji uključuje Google, Apple, Microsoft i mnoge druge) i standarda W3C pristupni ključevi koriste kriptografske ključeve. Za razliku od korisničkog imena i niza znakova za zaporke, privatno-javni ključ izrađen je za aplikaciju ili web-lokaciju. Privatni ključ pohranjen je na vašem uređaju ili upravitelju zaporki i potvrđuje vaš identitet. Javni se ključ dijeli s poslužiteljem aplikacije ili web-lokacije. Uz odgovarajuće ključeve možete se odmah registrirati i prijaviti."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Poboljšana sigurnost računa"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Svaki ključ povezan isključivo s aplikacijom ili web-lokacijom za koju je izrađen, stoga se nikad ne možete pogreškom prijaviti u prijevarnu aplikaciju ili na web-lokaciju. Osim toga, kad je riječ o poslužiteljima na kojem se nalaze samo javni ključevi, hakiranje je mnogo teže."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Besprijekorni prijelaz"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Kako idemo u smjeru budućnosti bez zaporki, one će i dalje biti dostupne uz pristupne ključeve."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Odaberite mjesto za spremanje: <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Odaberite upravitelja zaporki kako biste spremili svoje informacije i drugi se put brže prijavili"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Izraditi pristupni ključ za <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>

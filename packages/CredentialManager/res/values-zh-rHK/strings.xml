@@ -5,25 +5,45 @@
     <string name="string_cancel" msgid="6369133483981306063">"取消"</string>
     <string name="string_continue" msgid="1346732695941131882">"繼續"</string>
     <string name="string_more_options" msgid="7990658711962795124">"更多選項"</string>
+    <!-- no translation found for string_learn_more (4541600451688392447) -->
+    <skip />
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"使用密鑰確保帳戶安全"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"有了密鑰，您便無需建立或記住複雜的密碼"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"密鑰是您使用指紋、面孔或螢幕鎖定時建立的加密數碼鑰匙"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"密鑰已儲存至密碼管理工具，方便您在其他裝置上登入"</string>
-    <string name="choose_provider_title" msgid="8870795677024868108">"選擇要將<xliff:g id="CREATETYPES">%1$s</xliff:g>存在哪裡"</string>
-    <string name="choose_provider_body" msgid="4967074531845147434">"選取密碼管理工具並儲存資訊，下次就能更快登入"</string>
+    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
+    <skip />
+    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
+    <skip />
+    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
+    <skip />
+    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
+    <skip />
+    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
+    <skip />
+    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
+    <skip />
+    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
+    <skip />
+    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
+    <skip />
+    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
+    <skip />
+    <string name="choose_provider_title" msgid="8870795677024868108">"選擇儲存<xliff:g id="CREATETYPES">%1$s</xliff:g>的位置"</string>
+    <string name="choose_provider_body" msgid="4967074531845147434">"選取密碼管理工具即可儲存自己的資料，縮短下次登入的時間"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"要為「<xliff:g id="APPNAME">%1$s</xliff:g>」建立密鑰嗎？"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"要儲存「<xliff:g id="APPNAME">%1$s</xliff:g>」的密碼嗎？"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"要儲存「<xliff:g id="APPNAME">%1$s</xliff:g>」的登入資料嗎？"</string>
     <string name="passkey" msgid="632353688396759522">"密鑰"</string>
     <string name="password" msgid="6738570945182936667">"密碼"</string>
-    <string name="passkeys" msgid="5733880786866559847">"密碼金鑰"</string>
+    <string name="passkeys" msgid="5733880786866559847">"密鑰"</string>
     <string name="passwords" msgid="5419394230391253816">"密碼"</string>
     <string name="sign_ins" msgid="4710739369149469208">"登入資料"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"登入資料"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"將<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>儲存至"</string>
-    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"要在其他裝置上建立密碼金鑰嗎？"</string>
+    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"要在其他裝置上建立密鑰嗎？"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"要將「<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>」用於所有的登入資料嗎？"</string>
-    <string name="use_provider_for_all_description" msgid="8466427781848268490">"這個密碼管理工具會儲存密碼和密碼金鑰，協助你輕鬆登入"</string>
+    <string name="use_provider_for_all_description" msgid="8466427781848268490">"此密碼管理工具將儲存您的密碼和密鑰，協助您輕鬆登入"</string>
     <string name="set_as_default" msgid="4415328591568654603">"設定為預設"</string>
     <string name="use_once" msgid="9027366575315399714">"單次使用"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> 個密碼 • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> 個密鑰"</string>
