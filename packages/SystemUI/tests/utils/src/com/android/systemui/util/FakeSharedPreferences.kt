@@ -41,7 +41,7 @@ class FakeSharedPreferences : SharedPreferences {
     }
 
     override fun getStringSet(key: String, defValues: MutableSet<String>?): MutableSet<String>? {
-        return data.getOrDefault(key, defValues) as? MutableSet<String>?
+        return (data.getOrDefault(key, defValues) as? Set<String>?)?.toMutableSet()
     }
 
     override fun getInt(key: String, defValue: Int): Int {

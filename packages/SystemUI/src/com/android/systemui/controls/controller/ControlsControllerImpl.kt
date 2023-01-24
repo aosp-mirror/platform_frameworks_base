@@ -37,6 +37,7 @@ import com.android.systemui.backup.BackupHelper
 import com.android.systemui.controls.ControlStatus
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.management.ControlsListingController
+import com.android.systemui.controls.panels.AuthorizedPanelsRepository
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.controls.ui.SelectedItem
 import com.android.systemui.dagger.SysUISingleton
@@ -63,6 +64,7 @@ class ControlsControllerImpl @Inject constructor (
     private val listingController: ControlsListingController,
     private val userFileManager: UserFileManager,
     private val userTracker: UserTracker,
+    private val authorizedPanelsRepository: AuthorizedPanelsRepository,
     optionalWrapper: Optional<ControlsFavoritePersistenceWrapper>,
     dumpManager: DumpManager,
 ) : Dumpable, ControlsController {
@@ -251,6 +253,11 @@ class ControlsControllerImpl @Inject constructor (
     private fun resetFavorites() {
         Favorites.clear()
         Favorites.load(persistenceWrapper.readFavorites())
+        // After loading favorites, add the package names of any apps with favorites to the list
+        // of authorized panels. That way, if the user has previously favorited controls for an app,
+        // that panel will be authorized.
+        authorizedPanelsRepository.addAuthorizedPanels(
+                Favorites.getAllStructures().map { it.componentName.packageName }.toSet())
     }
 
     private fun confirmAvailability(): Boolean {
@@ -491,6 +498,7 @@ class ControlsControllerImpl @Inject constructor (
         if (!confirmAvailability()) return
         executor.execute {
             if (Favorites.addFavorite(componentName, structureName, controlInfo)) {
+                authorizedPanelsRepository.addAuthorizedPanels(setOf(componentName.packageName))
                 persistenceWrapper.storeFavorites(Favorites.getAllStructures())
             }
         }
@@ -555,6 +563,10 @@ class ControlsControllerImpl @Inject constructor (
 
     override fun getPreferredSelection(): SelectedItem {
         return uiController.getPreferredSelectedItem(getFavorites())
+    }
+
+    override fun setPreferredSelection(selectedItem: SelectedItem) {
+        uiController.updatePreferences(selectedItem)
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
