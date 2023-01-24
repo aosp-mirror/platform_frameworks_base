@@ -779,6 +779,10 @@ interface IActivityManager {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.DUMP)")
     boolean isModernBroadcastQueueEnabled();
 
+    /** Checks if the process represented by the given pid is frozen. */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.DUMP)")
+    boolean isProcessFrozen(int pid);
+
     /**
      * @return The reason code of whether or not the given UID should be exempted from background
      * restrictions here.

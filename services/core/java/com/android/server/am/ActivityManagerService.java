@@ -18539,6 +18539,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public boolean isProcessFrozen(int pid) {
+        enforceCallingPermission(permission.DUMP, "isProcessFrozen()");
+        return mOomAdjuster.mCachedAppOptimizer.isProcessFrozen(pid);
+    }
+
+    @Override
     @ReasonCode
     public int getBackgroundRestrictionExemptionReason(int uid) {
         enforceCallingPermission(android.Manifest.permission.DEVICE_POWER,

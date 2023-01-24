@@ -1509,6 +1509,12 @@ public final class CachedAppOptimizer {
         return profile;
     }
 
+    boolean isProcessFrozen(int pid) {
+        synchronized (mProcLock) {
+            return mFrozenProcesses.contains(pid);
+        }
+    }
+
     @VisibleForTesting
     static final class SingleCompactionStats {
         private static final float STATSD_SAMPLE_RATE = 0.1f;
