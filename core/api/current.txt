@@ -49156,6 +49156,8 @@ package android.util {
     method public static int complexToDimensionPixelSize(int, android.util.DisplayMetrics);
     method public static float complexToFloat(int);
     method public static float complexToFraction(int, float, float);
+    method public static float convertDimensionToPixels(int, float, @NonNull android.util.DisplayMetrics);
+    method public static float convertPixelsToDimension(int, float, @NonNull android.util.DisplayMetrics);
     method public static float deriveDimension(int, float, @NonNull android.util.DisplayMetrics);
     method public int getComplexUnit();
     method public float getDimension(android.util.DisplayMetrics);
