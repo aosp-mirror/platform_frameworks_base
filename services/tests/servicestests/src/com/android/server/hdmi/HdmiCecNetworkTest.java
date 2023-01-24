@@ -92,15 +92,35 @@ public class HdmiCecNetworkTest {
 
         mHdmiPortInfo = new HdmiPortInfo[5];
         mHdmiPortInfo[0] =
-                new HdmiPortInfo(1, HdmiPortInfo.PORT_INPUT, 0x2100, true, false, false);
+                new HdmiPortInfo.Builder(1, HdmiPortInfo.PORT_INPUT, 0x2100)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(false)
+                        .build();
         mHdmiPortInfo[1] =
-                new HdmiPortInfo(2, HdmiPortInfo.PORT_INPUT, 0x2200, true, false, false);
+                new HdmiPortInfo.Builder(2, HdmiPortInfo.PORT_INPUT, 0x2200)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(false)
+                        .build();
         mHdmiPortInfo[2] =
-                new HdmiPortInfo(3, HdmiPortInfo.PORT_INPUT, 0x2000, true, false, false);
+                new HdmiPortInfo.Builder(3, HdmiPortInfo.PORT_INPUT, 0x2000)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(false)
+                        .build();
         mHdmiPortInfo[3] =
-                new HdmiPortInfo(4, HdmiPortInfo.PORT_INPUT, 0x3000, true, false, false);
+                new HdmiPortInfo.Builder(4, HdmiPortInfo.PORT_INPUT, 0x3000)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(false)
+                        .build();
         mHdmiPortInfo[4] =
-                new HdmiPortInfo(5, HdmiPortInfo.PORT_OUTPUT, 0x0000, true, false, false);
+                new HdmiPortInfo.Builder(5, HdmiPortInfo.PORT_OUTPUT, 0x0000)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(false)
+                        .build();
         mNativeWrapper.setPortInfo(mHdmiPortInfo);
         mHdmiCecNetwork.initPortInfo();
 

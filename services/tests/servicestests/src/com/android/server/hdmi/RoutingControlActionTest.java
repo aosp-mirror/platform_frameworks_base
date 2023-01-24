@@ -180,8 +180,11 @@ public class RoutingControlActionTest {
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
         HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[1];
         hdmiPortInfos[0] =
-                new HdmiPortInfo(1, HdmiPortInfo.PORT_INPUT, PHYSICAL_ADDRESS_AVR,
-                        true, false, false);
+                new HdmiPortInfo.Builder(1, HdmiPortInfo.PORT_INPUT, PHYSICAL_ADDRESS_AVR)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(false)
+                        .build();
         mNativeWrapper.setPortInfo(hdmiPortInfos);
         mHdmiControlService.initService();
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);

@@ -1096,15 +1096,15 @@ final class HdmiCecController {
                 HdmiPortInfo[] hdmiPortInfo = new HdmiPortInfo[hdmiPortInfos.length];
                 int i = 0;
                 for (android.hardware.tv.hdmi.connection.HdmiPortInfo portInfo : hdmiPortInfos) {
-                    hdmiPortInfo[i] =
-                            new HdmiPortInfo(
+                    hdmiPortInfo[i] = new HdmiPortInfo.Builder(
                                     portInfo.portId,
                                     portInfo.type,
-                                    portInfo.physicalAddress,
-                                    portInfo.cecSupported,
-                                    false,
-                                    portInfo.arcSupported,
-                                    false);
+                                    portInfo.physicalAddress)
+                                    .setCecSupported(portInfo.cecSupported)
+                                    .setMhlSupported(false)
+                                    .setArcSupported(portInfo.arcSupported)
+                                    .setEarcSupported(false)
+                                    .build();
                     i++;
                 }
                 return hdmiPortInfo;
@@ -1260,13 +1260,15 @@ final class HdmiCecController {
                 HdmiPortInfo[] hdmiPortInfo = new HdmiPortInfo[hdmiPortInfos.size()];
                 int i = 0;
                 for (android.hardware.tv.cec.V1_0.HdmiPortInfo portInfo : hdmiPortInfos) {
-                    hdmiPortInfo[i] = new HdmiPortInfo(portInfo.portId,
+                    hdmiPortInfo[i] = new HdmiPortInfo.Builder(
+                            portInfo.portId,
                             portInfo.type,
-                            portInfo.physicalAddress,
-                            portInfo.cecSupported,
-                            false,
-                            portInfo.arcSupported,
-                            false);
+                            portInfo.physicalAddress)
+                            .setCecSupported(portInfo.cecSupported)
+                            .setMhlSupported(false)
+                            .setArcSupported(portInfo.arcSupported)
+                            .setEarcSupported(false)
+                            .build();
                     i++;
                 }
                 return hdmiPortInfo;
@@ -1442,13 +1444,15 @@ final class HdmiCecController {
                 HdmiPortInfo[] hdmiPortInfo = new HdmiPortInfo[hdmiPortInfos.size()];
                 int i = 0;
                 for (android.hardware.tv.cec.V1_0.HdmiPortInfo portInfo : hdmiPortInfos) {
-                    hdmiPortInfo[i] = new HdmiPortInfo(portInfo.portId,
+                    hdmiPortInfo[i] = new HdmiPortInfo.Builder(
+                            portInfo.portId,
                             portInfo.type,
-                            portInfo.physicalAddress,
-                            portInfo.cecSupported,
-                            false,
-                            portInfo.arcSupported,
-                            false);
+                            portInfo.physicalAddress)
+                            .setCecSupported(portInfo.cecSupported)
+                            .setMhlSupported(false)
+                            .setArcSupported(portInfo.arcSupported)
+                            .setEarcSupported(false)
+                            .build();
                     i++;
                 }
                 return hdmiPortInfo;

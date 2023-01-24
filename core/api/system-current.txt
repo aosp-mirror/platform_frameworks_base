@@ -4596,8 +4596,7 @@ package android.hardware.hdmi {
   }
 
   public final class HdmiPortInfo implements android.os.Parcelable {
-    ctor public HdmiPortInfo(int, int, int, boolean, boolean, boolean);
-    ctor public HdmiPortInfo(int, int, int, boolean, boolean, boolean, boolean);
+    ctor @Deprecated public HdmiPortInfo(int, int, int, boolean, boolean, boolean);
     method public int describeContents();
     method public int getAddress();
     method public int getId();
@@ -4610,6 +4609,15 @@ package android.hardware.hdmi {
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.hdmi.HdmiPortInfo> CREATOR;
     field public static final int PORT_INPUT = 0; // 0x0
     field public static final int PORT_OUTPUT = 1; // 0x1
+  }
+
+  public static final class HdmiPortInfo.Builder {
+    ctor public HdmiPortInfo.Builder(int, int, int);
+    method @NonNull public android.hardware.hdmi.HdmiPortInfo build();
+    method @NonNull public android.hardware.hdmi.HdmiPortInfo.Builder setArcSupported(boolean);
+    method @NonNull public android.hardware.hdmi.HdmiPortInfo.Builder setCecSupported(boolean);
+    method @NonNull public android.hardware.hdmi.HdmiPortInfo.Builder setEarcSupported(boolean);
+    method @NonNull public android.hardware.hdmi.HdmiPortInfo.Builder setMhlSupported(boolean);
   }
 
   public abstract class HdmiRecordListener {

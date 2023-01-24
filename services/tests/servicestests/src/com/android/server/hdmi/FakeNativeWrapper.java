@@ -112,7 +112,11 @@ final class FakeNativeWrapper implements NativeWrapper {
     public HdmiPortInfo[] nativeGetPortInfos() {
         if (mHdmiPortInfo == null) {
             mHdmiPortInfo = new HdmiPortInfo[1];
-            mHdmiPortInfo[0] = new HdmiPortInfo(1, 1, 0x1000, true, true, true);
+            mHdmiPortInfo[0] = new HdmiPortInfo.Builder(1, 1, 0x1000)
+                    .setCecSupported(true)
+                    .setMhlSupported(true)
+                    .setArcSupported(true)
+                    .build();
         }
         return mHdmiPortInfo;
     }
