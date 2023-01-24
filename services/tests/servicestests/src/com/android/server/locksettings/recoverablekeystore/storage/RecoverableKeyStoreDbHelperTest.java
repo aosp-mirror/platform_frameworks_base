@@ -104,7 +104,7 @@ public class RecoverableKeyStoreDbHelperTest {
     @Before
     public void setUp() throws Exception {
         Context context = InstrumentationRegistry.getTargetContext();
-        mDatabaseHelper = new RecoverableKeyStoreDbHelper(context);
+        mDatabaseHelper = new RecoverableKeyStoreDbHelper(context, 7);
         mDatabase = SQLiteDatabase.create(null);
     }
 
@@ -128,7 +128,7 @@ public class RecoverableKeyStoreDbHelperTest {
     @Test
     public void onUpgrade_beforeV2() throws Exception {
         mDatabaseHelper.onUpgrade(mDatabase, /*oldVersion=*/ 1,
-                RecoverableKeyStoreDbHelper.DATABASE_VERSION);
+                RecoverableKeyStoreDbHelper.DATABASE_VERSION_7);
         checkAllColumns_latest();
     }
 
@@ -136,7 +136,7 @@ public class RecoverableKeyStoreDbHelperTest {
     public void onUpgrade_fromV2() throws Exception {
         createV2Tables();
         mDatabaseHelper.onUpgrade(mDatabase, /*oldVersion=*/ 2,
-                RecoverableKeyStoreDbHelper.DATABASE_VERSION);
+                RecoverableKeyStoreDbHelper.DATABASE_VERSION_7);
         checkAllColumns_latest();
     }
 
@@ -153,8 +153,7 @@ public class RecoverableKeyStoreDbHelperTest {
         mDatabaseHelper.onUpgrade(mDatabase, /*oldVersion=*/ 3, /*newVersion=*/ 4);
         checkAllColumns_v4();
 
-        mDatabaseHelper.onUpgrade(mDatabase, /*oldVersion=*/ 4,
-                RecoverableKeyStoreDbHelper.DATABASE_VERSION);
+        mDatabaseHelper.onUpgrade(mDatabase, /*oldVersion=*/ 4, /*newVersion=*/ 7);
         checkAllColumns_latest();
     }
 
@@ -240,6 +239,14 @@ public class RecoverableKeyStoreDbHelperTest {
         values = new ContentValues();
         values.put(UserMetadataEntry.COLUMN_NAME_USER_ID, TEST_USER_ID);
         values.put(UserMetadataEntry.COLUMN_NAME_USER_SERIAL_NUMBER, TEST_USER_SERIAL_NUMBER);
+        assertThat(
+                mDatabase.replace(UserMetadataEntry.TABLE_NAME, /*nullColumnHack=*/ null, values))
+                .isGreaterThan(-1L);
+
+        // Bad guess counter was added when upgrading from v6 to v7
+        values = new ContentValues();
+        values.put(UserMetadataEntry.COLUMN_NAME_USER_ID, TEST_USER_ID);
+        values.put(UserMetadataEntry.COLUMN_NAME_BAD_REMOTE_GUESS_COUNTER, 2);
         assertThat(
                 mDatabase.replace(UserMetadataEntry.TABLE_NAME, /*nullColumnHack=*/ null, values))
                 .isGreaterThan(-1L);
