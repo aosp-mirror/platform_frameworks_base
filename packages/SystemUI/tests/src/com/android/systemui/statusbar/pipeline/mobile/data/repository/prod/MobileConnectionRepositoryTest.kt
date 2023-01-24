@@ -395,8 +395,6 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     fun `roaming - cdma - queries telephony manager`() =
         runBlocking(IMMEDIATE) {
             var latest: Boolean? = null
-            // Start the telephony collection job so that cdmaRoaming starts updating
-            val telephonyJob = underTest.connectionInfo.launchIn(this)
             val job = underTest.cdmaRoaming.onEach { latest = it }.launchIn(this)
 
             val cb = getTelephonyCallbackForType<ServiceStateListener>()
@@ -416,7 +414,6 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
             assertThat(latest).isTrue()
 
-            telephonyJob.cancel()
             job.cancel()
         }
 
