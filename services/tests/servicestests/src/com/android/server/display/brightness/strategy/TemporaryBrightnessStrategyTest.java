@@ -43,7 +43,7 @@ public class TemporaryBrightnessStrategyTest {
     }
 
     @Test
-    public void updateBrightnessWorksAsExpectedWhenTemporaryBrightnessIsSet() {
+    public void testUpdateBrightnessWhenTemporaryBrightnessIsSet() {
         DisplayManagerInternal.DisplayPowerRequest
                 displayPowerRequest = new DisplayManagerInternal.DisplayPowerRequest();
         float temporaryBrightness = 0.2f;

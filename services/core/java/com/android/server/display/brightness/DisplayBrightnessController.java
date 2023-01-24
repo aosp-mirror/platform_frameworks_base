@@ -129,6 +129,16 @@ public final class DisplayBrightnessController {
     }
 
     /**
+     * Sets the brightness to follow
+     */
+    public void setBrightnessToFollow(Float brightnessToFollow) {
+        synchronized (mLock) {
+            mDisplayBrightnessStrategySelector.getFollowerDisplayBrightnessStrategy()
+                    .setBrightnessToFollow(brightnessToFollow);
+        }
+    }
+
+    /**
      * Returns a boolean flag indicating if the light sensor is to be used to decide the screen
      * brightness when dozing
      */

@@ -26,50 +26,50 @@ import com.android.server.display.brightness.BrightnessUtils;
 import java.io.PrintWriter;
 
 /**
- * Manages the brightness of the display when the system brightness is temporary
+ * Manages the brightness of an additional display that copies the brightness value from the lead
+ * display when the device is using concurrent displays.
  */
-public class TemporaryBrightnessStrategy implements DisplayBrightnessStrategy {
-    // The temporary screen brightness. Typically set when a user is interacting with the
-    // brightness slider but hasn't settled on a choice yet. Set to
-    // PowerManager.BRIGHTNESS_INVALID_FLOAT when there's no temporary brightness set.
-    private float mTemporaryScreenBrightness;
+public class FollowerBrightnessStrategy implements DisplayBrightnessStrategy {
 
-    public TemporaryBrightnessStrategy() {
-        mTemporaryScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+    // The ID of the LogicalDisplay using this strategy.
+    private final int mDisplayId;
+
+    // Set to PowerManager.BRIGHTNESS_INVALID_FLOAT when there's no brightness to follow set.
+    private float mBrightnessToFollow;
+
+    public FollowerBrightnessStrategy(int displayId) {
+        mDisplayId = displayId;
+        mBrightnessToFollow = PowerManager.BRIGHTNESS_INVALID_FLOAT;
     }
 
-    // Use the temporary screen brightness if there isn't an override, either from
-    // WindowManager or based on the display state.
     @Override
     public DisplayBrightnessState updateBrightness(
             DisplayManagerInternal.DisplayPowerRequest displayPowerRequest) {
         // Todo(b/241308599): Introduce a validator class and add validations before setting
         // the brightness
-        DisplayBrightnessState displayBrightnessState =
-                BrightnessUtils.constructDisplayBrightnessState(BrightnessReason.REASON_TEMPORARY,
-                        mTemporaryScreenBrightness,
-                        mTemporaryScreenBrightness);
-        return displayBrightnessState;
+        return BrightnessUtils.constructDisplayBrightnessState(BrightnessReason.REASON_FOLLOWER,
+                mBrightnessToFollow, mBrightnessToFollow);
     }
 
     @Override
     public String getName() {
-        return "TemporaryBrightnessStrategy";
+        return "FollowerBrightnessStrategy";
     }
 
-    public float getTemporaryScreenBrightness() {
-        return mTemporaryScreenBrightness;
+    public float getBrightnessToFollow() {
+        return mBrightnessToFollow;
     }
 
-    public void setTemporaryScreenBrightness(float temporaryScreenBrightness) {
-        mTemporaryScreenBrightness = temporaryScreenBrightness;
+    public void setBrightnessToFollow(float brightnessToFollow) {
+        mBrightnessToFollow = brightnessToFollow;
     }
 
     /**
      * Dumps the state of this class.
      */
     public void dump(PrintWriter writer) {
-        writer.println("TemporaryBrightnessStrategy:");
-        writer.println("  mTemporaryScreenBrightness:" + mTemporaryScreenBrightness);
+        writer.println("FollowerBrightnessStrategy:");
+        writer.println("  mDisplayId=" + mDisplayId);
+        writer.println("  mBrightnessToFollow:" + mBrightnessToFollow);
     }
 }
