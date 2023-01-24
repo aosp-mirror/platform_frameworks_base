@@ -7234,11 +7234,6 @@ public class AudioService extends IAudioService.Stub
         // AudioDeviceInfo.convertDeviceTypeToInternalDevice()
         final int audioSystemDeviceOut = device.getInternalType();
 
-        int setDeviceVolumeBehavior = retrieveStoredDeviceVolumeBehavior(audioSystemDeviceOut);
-        if (setDeviceVolumeBehavior != AudioManager.DEVICE_VOLUME_BEHAVIOR_UNSET) {
-            return setDeviceVolumeBehavior;
-        }
-
         // setDeviceVolumeBehavior has not been explicitly called for the device type. Deduce the
         // current volume behavior.
         if (mFullVolumeDevices.contains(audioSystemDeviceOut)) {

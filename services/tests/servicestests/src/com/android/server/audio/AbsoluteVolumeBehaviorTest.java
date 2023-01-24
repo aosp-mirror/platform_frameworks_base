@@ -99,6 +99,27 @@ public class AbsoluteVolumeBehaviorTest {
                 .isEqualTo(AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE);
     }
 
+    /**
+     * Tests that getDeviceVolumeBehavior returns the correct volume behavior, even if
+     * a different volume behavior was previously persisted via setDeviceVolumeBehavior
+     */
+    @Test
+    public void registerDispatcherAfterSetDeviceVolumeBehavior_setsVolumeBehaviorToAbsolute() {
+        List<VolumeInfo> volumes = Collections.singletonList(
+                new VolumeInfo.Builder(AudioManager.STREAM_MUSIC).build());
+
+        mAudioService.setDeviceVolumeBehavior(DEVICE_SPEAKER_OUT,
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL, mPackageName);
+        mTestLooper.dispatchAll();
+
+        mAudioService.registerDeviceVolumeDispatcherForAbsoluteVolume(true,
+                mMockDispatcher, mPackageName, DEVICE_SPEAKER_OUT, volumes, true);
+        mTestLooper.dispatchAll();
+
+        assertThat(mAudioService.getDeviceVolumeBehavior(DEVICE_SPEAKER_OUT))
+                .isEqualTo(AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE);
+    }
+
     @Test
     public void registerDispatcher_setsVolume() {
         List<VolumeInfo> volumes = Collections.singletonList(
