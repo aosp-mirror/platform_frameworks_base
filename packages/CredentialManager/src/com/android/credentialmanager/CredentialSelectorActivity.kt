@@ -17,6 +17,7 @@
 package com.android.credentialmanager
 
 import android.content.Intent
+import android.credentials.ui.RequestInfo
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
@@ -26,89 +27,83 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.android.credentialmanager.common.DialogType
-import com.android.credentialmanager.common.DialogResult
+import com.android.credentialmanager.common.DialogState
 import com.android.credentialmanager.common.ProviderActivityResult
-import com.android.credentialmanager.common.ResultState
 import com.android.credentialmanager.createflow.CreateCredentialScreen
 import com.android.credentialmanager.createflow.CreateCredentialViewModel
 import com.android.credentialmanager.getflow.GetCredentialScreen
 import com.android.credentialmanager.getflow.GetCredentialViewModel
 import com.android.credentialmanager.ui.theme.CredentialSelectorTheme
-import kotlinx.coroutines.launch
 
 @ExperimentalMaterialApi
 class CredentialSelectorActivity : ComponentActivity() {
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    val credManRepo = CredentialManagerRepo(this, intent)
-    UserConfigRepo.setup(this)
-    val requestInfo = credManRepo.requestInfo
-    setContent {
-      CredentialSelectorTheme {
-        CredentialManagerBottomSheet(DialogType.toDialogType(requestInfo.type), credManRepo)
-      }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val credManRepo = CredentialManagerRepo(this, intent)
+        UserConfigRepo.setup(this)
+        val requestInfo = credManRepo.requestInfo
+        setContent {
+            CredentialSelectorTheme {
+                CredentialManagerBottomSheet(requestInfo.type, credManRepo)
+            }
+        }
     }
-  }
 
-  @ExperimentalMaterialApi
-  @Composable
-  fun CredentialManagerBottomSheet(dialogType: DialogType, credManRepo: CredentialManagerRepo) {
-    val providerActivityResult = remember { mutableStateOf<ProviderActivityResult?>(null) }
-    val launcher = rememberLauncherForActivityResult(
-      ActivityResultContracts.StartIntentSenderForResult()
-    ) {
-      providerActivityResult.value = ProviderActivityResult(it.resultCode, it.data)
+    @ExperimentalMaterialApi
+    @Composable
+    fun CredentialManagerBottomSheet(requestType: String, credManRepo: CredentialManagerRepo) {
+        val providerActivityResult = remember { mutableStateOf<ProviderActivityResult?>(null) }
+        val launcher = rememberLauncherForActivityResult(
+            ActivityResultContracts.StartIntentSenderForResult()
+        ) {
+            providerActivityResult.value = ProviderActivityResult(it.resultCode, it.data)
+        }
+        when (requestType) {
+            RequestInfo.TYPE_CREATE -> {
+                val viewModel: CreateCredentialViewModel = viewModel {
+                    CreateCredentialViewModel(credManRepo)
+                }
+                LaunchedEffect(viewModel.uiState.dialogState) {
+                    handleDialogState(viewModel.uiState.dialogState)
+                }
+                providerActivityResult.value?.let {
+                    viewModel.onProviderActivityResult(it)
+                    providerActivityResult.value = null
+                }
+                CreateCredentialScreen(viewModel = viewModel, providerActivityLauncher = launcher)
+            }
+            RequestInfo.TYPE_GET -> {
+                val viewModel: GetCredentialViewModel = viewModel {
+                    GetCredentialViewModel(credManRepo)
+                }
+                LaunchedEffect(viewModel.uiState.dialogState) {
+                    handleDialogState(viewModel.uiState.dialogState)
+                }
+                providerActivityResult.value?.let {
+                    viewModel.onProviderActivityResult(it)
+                    providerActivityResult.value = null
+                }
+                GetCredentialScreen(viewModel = viewModel, providerActivityLauncher = launcher)
+            }
+            else -> {
+                Log.w("AccountSelector", "Unknown type, not rendering any UI")
+                this.finish()
+            }
+        }
     }
-    when (dialogType) {
-      DialogType.CREATE_PASSKEY -> {
-        val viewModel: CreateCredentialViewModel = viewModel{
-          CreateCredentialViewModel(credManRepo)
-        }
-        lifecycleScope.launch {
-          viewModel.observeDialogResult().collect{ dialogResult ->
-            onCancel(dialogResult)
-          }
-        }
-        providerActivityResult.value?.let {
-          viewModel.onProviderActivityResult(it)
-          providerActivityResult.value = null
-        }
-        CreateCredentialScreen(viewModel = viewModel, providerActivityLauncher = launcher)
-      }
-      DialogType.GET_CREDENTIALS -> {
-        val viewModel: GetCredentialViewModel = viewModel{
-          GetCredentialViewModel(credManRepo)
-        }
-        lifecycleScope.launch {
-          viewModel.observeDialogResult().collect{ dialogResult ->
-            onCancel(dialogResult)
-          }
-        }
-        providerActivityResult.value?.let {
-          viewModel.onProviderActivityResult(it)
-          providerActivityResult.value = null
-        }
-        GetCredentialScreen(viewModel = viewModel, providerActivityLauncher = launcher)
-      }
-      else -> {
-        Log.w("AccountSelector", "Unknown type, not rendering any UI")
-        this.finish()
-      }
-    }
-  }
 
-  private fun onCancel(dialogResut: DialogResult) {
-    if (dialogResut.resultState == ResultState
-        .COMPLETE || dialogResut.resultState == ResultState.NORMAL_CANCELED) {
-      this@CredentialSelectorActivity.finish()
-    } else if (dialogResut.resultState == ResultState.LAUNCH_SETTING_CANCELED) {
-      this@CredentialSelectorActivity.startActivity(Intent(Settings.ACTION_SYNC_SETTINGS))
-      this@CredentialSelectorActivity.finish()
+    private fun handleDialogState(dialogState: DialogState) {
+        if (dialogState == DialogState.COMPLETE) {
+            Log.i("AccountSelector", "Received signal to finish the activity.")
+            this@CredentialSelectorActivity.finish()
+        } else if (dialogState == DialogState.CANCELED_FOR_SETTINGS) {
+            Log.i("AccountSelector", "Received signal to finish the activity and launch settings.")
+            this@CredentialSelectorActivity.startActivity(Intent(Settings.ACTION_SYNC_SETTINGS))
+            this@CredentialSelectorActivity.finish()
+        }
     }
-  }
 }
