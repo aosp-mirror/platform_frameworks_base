@@ -96,7 +96,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
@@ -287,7 +286,7 @@ public class BinaryTransparencyService extends SystemService {
          * - dynamically installed mobile bundled apps (MBAs) (new in Android U)
          */
         public void recordMeasurementsForAllPackages() {
-            // check if we should record the resulting measurements
+            // check if we should measure and record
             long currentTimeMs = System.currentTimeMillis();
             if ((currentTimeMs - mMeasurementsLastRecordedMs) < RECORD_MEASUREMENTS_COOLDOWN_MS) {
                 Slog.d(TAG, "Skip measurement since the last measurement was only taken at "
@@ -1227,10 +1226,8 @@ public class BinaryTransparencyService extends SystemService {
      * JobService to measure all covered binaries and record result to Westworld.
      */
     public static class UpdateMeasurementsJobService extends JobService {
-        private static AtomicBoolean sScheduled = new AtomicBoolean();
         private static long sTimeLastRanMs = 0;
-        private static final int DO_BINARY_MEASUREMENTS_JOB_ID =
-                UpdateMeasurementsJobService.class.hashCode();
+        private static final int DO_BINARY_MEASUREMENTS_JOB_ID = 1740526926;
 
         @Override
         public boolean onStartJob(JobParameters params) {
@@ -1253,7 +1250,6 @@ public class BinaryTransparencyService extends SystemService {
                     return;
                 }
                 sTimeLastRanMs = System.currentTimeMillis();
-                sScheduled.set(false);
                 jobFinished(params, false);
             }).start();
 
@@ -1274,7 +1270,7 @@ public class BinaryTransparencyService extends SystemService {
                 return;
             }
 
-            if (sScheduled.get()) {
+            if (jobScheduler.getPendingJob(DO_BINARY_MEASUREMENTS_JOB_ID) != null) {
                 Slog.d(TAG, "A measurement job has already been scheduled.");
                 return;
             }
@@ -1300,7 +1296,6 @@ public class BinaryTransparencyService extends SystemService {
                 Slog.e(TAG, "Failed to schedule job to measure binaries.");
                 return;
             }
-            sScheduled.set(true);
             Slog.d(TAG, TextUtils.formatSimple(
                     "Job %d to measure binaries was scheduled successfully.",
                     DO_BINARY_MEASUREMENTS_JOB_ID));
