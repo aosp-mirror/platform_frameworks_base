@@ -465,6 +465,12 @@
     <string-array translatable="false" name="config_cdma_dun_supported_types">
     </string-array>
 
+    <!-- Package name of the system app that implements the shared connectivity service -->
+    <string translatable="false" name="sharedconnectivity_service_package"></string>
+
+     <!-- Class name in the system app that implements the shared connectivity service -->
+    <string translatable="false" name="sharedconnectivity_service_class"></string>
+
     <!-- Flag indicating whether we should enable the automatic brightness.
          Software implementation will be used if config_hardware_auto_brightness_available is not set -->
     <bool name="config_automatic_brightness_available">false</bool>
