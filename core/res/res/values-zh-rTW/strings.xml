@@ -284,7 +284,7 @@
     <string name="notification_channel_vpn" msgid="1628529026203808999">"VPN 狀態"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"來自 IT 管理員的快訊"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"快訊"</string>
-    <string name="notification_channel_retail_mode" msgid="3732239154256431213">"零售商示範模式"</string>
+    <string name="notification_channel_retail_mode" msgid="3732239154256431213">"零售商展示模式"</string>
     <string name="notification_channel_usb" msgid="1528280969406244896">"USB 連線"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"應用程式執行中"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"正在耗用電量的應用程式"</string>
