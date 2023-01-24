@@ -485,6 +485,12 @@ public final class ProcessList {
     final ProcessMap<AppZygote> mAppZygotes = new ProcessMap<AppZygote>();
 
     /**
+     * The currently running SDK sandbox processes for a uid.
+     */
+    @GuardedBy("mService")
+    final SparseArray<ArrayList<ProcessRecord>> mSdkSandboxes = new SparseArray<>();
+
+    /**
      * Managees the {@link android.app.ApplicationExitInfo} records.
      */
     @GuardedBy("mAppExitInfoTracker")
@@ -2990,6 +2996,14 @@ public final class ProcessList {
         if (proc.isolated) {
             mIsolatedProcesses.put(proc.uid, proc);
         }
+        if (proc.isSdkSandbox) {
+            ArrayList<ProcessRecord> sdkSandboxes = mSdkSandboxes.get(proc.uid);
+            if (sdkSandboxes == null) {
+                sdkSandboxes = new ArrayList<>();
+            }
+            sdkSandboxes.add(proc);
+            mSdkSandboxes.put(Process.getAppUidForSdkSandboxUid(proc.uid), sdkSandboxes);
+        }
     }
 
     @GuardedBy("mService")
@@ -3028,6 +3042,19 @@ public final class ProcessList {
             }
         }
         return ret;
+    }
+
+    /**
+     * Returns the associated SDK sandbox processes for a UID. Note that this does
+     * NOT return a copy, so callers should not modify the result, or use it outside
+     * of the lock scope.
+     *
+     * @param uid UID to return sansdbox processes for
+     */
+    @Nullable
+    @GuardedBy("mService")
+    List<ProcessRecord> getSdkSandboxProcessesForAppLocked(int uid) {
+        return mSdkSandboxes.get(uid);
     }
 
     @GuardedBy("mService")
@@ -3134,6 +3161,16 @@ public final class ProcessList {
         // Remove the (expected) ProcessRecord from the app zygote
         if (record != null && record.appZygote) {
             removeProcessFromAppZygoteLocked(record);
+        }
+        if (record != null && record.isSdkSandbox) {
+            final int appUid = Process.getAppUidForSdkSandboxUid(uid);
+            final ArrayList<ProcessRecord> sdkSandboxesForUid = mSdkSandboxes.get(appUid);
+            if (sdkSandboxesForUid != null) {
+                sdkSandboxesForUid.remove(record);
+                if (sdkSandboxesForUid.size() == 0) {
+                    mSdkSandboxes.remove(appUid);
+                }
+            }
         }
         mAppsInBackgroundRestricted.remove(record);
 
