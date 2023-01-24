@@ -20,6 +20,7 @@
   <color name="footer_icon_enabled_color">@android:color/black</color>
   <color name="footer_icon_disabled_color">#ddd</color>
   <color name="colorControlNormal">@android:color/white</color>
+  <color name="snackbar_bg_color">#313235</color>
 
   <color name="colorAccessibilityMenuIcon">#3AA757</color>
 </resources>
