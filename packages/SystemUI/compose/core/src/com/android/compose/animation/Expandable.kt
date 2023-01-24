@@ -33,8 +33,8 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.LocalMinimumTouchTargetEnforcement
 import androidx.compose.material3.contentColorFor
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -64,11 +64,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.findRootCoordinates
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewTreeLifecycleOwner
@@ -77,7 +75,6 @@ import com.android.systemui.animation.Expandable
 import com.android.systemui.animation.LaunchAnimator
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.roundToInt
 
 /**
  * Create an expandable shape that can launch into an Activity or a Dialog.
@@ -218,21 +215,8 @@ fun Expandable(
     // If this expandable is expanded when it's being directly clicked on, let's ensure that it has
     // the minimum interactive size followed by all M3 components (48.dp).
     val minInteractiveSizeModifier =
-        if (onClick != null && LocalMinimumTouchTargetEnforcement.current) {
-            // TODO(b/242040009): Replace this by Modifier.minimumInteractiveComponentSize() once
-            // http://aosp/2305511 is available.
-            val minTouchSize = LocalViewConfiguration.current.minimumTouchTargetSize
-            Modifier.layout { measurable, constraints ->
-                // Copied from androidx.compose.material3.InteractiveComponentSize.kt
-                val placeable = measurable.measure(constraints)
-                val width = maxOf(placeable.width, minTouchSize.width.roundToPx())
-                val height = maxOf(placeable.height, minTouchSize.height.roundToPx())
-                layout(width, height) {
-                    val centerX = ((width - placeable.width) / 2f).roundToInt()
-                    val centerY = ((height - placeable.height) / 2f).roundToInt()
-                    placeable.place(centerX, centerY)
-                }
-            }
+        if (onClick != null) {
+            Modifier.minimumInteractiveComponentSize()
         } else {
             Modifier
         }
