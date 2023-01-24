@@ -207,7 +207,7 @@ constructor(
     fun isEnabled(): Boolean {
         execution.assertIsMainThread()
 
-        return featureFlags.isEnabled(Flags.SMARTSPACE) && plugin != null
+        return plugin != null
     }
 
     private fun updateBypassEnabled() {
