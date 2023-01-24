@@ -34,7 +34,8 @@ import java.io.ByteArrayOutputStream
 class BubbleXmlHelperTest : ShellTestCase() {
 
     private val user0Bubbles = listOf(
-            BubbleEntity(0, "com.example.messenger", "shortcut-1", "0k1", 120, 0, null, 1),
+            BubbleEntity(0, "com.example.messenger", "shortcut-1", "0k1", 120, 0, null, 1,
+                    isClearable = true),
             BubbleEntity(10, "com.example.chat", "alice and bob", "0k2", 0, 16537428, "title", 2,
                     null),
             BubbleEntity(0, "com.example.messenger", "shortcut-2", "0k3", 120, 0, null,
@@ -42,7 +43,8 @@ class BubbleXmlHelperTest : ShellTestCase() {
     )
 
     private val user1Bubbles = listOf(
-            BubbleEntity(1, "com.example.messenger", "shortcut-1", "1k1", 120, 0, null, 3),
+            BubbleEntity(1, "com.example.messenger", "shortcut-1", "1k1", 120, 0, null, 3,
+                    isClearable = true),
             BubbleEntity(12, "com.example.chat", "alice and bob", "1k2", 0, 16537428, "title", 4,
                     null),
             BubbleEntity(1, "com.example.messenger", "shortcut-2", "1k3", 120, 0, null,
@@ -50,28 +52,6 @@ class BubbleXmlHelperTest : ShellTestCase() {
     )
 
     private val bubbles = SparseArray<List<BubbleEntity>>()
-
-    // Checks that the contents of the two sparse arrays are the same.
-    companion object {
-        fun sparseArraysEqual(
-            one: SparseArray<List<BubbleEntity>>?,
-            two: SparseArray<List<BubbleEntity>>?
-        ): Boolean {
-            if (one == null && two == null) return true
-            if ((one == null) != (two == null)) return false
-            if (one!!.size() != two!!.size()) return false
-            for (i in 0 until one.size()) {
-                val k1 = one.keyAt(i)
-                val v1 = one.valueAt(i)
-                val k2 = two.keyAt(i)
-                val v2 = two.valueAt(i)
-                if (k1 != k2 && v1 != v2) {
-                    return false
-                }
-            }
-            return true
-        }
-    }
 
     @Before
     fun setup() {
@@ -83,14 +63,14 @@ class BubbleXmlHelperTest : ShellTestCase() {
     fun testWriteXml() {
         val expectedEntries = """
 <bs uid="0">
-<bb uid="0" pkg="com.example.messenger" sid="shortcut-1" key="0k1" h="120" hid="0" tid="1" />
-<bb uid="10" pkg="com.example.chat" sid="alice and bob" key="0k2" h="0" hid="16537428" t="title" tid="2" />
-<bb uid="0" pkg="com.example.messenger" sid="shortcut-2" key="0k3" h="120" hid="0" tid="-1" l="l3" />
+<bb uid="0" pkg="com.example.messenger" sid="shortcut-1" key="0k1" h="120" hid="0" tid="1" d="true" />
+<bb uid="10" pkg="com.example.chat" sid="alice and bob" key="0k2" h="0" hid="16537428" t="title" tid="2" d="false" />
+<bb uid="0" pkg="com.example.messenger" sid="shortcut-2" key="0k3" h="120" hid="0" tid="-1" l="l3" d="false" />
 </bs>
 <bs uid="1">
-<bb uid="1" pkg="com.example.messenger" sid="shortcut-1" key="1k1" h="120" hid="0" tid="3" />
-<bb uid="12" pkg="com.example.chat" sid="alice and bob" key="1k2" h="0" hid="16537428" t="title" tid="4" />
-<bb uid="1" pkg="com.example.messenger" sid="shortcut-2" key="1k3" h="120" hid="0" tid="-1" l="l4" />
+<bb uid="1" pkg="com.example.messenger" sid="shortcut-1" key="1k1" h="120" hid="0" tid="3" d="true" />
+<bb uid="12" pkg="com.example.chat" sid="alice and bob" key="1k2" h="0" hid="16537428" t="title" tid="4" d="false" />
+<bb uid="1" pkg="com.example.messenger" sid="shortcut-2" key="1k3" h="120" hid="0" tid="-1" l="l4" d="false" />
 </bs>
         """.trimIndent()
         ByteArrayOutputStream().use {
@@ -107,19 +87,19 @@ class BubbleXmlHelperTest : ShellTestCase() {
 <?xml version='1.0' encoding='utf-8' standalone='yes' ?>
 <bs v="2">
 <bs uid="0">
-<bb uid="0" pkg="com.example.messenger" sid="shortcut-1" key="0k1" h="120" hid="0" tid="1" />
-<bb uid="10" pkg="com.example.chat" sid="alice and bob" key="0k2" h="0" hid="16537428" t="title" tid="2" />
-<bb uid="0" pkg="com.example.messenger" sid="shortcut-2" key="0k3" h="120" hid="0" tid="-1" l="l3" />
+<bb uid="0" pkg="com.example.messenger" sid="shortcut-1" key="0k1" h="120" hid="0" tid="1" d="true" />
+<bb uid="10" pkg="com.example.chat" sid="alice and bob" key="0k2" h="0" hid="16537428" t="title" tid="2" d="false" />
+<bb uid="0" pkg="com.example.messenger" sid="shortcut-2" key="0k3" h="120" hid="0" tid="-1" l="l3" d="false" />
 </bs>
 <bs uid="1">
-<bb uid="1" pkg="com.example.messenger" sid="shortcut-1" key="1k1" h="120" hid="0" tid="3" />
-<bb uid="12" pkg="com.example.chat" sid="alice and bob" key="1k2" h="0" hid="16537428" t="title" tid="4" />
-<bb uid="1" pkg="com.example.messenger" sid="shortcut-2" key="1k3" h="120" hid="0" tid="-1" l="l4" />
+<bb uid="1" pkg="com.example.messenger" sid="shortcut-1" key="1k1" h="120" hid="0" tid="3" d="true" />
+<bb uid="12" pkg="com.example.chat" sid="alice and bob" key="1k2" h="0" hid="16537428" t="title" tid="4" d="false" />
+<bb uid="1" pkg="com.example.messenger" sid="shortcut-2" key="1k3" h="120" hid="0" tid="-1" l="l4" d="false" />
 </bs>
 </bs>
         """.trimIndent()
         val actual = readXml(ByteArrayInputStream(src.toByteArray(Charsets.UTF_8)))
-        assertTrue("failed parsing bubbles from xml\n$src", sparseArraysEqual(bubbles, actual))
+        assertTrue("failed parsing bubbles from xml\n$src", bubbles.contentEquals(actual))
     }
 
     // V0 -> V1 happened prior to release / during dogfood so nothing is saved
@@ -161,8 +141,7 @@ class BubbleXmlHelperTest : ShellTestCase() {
 </bs>
         """.trimIndent()
         val actual = readXml(ByteArrayInputStream(src.toByteArray(Charsets.UTF_8)))
-        assertTrue("failed parsing bubbles from xml\n$src",
-                sparseArraysEqual(expectedBubbles, actual))
+        assertTrue("failed parsing bubbles from xml\n$src", expectedBubbles.contentEquals(actual))
     }
 
     /**
@@ -187,7 +166,7 @@ class BubbleXmlHelperTest : ShellTestCase() {
         """.trimIndent()
         val actual = readXml(ByteArrayInputStream(src.toByteArray(Charsets.UTF_8)))
         assertTrue("failed parsing bubbles from xml\n$src",
-                sparseArraysEqual(expectedBubbles, actual))
+                expectedBubbles.contentEquals(actual))
     }
 
     @Test
@@ -210,6 +189,6 @@ class BubbleXmlHelperTest : ShellTestCase() {
         )
         val actual = readXml(ByteArrayInputStream(src.toByteArray(Charsets.UTF_8)))
         assertTrue("failed parsing bubbles from xml\n$src",
-                sparseArraysEqual(expectedBubbles, actual))
+                expectedBubbles.contentEquals(actual))
     }
 }
