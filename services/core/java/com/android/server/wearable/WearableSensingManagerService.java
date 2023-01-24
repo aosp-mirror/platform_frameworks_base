@@ -51,6 +51,9 @@ import java.util.Set;
 
 /**
  * System service for managing sensing {@link AmbientContextEvent}s on Wearables.
+ *
+ * <p>The use of "Wearable" here is not the same as the Android Wear platform and should be treated
+ * separately. </p>
  */
 public class WearableSensingManagerService extends
         AbstractMasterSystemService<WearableSensingManagerService,
