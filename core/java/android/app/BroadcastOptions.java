@@ -66,6 +66,7 @@ public class BroadcastOptions extends ComponentOptions {
     private @DeliveryGroupPolicy int mDeliveryGroupPolicy;
     private @Nullable String mDeliveryGroupMatchingKey;
     private @Nullable IntentFilter mDeliveryGroupMatchingFilter;
+    private boolean mIsDeferUntilActive = false;
 
     /**
      * Change ID which is invalid.
@@ -685,6 +686,41 @@ public class BroadcastOptions extends ComponentOptions {
     @SystemApi
     public void setDeliveryGroupMatchingFilter(@NonNull IntentFilter matchingFilter) {
         mDeliveryGroupMatchingFilter = Objects.requireNonNull(matchingFilter);
+    }
+
+    /**
+     * Sets whether the broadcast should not run until the process is in an active process state
+     * (ie, a process exists for the app and the app is not in a cached process state).
+     *
+     * Whether an app's process state is considered active is independent of its standby bucket.
+     *
+     * A broadcast that is deferred until the process is active will not execute until the process
+     * is brought to an active state by some other action, like a job, alarm, or service binding. As
+     * a result, the broadcast may be delayed indefinitely. This deferral only applies to runtime
+     * registered receivers of a broadcast. Any manifest receivers will run immediately, similar to
+     * how a manifest receiver would start a new process in order to run a broadcast receiver.
+     *
+     * Ordered broadcasts, alarm broadcasts, interactive broadcasts, and manifest broadcasts are
+     * never deferred.
+     *
+     * Unordered broadcasts and unordered broadcasts with completion callbacks may be
+     * deferred. Completion callbacks for broadcasts deferred until active are
+     * best-effort. Completion callbacks will run when all eligible processes have finished
+     * executing the broadcast. Processes in inactive process states that defer the broadcast are
+     * not considered eligible and may not execute the broadcast prior to the completion callback.
+     *
+     * @hide
+     */
+    @SystemApi
+    public @NonNull BroadcastOptions setDeferUntilActive(boolean shouldDefer) {
+        mIsDeferUntilActive = shouldDefer;
+        return this;
+    }
+
+    /** @hide */
+    @SystemApi
+    public boolean isDeferUntilActive() {
+        return mIsDeferUntilActive;
     }
 
     /**
