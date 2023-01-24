@@ -6166,6 +6166,12 @@
         <item>@string/config_mainDisplayShape</item>
         <item>@string/config_secondaryDisplayShape</item>
     </string-array>
+
+    <!-- Certificate digests for trusted apps that will be allowed to obtain the knownSigner
+         permission for staging HealthConnect's remote data. The digest should be computed over the
+         DER encoding of the trusted certificate using the SHA-256 digest algorithm. -->
+    <string-array name="config_healthConnectStagingDataKnownSigners">
+    </string-array>
     <!-- Certificate digests for trusted apps that will be allowed to obtain the knownSigner Health
         Connect Migration permissions. The digest should be computed over the DER encoding of the
         trusted certificate using the SHA-256 digest algorithm. -->

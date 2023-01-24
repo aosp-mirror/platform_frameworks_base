@@ -799,6 +799,10 @@
     <!-- Permission required for CTS test - CtsPackageInstallTestCases-->
     <uses-permission android:name="android.permission.GET_APP_METADATA" />
 
+    <!-- Permission required for CTS test - CtsHealthConnectDeviceTestCases -->
+    <uses-permission android:name="android.permission.DELETE_STAGED_HEALTH_CONNECT_REMOTE_DATA" />
+    <uses-permission android:name="android.permission.STAGE_HEALTH_CONNECT_REMOTE_DATA" />
+
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED"/>
 
