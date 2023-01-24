@@ -65,8 +65,7 @@ object Flags {
     val FSI_ON_DND_UPDATE = unreleasedFlag(259130119, "fsi_on_dnd_update", teamfood = true)
 
     // TODO(b/265804648): Tracking Bug
-    @JvmField
-    val DISABLE_FSI = unreleasedFlag(265804648, "disable_fsi")
+    @JvmField val DISABLE_FSI = unreleasedFlag(265804648, "disable_fsi")
 
     // TODO(b/254512538): Tracking Bug
     val INSTANT_VOICE_REPLY = unreleasedFlag(111, "instant_voice_reply", teamfood = true)
@@ -483,6 +482,11 @@ object Flags {
     val WM_SHADE_ANIMATE_BACK_GESTURE =
         unreleasedFlag(1208, "persist.wm.debug.shade_animate_back_gesture", teamfood = true)
 
+    // TODO(b/265639042): Tracking Bug
+    @JvmField
+    val WM_ENABLE_PREDICTIVE_BACK_QS_DIALOG_ANIM =
+        unreleasedFlag(1209, "persist.wm.debug.predictive_back_qs_dialog_anim", teamfood = true)
+
     // 1300 - screenshots
     // TODO(b/254513155): Tracking Bug
     @JvmField
@@ -573,6 +577,5 @@ object Flags {
 
     // 2600 - keyboard shortcut
     // TODO(b/259352579): Tracking Bug
-    @JvmField
-    val SHORTCUT_LIST_SEARCH_LAYOUT = unreleasedFlag(2600, "shortcut_list_search_layout")
+    @JvmField val SHORTCUT_LIST_SEARCH_LAYOUT = unreleasedFlag(2600, "shortcut_list_search_layout")
 }
