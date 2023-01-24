@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
+import static android.view.Surface.ROTATION_0;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_BOTTOM;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
@@ -78,6 +79,12 @@ class TestDisplayContent extends DisplayContent {
         final InputMonitor inputMonitor = getInputMonitor();
         spyOn(inputMonitor);
         doNothing().when(inputMonitor).resumeDispatchingLw(any());
+
+        // For devices that set the sysprop ro.bootanim.set_orientation_<display_id>
+        // See DisplayRotation#readDefaultDisplayRotation for context.
+        // Without that, meaning of height and width in context of the tests can be swapped if
+        // the default rotation is 90 or 270.
+        displayRotation.setRotation(ROTATION_0);
     }
 
     public static class Builder {
