@@ -230,6 +230,17 @@ public final class AccessibilityManager {
      */
     public static final int FLAG_CONTENT_CONTROLS = 4;
 
+
+    /**
+     * {@link ComponentName} for the Accessibility Menu {@link AccessibilityService} as provided
+     * inside the system build, used for automatic migration to this version of the service.
+     * @hide
+     */
+    public static final ComponentName ACCESSIBILITY_MENU_IN_SYSTEM =
+            new ComponentName("com.android.systemui.accessibility.accessibilitymenu",
+                    "com.android.systemui.accessibility.accessibilitymenu"
+                            + ".AccessibilityMenuService");
+
     @UnsupportedAppUsage
     static final Object sInstanceSync = new Object();
 
