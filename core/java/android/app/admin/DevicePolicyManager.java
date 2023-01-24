@@ -39,6 +39,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.StringDef;
+import android.annotation.SupportsCoexistence;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -8595,6 +8596,7 @@ public class DevicePolicyManager {
      * primary user, or a profile owner of an organization-owned managed profile or a holder of the
      * permission {@link android.Manifest.permission#SET_TIME_ZONE}.
      */
+    @SupportsCoexistence
     @RequiresPermission(value = SET_TIME_ZONE, conditional = true)
     public void setAutoTimeZoneEnabled(@NonNull ComponentName admin, boolean enabled) {
         throwIfParentInstance("setAutoTimeZone");
@@ -9664,6 +9666,7 @@ public class DevicePolicyManager {
      * @param activity The Activity that is added as default intent handler.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
+    @SupportsCoexistence
     public void addPersistentPreferredActivity(@NonNull ComponentName admin, IntentFilter filter,
             @NonNull ComponentName activity) {
         throwIfParentInstance("addPersistentPreferredActivity");
@@ -10623,6 +10626,7 @@ public class DevicePolicyManager {
      *                           profile owner of an organization-owned managed profile and the
      *                           list of permitted input method package names is not null or empty.
      */
+    @SupportsCoexistence
     public boolean setPermittedInputMethods(
             @NonNull ComponentName admin, List<String> packageNames) {
         if (mService != null) {
@@ -11695,6 +11699,7 @@ public class DevicePolicyManager {
      * @see DeviceAdminReceiver#onLockTaskModeExiting(Context, Intent)
      * @see UserManager#DISALLOW_CREATE_WINDOWS
      */
+    @SupportsCoexistence
     public void setLockTaskPackages(@NonNull ComponentName admin, @NonNull String[] packages)
             throws SecurityException {
         throwIfParentInstance("setLockTaskPackages");
@@ -11763,6 +11768,7 @@ public class DevicePolicyManager {
      * affiliated user or profile, or the profile owner when no device owner is set.
      * @see #isAffiliatedUser
      **/
+    @SupportsCoexistence
     public void setLockTaskFeatures(@NonNull ComponentName admin, @LockTaskFeature int flags) {
         throwIfParentInstance("setLockTaskFeatures");
         if (mService != null) {
@@ -12266,6 +12272,7 @@ public class DevicePolicyManager {
      * @see #setDelegatedScopes
      * @see #DELEGATION_BLOCK_UNINSTALL
      */
+    @SupportsCoexistence
     public void setUninstallBlocked(@Nullable ComponentName admin, String packageName,
             boolean uninstallBlocked) {
         throwIfParentInstance("setUninstallBlocked");
@@ -12754,6 +12761,7 @@ public class DevicePolicyManager {
      * @see #setDelegatedScopes
      * @see #DELEGATION_PERMISSION_GRANT
      */
+    @SupportsCoexistence
     public boolean setPermissionGrantState(@NonNull ComponentName admin,
             @NonNull String packageName, @NonNull String permission,
             @PermissionGrantState int grantState) {
@@ -15300,6 +15308,7 @@ public class DevicePolicyManager {
      * @param packages The package names for the apps.
      * @throws SecurityException if {@code admin} is not a device owner or a profile owner.
      */
+    @SupportsCoexistence
     public void setUserControlDisabledPackages(@NonNull ComponentName admin,
             @NonNull List<String> packages) {
         throwIfParentInstance("setUserControlDisabledPackages");
