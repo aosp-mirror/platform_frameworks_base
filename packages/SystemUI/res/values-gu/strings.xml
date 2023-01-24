@@ -91,10 +91,8 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"નીચેની સીમા <xliff:g id="PERCENT">%1$d</xliff:g> ટકા"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"ડાબી બાજુની સીમા <xliff:g id="PERCENT">%1$d</xliff:g> ટકા"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"જમણી બાજુની સીમા <xliff:g id="PERCENT">%1$d</xliff:g> ટકા"</string>
-    <!-- no translation found for screenshot_work_profile_notification (2812417845875653929) -->
-    <skip />
-    <!-- no translation found for screenshot_default_files_app_name (8721579578575161912) -->
-    <skip />
+    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"ઑફિસના સ્ક્રીનશૉટ <xliff:g id="APP">%1$s</xliff:g> ઍપમાં સાચવવામાં આવે છે"</string>
+    <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"ફાઇલો"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"સ્ક્રીન રેકોર્ડર"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"સ્ક્રીન રેકૉર્ડિંગ ચાલુ છે"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"સ્ક્રીન રેકોર્ડિંગ સત્ર માટે ચાલુ નોટિફિકેશન"</string>
@@ -534,8 +532,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"ઑટોમૅટિક રીતે"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"કોઈપણ સાઉન્ડ અથવા વાઇબ્રેશન નથી"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"કોઈપણ સાઉન્ડ અથવા વાઇબ્રેશન નથી અને વાતચીત વિભાગમાં તે વધુ નીચેની દિશાએ દેખાય છે"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"ફોન સેટિંગના આધારે રિંગ અથવા વાઇબ્રેટ થઈ શકે છે"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ફોન સેટિંગના આધારે રિંગ અથવા વાઇબ્રેટ થઈ શકે છે. ડિફૉલ્ટ તરીકે <xliff:g id="APP_NAME">%1$s</xliff:g> બબલની વાતચીત."</string>
+    <string name="notification_channel_summary_default" msgid="777294388712200605">"ડિવાઇસના સેટિંગના આધારે રિંગ અથવા વાઇબ્રેટ થઈ શકે છે"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"ડિવાઇસના સેટિંગના આધારે રિંગ અથવા વાઇબ્રેટ થઈ શકે છે. ડિફૉલ્ટ તરીકે <xliff:g id="APP_NAME">%1$s</xliff:g> બબલની વાતચીત."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"આ નોટિફિકેશન સાઉન્ડ અથવા વાઇબ્રેટ કરી શકશે કે નહીં તે સિસ્ટમને નક્કી કરવા દો"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;સ્ટેટસ:&lt;/b&gt; ડિફૉલ્ટ તરીકે બઢતી આપવામાં આવી"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;સ્ટેટસ:&lt;/b&gt; સાઇલન્ટ પર અવનત કરવામાં આવ્યું"</string>
@@ -854,13 +852,11 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="APP_LABEL">%2$s</xliff:g> પર <xliff:g id="SONG_NAME">%1$s</xliff:g> ગીત ચલાવો"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"છેલ્લો ફેરફાર રદ કરો"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> પર ચલાવવા માટે વધુ નજીક ખસેડો"</string>
-    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
-    <skip />
+    <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"અહીં ચલાવવા માટે, <xliff:g id="DEVICENAME">%1$s</xliff:g>ની નજીક લાવો"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> પર ચલાવવામાં આવી રહ્યું છે"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"કંઈક ખોટું થયું. ફરી પ્રયાસ કરો."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"લોડ થઈ રહ્યું છે"</string>
-    <!-- no translation found for media_ttt_default_device_type (4457646436153370169) -->
-    <skip />
+    <string name="media_ttt_default_device_type" msgid="4457646436153370169">"ટૅબ્લેટ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"નિષ્ક્રિય, ઍપને ચેક કરો"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"મળ્યું નથી"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"નિયંત્રણ ઉપલબ્ધ નથી"</string>
@@ -884,8 +880,7 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"વૉલ્યૂમ"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"સ્પીકર અને ડિસ્પ્લે"</string>
-    <!-- no translation found for media_output_group_title_suggested_device (4157186235837903826) -->
-    <skip />
+    <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"સૂચવેલા ડિવાઇસ"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"બ્રોડકાસ્ટ પ્રક્રિયાની કામ કરવાની રીત"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"બ્રોડકાસ્ટ કરો"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"સુસંગત બ્લૂટૂથ ડિવાઇસ ધરાવતા નજીકના લોકો તમે જે મીડિયા બ્રોડકાસ્ટ કરી રહ્યાં છો તે સાંભળી શકે છે"</string>
@@ -1023,8 +1018,12 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ આ સ્ક્રીન બંધ થઈ જશે"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ફોલ્ડ કરી શકાય એવું ડિવાઇસ અનફોલ્ડ કરવામાં આવી રહ્યું છે"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ફોલ્ડ કરી શકાય એવું ડિવાઇસ ફ્લિપ કરવામાં આવી રહ્યું છે"</string>
-    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
-    <skip />
-    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
-    <skip />
+    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> બૅટરી બાકી છે"</string>
+    <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"તમારા સ્ટાઇલસને ચાર્જર સાથે કનેક્ટ કરો"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"સ્ટાઇલસની બૅટરીમાં ચાર્જ ઓછો છે"</string>
+    <string name="video_camera" msgid="7654002575156149298">"વીડિયો કૅમેરા"</string>
+    <string name="call_from_work_profile_title" msgid="6991157106804289643">"આ પ્રોફાઇલ પરથી કૉલ કરી શકતા નથી"</string>
+    <string name="call_from_work_profile_text" msgid="3458704745640229638">"તમારી ઑફિસની પૉલિસી તમને માત્ર ઑફિસની પ્રોફાઇલ પરથી જ ફોન કૉલ કરવાની મંજૂરી આપે છે"</string>
+    <string name="call_from_work_profile_action" msgid="2937701298133010724">"ઑફિસની પ્રોફાઇલ પર સ્વિચ કરો"</string>
+    <string name="call_from_work_profile_close" msgid="7927067108901068098">"બંધ કરો"</string>
 </resources>

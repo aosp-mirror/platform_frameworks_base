@@ -91,10 +91,8 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Граница снизу: <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Граница слева: <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Граница справа: <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
-    <!-- no translation found for screenshot_work_profile_notification (2812417845875653929) -->
-    <skip />
-    <!-- no translation found for screenshot_default_files_app_name (8721579578575161912) -->
-    <skip />
+    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"Скриншоты сохраняются в приложении \"<xliff:g id="APP">%1$s</xliff:g>\" в рабочем профиле"</string>
+    <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Файлы"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Запись видео с экрана"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Обработка записи с экрана…"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Текущее уведомление для записи видео с экрана"</string>
@@ -534,8 +532,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"Автоматически"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Без звука и вибрации"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Без звука или вибрации, появляется в нижней части списка разговоров"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Звонок или вибрация в зависимости от настроек телефона"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Звонок или вибрация в зависимости от настроек телефона. Разговоры из приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" по умолчанию появляются в виде всплывающего чата"</string>
+    <string name="notification_channel_summary_default" msgid="777294388712200605">"Звонок или вибрация в зависимости от настроек устройства"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Звонок или вибрация в зависимости от настроек устройства. Разговоры из приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" по умолчанию появляются в виде всплывающего чата."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Система будет сама определять, включать ли звуковой сигнал или вибрацию для уведомления"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Статус:&lt;/b&gt; повышено до уровня \"По умолчанию\""</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Статус:&lt;/b&gt; понижено до уровня \"Без звука\""</string>
@@ -854,13 +852,11 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Воспроизвести медиафайл \"<xliff:g id="SONG_NAME">%1$s</xliff:g>\" из приложения \"<xliff:g id="APP_LABEL">%2$s</xliff:g>\""</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Отменить"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Чтобы начать трансляцию на устройстве \"<xliff:g id="DEVICENAME">%1$s</xliff:g>\", подойдите к нему ближе."</string>
-    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
-    <skip />
+    <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"Чтобы начать воспроизведение здесь, подойдите ближе к устройству (<xliff:g id="DEVICENAME">%1$s</xliff:g>)."</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Воспроизводится на устройстве \"<xliff:g id="DEVICENAME">%1$s</xliff:g>\"."</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Произошла ошибка. Повторите попытку."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"Загрузка…"</string>
-    <!-- no translation found for media_ttt_default_device_type (4457646436153370169) -->
-    <skip />
+    <string name="media_ttt_default_device_type" msgid="4457646436153370169">"планшет"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Нет ответа. Проверьте приложение."</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Не найдено."</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Управление недоступно"</string>
@@ -884,8 +880,7 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Громкость"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Колонки и дисплеи"</string>
-    <!-- no translation found for media_output_group_title_suggested_device (4157186235837903826) -->
-    <skip />
+    <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Рекомендуемые устройства"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Как работают трансляции"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Трансляция"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Находящиеся рядом с вами люди с совместимыми устройствами Bluetooth могут слушать медиафайлы, которые вы транслируете."</string>
@@ -1023,8 +1018,12 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Этот экран отключится"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Складное устройство в разложенном виде"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Перевернутое складное устройство"</string>
-    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
-    <skip />
-    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
-    <skip />
+    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Уровень заряда батареи: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Поставьте стилус на зарядку."</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Низкий заряд батареи стилуса"</string>
+    <string name="video_camera" msgid="7654002575156149298">"Видеокамера"</string>
+    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Невозможно совершить звонок из этого профиля"</string>
+    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Согласно правилам вашей организации вы можете совершать телефонные звонки только из рабочего профиля."</string>
+    <string name="call_from_work_profile_action" msgid="2937701298133010724">"Перейти в рабочий профиль"</string>
+    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Закрыть"</string>
 </resources>
