@@ -965,17 +965,21 @@ public class AppStandbyController
             Slog.d(TAG, "   Checking idle state for " + packageName
                     + " minBucket=" + standbyBucketToString(minBucket));
         }
+        final boolean previouslyIdle, stillIdle;
         if (minBucket <= STANDBY_BUCKET_ACTIVE) {
             // No extra processing needed for ACTIVE or higher since apps can't drop into lower
             // buckets.
             synchronized (mAppIdleLock) {
+                previouslyIdle = mAppIdleHistory.isIdle(packageName, userId, elapsedRealtime);
                 mAppIdleHistory.setAppStandbyBucket(packageName, userId, elapsedRealtime,
                         minBucket, REASON_MAIN_DEFAULT);
+                stillIdle = mAppIdleHistory.isIdle(packageName, userId, elapsedRealtime);
             }
             maybeInformListeners(packageName, userId, elapsedRealtime,
                     minBucket, REASON_MAIN_DEFAULT, false);
         } else {
             synchronized (mAppIdleLock) {
+                previouslyIdle = mAppIdleHistory.isIdle(packageName, userId, elapsedRealtime);
                 final AppIdleHistory.AppUsageHistory app =
                         mAppIdleHistory.getAppUsageHistory(packageName,
                         userId, elapsedRealtime);
@@ -1073,10 +1077,16 @@ public class AppStandbyController
                 if (oldBucket != newBucket || predictionLate) {
                     mAppIdleHistory.setAppStandbyBucket(packageName, userId,
                             elapsedRealtime, newBucket, reason);
+                    stillIdle = mAppIdleHistory.isIdle(packageName, userId, elapsedRealtime);
                     maybeInformListeners(packageName, userId, elapsedRealtime,
                             newBucket, reason, false);
+                } else {
+                    stillIdle = previouslyIdle;
                 }
             }
+        }
+        if (previouslyIdle != stillIdle) {
+            notifyBatteryStats(packageName, userId, stillIdle);
         }
     }
 
@@ -1234,8 +1244,9 @@ public class AppStandbyController
                     appHistory.currentBucket, reason, userStartedInteracting);
         }
 
-        if (previouslyIdle) {
-            notifyBatteryStats(pkg, userId, false);
+        final boolean stillIdle = appHistory.currentBucket >= AppIdleHistory.IDLE_BUCKET_CUTOFF;
+        if (previouslyIdle != stillIdle) {
+            notifyBatteryStats(pkg, userId, stillIdle);
         }
     }
 
@@ -1808,8 +1819,14 @@ public class AppStandbyController
                 reason = REASON_MAIN_FORCED_BY_SYSTEM
                         | (app.bucketingReason & REASON_SUB_MASK)
                         | (reason & REASON_SUB_MASK);
+                final boolean previouslyIdle =
+                        app.currentBucket >= AppIdleHistory.IDLE_BUCKET_CUTOFF;
                 mAppIdleHistory.setAppStandbyBucket(packageName, userId, elapsedRealtime,
                         newBucket, reason, resetTimeout);
+                final boolean stillIdle = newBucket >= AppIdleHistory.IDLE_BUCKET_CUTOFF;
+                if (previouslyIdle != stillIdle) {
+                    notifyBatteryStats(packageName, userId, stillIdle);
+                }
                 return;
             }
 
@@ -1910,8 +1927,13 @@ public class AppStandbyController
 
             // Make sure we don't put the app in a lower bucket than it's supposed to be in.
             newBucket = Math.min(newBucket, getAppMinBucket(packageName, userId));
+            final boolean previouslyIdle = app.currentBucket >= AppIdleHistory.IDLE_BUCKET_CUTOFF;
             mAppIdleHistory.setAppStandbyBucket(packageName, userId, elapsedRealtime, newBucket,
                     reason, resetTimeout);
+            final boolean stillIdle = newBucket >= AppIdleHistory.IDLE_BUCKET_CUTOFF;
+            if (previouslyIdle != stillIdle) {
+                notifyBatteryStats(packageName, userId, stillIdle);
+            }
         }
         maybeInformListeners(packageName, userId, elapsedRealtime, newBucket, reason, false);
     }
@@ -2668,7 +2690,9 @@ public class AppStandbyController
         }
 
         void noteEvent(int event, String packageName, int uid) throws RemoteException {
-            mBatteryStats.noteEvent(event, packageName, uid);
+            if (mBatteryStats != null) {
+                mBatteryStats.noteEvent(event, packageName, uid);
+            }
         }
 
         PackageManagerInternal getPackageManagerInternal() {
