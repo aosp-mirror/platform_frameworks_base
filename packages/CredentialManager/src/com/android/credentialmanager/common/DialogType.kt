@@ -19,16 +19,15 @@ package com.android.credentialmanager.common
 import android.credentials.ui.RequestInfo
 
 enum class DialogType {
-  CREATE_PASSKEY,
+  CREATE_CREDENTIAL,
   GET_CREDENTIALS,
-  CREATE_PASSWORD,
   UNKNOWN;
 
   companion object {
     fun toDialogType(value: String): DialogType {
       return when (value) {
         RequestInfo.TYPE_GET -> GET_CREDENTIALS
-        RequestInfo.TYPE_CREATE -> CREATE_PASSKEY
+        RequestInfo.TYPE_CREATE -> CREATE_CREDENTIAL
         else -> UNKNOWN
       }
     }
