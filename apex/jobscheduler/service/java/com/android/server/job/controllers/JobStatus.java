@@ -1411,16 +1411,18 @@ public final class JobStatus {
     public boolean canRunInDoze() {
         return appHasDozeExemption
                 || (getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0
-                || ((shouldTreatAsExpeditedJob() || startedAsExpeditedJob)
                 || shouldTreatAsUserInitiatedJob()
-                && (mDynamicConstraints & CONSTRAINT_DEVICE_NOT_DOZING) == 0);
+                // EJs can't run in Doze if we explicitly require that the device is not Dozing.
+                || ((shouldTreatAsExpeditedJob() || startedAsExpeditedJob)
+                        && (mDynamicConstraints & CONSTRAINT_DEVICE_NOT_DOZING) == 0);
     }
 
     boolean canRunInBatterySaver() {
         return (getInternalFlags() & INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION) != 0
-                || ((shouldTreatAsExpeditedJob() || startedAsExpeditedJob)
                 || shouldTreatAsUserInitiatedJob()
-                && (mDynamicConstraints & CONSTRAINT_BACKGROUND_NOT_RESTRICTED) == 0);
+                // EJs can't run in Battery Saver if we explicitly require that Battery Saver is off
+                || ((shouldTreatAsExpeditedJob() || startedAsExpeditedJob)
+                        && (mDynamicConstraints & CONSTRAINT_BACKGROUND_NOT_RESTRICTED) == 0);
     }
 
     /** @return true if the constraint was changed, false otherwise. */
