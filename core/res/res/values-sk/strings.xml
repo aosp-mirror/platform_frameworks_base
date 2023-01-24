@@ -331,7 +331,7 @@
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Zapnúť funkciu Preskúmanie dotykom"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Po klepnutí na položku sa vysloví jej názov a obrazovku je možné preskúmať pomocou gest."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Sledovať zadávaný text"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Sledovanie zahŕňa osobné údaje ako sú čísla kreditných kariet a heslá."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Sledovanie zahŕňa osobné údaje, ako sú čísla kreditných kariet a heslá."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Ovládať priblíženie obrazovky"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Ovládajte umiestnenie a úroveň priblíženia obrazovky."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Gestá"</string>
@@ -1945,10 +1945,8 @@
     <string name="work_mode_off_title" msgid="961171256005852058">"Zapnúť pracovné aplikácie?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"Získajte prístup k svojim pracovným aplikáciám a upozorneniam"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Zapnúť"</string>
-    <!-- no translation found for work_mode_emergency_call_button (6818855962881612322) -->
-    <skip />
-    <!-- no translation found for work_mode_dialer_off_message (2193299184850387465) -->
-    <skip />
+    <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Zavolať na tiesňovú linku"</string>
+    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Získajte prístup k svojim pracovným aplikáciám a hovorom"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikácia nie je dostupná"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> nie je teraz dostupná."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nie je k dispozícii"</string>
