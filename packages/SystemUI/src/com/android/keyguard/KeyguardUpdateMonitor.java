@@ -1537,6 +1537,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     @VisibleForTesting
     void setAssistantVisible(boolean assistantVisible) {
         mAssistantVisible = assistantVisible;
+        mLogger.logAssistantVisible(mAssistantVisible);
         updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE,
                 FACE_AUTH_UPDATED_ASSISTANT_VISIBILITY_CHANGED);
         if (mAssistantVisible) {
@@ -2678,7 +2679,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     private boolean shouldListenForFaceAssistant() {
         BiometricAuthenticated face = mUserFaceAuthenticated.get(getCurrentUser());
-        return mAssistantVisible && mKeyguardOccluded
+        return mAssistantVisible
+                // There can be intermediate states where mKeyguardShowing is false but
+                // mKeyguardOccluded is true, we don't want to run face auth in such a scenario.
+                && (mKeyguardShowing && mKeyguardOccluded)
                 && !(face != null && face.mAuthenticated)
                 && !mUserHasTrust.get(getCurrentUser(), false);
     }
@@ -3679,6 +3683,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 if (info == null) {
                     return;
                 }
+                mLogger.logTaskStackChangedForAssistant(info.visible);
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_ASSISTANT_STACK_CHANGED,
                         info.visible));
             } catch (RemoteException e) {
