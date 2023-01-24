@@ -45,6 +45,27 @@ constructor(
     override fun start() {
         listenForGoneToAodOrDozing()
         listenForGoneToDreaming()
+        listenForGoneToLockscreen()
+    }
+
+    // Primarily for when the user chooses to lock down the device
+    private fun listenForGoneToLockscreen() {
+        scope.launch {
+            keyguardInteractor.isKeyguardShowing
+                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .collect { (isKeyguardShowing, lastStartedStep) ->
+                    if (isKeyguardShowing && lastStartedStep.to == KeyguardState.GONE) {
+                        keyguardTransitionRepository.startTransition(
+                            TransitionInfo(
+                                name,
+                                KeyguardState.GONE,
+                                KeyguardState.LOCKSCREEN,
+                                getAnimator(),
+                            )
+                        )
+                    }
+                }
+        }
     }
 
     private fun listenForGoneToDreaming() {

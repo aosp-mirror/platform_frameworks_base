@@ -229,7 +229,6 @@ object Flags {
     // TODO(b/254513100): Tracking Bug
     val SMARTSPACE_SHARED_ELEMENT_TRANSITION_ENABLED =
         releasedFlag(401, "smartspace_shared_element_transition_enabled")
-    val SMARTSPACE = resourceBooleanFlag(402, R.bool.flag_smartspace, "smartspace")
 
     // TODO(b/258517050): Clean up after the feature is launched.
     @JvmField
