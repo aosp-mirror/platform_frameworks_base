@@ -1977,8 +1977,8 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    public int runForceDexOpt() throws RemoteException {
-        mInterface.forceDexOpt(getNextArgRequired());
+    public int runForceDexOpt() throws RemoteException, LegacyDexoptDisabledException {
+        mPm.legacyForceDexOpt(getNextArgRequired());
         return 0;
     }
 
