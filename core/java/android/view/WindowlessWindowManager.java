@@ -361,7 +361,6 @@ public class WindowlessWindowManager implements IWindowSession {
         }
 
         t.setPosition(leash, frames.frame.left, frames.frame.top);
-        t.setWindowCrop(leash, frames.frame.width(), frames.frame.height());
 
         if (viewFlags == View.VISIBLE) {
             // TODO(b/262892794) ViewRootImpl modifies the app's rendering SurfaceControl
