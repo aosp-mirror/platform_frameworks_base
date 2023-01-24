@@ -72,6 +72,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
     private lateinit var executor: FakeExecutor
     @Mock private lateinit var timeoutCallback: (String, Boolean) -> Unit
     @Mock private lateinit var stateCallback: (String, PlaybackState) -> Unit
+    @Mock private lateinit var sessionCallback: (String) -> Unit
     @Captor private lateinit var mediaCallbackCaptor: ArgumentCaptor<MediaController.Callback>
     @Captor
     private lateinit var dozingCallbackCaptor:
@@ -99,6 +100,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
             )
         mediaTimeoutListener.timeoutCallback = timeoutCallback
         mediaTimeoutListener.stateCallback = stateCallback
+        mediaTimeoutListener.sessionCallback = sessionCallback
 
         // Create a media session and notification for testing.
         metadataBuilder =
@@ -284,6 +286,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         verify(mediaController).unregisterCallback(anyObject())
         assertThat(executor.numPending()).isEqualTo(0)
         verify(logger).logSessionDestroyed(eq(KEY))
+        verify(sessionCallback).invoke(eq(KEY))
     }
 
     @Test
@@ -322,6 +325,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         // THEN the controller is unregistered, but the timeout is still scheduled
         verify(mediaController).unregisterCallback(anyObject())
         assertThat(executor.numPending()).isEqualTo(1)
+        verify(sessionCallback, never()).invoke(eq(KEY))
     }
 
     @Test

@@ -303,7 +303,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                     mEntry.mRemoteEditImeVisible = editTextRootWindowInsets != null
                             && editTextRootWindowInsets.isVisible(WindowInsets.Type.ime());
                     if (!mEntry.mRemoteEditImeVisible && !mEditText.mShowImeOnInputConnection) {
-                        mController.removeRemoteInput(mEntry, mToken);
+                        // Pass null to ensure all inputs are cleared for this entry b/227115380
+                        mController.removeRemoteInput(mEntry, null);
                     }
                 }
             }
