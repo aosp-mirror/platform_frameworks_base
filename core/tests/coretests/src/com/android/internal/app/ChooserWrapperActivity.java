@@ -64,14 +64,14 @@ public class ChooserWrapperActivity extends ChooserActivity implements IChooserW
     @Override
     public ChooserListAdapter createChooserListAdapter(Context context, List<Intent> payloadIntents,
             Intent[] initialIntents, List<ResolveInfo> rList, boolean filterLastUsed,
-            ResolverListController resolverListController) {
+            UserHandle userHandle) {
         PackageManager packageManager =
                 sOverrides.packageManager == null ? context.getPackageManager()
                         : sOverrides.packageManager;
         return new ChooserListAdapter(context, payloadIntents, initialIntents, rList,
-                filterLastUsed, resolverListController,
+                filterLastUsed, createListController(userHandle),
                 this, this, packageManager,
-                getChooserActivityLogger());
+                getChooserActivityLogger(), userHandle);
     }
 
     @Override
@@ -143,15 +143,14 @@ public class ChooserWrapperActivity extends ChooserActivity implements IChooserW
         return super.createQuietModeManager();
     }
 
-    // TODO: Remove this and override safelyStartActivityInternal() instead.
     @Override
-    public void safelyStartActivityAsUser(TargetInfo cti, UserHandle user,
+    public void safelyStartActivityInternal(TargetInfo cti, UserHandle user,
             @Nullable Bundle options) {
-        if (sOverrides.onSafelyStartCallback != null &&
-                sOverrides.onSafelyStartCallback.apply(cti)) {
+        if (sOverrides.onSafelyStartInternalCallback != null
+                && sOverrides.onSafelyStartInternalCallback.apply(cti)) {
             return;
         }
-        super.safelyStartActivityAsUser(cti, user, options);
+        super.safelyStartActivityInternal(cti, user, options);
     }
 
     @Override
