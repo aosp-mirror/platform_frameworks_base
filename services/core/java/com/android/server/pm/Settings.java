@@ -4430,6 +4430,15 @@ public final class Settings implements Watchable, Snappable {
                                 ps.getPackageName()));
                 // Only system apps are initially installed.
                 ps.setInstalled(shouldReallyInstall, userHandle);
+
+                // Non-Apex system apps, that are not included in the allowlist in
+                // initialNonStoppedSystemPackages, should be marked as stopped by default.
+                final boolean shouldBeStopped = service.mShouldStopSystemPackagesByDefault
+                        && ps.isSystem()
+                        && !ps.isApex()
+                        && !service.mInitialNonStoppedSystemPackages.contains(ps.getPackageName());
+                ps.setStopped(shouldBeStopped, userHandle);
+
                 // If userTypeInstallablePackages is the *only* reason why we're not installing,
                 // then uninstallReason is USER_TYPE. If there's a different reason, or if we
                 // actually are installing, put UNKNOWN.
