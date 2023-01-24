@@ -4607,6 +4607,12 @@
     <!-- Component name for the default module metadata provider on this device -->
     <string name="config_defaultModuleMetadataProvider" translatable="false">com.android.modulemetadata</string>
 
+    <!-- Package name for the default Health Connect app.
+         OEMs can set this with their own health app package name to define a default app with high
+         priority for the app to store the health data. If set the app always has priority of 1
+         unless it is changed by the user. -->
+    <string name="config_defaultHealthConnectApp" translatable="false"></string>
+
     <!-- This is the default launcher package with an activity to use on secondary displays that
          support system decorations.
          This launcher package must have an activity that supports multiple instances and has
