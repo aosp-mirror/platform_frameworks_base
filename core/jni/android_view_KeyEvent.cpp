@@ -157,7 +157,7 @@ static jstring android_view_KeyEvent_nativeKeyCodeToString(JNIEnv* env, jobject 
 static jint android_view_KeyEvent_nativeKeyCodeFromString(JNIEnv* env, jobject clazz,
         jstring label) {
     ScopedUtfChars keyLabel(env, label);
-    return KeyEvent::getKeyCodeFromLabel(keyLabel.c_str());
+    return KeyEvent::getKeyCodeFromLabel(keyLabel.c_str()).value_or(AKEYCODE_UNKNOWN);
 }
 
 static jint android_view_KeyEvent_nativeNextId() {
