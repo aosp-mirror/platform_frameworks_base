@@ -142,6 +142,14 @@ final class FakeNativeWrapper implements NativeWrapper {
         return isConnected == null ? false : isConnected;
     }
 
+    @Override
+    public void nativeSetHpdSignalType(int signal, int portId) {}
+
+    @Override
+    public int nativeGetHpdSignalType(int portId) {
+        return Constants.HDMI_HPD_TYPE_PHYSICAL;
+    }
+
     public void setPortConnectionStatus(int port, boolean connected) {
         mPortConnectionStatus.put(port, connected);
     }
