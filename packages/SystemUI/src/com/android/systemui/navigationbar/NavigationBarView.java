@@ -16,13 +16,11 @@
 
 package com.android.systemui.navigationbar;
 
-import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
 import static android.inputmethodservice.InputMethodService.canImeRenderGesturalNavButtons;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_HOME_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_OVERVIEW_DISABLED;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SEARCH_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.isGesturalMode;
 
@@ -79,9 +77,7 @@ import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shared.rotation.FloatingRotationButton;
 import com.android.systemui.shared.rotation.RotationButton.RotationButtonUpdatesCallback;
 import com.android.systemui.shared.rotation.RotationButtonController;
-import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
@@ -303,7 +299,8 @@ public class NavigationBarView extends FrameLayout {
                 R.dimen.floating_rotation_button_taskbar_left_margin,
                 R.dimen.floating_rotation_button_taskbar_bottom_margin,
                 R.dimen.floating_rotation_button_diameter,
-                R.dimen.key_button_ripple_max_width);
+                R.dimen.key_button_ripple_max_width,
+                R.bool.floating_rotation_button_position_left);
         mRotationButtonController = new RotationButtonController(mLightContext, mLightIconColor,
                 mDarkIconColor, R.drawable.ic_sysbar_rotate_button_ccw_start_0,
                 R.drawable.ic_sysbar_rotate_button_ccw_start_90,
