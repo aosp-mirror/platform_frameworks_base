@@ -54,6 +54,7 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
     private static final String LOG_TAG = UninstallAlertDialogFragment.class.getSimpleName();
 
     private @Nullable CheckBox mKeepData;
+    private boolean mIsClonedApp;
 
     /**
      * Get number of bytes of the app data of the package.
@@ -125,7 +126,6 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
                 messageBuilder.append(" ").append(appLabel).append(".\n\n");
             }
         }
-        boolean isClonedApp = false;
 
         final boolean isUpdate =
                 ((dialogInfo.appInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
@@ -154,7 +154,7 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
                                     userName));
                 } else if (customUserManager.isUserOfType(USER_TYPE_PROFILE_CLONE)
                         && customUserManager.isSameProfileGroup(dialogInfo.user, myUserHandle)) {
-                    isClonedApp = true;
+                    mIsClonedApp = true;
                     messageBuilder.append(getString(
                             R.string.uninstall_application_text_current_user_clone_profile));
                 } else {
@@ -162,7 +162,7 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
                             getString(R.string.uninstall_application_text_user, userName));
                 }
             } else if (isCloneProfile(myUserHandle)) {
-                isClonedApp = true;
+                mIsClonedApp = true;
                 messageBuilder.append(getString(
                         R.string.uninstall_application_text_current_user_clone_profile));
             } else {
@@ -177,7 +177,7 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
             }
         }
 
-        if (isClonedApp) {
+        if (mIsClonedApp) {
             dialogBuilder.setTitle(getString(R.string.cloned_app_label, appLabel));
         } else {
             dialogBuilder.setTitle(appLabel);
@@ -236,7 +236,7 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
         UserManager userManager = getContext().getSystemService(UserManager.class);
         List<UserHandle> profiles = userManager.getUserProfiles();
         for (UserHandle userHandle : profiles) {
-            if (!Process.myUserHandle().equals(UserHandle.SYSTEM) && isCloneProfile(userHandle)) {
+            if (!userHandle.equals(UserHandle.SYSTEM) && isCloneProfile(userHandle)) {
                 cloneUser = userHandle;
                 break;
             }
@@ -260,7 +260,7 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
     public void onClick(DialogInterface dialog, int which) {
         if (which == Dialog.BUTTON_POSITIVE) {
             ((UninstallerActivity) getActivity()).startUninstallProgress(
-                    mKeepData != null && mKeepData.isChecked());
+                    mKeepData != null && mKeepData.isChecked(), mIsClonedApp);
         } else {
             ((UninstallerActivity) getActivity()).dispatchAborted();
         }
