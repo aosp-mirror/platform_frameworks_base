@@ -87,8 +87,8 @@ public class UserManagerServiceUserTypeTest {
                 .setUseParentsContacts(true)
                 .setCrossProfileIntentFilterAccessControl(10)
                 .setCrossProfileIntentResolutionStrategy(1)
-                .setIsMediaSharedWithParent(true)
-                .setIsCredentialSharableWithParent(false);
+                .setMediaSharedWithParent(true)
+                .setCredentialShareableWithParent(false);
         final UserTypeDetails type = new UserTypeDetails.Builder()
                 .setName("a.name")
                 .setEnabled(1)
@@ -150,8 +150,8 @@ public class UserManagerServiceUserTypeTest {
                 .getCrossProfileIntentFilterAccessControl());
         assertEquals(1, type.getDefaultUserPropertiesReference()
                 .getCrossProfileIntentResolutionStrategy());
-        assertTrue(type.getDefaultUserPropertiesReference().getIsMediaSharedWithParent());
-        assertFalse(type.getDefaultUserPropertiesReference().getIsCredentialSharableWithParent());
+        assertTrue(type.getDefaultUserPropertiesReference().isMediaSharedWithParent());
+        assertFalse(type.getDefaultUserPropertiesReference().isCredentialShareableWithParent());
 
         assertEquals(23, type.getBadgeLabel(0));
         assertEquals(24, type.getBadgeLabel(1));
@@ -200,8 +200,8 @@ public class UserManagerServiceUserTypeTest {
         assertEquals(UserProperties.SHOW_IN_LAUNCHER_WITH_PARENT, props.getShowInLauncher());
         assertEquals(UserProperties.CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY_DEFAULT,
                 props.getCrossProfileIntentResolutionStrategy());
-        assertFalse(props.getIsMediaSharedWithParent());
-        assertFalse(props.getIsCredentialSharableWithParent());
+        assertFalse(props.isMediaSharedWithParent());
+        assertFalse(props.isCredentialShareableWithParent());
 
         assertFalse(type.hasBadge());
     }
@@ -286,8 +286,8 @@ public class UserManagerServiceUserTypeTest {
                 .setUseParentsContacts(true)
                 .setCrossProfileIntentFilterAccessControl(10)
                 .setCrossProfileIntentResolutionStrategy(1)
-                .setIsMediaSharedWithParent(false)
-                .setIsCredentialSharableWithParent(true);
+                .setMediaSharedWithParent(false)
+                .setCredentialShareableWithParent(true);
         final ArrayMap<String, UserTypeDetails.Builder> builders = new ArrayMap<>();
         builders.put(userTypeAosp1, new UserTypeDetails.Builder()
                 .setName(userTypeAosp1)
@@ -320,9 +320,9 @@ public class UserManagerServiceUserTypeTest {
         assertTrue(aospType.getDefaultUserPropertiesReference().getStartWithParent());
         assertTrue(aospType.getDefaultUserPropertiesReference()
                 .getUseParentsContacts());
-        assertFalse(aospType.getDefaultUserPropertiesReference().getIsMediaSharedWithParent());
+        assertFalse(aospType.getDefaultUserPropertiesReference().isMediaSharedWithParent());
         assertTrue(aospType.getDefaultUserPropertiesReference()
-                .getIsCredentialSharableWithParent());
+                .isCredentialShareableWithParent());
 
         // userTypeAosp2 should be modified.
         aospType = builders.get(userTypeAosp2).createUserTypeDetails();
@@ -359,9 +359,9 @@ public class UserManagerServiceUserTypeTest {
         assertFalse(aospType.getDefaultUserPropertiesReference().getStartWithParent());
         assertFalse(aospType.getDefaultUserPropertiesReference()
                 .getUseParentsContacts());
-        assertTrue(aospType.getDefaultUserPropertiesReference().getIsMediaSharedWithParent());
+        assertTrue(aospType.getDefaultUserPropertiesReference().isMediaSharedWithParent());
         assertFalse(aospType.getDefaultUserPropertiesReference()
-                .getIsCredentialSharableWithParent());
+                .isCredentialShareableWithParent());
 
         // userTypeOem1 should be created.
         UserTypeDetails.Builder customType = builders.get(userTypeOem1);

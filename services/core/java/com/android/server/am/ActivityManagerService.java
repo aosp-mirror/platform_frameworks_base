@@ -8432,15 +8432,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 t.traceEnd();
             }
 
+            boolean isBootingSystemUser = currentUserId == UserHandle.USER_SYSTEM;
+
             // Some systems - like automotive - will explicitly unlock system user then switch
-            // to a secondary user. Hence, we don't want to send duplicate broadcasts for
-            // the system user here.
+            // to a secondary user.
             // TODO(b/242195409): this workaround shouldn't be necessary once we move
             // the headless-user start logic to UserManager-land.
-            final boolean isBootingSystemUser = (currentUserId == UserHandle.USER_SYSTEM)
-                    && !UserManager.isHeadlessSystemUserMode();
-
-            if (isBootingSystemUser) {
+            if (isBootingSystemUser && !UserManager.isHeadlessSystemUserMode()) {
                 t.traceBegin("startHomeOnAllDisplays");
                 mAtmInternal.startHomeOnAllDisplays(currentUserId, "systemReady");
                 t.traceEnd();
@@ -8452,6 +8450,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
 
             if (isBootingSystemUser) {
+                // Need to send the broadcasts for the system user here because
+                // UserController#startUserInternal will not send them for the system user starting,
+                // It checks if the user state already exists, which is always the case for the
+                // system user.
                 t.traceBegin("sendUserStartBroadcast");
                 final int callingUid = Binder.getCallingUid();
                 final int callingPid = Binder.getCallingPid();

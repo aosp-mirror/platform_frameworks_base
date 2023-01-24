@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.graphics.Point;
 import android.graphics.Rect;
 
+import java.util.function.Supplier;
+
 /**
  * Metrics about a Window, consisting of the bounds and {@link WindowInsets}.
  * <p>
@@ -50,8 +52,9 @@ import android.graphics.Rect;
 public final class WindowMetrics {
     @NonNull
     private final Rect mBounds;
-    @NonNull
-    private final WindowInsets mWindowInsets;
+
+    private WindowInsets mWindowInsets;
+    private Supplier<WindowInsets> mWindowInsetsSupplier;
 
     /** @see android.util.DisplayMetrics#density */
     private final float mDensity;
@@ -77,6 +80,21 @@ public final class WindowMetrics {
     public WindowMetrics(@NonNull Rect bounds, @NonNull WindowInsets windowInsets, float density) {
         mBounds = bounds;
         mWindowInsets = windowInsets;
+        mDensity = density;
+    }
+
+    /**
+     * Similar to {@link #WindowMetrics(Rect, WindowInsets, float)} but the window insets are
+     * computed when {@link #getWindowInsets()} is first time called. This reduces unnecessary
+     * calculation and the overhead of obtaining insets state from server side because most
+     * callers are usually only interested in {@link #getBounds()}.
+     *
+     * @hide
+     */
+    public WindowMetrics(@NonNull Rect bounds, @NonNull Supplier<WindowInsets> windowInsetsSupplier,
+            float density) {
+        mBounds = bounds;
+        mWindowInsetsSupplier = windowInsetsSupplier;
         mDensity = density;
     }
 
@@ -121,7 +139,10 @@ public final class WindowMetrics {
      */
     @NonNull
     public WindowInsets getWindowInsets() {
-        return mWindowInsets;
+        if (mWindowInsets != null) {
+            return mWindowInsets;
+        }
+        return mWindowInsets = mWindowInsetsSupplier.get();
     }
 
     /**

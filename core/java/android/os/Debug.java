@@ -1006,12 +1006,15 @@ public final class Debug
         // been replaced with an implementation that will suspendAll and
         // send VM_START.
         System.out.println("Waiting for debugger first packet");
+
+        mWaiting = true;
         while (!isDebuggerConnected()) {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException ie) {
             }
         }
+        mWaiting = false;
 
         System.out.println("Debug.suspendAllAndSentVmStart");
         VMDebug.suspendAllAndSendVmStart();

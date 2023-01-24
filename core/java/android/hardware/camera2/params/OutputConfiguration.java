@@ -257,7 +257,7 @@ public final class OutputConfiguration implements Parcelable {
     /**
      * Timestamp is the start of readout in the same time domain as TIMESTAMP_BASE_SENSOR.
      *
-     * <p>NOTE: do not use! Use useReadoutTimestamp instead.</p>
+     * <p>NOTE: do not use! Use setReadoutTimestampEnabled instead.</p>
      *
      * @hide
      */
@@ -574,7 +574,7 @@ public final class OutputConfiguration implements Parcelable {
         mStreamUseCase = CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT;
         mTimestampBase = TIMESTAMP_BASE_DEFAULT;
         mMirrorMode = MIRROR_MODE_AUTO;
-        mUseReadoutTimestamp = false;
+        mReadoutTimestampEnabled = false;
         mIsReadoutSensorTimestampBase = false;
     }
 
@@ -676,7 +676,7 @@ public final class OutputConfiguration implements Parcelable {
         mDynamicRangeProfile = DynamicRangeProfiles.STANDARD;
         mColorSpace = ColorSpaceProfiles.UNSPECIFIED;
         mStreamUseCase = CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT;
-        mUseReadoutTimestamp = false;
+        mReadoutTimestampEnabled = false;
         mIsReadoutSensorTimestampBase = false;
     }
 
@@ -1050,7 +1050,7 @@ public final class OutputConfiguration implements Parcelable {
 
         if (timestampBase == TIMESTAMP_BASE_READOUT_SENSOR) {
             mTimestampBase = TIMESTAMP_BASE_SENSOR;
-            mUseReadoutTimestamp = true;
+            mReadoutTimestampEnabled = true;
             mIsReadoutSensorTimestampBase = true;
         } else {
             mTimestampBase = timestampBase;
@@ -1131,14 +1131,16 @@ public final class OutputConfiguration implements Parcelable {
      * @param on The output image timestamp is the start of exposure time if false, and
      *           the start of readout time if true.
      */
-    public void useReadoutTimestamp(boolean on) {
-        mUseReadoutTimestamp = on;
+    public void setReadoutTimestampEnabled(boolean on) {
+        mReadoutTimestampEnabled = on;
     }
 
     /** Whether readout timestamp is used for this OutputConfiguration.
+     *
+     * @see #setReadoutTimestampEnabled
      */
-    public boolean isReadoutTimestampUsed() {
-        return mUseReadoutTimestamp;
+    public boolean isReadoutTimestampEnabled() {
+        return mReadoutTimestampEnabled;
     }
 
     /**
@@ -1172,7 +1174,7 @@ public final class OutputConfiguration implements Parcelable {
         this.mStreamUseCase = other.mStreamUseCase;
         this.mTimestampBase = other.mTimestampBase;
         this.mMirrorMode = other.mMirrorMode;
-        this.mUseReadoutTimestamp = other.mUseReadoutTimestamp;
+        this.mReadoutTimestampEnabled = other.mReadoutTimestampEnabled;
     }
 
     /**
@@ -1200,7 +1202,7 @@ public final class OutputConfiguration implements Parcelable {
 
         int timestampBase = source.readInt();
         int mirrorMode = source.readInt();
-        boolean useReadoutTimestamp = source.readInt() == 1;
+        boolean readoutTimestampEnabled = source.readInt() == 1;
 
         mSurfaceGroupId = surfaceSetId;
         mRotation = rotation;
@@ -1229,7 +1231,7 @@ public final class OutputConfiguration implements Parcelable {
         mStreamUseCase = streamUseCase;
         mTimestampBase = timestampBase;
         mMirrorMode = mirrorMode;
-        mUseReadoutTimestamp = useReadoutTimestamp;
+        mReadoutTimestampEnabled = readoutTimestampEnabled;
     }
 
     /**
@@ -1350,7 +1352,7 @@ public final class OutputConfiguration implements Parcelable {
         dest.writeLong(mStreamUseCase);
         dest.writeInt(mTimestampBase);
         dest.writeInt(mMirrorMode);
-        dest.writeInt(mUseReadoutTimestamp ? 1 : 0);
+        dest.writeInt(mReadoutTimestampEnabled ? 1 : 0);
     }
 
     /**
@@ -1385,7 +1387,7 @@ public final class OutputConfiguration implements Parcelable {
                     mStreamUseCase != other.mStreamUseCase ||
                     mTimestampBase != other.mTimestampBase ||
                     mMirrorMode != other.mMirrorMode ||
-                    mUseReadoutTimestamp != other.mUseReadoutTimestamp)
+                    mReadoutTimestampEnabled != other.mReadoutTimestampEnabled)
                 return false;
             if (mSensorPixelModesUsed.size() != other.mSensorPixelModesUsed.size()) {
                 return false;
@@ -1428,7 +1430,7 @@ public final class OutputConfiguration implements Parcelable {
                     mPhysicalCameraId == null ? 0 : mPhysicalCameraId.hashCode(),
                     mIsMultiResolution ? 1 : 0, mSensorPixelModesUsed.hashCode(),
                     mDynamicRangeProfile, mColorSpace, mStreamUseCase,
-                    mTimestampBase, mMirrorMode, mUseReadoutTimestamp ? 1 : 0);
+                    mTimestampBase, mMirrorMode, mReadoutTimestampEnabled ? 1 : 0);
         }
 
         return HashCodeHelpers.hashCode(
@@ -1438,7 +1440,7 @@ public final class OutputConfiguration implements Parcelable {
                 mPhysicalCameraId == null ? 0 : mPhysicalCameraId.hashCode(),
                 mIsMultiResolution ? 1 : 0, mSensorPixelModesUsed.hashCode(),
                 mDynamicRangeProfile, mColorSpace, mStreamUseCase, mTimestampBase,
-                mMirrorMode, mUseReadoutTimestamp ? 1 : 0);
+                mMirrorMode, mReadoutTimestampEnabled ? 1 : 0);
     }
 
     private static final String TAG = "OutputConfiguration";
@@ -1480,8 +1482,8 @@ public final class OutputConfiguration implements Parcelable {
     private int mTimestampBase;
     // Mirroring mode
     private int mMirrorMode;
-    // Use readout timestamp
-    private boolean mUseReadoutTimestamp;
+    // readout timestamp
+    private boolean mReadoutTimestampEnabled;
     // Whether the timestamp base is set to READOUT_SENSOR
     private boolean mIsReadoutSensorTimestampBase;
 }

@@ -1650,6 +1650,12 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // DisplayContent is the "root", so we reinterpret it's wc as the window layer
             // making the parent surface the displaycontent's surface.
             return wc.getSurfaceControl();
+        } else if (wc.getParent().asDisplayContent() != null) {
+            // DisplayContent is kinda split into 2 pieces, the "real root" and the
+            // "windowing layer". So if the parent of the window is DC, then it really belongs on
+            // the windowing layer (unless it's an overlay display area, but those can't be in
+            // transitions anyways).
+            return wc.getParent().asDisplayContent().getWindowingLayer();
         }
         return wc.getParent().getSurfaceControl();
     }

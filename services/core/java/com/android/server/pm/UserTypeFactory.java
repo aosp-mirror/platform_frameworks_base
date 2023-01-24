@@ -134,8 +134,8 @@ public final class UserTypeFactory {
                                 UserProperties.CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_SYSTEM)
                         .setCrossProfileIntentResolutionStrategy(UserProperties
                                 .CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY_NO_FILTERING)
-                        .setIsMediaSharedWithParent(true)
-                        .setIsCredentialSharableWithParent(true)
+                        .setMediaSharedWithParent(true)
+                        .setCredentialShareableWithParent(true)
                 );
     }
 
@@ -172,7 +172,7 @@ public final class UserTypeFactory {
                         .setStartWithParent(true)
                         .setShowInLauncher(UserProperties.SHOW_IN_LAUNCHER_SEPARATE)
                         .setShowInSettings(UserProperties.SHOW_IN_SETTINGS_SEPARATE)
-                        .setIsCredentialSharableWithParent(true));
+                        .setCredentialShareableWithParent(true));
     }
 
     /**

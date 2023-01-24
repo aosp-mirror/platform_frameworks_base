@@ -29,13 +29,14 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.UserHandle
 import android.util.Log
-import android.view.InputDevice
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.shared.hardware.hasInputDevice
+import com.android.systemui.shared.hardware.isAnyStylusSource
 import com.android.systemui.util.NotificationChannels
 import java.text.NumberFormat
 import javax.inject.Inject
@@ -150,10 +151,7 @@ constructor(
     }
 
     private fun hasConnectedBluetoothStylus(): Boolean {
-        // TODO(b/257936830): get bt address once input api available
-        return inputManager.inputDeviceIds.any { deviceId ->
-            inputManager.getInputDevice(deviceId).supportsSource(InputDevice.SOURCE_STYLUS)
-        }
+        return inputManager.hasInputDevice { it.isAnyStylusSource && it.bluetoothAddress != null }
     }
 
     private fun getPendingBroadcast(action: String): PendingIntent? {

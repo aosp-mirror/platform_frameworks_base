@@ -2250,14 +2250,19 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
+                boolean preciseCallStateChanged = false;
                 mRingingCallState[phoneId] = ringingCallState;
                 mForegroundCallState[phoneId] = foregroundCallState;
                 mBackgroundCallState[phoneId] = backgroundCallState;
-                mPreciseCallState[phoneId] = new PreciseCallState(
+                PreciseCallState preciseCallState = new PreciseCallState(
                         ringingCallState, foregroundCallState,
                         backgroundCallState,
                         DisconnectCause.NOT_VALID,
                         PreciseDisconnectCause.NOT_VALID);
+                if (!preciseCallState.equals(mPreciseCallState[phoneId])) {
+                    preciseCallStateChanged = true;
+                    mPreciseCallState[phoneId] = preciseCallState;
+                }
                 boolean notifyCallState = true;
                 if (mCallQuality == null) {
                     log("notifyPreciseCallState: mCallQuality is null, "
@@ -2271,6 +2276,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         mCallNetworkType[phoneId] = TelephonyManager.NETWORK_TYPE_UNKNOWN;
                         mCallQuality[phoneId] = createCallQuality();
                     }
+                    List<CallState> prevCallStateList = new ArrayList<>();
+                    prevCallStateList.addAll(mCallStateLists.get(phoneId));
                     mCallStateLists.get(phoneId).clear();
                     if (foregroundCallState != PreciseCallState.PRECISE_CALL_STATE_NOT_VALID
                             && foregroundCallState != PreciseCallState.PRECISE_CALL_STATE_IDLE) {
@@ -2330,6 +2337,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         }
                         mCallStateLists.get(phoneId).add(builder.build());
                     }
+                    if (prevCallStateList.equals(mCallStateLists.get(phoneId))) {
+                        notifyCallState = false;
+                    }
                     boolean hasOngoingCall = false;
                     for (CallState cs : mCallStateLists.get(phoneId)) {
                         if (cs.getCallState() != PreciseCallState.PRECISE_CALL_STATE_DISCONNECTED) {
@@ -2343,23 +2353,30 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     }
                 }
 
-                for (Record r : mRecords) {
-                    if (r.matchTelephonyCallbackEvent(
-                            TelephonyCallback.EVENT_PRECISE_CALL_STATE_CHANGED)
-                            && idMatch(r, subId, phoneId)) {
-                        try {
-                            r.callback.onPreciseCallStateChanged(mPreciseCallState[phoneId]);
-                        } catch (RemoteException ex) {
-                            mRemoveList.add(r.binder);
+                if (preciseCallStateChanged) {
+                    for (Record r : mRecords) {
+                        if (r.matchTelephonyCallbackEvent(
+                                TelephonyCallback.EVENT_PRECISE_CALL_STATE_CHANGED)
+                                && idMatch(r, subId, phoneId)) {
+                            try {
+                                r.callback.onPreciseCallStateChanged(mPreciseCallState[phoneId]);
+                            } catch (RemoteException ex) {
+                                mRemoveList.add(r.binder);
+                            }
                         }
                     }
-                    if (notifyCallState && r.matchTelephonyCallbackEvent(
-                            TelephonyCallback.EVENT_CALL_ATTRIBUTES_CHANGED)
-                            && idMatch(r, subId, phoneId)) {
-                        try {
-                            r.callback.onCallStatesChanged(mCallStateLists.get(phoneId));
-                        } catch (RemoteException ex) {
-                            mRemoveList.add(r.binder);
+                }
+
+                if (notifyCallState) {
+                    for (Record r : mRecords) {
+                        if (r.matchTelephonyCallbackEvent(
+                                TelephonyCallback.EVENT_CALL_ATTRIBUTES_CHANGED)
+                                && idMatch(r, subId, phoneId)) {
+                            try {
+                                r.callback.onCallStatesChanged(mCallStateLists.get(phoneId));
+                            } catch (RemoteException ex) {
+                                mRemoveList.add(r.binder);
+                            }
                         }
                     }
                 }

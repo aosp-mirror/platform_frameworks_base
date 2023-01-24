@@ -31,10 +31,14 @@ import java.io.PrintWriter;
 public interface DisplayPowerControllerInterface {
 
     /**
-     * Notified when the display is changed. We use this to apply any changes that might be needed
+     * Notified when the display is changed.
+     * We use this to apply any changes that might be needed
      * when displays get swapped on foldable devices.
+     * We also pass the High brightness mode metadata like
+     * remaining time and hbm events for the corresponding
+     * physical display, to update the values correctly.
      */
-    void onDisplayChanged();
+    void onDisplayChanged(HighBrightnessModeMetadata hbmInfo);
 
     /**
      * Unregisters all listeners and interrupts all running threads; halting future work.

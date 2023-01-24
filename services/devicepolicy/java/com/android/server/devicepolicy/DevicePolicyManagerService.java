@@ -221,6 +221,7 @@ import android.app.admin.DevicePolicyStringResource;
 import android.app.admin.DeviceStateCache;
 import android.app.admin.FactoryResetProtectionPolicy;
 import android.app.admin.FullyManagedDeviceProvisioningParams;
+import android.app.admin.IDevicePolicyManager;
 import android.app.admin.ManagedProfileProvisioningParams;
 import android.app.admin.ManagedSubscriptionsPolicy;
 import android.app.admin.NetworkEvent;
@@ -442,7 +443,7 @@ import java.util.stream.Collectors;
 /**
  * Implementation of the device policy APIs.
  */
-public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
+public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     protected static final String LOG_TAG = "DevicePolicyManager";
 
@@ -739,6 +740,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private static final String KEEP_PROFILES_RUNNING_FLAG = "enable_keep_profiles_running";
     private static final boolean DEFAULT_KEEP_PROFILES_RUNNING_FLAG = false;
 
+    private static final String ENABLE_WORK_PROFILE_TELEPHONY_FLAG =
+            "enable_work_profile_telephony";
+    private static final boolean DEFAULT_WORK_PROFILE_TELEPHONY_FLAG = false;
+
     // TODO(b/261999445) remove the flag after rollout.
     private static final String HEADLESS_FLAG = "headless";
     private static final boolean DEFAULT_HEADLESS_FLAG = true;
@@ -920,23 +925,24 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private final ArrayList<Object> mPendingUserCreatedCallbackTokens = new ArrayList<>();
 
     public static final class Lifecycle extends SystemService {
-        private BaseIDevicePolicyManager mService;
+        private DevicePolicyManagerService mService;
 
         public Lifecycle(Context context) {
             super(context);
             String dpmsClassName = context.getResources()
                     .getString(R.string.config_deviceSpecificDevicePolicyManagerService);
             if (TextUtils.isEmpty(dpmsClassName)) {
-                dpmsClassName = DevicePolicyManagerService.class.getName();
-            }
-            try {
-                Class<?> serviceClass = Class.forName(dpmsClassName);
-                Constructor<?> constructor = serviceClass.getConstructor(Context.class);
-                mService = (BaseIDevicePolicyManager) constructor.newInstance(context);
-            } catch (Exception e) {
-                throw new IllegalStateException(
-                    "Failed to instantiate DevicePolicyManagerService with class name: "
-                    + dpmsClassName, e);
+                mService = new DevicePolicyManagerService(context);
+            } else {
+                try {
+                    Class<?> serviceClass = Class.forName(dpmsClassName);
+                    Constructor<?> constructor = serviceClass.getConstructor(Context.class);
+                    mService = (DevicePolicyManagerService) constructor.newInstance(context);
+                } catch (Exception e) {
+                    throw new IllegalStateException(
+                        "Failed to instantiate DevicePolicyManagerService with class name: "
+                        + dpmsClassName, e);
+                }
             }
         }
 
@@ -1348,7 +1354,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    @Override
     public void setDevicePolicySafetyChecker(DevicePolicySafetyChecker safetyChecker) {
         CallerIdentity callerIdentity = getCallerIdentity();
         Preconditions.checkCallAuthorization(mIsAutomotive || isAdb(callerIdentity), "can only set "
@@ -3090,7 +3095,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @VisibleForTesting
-    @Override
     void systemReady(int phase) {
         if (!mHasFeature) {
             return;
@@ -3100,7 +3104,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 onLockSettingsReady();
                 loadAdminDataAsync();
                 mOwners.systemReady();
-                applyManagedSubscriptionsPolicyIfRequired();
+                if (isWorkProfileTelephonyFlagEnabled()) {
+                    applyManagedSubscriptionsPolicyIfRequired();
+                }
                 break;
             case SystemService.PHASE_ACTIVITY_MANAGER_READY:
                 synchronized (getLockObject()) {
@@ -3289,7 +3295,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    @Override
     void handleStartUser(int userId) {
         synchronized (getLockObject()) {
             pushScreenCapturePolicy(userId);
@@ -3337,7 +3342,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         targetUserId, protectedPackages));
     }
 
-    @Override
     void handleUnlockUser(int userId) {
         startOwnerService(userId, "unlock-user");
         if (isCoexistenceFlagEnabled()) {
@@ -3345,12 +3349,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    @Override
     void handleOnUserUnlocked(int userId) {
         showNewUserDisclaimerIfNecessary(userId);
     }
 
-    @Override
     void handleStopUser(int userId) {
         updateNetworkPreferenceForUser(userId, List.of(PreferentialNetworkServiceConfig.DEFAULT));
         mDeviceAdminServiceController.stopServicesForUser(userId, /* actionForLog= */ "stop-user");
@@ -7018,8 +7020,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         mLockSettingsInternal.refreshStrongAuthTimeout(parentId);
 
-        clearManagedSubscriptionsPolicy();
-
+        if (isWorkProfileTelephonyFlagEnabled()) {
+            clearManagedSubscriptionsPolicy();
+        }
         Slogf.i(LOG_TAG, "Cleaning up device-wide policies done.");
     }
 
@@ -10132,6 +10135,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             synchronized (mSubscriptionsChangedListenerLock) {
                 pw.println("Subscription changed listener : " + mSubscriptionsChangedListener);
             }
+            pw.println(
+                    "Flag enable_work_profile_telephony : " + isWorkProfileTelephonyFlagEnabled());
+
             mHandler.post(() -> handleDump(pw));
             dumpResources(pw);
         }
@@ -20104,6 +20110,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 DEFAULT_KEEP_PROFILES_RUNNING_FLAG);
     }
 
+    private static boolean isWorkProfileTelephonyFlagEnabled() {
+        return DeviceConfig.getBoolean(
+                NAMESPACE_DEVICE_POLICY_MANAGER,
+                ENABLE_WORK_PROFILE_TELEPHONY_FLAG,
+                DEFAULT_WORK_PROFILE_TELEPHONY_FLAG);
+    }
+
     @Override
     public void setMtePolicy(int flags) {
         final Set<Integer> allowedModes =
@@ -20184,10 +20197,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public ManagedSubscriptionsPolicy getManagedSubscriptionsPolicy() {
-        synchronized (getLockObject()) {
-            ActiveAdmin admin = getProfileOwnerOfOrganizationOwnedDeviceLocked();
-            if (admin != null && admin.mManagedSubscriptionsPolicy != null) {
-                return admin.mManagedSubscriptionsPolicy;
+        if (isWorkProfileTelephonyFlagEnabled()) {
+            synchronized (getLockObject()) {
+                ActiveAdmin admin = getProfileOwnerOfOrganizationOwnedDeviceLocked();
+                if (admin != null && admin.mManagedSubscriptionsPolicy != null) {
+                    return admin.mManagedSubscriptionsPolicy;
+                }
             }
         }
         return new ManagedSubscriptionsPolicy(
@@ -20196,9 +20211,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void setManagedSubscriptionsPolicy(ManagedSubscriptionsPolicy policy) {
+        if (!isWorkProfileTelephonyFlagEnabled()) {
+            throw new UnsupportedOperationException("This api is not enabled");
+        }
         CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(isProfileOwnerOfOrganizationOwnedDevice(caller),
-                "This policy can only be set by a profile owner on an organization-owned device.");
+                "This policy can only be set by a profile owner on an organization-owned "
+                        + "device.");
 
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getProfileOwnerLocked(caller.getUserId());

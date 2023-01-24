@@ -53,7 +53,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.Pair;
-import android.util.Slog;
 import android.util.SparseArray;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowInsets.Type.InsetsType;
@@ -1271,8 +1270,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     public void showMediaOutputSwitcher(String packageName) {
         int callingUid = Binder.getCallingUid();
         if (callingUid != 0 && callingUid != Process.SYSTEM_UID) {
-            Slog.e(TAG, "Call only allowed from system server.");
-            return;
+            throw new SecurityException("Call only allowed from system server.");
         }
         synchronized (mLock) {
             SomeArgs args = SomeArgs.obtain();

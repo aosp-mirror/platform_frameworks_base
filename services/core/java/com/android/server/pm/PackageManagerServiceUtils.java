@@ -1152,8 +1152,8 @@ public class PackageManagerServiceUtils {
                 throw new IOException("Root has not present");
             }
             return ApkChecksums.verityHashForFile(new File(filename), hashInfo.rawRootHash);
-        } catch (IOException ignore) {
-            Slog.e(TAG, "ERROR: could not load root hash from incremental install");
+        } catch (IOException e) {
+            Slog.i(TAG, "Could not obtain verity root hash", e);
         }
         return null;
     }
