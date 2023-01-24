@@ -23,7 +23,10 @@ package {
 
 java_test_host {
     name: "PackageManagerServiceHostTests",
-    srcs: ["src/**/*.kt"],
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
     libs: [
         "tradefed",
         "junit",
@@ -34,11 +37,17 @@ java_test_host {
         "cts-host-utils",
         "frameworks-base-hostutils",
         "PackageManagerServiceHostTestsIntentVerifyUtils",
+        "block_device_writer_jar",
     ],
     test_suites: ["general-tests"],
     data: [
         ":PackageManagerTestApex",
         ":PackageManagerTestApexApp",
+        ":PackageManagerServiceServerTests",
+    ],
+    data_device_bins_both: [
+        "block_device_writer",
+        "fsverity_multilib",
     ],
     java_resources: [
         ":PackageManagerTestOverlayActor",
