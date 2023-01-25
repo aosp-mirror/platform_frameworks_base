@@ -40,9 +40,7 @@ class TaskPositioner implements DragResizeCallback {
     private final Rect mTaskBoundsAtDragStart = new Rect();
     private final PointF mResizeStartPoint = new PointF();
     private final Rect mResizeTaskBounds = new Rect();
-    // Whether the |dragResizing| hint should be sent with the next bounds change WCT.
-    // Used to optimized fluid resizing of freeform tasks.
-    private boolean mPendingDragResizeHint = false;
+    private boolean mHasMoved = false;
 
     private int mCtrlType;
     private DragStartListener mDragStartListener;
@@ -60,11 +58,7 @@ class TaskPositioner implements DragResizeCallback {
 
     @Override
     public void onDragResizeStart(int ctrlType, float x, float y) {
-        if (ctrlType != CTRL_TYPE_UNDEFINED) {
-            // The task is being resized, send the |dragResizing| hint to core with the first
-            // bounds-change wct.
-            mPendingDragResizeHint = true;
-        }
+        mHasMoved = false;
 
         mDragStartListener.onDragStart(mWindowDecoration.mTaskInfo.taskId);
         mCtrlType = ctrlType;
@@ -78,30 +72,44 @@ class TaskPositioner implements DragResizeCallback {
     public void onDragResizeMove(float x, float y) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (changeBounds(wct, x, y)) {
-            if (mPendingDragResizeHint) {
+            // The task is being resized, send the |dragResizing| hint to core with the first
+            // bounds-change wct.
+            if (!mHasMoved && mCtrlType != CTRL_TYPE_UNDEFINED) {
                 // This is the first bounds change since drag resize operation started.
                 wct.setDragResizing(mWindowDecoration.mTaskInfo.token, true /* dragResizing */);
-                mPendingDragResizeHint = false;
             }
             mTaskOrganizer.applyTransaction(wct);
+            mHasMoved = true;
         }
     }
 
     @Override
     public void onDragResizeEnd(float x, float y) {
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
-        wct.setDragResizing(mWindowDecoration.mTaskInfo.token, false /* dragResizing */);
-        changeBounds(wct, x, y);
-        mTaskOrganizer.applyTransaction(wct);
+        // |mHasMoved| being false means there is no real change to the task bounds in WM core, so
+        // we don't need a WCT to finish it.
+        if (mHasMoved) {
+            final WindowContainerTransaction wct = new WindowContainerTransaction();
+            wct.setDragResizing(mWindowDecoration.mTaskInfo.token, false /* dragResizing */);
+            changeBounds(wct, x, y);
+            mTaskOrganizer.applyTransaction(wct);
+        }
 
-        mCtrlType = 0;
+        mCtrlType = CTRL_TYPE_UNDEFINED;
         mTaskBoundsAtDragStart.setEmpty();
         mResizeStartPoint.set(0, 0);
-        mPendingDragResizeHint = false;
+        mHasMoved = false;
     }
 
     private boolean changeBounds(WindowContainerTransaction wct, float x, float y) {
-        float deltaX = x - mResizeStartPoint.x;
+        // |mResizeTaskBounds| is the bounds last reported if |mHasMoved| is true. If it's not true,
+        // we can compare it against |mTaskBoundsAtDragStart|.
+        final int oldLeft = mHasMoved ? mResizeTaskBounds.left : mTaskBoundsAtDragStart.left;
+        final int oldTop = mHasMoved ? mResizeTaskBounds.top : mTaskBoundsAtDragStart.top;
+        final int oldRight = mHasMoved ? mResizeTaskBounds.right : mTaskBoundsAtDragStart.right;
+        final int oldBottom = mHasMoved ? mResizeTaskBounds.bottom : mTaskBoundsAtDragStart.bottom;
+
+        final float deltaX = x - mResizeStartPoint.x;
+        final float deltaY = y - mResizeStartPoint.y;
         mResizeTaskBounds.set(mTaskBoundsAtDragStart);
         if ((mCtrlType & CTRL_TYPE_LEFT) != 0) {
             mResizeTaskBounds.left += deltaX;
@@ -109,22 +117,22 @@ class TaskPositioner implements DragResizeCallback {
         if ((mCtrlType & CTRL_TYPE_RIGHT) != 0) {
             mResizeTaskBounds.right += deltaX;
         }
-        float deltaY = y - mResizeStartPoint.y;
         if ((mCtrlType & CTRL_TYPE_TOP) != 0) {
             mResizeTaskBounds.top += deltaY;
         }
         if ((mCtrlType & CTRL_TYPE_BOTTOM) != 0) {
             mResizeTaskBounds.bottom += deltaY;
         }
-        if (mCtrlType == 0) {
+        if (mCtrlType == CTRL_TYPE_UNDEFINED) {
             mResizeTaskBounds.offset((int) deltaX, (int) deltaY);
         }
 
-        if (!mResizeTaskBounds.isEmpty()) {
-            wct.setBounds(mWindowDecoration.mTaskInfo.token, mResizeTaskBounds);
-            return true;
+        if (oldLeft == mResizeTaskBounds.left && oldTop == mResizeTaskBounds.top
+                && oldRight == mResizeTaskBounds.right && oldBottom == mResizeTaskBounds.bottom) {
+            return false;
         }
-        return false;
+        wct.setBounds(mWindowDecoration.mTaskInfo.token, mResizeTaskBounds);
+        return true;
     }
 
     interface DragStartListener {

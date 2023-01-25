@@ -1,6 +1,7 @@
 package com.android.wm.shell.windowdecor
 
 import android.app.ActivityManager
+import android.app.WindowConfiguration
 import android.graphics.Rect
 import android.os.IBinder
 import android.testing.AndroidTestingRunner
@@ -10,6 +11,7 @@ import androidx.test.filters.SmallTest
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.windowdecor.TaskPositioner.CTRL_TYPE_RIGHT
+import com.android.wm.shell.windowdecor.TaskPositioner.CTRL_TYPE_TOP
 import com.android.wm.shell.windowdecor.TaskPositioner.CTRL_TYPE_UNDEFINED
 import org.junit.Before
 import org.junit.Test
@@ -60,6 +62,90 @@ class TaskPositionerTest : ShellTestCase() {
             token = taskToken
             configuration.windowConfiguration.bounds = STARTING_BOUNDS
         }
+    }
+
+    @Test
+    fun testDragResize_notMove_skipsTransactionOnEnd() {
+        taskPositioner.onDragResizeStart(
+                CTRL_TYPE_TOP or CTRL_TYPE_RIGHT,
+                STARTING_BOUNDS.left.toFloat(),
+                STARTING_BOUNDS.top.toFloat()
+        )
+
+        taskPositioner.onDragResizeEnd(
+                STARTING_BOUNDS.left.toFloat() + 10,
+                STARTING_BOUNDS.top.toFloat() + 10
+        )
+
+        verify(mockShellTaskOrganizer, never()).applyTransaction(argThat { wct ->
+            return@argThat wct.changes.any { (token, change) ->
+                token == taskBinder &&
+                        ((change.windowSetMask and WindowConfiguration.WINDOW_CONFIG_BOUNDS) != 0)
+            }
+        })
+    }
+
+    @Test
+    fun testDragResize_noEffectiveMove_skipsTransactionOnMoveAndEnd() {
+        taskPositioner.onDragResizeStart(
+                CTRL_TYPE_TOP or CTRL_TYPE_RIGHT,
+                STARTING_BOUNDS.left.toFloat(),
+                STARTING_BOUNDS.top.toFloat()
+        )
+
+        taskPositioner.onDragResizeMove(
+                STARTING_BOUNDS.left.toFloat(),
+                STARTING_BOUNDS.top.toFloat()
+        )
+
+        taskPositioner.onDragResizeEnd(
+                STARTING_BOUNDS.left.toFloat() + 10,
+                STARTING_BOUNDS.top.toFloat() + 10
+        )
+
+        verify(mockShellTaskOrganizer, never()).applyTransaction(argThat { wct ->
+            return@argThat wct.changes.any { (token, change) ->
+                token == taskBinder &&
+                        ((change.windowSetMask and WindowConfiguration.WINDOW_CONFIG_BOUNDS) != 0)
+            }
+        })
+    }
+
+    @Test
+    fun testDragResize_hasEffectiveMove_issuesTransactionOnMoveAndEnd() {
+        taskPositioner.onDragResizeStart(
+                CTRL_TYPE_TOP or CTRL_TYPE_RIGHT,
+                STARTING_BOUNDS.left.toFloat(),
+                STARTING_BOUNDS.top.toFloat()
+        )
+
+        taskPositioner.onDragResizeMove(
+                STARTING_BOUNDS.left.toFloat() + 10,
+                STARTING_BOUNDS.top.toFloat()
+        )
+        val rectAfterMove = Rect(STARTING_BOUNDS)
+        rectAfterMove.right += 10
+        verify(mockShellTaskOrganizer).applyTransaction(argThat { wct ->
+            return@argThat wct.changes.any { (token, change) ->
+                token == taskBinder &&
+                        (change.windowSetMask and WindowConfiguration.WINDOW_CONFIG_BOUNDS) != 0 &&
+                        change.configuration.windowConfiguration.bounds == rectAfterMove
+            }
+        })
+
+        taskPositioner.onDragResizeEnd(
+                STARTING_BOUNDS.left.toFloat() + 10,
+                STARTING_BOUNDS.top.toFloat() + 10
+        )
+        val rectAfterEnd = Rect(rectAfterMove)
+        rectAfterEnd.top += 10
+        verify(mockShellTaskOrganizer).applyTransaction(argThat { wct ->
+            return@argThat wct.changes.any { (token, change) ->
+                token == taskBinder &&
+                        (change.windowSetMask and WindowConfiguration.WINDOW_CONFIG_BOUNDS) != 0 &&
+                        change.configuration.windowConfiguration.bounds == rectAfterEnd
+            }
+        })
     }
 
     @Test
