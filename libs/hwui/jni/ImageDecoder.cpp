@@ -14,20 +14,10 @@
  * limitations under the License.
  */
 
-#include "Bitmap.h"
-#include "BitmapFactory.h"
-#include "ByteBufferStreamAdaptor.h"
-#include "CreateJavaOutputStreamAdaptor.h"
-#include "GraphicsJNI.h"
 #include "ImageDecoder.h"
-#include "NinePatchPeeker.h"
-#include "Utils.h"
-
-#include <hwui/Bitmap.h>
-#include <hwui/ImageDecoder.h>
-#include <HardwareBitmapUploader.h>
 
 #include <FrontBufferedStream.h>
+#include <HardwareBitmapUploader.h>
 #include <SkAndroidCodec.h>
 #include <SkBitmap.h>
 #include <SkColorSpace.h>
@@ -35,10 +25,21 @@
 #include <SkRect.h>
 #include <SkStream.h>
 #include <SkString.h>
-
 #include <androidfw/Asset.h>
 #include <fcntl.h>
+#include <gui/TraceUtils.h>
+#include <hwui/Bitmap.h>
+#include <hwui/ImageDecoder.h>
 #include <sys/stat.h>
+
+#include "Bitmap.h"
+#include "BitmapFactory.h"
+#include "ByteBufferStreamAdaptor.h"
+#include "CreateJavaOutputStreamAdaptor.h"
+#include "Gainmap.h"
+#include "GraphicsJNI.h"
+#include "NinePatchPeeker.h"
+#include "Utils.h"
 
 using namespace android;
 
@@ -246,6 +247,7 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
                                           jboolean requireUnpremul, jboolean preferRamOverQuality,
                                           jboolean asAlphaMask, jlong colorSpaceHandle,
                                           jboolean extended) {
+    ATRACE_CALL();
     auto* decoder = reinterpret_cast<ImageDecoder*>(nativePtr);
     if (!decoder->setTargetSize(targetWidth, targetHeight)) {
         doThrowISE(env, "Could not scale to target size!");
@@ -336,10 +338,21 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
         return nullptr;
     }
 
+    ATRACE_FORMAT("Decoding %dx%d bitmap", bitmapInfo.width(), bitmapInfo.height());
     SkCodec::Result result = decoder->decode(bm.getPixels(), bm.rowBytes());
     jthrowable jexception = get_and_clear_exception(env);
-    int onPartialImageError = jexception ? kSourceException
-                                         : 0; // No error.
+    int onPartialImageError = jexception ? kSourceException : 0;  // No error.
+
+    // Only attempt to extract the gainmap if we're not post-processing, as we can't automatically
+    // mimic that to the gainmap and expect it to be meaningful. And also don't extract the gainmap
+    // if we're prioritizing RAM over quality, since the gainmap improves quality at the
+    // cost of RAM
+    if (result == SkCodec::kSuccess && !jpostProcess && !preferRamOverQuality) {
+        // The gainmap costs RAM to improve quality, so skip this if we're prioritizing RAM instead
+        result = decoder->extractGainmap(nativeBitmap.get());
+        jexception = get_and_clear_exception(env);
+    }
+
     switch (result) {
         case SkCodec::kSuccess:
             // Ignore the exception, since the decode was successful anyway.
@@ -450,6 +463,10 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
             sk_sp<Bitmap> hwBitmap = Bitmap::allocateHardwareBitmap(bm);
             if (hwBitmap) {
                 hwBitmap->setImmutable();
+                if (nativeBitmap->hasGainmap()) {
+                    // TODO: Also convert to a HW gainmap image
+                    hwBitmap->setGainmap(nativeBitmap->gainmap());
+                }
                 return bitmap::createBitmap(env, hwBitmap.release(), bitmapCreateFlags,
                                             ninePatchChunk, ninePatchInsets);
             }

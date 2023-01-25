@@ -347,6 +347,7 @@ cc_defaults {
         "jni/CreateJavaOutputStreamAdaptor.cpp",
         "jni/FontFamily.cpp",
         "jni/FontUtils.cpp",
+        "jni/Gainmap.cpp",
         "jni/Graphics.cpp",
         "jni/ImageDecoder.cpp",
         "jni/Interpolator.cpp",

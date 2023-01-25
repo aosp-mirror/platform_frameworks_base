@@ -79,6 +79,8 @@ public:
     // Set whether the ImageDecoder should handle RestorePrevious frames.
     void setHandleRestorePrevious(bool handle);
 
+    SkCodec::Result extractGainmap(Bitmap* destination);
+
 private:
     // State machine for keeping track of how to handle RestorePrevious (RP)
     // frames in decode().
@@ -115,6 +117,7 @@ private:
     RestoreState mRestoreState;
     sk_sp<Bitmap> mRestoreFrame;
     std::optional<SkIRect> mCropRect;
+    std::optional<SkEncodedOrigin> mOverrideOrigin;
 
     ImageDecoder(const ImageDecoder&) = delete;
     ImageDecoder& operator=(const ImageDecoder&) = delete;
@@ -124,6 +127,10 @@ private:
     bool swapWidthHeight() const;
     // Store/restore a frame if necessary. Returns false on error.
     bool handleRestorePrevious(const SkImageInfo&, void* pixels, size_t rowBytes);
+
+    SkEncodedOrigin getOrigin() const {
+        return mOverrideOrigin.has_value() ? *mOverrideOrigin : mCodec->codec()->getOrigin();
+    }
 };
 
 } // namespace android
