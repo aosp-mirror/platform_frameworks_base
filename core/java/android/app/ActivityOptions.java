@@ -1997,10 +1997,12 @@ public class ActivityOptions extends ComponentOptions {
 
     /**
      * Sets background activity launch logic won't use pending intent creator foreground state.
+     *
      * @hide
      */
-    public void setIgnorePendingIntentCreatorForegroundState(boolean state) {
+    public ActivityOptions setIgnorePendingIntentCreatorForegroundState(boolean state) {
         mIgnorePendingIntentCreatorForegroundState = state;
+        return this;
     }
 
     /**
