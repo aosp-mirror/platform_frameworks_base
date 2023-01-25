@@ -15,8 +15,9 @@
  */
 
 #include "Utils.h"
-#include "SkUtils.h"
 #include "SkData.h"
+#include "SkRefCnt.h"
+#include "SkStream.h"
 
 #include <inttypes.h>
 #include <log/log.h>
