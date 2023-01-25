@@ -17,26 +17,14 @@
 <com.android.wm.shell.windowdecor.WindowDecorLinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/desktop_mode_caption"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
     android:background="@drawable/desktop_mode_decor_title">
-    <Button
-        style="@style/CaptionButtonStyle"
-        android:id="@+id/back_button"
-        android:contentDescription="@string/back_button_text"
-        android:background="@drawable/decor_back_button_dark"
-    />
     <Button
         android:id="@+id/caption_handle"
         android:layout_width="128dp"
         android:layout_height="32dp"
-        android:layout_margin="5dp"
-        android:padding="4dp"
         android:contentDescription="@string/handle_text"
         android:background="@drawable/decor_handle_dark"/>
-    <Button
-        style="@style/CaptionButtonStyle"
-        android:id="@+id/close_window"
-        android:contentDescription="@string/close_button_text"
-        android:background="@drawable/decor_close_button_dark"/>
 </com.android.wm.shell.windowdecor.WindowDecorLinearLayout>
