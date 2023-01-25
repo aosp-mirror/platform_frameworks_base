@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade
 
+import android.animation.Animator
 import android.annotation.IdRes
 import android.app.StatusBarManager
 import android.content.res.Configuration
@@ -175,9 +176,13 @@ class LargeScreenShadeHeaderController @Inject constructor(
     var shadeExpandedFraction = -1f
         set(value) {
             if (field != value) {
+                val oldAlpha = header.alpha
                 header.alpha = ShadeInterpolation.getContentAlpha(value)
                 field = value
-                updateVisibility()
+                if ((oldAlpha == 0f && header.alpha > 0f) ||
+                        (oldAlpha > 0f && header.alpha == 0f)) {
+                    updateVisibility()
+                }
             }
         }
 
@@ -336,7 +341,26 @@ class LargeScreenShadeHeaderController @Inject constructor(
                 .setUpdateListener {
                     updateVisibility()
                 }
+                .setListener(endAnimationListener)
                 .start()
+    }
+
+    private val endAnimationListener = object : Animator.AnimatorListener {
+        override fun onAnimationCancel(animation: Animator?) {
+            clearListeners()
+        }
+
+        override fun onAnimationEnd(animation: Animator?) {
+            clearListeners()
+        }
+
+        override fun onAnimationRepeat(animation: Animator?) {}
+
+        override fun onAnimationStart(animation: Animator?) {}
+
+        private fun clearListeners() {
+            header.animate().setListener(null).setUpdateListener(null)
+        }
     }
 
     private fun loadConstraints() {
