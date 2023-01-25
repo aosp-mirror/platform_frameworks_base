@@ -161,6 +161,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 chipbarCoordinator,
                 commandQueue,
                 context,
+                dumpManager,
                 logger,
                 mediaTttFlags,
                 uiEventLogger,
@@ -179,6 +180,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 chipbarCoordinator,
                 commandQueue,
                 context,
+                dumpManager,
                 logger,
                 mediaTttFlags,
                 uiEventLogger,
@@ -540,6 +542,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         val viewCaptor = ArgumentCaptor.forClass(View::class.java)
         verify(windowManager).addView(viewCaptor.capture(), any())
         verify(windowManager).removeView(viewCaptor.value)
+        verify(logger).logStateMapRemoval(eq(DEFAULT_ID), any())
     }
 
     @Test
@@ -739,6 +742,99 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         verify(windowManager, never()).addView(any(), any())
     }
 
+    /** Regression test for b/266217596. */
+    @Test
+    fun toReceiver_triggeredThenFar_thenSucceeded_updatesToSucceeded() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED,
+            routeInfo,
+            null,
+        )
+
+        // WHEN a FAR command comes in
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
+            routeInfo,
+            null,
+        )
+
+        // THEN it is ignored and the chipbar is stilled displayed
+        val chipbarView = getChipbarView()
+        assertThat(chipbarView.getChipText())
+            .isEqualTo(ChipStateSender.TRANSFER_TO_RECEIVER_TRIGGERED.getExpectedStateText())
+        assertThat(chipbarView.getLoadingIcon().visibility).isEqualTo(View.VISIBLE)
+        verify(windowManager, never()).removeView(any())
+
+        // WHEN a SUCCEEDED command comes in
+        val succeededRouteInfo =
+            MediaRoute2Info.Builder(DEFAULT_ID, "Tablet Succeeded")
+                .addFeature("feature")
+                .setClientPackageName(PACKAGE_NAME)
+                .build()
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
+            succeededRouteInfo,
+            /* undoCallback= */ object : IUndoMediaTransferCallback.Stub() {
+                override fun onUndoTriggered() {}
+            },
+        )
+
+        // THEN it is *not* marked as an invalid transition and the chipbar updates to the succeeded
+        // state. (The "invalid transition" would be FAR => SUCCEEDED.)
+        assertThat(chipbarView.getChipText())
+            .isEqualTo(
+                ChipStateSender.TRANSFER_TO_RECEIVER_SUCCEEDED.getExpectedStateText(
+                    "Tablet Succeeded"
+                )
+            )
+        assertThat(chipbarView.getLoadingIcon().visibility).isEqualTo(View.GONE)
+        assertThat(chipbarView.getUndoButton().visibility).isEqualTo(View.VISIBLE)
+    }
+
+    /** Regression test for b/266217596. */
+    @Test
+    fun toThisDevice_triggeredThenFar_thenSucceeded_updatesToSucceeded() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED,
+            routeInfo,
+            null,
+        )
+
+        // WHEN a FAR command comes in
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
+            routeInfo,
+            null,
+        )
+
+        // THEN it is ignored and the chipbar is stilled displayed
+        val chipbarView = getChipbarView()
+        assertThat(chipbarView.getChipText())
+            .isEqualTo(ChipStateSender.TRANSFER_TO_THIS_DEVICE_TRIGGERED.getExpectedStateText())
+        assertThat(chipbarView.getLoadingIcon().visibility).isEqualTo(View.VISIBLE)
+        verify(windowManager, never()).removeView(any())
+
+        // WHEN a SUCCEEDED command comes in
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
+            routeInfo,
+            /* undoCallback= */ object : IUndoMediaTransferCallback.Stub() {
+                override fun onUndoTriggered() {}
+            },
+        )
+
+        // THEN it is *not* marked as an invalid transition and the chipbar updates to the succeeded
+        // state. (The "invalid transition" would be FAR => SUCCEEDED.)
+        assertThat(chipbarView.getChipText())
+            .isEqualTo(
+                ChipStateSender.TRANSFER_TO_THIS_DEVICE_SUCCEEDED.getExpectedStateText(
+                    "Tablet Succeeded"
+                )
+            )
+        assertThat(chipbarView.getLoadingIcon().visibility).isEqualTo(View.GONE)
+        assertThat(chipbarView.getUndoButton().visibility).isEqualTo(View.VISIBLE)
+    }
+
     @Test
     fun receivesNewStateFromCommandQueue_isLogged() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
@@ -932,6 +1028,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 mockChipbarCoordinator,
                 commandQueue,
                 context,
+                dumpManager,
                 logger,
                 mediaTttFlags,
                 uiEventLogger,
@@ -958,6 +1055,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 mockChipbarCoordinator,
                 commandQueue,
                 context,
+                dumpManager,
                 logger,
                 mediaTttFlags,
                 uiEventLogger,
@@ -975,9 +1073,10 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         verify(mockChipbarCoordinator).registerListener(capture(listenerCaptor))
 
         // WHEN the listener is notified that the view has been removed
-        listenerCaptor.value.onInfoPermanentlyRemoved(DEFAULT_ID)
+        listenerCaptor.value.onInfoPermanentlyRemoved(DEFAULT_ID, "reason")
 
         // THEN the media coordinator unregisters the listener
+        verify(logger).logStateMapRemoval(DEFAULT_ID, "reason")
         verify(mockChipbarCoordinator).unregisterListener(listenerCaptor.value)
     }
 
@@ -989,6 +1088,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 mockChipbarCoordinator,
                 commandQueue,
                 context,
+                dumpManager,
                 logger,
                 mediaTttFlags,
                 uiEventLogger,
@@ -1006,7 +1106,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         verify(mockChipbarCoordinator).registerListener(capture(listenerCaptor))
 
         // WHEN the listener is notified that a different view has been removed
-        listenerCaptor.value.onInfoPermanentlyRemoved("differentViewId")
+        listenerCaptor.value.onInfoPermanentlyRemoved("differentViewId", "reason")
 
         // THEN the media coordinator doesn't unregister the listener
         verify(mockChipbarCoordinator, never()).unregisterListener(listenerCaptor.value)
@@ -1020,6 +1120,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 mockChipbarCoordinator,
                 commandQueue,
                 context,
+                dumpManager,
                 logger,
                 mediaTttFlags,
                 uiEventLogger,
@@ -1055,6 +1156,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 mockChipbarCoordinator,
                 commandQueue,
                 context,
+                dumpManager,
                 logger,
                 mediaTttFlags,
                 uiEventLogger,
@@ -1084,10 +1186,173 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         verify(mockChipbarCoordinator, atLeast(1)).registerListener(capture(listenerCaptor))
 
         // THEN one of them is removed
-        listenerCaptor.value.onInfoPermanentlyRemoved("route1")
+        listenerCaptor.value.onInfoPermanentlyRemoved("route1", "reason")
 
         // THEN the media coordinator doesn't unregister the listener (since route2 is still active)
         verify(mockChipbarCoordinator, never()).unregisterListener(listenerCaptor.value)
+        verify(logger).logStateMapRemoval("route1", "reason")
+    }
+
+    /** Regression test for b/266218672. */
+    @Test
+    fun twoIdsDisplayed_oldIdIsFar_viewStillDisplayed() {
+        // WHEN there are two different media transfers with different IDs
+        val route1 =
+            MediaRoute2Info.Builder("route1", OTHER_DEVICE_NAME)
+                .addFeature("feature")
+                .setClientPackageName(PACKAGE_NAME)
+                .build()
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST,
+            route1,
+            null,
+        )
+        verify(windowManager).addView(any(), any())
+        reset(windowManager)
+
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
+            MediaRoute2Info.Builder("route2", "Route 2 name")
+                .addFeature("feature")
+                .setClientPackageName(PACKAGE_NAME)
+                .build(),
+            null,
+        )
+        val newView = getChipbarView()
+
+        // WHEN there's a FAR event for the earlier one
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
+            route1,
+            null,
+        )
+
+        // THEN it's ignored and the more recent one is still displayed
+        assertThat(newView.getChipText())
+            .isEqualTo(
+                ChipStateSender.ALMOST_CLOSE_TO_START_CAST.getExpectedStateText("Route 2 name")
+            )
+    }
+
+    /** Regression test for b/266218672. */
+    @Test
+    fun receiverSucceededThenTimedOut_internalStateResetAndCanDisplayAlmostCloseToEnd() {
+        displayReceiverTriggered()
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
+            routeInfo,
+            null,
+        )
+
+        fakeClock.advanceTime(TIMEOUT + 1L)
+        verify(windowManager).removeView(any())
+
+        reset(windowManager)
+
+        // WHEN we try to show ALMOST_CLOSE_TO_END
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST,
+            routeInfo,
+            null,
+        )
+
+        // THEN it succeeds
+        val chipbarView = getChipbarView()
+        assertThat(chipbarView.getChipText())
+            .isEqualTo(ChipStateSender.ALMOST_CLOSE_TO_END_CAST.getExpectedStateText())
+    }
+
+    /** Regression test for b/266218672. */
+    @Test
+    fun receiverSucceededThenTimedOut_internalStateResetAndCanDisplayReceiverTriggered() {
+        displayReceiverTriggered()
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
+            routeInfo,
+            null,
+        )
+
+        fakeClock.advanceTime(TIMEOUT + 1L)
+        verify(windowManager).removeView(any())
+
+        reset(windowManager)
+
+        // WHEN we try to show RECEIVER_TRIGGERED
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED,
+            routeInfo,
+            null,
+        )
+
+        // THEN it succeeds
+        val chipbarView = getChipbarView()
+        assertThat(chipbarView.getChipText())
+            .isEqualTo(ChipStateSender.TRANSFER_TO_RECEIVER_TRIGGERED.getExpectedStateText())
+        assertThat(chipbarView.getLoadingIcon().visibility).isEqualTo(View.VISIBLE)
+    }
+
+    /** Regression test for b/266218672. */
+    @Test
+    fun toThisDeviceSucceededThenTimedOut_internalStateResetAndCanDisplayAlmostCloseToStart() {
+        displayThisDeviceTriggered()
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
+            routeInfo,
+            null,
+        )
+
+        fakeClock.advanceTime(TIMEOUT + 1L)
+        verify(windowManager).removeView(any())
+
+        reset(windowManager)
+
+        // WHEN we try to show ALMOST_CLOSE_TO_START
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
+            routeInfo,
+            null,
+        )
+
+        // THEN it succeeds
+        val chipbarView = getChipbarView()
+        assertThat(chipbarView.getChipText())
+            .isEqualTo(ChipStateSender.ALMOST_CLOSE_TO_START_CAST.getExpectedStateText())
+    }
+
+    /** Regression test for b/266218672. */
+    @Test
+    fun toThisDeviceSucceededThenTimedOut_internalStateResetAndCanDisplayThisDeviceTriggered() {
+        displayThisDeviceTriggered()
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
+            routeInfo,
+            null,
+        )
+
+        fakeClock.advanceTime(TIMEOUT + 1L)
+        verify(windowManager).removeView(any())
+
+        reset(windowManager)
+
+        // WHEN we try to show THIS_DEVICE_TRIGGERED
+        val newRouteInfo =
+            MediaRoute2Info.Builder(DEFAULT_ID, "New Name")
+                .addFeature("feature")
+                .setClientPackageName(PACKAGE_NAME)
+                .build()
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED,
+            newRouteInfo,
+            null,
+        )
+
+        // THEN it succeeds
+        val chipbarView = getChipbarView()
+        assertThat(chipbarView.getChipText())
+            .isEqualTo(
+                ChipStateSender.TRANSFER_TO_THIS_DEVICE_TRIGGERED.getExpectedStateText("New Name")
+            )
+        assertThat(chipbarView.getLoadingIcon().visibility).isEqualTo(View.VISIBLE)
     }
 
     private fun getChipbarView(): ViewGroup {
@@ -1107,8 +1372,10 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
 
     private fun ViewGroup.getUndoButton(): View = this.requireViewById(R.id.end_button)
 
-    private fun ChipStateSender.getExpectedStateText(): String? {
-        return this.getChipTextString(context, OTHER_DEVICE_NAME).loadText(context)
+    private fun ChipStateSender.getExpectedStateText(
+        otherDeviceName: String = OTHER_DEVICE_NAME,
+    ): String? {
+        return this.getChipTextString(context, otherDeviceName).loadText(context)
     }
 
     // display receiver triggered state helper method to make sure we start from a valid state
