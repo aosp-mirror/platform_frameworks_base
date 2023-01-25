@@ -1789,6 +1789,10 @@ public final class SystemServer implements Dumpable {
         }
         t.traceEnd();
 
+        t.traceBegin("ArtManagerLocal");
+        DexOptHelper.initializeArtManagerLocal(context, mPackageManagerService);
+        t.traceEnd();
+
         t.traceBegin("UpdatePackagesIfNeeded");
         try {
             Watchdog.getInstance().pauseWatchingCurrentThread("dexopt");
@@ -2735,10 +2739,6 @@ public final class SystemServer implements Dumpable {
         // Permission policy service
         t.traceBegin("StartPermissionPolicyService");
         mSystemServiceManager.startService(PermissionPolicyService.class);
-        t.traceEnd();
-
-        t.traceBegin("ArtManagerLocal");
-        DexOptHelper.initializeArtManagerLocal(context, mPackageManagerService);
         t.traceEnd();
 
         t.traceBegin("MakePackageManagerServiceReady");
