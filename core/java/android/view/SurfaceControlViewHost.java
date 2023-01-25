@@ -292,7 +292,7 @@ public class SurfaceControlViewHost {
     public SurfaceControlViewHost(@NonNull Context c, @NonNull Display d,
             @NonNull WindowlessWindowManager wwm) {
         mWm = wwm;
-        mViewRoot = new ViewRootImpl(c, d, mWm);
+        mViewRoot = new ViewRootImpl(c, d, mWm, new WindowlessWindowLayout());
         addConfigCallback(c, d);
 
         WindowManagerGlobal.getInstance().addWindowlessRoot(mViewRoot);
@@ -322,7 +322,7 @@ public class SurfaceControlViewHost {
         mWm = new WindowlessWindowManager(context.getResources().getConfiguration(),
                 mSurfaceControl, hostToken);
 
-        mViewRoot = new ViewRootImpl(context, display, mWm);
+        mViewRoot = new ViewRootImpl(context, display, mWm, new WindowlessWindowLayout());
         addConfigCallback(context, display);
 
         WindowManagerGlobal.getInstance().addWindowlessRoot(mViewRoot);

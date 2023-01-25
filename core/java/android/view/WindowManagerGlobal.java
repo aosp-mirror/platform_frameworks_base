@@ -388,7 +388,8 @@ public final class WindowManagerGlobal {
             if (windowlessSession == null) {
                 root = new ViewRootImpl(view.getContext(), display);
             } else {
-                root = new ViewRootImpl(view.getContext(), display, windowlessSession);
+                root = new ViewRootImpl(view.getContext(), display,
+                        windowlessSession, new WindowlessWindowLayout());
             }
 
             view.setLayoutParams(wparams);
