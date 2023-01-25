@@ -115,6 +115,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
     private final SecureSettings mSecureSettings;
     private final Executor mMainExecutor;
     private final Handler mBgHandler;
+    private final boolean mIsMonochromaticEnabled;
     private final Context mContext;
     private final boolean mIsMonetEnabled;
     private final UserTracker mUserTracker;
@@ -364,6 +365,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
             UserTracker userTracker, DumpManager dumpManager, FeatureFlags featureFlags,
             @Main Resources resources, WakefulnessLifecycle wakefulnessLifecycle) {
         mContext = context;
+        mIsMonochromaticEnabled = featureFlags.isEnabled(Flags.MONOCHROMATIC_THEME);
         mIsMonetEnabled = featureFlags.isEnabled(Flags.MONET);
         mDeviceProvisionedController = deviceProvisionedController;
         mBroadcastDispatcher = broadcastDispatcher;
