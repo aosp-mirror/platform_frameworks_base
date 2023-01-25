@@ -1391,7 +1391,8 @@ public final class JobStatus {
     public UserVisibleJobSummary getUserVisibleJobSummary() {
         if (mUserVisibleJobSummary == null) {
             mUserVisibleJobSummary = new UserVisibleJobSummary(
-                    callingUid, getSourceUserId(), getSourcePackageName(),
+                    callingUid, getServiceComponent().getPackageName(),
+                    getSourceUserId(), getSourcePackageName(),
                     getNamespace(), getJobId());
         }
         return mUserVisibleJobSummary;
