@@ -137,7 +137,9 @@ public:
     void setLightAlpha(uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
     void setLightGeometry(const Vector3& lightCenter, float lightRadius);
     void setOpaque(bool opaque);
-    void setColorMode(ColorMode mode);
+    float setColorMode(ColorMode mode);
+    float targetSdrHdrRatio() const;
+    void setTargetSdrHdrRatio(float ratio);
     bool makeCurrent();
     void prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t syncQueued, RenderNode* target);
     // Returns the DequeueBufferDuration.
@@ -352,6 +354,9 @@ private:
     nsecs_t mLastDequeueBufferDuration = 0;
     nsecs_t mSyncDelayDuration = 0;
     nsecs_t mIdleDuration = 0;
+
+    ColorMode mColorMode = ColorMode::Default;
+    float mTargetSdrHdrRatio = 1.f;
 };
 
 } /* namespace renderthread */

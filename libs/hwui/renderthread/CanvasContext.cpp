@@ -299,9 +299,40 @@ void CanvasContext::setOpaque(bool opaque) {
     mOpaque = opaque;
 }
 
-void CanvasContext::setColorMode(ColorMode mode) {
-    mRenderPipeline->setSurfaceColorProperties(mode);
-    setupPipelineSurface();
+float CanvasContext::setColorMode(ColorMode mode) {
+    if (mode != mColorMode) {
+        if (mode == ColorMode::Hdr && !mRenderPipeline->supportsExtendedRangeHdr()) {
+            mode = ColorMode::WideColorGamut;
+        }
+        mColorMode = mode;
+        mRenderPipeline->setSurfaceColorProperties(mode);
+        setupPipelineSurface();
+    }
+    switch (mColorMode) {
+        case ColorMode::Hdr:
+            return 3.f;  // TODO: Refine this number
+        default:
+            return 1.f;
+    }
+}
+
+float CanvasContext::targetSdrHdrRatio() const {
+    if (mColorMode == ColorMode::Hdr) {
+        return mTargetSdrHdrRatio;
+    } else {
+        return 1.f;
+    }
+}
+
+void CanvasContext::setTargetSdrHdrRatio(float ratio) {
+    if (mTargetSdrHdrRatio == ratio) return;
+
+    mTargetSdrHdrRatio = ratio;
+    mRenderPipeline->setTargetSdrHdrRatio(ratio);
+    // We don't actually but we need to behave as if we do. Specifically we need to ensure
+    // all buffers in the swapchain are fully re-rendered as any partial updates to them will
+    // result in mixed target white points which looks really bad & flickery
+    mHaveNewSurface = true;
 }
 
 bool CanvasContext::makeCurrent() {

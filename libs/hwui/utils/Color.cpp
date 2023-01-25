@@ -101,6 +101,26 @@ uint32_t ColorTypeToBufferFormat(SkColorType colorType) {
             return AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
     }
 }
+
+SkColorType BufferFormatToColorType(uint32_t format) {
+    switch (format) {
+        case AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM:
+            return kN32_SkColorType;
+        case AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM:
+            return kN32_SkColorType;
+        case AHARDWAREBUFFER_FORMAT_R5G6B5_UNORM:
+            return kRGB_565_SkColorType;
+        case AHARDWAREBUFFER_FORMAT_R10G10B10A2_UNORM:
+            return kRGBA_1010102_SkColorType;
+        case AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT:
+            return kRGBA_F16_SkColorType;
+        case AHARDWAREBUFFER_FORMAT_R8_UNORM:
+            return kAlpha_8_SkColorType;
+        default:
+            ALOGV("Unsupported format: %d, return unknown by default", format);
+            return kUnknown_SkColorType;
+    }
+}
 #endif
 
 namespace {
@@ -394,6 +414,27 @@ skcms_TransferFunction GetPQSkTransferFunction(float sdr_white_level) {
     fn.a = ws * fn.a;
     fn.b = ws * fn.b;
     return fn;
+}
+
+static skcms_TransferFunction trfn_apply_gain(const skcms_TransferFunction trfn, float gain) {
+    float pow_gain_ginv = sk_float_pow(gain, 1 / trfn.g);
+    skcms_TransferFunction result;
+    result.g = trfn.g;
+    result.a = trfn.a * pow_gain_ginv;
+    result.b = trfn.b * pow_gain_ginv;
+    result.c = trfn.c * gain;
+    result.d = trfn.d;
+    result.e = trfn.e * gain;
+    result.f = trfn.f * gain;
+    return result;
+}
+
+skcms_TransferFunction GetExtendedTransferFunction(float sdrHdrRatio) {
+    if (sdrHdrRatio <= 1.f) {
+        return SkNamedTransferFn::kSRGB;
+    }
+    // Scale the transfer by the sdrHdrRatio
+    return trfn_apply_gain(SkNamedTransferFn::kSRGB, sdrHdrRatio);
 }
 
 // Skia skcms' default HLG maps encoded [0, 1] to linear [1, 12] in order to follow ARIB
