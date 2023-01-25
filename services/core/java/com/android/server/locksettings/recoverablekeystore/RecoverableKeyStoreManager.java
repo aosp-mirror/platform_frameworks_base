@@ -28,7 +28,10 @@ import static android.security.keystore.recovery.RecoveryController.ERROR_SESSIO
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.KeyguardManager;
 import android.app.PendingIntent;
+import android.app.RemoteLockscreenValidationResult;
+import android.app.StartLockscreenValidationRequest;
 import android.content.Context;
 import android.os.Binder;
 import android.os.RemoteException;
@@ -40,11 +43,14 @@ import android.security.keystore.recovery.RecoveryCertPath;
 import android.security.keystore.recovery.RecoveryController;
 import android.security.keystore.recovery.WrappedApplicationKey;
 import android.util.ArrayMap;
+import android.util.FeatureFlagUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.HexDump;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.security.SecureBox;
+import com.android.server.locksettings.LockSettingsService;
 import com.android.server.locksettings.recoverablekeystore.certificate.CertParsingException;
 import com.android.server.locksettings.recoverablekeystore.certificate.CertUtils;
 import com.android.server.locksettings.recoverablekeystore.certificate.CertValidationException;
@@ -55,6 +61,8 @@ import com.android.server.locksettings.recoverablekeystore.storage.CleanupManage
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySessionStorage;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySnapshotStorage;
+import com.android.server.locksettings.recoverablekeystore.storage.RemoteLockscreenValidationSessionStorage;
+import com.android.server.locksettings.recoverablekeystore.storage.RemoteLockscreenValidationSessionStorage.LockscreenVerificationSession;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -103,6 +111,9 @@ public class RecoverableKeyStoreManager {
     private final ApplicationKeyStorage mApplicationKeyStorage;
     private final TestOnlyInsecureCertificateHelper mTestCertHelper;
     private final CleanupManager mCleanupManager;
+    // only set if SETTINGS_ENABLE_LOCKSCREEN_TRANSFER_API is enabled.
+    @Nullable private final RemoteLockscreenValidationSessionStorage
+            mRemoteLockscreenValidationSessionStorage;
 
     /**
      * Returns a new or existing instance.
@@ -112,7 +123,18 @@ public class RecoverableKeyStoreManager {
     public static synchronized RecoverableKeyStoreManager
             getInstance(Context context) {
         if (mInstance == null) {
-            RecoverableKeyStoreDb db = RecoverableKeyStoreDb.newInstance(context);
+            RecoverableKeyStoreDb db;
+            RemoteLockscreenValidationSessionStorage lockscreenCheckSessions;
+            if (FeatureFlagUtils.isEnabled(context,
+                    FeatureFlagUtils.SETTINGS_ENABLE_LOCKSCREEN_TRANSFER_API)) {
+                // TODO(b/254335492): Remove flag check when feature is launched.
+                db = RecoverableKeyStoreDb.newInstance(context, 7);
+                lockscreenCheckSessions = new RemoteLockscreenValidationSessionStorage();
+            } else {
+                db = RecoverableKeyStoreDb.newInstance(context);
+                lockscreenCheckSessions = null;
+            }
+
             PlatformKeyManager platformKeyManager;
             ApplicationKeyStorage applicationKeyStorage;
             try {
@@ -142,7 +164,8 @@ public class RecoverableKeyStoreManager {
                     platformKeyManager,
                     applicationKeyStorage,
                     new TestOnlyInsecureCertificateHelper(),
-                    cleanupManager);
+                    cleanupManager,
+                    lockscreenCheckSessions);
         }
         return mInstance;
     }
@@ -158,7 +181,8 @@ public class RecoverableKeyStoreManager {
             PlatformKeyManager platformKeyManager,
             ApplicationKeyStorage applicationKeyStorage,
             TestOnlyInsecureCertificateHelper testOnlyInsecureCertificateHelper,
-            CleanupManager cleanupManager) {
+            CleanupManager cleanupManager,
+            RemoteLockscreenValidationSessionStorage remoteLockscreenValidationSessionStorage) {
         mContext = context;
         mDatabase = recoverableKeyStoreDb;
         mRecoverySessionStorage = recoverySessionStorage;
@@ -177,6 +201,7 @@ public class RecoverableKeyStoreManager {
             Log.wtf(TAG, "AES keygen algorithm not available. AOSP must support this.", e);
             throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
         }
+        mRemoteLockscreenValidationSessionStorage = remoteLockscreenValidationSessionStorage;
     }
 
     /**
@@ -969,19 +994,50 @@ public class RecoverableKeyStoreManager {
     /**
      * Starts a session to verify lock screen credentials provided by a remote device.
      */
-    public void startRemoteLockscreenValidation() {
+    public StartLockscreenValidationRequest startRemoteLockscreenValidation(
+            LockSettingsService lockSettingService) {
+        if (mRemoteLockscreenValidationSessionStorage == null) {
+            throw new UnsupportedOperationException("Under development");
+        }
         checkVerifyRemoteLockscreenPermission();
-        // TODO(b/254335492): Create session in memory
-        return;
+        int userId = UserHandle.getCallingUserId();
+        int savedCredentialType;
+        final long token = Binder.clearCallingIdentity();
+        try {
+            savedCredentialType = lockSettingService.getCredentialType(userId);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        int keyguardCredentailsType = lockPatternUtilsToKeyguardType(savedCredentialType);
+        LockscreenVerificationSession session =
+                mRemoteLockscreenValidationSessionStorage.startSession(userId);
+        PublicKey publicKey = session.getKeyPair().getPublic();
+        byte[] encodedPublicKey = SecureBox.encodePublicKey(publicKey);
+        int badGuesses = mDatabase.getBadRemoteGuessCounter(userId);
+        return new StartLockscreenValidationRequest.Builder()
+                .setLockscreenUiType(keyguardCredentailsType)
+                .setSourcePublicKey(new byte[]{})
+                .build();
     }
 
     /**
      * Verifies encrypted credentials guess from a remote device.
      */
-    public void validateRemoteLockscreen(@NonNull byte[] encryptedCredential) {
+    public RemoteLockscreenValidationResult validateRemoteLockscreen(
+            @NonNull byte[] encryptedCredential,
+            LockSettingsService lockSettingService) {
+        if (mRemoteLockscreenValidationSessionStorage == null) {
+            throw new UnsupportedOperationException("Under development");
+        }
         checkVerifyRemoteLockscreenPermission();
-        // TODO(b/254335492): Decrypt and verify credentials
-        return;
+        int userId = UserHandle.getCallingUserId();
+        LockscreenVerificationSession session =
+                mRemoteLockscreenValidationSessionStorage.get(userId);
+        if (session == null) {
+            throw new IllegalStateException("There is no active lock screen check session");
+        }
+        // TODO(b/254335492): Call lockSettingService.verifyCredential
+        return new RemoteLockscreenValidationResult.Builder().build();
     }
 
     private void checkVerifyRemoteLockscreenPermission() {
@@ -993,6 +1049,21 @@ public class RecoverableKeyStoreManager {
         int userId = UserHandle.getCallingUserId();
         int uid = Binder.getCallingUid();
         mCleanupManager.registerRecoveryAgent(userId, uid);
+    }
+
+    private int lockPatternUtilsToKeyguardType(int credentialsType) {
+        switch(credentialsType) {
+            case LockPatternUtils.CREDENTIAL_TYPE_NONE:
+                throw new IllegalStateException("Screen lock is not set");
+            case LockPatternUtils.CREDENTIAL_TYPE_PATTERN:
+                return KeyguardManager.PATTERN;
+            case LockPatternUtils.CREDENTIAL_TYPE_PIN:
+                return KeyguardManager.PIN;
+            case LockPatternUtils.CREDENTIAL_TYPE_PASSWORD:
+                return KeyguardManager.PASSWORD;
+            default:
+                throw new IllegalStateException("Screen lock is not set");
+        }
     }
 
     private void checkRecoverKeyStorePermission() {
