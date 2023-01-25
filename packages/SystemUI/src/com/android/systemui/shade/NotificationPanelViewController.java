@@ -2157,6 +2157,7 @@ public final class NotificationPanelViewController implements Dumpable {
         }
         ValueAnimator animator = createHeightAnimator(target, overshootAmount);
         if (expand) {
+            maybeVibrateOnOpening(true /* openingWithTouch */);
             if (expandBecauseOfFalsing && vel < 0) {
                 vel = 0;
             }
@@ -2167,6 +2168,7 @@ public final class NotificationPanelViewController implements Dumpable {
                 animator.setDuration(SHADE_OPEN_SPRING_OUT_DURATION);
             }
         } else {
+            mHasVibratedOnOpen = false;
             if (shouldUseDismissingAnimation()) {
                 if (vel == 0) {
                     animator.setInterpolator(Interpolators.PANEL_CLOSE_ACCELERATED);
@@ -6375,7 +6377,7 @@ public final class NotificationPanelViewController implements Dumpable {
                         mShadeLog.logHasVibrated(mHasVibratedOnOpen, mExpandedFraction);
                     }
                     addMovement(event);
-                    if (!isFullyCollapsed()) {
+                    if (!isFullyCollapsed() && !isOnKeyguard()) {
                         maybeVibrateOnOpening(true /* openingWithTouch */);
                     }
                     float h = y - mInitialExpandY;
