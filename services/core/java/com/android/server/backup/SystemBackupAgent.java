@@ -86,7 +86,7 @@ public class SystemBackupAgent extends BackupAgentHelper {
 
     private static final Set<String> sEligibleForMultiUser = Sets.newArraySet(
             PERMISSION_HELPER, NOTIFICATION_HELPER, SYNC_SETTINGS_HELPER, APP_LOCALES_HELPER,
-            ACCOUNT_MANAGER_HELPER, USAGE_STATS_HELPER);
+            ACCOUNT_MANAGER_HELPER, USAGE_STATS_HELPER, PREFERRED_HELPER);
 
     private int mUserId = UserHandle.USER_SYSTEM;
 
