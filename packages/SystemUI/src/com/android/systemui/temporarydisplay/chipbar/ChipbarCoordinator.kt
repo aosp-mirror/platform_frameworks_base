@@ -206,31 +206,44 @@ constructor(
     }
 
     override fun animateViewIn(view: ViewGroup) {
-        ViewHierarchyAnimator.animateAddition(
-            view.getInnerView(),
-            ViewHierarchyAnimator.Hotspot.TOP,
-            Interpolators.EMPHASIZED_DECELERATE,
-            duration = ANIMATION_IN_DURATION,
-            includeMargins = true,
-            includeFadeIn = true,
-            // We can only request focus once the animation finishes.
-            onAnimationEnd = {
-                maybeGetAccessibilityFocus(view.getTag(INFO_TAG) as ChipbarInfo?, view)
-            },
-        )
+        val onAnimationEnd = Runnable {
+            maybeGetAccessibilityFocus(view.getTag(INFO_TAG) as ChipbarInfo?, view)
+        }
+        val added =
+            ViewHierarchyAnimator.animateAddition(
+                view.getInnerView(),
+                ViewHierarchyAnimator.Hotspot.TOP,
+                Interpolators.EMPHASIZED_DECELERATE,
+                duration = ANIMATION_IN_DURATION,
+                includeMargins = true,
+                includeFadeIn = true,
+                // We can only request focus once the animation finishes.
+                onAnimationEnd = onAnimationEnd,
+            )
+        // If the view doesn't get animated, the [onAnimationEnd] runnable won't get run. So, just
+        // run it immediately.
+        if (!added) {
+            onAnimationEnd.run()
+        }
     }
 
     override fun animateViewOut(view: ViewGroup, removalReason: String?, onAnimationEnd: Runnable) {
         val innerView = view.getInnerView()
         innerView.accessibilityLiveRegion = ACCESSIBILITY_LIVE_REGION_NONE
-        ViewHierarchyAnimator.animateRemoval(
-            innerView,
-            ViewHierarchyAnimator.Hotspot.TOP,
-            Interpolators.EMPHASIZED_ACCELERATE,
-            ANIMATION_OUT_DURATION,
-            includeMargins = true,
-            onAnimationEnd,
-        )
+        val removed =
+            ViewHierarchyAnimator.animateRemoval(
+                innerView,
+                ViewHierarchyAnimator.Hotspot.TOP,
+                Interpolators.EMPHASIZED_ACCELERATE,
+                ANIMATION_OUT_DURATION,
+                includeMargins = true,
+                onAnimationEnd,
+            )
+        // If the view doesn't get animated, the [onAnimationEnd] runnable won't get run. So, just
+        // run it immediately.
+        if (!removed) {
+            onAnimationEnd.run()
+        }
 
         updateGestureListening()
     }
