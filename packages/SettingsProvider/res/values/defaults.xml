@@ -286,7 +286,7 @@
     <bool name="def_wearable_sideButtonPresent">true</bool>
 
     <!-- Android wear version. This value is a string due to no long type in resources -->
-    <string name="def_wearable_androidWearVersion" translatable="false">2</string>
+    <string name="def_wearable_androidWearVersion" translatable="false">4</string>
 
     <!-- This value is the decimal representation of the capabilities bitmask as defined below:
         0000001 - WIFI
