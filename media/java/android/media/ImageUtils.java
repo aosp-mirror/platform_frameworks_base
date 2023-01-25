@@ -85,6 +85,7 @@ class ImageUtils {
     public static int getNumPlanesForHardwareBufferFormat(int hardwareBufferFormat) {
         switch(hardwareBufferFormat) {
             case HardwareBuffer.YCBCR_420_888:
+            case HardwareBuffer.YCBCR_P010:
                 return 3;
             case HardwareBuffer.RGBA_8888:
             case HardwareBuffer.RGBX_8888:
