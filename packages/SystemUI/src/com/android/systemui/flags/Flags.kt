@@ -266,10 +266,11 @@ object Flags {
     // 600- status bar
 
     // TODO(b/256614753): Tracking Bug
-    val NEW_STATUS_BAR_MOBILE_ICONS = unreleasedFlag(606, "new_status_bar_mobile_icons")
+    val NEW_STATUS_BAR_MOBILE_ICONS =
+        unreleasedFlag(606, "new_status_bar_mobile_icons", teamfood = true)
 
     // TODO(b/256614210): Tracking Bug
-    val NEW_STATUS_BAR_WIFI_ICON = unreleasedFlag(607, "new_status_bar_wifi_icon")
+    val NEW_STATUS_BAR_WIFI_ICON = unreleasedFlag(607, "new_status_bar_wifi_icon", teamfood = true)
 
     // TODO(b/256614751): Tracking Bug
     val NEW_STATUS_BAR_MOBILE_ICONS_BACKEND =
