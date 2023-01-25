@@ -49,7 +49,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     private View.OnTouchListener mOnCaptionTouchListener;
     private DragResizeCallback mDragResizeCallback;
     private DragResizeInputListener mDragResizeListener;
-    private final DragDetector mDragDetector;
+    private DragDetector mDragDetector;
 
     private RelayoutParams mRelayoutParams = new RelayoutParams();
     private final RelayoutResult<WindowDecorLinearLayout> mResult =
@@ -69,7 +69,6 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         mHandler = handler;
         mChoreographer = choreographer;
         mSyncQueue = syncQueue;
-        mDragDetector = new DragDetector(ViewConfiguration.get(context).getScaledTouchSlop());
     }
 
     void setCaptionListeners(
@@ -81,6 +80,11 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
 
     void setDragResizeCallback(DragResizeCallback dragResizeCallback) {
         mDragResizeCallback = dragResizeCallback;
+    }
+
+    void setDragDetector(DragDetector dragDetector) {
+        mDragDetector = dragDetector;
+        mDragDetector.setTouchSlop(ViewConfiguration.get(mContext).getScaledTouchSlop());
     }
 
     @Override
