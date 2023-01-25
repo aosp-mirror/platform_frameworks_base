@@ -221,6 +221,15 @@ object Flags {
     val WALLPAPER_FULLSCREEN_PREVIEW =
         unreleasedFlag(227, "wallpaper_fullscreen_preview", teamfood = true)
 
+    /** Whether the long-press gesture to open wallpaper picker is enabled. */
+    // TODO(b/266242192): Tracking Bug
+    @JvmField
+    val LOCK_SCREEN_LONG_PRESS_ENABLED =
+        unreleasedFlag(
+            228,
+            "lock_screen_long_press_enabled",
+        )
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")

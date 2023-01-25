@@ -29,6 +29,7 @@ import com.android.systemui.keyguard.shared.model.WakefulnessState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /** Fake implementation of [KeyguardRepository] */
 class FakeKeyguardRepository : KeyguardRepository {
@@ -101,6 +102,13 @@ class FakeKeyguardRepository : KeyguardRepository {
     private val _biometricUnlockSource = MutableStateFlow<BiometricUnlockSource?>(null)
     override val biometricUnlockSource: Flow<BiometricUnlockSource?> = _biometricUnlockSource
 
+    private val _isQuickSettingsVisible = MutableStateFlow(false)
+    override val isQuickSettingsVisible: Flow<Boolean> = _isQuickSettingsVisible.asStateFlow()
+
+    override fun setQuickSettingsVisible(isVisible: Boolean) {
+        _isQuickSettingsVisible.value = isVisible
+    }
+
     override fun isKeyguardShowing(): Boolean {
         return _isKeyguardShowing.value
     }
@@ -167,6 +175,10 @@ class FakeKeyguardRepository : KeyguardRepository {
 
     fun setDozeTransitionModel(model: DozeTransitionModel) {
         _dozeTransitionModel.value = model
+    }
+
+    fun setStatusBarState(state: StatusBarState) {
+        _statusBarState.value = state
     }
 
     override fun isUdfpsSupported(): Boolean {

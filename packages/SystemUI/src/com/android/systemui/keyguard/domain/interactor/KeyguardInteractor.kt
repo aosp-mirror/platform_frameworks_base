@@ -155,6 +155,11 @@ constructor(
         }
     }
 
+    /** Sets whether quick settings or quick-quick settings is visible. */
+    fun setQuickSettingsVisible(isVisible: Boolean) {
+        repository.setQuickSettingsVisible(isVisible)
+    }
+
     companion object {
         private const val TAG = "KeyguardInteractor"
     }

@@ -148,6 +148,9 @@ interface KeyguardRepository {
     /** Source of the most recent biometric unlock, such as fingerprint or face. */
     val biometricUnlockSource: Flow<BiometricUnlockSource?>
 
+    /** Whether quick settings or quick-quick settings is visible. */
+    val isQuickSettingsVisible: Flow<Boolean>
+
     /**
      * Returns `true` if the keyguard is showing; `false` otherwise.
      *
@@ -172,6 +175,9 @@ interface KeyguardRepository {
      * Returns whether the keyguard bottom area should be constrained to the top of the lock icon
      */
     fun isUdfpsSupported(): Boolean
+
+    /** Sets whether quick settings or quick-quick settings is visible. */
+    fun setQuickSettingsVisible(isVisible: Boolean)
 }
 
 /** Encapsulates application state for the keyguard. */
@@ -581,6 +587,9 @@ constructor(
         awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
     }
 
+    private val _isQuickSettingsVisible = MutableStateFlow(false)
+    override val isQuickSettingsVisible: Flow<Boolean> = _isQuickSettingsVisible.asStateFlow()
+
     override fun setAnimateDozingTransitions(animate: Boolean) {
         _animateBottomAreaDozingTransitions.value = animate
     }
@@ -594,6 +603,10 @@ constructor(
     }
 
     override fun isUdfpsSupported(): Boolean = keyguardUpdateMonitor.isUdfpsSupported
+
+    override fun setQuickSettingsVisible(isVisible: Boolean) {
+        _isQuickSettingsVisible.value = isVisible
+    }
 
     private fun statusBarStateIntToObject(value: Int): StatusBarState {
         return when (value) {

@@ -2929,4 +2929,13 @@
     <!-- Label for the close button on switch to work profile dialog. Switch to work profile dialog guide users to make call from work
     profile dialer app as it's not possible to make call from current profile due to an admin policy.[CHAR LIMIT=60] -->
     <string name="call_from_work_profile_close">Close</string>
+
+    <!--
+    Label for a menu item in a menu that is shown when the user wishes to configure the lock screen.
+    Clicking on this menu item takes the user to a screen where they can modify the settings of the
+    lock screen.
+
+    [CHAR LIMIT=32]
+    -->
+    <string name="lock_screen_settings">Lock screen settings</string>
 </resources>
