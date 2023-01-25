@@ -206,13 +206,6 @@ public class SyncManager {
      */
     private static final long SYNC_DELAY_ON_CONFLICT = 10*1000; // 10 seconds
 
-    /**
-     * Generate job ids in the range [MIN_SYNC_JOB_ID, MAX_SYNC_JOB_ID) to avoid conflicts with
-     * other jobs scheduled by the system process.
-     */
-    private static final int MIN_SYNC_JOB_ID = 100000;
-    private static final int MAX_SYNC_JOB_ID = 110000;
-
     private static final String SYNC_WAKE_LOCK_PREFIX = "*sync*/";
     private static final String HANDLE_SYNC_ALARM_WAKE_LOCK = "SyncManagerHandleSyncAlarm";
     private static final String SYNC_LOOP_WAKE_LOCK = "SyncLoopWakeLock";
@@ -243,12 +236,11 @@ public class SyncManager {
 
     volatile private PowerManager.WakeLock mSyncManagerWakeLock;
     volatile private boolean mDataConnectionIsConnected = false;
-    private volatile int mNextJobIdOffset = 0;
+    private volatile int mNextJobId = 0;
 
     private final NotificationManager mNotificationMgr;
     private final IBatteryStats mBatteryStats;
     private JobScheduler mJobScheduler;
-    private JobSchedulerInternal mJobSchedulerInternal;
 
     private SyncStorageEngine mSyncStorageEngine;
 
@@ -284,24 +276,19 @@ public class SyncManager {
     }
 
     private int getUnusedJobIdH() {
-        final int maxNumSyncJobIds = MAX_SYNC_JOB_ID - MIN_SYNC_JOB_ID;
-        final List<JobInfo> pendingJobs = mJobSchedulerInternal.getSystemScheduledPendingJobs();
-        for (int i = 0; i < maxNumSyncJobIds; ++i) {
-            int newJobId = MIN_SYNC_JOB_ID + ((mNextJobIdOffset + i) % maxNumSyncJobIds);
-            if (!isJobIdInUseLockedH(newJobId, pendingJobs)) {
-                mNextJobIdOffset = (mNextJobIdOffset + i + 1) % maxNumSyncJobIds;
-                return newJobId;
-            }
+        final List<JobInfo> pendingJobs = mJobScheduler.getAllPendingJobs();
+        while (isJobIdInUseLockedH(mNextJobId, pendingJobs)) {
+            // SyncManager jobs are placed in their own namespace. Since there's no chance of
+            // conflicting with other parts of the system, we can just keep incrementing until
+            // we find an unused ID.
+            mNextJobId++;
         }
-        // We've used all 10,000 intended job IDs.... We're probably in a world of pain right now :/
-        Slog.wtf(TAG, "All " + maxNumSyncJobIds + " possible sync job IDs are taken :/");
-        mNextJobIdOffset = (mNextJobIdOffset + 1) % maxNumSyncJobIds;
-        return MIN_SYNC_JOB_ID + mNextJobIdOffset;
+        return mNextJobId;
     }
 
     private List<SyncOperation> getAllPendingSyncs() {
         verifyJobScheduler();
-        List<JobInfo> pendingJobs = mJobSchedulerInternal.getSystemScheduledPendingJobs();
+        List<JobInfo> pendingJobs = mJobScheduler.getAllPendingJobs();
         final int numJobs = pendingJobs.size();
         final List<SyncOperation> pendingSyncs = new ArrayList<>(numJobs);
         for (int i = 0; i < numJobs; ++i) {
@@ -309,6 +296,8 @@ public class SyncManager {
             SyncOperation op = SyncOperation.maybeCreateFromJobExtras(job.getExtras());
             if (op != null) {
                 pendingSyncs.add(op);
+            } else {
+                Slog.wtf(TAG, "Non-sync job inside of SyncManager's namespace");
             }
         }
         return pendingSyncs;
@@ -494,6 +483,38 @@ public class SyncManager {
         });
     }
 
+    /**
+     * Migrate syncs from the default job namespace to SyncManager's namespace if they haven't been
+     * migrated already.
+     */
+    private void migrateSyncJobNamespaceIfNeeded() {
+        if (mSyncStorageEngine.isJobNamespaceMigrated()) {
+            return;
+        }
+        final JobScheduler jobSchedulerDefaultNamespace =
+                mContext.getSystemService(JobScheduler.class);
+        final List<JobInfo> pendingJobs = jobSchedulerDefaultNamespace.getAllPendingJobs();
+        // Wait until we've confirmed that all syncs have been migrated to the new namespace
+        // before we persist successful migration to our status file. This is done to avoid
+        // internal consistency issues if the devices reboots right after SyncManager has
+        // done the migration on its side but before JobScheduler has finished persisting
+        // the updated jobs to disk. If JobScheduler hasn't persisted the update to disk,
+        // then nothing that happened afterwards should have been persisted either, so there's
+        // no concern over activity happening after the migration causing issues.
+        boolean allSyncsMigrated = true;
+        for (int i = pendingJobs.size() - 1; i >= 0; --i) {
+            final JobInfo job = pendingJobs.get(i);
+            final SyncOperation op = SyncOperation.maybeCreateFromJobExtras(job.getExtras());
+            if (op != null) {
+                // This is a sync. Move it over to SyncManager's namespace.
+                mJobScheduler.schedule(job);
+                jobSchedulerDefaultNamespace.cancel(job.getId());
+                allSyncsMigrated = false;
+            }
+        }
+        mSyncStorageEngine.setJobNamespaceMigrated(allSyncsMigrated);
+    }
+
     private synchronized void verifyJobScheduler() {
         if (mJobScheduler != null) {
             return;
@@ -503,10 +524,12 @@ public class SyncManager {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.d(TAG, "initializing JobScheduler object.");
             }
-            mJobScheduler = (JobScheduler) mContext.getSystemService(
-                    Context.JOB_SCHEDULER_SERVICE);
-            mJobSchedulerInternal = getJobSchedulerInternal();
-            // Get all persisted syncs from JobScheduler
+            // Use a dedicated namespace to avoid conflicts with other jobs
+            // scheduled by the system process.
+            mJobScheduler = mContext.getSystemService(JobScheduler.class)
+                    .forNamespace("SyncManager");
+            migrateSyncJobNamespaceIfNeeded();
+            // Get all persisted syncs from JobScheduler in the SyncManager namespace.
             List<JobInfo> pendingJobs = mJobScheduler.getAllPendingJobs();
 
             int numPersistedPeriodicSyncs = 0;
@@ -522,6 +545,8 @@ public class SyncManager {
                         // shown on the settings activity.
                         mSyncStorageEngine.markPending(op.target, true);
                     }
+                } else {
+                    Slog.wtf(TAG, "Non-sync job inside of SyncManager namespace");
                 }
             }
             final String summary = "Loaded persisted syncs: "
@@ -541,11 +566,6 @@ public class SyncManager {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-    }
-
-    @VisibleForTesting
-    protected JobSchedulerInternal getJobSchedulerInternal() {
-        return LocalServices.getService(JobSchedulerInternal.class);
     }
 
     /**

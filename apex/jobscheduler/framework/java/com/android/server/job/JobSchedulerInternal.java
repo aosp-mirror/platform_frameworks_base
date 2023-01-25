@@ -17,22 +17,14 @@
 package com.android.server.job;
 
 import android.annotation.Nullable;
-import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.util.proto.ProtoOutputStream;
-
-import java.util.List;
 
 /**
  * JobScheduler local system service interface.
  * {@hide} Only for use within the system server.
  */
 public interface JobSchedulerInternal {
-
-    /**
-     * Returns a list of pending jobs scheduled by the system service.
-     */
-    List<JobInfo> getSystemScheduledPendingJobs();
 
     /**
      * Cancel the jobs for a given uid (e.g. when app data is cleared)

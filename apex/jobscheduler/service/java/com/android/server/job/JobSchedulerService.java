@@ -3478,23 +3478,6 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     final class LocalService implements JobSchedulerInternal {
 
-        /**
-         * Returns a list of all pending jobs. A running job is not considered pending. Periodic
-         * jobs are always considered pending.
-         */
-        @Override
-        public List<JobInfo> getSystemScheduledPendingJobs() {
-            synchronized (mLock) {
-                final List<JobInfo> pendingJobs = new ArrayList<JobInfo>();
-                mJobs.forEachJob(Process.SYSTEM_UID, (job) -> {
-                    if (job.getJob().isPeriodic() || !mConcurrencyManager.isJobRunningLocked(job)) {
-                        pendingJobs.add(job.getJob());
-                    }
-                });
-                return pendingJobs;
-            }
-        }
-
         @Override
         public void cancelJobsForUid(int uid, boolean includeProxiedJobs,
                 @JobParameters.StopReason int reason, int internalReasonCode, String debugReason) {
