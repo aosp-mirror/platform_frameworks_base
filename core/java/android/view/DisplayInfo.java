@@ -765,7 +765,7 @@ public final class DisplayInfo implements Parcelable {
         sb.append(name);
         sb.append("\", displayId ");
         sb.append(displayId);
-        sb.append("\", displayGroupId ");
+        sb.append(", displayGroupId ");
         sb.append(displayGroupId);
         sb.append(flagsToString(flags));
         sb.append(", real ");

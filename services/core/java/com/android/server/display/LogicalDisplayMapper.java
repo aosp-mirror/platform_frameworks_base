@@ -18,6 +18,8 @@ package com.android.server.display;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.server.display.layout.Layout.NO_LEAD_DISPLAY;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -639,7 +641,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                         && !nextDeviceInfo.address.equals(deviceInfo.address)) {
                     layout.createDisplayLocked(nextDeviceInfo.address,
                             /* isDefault= */ true, /* isEnabled= */ true, mIdProducer,
-                            /* brightnessThrottlingMapId= */ null);
+                            /* brightnessThrottlingMapId= */ null, DEFAULT_DISPLAY);
                     applyLayoutLocked();
                     return;
                 }
@@ -991,6 +993,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             }
 
             newDisplay.setPositionLocked(displayLayout.getPosition());
+            newDisplay.setLeadDisplayLocked(displayLayout.getLeadDisplayId());
             setLayoutLimitedRefreshRate(newDisplay, device, displayLayout);
             setEnabledLocked(newDisplay, displayLayout.isEnabled());
             newDisplay.setBrightnessThrottlingDataIdLocked(
@@ -1076,7 +1079,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         }
         final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         layout.createDisplayLocked(info.address, /* isDefault= */ true, /* isEnabled= */ true,
-                mIdProducer, /* brightnessThrottlingMapId= */ null);
+                mIdProducer, /* brightnessThrottlingMapId= */ null, NO_LEAD_DISPLAY);
     }
 
     private int assignLayerStackLocked(int displayId) {
