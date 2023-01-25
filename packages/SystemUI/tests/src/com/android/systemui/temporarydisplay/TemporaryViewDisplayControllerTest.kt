@@ -1172,7 +1172,7 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
 
     inner class Listener : TemporaryViewDisplayController.Listener {
         val permanentlyRemovedIds = mutableListOf<String>()
-        override fun onInfoPermanentlyRemoved(id: String) {
+        override fun onInfoPermanentlyRemoved(id: String, reason: String) {
             permanentlyRemovedIds.add(id)
         }
     }

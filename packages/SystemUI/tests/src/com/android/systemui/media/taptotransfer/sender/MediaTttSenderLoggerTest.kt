@@ -87,6 +87,32 @@ class MediaTttSenderLoggerTest : SysuiTestCase() {
         assertThat(actualString).contains(bypassReason)
     }
 
+    @Test
+    fun logStateMap_bufferHasInfo() {
+        val map =
+            mapOf(
+                "123" to ChipStateSender.ALMOST_CLOSE_TO_START_CAST,
+                "456" to ChipStateSender.TRANSFER_TO_THIS_DEVICE_TRIGGERED,
+            )
+
+        logger.logStateMap(map)
+
+        val actualString = getStringFromBuffer()
+        assertThat(actualString).contains("123")
+        assertThat(actualString).contains(ChipStateSender.ALMOST_CLOSE_TO_START_CAST.name)
+        assertThat(actualString).contains("456")
+        assertThat(actualString).contains(ChipStateSender.TRANSFER_TO_THIS_DEVICE_TRIGGERED.name)
+    }
+
+    @Test
+    fun logStateMapRemoval_bufferHasInfo() {
+        logger.logStateMapRemoval("456", "testReason")
+
+        val actualString = getStringFromBuffer()
+        assertThat(actualString).contains("456")
+        assertThat(actualString).contains("testReason")
+    }
+
     private fun getStringFromBuffer(): String {
         val stringWriter = StringWriter()
         buffer.dump(PrintWriter(stringWriter), tailLength = 0)
