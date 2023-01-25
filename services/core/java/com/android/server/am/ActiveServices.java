@@ -1272,7 +1272,8 @@ public final class ActiveServices {
                 : (wasStartRequested || !r.getConnections().isEmpty()
                 ? SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_HOT
                 : SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM),
-                getShortProcessNameForStats(callingUid, callingProcessName));
+                getShortProcessNameForStats(callingUid, callingProcessName),
+                getShortServiceNameForStats(r));
 
         if (r.startRequested && addToStarting) {
             boolean first = smap.mStartingBackground.size() == 0;
@@ -1309,6 +1310,11 @@ public final class ActiveServices {
         }
         // return the full process name.
         return processName;
+    }
+
+    private @Nullable String getShortServiceNameForStats(@NonNull ServiceRecord r) {
+        final ComponentName cn = r.getComponentName();
+        return cn != null ? cn.getShortClassName() : null;
     }
 
     private void stopServiceLocked(ServiceRecord service, boolean enqueueOomAdj) {
@@ -3488,7 +3494,8 @@ public final class ActiveServices {
                     : (wasStartRequested || hadConnections
                     ? SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_HOT
                     : SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM),
-                    getShortProcessNameForStats(callingUid, callerApp.processName));
+                    getShortProcessNameForStats(callingUid, callerApp.processName),
+                    getShortServiceNameForStats(s));
 
             if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Bind " + s + " with " + b
                     + ": received=" + b.intent.received
