@@ -23,6 +23,8 @@ import com.android.systemui.hdmi.HdmiCecSetMenuLanguageActivity;
 import com.android.systemui.keyguard.WorkLockActivity;
 import com.android.systemui.people.PeopleSpaceActivity;
 import com.android.systemui.people.widget.LaunchConversationActivity;
+import com.android.systemui.screenshot.AppClipsActivity;
+import com.android.systemui.screenshot.AppClipsTrampolineActivity;
 import com.android.systemui.screenshot.LongScreenshotActivity;
 import com.android.systemui.sensorprivacy.SensorUseStartedActivity;
 import com.android.systemui.sensorprivacy.television.TvSensorPrivacyChangedActivity;
@@ -118,6 +120,18 @@ public abstract class DefaultActivityBinder {
     @IntoMap
     @ClassKey(LongScreenshotActivity.class)
     public abstract Activity bindLongScreenshotActivity(LongScreenshotActivity activity);
+
+    /** Inject into AppClipsTrampolineActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(AppClipsTrampolineActivity.class)
+    public abstract Activity bindAppClipsTrampolineActivity(AppClipsTrampolineActivity activity);
+
+    /** Inject into AppClipsActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(AppClipsActivity.class)
+    public abstract Activity bindAppClipsActivity(AppClipsActivity activity);
 
     /** Inject into LaunchConversationActivity. */
     @Binds
