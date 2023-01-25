@@ -26,6 +26,7 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.MathUtils;
@@ -34,6 +35,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
 
@@ -65,6 +67,7 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
     private AnimatorSet mBackgroundInAnimator = new AnimatorSet();
     private int mAlpha; // 0-255
     private float mScaleFactor = 1;
+    private Rect mSensorBounds = new Rect();
 
     // AOD anti-burn-in offsets
     private final int mMaxBurnInOffsetX;
@@ -76,8 +79,6 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
     private int mAnimationType = ANIMATION_NONE;
     private boolean mFullyInflated;
 
-    private LayoutParams mParams;
-
     public UdfpsKeyguardView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         mFingerprintDrawable = new UdfpsFpDrawable(context);
@@ -88,10 +89,7 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
             .getDimensionPixelSize(R.dimen.udfps_burn_in_offset_y);
     }
 
-    @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
-
+    public void startIconAsyncInflate() {
         // inflate Lottie views on a background thread in case it takes a while to inflate
         AsyncLayoutInflater inflater = new AsyncLayoutInflater(mContext);
         inflater.inflate(R.layout.udfps_keyguard_view_internal, this,
@@ -242,20 +240,8 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
         updateAlpha();
     }
 
-    @Override
-    void onSensorRectUpdated(RectF bounds) {
-        super.onSensorRectUpdated(bounds);
-
-        if (mUseExpandedOverlay) {
-            mParams = new LayoutParams((int) bounds.width(), (int) bounds.height());
-            RectF converted = getBoundsRelativeToView(bounds);
-            mParams.setMargins(
-                    (int) converted.left,
-                    (int) converted.top,
-                    (int) converted.right,
-                    (int) converted.bottom
-            );
-        }
+    void updateSensorLocation(@NonNull Rect sensorBounds) {
+        mSensorBounds.set(sensorBounds);
     }
 
     /**
@@ -313,7 +299,17 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
             updateAlpha();
 
             if (mUseExpandedOverlay) {
-                parent.addView(view, mParams);
+                final LayoutParams lp = (LayoutParams) view.getLayoutParams();
+                lp.width = mSensorBounds.width();
+                lp.height = mSensorBounds.height();
+                RectF relativeToView = getBoundsRelativeToView(new RectF(mSensorBounds));
+                lp.setMargins(
+                        (int) relativeToView.left,
+                        (int) relativeToView.top,
+                        (int) relativeToView.right,
+                        (int) relativeToView.bottom
+                );
+                parent.addView(view, lp);
             } else {
                 parent.addView(view);
             }
