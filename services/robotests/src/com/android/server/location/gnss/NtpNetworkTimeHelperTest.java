@@ -26,7 +26,7 @@ import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.NtpTrustedTime;
 
-import com.android.server.location.gnss.NtpTimeHelper.InjectNtpTimeCallback;
+import com.android.server.location.gnss.NetworkTimeHelper.InjectTimeCallback;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -41,16 +41,16 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Unit tests for {@link NtpTimeHelper}.
+ * Unit tests for {@link NtpNetworkTimeHelper}.
  */
 @RunWith(RobolectricTestRunner.class)
 @Presubmit
-public class NtpTimeHelperTest {
+public class NtpNetworkTimeHelperTest {
 
     private static final long MOCK_NTP_TIME = 1519930775453L;
     @Mock
     private NtpTrustedTime mMockNtpTrustedTime;
-    private NtpTimeHelper mNtpTimeHelper;
+    private NtpNetworkTimeHelper mNtpNetworkTimeHelper;
     private CountDownLatch mCountDownLatch;
 
     /**
@@ -60,12 +60,12 @@ public class NtpTimeHelperTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mCountDownLatch = new CountDownLatch(1);
-        InjectNtpTimeCallback callback =
+        InjectTimeCallback callback =
                 (time, timeReference, uncertainty) -> {
                     assertThat(time).isEqualTo(MOCK_NTP_TIME);
                     mCountDownLatch.countDown();
                 };
-        mNtpTimeHelper = new NtpTimeHelper(RuntimeEnvironment.application,
+        mNtpNetworkTimeHelper = new NtpNetworkTimeHelper(RuntimeEnvironment.application,
                 Looper.myLooper(),
                 callback, mMockNtpTrustedTime);
     }
@@ -74,13 +74,13 @@ public class NtpTimeHelperTest {
      * Verify that cached time is returned if cached age is low.
      */
     @Test
-    public void handleInjectNtpTime_cachedAgeLow_injectTime() throws InterruptedException {
+    public void demandUtcTimeInjection_cachedAgeLow_injectTime() throws InterruptedException {
         NtpTrustedTime.TimeResult result = mock(NtpTrustedTime.TimeResult.class);
-        doReturn(NtpTimeHelper.NTP_INTERVAL - 1).when(result).getAgeMillis();
+        doReturn(NtpNetworkTimeHelper.NTP_INTERVAL - 1).when(result).getAgeMillis();
         doReturn(MOCK_NTP_TIME).when(result).getTimeMillis();
         doReturn(result).when(mMockNtpTrustedTime).getCachedTimeResult();
 
-        mNtpTimeHelper.retrieveAndInjectNtpTime();
+        mNtpNetworkTimeHelper.demandUtcTimeInjection();
 
         waitForTasksToBePostedOnHandlerAndRunThem();
         assertThat(mCountDownLatch.await(2, TimeUnit.SECONDS)).isTrue();
@@ -90,14 +90,14 @@ public class NtpTimeHelperTest {
      * Verify that failed inject time and delayed inject time are handled properly.
      */
     @Test
-    public void handleInjectNtpTime_injectTimeFailed_injectTimeDelayed()
+    public void demandUtcTimeInjection_injectTimeFailed_injectTimeDelayed()
             throws InterruptedException {
         NtpTrustedTime.TimeResult result1 = mock(NtpTrustedTime.TimeResult.class);
-        doReturn(NtpTimeHelper.NTP_INTERVAL + 1).when(result1).getAgeMillis();
+        doReturn(NtpNetworkTimeHelper.NTP_INTERVAL + 1).when(result1).getAgeMillis();
         doReturn(result1).when(mMockNtpTrustedTime).getCachedTimeResult();
         doReturn(false).when(mMockNtpTrustedTime).forceRefresh();
 
-        mNtpTimeHelper.retrieveAndInjectNtpTime();
+        mNtpNetworkTimeHelper.demandUtcTimeInjection();
         waitForTasksToBePostedOnHandlerAndRunThem();
         assertThat(mCountDownLatch.await(2, TimeUnit.SECONDS)).isFalse();
 
@@ -106,15 +106,15 @@ public class NtpTimeHelperTest {
         doReturn(1L).when(result2).getAgeMillis();
         doReturn(MOCK_NTP_TIME).when(result2).getTimeMillis();
         doReturn(result2).when(mMockNtpTrustedTime).getCachedTimeResult();
-        SystemClock.sleep(NtpTimeHelper.RETRY_INTERVAL);
+        SystemClock.sleep(NtpNetworkTimeHelper.RETRY_INTERVAL);
 
         waitForTasksToBePostedOnHandlerAndRunThem();
         assertThat(mCountDownLatch.await(2, TimeUnit.SECONDS)).isTrue();
     }
 
     /**
-     * Since a thread is created in {@link NtpTimeHelper#retrieveAndInjectNtpTime} and the task to
-     * be verified is posted in the thread, we have to wait for the task to be posted and then it
+     * Since a thread is created in {@link NtpNetworkTimeHelper#demandUtcTimeInjection} and the task
+     * to be verified is posted in the thread, we have to wait for the task to be posted and then it
      * can be run.
      */
     private void waitForTasksToBePostedOnHandlerAndRunThem() throws InterruptedException {
