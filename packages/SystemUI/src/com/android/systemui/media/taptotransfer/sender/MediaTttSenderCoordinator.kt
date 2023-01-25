@@ -27,7 +27,6 @@ import com.android.systemui.R
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.media.taptotransfer.MediaTttFlags
-import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.media.taptotransfer.common.MediaTttUtils
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
@@ -48,7 +47,7 @@ constructor(
     private val chipbarCoordinator: ChipbarCoordinator,
     private val commandQueue: CommandQueue,
     private val context: Context,
-    @MediaTttSenderLogger private val logger: MediaTttLogger<ChipbarInfo>,
+    private val logger: MediaTttSenderLogger,
     private val mediaTttFlags: MediaTttFlags,
     private val uiEventLogger: MediaTttSenderUiEventLogger,
 ) : CoreStartable {
@@ -150,7 +149,7 @@ constructor(
         routeInfo: MediaRoute2Info,
         undoCallback: IUndoMediaTransferCallback?,
         context: Context,
-        logger: MediaTttLogger<ChipbarInfo>,
+        logger: MediaTttSenderLogger,
     ): ChipbarInfo {
         val packageName = routeInfo.clientPackageName
         val otherDeviceName =
@@ -159,12 +158,14 @@ constructor(
             } else {
                 routeInfo.name.toString()
             }
+        val icon =
+            MediaTttUtils.getIconInfoFromPackageName(context, packageName) {
+                logger.logPackageNotFound(packageName)
+            }
 
         return ChipbarInfo(
             // Display the app's icon as the start icon
-            startIcon =
-                MediaTttUtils.getIconInfoFromPackageName(context, packageName, logger)
-                    .toTintedIcon(),
+            startIcon = icon.toTintedIcon(),
             text = chipStateSender.getChipTextString(context, otherDeviceName),
             endItem =
                 when (chipStateSender.endItem) {
