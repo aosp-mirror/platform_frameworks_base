@@ -5846,46 +5846,16 @@ public class AudioService extends IAudioService.Stub
         restoreDeviceVolumeBehavior();
     }
 
-    private static final int[] VALID_COMMUNICATION_DEVICE_TYPES = {
-        AudioDeviceInfo.TYPE_BUILTIN_SPEAKER,
-        AudioDeviceInfo.TYPE_BLUETOOTH_SCO,
-        AudioDeviceInfo.TYPE_WIRED_HEADSET,
-        AudioDeviceInfo.TYPE_USB_HEADSET,
-        AudioDeviceInfo.TYPE_BUILTIN_EARPIECE,
-        AudioDeviceInfo.TYPE_WIRED_HEADPHONES,
-        AudioDeviceInfo.TYPE_HEARING_AID,
-        AudioDeviceInfo.TYPE_BLE_HEADSET,
-        AudioDeviceInfo.TYPE_USB_DEVICE,
-        AudioDeviceInfo.TYPE_BLE_SPEAKER,
-        AudioDeviceInfo.TYPE_LINE_ANALOG,
-        AudioDeviceInfo.TYPE_HDMI,
-        AudioDeviceInfo.TYPE_AUX_LINE
-    };
-
-    private boolean isValidCommunicationDevice(AudioDeviceInfo device) {
-        for (int type : VALID_COMMUNICATION_DEVICE_TYPES) {
-            if (device.getType() == type) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     /** @see AudioManager#getAvailableCommunicationDevices(int) */
     public int[] getAvailableCommunicationDeviceIds() {
-        ArrayList<Integer> deviceIds = new ArrayList<>();
-        AudioDeviceInfo[] devices = AudioManager.getDevicesStatic(AudioManager.GET_DEVICES_OUTPUTS);
-        for (AudioDeviceInfo device : devices) {
-            if (isValidCommunicationDevice(device)) {
-                deviceIds.add(device.getId());
-            }
-        }
-        return deviceIds.stream().mapToInt(Integer::intValue).toArray();
+        List<AudioDeviceInfo> commDevices = AudioDeviceBroker.getAvailableCommunicationDevices();
+        return commDevices.stream().mapToInt(AudioDeviceInfo::getId).toArray();
     }
-        /**
-         * @see AudioManager#setCommunicationDevice(int)
-         * @see AudioManager#clearCommunicationDevice()
-         */
+
+    /**
+     * @see AudioManager#setCommunicationDevice(int)
+     * @see AudioManager#clearCommunicationDevice()
+     */
     public boolean setCommunicationDevice(IBinder cb, int portId) {
         final int uid = Binder.getCallingUid();
         final int pid = Binder.getCallingPid();
@@ -5897,7 +5867,7 @@ public class AudioService extends IAudioService.Stub
                 Log.w(TAG, "setCommunicationDevice: invalid portID " + portId);
                 return false;
             }
-            if (!isValidCommunicationDevice(device)) {
+            if (!AudioDeviceBroker.isValidCommunicationDevice(device)) {
                 throw new IllegalArgumentException("invalid device type " + device.getType());
             }
         }
@@ -5940,13 +5910,15 @@ public class AudioService extends IAudioService.Stub
 
     /** @see AudioManager#getCommunicationDevice() */
     public int getCommunicationDevice() {
+        int deviceId = 0;
         final long ident = Binder.clearCallingIdentity();
-        AudioDeviceInfo device = mDeviceBroker.getCommunicationDevice();
-        Binder.restoreCallingIdentity(ident);
-        if (device == null) {
-            return 0;
+        try {
+            AudioDeviceInfo device = mDeviceBroker.getCommunicationDevice();
+            deviceId = device != null ? device.getId() : 0;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
-        return device.getId();
+        return deviceId;
     }
 
     /** @see AudioManager#addOnCommunicationDeviceChangedListener(
