@@ -49586,6 +49586,7 @@ package android.view {
     field public static final int HDR_TYPE_HDR10 = 2; // 0x2
     field public static final int HDR_TYPE_HDR10_PLUS = 4; // 0x4
     field public static final int HDR_TYPE_HLG = 3; // 0x3
+    field public static final int HDR_TYPE_INVALID = -1; // 0xffffffff
     field public static final float INVALID_LUMINANCE = -1.0f;
   }
 

@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.os.IBinder;
+import android.view.Display;
 
 import java.util.Objects;
 
@@ -32,6 +33,9 @@ public class DisplayControl {
     private static native void nativeOverrideHdrTypes(IBinder displayToken, int[] modes);
     private static native long[] nativeGetPhysicalDisplayIds();
     private static native IBinder nativeGetPhysicalDisplayToken(long physicalDisplayId);
+    private static native void nativeSetHdrConversionMode(int conversionMode,
+            int preferredHdrOutputType, int[] autoHdrTypes, int autoHdrTypesLength);
+    private static native int[] nativeGetSupportedHdrOutputTypes();
 
     /**
      * Create a display in SurfaceFlinger.
@@ -78,5 +82,21 @@ public class DisplayControl {
      */
     public static IBinder getPhysicalDisplayToken(long physicalDisplayId) {
         return nativeGetPhysicalDisplayToken(physicalDisplayId);
+    }
+
+    /**
+     * @hide
+     */
+    public static void setHdrConversionMode(int conversionMode, int preferredHdrOutputType,
+            int[] autoHdrTypes) {
+        int length = autoHdrTypes != null ? autoHdrTypes.length : 0;
+        nativeSetHdrConversionMode(conversionMode, preferredHdrOutputType, autoHdrTypes, length);
+    }
+
+    /**
+     * @hide
+     */
+    public static @Display.HdrCapabilities.HdrType int[] getSupportedHdrOutputTypes() {
+        return nativeGetSupportedHdrOutputTypes();
     }
 }

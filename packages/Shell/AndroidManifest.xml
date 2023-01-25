@@ -512,6 +512,9 @@
     <!-- Permission needed for CTS test - DefaultDisplayModeTest -->
     <uses-permission android:name="android.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE" />
 
+    <!-- Permission needed for CTS test - HdrConversionTest -->
+    <uses-permission android:name="android.permission.MODIFY_HDR_CONVERSION_MODE" />
+
     <!-- Permissions needed for manual testing telephony time zone detector behavior -->
     <uses-permission android:name="android.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE" />
 

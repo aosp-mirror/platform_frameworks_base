@@ -23,6 +23,7 @@ import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.BrightnessInfo;
 import android.hardware.display.Curve;
 import android.hardware.graphics.common.DisplayDecorationSupport;
+import android.hardware.display.HdrConversionMode;
 import android.hardware.display.IDisplayManagerCallback;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplayConfig;
@@ -173,6 +174,14 @@ interface IDisplayManager {
     void setUserPreferredDisplayMode(int displayId, in Mode mode);
     Mode getUserPreferredDisplayMode(int displayId);
     Mode getSystemPreferredDisplayMode(int displayId);
+
+    // Sets the HDR conversion mode for a device.
+    // Requires MODIFY_HDR_CONVERSION_MODE permission.
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+                + ".permission.MODIFY_HDR_CONVERSION_MODE)")
+    void setHdrConversionMode(in HdrConversionMode hdrConversionMode);
+    HdrConversionMode getHdrConversionMode();
+    int[] getSupportedHdrOutputTypes();
 
     // When enabled the app requested display resolution and refresh rate is always selected
     // in DisplayModeDirector regardless of user settings and policies for low brightness, low

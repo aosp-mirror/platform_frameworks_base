@@ -1301,6 +1301,54 @@ public final class DisplayManager {
     }
 
     /**
+     * Sets the HDR conversion mode for the device.
+     *
+     * @param hdrConversionMode The {@link HdrConversionMode} to set.
+     * Note, {@code HdrConversionMode.preferredHdrOutputType} is only applicable when
+     * {@code HdrConversionMode.conversionMode} is {@link HdrConversionMode#HDR_CONVERSION_FORCE}.
+     *
+     * @throws IllegalArgumentException if hdrConversionMode.preferredHdrOutputType is not set
+     * when hdrConversionMode.conversionMode is {@link HdrConversionMode#HDR_CONVERSION_FORCE}.
+     * @throws IllegalArgumentException if hdrConversionMode.preferredHdrOutputType is set but
+     * hdrConversionMode.conversionMode is not {@link HdrConversionMode#HDR_CONVERSION_FORCE}.
+     *
+     * @see #getHdrConversionMode
+     * @see #getSupportedHdrOutputTypes
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.MODIFY_HDR_CONVERSION_MODE)
+    public void setHdrConversionMode(@NonNull HdrConversionMode hdrConversionMode) {
+        mGlobal.setHdrConversionMode(hdrConversionMode);
+    }
+
+    /**
+     * Returns the {@link HdrConversionMode} of the device, which is set by the user.
+     *
+     * @see #setHdrConversionMode
+     * @see #getSupportedHdrOutputTypes
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    public HdrConversionMode getHdrConversionMode() {
+        return mGlobal.getHdrConversionMode();
+    }
+
+    /**
+     * Returns the HDR output types supported by the device.
+     *
+     * @see #getHdrConversionMode
+     * @see #setHdrConversionMode
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    public @HdrType int[] getSupportedHdrOutputTypes() {
+        return mGlobal.getSupportedHdrOutputTypes();
+    }
+
+    /**
      * When enabled the app requested mode is always selected regardless of user settings and
      * policies for low brightness, low battery, etc.
      *
