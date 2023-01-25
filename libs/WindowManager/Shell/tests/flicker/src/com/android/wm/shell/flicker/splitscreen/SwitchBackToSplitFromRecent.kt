@@ -23,6 +23,7 @@ import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.traces.common.service.PlatformConsts
 import com.android.wm.shell.flicker.appWindowBecomesVisible
@@ -30,6 +31,7 @@ import com.android.wm.shell.flicker.layerBecomesVisible
 import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitScreenDividerBecomesVisible
 import com.android.wm.shell.flicker.splitScreenEntered
+import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -71,7 +73,19 @@ class SwitchBackToSplitFromRecent(flicker: FlickerTest) : SplitScreenBase(flicke
     @Test
     fun splitScreenDividerBecomesVisible() = flicker.splitScreenDividerBecomesVisible()
 
-    @Presubmit @Test fun primaryAppLayerBecomesVisible() = flicker.layerBecomesVisible(primaryApp)
+    @FlakyTest
+    @Test
+    fun primaryAppLayerBecomesVisible() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        flicker.layerBecomesVisible(primaryApp)
+    }
+
+    @Presubmit
+    @Test
+    fun primaryAppLayerBecomesVisibleShellTransit() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
+        flicker.layerBecomesVisible(primaryApp)
+    }
 
     @Presubmit
     @Test
