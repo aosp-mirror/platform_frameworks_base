@@ -59,8 +59,10 @@ import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
+
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.Preconditions;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -1096,6 +1098,33 @@ public abstract class TvInputService extends Service {
                         }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifySignalStrength", e);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Informs the application that cueing message is available or unavailable.
+         *
+         * <p>The cueing message is used for digital program insertion, based on the standard
+         * ANSI/SCTE 35 2019r1.
+         *
+         * @param available {@code true} if cueing message is available; {@code false} if it becomes
+         *                  unavailable.
+         * @hide
+         */
+        public void notifyCueingMessageAvailability(boolean available) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifyCueingMessageAvailability");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onCueingMessageAvailability(available);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyCueingMessageAvailability", e);
                     }
                 }
             });

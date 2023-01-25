@@ -608,6 +608,77 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
+         * This is called when an error occurred while establishing a connection to the recording
+         * session for the corresponding TV input.
+         *
+         * @param recordingId The ID of the related recording which is sent via
+         *                    {@link #notifyRecordingStarted(String)}
+         * @param inputId The ID of the TV input bound to the current TvRecordingClient.
+         * @see android.media.tv.TvRecordingClient.RecordingCallback#onConnectionFailed(String)
+         * @hide
+         */
+        public void onRecordingConnectionFailed(
+                @NonNull String recordingId, @NonNull String inputId) {
+        }
+
+        /**
+         * This is called when the connection to the current recording session is lost.
+         *
+         * @param recordingId The ID of the related recording which is sent via
+         *                    {@link #notifyRecordingStarted(String)}
+         * @param inputId The ID of the TV input bound to the current TvRecordingClient.
+         * @see android.media.tv.TvRecordingClient.RecordingCallback#onDisconnected(String)
+         * @hide
+         */
+        public void onRecordingDisconnected(@NonNull String recordingId, @NonNull String inputId) {
+        }
+
+        /**
+         * This is called when the recording session has been tuned to the given channel and is
+         * ready to start recording.
+         *
+         * @param recordingId The ID of the related recording which is sent via
+         *                    {@link #notifyRecordingStarted(String)}
+         * @param channelUri The URI of the tuned channel.
+         * @see android.media.tv.TvRecordingClient.RecordingCallback#onTuned(Uri)
+         * @hide
+         */
+        public void onRecordingTuned(@NonNull String recordingId, @NonNull Uri channelUri) {
+        }
+
+        /**
+         * This is called when an issue has occurred. It may be called at any time after the current
+         * recording session is created until it is released.
+         *
+         * @param recordingId The ID of the related recording which is sent via
+         *                    {@link #notifyRecordingStarted(String)}
+         * @param err The error code. Should be one of the following.
+         * <ul>
+         * <li>{@link TvInputManager#RECORDING_ERROR_UNKNOWN}
+         * <li>{@link TvInputManager#RECORDING_ERROR_INSUFFICIENT_SPACE}
+         * <li>{@link TvInputManager#RECORDING_ERROR_RESOURCE_BUSY}
+         * </ul>
+         * @see android.media.tv.TvRecordingClient.RecordingCallback#onError(int)
+         * @hide
+         */
+        public void onRecordingError(
+                @NonNull String recordingId, @TvInputManager.RecordingError int err) {
+        }
+
+        /**
+         * This is called when the recording has been scheduled.
+         *
+         * @param recordingId The ID assigned to this recording by the app. It can be used to send
+         *                    recording related requests such as
+         *                    {@link #requestStopRecording(String)}.
+         * @param requestId The ID of the request when requestScheduleRecording is called.
+         *                  {@code null} if the recording is not triggered by a request.
+         * @hide
+         */
+        public void onRecordingScheduled(@NonNull String recordingId, @Nullable String requestId) {
+        }
+
+        /**
          * Receives signing result.
          * @param signingId the ID to identify the request. It's the same as the corresponding ID in
          *        {@link Session#requestSigning(String, String, String, byte[])}
@@ -1219,7 +1290,71 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
-         * Sets the recording info for the specified recording.
+         * Requests scheduling of a recording.
+         *
+         * @param inputId The ID of the TV input for the given channel.
+         * @param channelUri The URI of a channel to be recorded.
+         * @param programUri The URI of the TV program to be recorded.
+         * @param params Domain-specific data for this tune request. Keys <em>must</em> be a scoped
+         *            name, i.e. prefixed with a package name you own, so that different developers
+         *            will not create conflicting keys.
+         * @see android.media.tv.TvRecordingClient#tune(String, Uri, Bundle)
+         * @see android.media.tv.TvRecordingClient#startRecording(Uri)
+         * @hide
+         */
+        @CallSuper
+        public void requestScheduleRecording(@NonNull String inputId, @NonNull Uri channelUri,
+                @NonNull Uri programUri, @NonNull Bundle params) {
+            executeOrPostRunnableOnMainThread(() -> {
+                try {
+                    if (DEBUG) {
+                        Log.d(TAG, "requestScheduleRecording");
+                    }
+                    if (mSessionCallback != null) {
+                        mSessionCallback.onRequestScheduleRecording(
+                                inputId, channelUri, programUri, params);
+                    }
+                } catch (RemoteException e) {
+                    Log.w(TAG, "error in requestScheduleRecording", e);
+                }
+            });
+        }
+
+        /**
+         * Requests scheduling of a recording.
+         *
+         * @param inputId The ID of the TV input for the given channel.
+         * @param channelUri The URI of a channel to be recorded.
+         * @param startTime The start time of the recording in milliseconds since epoch.
+         * @param duration The duration of the recording in milliseconds.
+         * @param repeatDays The repeated days. 0 if not repeated.
+         * @param params Domain-specific data for this tune request. Keys <em>must</em> be a scoped
+         *            name, i.e. prefixed with a package name you own, so that different developers
+         *            will not create conflicting keys.
+         * @see android.media.tv.TvRecordingClient#tune(String, Uri, Bundle)
+         * @see android.media.tv.TvRecordingClient#startRecording(Uri)
+         * @hide
+         */
+        @CallSuper
+        public void requestScheduleRecording(@NonNull String inputId, @NonNull Uri channelUri,
+                long startTime, long duration, int repeatDays, @NonNull Bundle params) {
+            executeOrPostRunnableOnMainThread(() -> {
+                try {
+                    if (DEBUG) {
+                        Log.d(TAG, "requestScheduleRecording");
+                    }
+                    if (mSessionCallback != null) {
+                        mSessionCallback.onRequestScheduleRecording2(
+                                inputId, channelUri, startTime, duration, repeatDays, params);
+                    }
+                } catch (RemoteException e) {
+                    Log.w(TAG, "error in requestScheduleRecording", e);
+                }
+            });
+        }
+
+        /**
+         * Sets the recording info for the specified recording
          *
          * @param recordingId The ID of the recording to set the info for. This is provided by the
          *     TV app in {@link TvInteractiveAppView#notifyRecordingStarted(String)}
@@ -1537,6 +1672,41 @@ public abstract class TvInteractiveAppService extends Service {
          */
         void notifyRecordingStopped(String recordingId) {
             onRecordingStopped(recordingId);
+        }
+
+        /**
+         * Calls {@link #onRecordingConnectionFailed(String, String)}.
+         */
+        void notifyRecordingConnectionFailed(String recordingId, String inputId) {
+            onRecordingConnectionFailed(recordingId, inputId);
+        }
+
+        /**
+         * Calls {@link #onRecordingDisconnected(String, String)}.
+         */
+        void notifyRecordingDisconnected(String recordingId, String inputId) {
+            onRecordingDisconnected(recordingId, inputId);
+        }
+
+        /**
+         * Calls {@link #onRecordingTuned(String, Uri)}.
+         */
+        void notifyRecordingTuned(String recordingId, Uri channelUri) {
+            onRecordingTuned(recordingId, channelUri);
+        }
+
+        /**
+         * Calls {@link #onRecordingError(String, int)}.
+         */
+        void notifyRecordingError(String recordingId, int err) {
+            onRecordingError(recordingId, err);
+        }
+
+        /**
+         * Calls {@link #onRecordingScheduled(String, String)}.
+         */
+        void notifyRecordingScheduled(String recordingId, String requestId) {
+            onRecordingScheduled(recordingId, requestId);
         }
 
         /**

@@ -56,7 +56,9 @@ import android.view.InputEventSender;
 import android.view.KeyEvent;
 import android.view.Surface;
 import android.view.View;
+
 import com.android.internal.util.Preconditions;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -719,6 +721,15 @@ public final class TvInputManager {
         }
 
         /**
+         * This is called when cueing message becomes available or unavailable.
+         * @param session A {@link TvInputManager.Session} associated with this callback.
+         * @param available The current availability of cueing message. {@code true} if cueing
+         *                  message is available; {@code false} if it becomes unavailable.
+         */
+        public void onCueingMessageAvailability(Session session, boolean available) {
+        }
+
+        /**
          * This is called when the session has been tuned to the given channel.
          *
          * @param channelUri The URI of a channel.
@@ -968,6 +979,15 @@ public final class TvInputManager {
                             && mSession.getInteractiveAppSession() != null) {
                         mSession.getInteractiveAppSession().notifySignalStrength(strength);
                     }
+                }
+            });
+        }
+
+        void postCueingMessageAvailability(final boolean available) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onCueingMessageAvailability(mSession, available);
                 }
             });
         }
@@ -1471,6 +1491,18 @@ public final class TvInputManager {
                         return;
                     }
                     record.postSignalStrength(strength);
+                }
+            }
+
+            @Override
+            public void onCueingMessageAvailability(boolean available, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postCueingMessageAvailability(available);
                 }
             }
 

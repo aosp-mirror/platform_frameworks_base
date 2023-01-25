@@ -50,6 +50,10 @@ oneway interface ITvInteractiveAppSessionCallback {
     void onRequestCurrentTvInputId();
     void onRequestStartRecording(in Uri programUri);
     void onRequestStopRecording(in String recordingId);
+    void onRequestScheduleRecording(in String inputId, in Uri channelUri, in Uri programUri,
+            in Bundle params);
+    void onRequestScheduleRecording2(in String inputId, in Uri channelUri, long start,
+            long duration, int repeat, in Bundle params);
     void onSetTvRecordingInfo(in String recordingId, in TvRecordingInfo recordingInfo);
     void onRequestTvRecordingInfo(in String recordingId);
     void onRequestTvRecordingInfoList(in int type);

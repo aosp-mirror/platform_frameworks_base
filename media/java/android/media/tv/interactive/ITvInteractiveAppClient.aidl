@@ -51,6 +51,10 @@ oneway interface ITvInteractiveAppClient {
     void onRequestCurrentTvInputId(int seq);
     void onRequestStartRecording(in Uri programUri, int seq);
     void onRequestStopRecording(in String recordingId, int seq);
+    void onRequestScheduleRecording(in String inputId, in Uri channelUri, in Uri programUri,
+            in Bundle params, int seq);
+    void onRequestScheduleRecording2(in String inputId, in Uri channelUri, long start,
+            long duration, int repeat, in Bundle params, int seq);
     void onSetTvRecordingInfo(in String recordingId, in TvRecordingInfo recordingInfo, int seq);
     void onRequestTvRecordingInfo(in String recordingId, int seq);
     void onRequestTvRecordingInfoList(in int type, int seq);

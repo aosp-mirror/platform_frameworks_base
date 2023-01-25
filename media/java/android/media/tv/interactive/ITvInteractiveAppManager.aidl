@@ -68,6 +68,16 @@ interface ITvInteractiveAppManager {
             in IBinder sessionToken, in String inputId, long timeMs, int userId);
     void notifyTimeShiftCurrentPositionChanged(
             in IBinder sessionToken, in String inputId, long timeMs, int userId);
+    void notifyRecordingConnectionFailed(
+            in IBinder sessionToken, in String recordingId, in String inputId, int userId);
+    void notifyRecordingDisconnected(
+            in IBinder sessionToken, in String recordingId, in String inputId, int userId);
+    void notifyRecordingTuned(
+            in IBinder sessionToken, in String recordingId, in Uri channelUri, int userId);
+    void notifyRecordingError(
+            in IBinder sessionToken, in String recordingId, int err, int userId);
+    void notifyRecordingScheduled(
+            in IBinder sessionToken, in String recordingId, in String requestId, int userId);
     void createSession(in ITvInteractiveAppClient client, in String iAppServiceId, int type,
             int seq, int userId);
     void releaseSession(in IBinder sessionToken, int userId);

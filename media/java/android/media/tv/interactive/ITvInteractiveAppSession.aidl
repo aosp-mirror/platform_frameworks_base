@@ -54,6 +54,11 @@ oneway interface ITvInteractiveAppSession {
     void notifyTimeShiftStatusChanged(in String inputId, int status);
     void notifyTimeShiftStartPositionChanged(in String inputId, long timeMs);
     void notifyTimeShiftCurrentPositionChanged(in String inputId, long timeMs);
+    void notifyRecordingConnectionFailed(in String recordingId, in String inputId);
+    void notifyRecordingDisconnected(in String recordingId, in String inputId);
+    void notifyRecordingTuned(in String recordingId, in Uri channelUri);
+    void notifyRecordingError(in String recordingId, int err);
+    void notifyRecordingScheduled(in String recordingId, in String requestId);
     void release();
     void notifyTuned(in Uri channelUri);
     void notifyTrackSelected(int type, in String trackId);

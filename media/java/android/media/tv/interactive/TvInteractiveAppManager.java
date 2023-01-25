@@ -541,6 +541,33 @@ public final class TvInteractiveAppManager {
             }
 
             @Override
+            public void onRequestScheduleRecording(String inputId, Uri channelUri, Uri programUri,
+                    Bundle params, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestScheduleRecording(inputId, channelUri, programUri, params);
+                }
+            }
+
+            @Override
+            public void onRequestScheduleRecording2(String inputId, Uri channelUri, long startTime,
+                    long duration, int repeatDays, Bundle params, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestScheduleRecording(
+                            inputId, channelUri, startTime, duration, repeatDays, params);
+                }
+            }
+
+            @Override
             public void onSetTvRecordingInfo(String recordingId, TvRecordingInfo recordingInfo,
                     int seq) {
                 synchronized (mSessionCallbackRecordMap) {
@@ -1289,6 +1316,66 @@ public final class TvInteractiveAppManager {
             }
         }
 
+        void notifyRecordingConnectionFailed(@NonNull String recordingId, @NonNull String inputId) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyRecordingConnectionFailed(mToken, recordingId, inputId, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void notifyRecordingDisconnected(@NonNull String recordingId, @NonNull String inputId) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyRecordingDisconnected(mToken, recordingId, inputId, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void notifyRecordingTuned(@NonNull String recordingId, @NonNull Uri channelUri) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyRecordingTuned(mToken, recordingId, channelUri, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void notifyRecordingError(@NonNull String recordingId, int err) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyRecordingError(mToken, recordingId, err, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void notifyRecordingScheduled(@NonNull String recordingId, @Nullable String requestId) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyRecordingScheduled(mToken, recordingId, recordingId, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
         /**
          * Sets the {@link android.view.Surface} for this session.
          *
@@ -1994,6 +2081,28 @@ public final class TvInteractiveAppManager {
             });
         }
 
+        void postRequestScheduleRecording(String inputId, Uri channelUri, Uri programUri,
+                Bundle params) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestScheduleRecording(
+                            mSession, inputId, channelUri, programUri, params);
+                }
+            });
+        }
+
+        void postRequestScheduleRecording(String inputId, Uri channelUri, long startTime,
+                long duration, int repeatDays, Bundle params) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestScheduleRecording(
+                            mSession, inputId, channelUri, startTime, duration, repeatDays, params);
+                }
+            });
+        }
+
         void postRequestSigning(String id, String algorithm, String alias, byte[] data) {
             mHandler.post(new Runnable() {
                 @Override
@@ -2216,13 +2325,54 @@ public final class TvInteractiveAppManager {
         }
 
         /**
-         * This is called when {@link TvInteractiveAppService.Session#RequestStopRecording} is
-         * called.
+         * This is called when {@link TvInteractiveAppService.Session#requestStopRecording(String)}
+         * is called.
          *
          * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
          * @param recordingId The recordingId of the recording to be stopped.
          */
         public void onRequestStopRecording(Session session, String recordingId) {
+        }
+
+        /**
+         * This is called when
+         * {@link TvInteractiveAppService.Session#requestScheduleRecording(String, Uri, Uri, Bundle)}
+         * is called.
+         *
+         * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
+         * @param inputId The ID of the TV input for the given channel.
+         * @param channelUri The URI of a channel to be recorded.
+         * @param programUri The URI of the TV program to be recorded.
+         * @param params Domain-specific data for this tune request. Keys <em>must</em> be a scoped
+         *            name, i.e. prefixed with a package name you own, so that different developers
+         *            will not create conflicting keys.
+         * @see android.media.tv.TvRecordingClient#tune(String, Uri, Bundle)
+         * @see android.media.tv.TvRecordingClient#startRecording(Uri)
+         */
+        public void onRequestScheduleRecording(Session session, @NonNull String inputId,
+                @NonNull Uri channelUri, @NonNull Uri programUri, @NonNull Bundle params) {
+        }
+
+        /**
+         * This is called when
+         * {@link TvInteractiveAppService.Session#requestScheduleRecording(String, Uri, long, long, int, Bundle)}
+         * is called.
+         *
+         * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
+         * @param inputId The ID of the TV input for the given channel.
+         * @param channelUri The URI of a channel to be recorded.
+         * @param startTime The start time of the recording in milliseconds since epoch.
+         * @param duration The duration of the recording in milliseconds.
+         * @param repeatDays The repeated days. 0 if not repeated.
+         * @param params Domain-specific data for this tune request. Keys <em>must</em> be a scoped
+         *            name, i.e. prefixed with a package name you own, so that different developers
+         *            will not create conflicting keys.
+         * @see android.media.tv.TvRecordingClient#tune(String, Uri, Bundle)
+         * @see android.media.tv.TvRecordingClient#startRecording(Uri)
+         */
+        public void onRequestScheduleRecording(Session session, @NonNull String inputId,
+                @NonNull Uri channelUri, long startTime, long duration, int repeatDays,
+                @NonNull Bundle params) {
         }
 
         /**

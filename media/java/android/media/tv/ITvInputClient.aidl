@@ -52,6 +52,7 @@ oneway interface ITvInputClient {
     void onTimeShiftCurrentPositionChanged(long timeMs, int seq);
     void onAitInfoUpdated(in AitInfo aitInfo, int seq);
     void onSignalStrength(int stength, int seq);
+    void onCueingMessageAvailability(boolean available, int seq);
     void onTvMessage(in String type, in Bundle data, int seq);
 
     void onTuned(in Uri channelUri, int seq);

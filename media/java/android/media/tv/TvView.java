@@ -53,6 +53,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -1171,6 +1172,17 @@ public class TvView extends ViewGroup {
         }
 
         /**
+         * This is called when cueing message becomes available or unavailable.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param available The current availability of cueing message. {@code true} if cueing
+         *                  message is available; {@code false} if it becomes unavailable.
+         * @hide
+         */
+        public void onCueingMessageAvailability(@NonNull String inputId, boolean available) {
+        }
+
+        /**
          * This is called when the session has been tuned to the given channel.
          *
          * @param channelUri The URI of a channel.
@@ -1541,6 +1553,20 @@ public class TvView extends ViewGroup {
             }
             if (mCallback != null) {
                 mCallback.onSignalStrengthUpdated(mInputId, strength);
+            }
+        }
+
+        @Override
+        public void onCueingMessageAvailability(Session session, boolean available) {
+            if (DEBUG) {
+                Log.d(TAG, "onCueingMessageAvailability(available=" + available + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onCueingMessageAvailability - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onCueingMessageAvailability(mInputId, available);
             }
         }
 
