@@ -54,9 +54,12 @@ class SinglePointerTouchProcessor @Inject constructor(val overlapDetector: Overl
         return when (event.actionMasked) {
             MotionEvent.ACTION_DOWN,
             MotionEvent.ACTION_POINTER_DOWN,
-            MotionEvent.ACTION_MOVE -> processActionMove(preprocess())
+            MotionEvent.ACTION_MOVE,
+            MotionEvent.ACTION_HOVER_ENTER,
+            MotionEvent.ACTION_HOVER_MOVE -> processActionMove(preprocess())
             MotionEvent.ACTION_UP,
-            MotionEvent.ACTION_POINTER_UP ->
+            MotionEvent.ACTION_POINTER_UP,
+            MotionEvent.ACTION_HOVER_EXIT ->
                 processActionUp(preprocess(), event.getPointerId(event.actionIndex))
             MotionEvent.ACTION_CANCEL -> processActionCancel(NormalizedTouchData())
             else ->
