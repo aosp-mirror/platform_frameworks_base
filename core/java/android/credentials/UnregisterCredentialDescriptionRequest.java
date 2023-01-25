@@ -27,7 +27,9 @@ import com.android.internal.util.AnnotationValidations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -46,7 +48,7 @@ public final class UnregisterCredentialDescriptionRequest implements Parcelable 
     }
 
     public UnregisterCredentialDescriptionRequest(
-            @NonNull List<CredentialDescription> credentialDescriptions) {
+            @NonNull Set<CredentialDescription> credentialDescriptions) {
         mCredentialDescriptions = new ArrayList<>(requireNonNull(credentialDescriptions));
     }
 
@@ -84,7 +86,7 @@ public final class UnregisterCredentialDescriptionRequest implements Parcelable 
     }
 
     @NonNull
-    public List<CredentialDescription> getCredentialDescriptions() {
-        return mCredentialDescriptions;
+    public Set<CredentialDescription> getCredentialDescriptions() {
+        return new HashSet<>(mCredentialDescriptions);
     }
 }
