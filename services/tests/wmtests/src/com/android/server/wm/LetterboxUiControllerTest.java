@@ -28,20 +28,35 @@ import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENT
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 
+import android.annotation.Nullable;
 import android.compat.testing.PlatformCompatChangeRule;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.Property;
+import android.content.res.Resources;
+import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
+import android.view.InsetsSource;
+import android.view.InsetsState;
+import android.view.RoundedCorner;
+import android.view.RoundedCorners;
+import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
+
+import com.android.internal.R;
 
 import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
 
@@ -61,6 +76,14 @@ import org.junit.runner.RunWith;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class LetterboxUiControllerTest extends WindowTestsBase {
+    private static final int TASKBAR_COLLAPSED_HEIGHT = 10;
+    private static final int TASKBAR_EXPANDED_HEIGHT = 20;
+    private static final int SCREEN_WIDTH = 200;
+    private static final int SCREEN_HEIGHT = 100;
+    private static final Rect TASKBAR_COLLAPSED_BOUNDS = new Rect(0,
+            SCREEN_HEIGHT - TASKBAR_COLLAPSED_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT);
+    private static final Rect TASKBAR_EXPANDED_BOUNDS = new Rect(0,
+            SCREEN_HEIGHT - TASKBAR_EXPANDED_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     @Rule
     public TestRule compatChangeRule = new PlatformCompatChangeRule();
@@ -69,6 +92,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     private DisplayContent mDisplayContent;
     private LetterboxUiController mController;
     private LetterboxConfiguration mLetterboxConfiguration;
+    private final Rect mLetterboxedPortraitTaskBounds = new Rect();
 
     @Before
     public void setUp() throws Exception {
@@ -306,6 +330,162 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         mController = new LetterboxUiController(mWm, mActivity);
 
         assertTrue(mController.shouldForceRotateForCameraCompat());
+    }
+
+    @Test
+    public void testGetCropBoundsIfNeeded_noCrop() {
+        final InsetsSource taskbar = new InsetsSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
+        final WindowState mainWindow = mockForGetCropBoundsAndRoundedCorners(taskbar);
+
+        // Do not apply crop if taskbar is collapsed
+        taskbar.setFrame(TASKBAR_COLLAPSED_BOUNDS);
+        assertNull(mController.getExpandedTaskbarOrNull(mainWindow));
+
+        mLetterboxedPortraitTaskBounds.set(SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4,
+                SCREEN_WIDTH - SCREEN_WIDTH / 4, SCREEN_HEIGHT - SCREEN_HEIGHT / 4);
+
+        final Rect noCrop = mController.getCropBoundsIfNeeded(mainWindow);
+        assertNotEquals(null, noCrop);
+        assertEquals(0, noCrop.left);
+        assertEquals(0, noCrop.top);
+        assertEquals(mLetterboxedPortraitTaskBounds.width(), noCrop.right);
+        assertEquals(mLetterboxedPortraitTaskBounds.height(), noCrop.bottom);
+    }
+
+    @Test
+    public void testGetCropBoundsIfNeeded_appliesCrop() {
+        final InsetsSource taskbar = new InsetsSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
+        final WindowState mainWindow = mockForGetCropBoundsAndRoundedCorners(taskbar);
+
+        // Apply crop if taskbar is expanded
+        taskbar.setFrame(TASKBAR_EXPANDED_BOUNDS);
+        assertNotNull(mController.getExpandedTaskbarOrNull(mainWindow));
+
+        mLetterboxedPortraitTaskBounds.set(SCREEN_WIDTH / 4, 0, SCREEN_WIDTH - SCREEN_WIDTH / 4,
+                SCREEN_HEIGHT);
+
+        final Rect crop = mController.getCropBoundsIfNeeded(mainWindow);
+        assertNotEquals(null, crop);
+        assertEquals(0, crop.left);
+        assertEquals(0, crop.top);
+        assertEquals(mLetterboxedPortraitTaskBounds.width(), crop.right);
+        assertEquals(mLetterboxedPortraitTaskBounds.height() - TASKBAR_EXPANDED_HEIGHT,
+                crop.bottom);
+    }
+
+    @Test
+    public void testGetCropBoundsIfNeeded_appliesCropWithSizeCompatScaling() {
+        final InsetsSource taskbar = new InsetsSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
+        final WindowState mainWindow = mockForGetCropBoundsAndRoundedCorners(taskbar);
+        final float scaling = 2.0f;
+
+        // Apply crop if taskbar is expanded
+        taskbar.setFrame(TASKBAR_EXPANDED_BOUNDS);
+        assertNotNull(mController.getExpandedTaskbarOrNull(mainWindow));
+        // With SizeCompat scaling
+        doReturn(true).when(mActivity).inSizeCompatMode();
+        mainWindow.mInvGlobalScale = scaling;
+
+        mLetterboxedPortraitTaskBounds.set(SCREEN_WIDTH / 4, 0, SCREEN_WIDTH - SCREEN_WIDTH / 4,
+                SCREEN_HEIGHT);
+
+        final int appWidth = mLetterboxedPortraitTaskBounds.width();
+        final int appHeight = mLetterboxedPortraitTaskBounds.height();
+
+        final Rect crop = mController.getCropBoundsIfNeeded(mainWindow);
+        assertNotEquals(null, crop);
+        assertEquals(0, crop.left);
+        assertEquals(0, crop.top);
+        assertEquals((int) (appWidth * scaling), crop.right);
+        assertEquals((int) ((appHeight - TASKBAR_EXPANDED_HEIGHT) * scaling), crop.bottom);
+    }
+
+    @Test
+    public void testGetRoundedCornersRadius_withRoundedCornersFromInsets() {
+        final float invGlobalScale = 0.5f;
+        final int expectedRadius = 7;
+        final int configurationRadius = 15;
+
+        final WindowState mainWindow = mockForGetCropBoundsAndRoundedCorners(/*taskbar=*/ null);
+        mainWindow.mInvGlobalScale = invGlobalScale;
+        final InsetsState insets = mainWindow.getInsetsState();
+
+        RoundedCorners roundedCorners = new RoundedCorners(
+                /*topLeft=*/ null,
+                /*topRight=*/ null,
+                /*bottomRight=*/ new RoundedCorner(RoundedCorner.POSITION_BOTTOM_RIGHT,
+                    configurationRadius, /*centerX=*/ 1, /*centerY=*/ 1),
+                /*bottomLeft=*/ new RoundedCorner(RoundedCorner.POSITION_BOTTOM_LEFT,
+                    configurationRadius * 2 /*2 is to test selection of the min radius*/,
+                    /*centerX=*/ 1, /*centerY=*/ 1)
+        );
+        doReturn(roundedCorners).when(insets).getRoundedCorners();
+        mLetterboxConfiguration.setLetterboxActivityCornersRadius(-1);
+
+        assertEquals(expectedRadius, mController.getRoundedCornersRadius(mainWindow));
+    }
+
+    @Test
+    public void testGetRoundedCornersRadius_withLetterboxActivityCornersRadius() {
+        final float invGlobalScale = 0.5f;
+        final int expectedRadius = 7;
+        final int configurationRadius = 15;
+
+        final WindowState mainWindow = mockForGetCropBoundsAndRoundedCorners(/*taskbar=*/ null);
+        mainWindow.mInvGlobalScale = invGlobalScale;
+        mLetterboxConfiguration.setLetterboxActivityCornersRadius(configurationRadius);
+
+        assertEquals(expectedRadius, mController.getRoundedCornersRadius(mainWindow));
+
+    }
+
+    @Test
+    public void testGetRoundedCornersRadius_noScalingApplied() {
+        final int configurationRadius = 15;
+
+        final WindowState mainWindow = mockForGetCropBoundsAndRoundedCorners(/*taskbar=*/ null);
+        mLetterboxConfiguration.setLetterboxActivityCornersRadius(configurationRadius);
+
+        mainWindow.mInvGlobalScale = -1f;
+        assertEquals(configurationRadius, mController.getRoundedCornersRadius(mainWindow));
+
+        mainWindow.mInvGlobalScale = 0f;
+        assertEquals(configurationRadius, mController.getRoundedCornersRadius(mainWindow));
+
+        mainWindow.mInvGlobalScale = 1f;
+        assertEquals(configurationRadius, mController.getRoundedCornersRadius(mainWindow));
+    }
+
+    private WindowState mockForGetCropBoundsAndRoundedCorners(@Nullable InsetsSource taskbar) {
+        final WindowState mainWindow = mock(WindowState.class);
+        final InsetsState insets = mock(InsetsState.class);
+        final Resources resources = mWm.mContext.getResources();
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams();
+
+        mainWindow.mInvGlobalScale = 1f;
+        spyOn(resources);
+        spyOn(mActivity);
+
+        if (taskbar != null) {
+            taskbar.setVisible(true);
+            doReturn(taskbar).when(insets).peekSource(taskbar.getType());
+        }
+        doReturn(mLetterboxedPortraitTaskBounds).when(mActivity).getBounds();
+        doReturn(true).when(mActivity).isVisible();
+        doReturn(true).when(mActivity).isLetterboxedForFixedOrientationAndAspectRatio();
+        doReturn(insets).when(mainWindow).getInsetsState();
+        doReturn(attrs).when(mainWindow).getAttrs();
+        doReturn(true).when(mainWindow).isDrawn();
+        doReturn(false).when(mainWindow).isLetterboxedForDisplayCutout();
+        doReturn(true).when(mainWindow).areAppWindowBoundsLetterboxed();
+        doReturn(true).when(mLetterboxConfiguration).isLetterboxActivityCornersRounded();
+        doReturn(TASKBAR_EXPANDED_HEIGHT).when(resources).getDimensionPixelSize(
+                R.dimen.taskbar_frame_height);
+
+        // Need to reinitialise due to the change in resources getDimensionPixelSize output.
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        return mainWindow;
     }
 
     private void mockThatProperty(String propertyName, boolean value) throws Exception {
