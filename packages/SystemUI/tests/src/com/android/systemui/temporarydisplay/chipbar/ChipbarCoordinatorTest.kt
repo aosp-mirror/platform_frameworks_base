@@ -66,7 +66,7 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
 class ChipbarCoordinatorTest : SysuiTestCase() {
-    private lateinit var underTest: FakeChipbarCoordinator
+    private lateinit var underTest: ChipbarCoordinator
 
     @Mock private lateinit var logger: ChipbarLogger
     @Mock private lateinit var accessibilityManager: AccessibilityManager
@@ -100,7 +100,7 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
         uiEventLoggerFake = UiEventLoggerFake()
 
         underTest =
-            FakeChipbarCoordinator(
+            ChipbarCoordinator(
                 context,
                 logger,
                 windowManager,
@@ -434,6 +434,23 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
         )
 
         verify(logger).logViewUpdate(eq(WINDOW_TITLE), eq("new title text"), any())
+    }
+
+    /** Regression test for b/266209420. */
+    @Test
+    fun displayViewThenImmediateRemoval_viewStillRemoved() {
+        underTest.displayView(
+            createChipbarInfo(
+                Icon.Resource(R.drawable.ic_cake, contentDescription = null),
+                Text.Loaded("title text"),
+                endItem = ChipbarEndItem.Error,
+            ),
+        )
+        val chipbarView = getChipbarView()
+
+        underTest.removeView(DEVICE_ID, "test reason")
+
+        verify(windowManager).removeView(chipbarView)
     }
 
     @Test

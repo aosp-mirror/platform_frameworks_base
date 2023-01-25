@@ -47,7 +47,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import com.android.systemui.temporarydisplay.chipbar.ChipbarLogger
-import com.android.systemui.temporarydisplay.chipbar.FakeChipbarCoordinator
 import com.android.systemui.temporarydisplay.chipbar.SwipeChipbarAwayGestureHandler
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
@@ -137,7 +136,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         uiEventLogger = MediaTttSenderUiEventLogger(uiEventLoggerFake)
 
         chipbarCoordinator =
-            FakeChipbarCoordinator(
+            ChipbarCoordinator(
                 context,
                 chipbarLogger,
                 windowManager,
