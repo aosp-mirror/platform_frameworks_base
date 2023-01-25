@@ -265,15 +265,9 @@ class BroadcastProcessQueue {
      */
     private boolean replaceBroadcast(@NonNull BroadcastRecord record, int recordIndex,
             @NonNull BroadcastConsumer replacedBroadcastConsumer, boolean wouldBeSkipped) {
-        final int count = mPendingQueues.size();
-        for (int i = 0; i < count; ++i) {
-            final ArrayDeque<SomeArgs> queue = mPendingQueues.get(i);
-            if (replaceBroadcastInQueue(queue, record, recordIndex,
-                    replacedBroadcastConsumer, wouldBeSkipped)) {
-                return true;
-            }
-        }
-        return false;
+        final ArrayDeque<SomeArgs> queue = getQueueForBroadcast(record);
+        return replaceBroadcastInQueue(queue, record, recordIndex,
+                replacedBroadcastConsumer, wouldBeSkipped);
     }
 
     /**

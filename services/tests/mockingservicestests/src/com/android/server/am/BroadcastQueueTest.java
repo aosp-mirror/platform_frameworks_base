@@ -1876,6 +1876,54 @@ public class BroadcastQueueTest {
     }
 
     @Test
+    public void testReplacePending_withUrgentBroadcast() throws Exception {
+        // The behavior is same with the legacy queue but AMS takes care of finding
+        // the right queue and replacing the broadcast.
+        Assume.assumeTrue(mImpl == Impl.MODERN);
+
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+
+        final Intent timeTickFirst = new Intent(Intent.ACTION_TIME_TICK);
+        timeTickFirst.putExtra(Intent.EXTRA_INDEX, "one");
+        timeTickFirst.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+        timeTickFirst.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+
+        final Intent timeTickSecond = new Intent(Intent.ACTION_TIME_TICK);
+        timeTickFirst.putExtra(Intent.EXTRA_INDEX, "second");
+        timeTickSecond.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+
+        final Intent timeTickThird = new Intent(Intent.ACTION_TIME_TICK);
+        timeTickFirst.putExtra(Intent.EXTRA_INDEX, "third");
+        timeTickThird.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+
+        try (SyncBarrier b = new SyncBarrier()) {
+            enqueueBroadcast(makeBroadcastRecord(timeTickFirst, callerApp,
+                    List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE))));
+            enqueueBroadcast(makeBroadcastRecord(timeTickSecond, callerApp,
+                    List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE))));
+            enqueueBroadcast(makeBroadcastRecord(timeTickThird, callerApp,
+                    List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE))));
+        }
+
+        waitForIdle();
+        final IApplicationThread blueThread = mAms.getProcessRecordLocked(PACKAGE_BLUE,
+                getUidForPackage(PACKAGE_BLUE)).getThread();
+        final InOrder inOrder = inOrder(blueThread);
+
+        // First broadcast is delivered.
+        timeTickFirst.setClassName(PACKAGE_BLUE, CLASS_BLUE);
+        inOrder.verify(blueThread).scheduleReceiverList(manifestReceiver(
+                filterAndExtrasEquals(timeTickFirst),
+                null, null, null, null, null, false, false, null, null));
+
+        // Second broadcast should be replaced by third broadcast.
+        timeTickThird.setClassName(PACKAGE_BLUE, CLASS_BLUE);
+        inOrder.verify(blueThread).scheduleReceiverList(manifestReceiver(
+                filterAndExtrasEquals(timeTickThird),
+                null, null, null, null, null, false, false, null, null));
+    }
+
+    @Test
     public void testIdleAndBarrier() throws Exception {
         final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
         final ProcessRecord receiverApp = makeActiveProcessRecord(PACKAGE_GREEN);
