@@ -366,7 +366,7 @@ public class LongScreenshotActivity extends Activity {
 
     private void doShare(Uri uri) {
         if (mFeatureFlags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY)) {
-            Intent shareIntent = ActionIntentCreator.INSTANCE.createShareIntent(uri, null);
+            Intent shareIntent = ActionIntentCreator.INSTANCE.createShareIntent(uri);
             mActionExecutor.launchIntentAsync(shareIntent, null,
                     mScreenshotUserHandle.getIdentifier(), false);
         } else {
