@@ -19,7 +19,6 @@ package com.android.server.usb;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.usb.UsbConfiguration;
-import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
@@ -35,9 +34,12 @@ import android.os.Bundle;
 import android.service.usb.UsbDirectMidiDeviceProto;
 import android.util.Log;
 
+import com.android.internal.midi.MidiEventMultiScheduler;
 import com.android.internal.midi.MidiEventScheduler;
 import com.android.internal.midi.MidiEventScheduler.MidiEvent;
 import com.android.internal.util.dump.DualDumpOutputStream;
+import com.android.server.usb.descriptors.UsbACMidi10Endpoint;
+import com.android.server.usb.descriptors.UsbDescriptor;
 import com.android.server.usb.descriptors.UsbDescriptorParser;
 import com.android.server.usb.descriptors.UsbEndpointDescriptor;
 import com.android.server.usb.descriptors.UsbInterfaceDescriptor;
@@ -45,6 +47,7 @@ import com.android.server.usb.descriptors.UsbMidiBlockParser;
 
 import libcore.io.IoUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -56,7 +59,7 @@ import java.util.ArrayList;
  */
 public final class UsbDirectMidiDevice implements Closeable {
     private static final String TAG = "UsbDirectMidiDevice";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     private Context mContext;
     private String mName;
@@ -74,9 +77,6 @@ public final class UsbDirectMidiDevice implements Closeable {
 
     private MidiDeviceServer mServer;
 
-    // event schedulers for each input port of the physical device
-    private MidiEventScheduler[] mEventSchedulers;
-
     // Timeout for sending a packet to a device.
     // If bulkTransfer times out, retry sending the packet up to 20 times.
     private static final int BULK_TRANSFER_TIMEOUT_MILLISECONDS = 50;
@@ -86,8 +86,21 @@ public final class UsbDirectMidiDevice implements Closeable {
     private static final int THREAD_JOIN_TIMEOUT_MILLISECONDS = 200;
 
     private ArrayList<UsbDeviceConnection> mUsbDeviceConnections;
+
+    // Array of endpoints by device connection.
     private ArrayList<ArrayList<UsbEndpoint>> mInputUsbEndpoints;
     private ArrayList<ArrayList<UsbEndpoint>> mOutputUsbEndpoints;
+
+    // Array of cable counts by device connection.
+    // Each number here maps to an entry in mInputUsbEndpoints or mOutputUsbEndpoints.
+    // This is needed because this info is part of UsbEndpointDescriptor but not UsbEndpoint.
+    private ArrayList<ArrayList<Integer>> mInputUsbEndpointCableCounts;
+    private ArrayList<ArrayList<Integer>> mOutputUsbEndpointCableCounts;
+
+    // Array of event schedulers by device connection.
+    // Each number here maps to an entry in mOutputUsbEndpoints.
+    private ArrayList<ArrayList<MidiEventMultiScheduler>> mMidiEventMultiSchedulers;
+
     private ArrayList<Thread> mThreads;
 
     private UsbMidiBlockParser mMidiBlockParser = new UsbMidiBlockParser();
@@ -96,8 +109,6 @@ public final class UsbDirectMidiDevice implements Closeable {
     private final Object mLock = new Object();
     private boolean mIsOpen;
     private boolean mServerAvailable;
-
-    private UsbMidiPacketConverter mUsbMidiPacketConverter;
 
     private PowerBoostSetter mPowerBoostSetter = null;
 
@@ -238,9 +249,9 @@ public final class UsbDirectMidiDevice implements Closeable {
                         interfaceDescriptor.getEndpointDescriptor(endpointIndex);
                 // 0 is output, 1 << 7 is input.
                 if (endpoint.getDirection() == 0) {
-                    numOutputs++;
+                    numOutputs += getNumJacks(endpoint);
                 } else {
-                    numInputs++;
+                    numInputs += getNumJacks(endpoint);
                 }
             }
         }
@@ -307,19 +318,21 @@ public final class UsbDirectMidiDevice implements Closeable {
         Log.d(TAG, "openLocked()");
         UsbManager manager = mContext.getSystemService(UsbManager.class);
 
-        // Converting from raw MIDI to USB MIDI is not thread-safe.
-        // UsbMidiPacketConverter creates a converter from raw MIDI
-        // to USB MIDI for each USB output.
-        mUsbMidiPacketConverter = new UsbMidiPacketConverter(mNumOutputs);
-
         mUsbDeviceConnections = new ArrayList<UsbDeviceConnection>();
         mInputUsbEndpoints = new ArrayList<ArrayList<UsbEndpoint>>();
         mOutputUsbEndpoints = new ArrayList<ArrayList<UsbEndpoint>>();
+        mInputUsbEndpointCableCounts = new ArrayList<ArrayList<Integer>>();
+        mOutputUsbEndpointCableCounts = new ArrayList<ArrayList<Integer>>();
+        mMidiEventMultiSchedulers = new ArrayList<ArrayList<MidiEventMultiScheduler>>();
         mThreads = new ArrayList<Thread>();
 
         for (int interfaceIndex = 0; interfaceIndex < mUsbInterfaces.size(); interfaceIndex++) {
             ArrayList<UsbEndpoint> inputEndpoints = new ArrayList<UsbEndpoint>();
             ArrayList<UsbEndpoint> outputEndpoints = new ArrayList<UsbEndpoint>();
+            ArrayList<Integer> inputEndpointCableCounts = new ArrayList<Integer>();
+            ArrayList<Integer> outputEndpointCableCounts = new ArrayList<Integer>();
+            ArrayList<MidiEventMultiScheduler> midiEventMultiSchedulers =
+                    new ArrayList<MidiEventMultiScheduler>();
             UsbInterfaceDescriptor interfaceDescriptor = mUsbInterfaces.get(interfaceIndex);
             for (int endpointIndex = 0; endpointIndex < interfaceDescriptor.getNumEndpoints();
                     endpointIndex++) {
@@ -328,8 +341,13 @@ public final class UsbDirectMidiDevice implements Closeable {
                 // 0 is output, 1 << 7 is input.
                 if (endpoint.getDirection() == 0) {
                     outputEndpoints.add(endpoint.toAndroid(mParser));
+                    outputEndpointCableCounts.add(getNumJacks(endpoint));
+                    MidiEventMultiScheduler scheduler =
+                            new MidiEventMultiScheduler(getNumJacks(endpoint));
+                    midiEventMultiSchedulers.add(scheduler);
                 } else {
                     inputEndpoints.add(endpoint.toAndroid(mParser));
+                    inputEndpointCableCounts.add(getNumJacks(endpoint));
                 }
             }
             if (!outputEndpoints.isEmpty() || !inputEndpoints.isEmpty()) {
@@ -341,40 +359,69 @@ public final class UsbDirectMidiDevice implements Closeable {
                 mUsbDeviceConnections.add(connection);
                 mInputUsbEndpoints.add(inputEndpoints);
                 mOutputUsbEndpoints.add(outputEndpoints);
+                mInputUsbEndpointCableCounts.add(inputEndpointCableCounts);
+                mOutputUsbEndpointCableCounts.add(outputEndpointCableCounts);
+                mMidiEventMultiSchedulers.add(midiEventMultiSchedulers);
             }
         }
 
-        mEventSchedulers = new MidiEventScheduler[mNumOutputs];
-
-        for (int i = 0; i < mNumOutputs; i++) {
-            MidiEventScheduler scheduler = new MidiEventScheduler();
-            mEventSchedulers[i] = scheduler;
-            mMidiInputPortReceivers[i].setReceiver(scheduler.getReceiver());
+        // Set up event schedulers
+        int outputIndex = 0;
+        for (int connectionIndex = 0; connectionIndex < mMidiEventMultiSchedulers.size();
+                connectionIndex++) {
+            for (int endpointIndex = 0;
+                    endpointIndex < mMidiEventMultiSchedulers.get(connectionIndex).size();
+                    endpointIndex++) {
+                int cableCount =
+                        mOutputUsbEndpointCableCounts.get(connectionIndex).get(endpointIndex);
+                MidiEventMultiScheduler multiScheduler =
+                        mMidiEventMultiSchedulers.get(connectionIndex).get(endpointIndex);
+                for (int cableNumber = 0; cableNumber < cableCount; cableNumber++) {
+                    MidiEventScheduler scheduler = multiScheduler.getEventScheduler(cableNumber);
+                    mMidiInputPortReceivers[outputIndex].setReceiver(scheduler.getReceiver());
+                    outputIndex++;
+                }
+            }
         }
 
         final MidiReceiver[] outputReceivers = mServer.getOutputPortReceivers();
 
         // Create input thread for each input port of the physical device
-        int portNumber = 0;
+        int portStartNumber = 0;
         for (int connectionIndex = 0; connectionIndex < mInputUsbEndpoints.size();
                 connectionIndex++) {
             for (int endpointIndex = 0;
                     endpointIndex < mInputUsbEndpoints.get(connectionIndex).size();
                     endpointIndex++) {
+                // Each USB endpoint maps to one or more outputReceivers. USB MIDI data from an
+                // endpoint should be sent to the appropriate outputReceiver. A new thread is
+                // created and waits for incoming USB data. Once the data is received, it is added
+                // to the packet converter. The packet converter acts as an inverse multiplexer.
+                // With a for loop, data is pulled per cable and sent to the correct output
+                // receiver. The first byte of each legacy MIDI 1.0 USB message indicates which
+                // cable the data should be used and is how the reverse multiplexer directs data.
+                // For MIDI UMP endpoints, a multiplexer is not needed as we are just swapping
+                // the endianness of the packets.
                 final UsbDeviceConnection connectionFinal =
                         mUsbDeviceConnections.get(connectionIndex);
                 final UsbEndpoint endpointFinal =
                         mInputUsbEndpoints.get(connectionIndex).get(endpointIndex);
-                final int portFinal = portNumber;
+                final int portStartFinal = portStartNumber;
+                final int cableCountFinal =
+                        mInputUsbEndpointCableCounts.get(connectionIndex).get(endpointIndex);
 
-                Thread newThread = new Thread("UsbDirectMidiDevice input thread " + portFinal) {
+                Thread newThread = new Thread("UsbDirectMidiDevice input thread "
+                        + portStartFinal) {
                     @Override
                     public void run() {
                         final UsbRequest request = new UsbRequest();
+                        final UsbMidiPacketConverter packetConverter = new UsbMidiPacketConverter();
+                        packetConverter.createDecoders(cableCountFinal);
                         try {
                             request.initialize(connectionFinal, endpointFinal);
                             byte[] inputBuffer = new byte[endpointFinal.getMaxPacketSize()];
-                            while (true) {
+                            boolean keepGoing = true;
+                            while (keepGoing) {
                                 if (Thread.currentThread().interrupted()) {
                                     Log.w(TAG, "input thread interrupted");
                                     break;
@@ -403,42 +450,56 @@ public final class UsbDirectMidiDevice implements Closeable {
                                         logByteArray("Input before conversion ", inputBuffer,
                                                 0, bytesRead);
                                     }
+
+                                    // Add packets into the packet decoder.
+                                    if (!mIsUniversalMidiDevice) {
+                                        packetConverter.decodeMidiPackets(inputBuffer, bytesRead);
+                                    }
+
                                     byte[] convertedArray;
-                                    if (mIsUniversalMidiDevice) {
-                                        // For USB, each 32 bit word of a UMP is
-                                        // sent with the least significant byte first.
-                                        convertedArray = swapEndiannessPerWord(inputBuffer,
-                                                bytesRead);
-                                    } else {
-                                        if (mUsbMidiPacketConverter == null) {
-                                            Log.w(TAG, "mUsbMidiPacketConverter is null");
+                                    for (int cableNumber = 0; cableNumber < cableCountFinal;
+                                            cableNumber++) {
+                                        if (mIsUniversalMidiDevice) {
+                                            // For USB, each 32 bit word of a UMP is
+                                            // sent with the least significant byte first.
+                                            convertedArray = swapEndiannessPerWord(inputBuffer,
+                                                    bytesRead);
+                                        } else {
+                                            convertedArray =
+                                                    packetConverter.pullDecodedMidiPackets(
+                                                            cableNumber);
+                                        }
+
+                                        if (DEBUG) {
+                                            logByteArray("Input " + cableNumber
+                                                    + " after conversion ", convertedArray, 0,
+                                                    convertedArray.length);
+                                        }
+
+                                        if (convertedArray.length == 0) {
+                                            continue;
+                                        }
+
+                                        if ((outputReceivers == null)
+                                                || (outputReceivers[portStartFinal + cableNumber]
+                                                == null)) {
+                                            Log.w(TAG, "outputReceivers is null");
+                                            keepGoing = false;
                                             break;
                                         }
-                                        convertedArray =
-                                                mUsbMidiPacketConverter.usbMidiToRawMidi(
-                                                         inputBuffer, bytesRead);
-                                    }
+                                        outputReceivers[portStartFinal + cableNumber].send(
+                                                convertedArray, 0, convertedArray.length,
+                                                timestamp);
 
-                                    if (DEBUG) {
-                                        logByteArray("Input after conversion ", convertedArray,
-                                                0, convertedArray.length);
-                                    }
-
-                                    if ((outputReceivers == null)
-                                            || (outputReceivers[portFinal] == null)) {
-                                        Log.w(TAG, "outputReceivers is null");
-                                        break;
-                                    }
-                                    outputReceivers[portFinal].send(convertedArray, 0,
-                                            convertedArray.length, timestamp);
-
-                                    // Boost power if there seems to be a voice message.
-                                    // For legacy devices, boost when message is more than size 1.
-                                    // For UMP devices, boost for channel voice messages.
-                                    if ((mPowerBoostSetter != null && convertedArray.length > 1)
-                                            && (!mIsUniversalMidiDevice
-                                            || isChannelVoiceMessage(convertedArray))) {
-                                        mPowerBoostSetter.boostPower();
+                                        // Boost power if there seems to be a voice message.
+                                        // For legacy devices, boost if message length > 1.
+                                        // For UMP devices, boost for channel voice messages.
+                                        if ((mPowerBoostSetter != null
+                                                && convertedArray.length > 1)
+                                                && (!mIsUniversalMidiDevice
+                                                || isChannelVoiceMessage(convertedArray))) {
+                                            mPowerBoostSetter.boostPower();
+                                        }
                                     }
                                 }
                             }
@@ -454,64 +515,93 @@ public final class UsbDirectMidiDevice implements Closeable {
                 };
                 newThread.start();
                 mThreads.add(newThread);
-                portNumber++;
+                portStartNumber += cableCountFinal;
             }
         }
 
         // Create output thread for each output port of the physical device
-        portNumber = 0;
+        portStartNumber = 0;
         for (int connectionIndex = 0; connectionIndex < mOutputUsbEndpoints.size();
                 connectionIndex++) {
             for (int endpointIndex = 0;
                     endpointIndex < mOutputUsbEndpoints.get(connectionIndex).size();
                     endpointIndex++) {
+                // Each USB endpoint maps to one or more MIDI ports. Each port has an event
+                // scheduler that is used to pull incoming raw MIDI bytes from Android apps.
+                // With a MidiEventMultiScheduler, data can be pulled if any of the schedulers
+                // have new incoming data. This data is then packaged as USB MIDI packets before
+                // getting sent through USB. One thread will be created per endpoint that pulls
+                // data from all relevant event schedulers. Raw MIDI from the event schedulers
+                // will be converted to the correct USB MIDI format before getting sent through
+                // USB.
+
                 final UsbDeviceConnection connectionFinal =
                         mUsbDeviceConnections.get(connectionIndex);
                 final UsbEndpoint endpointFinal =
                         mOutputUsbEndpoints.get(connectionIndex).get(endpointIndex);
-                final int portFinal = portNumber;
-                final MidiEventScheduler eventSchedulerFinal = mEventSchedulers[portFinal];
+                final int portStartFinal = portStartNumber;
+                final int cableCountFinal =
+                        mOutputUsbEndpointCableCounts.get(connectionIndex).get(endpointIndex);
+                final MidiEventMultiScheduler multiSchedulerFinal =
+                            mMidiEventMultiSchedulers.get(connectionIndex).get(endpointIndex);
 
-                Thread newThread = new Thread("UsbDirectMidiDevice output thread " + portFinal) {
+                Thread newThread = new Thread("UsbDirectMidiDevice output write thread "
+                        + portStartFinal) {
                     @Override
                     public void run() {
                         try {
-                            while (true) {
-                                if (Thread.currentThread().interrupted()) {
-                                    Log.w(TAG, "output thread interrupted");
+                            final ByteArrayOutputStream midi2ByteStream =
+                                    new ByteArrayOutputStream();
+                            final UsbMidiPacketConverter packetConverter =
+                                    new UsbMidiPacketConverter();
+                            packetConverter.createEncoders(cableCountFinal);
+                            boolean isInterrupted = false;
+                            while (!isInterrupted) {
+                                boolean wasSuccessful = multiSchedulerFinal.waitNextEvent();
+                                if (!wasSuccessful) {
+                                    Log.d(TAG, "output thread closed");
                                     break;
                                 }
-                                MidiEvent event;
-                                try {
-                                    event = (MidiEvent) eventSchedulerFinal.waitNextEvent();
-                                } catch (InterruptedException e) {
-                                    Log.w(TAG, "event scheduler interrupted");
-                                    break;
-                                }
-                                if (event == null) {
-                                    Log.w(TAG, "event is null");
-                                    break;
-                                }
-
-                                if (DEBUG) {
-                                    logByteArray("Output before conversion ", event.data, 0,
-                                            event.count);
-                                }
-
-                                byte[] convertedArray;
-                                if (mIsUniversalMidiDevice) {
-                                    // For USB, each 32 bit word of a UMP is
-                                    // sent with the least significant byte first.
-                                    convertedArray = swapEndiannessPerWord(event.data,
-                                            event.count);
-                                } else {
-                                    if (mUsbMidiPacketConverter == null) {
-                                        Log.w(TAG, "mUsbMidiPacketConverter is null");
-                                        break;
+                                long now = System.nanoTime();
+                                for (int cableNumber = 0; cableNumber < cableCountFinal;
+                                        cableNumber++) {
+                                    MidiEventScheduler eventScheduler =
+                                            multiSchedulerFinal.getEventScheduler(cableNumber);
+                                    MidiEvent event =
+                                            (MidiEvent) eventScheduler.getNextEvent(now);
+                                    while (event != null) {
+                                        if (DEBUG) {
+                                            logByteArray("Output before conversion ",
+                                                    event.data, 0, event.count);
+                                        }
+                                        if (mIsUniversalMidiDevice) {
+                                            // For USB, each 32 bit word of a UMP is
+                                            // sent with the least significant byte first.
+                                            byte[] convertedArray = swapEndiannessPerWord(
+                                                    event.data, event.count);
+                                            midi2ByteStream.write(convertedArray, 0,
+                                                    convertedArray.length);
+                                        } else {
+                                            packetConverter.encodeMidiPackets(event.data,
+                                                    event.count, cableNumber);
+                                        }
+                                        eventScheduler.addEventToPool(event);
+                                        event = (MidiEvent) eventScheduler.getNextEvent(now);
                                     }
+                                }
+
+                                if (Thread.currentThread().interrupted()) {
+                                    Log.d(TAG, "output thread interrupted");
+                                    break;
+                                }
+
+                                byte[] convertedArray = new byte[0];
+                                if (mIsUniversalMidiDevice) {
+                                    convertedArray = midi2ByteStream.toByteArray();
+                                    midi2ByteStream.reset();
+                                } else {
                                     convertedArray =
-                                            mUsbMidiPacketConverter.rawMidiToUsbMidi(
-                                                     event.data, event.count, portFinal);
+                                            packetConverter.pullEncodedMidiPackets();
                                 }
 
                                 if (DEBUG) {
@@ -519,7 +609,6 @@ public final class UsbDirectMidiDevice implements Closeable {
                                             convertedArray.length);
                                 }
 
-                                boolean isInterrupted = false;
                                 // Split the packet into multiple if they are greater than the
                                 // endpoint's max packet size.
                                 for (int curPacketStart = 0;
@@ -557,11 +646,9 @@ public final class UsbDirectMidiDevice implements Closeable {
                                         }
                                     }
                                 }
-                                if (isInterrupted == true) {
-                                    break;
-                                }
-                                eventSchedulerFinal.addEventToPool(event);
                             }
+                        } catch (InterruptedException e) {
+                            Log.w(TAG, "output thread: ", e);
                         } catch (NullPointerException e) {
                             Log.e(TAG, "output thread: ", e);
                         }
@@ -570,7 +657,7 @@ public final class UsbDirectMidiDevice implements Closeable {
                 };
                 newThread.start();
                 mThreads.add(newThread);
-                portNumber++;
+                portStartNumber += cableCountFinal;
             }
         }
 
@@ -666,11 +753,21 @@ public final class UsbDirectMidiDevice implements Closeable {
         }
         mThreads = null;
 
-        for (int i = 0; i < mEventSchedulers.length; i++) {
+        for (int i = 0; i < mMidiInputPortReceivers.length; i++) {
             mMidiInputPortReceivers[i].setReceiver(null);
-            mEventSchedulers[i].close();
         }
-        mEventSchedulers = null;
+
+        for (int connectionIndex = 0; connectionIndex < mMidiEventMultiSchedulers.size();
+                connectionIndex++) {
+            for (int endpointIndex = 0;
+                    endpointIndex < mMidiEventMultiSchedulers.get(connectionIndex).size();
+                    endpointIndex++) {
+                MidiEventMultiScheduler multiScheduler =
+                        mMidiEventMultiSchedulers.get(connectionIndex).get(endpointIndex);
+                multiScheduler.close();
+            }
+        }
+        mMidiEventMultiSchedulers = null;
 
         for (UsbDeviceConnection connection : mUsbDeviceConnections) {
             connection.close();
@@ -678,8 +775,8 @@ public final class UsbDirectMidiDevice implements Closeable {
         mUsbDeviceConnections = null;
         mInputUsbEndpoints = null;
         mOutputUsbEndpoints = null;
-
-        mUsbMidiPacketConverter = null;
+        mInputUsbEndpointCableCounts = null;
+        mOutputUsbEndpointCableCounts = null;
 
         mIsOpen = false;
     }
@@ -786,5 +883,20 @@ public final class UsbDirectMidiDevice implements Closeable {
         byte messageType = (byte) ((umpMessage[0] >> 4) & 0x0f);
         return messageType == MESSAGE_TYPE_MIDI_1_CHANNEL_VOICE
                 || messageType == MESSAGE_TYPE_MIDI_2_CHANNEL_VOICE;
+    }
+
+    // Returns the number of jacks for MIDI 1.0 endpoints.
+    // For MIDI 2.0 endpoints, this concept does not exist and each endpoint should be treated as
+    // one port.
+    private int getNumJacks(UsbEndpointDescriptor usbEndpointDescriptor) {
+        UsbDescriptor classSpecificEndpointDescriptor =
+                usbEndpointDescriptor.getClassSpecificEndpointDescriptor();
+        if (classSpecificEndpointDescriptor != null
+                && (classSpecificEndpointDescriptor instanceof UsbACMidi10Endpoint)) {
+            UsbACMidi10Endpoint midiEndpoint =
+                    (UsbACMidi10Endpoint) classSpecificEndpointDescriptor;
+            return midiEndpoint.getNumJacks();
+        }
+        return 1;
     }
 }
