@@ -593,16 +593,19 @@ public class AmbientContextManagerService extends
                     Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT, TAG);
             assertCalledByPackageOwner(callingPackage);
 
-            for (ClientRequest cr : mExistingClientRequests) {
-                if (cr.getPackageName().equals(callingPackage)) {
-                    AmbientContextManagerPerUserService service =
-                            getAmbientContextManagerPerUserServiceForEventTypes(
-                            UserHandle.getCallingUserId(), cr.getRequest().getEventTypes());
-                    if (service != null) {
-                        service.onUnregisterObserver(callingPackage);
-                    } else {
-                        Slog.w(TAG, "onUnregisterObserver unavailable user_id: "
-                                + UserHandle.getCallingUserId());
+            synchronized (mLock) {
+                for (ClientRequest cr : mExistingClientRequests) {
+                    if (cr.getPackageName().equals(callingPackage)) {
+                        AmbientContextManagerPerUserService service =
+                                getAmbientContextManagerPerUserServiceForEventTypes(
+                                        UserHandle.getCallingUserId(),
+                                        cr.getRequest().getEventTypes());
+                        if (service != null) {
+                            service.onUnregisterObserver(callingPackage);
+                        } else {
+                            Slog.w(TAG, "onUnregisterObserver unavailable user_id: "
+                                    + UserHandle.getCallingUserId());
+                        }
                     }
                 }
             }
