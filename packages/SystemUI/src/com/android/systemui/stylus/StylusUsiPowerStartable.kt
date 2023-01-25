@@ -39,6 +39,17 @@ constructor(
     private val featureFlags: FeatureFlags,
 ) : CoreStartable, StylusManager.StylusCallback, StylusManager.StylusBatteryCallback {
 
+    override fun onStylusAdded(deviceId: Int) {
+        // On some devices, the addition of a new internal stylus indicates the use of a
+        // USI stylus with a different vendor/product ID. We would therefore like to reset
+        // the battery notification suppression, in case the user has dismissed a low battery
+        // notification of the previous stylus.
+        val device = inputManager.getInputDevice(deviceId) ?: return
+        if (!device.isExternal) {
+            stylusUsiPowerUi.updateSuppression(false)
+        }
+    }
+
     override fun onStylusBluetoothConnected(deviceId: Int, btAddress: String) {
         stylusUsiPowerUi.refresh()
     }

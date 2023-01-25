@@ -91,10 +91,8 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"ਹੇਠਾਂ ਦੀ ਸੀਮਾ <xliff:g id="PERCENT">%1$d</xliff:g> ਫ਼ੀਸਦ"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"ਖੱਬੇ ਪਾਸੇ ਵਾਲੀ ਸੀਮਾ <xliff:g id="PERCENT">%1$d</xliff:g> ਫ਼ੀਸਦ"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"ਸੱਜੇ ਪਾਸੇ ਵਾਲੀ ਸੀਮਾ <xliff:g id="PERCENT">%1$d</xliff:g> ਫ਼ੀਸਦ"</string>
-    <!-- no translation found for screenshot_work_profile_notification (2812417845875653929) -->
-    <skip />
-    <!-- no translation found for screenshot_default_files_app_name (8721579578575161912) -->
-    <skip />
+    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"ਕਾਰਜ ਸਕ੍ਰੀਨਸ਼ਾਟਾਂ ਨੂੰ <xliff:g id="APP">%1$s</xliff:g> ਐਪ ਵਿੱਚ ਰੱਖਿਅਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ"</string>
+    <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"ਫ਼ਾਈਲਾਂ"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"ਸਕ੍ਰੀਨ ਰਿਕਾਰਡਰ"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ਸਕ੍ਰੀਨ ਰਿਕਾਰਡਿੰਗ ਜਾਰੀ ਹੈ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ਕਿਸੇ ਸਕ੍ਰੀਨ ਰਿਕਾਰਡ ਸੈਸ਼ਨ ਲਈ ਚੱਲ ਰਹੀ ਸੂਚਨਾ"</string>
@@ -534,8 +532,10 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"ਸਵੈਚਲਿਤ"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"ਕੋਈ ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਹੀਂ"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ਕੋਈ ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਹੀਂ ਅਤੇ ਸੂਚਨਾਵਾਂ ਗੱਲਬਾਤ ਸੈਕਸ਼ਨ ਵਿੱਚ ਹੇਠਲੇ ਪਾਸੇ ਦਿਸਦੀਆਂ ਹਨ"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"ਫ਼ੋਨ ਸੈਟਿੰਗਾਂ ਦੇ ਆਧਾਰ \'ਤੇ ਘੰਟੀ ਵੱਜ ਸਕਦੀ ਹੈ ਜਾਂ ਥਰਥਰਾਹਟ ਹੋ ਸਕਦੀ ਹੈ"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ਫ਼ੋਨ ਸੈਟਿੰਗਾਂ ਦੇ ਆਧਾਰ \'ਤੇ ਘੰਟੀ ਵੱਜ ਸਕਦੀ ਹੈ ਜਾਂ ਥਰਥਰਾਹਟ ਹੋ ਸਕਦੀ ਹੈ। ਪੂਰਵ-ਨਿਰਧਾਰਿਤ ਤੌਰ \'ਤੇ <xliff:g id="APP_NAME">%1$s</xliff:g> ਤੋਂ ਗੱਲਾਂਬਾਤਾਂ ਬਬਲ ਵਜੋਂ ਦਿਸਦੀਆਂ ਹਨ।"</string>
+    <!-- no translation found for notification_channel_summary_default (777294388712200605) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_default_with_bubbles (3482483084451555344) -->
+    <skip />
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ਸਿਸਟਮ ਨੂੰ ਨਿਰਧਾਰਤ ਕਰਨ ਦਿਓ ਕਿ ਇਸ ਸੂਚਨਾ ਲਈ ਕੋਈ ਧੁਨੀ ਵਜਾਉਣੀ ਚਾਹੀਦੀ ਹੈ ਜਾਂ ਥਰਥਰਾਹਟ ਕਰਨੀ ਚਾਹੀਦੀ ਹੈ"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;ਸਥਿਤੀ:&lt;/b&gt; ਦਰਜਾ ਵਧਾ ਕੇ ਪੂਰਵ-ਨਿਰਧਾਰਤ \'ਤੇ ਸੈੱਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;ਸਥਿਤੀ:&lt;/b&gt; ਦਰਜਾ ਘਟਾ ਕੇ ਸ਼ਾਂਤ \'ਤੇ ਸੈੱਟ ਕੀਤਾ ਗਿਆ"</string>
@@ -854,13 +854,11 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="APP_LABEL">%2$s</xliff:g> ਤੋਂ <xliff:g id="SONG_NAME">%1$s</xliff:g> ਚਲਾਓ"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"ਅਣਕੀਤਾ ਕਰੋ"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> \'ਤੇ ਚਲਾਉਣ ਲਈ ਨੇੜੇ ਲਿਜਾਓ"</string>
-    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
-    <skip />
+    <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"ਇੱਥੇ ਚਲਾਉਣ ਲਈ, <xliff:g id="DEVICENAME">%1$s</xliff:g> ਦੇ ਨੇੜੇ ਲਿਆਓ"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> \'ਤੇ ਚਲਾਇਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"ਕੋਈ ਗੜਬੜ ਹੋ ਗਈ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"ਲੋਡ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ"</string>
-    <!-- no translation found for media_ttt_default_device_type (4457646436153370169) -->
-    <skip />
+    <string name="media_ttt_default_device_type" msgid="4457646436153370169">"ਟੈਬਲੈੱਟ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ਅਕਿਰਿਆਸ਼ੀਲ, ਐਪ ਦੀ ਜਾਂਚ ਕਰੋ"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"ਨਹੀਂ ਮਿਲਿਆ"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"ਕੰਟਰੋਲ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
@@ -884,8 +882,7 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"ਅਵਾਜ਼"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ਸਪੀਕਰ ਅਤੇ ਡਿਸਪਲੇਆਂ"</string>
-    <!-- no translation found for media_output_group_title_suggested_device (4157186235837903826) -->
-    <skip />
+    <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"ਸੁਝਾਏ ਗਏ ਡੀਵਾਈਸ"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ਪ੍ਰਸਾਰਨ ਕਿਵੇਂ ਕੰਮ ਕਰਦਾ ਹੈ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ਪ੍ਰਸਾਰਨ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"ਅਨੁਰੂਪ ਬਲੂਟੁੱਥ ਡੀਵਾਈਸਾਂ ਨਾਲ ਨਜ਼ਦੀਕੀ ਲੋਕ ਤੁਹਾਡੇ ਵੱਲੋਂ ਪ੍ਰਸਾਰਨ ਕੀਤੇ ਜਾ ਰਹੇ ਮੀਡੀਆ ਨੂੰ ਸੁਣ ਸਕਦੇ ਹਨ"</string>
@@ -1023,8 +1020,17 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ਇਹ ਸਕ੍ਰੀਨ ਬੰਦ ਹੋ ਜਾਵੇਗੀ"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ਮੋੜਨਯੋਗ ਡੀਵਾਈਸ ਨੂੰ ਖੋਲ੍ਹਿਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ਮੋੜਨਯੋਗ ਡੀਵਾਈਸ ਨੂੰ ਆਲੇ-ਦੁਆਲੇ ਫਲਿੱਪ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
-    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
+    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> ਬੈਟਰੀ ਬਾਕੀ"</string>
+    <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"ਆਪਣੇ ਸਟਾਈਲਸ ਨੂੰ ਚਾਰਜਰ ਨਾਲ ਕਨੈਕਟ ਕਰੋ"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"ਸਟਾਈਲਸ ਦੀ ਬੈਟਰੀ ਘੱਟ ਹੈ"</string>
+    <!-- no translation found for video_camera (7654002575156149298) -->
     <skip />
-    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
+    <!-- no translation found for call_from_work_profile_title (6991157106804289643) -->
+    <skip />
+    <!-- no translation found for call_from_work_profile_text (3458704745640229638) -->
+    <skip />
+    <!-- no translation found for call_from_work_profile_action (2937701298133010724) -->
+    <skip />
+    <!-- no translation found for call_from_work_profile_close (7927067108901068098) -->
     <skip />
 </resources>

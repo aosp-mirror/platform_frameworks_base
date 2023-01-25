@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Companion Device Manager"</string>
     <string name="confirmation_title" msgid="3785000297483688997">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; toegang geven tot je &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
-    <string name="profile_name_watch" msgid="576290739483672360">"horloge"</string>
+    <string name="profile_name_watch" msgid="576290739483672360">"smartwatch"</string>
     <string name="chooser_title" msgid="2262294130493605839">"Een <xliff:g id="PROFILE_NAME">%1$s</xliff:g> kiezen om te beheren met &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="summary_watch" msgid="3002344206574997652">"Deze app is vereist om je <xliff:g id="DEVICE_NAME">%1$s</xliff:g> te beheren. <xliff:g id="APP_NAME">%2$s</xliff:g> kan interactie hebben met je meldingen en toegang krijgen tot rechten voor Telefoon, Sms, Contacten, Agenda, Gesprekslijsten en Apparaten in de buurt."</string>
     <string name="permission_apps" msgid="6142133265286656158">"Apps"</string>
@@ -41,8 +41,8 @@
     <string name="consent_yes" msgid="8344487259618762872">"Toestaan"</string>
     <string name="consent_no" msgid="2640796915611404382">"Niet toestaan"</string>
     <string name="consent_back" msgid="2560683030046918882">"Terug"</string>
-    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"App-rechten overzetten naar je horloge"</string>
-    <string name="permission_sync_summary" msgid="8873391306499120778">"We willen het makkelijker voor je maken om je horloge in te stellen. Daarom gebruiken apps die tijdens het instellen worden geïnstalleerd op je horloge, dezelfde rechten als op je telefoon.\n\n Deze rechten kunnen toegang tot de microfoon en locatie van je horloge omvatten."</string>
+    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"App-rechten overzetten naar je smartwatch"</string>
+    <string name="permission_sync_summary" msgid="8873391306499120778">"We willen het makkelijker voor je maken om je smartwatch in te stellen. Daarom gebruiken apps die tijdens het instellen worden geïnstalleerd op je smartwatch, dezelfde rechten als op je telefoon.\n\n Deze rechten kunnen toegang tot de microfoon en locatie van je smartwatch omvatten."</string>
     <string name="vendor_icon_description" msgid="4445875290032225965">"App-icoon"</string>
     <string name="vendor_header_button_description" msgid="6566660389500630608">"Knop Meer informatie"</string>
 </resources>
