@@ -33,6 +33,8 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_IS_RECENTS;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -1302,8 +1304,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     private void handleNonAppWindowsInTransition(@NonNull DisplayContent dc,
             @TransitionType int transit, @TransitionFlags int flags) {
         if ((flags & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0) {
-            mController.mAtm.mWindowManager.mPolicy.applyKeyguardOcclusionChange(
-                    false /* notify */);
+            // If the occlusion changed but the transition isn't an occlude/unocclude transition,
+            // then we have to notify KeyguardService directly. This can happen if there is
+            // another ongoing transition when the app changes occlusion OR if the app dies or
+            // is killed. Both of these are common during tests.
+            final boolean notify = !(transit == TRANSIT_KEYGUARD_OCCLUDE
+                    || transit == TRANSIT_KEYGUARD_UNOCCLUDE);
+            mController.mAtm.mWindowManager.mPolicy.applyKeyguardOcclusionChange(notify);
         }
     }
 

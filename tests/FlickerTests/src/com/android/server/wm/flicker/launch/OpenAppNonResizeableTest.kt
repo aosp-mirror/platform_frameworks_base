@@ -24,12 +24,10 @@ import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.annotation.FlickerServiceCompatible
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.Assume
-import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Ignore
 import org.junit.Test
@@ -66,13 +64,6 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 open class OpenAppNonResizeableTest(flicker: FlickerTest) : OpenAppFromLockTransition(flicker) {
     override val testApp = NonResizeableAppHelper(instrumentation)
-
-    @Before
-    open fun before() {
-        // b/266384300 - The test causes the keyguard occluded state to be incorrect, disable
-        // it while enabling shell transitions
-        Assume.assumeFalse(isShellTransitionsEnabled)
-    }
 
     /**
      * Checks that the [ComponentNameMatcher.NAV_BAR] layer starts invisible, becomes visible during
