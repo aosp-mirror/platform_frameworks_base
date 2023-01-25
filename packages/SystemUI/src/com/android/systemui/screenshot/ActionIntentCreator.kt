@@ -25,8 +25,22 @@ import android.net.Uri
 import com.android.systemui.R
 
 object ActionIntentCreator {
+    /** @return a chooser intent to share the given URI. */
+    fun createShareIntent(uri: Uri) = createShareIntent(uri, null, null)
+
     /** @return a chooser intent to share the given URI with the optional provided subject. */
-    fun createShareIntent(uri: Uri, subject: String?): Intent {
+    fun createShareIntentWithSubject(uri: Uri, subject: String?) =
+        createShareIntent(uri, subject = subject)
+
+    /** @return a chooser intent to share the given URI with the optional provided extra text. */
+    fun createShareIntentWithExtraText(uri: Uri, extraText: String?) =
+        createShareIntent(uri, extraText = extraText)
+
+    private fun createShareIntent(
+        uri: Uri,
+        subject: String? = null,
+        extraText: String? = null
+    ): Intent {
         // Create a share intent, this will always go through the chooser activity first
         // which should not trigger auto-enter PiP
         val sharingIntent =
@@ -43,6 +57,7 @@ object ActionIntentCreator {
                     )
 
                 putExtra(Intent.EXTRA_SUBJECT, subject)
+                putExtra(Intent.EXTRA_TEXT, extraText)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
             }
