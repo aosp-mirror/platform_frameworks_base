@@ -36,6 +36,7 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dreams.complication.ComplicationHostViewController;
+import com.android.systemui.dreams.touch.scrim.BouncerlessScrimController;
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor;
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
 import com.android.systemui.statusbar.BlurUtils;
@@ -96,6 +97,9 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     DreamOverlayAnimationsController mAnimationsController;
 
     @Mock
+    BouncerlessScrimController mBouncerlessScrimController;
+
+    @Mock
     DreamOverlayStateController mStateController;
 
     DreamOverlayContainerViewController mController;
@@ -123,7 +127,8 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
                 MILLIS_UNTIL_FULL_JITTER,
                 mPrimaryBouncerCallbackInteractor,
                 mAnimationsController,
-                mStateController);
+                mStateController,
+                mBouncerlessScrimController);
     }
 
     @Test
