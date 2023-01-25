@@ -305,4 +305,60 @@ public class OomAdjusterTests {
         assertEquals("Interaction event time was not updated correctly.",
                 interactionEventTime, mProcessRecord.mState.getInteractionEventTime());
     }
+
+    private void updateShortFgsOwner(int uid, int pid, boolean add) {
+        sService.mOomAdjuster.updateShortFgsOwner(uid, pid, add);
+    }
+
+    private void assertHasUidShortForegroundService(int uid, boolean expected) {
+        assertEquals(expected, sService.mOomAdjuster.hasUidShortForegroundService(uid));
+    }
+
+    @Test
+    public void testHasUidShortForegroundService() {
+        assertHasUidShortForegroundService(1, false);
+        assertHasUidShortForegroundService(2, false);
+        assertHasUidShortForegroundService(3, false);
+        assertHasUidShortForegroundService(100, false);
+        assertHasUidShortForegroundService(101, false);
+
+        updateShortFgsOwner(1, 100, true);
+        assertHasUidShortForegroundService(1, true);
+        assertHasUidShortForegroundService(100, false);
+        assertHasUidShortForegroundService(2, false);
+
+        updateShortFgsOwner(1, 101, true);
+        assertHasUidShortForegroundService(1, true);
+        assertHasUidShortForegroundService(101, false);
+        assertHasUidShortForegroundService(2, false);
+
+        updateShortFgsOwner(2, 200, true);
+        assertHasUidShortForegroundService(1, true);
+        assertHasUidShortForegroundService(2, true);
+        assertHasUidShortForegroundService(200, false);
+
+        updateShortFgsOwner(1, 101, false);
+        assertHasUidShortForegroundService(1, true);
+        assertHasUidShortForegroundService(2, true);
+
+        updateShortFgsOwner(1, 99, false); // unused PID
+        assertHasUidShortForegroundService(1, true);
+        assertHasUidShortForegroundService(2, true);
+
+        updateShortFgsOwner(1, 100, false);
+        assertHasUidShortForegroundService(1, false);
+        assertHasUidShortForegroundService(2, true);
+
+        updateShortFgsOwner(1, 100, true);
+        assertHasUidShortForegroundService(1, true);
+        assertHasUidShortForegroundService(2, true);
+
+        updateShortFgsOwner(2, 200, false);
+        assertHasUidShortForegroundService(1, true);
+        assertHasUidShortForegroundService(2, false);
+
+        updateShortFgsOwner(2, 201, true);
+        assertHasUidShortForegroundService(1, true);
+        assertHasUidShortForegroundService(2, true);
+    }
 }
