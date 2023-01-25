@@ -217,6 +217,27 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testSkipEntryAnimationsWhenExitingLowLight() {
+        ArgumentCaptor<DreamOverlayStateController.Callback> callbackCaptor =
+                ArgumentCaptor.forClass(DreamOverlayStateController.Callback.class);
+        when(mStateController.isLowLightActive()).thenReturn(false);
+
+        // Call onInit so that the callback is added.
+        mController.onInit();
+        verify(mStateController).addCallback(callbackCaptor.capture());
+
+        // Send the signal that low light is exiting
+        callbackCaptor.getValue().onExitLowLight();
+
+        // View is attached to trigger animations.
+        mController.onViewAttached();
+
+        // Entry animations should be started then immediately ended to skip to the end.
+        verify(mAnimationsController).startEntryAnimations();
+        verify(mAnimationsController).endAnimations();
+    }
+
+    @Test
     public void testCancelDreamEntryAnimationsOnDetached() {
         mController.onViewAttached();
         mController.onViewDetached();

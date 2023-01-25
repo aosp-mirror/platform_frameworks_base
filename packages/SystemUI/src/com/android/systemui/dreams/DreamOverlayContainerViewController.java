@@ -127,6 +127,23 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
                 }
             };
 
+    /**
+     * If true, overlay entry animations should be skipped once.
+     *
+     * This is turned on when exiting low light and should be turned off once the entry animations
+     * are skipped once.
+     */
+    private boolean mSkipEntryAnimations;
+
+    private final DreamOverlayStateController.Callback
+            mDreamOverlayStateCallback =
+            new DreamOverlayStateController.Callback() {
+                @Override
+                public void onExitLowLight() {
+                    mSkipEntryAnimations = true;
+                }
+            };
+
     @Inject
     public DreamOverlayContainerViewController(
             DreamOverlayContainerView containerView,
@@ -170,6 +187,7 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
 
     @Override
     protected void onInit() {
+        mStateController.addCallback(mDreamOverlayStateCallback);
         mStatusBarViewController.init();
         mComplicationHostViewController.init();
         mDreamOverlayAnimationsController.init(mView);
@@ -188,6 +206,13 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
         // Start dream entry animations. Skip animations for low light clock.
         if (!mStateController.isLowLightActive()) {
             mDreamOverlayAnimationsController.startEntryAnimations();
+
+            if (mSkipEntryAnimations) {
+                // If we're transitioning from the low light dream back to the user dream, skip the
+                // overlay animations and show immediately.
+                mDreamOverlayAnimationsController.endAnimations();
+                mSkipEntryAnimations = false;
+            }
         }
     }
 
