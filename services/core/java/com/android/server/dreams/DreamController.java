@@ -118,6 +118,8 @@ final class DreamController {
         //   are yet to be delivered.
         options.setDeliveryGroupMatchingKey(
                 DREAMING_DELIVERY_GROUP_NAMESPACE, DREAMING_DELIVERY_GROUP_KEY);
+        // This allows the broadcast delivery to be delayed to apps in the Cached state.
+        options.setDeferUntilActive(true);
         return options.toBundle();
     }
 
