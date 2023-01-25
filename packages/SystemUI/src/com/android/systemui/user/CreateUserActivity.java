@@ -49,14 +49,16 @@ public class CreateUserActivity extends Activity {
     /**
      * Creates an intent to start this activity.
      */
-    public static Intent createIntentForStart(Context context) {
+    public static Intent createIntentForStart(Context context, boolean isKeyguardShowing) {
         Intent intent = new Intent(context, CreateUserActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(EXTRA_IS_KEYGUARD_SHOWING, isKeyguardShowing);
         return intent;
     }
 
     private static final String TAG = "CreateUserActivity";
     private static final String DIALOG_STATE_KEY = "create_user_dialog_state";
+    private static final String EXTRA_IS_KEYGUARD_SHOWING = "extra_is_keyguard_showing";
 
     private final UserCreator mUserCreator;
     private final EditUserInfoController mEditUserInfoController;
@@ -86,7 +88,11 @@ public class CreateUserActivity extends Activity {
         if (savedInstanceState != null) {
             mEditUserInfoController.onRestoreInstanceState(savedInstanceState);
         }
-        if (mUserCreator.isMultipleAdminEnabled()) {
+        boolean isKeyguardShowing = getIntent().getBooleanExtra(EXTRA_IS_KEYGUARD_SHOWING, true);
+        // Display grant admin dialog only on unlocked device to admin users if multiple admins
+        // are allowed on this device.
+        if (mUserCreator.isMultipleAdminEnabled() && mUserCreator.isUserAdmin()
+                && !isKeyguardShowing) {
             mGrantAdminDialog = buildGrantAdminDialog();
             mGrantAdminDialog.show();
         } else {
