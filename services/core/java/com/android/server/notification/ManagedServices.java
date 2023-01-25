@@ -150,8 +150,9 @@ abstract public class ManagedServices {
             = new ArraySet<>();
     // Just the packages from mEnabledServicesForCurrentProfiles
     private ArraySet<String> mEnabledServicesPackageNames = new ArraySet<>();
-    // List of enabled packages that have nevertheless asked not to be run
-    private ArraySet<ComponentName> mSnoozingForCurrentProfiles = new ArraySet<>();
+    // Per user id, list of enabled packages that have nevertheless asked not to be run
+    private final android.util.SparseSetArray<ComponentName> mSnoozing =
+            new android.util.SparseSetArray<>();
 
     // List of approved packages or components (by user, then by primary/secondary) that are
     // allowed to be bound as managed services. A package or component appearing in this list does
@@ -386,10 +387,15 @@ abstract public class ManagedServices {
             }
         }
 
-        pw.println("    Snoozed " + getCaption() + "s (" +
-                mSnoozingForCurrentProfiles.size() + "):");
-        for (ComponentName name : mSnoozingForCurrentProfiles) {
-            pw.println("      " + name.flattenToShortString());
+        synchronized (mSnoozing) {
+            pw.println("    Snoozed " + getCaption() + "s ("
+                    + mSnoozing.size() + "):");
+            for (int i = 0; i < mSnoozing.size(); i++) {
+                pw.println("      User: " + mSnoozing.keyAt(i));
+                for (ComponentName name : mSnoozing.valuesAt(i)) {
+                    pw.println("        " + name.flattenToShortString());
+                }
+            }
         }
     }
 
@@ -431,8 +437,16 @@ abstract public class ManagedServices {
             }
         }
 
-        for (ComponentName name : mSnoozingForCurrentProfiles) {
-            name.dumpDebug(proto, ManagedServicesProto.SNOOZED);
+        synchronized (mSnoozing) {
+            for (int i = 0; i < mSnoozing.size(); i++) {
+                long token = proto.start(ManagedServicesProto.SNOOZED);
+                proto.write(ManagedServicesProto.SnoozedServices.USER_ID,
+                        mSnoozing.keyAt(i));
+                for (ComponentName name : mSnoozing.valuesAt(i)) {
+                    name.dumpDebug(proto, ManagedServicesProto.SnoozedServices.SNOOZED);
+                }
+                proto.end(token);
+            }
         }
     }
 
@@ -975,6 +989,9 @@ abstract public class ManagedServices {
         synchronized (mApproved) {
             mApproved.remove(user);
         }
+        synchronized (mSnoozing) {
+            mSnoozing.remove(user);
+        }
         rebindServices(true, user);
     }
 
@@ -1066,15 +1083,17 @@ abstract public class ManagedServices {
     }
 
     protected void setComponentState(ComponentName component, int userId, boolean enabled) {
-        boolean previous = !mSnoozingForCurrentProfiles.contains(component);
-        if (previous == enabled) {
-            return;
-        }
+        synchronized (mSnoozing) {
+            boolean previous = !mSnoozing.contains(userId, component);
+            if (previous == enabled) {
+                return;
+            }
 
-        if (enabled) {
-            mSnoozingForCurrentProfiles.remove(component);
-        } else {
-            mSnoozingForCurrentProfiles.add(component);
+            if (enabled) {
+                mSnoozing.remove(userId, component);
+            } else {
+                mSnoozing.add(userId, component);
+            }
         }
 
         // State changed
@@ -1287,7 +1306,10 @@ abstract public class ManagedServices {
             }
 
             final Set<ComponentName> add = new HashSet<>(userComponents);
-            add.removeAll(mSnoozingForCurrentProfiles);
+            ArraySet<ComponentName> snoozed = mSnoozing.get(userId);
+            if (snoozed != null) {
+                add.removeAll(snoozed);
+            }
 
             componentsToBind.put(userId, add);
 
