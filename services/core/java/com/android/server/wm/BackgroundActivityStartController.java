@@ -86,7 +86,8 @@ public class BackgroundActivityStartController {
     /** Apps that fulfill a certain role that can can always launch new tasks */
     static final int BAL_ALLOW_ALLOWLISTED_COMPONENT = 3;
 
-    /** Apps which currently have a visible window */
+    /** Apps which currently have a visible window or are bound by a service with a visible
+     * window */
     static final int BAL_ALLOW_VISIBLE_WINDOW = 4;
 
     /** Allowed due to the PendingIntent sender */
