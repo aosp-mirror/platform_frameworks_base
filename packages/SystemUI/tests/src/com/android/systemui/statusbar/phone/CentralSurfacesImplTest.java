@@ -1288,6 +1288,18 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
+    public void keyguard_notHidden_ifGoingAwayAndOccluded() {
+        setKeyguardShowingAndOccluded(true /* showing */, false /* occluded */);
+
+        when(mKeyguardStateController.isKeyguardGoingAway()).thenReturn(true);
+        when(mKeyguardStateController.isOccluded()).thenReturn(true);
+
+        mCentralSurfaces.updateIsKeyguard(false);
+
+        verify(mStatusBarStateController, never()).setState(eq(SHADE), anyBoolean());
+    }
+
+    @Test
     public void frpLockedDevice_shadeDisabled() {
         when(mDeviceProvisionedController.isFrpActive()).thenReturn(true);
         when(mDozeServiceHost.isPulsing()).thenReturn(true);
