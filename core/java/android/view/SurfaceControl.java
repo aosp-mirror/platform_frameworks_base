@@ -222,6 +222,8 @@ public final class SurfaceControl implements Parcelable {
             int transform);
     private static native void nativeSetDataSpace(long transactionObj, long nativeObject,
             @DataSpace.NamedDataSpace int dataSpace);
+    private static native void nativeSetExtendedRangeBrightness(long transactionObj,
+            long nativeObject, float currentBufferRatio, float desiredRatio);
     private static native void nativeSetDamageRegion(long transactionObj, long nativeObject,
             Region region);
     private static native void nativeSetDimmingEnabled(long transactionObj, long nativeObject,
@@ -3606,6 +3608,46 @@ public final class SurfaceControl implements Parcelable {
                 @DataSpace.NamedDataSpace int dataspace) {
             checkPreconditions(sc);
             nativeSetDataSpace(mNativeObject, sc.mNativeObject, dataspace);
+            return this;
+        }
+
+        /**
+         * Sets the desired extended range brightness for the layer. This only applies for layers
+         * whose dataspace has RANGE_EXTENDED.
+         *
+         * @param sc The layer whose extended range brightness is being specified
+         * @param currentBufferRatio The current sdr/hdr ratio of the current buffer. For example
+         *                           if the buffer was rendered with a target SDR whitepoint of
+         *                           100 nits and a max display brightness of 200 nits, this should
+         *                           be set to 2.0f.
+         *
+         *                           Default value is 1.0f.
+         *
+         *                           Transfer functions that encode their own brightness ranges,
+         *                           such as HLG or PQ, should also set this to 1.0f and instead
+         *                           communicate extended content brightness information via
+         *                           metadata such as CTA861_3 or SMPTE2086.
+         *
+         * @param desiredRatio The desired sdr/hdr ratio. This can be used to communicate the max
+         *                     desired brightness range. This is similar to the "max luminance"
+         *                     value in other HDR metadata formats, but represented as a ratio of
+         *                     the target SDR whitepoint to the max display brightness. The system
+         *                     may not be able to, or may choose not to, deliver the
+         *                     requested range.
+         *
+         *                     If unspecified, the system will attempt to provide the best range
+         *                     it can for the given ambient conditions & device state. However,
+         *                     voluntarily reducing the requested range can help improve battery
+         *                     life as well as can improve quality by ensuring greater bit depth
+         *                     is allocated to the luminance range in use.
+         * @return this
+         * @hide
+         **/
+        public @NonNull Transaction setExtendedRangeBrightness(@NonNull SurfaceControl sc,
+                float currentBufferRatio, float desiredRatio) {
+            checkPreconditions(sc);
+            nativeSetExtendedRangeBrightness(mNativeObject, sc.mNativeObject, currentBufferRatio,
+                    desiredRatio);
             return this;
         }
 
