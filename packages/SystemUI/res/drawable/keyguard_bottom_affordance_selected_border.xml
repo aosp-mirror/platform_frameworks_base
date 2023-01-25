@@ -21,7 +21,7 @@
   <item android:state_selected="true">
     <shape android:shape="oval">
       <stroke
-          android:color="@color/control_primary_text"
+          android:color="?android:attr/textColorPrimary"
           android:width="2dp"/>
       <size
           android:width="@dimen/keyguard_affordance_fixed_width"
