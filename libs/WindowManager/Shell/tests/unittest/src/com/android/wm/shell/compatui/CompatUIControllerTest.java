@@ -95,7 +95,10 @@ public class CompatUIControllerTest extends ShellTestCase {
     private @Mock Lazy<Transitions> mMockTransitionsLazy;
     private @Mock CompatUIWindowManager mMockCompatLayout;
     private @Mock LetterboxEduWindowManager mMockLetterboxEduLayout;
+    private @Mock RestartDialogWindowManager mMockRestartDialogLayout;
     private @Mock DockStateReader mDockStateReader;
+    private @Mock CompatUIConfiguration mCompatUIConfiguration;
+    private @Mock CompatUIShellCommandHandler mCompatUIShellCommandHandler;
 
     @Captor
     ArgumentCaptor<OnInsetsChangedListener> mOnInsetsChangedListenerCaptor;
@@ -113,10 +116,17 @@ public class CompatUIControllerTest extends ShellTestCase {
         doReturn(TASK_ID).when(mMockLetterboxEduLayout).getTaskId();
         doReturn(true).when(mMockLetterboxEduLayout).createLayout(anyBoolean());
         doReturn(true).when(mMockLetterboxEduLayout).updateCompatInfo(any(), any(), anyBoolean());
+
+        doReturn(DISPLAY_ID).when(mMockRestartDialogLayout).getDisplayId();
+        doReturn(TASK_ID).when(mMockRestartDialogLayout).getTaskId();
+        doReturn(true).when(mMockRestartDialogLayout).createLayout(anyBoolean());
+        doReturn(true).when(mMockRestartDialogLayout).updateCompatInfo(any(), any(), anyBoolean());
+
         mShellInit = spy(new ShellInit(mMockExecutor));
         mController = new CompatUIController(mContext, mShellInit, mMockShellController,
                 mMockDisplayController, mMockDisplayInsetsController, mMockImeController,
-                mMockSyncQueue, mMockExecutor, mMockTransitionsLazy, mDockStateReader) {
+                mMockSyncQueue, mMockExecutor, mMockTransitionsLazy, mDockStateReader,
+                mCompatUIConfiguration, mCompatUIShellCommandHandler) {
             @Override
             CompatUIWindowManager createCompatUiWindowManager(Context context, TaskInfo taskInfo,
                     ShellTaskOrganizer.TaskListener taskListener) {
@@ -127,6 +137,12 @@ public class CompatUIControllerTest extends ShellTestCase {
             LetterboxEduWindowManager createLetterboxEduWindowManager(Context context,
                     TaskInfo taskInfo, ShellTaskOrganizer.TaskListener taskListener) {
                 return mMockLetterboxEduLayout;
+            }
+
+            @Override
+            RestartDialogWindowManager createRestartDialogWindowManager(Context context,
+                    TaskInfo taskInfo, ShellTaskOrganizer.TaskListener taskListener) {
+                return mMockRestartDialogLayout;
             }
         };
         mShellInit.init();
@@ -160,6 +176,8 @@ public class CompatUIControllerTest extends ShellTestCase {
         verify(mController).createCompatUiWindowManager(any(), eq(taskInfo), eq(mMockTaskListener));
         verify(mController).createLetterboxEduWindowManager(any(), eq(taskInfo),
                 eq(mMockTaskListener));
+        verify(mController).createRestartDialogWindowManager(any(), eq(taskInfo),
+                eq(mMockTaskListener));
 
         // Verify that the compat controls and letterbox education are updated with new size compat
         // info.
@@ -168,10 +186,12 @@ public class CompatUIControllerTest extends ShellTestCase {
                 CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED);
         mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
 
-        verify(mMockCompatLayout).updateCompatInfo(taskInfo, mMockTaskListener, /* canShow= */
-                true);
-        verify(mMockLetterboxEduLayout).updateCompatInfo(taskInfo, mMockTaskListener, /* canShow= */
-                true);
+        verify(mMockCompatLayout).updateCompatInfo(taskInfo, mMockTaskListener,
+                /* canShow= */ true);
+        verify(mMockLetterboxEduLayout).updateCompatInfo(taskInfo, mMockTaskListener,
+                /* canShow= */ true);
+        verify(mMockRestartDialogLayout).updateCompatInfo(taskInfo, mMockTaskListener,
+                /* canShow= */ true);
 
         // Verify that compat controls and letterbox education are removed with null task listener.
         clearInvocations(mMockCompatLayout, mMockLetterboxEduLayout, mController);
@@ -181,12 +201,14 @@ public class CompatUIControllerTest extends ShellTestCase {
 
         verify(mMockCompatLayout).release();
         verify(mMockLetterboxEduLayout).release();
+        verify(mMockRestartDialogLayout).release();
     }
 
     @Test
     public void testOnCompatInfoChanged_createLayoutReturnsFalse() {
         doReturn(false).when(mMockCompatLayout).createLayout(anyBoolean());
         doReturn(false).when(mMockLetterboxEduLayout).createLayout(anyBoolean());
+        doReturn(false).when(mMockRestartDialogLayout).createLayout(anyBoolean());
 
         TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true,
                 CAMERA_COMPAT_CONTROL_HIDDEN);
@@ -195,6 +217,8 @@ public class CompatUIControllerTest extends ShellTestCase {
         verify(mController).createCompatUiWindowManager(any(), eq(taskInfo), eq(mMockTaskListener));
         verify(mController).createLetterboxEduWindowManager(any(), eq(taskInfo),
                 eq(mMockTaskListener));
+        verify(mController).createRestartDialogWindowManager(any(), eq(taskInfo),
+                eq(mMockTaskListener));
 
         // Verify that the layout is created again.
         clearInvocations(mMockCompatLayout, mMockLetterboxEduLayout, mController);
@@ -202,8 +226,11 @@ public class CompatUIControllerTest extends ShellTestCase {
 
         verify(mMockCompatLayout, never()).updateCompatInfo(any(), any(), anyBoolean());
         verify(mMockLetterboxEduLayout, never()).updateCompatInfo(any(), any(), anyBoolean());
+        verify(mMockRestartDialogLayout, never()).updateCompatInfo(any(), any(), anyBoolean());
         verify(mController).createCompatUiWindowManager(any(), eq(taskInfo), eq(mMockTaskListener));
         verify(mController).createLetterboxEduWindowManager(any(), eq(taskInfo),
+                eq(mMockTaskListener));
+        verify(mController).createRestartDialogWindowManager(any(), eq(taskInfo),
                 eq(mMockTaskListener));
     }
 
@@ -211,6 +238,7 @@ public class CompatUIControllerTest extends ShellTestCase {
     public void testOnCompatInfoChanged_updateCompatInfoReturnsFalse() {
         doReturn(false).when(mMockCompatLayout).updateCompatInfo(any(), any(), anyBoolean());
         doReturn(false).when(mMockLetterboxEduLayout).updateCompatInfo(any(), any(), anyBoolean());
+        doReturn(false).when(mMockRestartDialogLayout).updateCompatInfo(any(), any(), anyBoolean());
 
         TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true,
                 CAMERA_COMPAT_CONTROL_HIDDEN);
@@ -219,23 +247,32 @@ public class CompatUIControllerTest extends ShellTestCase {
         verify(mController).createCompatUiWindowManager(any(), eq(taskInfo), eq(mMockTaskListener));
         verify(mController).createLetterboxEduWindowManager(any(), eq(taskInfo),
                 eq(mMockTaskListener));
+        verify(mController).createRestartDialogWindowManager(any(), eq(taskInfo),
+                eq(mMockTaskListener));
 
-        clearInvocations(mMockCompatLayout, mMockLetterboxEduLayout, mController);
+        clearInvocations(mMockCompatLayout, mMockLetterboxEduLayout, mMockRestartDialogLayout,
+                mController);
         mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
 
-        verify(mMockCompatLayout).updateCompatInfo(taskInfo, mMockTaskListener, /* canShow= */
-                true);
-        verify(mMockLetterboxEduLayout).updateCompatInfo(taskInfo, mMockTaskListener, /* canShow= */
-                true);
+        verify(mMockCompatLayout).updateCompatInfo(taskInfo, mMockTaskListener,
+                /* canShow= */ true);
+        verify(mMockLetterboxEduLayout).updateCompatInfo(taskInfo, mMockTaskListener,
+                /* canShow= */ true);
+        verify(mMockRestartDialogLayout).updateCompatInfo(taskInfo, mMockTaskListener,
+                /* canShow= */ true);
 
         // Verify that the layout is created again.
-        clearInvocations(mMockCompatLayout, mMockLetterboxEduLayout, mController);
+        clearInvocations(mMockCompatLayout, mMockLetterboxEduLayout, mMockRestartDialogLayout,
+                mController);
         mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
 
         verify(mMockCompatLayout, never()).updateCompatInfo(any(), any(), anyBoolean());
         verify(mMockLetterboxEduLayout, never()).updateCompatInfo(any(), any(), anyBoolean());
+        verify(mMockRestartDialogLayout, never()).updateCompatInfo(any(), any(), anyBoolean());
         verify(mController).createCompatUiWindowManager(any(), eq(taskInfo), eq(mMockTaskListener));
         verify(mController).createLetterboxEduWindowManager(any(), eq(taskInfo),
+                eq(mMockTaskListener));
+        verify(mController).createRestartDialogWindowManager(any(), eq(taskInfo),
                 eq(mMockTaskListener));
     }
 
@@ -260,6 +297,7 @@ public class CompatUIControllerTest extends ShellTestCase {
 
         verify(mMockCompatLayout, never()).release();
         verify(mMockLetterboxEduLayout, never()).release();
+        verify(mMockRestartDialogLayout, never()).release();
         verify(mMockDisplayInsetsController, never()).removeInsetsChangedListener(eq(DISPLAY_ID),
                 any());
 
@@ -268,6 +306,7 @@ public class CompatUIControllerTest extends ShellTestCase {
         verify(mMockDisplayInsetsController).removeInsetsChangedListener(eq(DISPLAY_ID), any());
         verify(mMockCompatLayout).release();
         verify(mMockLetterboxEduLayout).release();
+        verify(mMockRestartDialogLayout).release();
     }
 
     @Test
@@ -279,11 +318,13 @@ public class CompatUIControllerTest extends ShellTestCase {
 
         verify(mMockCompatLayout, never()).updateDisplayLayout(any());
         verify(mMockLetterboxEduLayout, never()).updateDisplayLayout(any());
+        verify(mMockRestartDialogLayout, never()).updateDisplayLayout(any());
 
         mController.onDisplayConfigurationChanged(DISPLAY_ID, new Configuration());
 
         verify(mMockCompatLayout).updateDisplayLayout(mMockDisplayLayout);
         verify(mMockLetterboxEduLayout).updateDisplayLayout(mMockDisplayLayout);
+        verify(mMockRestartDialogLayout).updateDisplayLayout(mMockDisplayLayout);
     }
 
     @Test
@@ -302,12 +343,14 @@ public class CompatUIControllerTest extends ShellTestCase {
 
         verify(mMockCompatLayout).updateDisplayLayout(mMockDisplayLayout);
         verify(mMockLetterboxEduLayout).updateDisplayLayout(mMockDisplayLayout);
+        verify(mMockRestartDialogLayout).updateDisplayLayout(mMockDisplayLayout);
 
         // No update if the insets state is the same.
-        clearInvocations(mMockCompatLayout, mMockLetterboxEduLayout);
+        clearInvocations(mMockCompatLayout, mMockLetterboxEduLayout, mMockRestartDialogLayout);
         mOnInsetsChangedListenerCaptor.getValue().insetsChanged(new InsetsState(insetsState));
         verify(mMockCompatLayout, never()).updateDisplayLayout(mMockDisplayLayout);
         verify(mMockLetterboxEduLayout, never()).updateDisplayLayout(mMockDisplayLayout);
+        verify(mMockRestartDialogLayout, never()).updateDisplayLayout(mMockDisplayLayout);
     }
 
     @Test
@@ -320,22 +363,26 @@ public class CompatUIControllerTest extends ShellTestCase {
 
         verify(mMockCompatLayout).updateVisibility(false);
         verify(mMockLetterboxEduLayout).updateVisibility(false);
+        verify(mMockRestartDialogLayout).updateVisibility(false);
 
         // Verify button remains hidden while IME is showing.
         TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true,
                 CAMERA_COMPAT_CONTROL_HIDDEN);
         mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
 
-        verify(mMockCompatLayout).updateCompatInfo(taskInfo, mMockTaskListener, /* canShow= */
-                false);
-        verify(mMockLetterboxEduLayout).updateCompatInfo(taskInfo, mMockTaskListener, /* canShow= */
-                false);
+        verify(mMockCompatLayout).updateCompatInfo(taskInfo, mMockTaskListener,
+                /* canShow= */ false);
+        verify(mMockLetterboxEduLayout).updateCompatInfo(taskInfo, mMockTaskListener,
+                /* canShow= */ false);
+        verify(mMockRestartDialogLayout).updateCompatInfo(taskInfo, mMockTaskListener,
+                /* canShow= */ false);
 
         // Verify button is shown after IME is hidden.
         mController.onImeVisibilityChanged(DISPLAY_ID, /* isShowing= */ false);
 
         verify(mMockCompatLayout).updateVisibility(true);
         verify(mMockLetterboxEduLayout).updateVisibility(true);
+        verify(mMockRestartDialogLayout).updateVisibility(true);
     }
 
     @Test
@@ -348,22 +395,26 @@ public class CompatUIControllerTest extends ShellTestCase {
 
         verify(mMockCompatLayout).updateVisibility(false);
         verify(mMockLetterboxEduLayout).updateVisibility(false);
+        verify(mMockRestartDialogLayout).updateVisibility(false);
 
         // Verify button remains hidden while keyguard is showing.
         TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true,
                 CAMERA_COMPAT_CONTROL_HIDDEN);
         mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
 
-        verify(mMockCompatLayout).updateCompatInfo(taskInfo, mMockTaskListener, /* canShow= */
-                false);
-        verify(mMockLetterboxEduLayout).updateCompatInfo(taskInfo, mMockTaskListener, /* canShow= */
-                false);
+        verify(mMockCompatLayout).updateCompatInfo(taskInfo, mMockTaskListener,
+                /* canShow= */ false);
+        verify(mMockLetterboxEduLayout).updateCompatInfo(taskInfo, mMockTaskListener,
+                /* canShow= */ false);
+        verify(mMockRestartDialogLayout).updateCompatInfo(taskInfo, mMockTaskListener,
+                /* canShow= */ false);
 
         // Verify button is shown after keyguard becomes not showing.
         mController.onKeyguardVisibilityChanged(false, false, false);
 
         verify(mMockCompatLayout).updateVisibility(true);
         verify(mMockLetterboxEduLayout).updateVisibility(true);
+        verify(mMockRestartDialogLayout).updateVisibility(true);
     }
 
     @Test
@@ -376,20 +427,23 @@ public class CompatUIControllerTest extends ShellTestCase {
 
         verify(mMockCompatLayout, times(2)).updateVisibility(false);
         verify(mMockLetterboxEduLayout, times(2)).updateVisibility(false);
+        verify(mMockRestartDialogLayout, times(2)).updateVisibility(false);
 
-        clearInvocations(mMockCompatLayout, mMockLetterboxEduLayout);
+        clearInvocations(mMockCompatLayout, mMockLetterboxEduLayout, mMockRestartDialogLayout);
 
         // Verify button remains hidden after keyguard becomes not showing since IME is showing.
         mController.onKeyguardVisibilityChanged(false, false, false);
 
         verify(mMockCompatLayout).updateVisibility(false);
         verify(mMockLetterboxEduLayout).updateVisibility(false);
+        verify(mMockRestartDialogLayout).updateVisibility(false);
 
         // Verify button is shown after IME is not showing.
         mController.onImeVisibilityChanged(DISPLAY_ID, /* isShowing= */ false);
 
         verify(mMockCompatLayout).updateVisibility(true);
         verify(mMockLetterboxEduLayout).updateVisibility(true);
+        verify(mMockRestartDialogLayout).updateVisibility(true);
     }
 
     @Test
@@ -402,20 +456,23 @@ public class CompatUIControllerTest extends ShellTestCase {
 
         verify(mMockCompatLayout, times(2)).updateVisibility(false);
         verify(mMockLetterboxEduLayout, times(2)).updateVisibility(false);
+        verify(mMockRestartDialogLayout, times(2)).updateVisibility(false);
 
-        clearInvocations(mMockCompatLayout, mMockLetterboxEduLayout);
+        clearInvocations(mMockCompatLayout, mMockLetterboxEduLayout, mMockRestartDialogLayout);
 
         // Verify button remains hidden after IME is hidden since keyguard is showing.
         mController.onImeVisibilityChanged(DISPLAY_ID, /* isShowing= */ false);
 
         verify(mMockCompatLayout).updateVisibility(false);
         verify(mMockLetterboxEduLayout).updateVisibility(false);
+        verify(mMockRestartDialogLayout).updateVisibility(false);
 
         // Verify button is shown after keyguard becomes not showing.
         mController.onKeyguardVisibilityChanged(false, false, false);
 
         verify(mMockCompatLayout).updateVisibility(true);
         verify(mMockLetterboxEduLayout).updateVisibility(true);
+        verify(mMockRestartDialogLayout).updateVisibility(true);
     }
 
     private static TaskInfo createTaskInfo(int displayId, int taskId, boolean hasSizeCompat,

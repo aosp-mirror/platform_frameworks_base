@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.timeout;
@@ -51,7 +52,7 @@ public final class TunerAdapterTest {
 
     private static final int TEST_TARGET_SDK_VERSION = Build.VERSION_CODES.CUR_DEVELOPMENT;
 
-    private static final int CALLBACK_TIMEOUT_MS = 30_000;
+    private static final int CALLBACK_TIMEOUT_MS = 500;
     private static final int AM_LOWER_LIMIT_KHZ = 150;
 
     private static final RadioManager.BandConfig TEST_BAND_CONFIG = createBandConfig();
@@ -445,7 +446,17 @@ public final class TunerAdapterTest {
     }
 
     @Test
-    public void getProgramInfo_beforeProgramInfoSetForTunerAdapter() {
+    public void getProgramInfo_withInvalidInput_fails() {
+        RadioManager.ProgramInfo[] programInfoArray = new RadioManager.ProgramInfo[2];
+
+        int status = mRadioTuner.getProgramInformation(programInfoArray);
+
+        assertWithMessage("Status for getting program info with input array of wrong size")
+                .that(status).isEqualTo(RadioManager.STATUS_BAD_VALUE);
+    }
+
+    @Test
+    public void getProgramInfo_beforeProgramInfoSetForTunerAdapter_fails() {
         RadioManager.ProgramInfo[] programInfoArray = new RadioManager.ProgramInfo[1];
 
         int status = mRadioTuner.getProgramInformation(programInfoArray);
@@ -729,6 +740,13 @@ public final class TunerAdapterTest {
 
         verify(mCallbackMock, timeout(CALLBACK_TIMEOUT_MS))
                 .onBackgroundScanAvailabilityChange(/* isAvailable= */ false);
+    }
+
+    @Test
+    public void onCurrentProgramInfoChanged_withNullInfo_notInvokeMockCallback() throws Exception {
+        mTunerCallback.onCurrentProgramInfoChanged(null);
+
+        verify(mCallbackMock, after(CALLBACK_TIMEOUT_MS).never()).onProgramInfoChanged(any());
     }
 
     @Test

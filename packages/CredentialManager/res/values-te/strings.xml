@@ -5,10 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"రద్దు చేయండి"</string>
     <string name="string_continue" msgid="1346732695941131882">"కొనసాగించండి"</string>
     <string name="string_more_options" msgid="7990658711962795124">"మరిన్ని ఆప్షన్‌లు"</string>
+    <string name="string_learn_more" msgid="4541600451688392447">"మరింత తెలుసుకోండి"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"పాస్-కీలతో సురక్షితంగా చెల్లించవచ్చు"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"పాస్-కీలతో, మీరు క్లిష్టమైన పాస్‌వర్డ్‌లను క్రియేట్ చేయనవసరం లేదు లేదా గుర్తుంచుకోనవసరం లేదు"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"పాస్-కీలు అనేవి మీ వేలిముద్రను, ముఖాన్ని లేదా స్క్రీన్ లాక్‌ను ఉపయోగించి మీరు క్రియేట్ చేసే ఎన్‌క్రిప్ట్ చేసిన డిజిటల్ కీలు"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"అవి Password Managerకు సేవ్ చేయబడతాయి, తద్వారా మీరు ఇతర పరికరాలలో సైన్ ఇన్ చేయవచ్చు"</string>
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"పాస్-కీల గురించి మరిన్ని వివరాలు"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"పాస్‌వర్డ్ రహిత టెక్నాలజీ"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"పాస్‌వర్డ్‌లపై ఆధారపడకుండా సైన్ ఇన్ చేయడానికి పాస్-కీలు మిమ్మల్ని అనుమతిస్తాయి. మీ గుర్తింపును వెరిఫై చేసి, పాస్-కీని క్రియేట్ చేయడానికి మీరు మీ వేలిముద్ర, ముఖ గుర్తింపు, PIN, లేదా స్వైప్ ఆకృతిని ఉపయోగించాలి."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"పబ్లిక్ కీ క్రిప్టోగ్రఫీ"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"FIDO Alliance (దీనిలో Google, Apple, Microsoft, మరిన్ని ఉన్నాయి), W3C ప్రమాణాల ప్రకారం, పాస్‌కీలు క్రిప్టోగ్రాఫిక్ కీల జతలను ఉపయోగిస్తాయి. మనం పాస్‌వర్డ్‌ల కోసం ఉపయోగించే యూజర్‌నేమ్, అక్షరాల స్ట్రింగ్ కాకుండా, యాప్ లేదా సైట్ కోసం ప్రైవేట్-పబ్లిక్ కీల జత సృష్టించబడుతుంది. ప్రైవేట్ కీ మీ డివైజ్/పాస్‌వర్డ్ మేనేజర్‌లో సురక్షితంగా స్టోర్ చేయబడుతుంది, ఇది మీ గుర్తింపును నిర్ధారిస్తుంది. పబ్లిక్ కీ, యాప్/వెబ్‌సైట్ సర్వర్‌తో షేర్ చేయబడుతుంది. సంబంధిత కీలతో, తక్షణమే రిజిస్టర్ చేసుకొని, సైన్ ఇన్ చేయవచ్చు."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"మెరుగైన ఖాతా సెక్యూరిటీ"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"ప్రతి కీ దానిని క్రియేట్ చేసిన యాప్ లేదా వెబ్‌సైట్‌తో ప్రత్యేకంగా లింక్ చేయబడి ఉంటుంది, కాబట్టి మీరు పొరపాటున కూడా మోసపూరిత యాప్ లేదా వెబ్‌సైట్‌కు సైన్ ఇన్ చేయలేరు. అంతే కాకుండా, సర్వర్‌లు పబ్లిక్ కీలను మాత్రమే స్టోర్ చేయడం వల్ల, హ్యాకింగ్ చేయడం చాలా కష్టం."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"అవాంతరాలు లేని పరివర్తన"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"మనం భవిష్యత్తులో పాస్‌వర్డ్ రహిత టెక్నాలజీని ఉపయోగించినా, పాస్‌కీలతో పాటు పాస్‌వర్డ్‌లు కూడా అందుబాటులో ఉంటాయి."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"మీ <xliff:g id="CREATETYPES">%1$s</xliff:g>ని ఎక్కడ సేవ్ చేయాలో ఎంచుకోండి"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"మీ సమాచారాన్ని సేవ్ చేయడం కోసం ఒక Password Managerను ఎంచుకొని, తర్వాతసారి వేగంగా సైన్ ఇన్ చేయండి"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> కోసం పాస్‌కీని క్రియేట్ చేయాలా?"</string>

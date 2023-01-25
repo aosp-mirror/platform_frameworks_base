@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.DEFAULT_DISPLAY_GROUP;
 import static android.view.Display.TYPE_EXTERNAL;
@@ -534,6 +535,11 @@ public class LogicalDisplayMapperTest {
     public void testDeviceShouldNotBePutToSleep() {
         assertFalse(mLogicalDisplayMapper.shouldDeviceBePutToSleep(DEVICE_STATE_OPEN,
                 DEVICE_STATE_CLOSED,
+                /* isOverrideActive= */false,
+                /* isInteractive= */true,
+                /* isBootCompleted= */true));
+        assertFalse(mLogicalDisplayMapper.shouldDeviceBePutToSleep(DEVICE_STATE_CLOSED,
+                INVALID_DEVICE_STATE,
                 /* isOverrideActive= */false,
                 /* isInteractive= */true,
                 /* isBootCompleted= */true));

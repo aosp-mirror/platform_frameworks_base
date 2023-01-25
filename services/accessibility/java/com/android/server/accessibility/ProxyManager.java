@@ -178,9 +178,15 @@ public class ProxyManager {
         if (a11yEnabled) {
             clientState |= AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED;
         }
+        for (int i = 0; i < mProxyA11yServiceConnections.size(); i++) {
+            final ProxyAccessibilityServiceConnection proxy =
+                    mProxyA11yServiceConnections.valueAt(i);
+            if (proxy.mRequestTouchExplorationMode) {
+                clientState |= AccessibilityManager.STATE_FLAG_TOUCH_EXPLORATION_ENABLED;
+            }
+        }
         return clientState;
-        // TODO(b/254545943): When A11yManager is separated, include support for other properties
-        // like isTouchExplorationEnabled.
+        // TODO(b/254545943): When A11yManager is separated, include support for other properties.
     }
 
     /**

@@ -137,6 +137,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.Display;
+import android.widget.Toast;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -147,6 +148,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
+import com.android.server.UiThread;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.HostingRecord;
 import com.android.server.am.UserState;
@@ -1628,16 +1630,16 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             // Prevent recursion.
             return;
         }
+        boolean passesAsmChecks = true;
         // We may have already checked that the callingUid has additional clearTask privileges, and
         // cleared the calling identify. If so, we infer we do not need further restrictions here.
         // TODO(b/263368846) Move to live with the rest of the ASM logic.
         if (callingUid != SYSTEM_UID) {
-            boolean passesAsmChecks = doesTopActivityMatchingUidExistForAsm(task, callingUid,
+            passesAsmChecks = doesTopActivityMatchingUidExistForAsm(task, callingUid,
                     null);
             if (!passesAsmChecks) {
                 ActivityRecord topActivity =  task.getActivity(ar ->
                         !ar.isState(FINISHING) && !ar.isAlwaysOnTop());
-                Slog.i(TAG, "Finishing task from background. t: " + task);
                 FrameworkStatsLog.write(FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED,
                         /* caller_uid */
                         callingUid,
@@ -1675,6 +1677,28 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             mService.getTaskChangeNotificationController().notifyTaskStackChanged();
             if (task.isPersistable) {
                 mService.notifyTaskPersisterLocked(null, true);
+            }
+            if (!passesAsmChecks) {
+                boolean shouldRestrictActivitySwitch =
+                        ActivitySecurityModelFeatureFlags.shouldRestrictActivitySwitch(callingUid);
+
+                if (ActivitySecurityModelFeatureFlags.shouldShowToast(callingUid)) {
+                    UiThread.getHandler().post(() -> Toast.makeText(mService.mContext,
+                            (shouldRestrictActivitySwitch
+                                    ? "Returning home due to "
+                                    : "Would return home due to ")
+                                    + ActivitySecurityModelFeatureFlags.DOC_LINK,
+                            Toast.LENGTH_SHORT).show());
+                }
+
+                // If the activity switch should be restricted, return home rather than the
+                // previously top task, to prevent users from being confused which app they're
+                // viewing
+                if (shouldRestrictActivitySwitch) {
+                    Slog.w(TAG, "Return to home as source uid: " + callingUid
+                            + "is not on top of task t: " + task);
+                    task.getTaskDisplayArea().moveHomeActivityToTop("taskRemoved");
+                }
             }
         } finally {
             task.mInRemoveTask = false;

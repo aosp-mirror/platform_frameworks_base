@@ -75,7 +75,7 @@ public final class DisplayBrightnessControllerTest {
     }
 
     @Test
-    public void updateBrightness() {
+    public void testUpdateBrightness() {
         DisplayPowerRequest displayPowerRequest = mock(DisplayPowerRequest.class);
         DisplayBrightnessStrategy displayBrightnessStrategy = mock(DisplayBrightnessStrategy.class);
         int targetDisplayState = Display.STATE_DOZE;

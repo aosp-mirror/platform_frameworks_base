@@ -18,6 +18,8 @@ package com.android.server.display;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -252,5 +254,36 @@ public final class DisplayPowerController2Test {
                     }
                 });
         when(mDisplayDeviceConfigMock.getNits()).thenReturn(new float[]{2, 500});
+    }
+
+    @Test
+    public void testDisplayBrightnessFollowers() {
+        setUpDisplay(DISPLAY_ID, UNIQUE_DISPLAY_ID);
+
+        DisplayPowerController2 defaultDpc = new DisplayPowerController2(
+                mContextSpy, mInjector, mDisplayPowerCallbacksMock, mHandler,
+                mSensorManagerMock, mDisplayBlankerMock, mLogicalDisplayMock,
+                mBrightnessTrackerMock, mBrightnessSettingMock, () -> {
+        }, mHighBrightnessModeMetadataMock);
+        DisplayPowerController2 followerDpc = new DisplayPowerController2(
+                mContextSpy, mInjector, mDisplayPowerCallbacksMock, mHandler,
+                mSensorManagerMock, mDisplayBlankerMock, mLogicalDisplayMock,
+                mBrightnessTrackerMock, mBrightnessSettingMock, () -> {
+        }, mHighBrightnessModeMetadataMock);
+
+        defaultDpc.addDisplayBrightnessFollower(followerDpc);
+
+        defaultDpc.setBrightness(0.3f);
+        assertEquals(defaultDpc.getBrightnessInfo().brightness,
+                followerDpc.getBrightnessInfo().brightness, 0);
+
+        defaultDpc.setBrightness(0.6f);
+        assertEquals(defaultDpc.getBrightnessInfo().brightness,
+                followerDpc.getBrightnessInfo().brightness, 0);
+
+        float brightness = 0.1f;
+        defaultDpc.clearDisplayBrightnessFollowers();
+        defaultDpc.setBrightness(brightness);
+        assertNotEquals(brightness, followerDpc.getBrightnessInfo().brightness, 0);
     }
 }

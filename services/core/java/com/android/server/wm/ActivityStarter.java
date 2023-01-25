@@ -1972,7 +1972,7 @@ class ActivityStarter {
         );
 
         boolean shouldBlockActivityStart =
-                ActivitySecurityModelFeatureFlags.shouldBlockActivityStart(mCallingUid);
+                ActivitySecurityModelFeatureFlags.shouldRestrictActivitySwitch(mCallingUid);
 
         if (ActivitySecurityModelFeatureFlags.shouldShowToast(mCallingUid)) {
             UiThread.getHandler().post(() -> Toast.makeText(mService.mContext,
@@ -2080,6 +2080,7 @@ class ActivityStarter {
                 reusedTask != null ? reusedTask.getTopNonFinishingActivity() : null, intentGrants);
 
         if (mAddingToTask) {
+            clearTopIfNeeded(targetTask, mCallingUid, mStartActivity.getUid(), mLaunchFlags);
             return START_SUCCESS;
         }
 
@@ -2109,6 +2110,55 @@ class ActivityStarter {
 
         mLastStartActivityRecord = targetTaskTop;
         return mMovedToFront ? START_TASK_TO_FRONT : START_DELIVERED_TO_TOP;
+    }
+
+    /**
+     * If the top activity uid does not match the launched activity, and the launch was not
+     * requested from the top uid, we want to clear out all non matching activities to prevent the
+     * top activity being sandwiched.
+     */
+    private void clearTopIfNeeded(@NonNull Task targetTask, int callingUid, int startingUid,
+            int launchFlags) {
+        if ((launchFlags & FLAG_ACTIVITY_NEW_TASK) != FLAG_ACTIVITY_NEW_TASK) {
+            // Launch is from the same task, so must be a top or privileged UID
+            return;
+        }
+
+        ActivityRecord targetTaskTop = targetTask.getTopNonFinishingActivity();
+        if (targetTaskTop != null && targetTaskTop.getUid() != startingUid) {
+            boolean shouldBlockActivityStart = ActivitySecurityModelFeatureFlags
+                    .shouldRestrictActivitySwitch(callingUid);
+            int[] finishCount = new int[0];
+            if (shouldBlockActivityStart) {
+                ActivityRecord activity = targetTask.getActivity(
+                        ar -> !ar.finishing && ar.isUid(startingUid));
+
+                if (activity == null) {
+                    // mStartActivity is not in task, so clear everything
+                    activity = mStartActivity;
+                }
+
+                finishCount = new int[1];
+                if (activity != null) {
+                    targetTask.performClearTop(activity, launchFlags, finishCount);
+                }
+
+                if (finishCount[0] > 0) {
+                    Slog.w(TAG, "Clearing top n: " + finishCount[0] + " activities from task t: "
+                            + targetTask + " not matching top uid: " + callingUid);
+                }
+            }
+
+            if (ActivitySecurityModelFeatureFlags.shouldShowToast(callingUid)
+                    && (!shouldBlockActivityStart || finishCount[0] > 0)) {
+                UiThread.getHandler().post(() -> Toast.makeText(mService.mContext,
+                        (shouldBlockActivityStart
+                                ? "Top activities cleared by "
+                                : "Top activities would be cleared by ")
+                                + ActivitySecurityModelFeatureFlags.DOC_LINK,
+                        Toast.LENGTH_SHORT).show());
+            }
+        }
     }
 
     /**

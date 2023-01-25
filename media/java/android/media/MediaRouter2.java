@@ -461,6 +461,19 @@ public final class MediaRouter2 {
     }
 
     /**
+     * Shows the system UI output switcher.
+     */
+    public void showSystemOutputSwitcher() {
+        synchronized (mLock) {
+            try {
+                mMediaRouterService.showMediaOutputSwitcher(mPackageName);
+            } catch (RemoteException ex) {
+                ex.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
      * Sets the {@link RouteListingPreference} of the app associated to this media router.
      *
      * <p>Use this method to inform the system UI of the routes that you would like to list for

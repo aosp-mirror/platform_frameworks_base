@@ -43,7 +43,7 @@ public final class ScreenOffBrightnessStrategyTest {
     }
 
     @Test
-    public void updateBrightnessWorksAsExpectedWhenScreenOffDisplayState() {
+    public void testUpdateBrightnessWhenScreenOffDisplayState() {
         DisplayPowerRequest displayPowerRequest = new DisplayPowerRequest();
         BrightnessReason brightnessReason = new BrightnessReason();
         brightnessReason.setReason(BrightnessReason.REASON_SCREEN_OFF);

@@ -56,11 +56,19 @@ public interface TimeDetectorInternal {
      * valid but does not change the time because it matches the current device time is considered
      * accepted.
      */
-    boolean setManualTimeForDpm(@NonNull ManualTimeSuggestion manualTimeSuggestion);
+    boolean setManualTimeForDpm(@NonNull ManualTimeSuggestion suggestion);
 
-    /** Used to pass new network time suggestions to the time detector. */
-    void suggestNetworkTime(@NonNull NetworkTimeSuggestion timeSignal);
+    /**
+     * Suggests a network time to the time detector. The suggestion may not be used by the time
+     * detector to set the device's time depending on device configuration and user settings, but
+     * can replace previous network suggestions received.
+     */
+    void suggestNetworkTime(@NonNull NetworkTimeSuggestion suggestion);
 
-    /** Used to pass new GNSS time suggestions to the time detector. */
-    void suggestGnssTime(@NonNull GnssTimeSuggestion timeSignal);
+    /**
+     * Suggests a GNSS-derived time to the time detector. The suggestion may not be used by the time
+     * detector to set the device's time depending on device configuration and user settings, but
+     * can replace previous GNSS suggestions received.
+     */
+    void suggestGnssTime(@NonNull GnssTimeSuggestion suggestion);
 }

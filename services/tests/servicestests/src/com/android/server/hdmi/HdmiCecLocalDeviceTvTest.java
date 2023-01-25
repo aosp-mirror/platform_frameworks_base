@@ -193,10 +193,19 @@ public class HdmiCecLocalDeviceTvTest {
         mHdmiControlService.setEarcController(mHdmiEarcController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
         HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[2];
-        hdmiPortInfos[0] =
-                new HdmiPortInfo(1, HdmiPortInfo.PORT_INPUT, 0x1000, true, false, false, false);
+        hdmiPortInfos[0] = new HdmiPortInfo.Builder(1, HdmiPortInfo.PORT_INPUT, 0x1000)
+                .setCecSupported(true)
+                .setMhlSupported(false)
+                .setArcSupported(false)
+                .setEarcSupported(false)
+                .build();
         hdmiPortInfos[1] =
-                new HdmiPortInfo(2, HdmiPortInfo.PORT_INPUT, 0x2000, true, false, true, true);
+                new HdmiPortInfo.Builder(2, HdmiPortInfo.PORT_INPUT, 0x2000)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(true)
+                        .setEarcSupported(true)
+                        .build();
         mNativeWrapper.setPortInfo(hdmiPortInfos);
         mHdmiControlService.initService();
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);

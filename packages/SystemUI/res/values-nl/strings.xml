@@ -91,10 +91,8 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Ondergrens <xliff:g id="PERCENT">%1$d</xliff:g> procent"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Linkergrens <xliff:g id="PERCENT">%1$d</xliff:g> procent"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Rechtergrens <xliff:g id="PERCENT">%1$d</xliff:g> procent"</string>
-    <!-- no translation found for screenshot_work_profile_notification (2812417845875653929) -->
-    <skip />
-    <!-- no translation found for screenshot_default_files_app_name (8721579578575161912) -->
-    <skip />
+    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"Werkscreenshots worden opgeslagen in de <xliff:g id="APP">%1$s</xliff:g>-app"</string>
+    <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Bestanden"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Schermopname"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Schermopname verwerken"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Doorlopende melding voor een schermopname-sessie"</string>
@@ -545,8 +543,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automatisch"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Geen geluid of trilling"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Geen geluid of trilling en wordt lager in het gedeelte met gesprekken getoond"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Kan overgaan of trillen op basis van de telefooninstellingen"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Kan overgaan of trillen op basis van de telefooninstellingen. Gesprekken uit <xliff:g id="APP_NAME">%1$s</xliff:g> worden standaard als bubbels getoond."</string>
+    <string name="notification_channel_summary_default" msgid="777294388712200605">"Kan overgaan of trillen op basis van de apparaatinstellingen"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Kan overgaan of trillen op basis van de apparaatinstellingen. Gesprekken uit <xliff:g id="APP_NAME">%1$s</xliff:g> worden standaard als bubbels weergegeven."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Het systeem laten bepalen of deze melding geluid moet maken of moet trillen"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Status:&lt;/b&gt; opgeschaald naar Standaard"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Status:&lt;/b&gt; verlaagd naar Stil"</string>
@@ -887,13 +885,11 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="SONG_NAME">%1$s</xliff:g> afspelen via <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Ongedaan maken"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Houd dichter bij <xliff:g id="DEVICENAME">%1$s</xliff:g> om af te spelen"</string>
-    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
-    <skip />
+    <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"Ga dichter naar <xliff:g id="DEVICENAME">%1$s</xliff:g> toe om hier af te spelen"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Afspelen op <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Er is iets misgegaan. Probeer het opnieuw."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"Laden"</string>
-    <!-- no translation found for media_ttt_default_device_type (4457646436153370169) -->
-    <skip />
+    <string name="media_ttt_default_device_type" msgid="4457646436153370169">"tablet"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactief, check de app"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Niet gevonden"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Beheeroptie niet beschikbaar"</string>
@@ -917,8 +913,8 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Speakers en schermen"</string>
-    <!-- no translation found for media_output_group_title_suggested_device (4157186235837903826) -->
-    <skip />
+    <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Voorgestelde apparaten"</string>
+    <string name="media_output_status_require_premium" msgid="5691200962588753380">"Je hebt een premium account nodig"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Hoe uitzenden werkt"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Uitzending"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Mensen bij jou in de buurt met geschikte bluetooth-apparaten kunnen luisteren naar de media die je uitzendt"</string>
@@ -1060,8 +1056,12 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Dit scherm gaat uit"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Opvouwbaar apparaat wordt uitgevouwen"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Opvouwbaar apparaat wordt gedraaid"</string>
-    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
-    <skip />
-    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
-    <skip />
+    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Nog <xliff:g id="PERCENTAGE">%s</xliff:g> batterijlading"</string>
+    <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Verbind je stylus met een oplader"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Batterij van stylus bijna leeg"</string>
+    <string name="video_camera" msgid="7654002575156149298">"Videocamera"</string>
+    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Je kunt niet bellen vanuit dit profiel"</string>
+    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Op basis van je werkbeleid kun je alleen bellen vanuit het werkprofiel"</string>
+    <string name="call_from_work_profile_action" msgid="2937701298133010724">"Overschakelen naar werkprofiel"</string>
+    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Sluiten"</string>
 </resources>

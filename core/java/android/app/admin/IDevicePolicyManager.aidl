@@ -336,6 +336,9 @@ interface IDevicePolicyManager {
     PackagePolicy getManagedProfileCallerIdAccessPolicy();
     boolean hasManagedProfileCallerIdAccess(int userId, String packageName);
 
+    void setCredentialManagerPolicy(in PackagePolicy policy);
+    PackagePolicy getCredentialManagerPolicy();
+
     void setManagedProfileContactsAccessPolicy(in PackagePolicy policy);
     PackagePolicy getManagedProfileContactsAccessPolicy();
     boolean hasManagedProfileContactsAccess(int userId, String packageName);

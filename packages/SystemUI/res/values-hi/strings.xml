@@ -91,10 +91,8 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"निचले किनारे से <xliff:g id="PERCENT">%1$d</xliff:g> प्रतिशत"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"बाएं किनारे से <xliff:g id="PERCENT">%1$d</xliff:g> प्रतिशत"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"दाएं किनारे से <xliff:g id="PERCENT">%1$d</xliff:g> प्रतिशत"</string>
-    <!-- no translation found for screenshot_work_profile_notification (2812417845875653929) -->
-    <skip />
-    <!-- no translation found for screenshot_default_files_app_name (8721579578575161912) -->
-    <skip />
+    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"वर्क प्रोफ़ाइल से लिए गए स्क्रीनशॉट, <xliff:g id="APP">%1$s</xliff:g> ऐप्लिकेशन में सेव किए गए हैं"</string>
+    <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Files"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"स्क्रीन रिकॉर्डर"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"स्क्रीन रिकॉर्डिंग को प्रोसेस किया जा रहा है"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"स्क्रीन रिकॉर्ड सेशन के लिए जारी सूचना"</string>
@@ -545,8 +543,10 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"अपने-आप"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"किसी तरह की आवाज़ या वाइब्रेशन न हो"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"इससे किसी तरह की आवाज़ या वाइब्रेशन नहीं होता और बातचीत, सेक्शन में सबसे नीचे दिखती है"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"फ़ोन की सेटिंग के आधार पर, सूचना आने पर घंटी बज सकती है या वाइब्रेशन हो सकता है"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"फ़ोन की सेटिंग के आधार पर, सूचना आने पर घंटी बज सकती है या वाइब्रेशन हो सकता है. <xliff:g id="APP_NAME">%1$s</xliff:g> में होने वाली बातचीत, डिफ़ॉल्ट रूप से बबल के तौर पर दिखती है."</string>
+    <!-- no translation found for notification_channel_summary_default (777294388712200605) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_default_with_bubbles (3482483084451555344) -->
+    <skip />
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"सिस्टम को यह तय करने की अनुमति दें कि इस सूचना के मिलने पर आवाज़ हो या वाइब्रेशन हो"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;स्थिति:&lt;/b&gt; लेवल बढ़ाकर, डिफ़ॉल्ट के तौर पर सेट किया गया"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;स्थिति:&lt;/b&gt; लेवल घटाकर, साइलेंट पर सेट किया गया"</string>
@@ -814,8 +814,7 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"मध्यम"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"छोटा"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"बड़ा"</string>
-    <!-- no translation found for accessibility_magnification_done (263349129937348512) -->
-    <skip />
+    <string name="accessibility_magnification_done" msgid="263349129937348512">"हो गया"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"बदलाव करें"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"ज़ूम करने की सुविधा वाली विंडो से जुड़ी सेटिंग"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"सुलभता सुविधाएं खोलने के लिए टैप करें. सेटिंग में, इस बटन को बदलें या अपने हिसाब से सेट करें.\n\n"<annotation id="link">"सेटिंग देखें"</annotation></string>
@@ -887,13 +886,11 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="APP_LABEL">%2$s</xliff:g> पर, <xliff:g id="SONG_NAME">%1$s</xliff:g> चलाएं"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"पहले जैसा करें"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> पर मीडिया चलाने के लिए, अपने डिवाइस को उसके पास ले जाएं"</string>
-    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
-    <skip />
+    <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"मीडिया ट्रांसफ़र करने के लिए, <xliff:g id="DEVICENAME">%1$s</xliff:g> के करीब जाएं"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> पर मीडिया चल रहा है"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"कोई गड़बड़ी हुई. फिर से कोशिश करें."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"लोड हो रहा है"</string>
-    <!-- no translation found for media_ttt_default_device_type (4457646436153370169) -->
-    <skip />
+    <string name="media_ttt_default_device_type" msgid="4457646436153370169">"टैबलेट"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"काम नहीं कर रहा, ऐप जांचें"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"कंट्रोल नहीं है"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"कंट्रोल मौजूद नहीं है"</string>
@@ -917,7 +914,8 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"वॉल्यूम"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"स्पीकर और डिसप्ले"</string>
-    <!-- no translation found for media_output_group_title_suggested_device (4157186235837903826) -->
+    <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"सुझाए गए डिवाइस"</string>
+    <!-- no translation found for media_output_status_require_premium (5691200962588753380) -->
     <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ब्रॉडकास्ट करने की सुविधा कैसे काम करती है"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ब्रॉडकास्ट करें"</string>
@@ -1060,8 +1058,17 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ यह स्क्रीन बंद हो जाएगी"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"फ़ोल्ड किया जा सकने वाला डिवाइस अनफ़ोल्ड किया जा रहा है"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"फ़ोल्ड किया जा सकने वाला डिवाइस पलटा जा रहा है"</string>
-    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
+    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> बैटरी बची है"</string>
+    <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"अपने स्टाइलस को चार्ज करें"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"स्टाइलस की बैटरी कम है"</string>
+    <!-- no translation found for video_camera (7654002575156149298) -->
     <skip />
-    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
+    <!-- no translation found for call_from_work_profile_title (6991157106804289643) -->
+    <skip />
+    <!-- no translation found for call_from_work_profile_text (3458704745640229638) -->
+    <skip />
+    <!-- no translation found for call_from_work_profile_action (2937701298133010724) -->
+    <skip />
+    <!-- no translation found for call_from_work_profile_close (7927067108901068098) -->
     <skip />
 </resources>

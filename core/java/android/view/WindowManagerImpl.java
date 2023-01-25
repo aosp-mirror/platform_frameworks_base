@@ -26,6 +26,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiContext;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Region;
@@ -411,5 +412,16 @@ public final class WindowManagerImpl implements WindowManager {
 
     IBinder getDefaultToken() {
         return mDefaultToken;
+    }
+
+    @Override
+    @NonNull
+    public List<ComponentName> notifyScreenshotListeners(int displayId) {
+        try {
+            return List.copyOf(WindowManagerGlobal.getWindowManagerService()
+                    .notifyScreenshotListeners(displayId));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 }

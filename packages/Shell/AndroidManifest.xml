@@ -369,6 +369,9 @@
     <!-- Permission needed to test wallpapers supporting ambient mode -->
     <uses-permission android:name="android.permission.AMBIENT_WALLPAPER" />
 
+    <!-- Permission needed to test wallpaper read methods -->
+    <uses-permission android:name="android.permission.READ_WALLPAPER_INTERNAL" />
+
     <!-- Permission required to test ContentResolver caching. -->
     <uses-permission android:name="android.permission.CACHE_CONTENT" />
 
@@ -796,11 +799,18 @@
     <!-- Permission required for CTS test - CtsPackageInstallTestCases-->
     <uses-permission android:name="android.permission.GET_APP_METADATA" />
 
+    <!-- Permission required for CTS test - CtsHealthConnectDeviceTestCases -->
+    <uses-permission android:name="android.permission.DELETE_STAGED_HEALTH_CONNECT_REMOTE_DATA" />
+    <uses-permission android:name="android.permission.STAGE_HEALTH_CONNECT_REMOTE_DATA" />
+
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED"/>
 
     <!-- Permissions required for CTS test - CtsBroadcastRadioTestCases -->
     <uses-permission android:name="android.permission.ACCESS_BROADCAST_RADIO" />
+
+    <!-- Permission required for CTS test - ActivityCaptureCallbackTests -->
+    <uses-permission android:name="android.permission.DETECT_SCREEN_CAPTURE" />
 
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"

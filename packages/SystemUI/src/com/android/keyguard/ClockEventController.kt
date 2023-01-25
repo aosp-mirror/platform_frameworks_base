@@ -24,6 +24,7 @@ import android.content.res.Resources
 import android.text.format.DateFormat
 import android.util.TypedValue
 import android.view.View
+import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
@@ -47,18 +48,17 @@ import com.android.systemui.shared.regionsampling.RegionSampler
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback
 import com.android.systemui.statusbar.policy.ConfigurationController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DisposableHandle
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.launch
 import java.io.PrintWriter
 import java.util.Locale
 import java.util.TimeZone
 import java.util.concurrent.Executor
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DisposableHandle
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.launch
 
 /**
  * Controller for a Clock provided by the registry and used on the keyguard. Instantiated by
@@ -89,7 +89,11 @@ open class ClockEventController @Inject constructor(
                 value.largeClock.logBuffer = largeLogBuffer
 
                 value.initialize(resources, dozeAmount, 0f)
-                updateRegionSamplers(value)
+
+                if (regionSamplingEnabled) {
+                    clock?.smallClock?.view?.addOnLayoutChangeListener(mLayoutChangedListener)
+                    clock?.largeClock?.view?.addOnLayoutChangeListener(mLayoutChangedListener)
+                }
                 updateFontSizes()
             }
         }
@@ -104,47 +108,87 @@ open class ClockEventController @Inject constructor(
     private var disposableHandle: DisposableHandle? = null
     private val regionSamplingEnabled = featureFlags.isEnabled(REGION_SAMPLING)
 
-    private fun updateColors() {
+    private val mLayoutChangedListener = object : View.OnLayoutChangeListener {
+        private var currentSmallClockView: View? = null
+        private var currentLargeClockView: View? = null
+        private var currentSmallClockLocation = IntArray(2)
+        private var currentLargeClockLocation = IntArray(2)
 
-        if (regionSamplingEnabled && smallRegionSampler != null && largeRegionSampler != null) {
-            val wallpaperManager = WallpaperManager.getInstance(context)
-            if (!wallpaperManager.lockScreenWallpaperExists()) {
-                smallClockIsDark = smallRegionSampler!!.currentRegionDarkness().isDark
-                largeClockIsDark = largeRegionSampler!!.currentRegionDarkness().isDark
-            }
-        } else {
-            val isLightTheme = TypedValue()
-            context.theme.resolveAttribute(android.R.attr.isLightTheme, isLightTheme, true)
-            smallClockIsDark = isLightTheme.data == 0
-            largeClockIsDark = isLightTheme.data == 0
+        override fun onLayoutChange(
+            view: View?,
+            left: Int,
+            top: Int,
+            right: Int,
+            bottom: Int,
+            oldLeft: Int,
+            oldTop: Int,
+            oldRight: Int,
+            oldBottom: Int
+        ) {
+        val parent = (view?.parent) as FrameLayout
+
+        // don't pass in negative bounds when clocks are in transition state
+        if (view.locationOnScreen[0] < 0 || view.locationOnScreen[1] < 0) {
+            return
         }
+
+        // SMALL CLOCK
+        if (parent.id == R.id.lockscreen_clock_view) {
+            // view bounds have changed due to clock size changing (i.e. different character widths)
+            // AND/OR the view has been translated when transitioning between small and large clock
+            if (view != currentSmallClockView ||
+                !view.locationOnScreen.contentEquals(currentSmallClockLocation)) {
+                currentSmallClockView = view
+                currentSmallClockLocation = view.locationOnScreen
+                updateRegionSampler(view)
+            }
+        }
+        // LARGE CLOCK
+        else if (parent.id == R.id.lockscreen_clock_view_large) {
+            if (view != currentLargeClockView ||
+                !view.locationOnScreen.contentEquals(currentLargeClockLocation)) {
+                currentLargeClockView = view
+                currentLargeClockLocation = view.locationOnScreen
+                updateRegionSampler(view)
+            }
+        }
+        }
+    }
+
+    private fun updateColors() {
+        val wallpaperManager = WallpaperManager.getInstance(context)
+        if (regionSamplingEnabled && !wallpaperManager.lockScreenWallpaperExists()) {
+            if (regionSampler != null) {
+                if (regionSampler?.sampledView == clock?.smallClock?.view) {
+                    smallClockIsDark = regionSampler!!.currentRegionDarkness().isDark
+                    clock?.smallClock?.events?.onRegionDarknessChanged(smallClockIsDark)
+                    return
+                } else if (regionSampler?.sampledView == clock?.largeClock?.view) {
+                    largeClockIsDark = regionSampler!!.currentRegionDarkness().isDark
+                    clock?.largeClock?.events?.onRegionDarknessChanged(largeClockIsDark)
+                    return
+                }
+            }
+        }
+
+        val isLightTheme = TypedValue()
+        context.theme.resolveAttribute(android.R.attr.isLightTheme, isLightTheme, true)
+        smallClockIsDark = isLightTheme.data == 0
+        largeClockIsDark = isLightTheme.data == 0
 
         clock?.smallClock?.events?.onRegionDarknessChanged(smallClockIsDark)
         clock?.largeClock?.events?.onRegionDarknessChanged(largeClockIsDark)
     }
 
-    private fun updateRegionSamplers(currentClock: ClockController?) {
-        smallRegionSampler?.stopRegionSampler()
-        largeRegionSampler?.stopRegionSampler()
-
-        smallRegionSampler = createRegionSampler(
-                currentClock?.smallClock?.view,
-                mainExecutor,
-                bgExecutor,
-                regionSamplingEnabled,
-                ::updateColors
-        )
-
-        largeRegionSampler = createRegionSampler(
-                currentClock?.largeClock?.view,
-                mainExecutor,
-                bgExecutor,
-                regionSamplingEnabled,
-                ::updateColors
-        )
-
-        smallRegionSampler!!.startRegionSampler()
-        largeRegionSampler!!.startRegionSampler()
+    private fun updateRegionSampler(sampledRegion: View) {
+        regionSampler?.stopRegionSampler()
+        regionSampler = createRegionSampler(
+            sampledRegion,
+            mainExecutor,
+            bgExecutor,
+            regionSamplingEnabled,
+            ::updateColors
+        )?.apply { startRegionSampler() }
 
         updateColors()
     }
@@ -155,7 +199,7 @@ open class ClockEventController @Inject constructor(
             bgExecutor: Executor?,
             regionSamplingEnabled: Boolean,
             updateColors: () -> Unit
-    ): RegionSampler {
+    ): RegionSampler? {
         return RegionSampler(
             sampledView,
             mainExecutor,
@@ -164,8 +208,7 @@ open class ClockEventController @Inject constructor(
             updateColors)
     }
 
-    var smallRegionSampler: RegionSampler? = null
-    var largeRegionSampler: RegionSampler? = null
+    var regionSampler: RegionSampler? = null
 
     private var smallClockIsDark = true
     private var largeClockIsDark = true
@@ -232,8 +275,6 @@ open class ClockEventController @Inject constructor(
         configurationController.addCallback(configListener)
         batteryController.addCallback(batteryCallback)
         keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
-        smallRegionSampler?.startRegionSampler()
-        largeRegionSampler?.startRegionSampler()
         disposableHandle = parent.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 listenForDozing(this)
@@ -258,8 +299,7 @@ open class ClockEventController @Inject constructor(
         configurationController.removeCallback(configListener)
         batteryController.removeCallback(batteryCallback)
         keyguardUpdateMonitor.removeCallback(keyguardUpdateMonitorCallback)
-        smallRegionSampler?.stopRegionSampler()
-        largeRegionSampler?.stopRegionSampler()
+        regionSampler?.stopRegionSampler()
     }
 
     private fun updateFontSizes() {
@@ -275,8 +315,7 @@ open class ClockEventController @Inject constructor(
     fun dump(pw: PrintWriter) {
         pw.println(this)
         clock?.dump(pw)
-        smallRegionSampler?.dump(pw)
-        largeRegionSampler?.dump(pw)
+        regionSampler?.dump(pw)
     }
 
     @VisibleForTesting

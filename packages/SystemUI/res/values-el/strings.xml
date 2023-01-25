@@ -543,8 +543,10 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"Αυτόματο"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Χωρίς ήχο ή δόνηση"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Χωρίς ήχο ή δόνηση και εμφανίζεται χαμηλά στην ενότητα συζητήσεων"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Ενδέχεται να κουδουνίζει ή να δονείται βάσει των ρυθμίσεων του τηλεφώνου"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Ενδέχεται να κουδουνίζει ή να δονείται βάσει των ρυθμίσεων του τηλεφώνου. Οι συζητήσεις από την εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> εμφανίζονται σε συννεφάκι από προεπιλογή."</string>
+    <!-- no translation found for notification_channel_summary_default (777294388712200605) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_default_with_bubbles (3482483084451555344) -->
+    <skip />
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Επιτρέψτε στο σύστημα να αποφασίσει αν αυτή η ειδοποίηση θα αναπαράγει έναν ήχο ή θα ενεργοποιήσει τη δόνηση της συσκευής"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Κατάσταση:&lt;/b&gt; Προάχθηκε σε Προεπιλογή"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Κατάσταση:&lt;/b&gt; Υποβιβάστηκε σε Αθόρυβη"</string>
@@ -885,8 +887,7 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Αναπαραγωγή του <xliff:g id="SONG_NAME">%1$s</xliff:g> στην εφαρμογή <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Αναίρεση"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Πλησιάστε για αναπαραγωγή στη συσκευή <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
-    <skip />
+    <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"Για να γίνει αναπαραγωγή εδώ, μετακινηθείτε πιο κοντά στη συσκευή <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Αναπαραγωγή στη συσκευή <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Παρουσιάστηκε κάποιο πρόβλημα. Δοκιμάστε ξανά."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"Φόρτωση"</string>
@@ -915,6 +916,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Ηχεία και οθόνες"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Προτεινόμενες συσκευές"</string>
+    <!-- no translation found for media_output_status_require_premium (5691200962588753380) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Πώς λειτουργεί η μετάδοση"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Μετάδοση"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Οι άνθρωποι με συμβατές συσκευές Bluetooth που βρίσκονται κοντά σας μπορούν να ακούσουν το μέσο που μεταδίδετε."</string>
@@ -1056,8 +1059,17 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"* Αυτή η οθόνη θα απενεργοποιηθεί"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Αναδιπλούμενη συσκευή που ξεδιπλώνει"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Αναδιπλούμενη συσκευή που διπλώνει"</string>
-    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
+    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Απομένει το <xliff:g id="PERCENTAGE">%s</xliff:g> της μπαταρίας"</string>
+    <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Συνδέστε τη γραφίδα σε έναν φορτιστή"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Χαμηλή στάθμη μπαταρίας γραφίδας"</string>
+    <!-- no translation found for video_camera (7654002575156149298) -->
     <skip />
-    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
+    <!-- no translation found for call_from_work_profile_title (6991157106804289643) -->
+    <skip />
+    <!-- no translation found for call_from_work_profile_text (3458704745640229638) -->
+    <skip />
+    <!-- no translation found for call_from_work_profile_action (2937701298133010724) -->
+    <skip />
+    <!-- no translation found for call_from_work_profile_close (7927067108901068098) -->
     <skip />
 </resources>

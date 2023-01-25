@@ -33,8 +33,13 @@ import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
 import android.widget.FrameLayout
+import android.window.OnBackInvokedDispatcher
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.jank.InteractionJankMonitor.CujType
+import com.android.systemui.animation.back.BackAnimationSpec
+import com.android.systemui.animation.back.applyTo
+import com.android.systemui.animation.back.floatingSystemSurfacesForSysUi
+import com.android.systemui.animation.back.onBackAnimationCallbackFrom
 import kotlin.math.roundToInt
 
 private const val TAG = "DialogLaunchAnimator"
@@ -55,8 +60,9 @@ class DialogLaunchAnimator
 constructor(
     private val callback: Callback,
     private val interactionJankMonitor: InteractionJankMonitor,
+    private val featureFlags: AnimationFeatureFlags,
     private val launchAnimator: LaunchAnimator = LaunchAnimator(TIMINGS, INTERPOLATORS),
-    private val isForTesting: Boolean = false
+    private val isForTesting: Boolean = false,
 ) {
     private companion object {
         private val TIMINGS = ActivityLaunchAnimator.TIMINGS
@@ -273,15 +279,16 @@ constructor(
 
         val animatedDialog =
             AnimatedDialog(
-                launchAnimator,
-                callback,
-                interactionJankMonitor,
-                controller,
+                launchAnimator = launchAnimator,
+                callback = callback,
+                interactionJankMonitor = interactionJankMonitor,
+                controller = controller,
                 onDialogDismissed = { openedDialogs.remove(it) },
                 dialog = dialog,
-                animateBackgroundBoundsChange,
-                animatedParent,
-                isForTesting,
+                animateBackgroundBoundsChange = animateBackgroundBoundsChange,
+                parentAnimatedDialog = animatedParent,
+                forceDisableSynchronization = isForTesting,
+                featureFlags = featureFlags,
             )
 
         openedDialogs.add(animatedDialog)
@@ -517,6 +524,7 @@ private class AnimatedDialog(
      * Whether synchronization should be disabled, which can be useful if we are running in a test.
      */
     private val forceDisableSynchronization: Boolean,
+    private val featureFlags: AnimationFeatureFlags,
 ) {
     /**
      * The DecorView of this dialog window.
@@ -778,10 +786,43 @@ private class AnimatedDialog(
         // the dialog.
         dialog.setDismissOverride(this::onDialogDismissed)
 
+        if (featureFlags.isPredictiveBackQsDialogAnim) {
+            // TODO(b/265923095) Improve animations for QS dialogs on configuration change
+            registerOnBackInvokedCallback(targetView = dialogContentWithBackground)
+        }
+
         // Show the dialog.
         dialog.show()
-
         moveSourceDrawingToDialog()
+    }
+
+    private fun registerOnBackInvokedCallback(targetView: View) {
+        val metrics = targetView.resources.displayMetrics
+
+        val onBackAnimationCallback =
+            onBackAnimationCallbackFrom(
+                backAnimationSpec = BackAnimationSpec.floatingSystemSurfacesForSysUi(metrics),
+                displayMetrics = metrics, // TODO(b/265060720): We could remove this
+                onBackProgressed = { backTransformation -> backTransformation.applyTo(targetView) },
+                onBackInvoked = { dialog.dismiss() },
+            )
+
+        val dispatcher = dialog.onBackInvokedDispatcher
+        targetView.addOnAttachStateChangeListener(
+            object : View.OnAttachStateChangeListener {
+                override fun onViewAttachedToWindow(v: View) {
+                    dispatcher.registerOnBackInvokedCallback(
+                        OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                        onBackAnimationCallback
+                    )
+                }
+
+                override fun onViewDetachedFromWindow(v: View) {
+                    targetView.removeOnAttachStateChangeListener(this)
+                    dispatcher.unregisterOnBackInvokedCallback(onBackAnimationCallback)
+                }
+            }
+        )
     }
 
     private fun moveSourceDrawingToDialog() {

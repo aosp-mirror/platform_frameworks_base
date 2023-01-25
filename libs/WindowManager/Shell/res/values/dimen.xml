@@ -273,6 +273,39 @@
     <!-- The space between two actions in the letterbox education dialog -->
     <dimen name="letterbox_education_dialog_space_between_actions">24dp</dimen>
 
+    <!-- The margin between the dialog container and its parent. -->
+    <dimen name="letterbox_restart_dialog_margin">24dp</dimen>
+
+    <!-- The corner radius of the restart confirmation dialog. -->
+    <dimen name="letterbox_restart_dialog_corner_radius">28dp</dimen>
+
+    <!-- The fixed width of the dialog if there is enough space in the parent. -->
+    <dimen name="letterbox_restart_dialog_width">348dp</dimen>
+
+    <!-- The width of the top icon in the restart confirmation dialog. -->
+    <dimen name="letterbox_restart_dialog_title_icon_width">32dp</dimen>
+
+    <!-- The height of the top icon in the restart confirmation dialog. -->
+    <dimen name="letterbox_restart_dialog_title_icon_height">32dp</dimen>
+
+    <!-- The width of an icon in the restart confirmation dialog. -->
+    <dimen name="letterbox_restart_dialog_icon_width">40dp</dimen>
+
+    <!-- The height of an icon in the restart confirmation dialog. -->
+    <dimen name="letterbox_restart_dialog_icon_height">32dp</dimen>
+
+    <!-- The space between two actions in the restart confirmation dialog -->
+    <dimen name="letterbox_restart_dialog_space_between_actions">24dp</dimen>
+
+    <!-- The width of the buttons in the restart dialog -->
+    <dimen name="letterbox_restart_dialog_button_width">82dp</dimen>
+
+    <!-- The width of the buttons in the restart dialog -->
+    <dimen name="letterbox_restart_dialog_button_height">36dp</dimen>
+
+    <!-- The corner radius of the buttons in the restart dialog -->
+    <dimen name="letterbox_restart_dialog_button_radius">18dp</dimen>
+
     <!-- The width of the brand image on staring surface. -->
     <dimen name="starting_surface_brand_image_width">200dp</dimen>
 

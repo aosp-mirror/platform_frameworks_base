@@ -105,6 +105,12 @@ final class LetterboxUiController {
 
     private final ActivityRecord mActivityRecord;
 
+    /**
+     * Taskbar expanded height. Used to determine when to crop an app window to display the
+     * rounded corners above the expanded taskbar.
+     */
+    private final float mExpandedTaskBarHeight;
+
     /*
      * WindowContainerListener responsible to make translucent activities inherit
      * constraints from the first opaque activity beneath them. It's null for not
@@ -184,6 +190,9 @@ final class LetterboxUiController {
                         () -> mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
                                 /* checkDeviceConfig */ true),
                         PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE);
+
+        mExpandedTaskBarHeight =
+                getResources().getDimensionPixelSize(R.dimen.taskbar_frame_height);
     }
 
     /**
@@ -422,7 +431,7 @@ final class LetterboxUiController {
             if (w == null) {
                 return;
             }
-            adjustBoundsForTaskbar(w, outBounds);
+            adjustBoundsIfNeeded(w, outBounds);
         } else {
             outBounds.setEmpty();
         }
@@ -465,13 +474,13 @@ final class LetterboxUiController {
         if (w == null || winHint != null && w != winHint) {
             return;
         }
-        updateRoundedCorners(w);
+        updateRoundedCornersIfNeeded(w);
         // If there is another main window that is not an application-starting window, we should
         // update rounded corners for it as well, to avoid flickering rounded corners.
         final WindowState nonStartingAppW = mActivityRecord.findMainWindow(
                 /* includeStartingApp= */ false);
         if (nonStartingAppW != null && nonStartingAppW != w) {
-            updateRoundedCorners(nonStartingAppW);
+            updateRoundedCornersIfNeeded(nonStartingAppW);
         }
 
         updateWallpaperForLetterbox(w);
@@ -724,6 +733,7 @@ final class LetterboxUiController {
      *   <li>Activity is portrait-only.
      *   <li>Fullscreen window in landscape device orientation.
      *   <li>Horizontal Reachability is enabled.
+     *   <li>Activity fills parent vertically.
      * </ul>
      */
     private boolean isHorizontalReachabilityEnabled(Configuration parentConfiguration) {
@@ -731,10 +741,14 @@ final class LetterboxUiController {
                 && parentConfiguration.windowConfiguration.getWindowingMode()
                         == WINDOWING_MODE_FULLSCREEN
                 && (parentConfiguration.orientation == ORIENTATION_LANDSCAPE
-                && mActivityRecord.getOrientationForReachability() == ORIENTATION_PORTRAIT);
+                        && mActivityRecord.getOrientationForReachability() == ORIENTATION_PORTRAIT)
+                // Check whether the activity fills the parent vertically.
+                && parentConfiguration.windowConfiguration.getBounds().height()
+                        == mActivityRecord.getBounds().height();
     }
 
-    private boolean isHorizontalReachabilityEnabled() {
+    @VisibleForTesting
+    boolean isHorizontalReachabilityEnabled() {
         return isHorizontalReachabilityEnabled(mActivityRecord.getParent().getConfiguration());
     }
 
@@ -746,6 +760,7 @@ final class LetterboxUiController {
      *   <li>Activity is landscape-only.
      *   <li>Fullscreen window in portrait device orientation.
      *   <li>Vertical Reachability is enabled.
+     *   <li>Activity fills parent horizontally.
      * </ul>
      */
     private boolean isVerticalReachabilityEnabled(Configuration parentConfiguration) {
@@ -753,10 +768,14 @@ final class LetterboxUiController {
                 && parentConfiguration.windowConfiguration.getWindowingMode()
                         == WINDOWING_MODE_FULLSCREEN
                 && (parentConfiguration.orientation == ORIENTATION_PORTRAIT
-                && mActivityRecord.getOrientationForReachability() == ORIENTATION_LANDSCAPE);
+                        && mActivityRecord.getOrientationForReachability() == ORIENTATION_LANDSCAPE)
+                // Check whether the activity fills the parent horizontally.
+                && parentConfiguration.windowConfiguration.getBounds().width()
+                        == mActivityRecord.getBounds().width();
     }
 
-    private boolean isVerticalReachabilityEnabled() {
+    @VisibleForTesting
+    boolean isVerticalReachabilityEnabled() {
         return isVerticalReachabilityEnabled(mActivityRecord.getParent().getConfiguration());
     }
 
@@ -765,8 +784,8 @@ final class LetterboxUiController {
         return isSurfaceReadyAndVisible(mainWindow) && mainWindow.areAppWindowBoundsLetterboxed()
                 // Check for FLAG_SHOW_WALLPAPER explicitly instead of using
                 // WindowContainer#showWallpaper because the later will return true when this
-                // activity is using blurred wallpaper for letterbox backgroud.
-                && (mainWindow.mAttrs.flags & FLAG_SHOW_WALLPAPER) == 0;
+                // activity is using blurred wallpaper for letterbox background.
+                && (mainWindow.getAttrs().flags & FLAG_SHOW_WALLPAPER) == 0;
     }
 
     @VisibleForTesting
@@ -818,106 +837,107 @@ final class LetterboxUiController {
         return mLetterboxConfiguration.getLetterboxBackgroundColor();
     }
 
-    private void updateRoundedCorners(WindowState mainWindow) {
+    private void updateRoundedCornersIfNeeded(final WindowState mainWindow) {
         final SurfaceControl windowSurface = mainWindow.getSurfaceControl();
-        if (windowSurface != null && windowSurface.isValid()) {
-            final Transaction transaction = mActivityRecord.getSyncTransaction();
-
-            if (!requiresRoundedCorners(mainWindow) || mActivityRecord.isInLetterboxAnimation()) {
-                // We don't want corner radius on the window.
-                // In the case the ActivityRecord requires a letterboxed animation we never want
-                // rounded corners on the window because rounded corners are applied at the
-                // animation-bounds surface level and rounded corners on the window would interfere
-                // with that leading to unexpected rounded corner positioning during the animation.
-                transaction
-                        .setWindowCrop(windowSurface, null)
-                        .setCornerRadius(windowSurface, 0);
-                return;
-            }
-
-            Rect cropBounds = null;
-
-            if (hasVisibleTaskbar(mainWindow)) {
-                cropBounds = new Rect(mActivityRecord.getBounds());
-
-                // Rounded corners should be displayed above the taskbar.
-                // It is important to call adjustBoundsForTaskbarUnchecked before offsetTo
-                // because taskbar bounds are in screen coordinates
-                adjustBoundsForTaskbarUnchecked(mainWindow, cropBounds);
-
-                // Activity bounds are in screen coordinates while (0,0) for activity's surface
-                // control is at the top left corner of an app window so offsetting bounds
-                // accordingly.
-                cropBounds.offsetTo(0, 0);
-            }
-
-            transaction
-                    .setWindowCrop(windowSurface, cropBounds)
-                    .setCornerRadius(windowSurface, getRoundedCornersRadius(mainWindow));
+        if (windowSurface == null || !windowSurface.isValid()) {
+            return;
         }
+
+        // cropBounds must be non-null for the cornerRadius to be ever applied.
+        mActivityRecord.getSyncTransaction()
+                .setCrop(windowSurface, getCropBoundsIfNeeded(mainWindow))
+                .setCornerRadius(windowSurface, getRoundedCornersRadius(mainWindow));
     }
 
-    private boolean requiresRoundedCorners(WindowState mainWindow) {
-        final InsetsSource taskbarInsetsSource = getTaskbarInsetsSource(mainWindow);
+    @VisibleForTesting
+    @Nullable
+    Rect getCropBoundsIfNeeded(final WindowState mainWindow) {
+        if (!requiresRoundedCorners(mainWindow) || mActivityRecord.isInLetterboxAnimation()) {
+            // We don't want corner radius on the window.
+            // In the case the ActivityRecord requires a letterboxed animation we never want
+            // rounded corners on the window because rounded corners are applied at the
+            // animation-bounds surface level and rounded corners on the window would interfere
+            // with that leading to unexpected rounded corner positioning during the animation.
+            return null;
+        }
 
+        final Rect cropBounds = new Rect(mActivityRecord.getBounds());
+
+        // It is important to call {@link #adjustBoundsIfNeeded} before {@link cropBounds.offsetTo}
+        // because taskbar bounds used in {@link #adjustBoundsIfNeeded}
+        // are in screen coordinates
+        adjustBoundsIfNeeded(mainWindow, cropBounds);
+
+        // ActivityRecord bounds are in screen coordinates while (0,0) for activity's surface
+        // control is in the top left corner of an app window so offsetting bounds
+        // accordingly.
+        cropBounds.offsetTo(0, 0);
+        return cropBounds;
+    }
+
+    private boolean requiresRoundedCorners(final WindowState mainWindow) {
         return isLetterboxedNotForDisplayCutout(mainWindow)
-                && mLetterboxConfiguration.isLetterboxActivityCornersRounded()
-                && taskbarInsetsSource != null;
+                && mLetterboxConfiguration.isLetterboxActivityCornersRounded();
     }
 
     // Returns rounded corners radius the letterboxed activity should have based on override in
     // R.integer.config_letterboxActivityCornersRadius or min device bottom corner radii.
-    // Device corners can be different on the right and left sides but we use the same radius
+    // Device corners can be different on the right and left sides, but we use the same radius
     // for all corners for consistency and pick a minimal bottom one for consistency with a
     // taskbar rounded corners.
-    int getRoundedCornersRadius(WindowState mainWindow) {
-        if (!requiresRoundedCorners(mainWindow)) {
+    int getRoundedCornersRadius(final WindowState mainWindow) {
+        if (!requiresRoundedCorners(mainWindow) || mActivityRecord.isInLetterboxAnimation()) {
             return 0;
         }
 
+        final int radius;
         if (mLetterboxConfiguration.getLetterboxActivityCornersRadius() >= 0) {
-            return mLetterboxConfiguration.getLetterboxActivityCornersRadius();
+            radius = mLetterboxConfiguration.getLetterboxActivityCornersRadius();
+        } else {
+            final InsetsState insetsState = mainWindow.getInsetsState();
+            radius = Math.min(
+                    getInsetsStateCornerRadius(insetsState, RoundedCorner.POSITION_BOTTOM_LEFT),
+                    getInsetsStateCornerRadius(insetsState, RoundedCorner.POSITION_BOTTOM_RIGHT));
         }
 
-        final InsetsState insetsState = mainWindow.getInsetsState();
-        return Math.min(
-                getInsetsStateCornerRadius(insetsState, RoundedCorner.POSITION_BOTTOM_LEFT),
-                getInsetsStateCornerRadius(insetsState, RoundedCorner.POSITION_BOTTOM_RIGHT));
+        final float scale = mainWindow.mInvGlobalScale;
+        return (scale != 1f && scale > 0f) ? (int) (scale * radius) : radius;
     }
 
     /**
-     * Returns whether the taskbar is visible. Returns false if the window is in immersive mode,
-     * since the user can swipe to show/hide the taskbar as an overlay.
+     * Returns the taskbar in case it is visible and expanded in height, otherwise returns null.
      */
-    private boolean hasVisibleTaskbar(WindowState mainWindow) {
-        final InsetsSource taskbarInsetsSource = getTaskbarInsetsSource(mainWindow);
-
-        return taskbarInsetsSource != null
-                && taskbarInsetsSource.isVisible();
+    @VisibleForTesting
+    @Nullable
+    InsetsSource getExpandedTaskbarOrNull(final WindowState mainWindow) {
+        final InsetsSource taskbar = mainWindow.getInsetsState().peekSource(
+                InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
+        if (taskbar != null && taskbar.isVisible()
+                && taskbar.getFrame().height() >= mExpandedTaskBarHeight) {
+            return taskbar;
+        }
+        return null;
     }
 
-    private InsetsSource getTaskbarInsetsSource(WindowState mainWindow) {
-        final InsetsState insetsState = mainWindow.getInsetsState();
-        return insetsState.peekSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
-    }
-
-    private void adjustBoundsForTaskbar(WindowState mainWindow, Rect bounds) {
+    private void adjustBoundsIfNeeded(final WindowState mainWindow, final Rect bounds) {
         // Rounded corners should be displayed above the taskbar. When taskbar is hidden,
         // an insets frame is equal to a navigation bar which shouldn't affect position of
         // rounded corners since apps are expected to handle navigation bar inset.
         // This condition checks whether the taskbar is visible.
         // Do not crop the taskbar inset if the window is in immersive mode - the user can
         // swipe to show/hide the taskbar as an overlay.
-        if (hasVisibleTaskbar(mainWindow)) {
-            adjustBoundsForTaskbarUnchecked(mainWindow, bounds);
+        // Adjust the bounds only in case there is an expanded taskbar,
+        // otherwise the rounded corners will be shown behind the navbar.
+        final InsetsSource expandedTaskbarOrNull = getExpandedTaskbarOrNull(mainWindow);
+        if (expandedTaskbarOrNull != null) {
+            // Rounded corners should be displayed above the expanded taskbar.
+            bounds.bottom = Math.min(bounds.bottom, expandedTaskbarOrNull.getFrame().top);
         }
-    }
 
-    private void adjustBoundsForTaskbarUnchecked(WindowState mainWindow, Rect bounds) {
-        // Rounded corners should be displayed above the taskbar.
-        bounds.bottom =
-                Math.min(bounds.bottom, getTaskbarInsetsSource(mainWindow).getFrame().top);
-        scaleIfNeeded(bounds);
+        final float scale = mainWindow.mInvGlobalScale;
+        if (scale != 1f && scale > 0f) {
+            bounds.scale(scale);
+        }
     }
 
     private int getInsetsStateCornerRadius(
@@ -1258,21 +1278,5 @@ final class LetterboxUiController {
         mIsInheritedInSizeCompatMode = false;
         mInheritedSizeCompatScale = 1f;
         mInheritedCompatDisplayInsets = null;
-    }
-
-    private void scaleIfNeeded(Rect bounds) {
-        if (boundsNeedToScale()) {
-            bounds.scale(1.0f / mActivityRecord.getCompatScale());
-        }
-    }
-
-    private boolean boundsNeedToScale() {
-        if (hasInheritedLetterboxBehavior()) {
-            return mIsInheritedInSizeCompatMode
-                    && mInheritedSizeCompatScale < 1.0f;
-        } else {
-            return mActivityRecord.inSizeCompatMode()
-                    && mActivityRecord.getCompatScale() < 1.0f;
-        }
     }
 }

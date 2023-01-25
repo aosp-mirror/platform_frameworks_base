@@ -29,7 +29,7 @@ import android.hardware.HardwareBuffer
 import android.os.UserHandle
 import android.os.UserManager
 import android.testing.AndroidTestingRunner
-import android.view.WindowManager.ScreenshotSource.SCREENSHOT_KEY_CHORD
+import android.view.WindowManager.ScreenshotSource.SCREENSHOT_KEY_OTHER
 import android.view.WindowManager.ScreenshotSource.SCREENSHOT_OVERVIEW
 import android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN
 import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
@@ -39,7 +39,8 @@ import com.android.internal.util.ScreenshotRequest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags.SCREENSHOT_WORK_PROFILE_POLICY
-import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_REQUESTED_KEY_CHORD
+import com.android.systemui.flags.Flags.SCREENSHOT_METADATA
+import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_REQUESTED_KEY_OTHER
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_REQUESTED_OVERVIEW
 import com.android.systemui.screenshot.TakeScreenshotService.RequestCallback
 import com.android.systemui.util.mockito.any
@@ -106,15 +107,22 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
 
         // Stub request processor as a synchronous no-op for tests with the flag enabled
         doAnswer {
-                val request: ScreenshotRequest = it.getArgument(0) as ScreenshotRequest
-                val consumer: Consumer<ScreenshotRequest> = it.getArgument(1)
-                consumer.accept(request)
-            }
-            .`when`(requestProcessor)
-            .processAsync(/* request= */ any(), /* callback= */ any())
+            val request: ScreenshotRequest = it.getArgument(0) as ScreenshotRequest
+            val consumer: Consumer<ScreenshotRequest> = it.getArgument(1)
+            consumer.accept(request)
+        }.`when`(requestProcessor).processAsync(
+            /* request= */ any(ScreenshotRequest::class.java), /* callback= */ any())
+
+        doAnswer {
+            val request: ScreenshotData = it.getArgument(0) as ScreenshotData
+            val consumer: Consumer<ScreenshotData> = it.getArgument(1)
+            consumer.accept(request)
+        }.`when`(requestProcessor).processAsync(
+            /* screenshot= */ any(ScreenshotData::class.java), /* callback= */ any())
 
         // Flipped in selected test cases
         flags.set(SCREENSHOT_WORK_PROFILE_POLICY, false)
+        flags.set(SCREENSHOT_METADATA, false)
 
         service.attach(
             mContext,
@@ -141,7 +149,7 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
     @Test
     fun takeScreenshotFullscreen() {
         val request =
-            ScreenshotRequest.Builder(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_CHORD)
+            ScreenshotRequest.Builder(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_OTHER)
                 .setTopComponent(topComponent)
                 .build()
 
@@ -157,16 +165,34 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
         assertEquals("Expected one UiEvent", eventLogger.numLogs(), 1)
         val logEvent = eventLogger.get(0)
 
-        assertEquals(
-            "Expected SCREENSHOT_REQUESTED UiEvent",
-            logEvent.eventId,
-            SCREENSHOT_REQUESTED_KEY_CHORD.id
-        )
-        assertEquals(
-            "Expected supplied package name",
-            topComponent.packageName,
-            eventLogger.get(0).packageName
-        )
+        assertEquals("Expected SCREENSHOT_REQUESTED UiEvent",
+            logEvent.eventId, SCREENSHOT_REQUESTED_KEY_OTHER.id)
+        assertEquals("Expected supplied package name",
+            topComponent.packageName, eventLogger.get(0).packageName)
+    }
+
+    @Test
+    fun takeScreenshotFullscreen_screenshotDataEnabled() {
+        flags.set(SCREENSHOT_METADATA, true)
+
+        val request = ScreenshotRequest.Builder(
+            TAKE_SCREENSHOT_FULLSCREEN,
+            SCREENSHOT_KEY_OTHER).setTopComponent(topComponent).build()
+
+        service.handleRequest(request, { /* onSaved */ }, callback)
+
+        verify(controller, times(1)).handleScreenshot(
+            eq(ScreenshotData.fromRequest(request)),
+            /* onSavedListener = */ any(),
+            /* requestCallback = */ any())
+
+        assertEquals("Expected one UiEvent", eventLogger.numLogs(), 1)
+        val logEvent = eventLogger.get(0)
+
+        assertEquals("Expected SCREENSHOT_REQUESTED UiEvent",
+            logEvent.eventId, SCREENSHOT_REQUESTED_KEY_OTHER.id)
+        assertEquals("Expected supplied package name",
+            topComponent.packageName, eventLogger.get(0).packageName)
     }
 
     @Test
@@ -218,7 +244,7 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
         whenever(userManager.isUserUnlocked).thenReturn(false)
 
         val request =
-            ScreenshotRequest.Builder(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_CHORD)
+            ScreenshotRequest.Builder(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_OTHER)
                 .setTopComponent(topComponent)
                 .build()
 
@@ -244,7 +270,7 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
             .thenReturn("SCREENSHOT_BLOCKED_BY_ADMIN")
 
         val request =
-            ScreenshotRequest.Builder(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_CHORD)
+            ScreenshotRequest.Builder(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_OTHER)
                 .setTopComponent(topComponent)
                 .build()
 

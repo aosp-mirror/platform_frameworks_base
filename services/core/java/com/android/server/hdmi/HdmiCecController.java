@@ -38,6 +38,7 @@ import android.os.IHwBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceSpecificException;
 import android.stats.hdmi.HdmiStatsEnums;
 import android.util.Slog;
 
@@ -380,7 +381,7 @@ final class HdmiCecController {
      * Configures the TV panel device wakeup behaviour in standby mode when it receives an OTP
      * (One Touch Play) from a source device.
      *
-     * @param value If true, the TV device will wake up when OTP is received and if false, the TV
+     * @param enabled If true, the TV device will wake up when OTP is received and if false, the TV
      *     device will not wake up for an OTP.
      */
     @ServiceThreadOnly
@@ -393,7 +394,7 @@ final class HdmiCecController {
     /**
      * Switch to enable or disable CEC on the device.
      *
-     * @param value If true, the device will have all CEC functionalities and if false, the device
+     * @param enabled If true, the device will have all CEC functionalities and if false, the device
      *     will not perform any CEC functions.
      */
     @ServiceThreadOnly
@@ -406,8 +407,8 @@ final class HdmiCecController {
     /**
      * Configures the module that processes CEC messages - the Android framework or the HAL.
      *
-     * @param value If true, the Android framework will actively process CEC messages and if false,
-     *     only the HAL will process the CEC messages.
+     * @param enabled If true, the Android framework will actively process CEC messages.
+     *                If false, only the HAL will process the CEC messages.
      */
     @ServiceThreadOnly
     void enableSystemCecControl(boolean enabled) {
@@ -423,9 +424,8 @@ final class HdmiCecController {
     @ServiceThreadOnly
     void setHpdSignalType(@Constants.HpdSignalType int signal, int portId) {
         assertRunOnServiceThread();
-        // Stub.
-        // TODO: bind to native.
-        // TODO: handle error return values here, with logging.
+        HdmiLogger.debug("setHpdSignalType: portId %b, signal %b", portId, signal);
+        mNativeWrapperImpl.nativeSetHpdSignalType(signal, portId);
     }
 
     /**
@@ -436,9 +436,8 @@ final class HdmiCecController {
     @Constants.HpdSignalType
     int getHpdSignalType(int portId) {
         assertRunOnServiceThread();
-        // Stub.
-        // TODO: bind to native.
-        return Constants.HDMI_HPD_TYPE_PHYSICAL;
+        HdmiLogger.debug("getHpdSignalType: portId %b ", portId);
+        return mNativeWrapperImpl.nativeGetHpdSignalType(portId);
     }
 
     /**
@@ -906,6 +905,8 @@ final class HdmiCecController {
         void nativeSetLanguage(String language);
         void nativeEnableAudioReturnChannel(int port, boolean flag);
         boolean nativeIsConnected(int port);
+        void nativeSetHpdSignalType(int signal, int portId);
+        int nativeGetHpdSignalType(int portId);
     }
 
     private static final class NativeWrapperImplAidl
@@ -1096,15 +1097,15 @@ final class HdmiCecController {
                 HdmiPortInfo[] hdmiPortInfo = new HdmiPortInfo[hdmiPortInfos.length];
                 int i = 0;
                 for (android.hardware.tv.hdmi.connection.HdmiPortInfo portInfo : hdmiPortInfos) {
-                    hdmiPortInfo[i] =
-                            new HdmiPortInfo(
+                    hdmiPortInfo[i] = new HdmiPortInfo.Builder(
                                     portInfo.portId,
                                     portInfo.type,
-                                    portInfo.physicalAddress,
-                                    portInfo.cecSupported,
-                                    false,
-                                    portInfo.arcSupported,
-                                    false);
+                                    portInfo.physicalAddress)
+                                    .setCecSupported(portInfo.cecSupported)
+                                    .setMhlSupported(false)
+                                    .setArcSupported(portInfo.arcSupported)
+                                    .setEarcSupported(portInfo.eArcSupported)
+                                    .build();
                     i++;
                 }
                 return hdmiPortInfo;
@@ -1121,6 +1122,34 @@ final class HdmiCecController {
             } catch (RemoteException e) {
                 HdmiLogger.error("Failed to get connection info : ", e);
                 return false;
+            }
+        }
+
+        @Override
+        public void nativeSetHpdSignalType(int signal, int portId) {
+            try {
+                // TODO(b/266178786) add portId to the HAL method
+                mHdmiConnection.setHpdSignal((byte) signal);
+            } catch (ServiceSpecificException sse) {
+                HdmiLogger.error(
+                        "Could not set HPD signal type for portId " + portId + " to " + signal
+                                + ". Error: ", sse.errorCode);
+            } catch (RemoteException e) {
+                HdmiLogger.error(
+                        "Could not set HPD signal type for portId " + portId + " to " + signal
+                                + ". Exception: ", e);
+            }
+        }
+
+        @Override
+        public int nativeGetHpdSignalType(int portId) {
+            try {
+                // TODO(b/266178786) add portId to the HAL method
+                return mHdmiConnection.getHpdSignal();
+            } catch (RemoteException e) {
+                HdmiLogger.error(
+                        "Could not get HPD signal type for portId " + portId + ". Exception: ", e);
+                return Constants.HDMI_HPD_TYPE_PHYSICAL;
             }
         }
     }
@@ -1260,13 +1289,15 @@ final class HdmiCecController {
                 HdmiPortInfo[] hdmiPortInfo = new HdmiPortInfo[hdmiPortInfos.size()];
                 int i = 0;
                 for (android.hardware.tv.cec.V1_0.HdmiPortInfo portInfo : hdmiPortInfos) {
-                    hdmiPortInfo[i] = new HdmiPortInfo(portInfo.portId,
+                    hdmiPortInfo[i] = new HdmiPortInfo.Builder(
+                            portInfo.portId,
                             portInfo.type,
-                            portInfo.physicalAddress,
-                            portInfo.cecSupported,
-                            false,
-                            portInfo.arcSupported,
-                            false);
+                            portInfo.physicalAddress)
+                            .setCecSupported(portInfo.cecSupported)
+                            .setMhlSupported(false)
+                            .setArcSupported(portInfo.arcSupported)
+                            .setEarcSupported(false)
+                            .build();
                     i++;
                 }
                 return hdmiPortInfo;
@@ -1325,6 +1356,19 @@ final class HdmiCecController {
                 HdmiLogger.error("Failed to get connection info : ", e);
                 return false;
             }
+        }
+
+        @Override
+        public void nativeSetHpdSignalType(int signal, int portId) {
+            HdmiLogger.error(
+                    "Failed to set HPD signal type: not supported by HAL.");
+        }
+
+        @Override
+        public int nativeGetHpdSignalType(int portId) {
+            HdmiLogger.error(
+                    "Failed to get HPD signal type: not supported by HAL.");
+            return Constants.HDMI_HPD_TYPE_PHYSICAL;
         }
     }
 
@@ -1442,13 +1486,15 @@ final class HdmiCecController {
                 HdmiPortInfo[] hdmiPortInfo = new HdmiPortInfo[hdmiPortInfos.size()];
                 int i = 0;
                 for (android.hardware.tv.cec.V1_0.HdmiPortInfo portInfo : hdmiPortInfos) {
-                    hdmiPortInfo[i] = new HdmiPortInfo(portInfo.portId,
+                    hdmiPortInfo[i] = new HdmiPortInfo.Builder(
+                            portInfo.portId,
                             portInfo.type,
-                            portInfo.physicalAddress,
-                            portInfo.cecSupported,
-                            false,
-                            portInfo.arcSupported,
-                            false);
+                            portInfo.physicalAddress)
+                            .setCecSupported(portInfo.cecSupported)
+                            .setMhlSupported(false)
+                            .setArcSupported(portInfo.arcSupported)
+                            .setEarcSupported(false)
+                            .build();
                     i++;
                 }
                 return hdmiPortInfo;
@@ -1507,6 +1553,19 @@ final class HdmiCecController {
                 HdmiLogger.error("Failed to get connection info : ", e);
                 return false;
             }
+        }
+
+        @Override
+        public void nativeSetHpdSignalType(int signal, int portId) {
+            HdmiLogger.error(
+                    "Failed to set HPD signal type: not supported by HAL.");
+        }
+
+        @Override
+        public int nativeGetHpdSignalType(int portId) {
+            HdmiLogger.error(
+                    "Failed to get HPD signal type: not supported by HAL.");
+            return Constants.HDMI_HPD_TYPE_PHYSICAL;
         }
 
         @Override

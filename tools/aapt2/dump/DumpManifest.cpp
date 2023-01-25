@@ -16,6 +16,8 @@
 
 #include "DumpManifest.h"
 
+#include <androidfw/ApkParsing.h>
+
 #include <algorithm>
 #include <array>
 #include <memory>
@@ -2729,19 +2731,25 @@ bool ManifestExtractor::Extract(android::IDiagnostics* diag) {
       }));
   supports_screen_ = screen ? screen : &default_screens;
 
-  // Gather the supported architectures_ of the app
-  std::set<std::string> architectures_from_apk;
+  bool has_renderscript_bitcode = false;
   auto it = apk_->GetFileCollection()->Iterator();
   while (it->HasNext()) {
-    auto file_path = it->Next()->GetSource().path;
-    if (file_path.starts_with("lib/")) {
-      file_path = file_path.substr(4);
-      size_t pos = file_path.find('/');
-      if (pos != std::string::npos) {
-        file_path = file_path.substr(0, pos);
-      }
+    if (it->Next()->GetSource().path.ends_with(".bc")) {
+      has_renderscript_bitcode = true;
+      break;
+    }
+  }
 
-      architectures_from_apk.insert(file_path);
+  // Gather the supported architectures_ of the app
+  std::set<std::string> architectures_from_apk;
+  it = apk_->GetFileCollection()->Iterator();
+  while (it->HasNext()) {
+    auto file_path = it->Next()->GetSource().path.c_str();
+
+    const char* last_slash =
+        android::util::ValidLibraryPathLastSlash(file_path, has_renderscript_bitcode, false);
+    if (last_slash) {
+      architectures_from_apk.insert(std::string(file_path + APK_LIB_LEN, last_slash));
     }
   }
 

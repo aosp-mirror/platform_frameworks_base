@@ -19,6 +19,7 @@ package com.android.server.job.controllers;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.job.JobSchedulerService.ACTIVE_INDEX;
 import static com.android.server.job.JobSchedulerService.FREQUENT_INDEX;
 import static com.android.server.job.JobSchedulerService.NEVER_INDEX;
@@ -129,6 +130,98 @@ public class JobStatusTest {
             jobStatus.setStandbyBucket(effectiveBucket.keyAt(i));
             assertEquals(effectiveBucket.valueAt(i), jobStatus.getEffectiveStandbyBucket());
         }
+    }
+
+    @Test
+    public void testCanRunInBatterySaver_regular() {
+        final JobInfo jobInfo =
+                new JobInfo.Builder(101, new ComponentName("foo", "bar")).build();
+        JobStatus job = createJobStatus(jobInfo);
+        assertFalse(job.canRunInBatterySaver());
+        job.disallowRunInBatterySaverAndDoze();
+        assertFalse(job.canRunInBatterySaver());
+    }
+
+    @Test
+    public void testCanRunInBatterySaver_expedited() {
+        final JobInfo jobInfo =
+                new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                        .setExpedited(true)
+                        .build();
+        JobStatus job = createJobStatus(jobInfo);
+        markExpeditedQuotaApproved(job, true);
+        assertTrue(job.canRunInBatterySaver());
+        job.disallowRunInBatterySaverAndDoze();
+        assertFalse(job.canRunInBatterySaver());
+
+        // Reset the job
+        job = createJobStatus(jobInfo);
+        markExpeditedQuotaApproved(job, true);
+        spyOn(job);
+        when(job.shouldTreatAsExpeditedJob()).thenReturn(false);
+        job.startedAsExpeditedJob = true;
+        assertTrue(job.canRunInBatterySaver());
+        job.disallowRunInBatterySaverAndDoze();
+        assertFalse(job.canRunInBatterySaver());
+    }
+
+    @Test
+    public void testCanRunInBatterySaver_userInitiated() {
+        final JobInfo jobInfo =
+                new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                        .setUserInitiated(true)
+                        .build();
+        JobStatus job = createJobStatus(jobInfo);
+        assertTrue(job.canRunInBatterySaver());
+        // User-initiated privilege should trump bs & doze requirement.
+        job.disallowRunInBatterySaverAndDoze();
+        assertTrue(job.canRunInBatterySaver());
+    }
+
+    @Test
+    public void testCanRunInDoze_regular() {
+        final JobInfo jobInfo =
+                new JobInfo.Builder(101, new ComponentName("foo", "bar")).build();
+        JobStatus job = createJobStatus(jobInfo);
+        assertFalse(job.canRunInDoze());
+        job.disallowRunInBatterySaverAndDoze();
+        assertFalse(job.canRunInDoze());
+    }
+
+    @Test
+    public void testCanRunInDoze_expedited() {
+        final JobInfo jobInfo =
+                new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                        .setExpedited(true)
+                        .build();
+        JobStatus job = createJobStatus(jobInfo);
+        markExpeditedQuotaApproved(job, true);
+        assertTrue(job.canRunInDoze());
+        job.disallowRunInBatterySaverAndDoze();
+        assertFalse(job.canRunInDoze());
+
+        // Reset the job
+        job = createJobStatus(jobInfo);
+        markExpeditedQuotaApproved(job, true);
+        spyOn(job);
+        when(job.shouldTreatAsExpeditedJob()).thenReturn(false);
+        job.startedAsExpeditedJob = true;
+        assertTrue(job.canRunInDoze());
+        job.disallowRunInBatterySaverAndDoze();
+        assertFalse(job.canRunInDoze());
+    }
+
+    @Test
+    public void testCanRunInDoze_userInitiated() {
+        final JobInfo jobInfo =
+                new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                        .setUserInitiated(true)
+                        .build();
+        JobStatus job = createJobStatus(jobInfo);
+        assertTrue(job.canRunInDoze());
+        // User-initiated privilege should trump bs & doze requirement.
+        job.disallowRunInBatterySaverAndDoze();
+        assertTrue(job.canRunInDoze());
     }
 
     @Test
@@ -905,6 +998,13 @@ public class JobStatusTest {
         markImplicitConstraintsSatisfied(job, false);
         assertFalse(job.readinessStatusWithConstraint(CONSTRAINT_FLEXIBLE, true));
         assertFalse(job.readinessStatusWithConstraint(CONSTRAINT_FLEXIBLE, false));
+    }
+
+    private void markExpeditedQuotaApproved(JobStatus job, boolean isApproved) {
+        if (job.isRequestedExpeditedJob()) {
+            job.setExpeditedJobQuotaApproved(sElapsedRealtimeClock.millis(), isApproved);
+            job.setExpeditedJobTareApproved(sElapsedRealtimeClock.millis(), isApproved);
+        }
     }
 
     private void markImplicitConstraintsSatisfied(JobStatus job, boolean isSatisfied) {

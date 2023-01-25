@@ -1945,10 +1945,8 @@
     <string name="work_mode_off_title" msgid="961171256005852058">"Уключыць працоўныя праграмы?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"Атрымаць доступ да працоўных праграм і апавяшчэнняў"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Уключыць"</string>
-    <!-- no translation found for work_mode_emergency_call_button (6818855962881612322) -->
-    <skip />
-    <!-- no translation found for work_mode_dialer_off_message (2193299184850387465) -->
-    <skip />
+    <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Экстранны выпадак"</string>
+    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Запытайце доступ да працоўных праграм і выклікаў"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Праграма недаступная"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Праграма \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" цяпер недаступная."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"Недаступна: <xliff:g id="ACTIVITY">%1$s</xliff:g>"</string>

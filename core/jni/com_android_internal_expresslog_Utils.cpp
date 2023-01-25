@@ -26,7 +26,7 @@
 static jclass g_stringClass = nullptr;
 
 /**
- * Class:     com_android_internal_expresslog_Counter
+ * Class:     com_android_internal_expresslog_Utils
  * Method:    hashString
  * Signature: (Ljava/lang/String;)J
  */
@@ -43,15 +43,15 @@ static const JNINativeMethod g_methods[] = {
         {"hashString", "(Ljava/lang/String;)J", (void*)hashString},
 };
 
-static const char* const kCounterPathName = "com/android/internal/expresslog/Counter";
+static const char* const kUtilsPathName = "com/android/internal/expresslog/Utils";
 
 namespace android {
 
-int register_com_android_internal_expresslog_Counter(JNIEnv* env) {
+int register_com_android_internal_expresslog_Utils(JNIEnv* env) {
     jclass stringClass = FindClassOrDie(env, "java/lang/String");
     g_stringClass = MakeGlobalRefOrDie(env, stringClass);
 
-    return RegisterMethodsOrDie(env, kCounterPathName, g_methods, NELEM(g_methods));
+    return RegisterMethodsOrDie(env, kUtilsPathName, g_methods, NELEM(g_methods));
 }
 
 } // namespace android

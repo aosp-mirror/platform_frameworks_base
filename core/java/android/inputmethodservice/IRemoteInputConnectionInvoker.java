@@ -66,73 +66,74 @@ final class IRemoteInputConnectionInvoker {
         mSessionId = sessionId;
     }
 
-    /**
-     * Subclass of {@link ResultReceiver} used by
-     * {@link #performHandwritingGesture(HandwritingGesture, Executor, IntConsumer)} for providing
-     * callback.
-     */
-    private static final class IntResultReceiver extends ResultReceiver {
-        @NonNull
-        private IntConsumer mConsumer;
-        @NonNull
+    private abstract static class OnceResultReceiver<C> extends ResultReceiver {
+        @Nullable
+        private C mConsumer;
+        @Nullable
         private Executor mExecutor;
 
-        IntResultReceiver(@NonNull Executor executor, @NonNull IntConsumer consumer) {
+        protected OnceResultReceiver(@NonNull Executor executor, @NonNull C consumer) {
             super(null);
+            Objects.requireNonNull(executor);
+            Objects.requireNonNull(consumer);
             mExecutor = executor;
             mConsumer = consumer;
         }
 
         @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
-            if (mExecutor != null && mConsumer != null) {
-                mExecutor.execute(() -> mConsumer.accept(resultCode));
-                // provide callback only once.
-                clear();
+        protected final void onReceiveResult(int resultCode, Bundle resultData) {
+            final Executor executor;
+            final C consumer;
+            synchronized (this) {
+                executor = mExecutor;
+                consumer = mConsumer;
+                mExecutor = null;
+                mConsumer = null;
+            }
+            if (executor != null && consumer != null) {
+                dispatch(executor, consumer, resultCode, resultData);
             }
         }
 
-        private void clear() {
-            mExecutor = null;
-            mConsumer = null;
+        protected abstract void dispatch(@NonNull Executor executor, @NonNull C consumer, int code,
+                Bundle data);
+    }
+
+    /**
+     * Subclass of {@link ResultReceiver} used by
+     * {@link #performHandwritingGesture(HandwritingGesture, Executor, IntConsumer)} for providing
+     * callback.
+     */
+    private static final class IntResultReceiver extends OnceResultReceiver<IntConsumer> {
+        IntResultReceiver(@NonNull Executor executor, @NonNull IntConsumer consumer) {
+            super(executor, consumer);
         }
-    };
+
+        @Override
+        protected void dispatch(@NonNull Executor executor, @NonNull IntConsumer consumer, int code,
+                Bundle data) {
+            executor.execute(() -> consumer.accept(code));
+        }
+    }
 
     /**
      * Subclass of {@link ResultReceiver} used by
      * {@link #requestTextBoundsInfo(RectF, Executor, Consumer)} for providing
      * callback.
      */
-    private static final class TextBoundsInfoResultReceiver extends ResultReceiver {
-        @Nullable
-        private Consumer<TextBoundsInfoResult> mConsumer;
-        @Nullable
-        private Executor mExecutor;
-
+    private static final class TextBoundsInfoResultReceiver extends
+            OnceResultReceiver<Consumer<TextBoundsInfoResult>> {
         TextBoundsInfoResultReceiver(@NonNull Executor executor,
                 @NonNull Consumer<TextBoundsInfoResult> consumer) {
-            super(null);
-            mExecutor = executor;
-            mConsumer = consumer;
+            super(executor, consumer);
         }
 
         @Override
-        protected void onReceiveResult(@TextBoundsInfoResult.ResultCode int resultCode,
-                @Nullable Bundle resultData) {
-            synchronized (this) {
-                if (mExecutor != null && mConsumer != null) {
-                    final TextBoundsInfoResult textBoundsInfoResult = new TextBoundsInfoResult(
-                            resultCode, TextBoundsInfo.createFromBundle(resultData));
-                    mExecutor.execute(() -> mConsumer.accept(textBoundsInfoResult));
-                    // provide callback only once.
-                    clear();
-                }
-            }
-        }
-
-        private void clear() {
-            mExecutor = null;
-            mConsumer = null;
+        protected void dispatch(@NonNull Executor executor,
+                @NonNull Consumer<TextBoundsInfoResult> consumer, int code, Bundle data) {
+            final TextBoundsInfoResult textBoundsInfoResult = new TextBoundsInfoResult(
+                    code, TextBoundsInfo.createFromBundle(data));
+            executor.execute(() -> consumer.accept(textBoundsInfoResult));
         }
     }
 
