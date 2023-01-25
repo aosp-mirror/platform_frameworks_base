@@ -5829,7 +5829,6 @@ public class Intent implements Parcelable, Cloneable {
      * in the sharesheet.
      * A reselection action allows the user to return to the source app to change the content being
      * shared.
-     * @hide
      */
     public static final String EXTRA_CHOOSER_PAYLOAD_RESELECTION_ACTION =
             "android.intent.extra.CHOOSER_PAYLOAD_RESELECTION_ACTION";
