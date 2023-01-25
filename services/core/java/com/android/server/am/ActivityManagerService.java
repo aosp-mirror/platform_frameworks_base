@@ -8603,7 +8603,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // On Automotive / Headless System User Mode, at this point the system user has already been
         // started and unlocked, and some of the tasks we do here have already been done. So skip
         // those in that case. The duplicate system user start is guarded in SystemServiceManager.
-        // TODO(b/242195409): this workaround shouldn't be necessary once we move the headless-user
+        // TODO(b/266158156): this workaround shouldn't be necessary once we move the headless-user
         // start logic to UserManager-land.
         mUserController.onSystemUserStarting();
 
@@ -8636,7 +8636,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             // Some systems - like automotive - will explicitly unlock system user then switch
             // to a secondary user.
-            // TODO(b/242195409): this workaround shouldn't be necessary once we move
+            // TODO(b/266158156): this workaround shouldn't be necessary once we move
             // the headless-user start logic to UserManager-land.
             if (isBootingSystemUser && !UserManager.isHeadlessSystemUserMode()) {
                 t.traceBegin("startHomeOnAllDisplays");
@@ -8659,26 +8659,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final int callingPid = Binder.getCallingPid();
                 final long ident = Binder.clearCallingIdentity();
                 try {
-                    Intent intent = new Intent(Intent.ACTION_USER_STARTED);
-                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
-                            | Intent.FLAG_RECEIVER_FOREGROUND);
-                    intent.putExtra(Intent.EXTRA_USER_HANDLE, currentUserId);
-                    broadcastIntentLocked(null, null, null, intent,
-                            null, null, 0, null, null, null, null, null, OP_NONE,
-                            null, false, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
-                            currentUserId);
-                    intent = new Intent(Intent.ACTION_USER_STARTING);
-                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                    intent.putExtra(Intent.EXTRA_USER_HANDLE, currentUserId);
-                    broadcastIntentLocked(null, null, null, intent, null,
-                            new IIntentReceiver.Stub() {
-                                @Override
-                                public void performReceive(Intent intent, int resultCode,
-                                        String data, Bundle extras, boolean ordered, boolean sticky,
-                                        int sendingUser) {}
-                            }, 0, null, null, new String[] {INTERACT_ACROSS_USERS}, null, null,
-                            OP_NONE, null, true, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
-                            UserHandle.USER_ALL);
+                    mUserController.sendUserStartedBroadcast(
+                            currentUserId, callingUid, callingPid);
+                    mUserController.sendUserStartingBroadcast(
+                            currentUserId, callingUid, callingPid);
                 } catch (Throwable e) {
                     Slog.wtf(TAG, "Failed sending first user broadcasts", e);
                 } finally {
