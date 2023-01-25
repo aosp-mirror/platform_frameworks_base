@@ -1380,16 +1380,16 @@ public class AppOpsManager {
             AppProtoEnums.APP_OP_SYSTEM_EXEMPT_FROM_APP_STANDBY;
 
     /**
-     * Prevent an app from being placed into forced app standby.
-     * {@link ActivityManager#isBackgroundRestricted()}
-     * {@link #OP_RUN_ANY_IN_BACKGROUND}
+     * Prevent an app from dismissible notifications. Starting from Android U, notifications with
+     * the ongoing parameter can be dismissed by a user on an unlocked device. An app with
+     * this appop will be exempt and cannot be dismissed by a user.
      *
      * Only to be used by the system.
      *
      * @hide
      */
-    public static final int OP_SYSTEM_EXEMPT_FROM_FORCED_APP_STANDBY =
-            AppProtoEnums.APP_OP_SYSTEM_EXEMPT_FROM_FORCED_APP_STANDBY;
+    public static final int OP_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS =
+            AppProtoEnums.APP_OP_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS;
 
     /**
      * An app op for reading/writing health connect data.
@@ -1973,16 +1973,17 @@ public class AppOpsManager {
             "android:system_exempt_from_app_standby";
 
     /**
-     * Prevent an app from being placed into forced app standby.
-     * {@link ActivityManager#isBackgroundRestricted()}
-     * {@link #OP_RUN_ANY_IN_BACKGROUND}
+     * Allow an application to create non-dismissible notifications. Starting from Android U,
+     * notifications with the ongoing parameter can be dismissed by a user on an unlocked device
+     * unless the application that created the notification is exempt.
+     * An application with this appop will be made exempt.
      *
      * Only to be used by the system.
      *
      * @hide
      */
-    public static final String OPSTR_SYSTEM_EXEMPT_FROM_FORCED_APP_STANDBY =
-            "android:system_exempt_from_forced_app_standby";
+    public static final String OPSTR_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS =
+            "android:system_exempt_from_dismissible_notifications";
 
     /**
      * Start a foreground service with the type "specialUse".
@@ -2526,9 +2527,9 @@ public class AppOpsManager {
         new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_APP_STANDBY,
                 OPSTR_SYSTEM_EXEMPT_FROM_APP_STANDBY,
                 "SYSTEM_EXEMPT_FROM_APP_STANDBY").build(),
-        new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_FORCED_APP_STANDBY,
-                OPSTR_SYSTEM_EXEMPT_FROM_FORCED_APP_STANDBY,
-                "SYSTEM_EXEMPT_FROM_FORCED_APP_STANDBY").build(),
+        new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS,
+                OPSTR_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS,
+                "SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS").build(),
         new AppOpInfo.Builder(OP_READ_WRITE_HEALTH_DATA, OPSTR_READ_WRITE_HEALTH_DATA,
                 "READ_WRITE_HEALTH_DATA").setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
         new AppOpInfo.Builder(OP_FOREGROUND_SERVICE_SPECIAL_USE,
