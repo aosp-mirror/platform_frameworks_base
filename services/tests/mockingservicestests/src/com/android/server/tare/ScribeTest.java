@@ -25,6 +25,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
+import android.app.tare.EconomyManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -89,7 +90,7 @@ public class ScribeTest {
                 .mockStatic(LocalServices.class)
                 .startMocking();
         when(mIrs.getLock()).thenReturn(new Object());
-        when(mIrs.isEnabled()).thenReturn(true);
+        when(mIrs.getEnabledMode()).thenReturn(EconomyManager.ENABLED_MODE_ON);
         when(mIrs.getInstalledPackages()).thenReturn(mInstalledPackages);
         when(mAnalyst.getReports()).thenReturn(mReports);
         mTestFileDir = new File(getContext().getFilesDir(), "scribe_test");
