@@ -234,6 +234,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     WindowManagerService mWindowManager;
     DisplayManager mDisplayManager;
     private DisplayManagerInternal mDisplayManagerInternal;
+    @NonNull
+    private final DeviceStateController mDeviceStateController;
+    @NonNull
+    private final DisplayRotationCoordinator mDisplayRotationCoordinator;
 
     /** Reference to default display so we can quickly look it up. */
     private DisplayContent mDefaultDisplay;
@@ -440,6 +444,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mTaskSupervisor = mService.mTaskSupervisor;
         mTaskSupervisor.mRootWindowContainer = this;
         mDisplayOffTokenAcquirer = mService.new SleepTokenAcquirerImpl(DISPLAY_OFF_SLEEP_TOKEN_TAG);
+        mDeviceStateController = new DeviceStateController(service.mContext, service.mH);
+        mDisplayRotationCoordinator = new DisplayRotationCoordinator();
     }
 
     /**
@@ -1279,7 +1285,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         final Display[] displays = mDisplayManager.getDisplays();
         for (int displayNdx = 0; displayNdx < displays.length; ++displayNdx) {
             final Display display = displays[displayNdx];
-            final DisplayContent displayContent = new DisplayContent(display, this);
+            final DisplayContent displayContent =
+                    new DisplayContent(display, this, mDeviceStateController);
             addChild(displayContent, POSITION_BOTTOM);
             if (displayContent.mDisplayId == DEFAULT_DISPLAY) {
                 mDefaultDisplay = displayContent;
@@ -1295,6 +1302,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     // TODO(multi-display): Look at all callpoints to make sure they make sense in multi-display.
     DisplayContent getDefaultDisplay() {
         return mDefaultDisplay;
+    }
+
+    DisplayRotationCoordinator getDisplayRotationCoordinator() {
+        return mDisplayRotationCoordinator;
     }
 
     /**
@@ -1358,7 +1369,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             return null;
         }
         // The display hasn't been added to ActivityManager yet, create a new record now.
-        displayContent = new DisplayContent(display, this);
+        displayContent = new DisplayContent(display, this, mDeviceStateController);
         addChild(displayContent, POSITION_BOTTOM);
         return displayContent;
     }

@@ -3390,6 +3390,13 @@
        TODO(b/265312193): Remove this workaround when this bug is fixed.-->
   <java-symbol type="array" name="config_deviceStatesToReverseDefaultDisplayRotationAroundZAxis" />
 
+  <!-- Boolean indicating whether secondary built-in displays should have their orientation
+       match the active default display. This config assumes that the secondary display only
+       requires swapping ROTATION_90 and ROTATION_270.
+       TODO(b/265991392): This should eventually be configured and parsed in
+        display_settings.xml -->
+  <java-symbol type="bool" name="config_matchSecondaryInternalDisplaysOrientationToReverseDefaultDisplay" />
+
   <!-- Default user restrictions for the SYSTEM user -->
   <java-symbol type="array" name="config_defaultFirstUserRestrictions" />
 
