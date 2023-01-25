@@ -99,6 +99,13 @@ public interface SysuiStatusBarStateController extends StatusBarStateController 
     boolean setIsDozing(boolean isDozing);
 
     /**
+     * Update the dreaming state from {@link CentralSurfaces}'s perspective
+     * @param isDreaming whether we are dreaming
+     * @return {@code true} if the state changed, else {@code false}
+     */
+    boolean setIsDreaming(boolean isDreaming);
+
+    /**
      * Changes the current doze amount, also starts the
      * {@link com.android.internal.jank.InteractionJankMonitor InteractionJankMonitor} as possible.
      *
