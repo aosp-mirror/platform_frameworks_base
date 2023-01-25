@@ -44,6 +44,7 @@ import android.app.ExitTransitionCoordinator;
 import android.app.ExitTransitionCoordinator.ExitTransitionCallbacks;
 import android.app.ICompatCameraControlCallback;
 import android.app.Notification;
+import android.app.assist.AssistContent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -281,6 +282,7 @@ public class ScreenshotController {
     private final ActionIntentExecutor mActionExecutor;
     private final UserManager mUserManager;
     private final WorkProfileMessageController mWorkProfileMessageController;
+    private final AssistContentRequester mAssistContentRequester;
 
     private final OnBackInvokedCallback mOnBackInvokedCallback = () -> {
         if (DEBUG_INPUT) {
@@ -328,7 +330,8 @@ public class ScreenshotController {
             ScreenshotNotificationSmartActionsProvider screenshotNotificationSmartActionsProvider,
             ActionIntentExecutor actionExecutor,
             UserManager userManager,
-            WorkProfileMessageController workProfileMessageController
+            WorkProfileMessageController workProfileMessageController,
+            AssistContentRequester assistContentRequester
     ) {
         mScreenshotSmartActions = screenshotSmartActions;
         mNotificationsController = screenshotNotificationsController;
@@ -361,6 +364,7 @@ public class ScreenshotController {
         mActionExecutor = actionExecutor;
         mUserManager = userManager;
         mWorkProfileMessageController = workProfileMessageController;
+        mAssistContentRequester = assistContentRequester;
 
         mAccessibilityManager = AccessibilityManager.getInstance(mContext);
 
@@ -466,7 +470,18 @@ public class ScreenshotController {
                     mContext.getDrawable(R.drawable.overlay_badge_background),
                     screenshot.getUserHandle()));
         }
-        mScreenshotView.setScreenshot(mScreenBitmap, screenshot.getInsets());
+        mScreenshotView.setScreenshot(screenshot);
+
+        if (screenshot.getTaskId() >= 0) {
+            mAssistContentRequester.requestAssistContent(screenshot.getTaskId(),
+                    new AssistContentRequester.Callback() {
+                        @Override
+                        public void onAssistContentAvailable(AssistContent assistContent) {
+                            screenshot.setContextUrl(assistContent.getWebUri());
+                        }
+                    });
+        }
+
         if (DEBUG_WINDOW) {
             Log.d(TAG, "setContentView: " + mScreenshotView);
         }

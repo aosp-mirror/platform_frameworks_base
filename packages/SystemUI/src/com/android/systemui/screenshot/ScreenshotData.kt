@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.graphics.Bitmap
 import android.graphics.Insets
 import android.graphics.Rect
+import android.net.Uri
 import android.os.UserHandle
 import android.view.WindowManager.ScreenshotSource
 import android.view.WindowManager.ScreenshotType
@@ -21,6 +22,8 @@ data class ScreenshotData(
     var taskId: Int,
     var insets: Insets,
     var bitmap: Bitmap?,
+    /** App-provided URL representing the content the user was looking at in the screenshot. */
+    var contextUrl: Uri? = null,
 ) {
     val packageNameString: String
         get() = if (topComponent == null) "" else topComponent!!.packageName
