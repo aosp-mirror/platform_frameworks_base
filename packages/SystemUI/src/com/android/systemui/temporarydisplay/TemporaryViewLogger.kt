@@ -80,6 +80,26 @@ open class TemporaryViewLogger<T : TemporaryViewInfo>(
         )
     }
 
+    /** Logs that there was a failure to animate the view in. */
+    fun logAnimateInFailure() {
+        buffer.log(
+            tag,
+            LogLevel.WARNING,
+            {},
+            { "View's appearance animation failed. Forcing view display manually." },
+        )
+    }
+
+    /** Logs that there was a failure to animate the view out. */
+    fun logAnimateOutFailure() {
+        buffer.log(
+            tag,
+            LogLevel.WARNING,
+            {},
+            { "View's disappearance animation failed." },
+        )
+    }
+
     fun logViewHidden(info: T) {
         buffer.log(
             tag,

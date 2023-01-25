@@ -46,6 +46,7 @@ import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
+import com.android.systemui.temporarydisplay.chipbar.ChipbarAnimator
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import com.android.systemui.temporarydisplay.chipbar.ChipbarInfo
 import com.android.systemui.temporarydisplay.chipbar.ChipbarLogger
@@ -147,6 +148,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 configurationController,
                 dumpManager,
                 powerManager,
+                ChipbarAnimator(),
                 falsingManager,
                 falsingCollector,
                 swipeHandler,
