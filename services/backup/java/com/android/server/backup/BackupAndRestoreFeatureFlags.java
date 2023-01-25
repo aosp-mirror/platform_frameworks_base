@@ -52,4 +52,29 @@ public class BackupAndRestoreFeatureFlags {
                 /* name= */ "backup_transport_callback_timeout_millis",
                 /* defaultValue= */ 300000); // 5 minutes
     }
+
+    /**
+     * Retrieves the value of the flag "full_backup_write_to_transport_buffer_size_bytes".
+     * The returned value is max size of a chunk of backup data that is sent to the transport.
+     */
+    @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
+    public static int getFullBackupWriteToTransportBufferSizeBytes() {
+        return DeviceConfig.getInt(
+                NAMESPACE,
+                /* name= */ "full_backup_write_to_transport_buffer_size_bytes",
+                /* defaultValue= */ 8 * 1024); // 8 KB
+    }
+
+    /**
+     * Retrieves the value of the flag "full_backup_utils_route_buffer_size_bytes".
+     * The returned value is max size of a chunk of backup data that routed from write end of
+     * pipe from BackupAgent, to read end of pipe to Full Backup Task (PFTBT).
+     */
+    @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
+    public static int getFullBackupUtilsRouteBufferSizeBytes() {
+        return DeviceConfig.getInt(
+                NAMESPACE,
+                /* name= */ "full_backup_utils_route_buffer_size_bytes",
+                /* defaultValue= */ 32 * 1024); // 32 KB
+    }
 }

@@ -40,6 +40,7 @@ import android.util.Slog;
 
 import com.android.server.EventLogTags;
 import com.android.server.backup.BackupAgentTimeoutParameters;
+import com.android.server.backup.BackupAndRestoreFeatureFlags;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.FullBackupJob;
 import com.android.server.backup.OperationStorage;
@@ -142,7 +143,6 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
     }
 
     private static final String TAG = "PFTBT";
-
     private UserBackupManagerService mUserBackupManagerService;
     private final Object mCancelLock = new Object();
 
@@ -388,7 +388,9 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
 
             // Set up to send data to the transport
             final int N = mPackages.size();
-            final byte[] buffer = new byte[8192];
+            final int chunkSizeInBytes =
+                    BackupAndRestoreFeatureFlags.getFullBackupWriteToTransportBufferSizeBytes();
+            final byte[] buffer = new byte[chunkSizeInBytes];
             for (int i = 0; i < N; i++) {
                 mBackupRunner = null;
                 PackageInfo currentPackage = mPackages.get(i);
