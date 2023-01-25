@@ -53,9 +53,12 @@ import android.hardware.biometrics.SensorProperties;
 import android.hardware.biometrics.SensorProperties.ComponentInfo;
 import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorProperties;
+import android.hardware.face.FaceSensorPropertiesInternal;
+import android.hardware.face.IFaceAuthenticatorsRegisteredCallback;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -1371,25 +1374,51 @@ public class BinaryTransparencyService extends SystemService {
         }
 
         if (fpManager != null) {
-            // Log data for each fingerprint sensor
-            for (FingerprintSensorPropertiesInternal propInternal :
-                    fpManager.getSensorPropertiesInternal()) {
-                final FingerprintSensorProperties prop =
-                        FingerprintSensorProperties.from(propInternal);
-                logBiometricProperties(prop,
-                        FrameworkStatsLog
-                                .BIOMETRIC_PROPERTIES_COLLECTED__MODALITY__MODALITY_FINGERPRINT,
-                        toFingerprintSensorType(prop.getSensorType()));
-            }
+            final int fpModality = FrameworkStatsLog
+                    .BIOMETRIC_PROPERTIES_COLLECTED__MODALITY__MODALITY_FINGERPRINT;
+            fpManager.addAuthenticatorsRegisteredCallback(
+                    new IFingerprintAuthenticatorsRegisteredCallback.Stub() {
+                        @Override
+                        public void onAllAuthenticatorsRegistered(
+                                List<FingerprintSensorPropertiesInternal> sensors) {
+                            if (DEBUG) {
+                                Slog.d(TAG, "Retrieve fingerprint sensor properties. "
+                                        + "sensors.size()=" + sensors.size());
+                            }
+                            // Log data for each fingerprint sensor
+                            for (FingerprintSensorPropertiesInternal propInternal : sensors) {
+                                final FingerprintSensorProperties prop =
+                                        FingerprintSensorProperties.from(propInternal);
+                                logBiometricProperties(prop,
+                                        fpModality,
+                                        toFingerprintSensorType(prop.getSensorType()));
+                            }
+                        }
+                    });
         }
 
         if (faceManager != null) {
-            // Log data for each face sensor
-            for (FaceSensorProperties prop : faceManager.getSensorProperties()) {
-                logBiometricProperties(prop,
-                        FrameworkStatsLog.BIOMETRIC_PROPERTIES_COLLECTED__MODALITY__MODALITY_FACE,
-                        toFaceSensorType(prop.getSensorType()));
-            }
+            final int faceModality = FrameworkStatsLog
+                    .BIOMETRIC_PROPERTIES_COLLECTED__MODALITY__MODALITY_FACE;
+            faceManager.addAuthenticatorsRegisteredCallback(
+                    new IFaceAuthenticatorsRegisteredCallback.Stub() {
+                        @Override
+                        public void onAllAuthenticatorsRegistered(
+                                List<FaceSensorPropertiesInternal> sensors) {
+                            if (DEBUG) {
+                                Slog.d(TAG, "Retrieve face sensor properties. sensors.size()="
+                                        + sensors.size());
+                            }
+                            // Log data for each face sensor
+                            for (FaceSensorPropertiesInternal propInternal : sensors) {
+                                final FaceSensorProperties prop =
+                                        FaceSensorProperties.from(propInternal);
+                                logBiometricProperties(prop,
+                                        faceModality,
+                                        toFaceSensorType(prop.getSensorType()));
+                            }
+                        }
+                    });
         }
     }
 

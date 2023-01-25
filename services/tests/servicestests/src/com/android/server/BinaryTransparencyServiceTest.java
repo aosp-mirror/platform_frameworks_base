@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
@@ -33,9 +35,11 @@ import android.hardware.biometrics.SensorProperties;
 import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorProperties;
 import android.hardware.face.FaceSensorPropertiesInternal;
+import android.hardware.face.IFaceAuthenticatorsRegisteredCallback;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -53,6 +57,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -74,6 +80,15 @@ public class BinaryTransparencyServiceTest {
     private FingerprintManager mFpManager;
     @Mock
     private FaceManager mFaceManager;
+    @Mock
+    private PackageManager mPackageManager;
+
+    @Captor
+    private ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback>
+            mFpAuthenticatorsRegisteredCaptor;
+    @Captor
+    private ArgumentCaptor<IFaceAuthenticatorsRegisteredCallback>
+            mFaceAuthenticatorsRegisteredCaptor;
 
     @Before
     public void setUp() {
@@ -83,9 +98,6 @@ public class BinaryTransparencyServiceTest {
         mBinaryTransparencyService = new BinaryTransparencyService(mContext, mBiometricLogger);
         mTestInterface = mBinaryTransparencyService.new BinaryTransparencyServiceImpl();
         mOriginalBiometricsFlags = DeviceConfig.getProperties(DeviceConfig.NAMESPACE_BIOMETRICS);
-
-        when(mContext.getSystemService(FingerprintManager.class)).thenReturn(mFpManager);
-        when(mContext.getSystemService(FaceManager.class)).thenReturn(mFaceManager);
     }
 
     @After
@@ -110,6 +122,14 @@ public class BinaryTransparencyServiceTest {
         String[] args = {"get", "apex_info"};
         mTestInterface.onShellCommand(FileDescriptor.in, FileDescriptor.out, FileDescriptor.err,
                 args, null, new ResultReceiver(null));
+    }
+
+    private void prepBiometricsTesting() {
+        when(mContext.getPackageManager()).thenReturn(mPackageManager);
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)).thenReturn(true);
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_FACE)).thenReturn(true);
+        when(mContext.getSystemService(FingerprintManager.class)).thenReturn(mFpManager);
+        when(mContext.getSystemService(FaceManager.class)).thenReturn(mFaceManager);
     }
 
     @Test
@@ -175,25 +195,14 @@ public class BinaryTransparencyServiceTest {
 
         mBinaryTransparencyService.collectBiometricProperties();
 
-        verify(mFpManager, never()).getSensorPropertiesInternal();
-        verify(mFaceManager, never()).getSensorProperties();
+        verify(mBiometricLogger, never()).logStats(anyInt(), anyInt(), anyInt(), anyInt(),
+                anyString(), anyString(), anyString(), anyString(), anyString());
     }
 
     @Test
-    public void testCollectBiometricProperties_enablesFeature() {
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_BIOMETRICS,
-                BinaryTransparencyService.KEY_ENABLE_BIOMETRIC_PROPERTY_VERIFICATION,
-                Boolean.TRUE.toString(),
-                false /* makeDefault */);
-
-        mBinaryTransparencyService.collectBiometricProperties();
-
-        verify(mFpManager, times(1)).getSensorPropertiesInternal();
-        verify(mFaceManager, times(1)).getSensorProperties();
-    }
-
-    @Test
-    public void testCollectBiometricProperties_enablesFeature_logsFingerprintProperties() {
+    public void testCollectBiometricProperties_enablesFeature_logsFingerprintProperties()
+            throws RemoteException {
+        prepBiometricsTesting();
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_BIOMETRICS,
                 BinaryTransparencyService.KEY_ENABLE_BIOMETRIC_PROPERTY_VERIFICATION,
                 Boolean.TRUE.toString(),
@@ -209,9 +218,12 @@ public class BinaryTransparencyServiceTest {
                                 "" /* softwareVersion */)),
                         FingerprintSensorProperties.TYPE_REAR,
                         true /* resetLockoutRequiresHardwareAuthToken */));
-        when(mFpManager.getSensorPropertiesInternal()).thenReturn(props);
 
         mBinaryTransparencyService.collectBiometricProperties();
+
+        verify(mFpManager).addAuthenticatorsRegisteredCallback(mFpAuthenticatorsRegisteredCaptor
+                .capture());
+        mFpAuthenticatorsRegisteredCaptor.getValue().onAllAuthenticatorsRegistered(props);
 
         verify(mBiometricLogger, times(1)).logStats(
                 eq(1) /* sensorId */,
@@ -230,27 +242,32 @@ public class BinaryTransparencyServiceTest {
     }
 
     @Test
-    public void testCollectBiometricProperties_enablesFeature_logsFaceProperties() {
+    public void testCollectBiometricProperties_enablesFeature_logsFaceProperties()
+            throws RemoteException {
+        prepBiometricsTesting();
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_BIOMETRICS,
                 BinaryTransparencyService.KEY_ENABLE_BIOMETRIC_PROPERTY_VERIFICATION,
                 Boolean.TRUE.toString(),
                 false /* makeDefault */);
-        final List<FaceSensorProperties> props = List.of(FaceSensorProperties.from(
-                        new FaceSensorPropertiesInternal(
-                                1 /* sensorId */,
-                                SensorProperties.STRENGTH_CONVENIENCE,
-                                1 /* maxEnrollmentsPerUser */,
-                                List.of(new ComponentInfoInternal("sensor" /* componentId */,
-                                        "vendor/model/revision" /* hardwareVersion */,
-                                        "1.01" /* firmwareVersion */, "00000001" /* serialNumber */,
-                                        "" /* softwareVersion */)),
-                                FaceSensorProperties.TYPE_RGB,
-                                true /* supportsFaceDetection */,
-                                true /* supportsSelfIllumination */,
-                                true /* resetLockoutRequiresHardwareAuthToken */)));
-        when(mFaceManager.getSensorProperties()).thenReturn(props);
+        final List<FaceSensorPropertiesInternal> props = List.of(
+                new FaceSensorPropertiesInternal(
+                        1 /* sensorId */,
+                        SensorProperties.STRENGTH_CONVENIENCE,
+                        1 /* maxEnrollmentsPerUser */,
+                        List.of(new ComponentInfoInternal("sensor" /* componentId */,
+                                "vendor/model/revision" /* hardwareVersion */,
+                                "1.01" /* firmwareVersion */, "00000001" /* serialNumber */,
+                                "" /* softwareVersion */)),
+                        FaceSensorProperties.TYPE_RGB,
+                        true /* supportsFaceDetection */,
+                        true /* supportsSelfIllumination */,
+                        true /* resetLockoutRequiresHardwareAuthToken */));
 
         mBinaryTransparencyService.collectBiometricProperties();
+
+        verify(mFaceManager).addAuthenticatorsRegisteredCallback(mFaceAuthenticatorsRegisteredCaptor
+                .capture());
+        mFaceAuthenticatorsRegisteredCaptor.getValue().onAllAuthenticatorsRegistered(props);
 
         verify(mBiometricLogger, times(1)).logStats(
                 eq(1) /* sensorId */,
