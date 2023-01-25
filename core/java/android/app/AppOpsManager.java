@@ -1448,9 +1448,13 @@ public class AppOpsManager {
     public static final int OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD =
             AppProtoEnums.APP_OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD;
 
+    /** @hide Access to wrist temperature sensors. */
+    public static final int OP_BODY_SENSORS_WRIST_TEMPERATURE =
+            AppProtoEnums.APP_OP_BODY_SENSORS_WRIST_TEMPERATURE;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 132;
+    public static final int _NUM_OP = 133;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -2030,6 +2034,10 @@ public class AppOpsManager {
     public static final String OPSTR_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD =
             "android:capture_consentless_bugreport_on_userdebug_build";
 
+    /** Access to wrist temperature body sensors. */
+    public static final String OPSTR_BODY_SENSORS_WRIST_TEMPERATURE =
+            "android:body_sensors_wrist_temperature";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -2128,6 +2136,7 @@ public class AppOpsManager {
             OP_READ_MEDIA_VISUAL_USER_SELECTED,
             OP_FOREGROUND_SERVICE_SPECIAL_USE,
             OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
+            OP_BODY_SENSORS_WRIST_TEMPERATURE,
     };
 
     static final AppOpInfo[] sAppOpInfos = new AppOpInfo[]{
@@ -2541,7 +2550,12 @@ public class AppOpsManager {
                 OPSTR_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
                 "CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD")
                 .setPermission(Manifest.permission.CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD)
-                .build()
+                .build(),
+        new AppOpInfo.Builder(OP_BODY_SENSORS_WRIST_TEMPERATURE,
+                OPSTR_BODY_SENSORS_WRIST_TEMPERATURE,
+                "BODY_SENSORS_WRIST_TEMPERATURE")
+                .setPermission(Manifest.permission.BODY_SENSORS_WRIST_TEMPERATURE)
+                .setDefaultMode(AppOpsManager.MODE_ALLOWED).build()
     };
 
     // The number of longs needed to form a full bitmask of app ops
