@@ -60,6 +60,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.security.SecureBox;
 import com.android.server.locksettings.recoverablekeystore.storage.ApplicationKeyStorage;
 import com.android.server.locksettings.recoverablekeystore.storage.CleanupManager;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;

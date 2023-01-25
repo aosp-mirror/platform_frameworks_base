@@ -23,7 +23,7 @@ import android.os.SystemClock;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.server.locksettings.recoverablekeystore.SecureBox;
+import com.android.security.SecureBox;
 
 import org.junit.Before;
 import org.junit.Test;

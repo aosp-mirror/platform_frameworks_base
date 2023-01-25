@@ -28,6 +28,8 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.security.SecureBox;
+
 import com.google.common.collect.ImmutableMap;
 
 import org.junit.Test;
