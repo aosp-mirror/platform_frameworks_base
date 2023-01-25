@@ -1408,14 +1408,16 @@ public class AppOpsManager {
             AppProtoEnums.APP_OP_FOREGROUND_SERVICE_SPECIAL_USE;
 
     /**
-     * Exempt from start foreground service from background restriction.
+     * Exempt an app from all power-related restrictions, including app standby and doze.
+     * In addition, the app will be able to start foreground services from the background, and the
+     * user will not be able to stop foreground services run by the app.
      *
      * Only to be used by the system.
      *
      * @hide
      */
-    public static final int OP_SYSTEM_EXEMPT_FROM_FGS_BG_START_RESTRICTION =
-            AppProtoEnums.APP_OP_SYSTEM_EXEMPT_FROM_FGS_BG_START_RESTRICTION;
+    public static final int OP_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS =
+            AppProtoEnums.APP_OP_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS;
 
     /**
      * Exempt from start foreground service from background with while in user permission
@@ -1989,14 +1991,16 @@ public class AppOpsManager {
             "android:foreground_service_special_use";
 
     /**
-     * Exempt from start foreground service from background restriction.
+     * Exempt an app from all power-related restrictions, including app standby and doze.
+     * In addition, the app will be able to start foreground services from the background, and the
+     * user will not be able to stop foreground services run by the app.
      *
      * Only to be used by the system.
      *
      * @hide
      */
-    public static final String OPSTR_SYSTEM_EXEMPT_FROM_FGS_BG_START_RESTRICTION =
-            "android:system_exempt_from_fgs_bg_start_restriction";
+    public static final String OPSTR_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS =
+            "android:system_exempt_from_power_restrictions";
 
     /**
      * Exempt from start foreground service from background with while in user permission
@@ -2525,9 +2529,9 @@ public class AppOpsManager {
         new AppOpInfo.Builder(OP_FOREGROUND_SERVICE_SPECIAL_USE,
                 OPSTR_FOREGROUND_SERVICE_SPECIAL_USE, "FOREGROUND_SERVICE_SPECIAL_USE")
                 .setPermission(Manifest.permission.FOREGROUND_SERVICE_SPECIAL_USE).build(),
-        new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_FGS_BG_START_RESTRICTION,
-                OPSTR_SYSTEM_EXEMPT_FROM_FGS_BG_START_RESTRICTION,
-                "SYSTEM_EXEMPT_FROM_FGS_BG_START_RESTRICTION").build(),
+        new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS,
+                OPSTR_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS,
+                "SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS").build(),
         new AppOpInfo.Builder(
                 OP_SYSTEM_EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION,
                 OPSTR_SYSTEM_EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION,
