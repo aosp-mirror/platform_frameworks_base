@@ -18,31 +18,31 @@ package com.android.systemui.common.ui.view
 
 import android.content.Context
 import android.util.AttributeSet
-import android.widget.LinearLayout
+import androidx.constraintlayout.widget.ConstraintLayout
 import com.android.systemui.animation.LaunchableView
 import com.android.systemui.animation.LaunchableViewDelegate
 
-/** A [LinearLayout] that also implements [LaunchableView]. */
-open class LaunchableLinearLayout : LinearLayout, LaunchableView {
+/** A [ConstraintLayout] that also implements [LaunchableView]. */
+open class LaunchableConstraintLayout : ConstraintLayout, LaunchableView {
     private val delegate =
         LaunchableViewDelegate(
             this,
             superSetVisibility = { super.setVisibility(it) },
         )
 
-    constructor(context: Context?) : super(context)
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
+    constructor(context: Context) : super(context)
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
     constructor(
-        context: Context?,
+        context: Context,
         attrs: AttributeSet?,
-        defStyleAttr: Int,
+        defStyleAttr: Int
     ) : super(context, attrs, defStyleAttr)
 
     constructor(
-        context: Context?,
+        context: Context,
         attrs: AttributeSet?,
         defStyleAttr: Int,
-        defStyleRes: Int,
+        defStyleRes: Int
     ) : super(context, attrs, defStyleAttr, defStyleRes)
 
     override fun setShouldBlockVisibilityChanges(block: Boolean) {

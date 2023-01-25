@@ -35,6 +35,7 @@ import android.view.View
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.LaunchableFrameLayout
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.qs.QSTile
@@ -339,7 +340,7 @@ class CustomTileTest : SysuiTestCase() {
         val tile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
         tile.qsTile.activityLaunchForClick = pi
 
-        tile.handleClick(mock(View::class.java))
+        tile.handleClick(mock(LaunchableFrameLayout::class.java))
 
         testableLooper.processAllMessages()
 
