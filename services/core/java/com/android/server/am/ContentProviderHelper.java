@@ -1121,11 +1121,15 @@ public class ContentProviderHelper {
             final String permissionCheck =
                     checkContentProviderPermission(cpi, callingPid, callingUid,
                             userId, checkUser, null);
-            if (permissionCheck != null) {
+            final boolean grantCheck = mService.checkUriPermission(uri, callingPid, callingUid,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION , userId, null)
+                    == PackageManager.PERMISSION_GRANTED;
+
+            if (!grantCheck && permissionCheck != null) {
                 FrameworkStatsLog.write(GET_TYPE_ACCESSED_WITHOUT_PERMISSION,
                         GET_TYPE_ACCESSED_WITHOUT_PERMISSION__LOCATION__AM_FRAMEWORK_PERMISSION,
                         callingUid, authority, type);
-            } else if (cpi.forceUriPermissions
+            } else if (!grantCheck && cpi.forceUriPermissions
                     && holder.provider.checkUriPermission(attributionSource,
                             uri, callingUid, Intent.FLAG_GRANT_READ_URI_PERMISSION)
                             != PermissionChecker.PERMISSION_GRANTED) {
