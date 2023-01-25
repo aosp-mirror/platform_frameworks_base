@@ -46,6 +46,25 @@ constructor(@NotificationLog private val buffer: LogBuffer) {
         )
     }
 
+    fun logMaybeClearDozeAmountOverrideHidingNotifs(
+        willRemove: Boolean,
+        onKeyguard: Boolean,
+        dozing: Boolean,
+        bypass: Boolean,
+        animating: Boolean,
+    ) {
+        buffer.log(
+            TAG,
+            DEBUG,
+            {
+                str1 =
+                    "willRemove=$willRemove onKeyguard=$onKeyguard dozing=$dozing" +
+                        " bypass=$bypass animating=$animating"
+            },
+            { "maybeClearDozeAmountOverrideHidingNotifs() $str1" }
+        )
+    }
+
     fun logOnDozeAmountChanged(linear: Float, eased: Float) {
         buffer.log(
             TAG,

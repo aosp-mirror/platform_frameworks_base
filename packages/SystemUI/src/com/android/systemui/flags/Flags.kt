@@ -65,8 +65,7 @@ object Flags {
     val FSI_ON_DND_UPDATE = unreleasedFlag(259130119, "fsi_on_dnd_update", teamfood = true)
 
     // TODO(b/265804648): Tracking Bug
-    @JvmField
-    val DISABLE_FSI = unreleasedFlag(265804648, "disable_fsi")
+    @JvmField val DISABLE_FSI = unreleasedFlag(265804648, "disable_fsi")
 
     // TODO(b/254512538): Tracking Bug
     val INSTANT_VOICE_REPLY = unreleasedFlag(111, "instant_voice_reply", teamfood = true)
@@ -230,7 +229,6 @@ object Flags {
     // TODO(b/254513100): Tracking Bug
     val SMARTSPACE_SHARED_ELEMENT_TRANSITION_ENABLED =
         releasedFlag(401, "smartspace_shared_element_transition_enabled")
-    val SMARTSPACE = resourceBooleanFlag(402, R.bool.flag_smartspace, "smartspace")
 
     // TODO(b/258517050): Clean up after the feature is launched.
     @JvmField
@@ -483,11 +481,19 @@ object Flags {
     val WM_SHADE_ANIMATE_BACK_GESTURE =
         unreleasedFlag(1208, "persist.wm.debug.shade_animate_back_gesture", teamfood = true)
 
+    // TODO(b/265639042): Tracking Bug
+    @JvmField
+    val WM_ENABLE_PREDICTIVE_BACK_QS_DIALOG_ANIM =
+        unreleasedFlag(1209, "persist.wm.debug.predictive_back_qs_dialog_anim", teamfood = true)
+
     // 1300 - screenshots
     // TODO(b/254513155): Tracking Bug
     @JvmField
     val SCREENSHOT_WORK_PROFILE_POLICY =
         unreleasedFlag(1301, "screenshot_work_profile_policy", teamfood = true)
+
+    // TODO(b/264916608): Tracking Bug
+    @JvmField val SCREENSHOT_METADATA = unreleasedFlag(1302, "screenshot_metadata")
 
     // 1400 - columbus
     // TODO(b/254512756): Tracking Bug
@@ -513,6 +519,8 @@ object Flags {
     // 1800 - shade container
     @JvmField
     val LEAVE_SHADE_OPEN_FOR_BUGREPORT = releasedFlag(1800, "leave_shade_open_for_bugreport")
+    // TODO(b/265944639): Tracking Bug
+    @JvmField val DUAL_SHADE = releasedFlag(1801, "dual_shade")
 
     // 1900
     @JvmField val NOTE_TASKS = unreleasedFlag(1900, "keycode_flag")
@@ -523,6 +531,10 @@ object Flags {
     @JvmField
     val APP_PANELS_ALL_APPS_ALLOWED =
         unreleasedFlag(2001, "app_panels_all_apps_allowed", teamfood = true)
+
+    @JvmField
+    val CONTROLS_MANAGEMENT_NEW_FLOWS =
+        unreleasedFlag(2002, "controls_management_new_flows", teamfood = true)
 
     // 2100 - Falsing Manager
     @JvmField val FALSING_FOR_LONG_TAPS = releasedFlag(2100, "falsing_for_long_taps")
@@ -573,6 +585,5 @@ object Flags {
 
     // 2600 - keyboard shortcut
     // TODO(b/259352579): Tracking Bug
-    @JvmField
-    val SHORTCUT_LIST_SEARCH_LAYOUT = unreleasedFlag(2600, "shortcut_list_search_layout")
+    @JvmField val SHORTCUT_LIST_SEARCH_LAYOUT = unreleasedFlag(2600, "shortcut_list_search_layout")
 }

@@ -724,6 +724,7 @@ final class LetterboxUiController {
      *   <li>Activity is portrait-only.
      *   <li>Fullscreen window in landscape device orientation.
      *   <li>Horizontal Reachability is enabled.
+     *   <li>Activity fills parent vertically.
      * </ul>
      */
     private boolean isHorizontalReachabilityEnabled(Configuration parentConfiguration) {
@@ -731,10 +732,14 @@ final class LetterboxUiController {
                 && parentConfiguration.windowConfiguration.getWindowingMode()
                         == WINDOWING_MODE_FULLSCREEN
                 && (parentConfiguration.orientation == ORIENTATION_LANDSCAPE
-                && mActivityRecord.getOrientationForReachability() == ORIENTATION_PORTRAIT);
+                        && mActivityRecord.getOrientationForReachability() == ORIENTATION_PORTRAIT)
+                // Check whether the activity fills the parent vertically.
+                && parentConfiguration.windowConfiguration.getBounds().height()
+                        == mActivityRecord.getBounds().height();
     }
 
-    private boolean isHorizontalReachabilityEnabled() {
+    @VisibleForTesting
+    boolean isHorizontalReachabilityEnabled() {
         return isHorizontalReachabilityEnabled(mActivityRecord.getParent().getConfiguration());
     }
 
@@ -746,6 +751,7 @@ final class LetterboxUiController {
      *   <li>Activity is landscape-only.
      *   <li>Fullscreen window in portrait device orientation.
      *   <li>Vertical Reachability is enabled.
+     *   <li>Activity fills parent horizontally.
      * </ul>
      */
     private boolean isVerticalReachabilityEnabled(Configuration parentConfiguration) {
@@ -753,10 +759,14 @@ final class LetterboxUiController {
                 && parentConfiguration.windowConfiguration.getWindowingMode()
                         == WINDOWING_MODE_FULLSCREEN
                 && (parentConfiguration.orientation == ORIENTATION_PORTRAIT
-                && mActivityRecord.getOrientationForReachability() == ORIENTATION_LANDSCAPE);
+                        && mActivityRecord.getOrientationForReachability() == ORIENTATION_LANDSCAPE)
+                // Check whether the activity fills the parent horizontally.
+                && parentConfiguration.windowConfiguration.getBounds().width()
+                        == mActivityRecord.getBounds().width();
     }
 
-    private boolean isVerticalReachabilityEnabled() {
+    @VisibleForTesting
+    boolean isVerticalReachabilityEnabled() {
         return isVerticalReachabilityEnabled(mActivityRecord.getParent().getConfiguration());
     }
 

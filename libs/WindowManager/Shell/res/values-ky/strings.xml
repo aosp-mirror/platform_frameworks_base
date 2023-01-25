@@ -51,7 +51,7 @@
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Чыгуу үчүн экранды ылдый жагынан өйдө сүрүңүз же колдонмонун өйдө жагын басыңыз"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Бир кол режимин баштоо"</string>
     <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Бир кол режиминен чыгуу"</string>
-    <string name="bubbles_settings_button_description" msgid="1301286017420516912">"<xliff:g id="APP_NAME">%1$s</xliff:g> калкып чыкма билдирмелер жөндөөлөрү"</string>
+    <string name="bubbles_settings_button_description" msgid="1301286017420516912">"<xliff:g id="APP_NAME">%1$s</xliff:g> калкып чыкма билдирмелер параметрлери"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Кошумча меню"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Кайра топтомго кошуу"</string>
     <string name="bubble_content_description_single" msgid="8495748092720065813">"<xliff:g id="APP_NAME">%2$s</xliff:g> колдонмосунан <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
@@ -60,7 +60,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Жогорку оң жакка жылдыруу"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Төмөнкү сол жакка жылдыруу"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Төмөнкү оң жакка жылдыруу"</string>
-    <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> жөндөөлөрү"</string>
+    <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> параметрлери"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Калкып чыкма билдирмени жабуу"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Жазышууда калкып чыкма билдирмелер көрүнбөсүн"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Калкып чыкма билдирмелер аркылуу маектешүү"</string>

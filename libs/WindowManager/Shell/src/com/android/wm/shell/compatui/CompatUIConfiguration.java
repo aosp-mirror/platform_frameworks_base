@@ -16,10 +16,11 @@
 
 package com.android.wm.shell.compatui;
 
+import android.annotation.NonNull;
+import android.app.TaskInfo;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.provider.DeviceConfig;
-
-import androidx.annotation.NonNull;
 
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.ShellExecutor;
@@ -34,10 +35,26 @@ import javax.inject.Inject;
 @WMSingleton
 public class CompatUIConfiguration implements DeviceConfig.OnPropertiesChangedListener {
 
-    static final String KEY_ENABLE_LETTERBOX_RESTART_DIALOG = "enable_letterbox_restart_dialog";
+    private static final String KEY_ENABLE_LETTERBOX_RESTART_DIALOG =
+            "enable_letterbox_restart_confirmation_dialog";
 
-    static final String KEY_ENABLE_LETTERBOX_REACHABILITY_EDUCATION =
+    private static final String KEY_ENABLE_LETTERBOX_REACHABILITY_EDUCATION =
             "enable_letterbox_reachability_education";
+
+    private static final boolean DEFAULT_VALUE_ENABLE_LETTERBOX_RESTART_DIALOG = true;
+
+    private static final boolean DEFAULT_VALUE_ENABLE_LETTERBOX_REACHABILITY_EDUCATION = false;
+
+    /**
+     * The name of the {@link SharedPreferences} that holds which user has seen the Restart
+     * confirmation dialog.
+     */
+    private static final String DONT_SHOW_RESTART_DIALOG_PREF_NAME = "dont_show_restart_dialog";
+
+    /**
+     * The {@link SharedPreferences} instance for {@link #DONT_SHOW_RESTART_DIALOG_PREF_NAME}.
+     */
+    private final SharedPreferences mSharedPreferences;
 
     // Whether the extended restart dialog is enabled
     private boolean mIsRestartDialogEnabled;
@@ -64,12 +81,15 @@ public class CompatUIConfiguration implements DeviceConfig.OnPropertiesChangedLi
         mIsReachabilityEducationEnabled = context.getResources().getBoolean(
                 R.bool.config_letterboxIsReachabilityEducationEnabled);
         mIsLetterboxRestartDialogAllowed = DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_WINDOW_MANAGER, KEY_ENABLE_LETTERBOX_RESTART_DIALOG, false);
+                DeviceConfig.NAMESPACE_WINDOW_MANAGER, KEY_ENABLE_LETTERBOX_RESTART_DIALOG,
+                DEFAULT_VALUE_ENABLE_LETTERBOX_RESTART_DIALOG);
         mIsLetterboxReachabilityEducationAllowed = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_WINDOW_MANAGER, KEY_ENABLE_LETTERBOX_REACHABILITY_EDUCATION,
-                false);
+                DEFAULT_VALUE_ENABLE_LETTERBOX_REACHABILITY_EDUCATION);
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_APP_COMPAT, mainExecutor,
                 this);
+        mSharedPreferences = context.getSharedPreferences(DONT_SHOW_RESTART_DIALOG_PREF_NAME,
+                Context.MODE_PRIVATE);
     }
 
     /**
@@ -102,18 +122,37 @@ public class CompatUIConfiguration implements DeviceConfig.OnPropertiesChangedLi
         mIsReachabilityEducationOverrideEnabled = enabled;
     }
 
+    boolean getDontShowRestartDialogAgain(TaskInfo taskInfo) {
+        final int userId = taskInfo.userId;
+        final String packageName = taskInfo.topActivity.getPackageName();
+        return mSharedPreferences.getBoolean(
+                getDontShowAgainRestartKey(userId, packageName), /* default= */ false);
+    }
+
+    void setDontShowRestartDialogAgain(TaskInfo taskInfo) {
+        final int userId = taskInfo.userId;
+        final String packageName = taskInfo.topActivity.getPackageName();
+        mSharedPreferences.edit().putBoolean(getDontShowAgainRestartKey(userId, packageName),
+                true).apply();
+    }
+
     @Override
     public void onPropertiesChanged(@NonNull DeviceConfig.Properties properties) {
-        // TODO(b/263349751): Update flag and default value to true
         if (properties.getKeyset().contains(KEY_ENABLE_LETTERBOX_RESTART_DIALOG)) {
             mIsLetterboxRestartDialogAllowed = DeviceConfig.getBoolean(
                     DeviceConfig.NAMESPACE_WINDOW_MANAGER, KEY_ENABLE_LETTERBOX_RESTART_DIALOG,
-                    false);
+                    DEFAULT_VALUE_ENABLE_LETTERBOX_RESTART_DIALOG);
         }
+        // TODO(b/263349751): Update flag and default value to true
         if (properties.getKeyset().contains(KEY_ENABLE_LETTERBOX_REACHABILITY_EDUCATION)) {
             mIsLetterboxReachabilityEducationAllowed = DeviceConfig.getBoolean(
                     DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-                    KEY_ENABLE_LETTERBOX_REACHABILITY_EDUCATION, false);
+                    KEY_ENABLE_LETTERBOX_REACHABILITY_EDUCATION,
+                    DEFAULT_VALUE_ENABLE_LETTERBOX_REACHABILITY_EDUCATION);
         }
+    }
+
+    private String getDontShowAgainRestartKey(int userId, String packageName) {
+        return packageName + "@" + userId;
     }
 }

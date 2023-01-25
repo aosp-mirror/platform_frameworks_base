@@ -329,20 +329,20 @@
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"pristupa podacima senzora o vašim vitalnim funkcijama"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"Obavještenja"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"prikaz obavještenja"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"preuzima sadržaj prozora"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"preuzimati sadržaj prozora"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Pregleda sadržaj prozora koji trenutno koristite."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"uključi opciju Istraživanje dodirom"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Stavke koje dodirnete bit će izgovorene naglas, a ekran možete istraživati koristeći pokrete."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"prati tekst koji unosite"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"uključiti Istraživanje dodirom"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Stavke koje dodirnete će se izgovarati naglas i moći ćete istraživati ekran pomoću pokreta."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"pratiti tekst koji unosite"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Obuhvata lične podatke kao što su brojevi kreditnih kartica i lozinke."</string>
-    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"kontrolira uvećavanje prikaza na ekranu"</string>
-    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Kontrolira stepen uvećanja prikaza na ekranu i podešavanje položaja."</string>
-    <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"izvodi pokrete"</string>
+    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"kontrolirati uvećavanje prikaza na ekranu"</string>
+    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Kontrolira nivo i položaj zumiranja na ekranu."</string>
+    <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"izvoditi pokrete"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Može dodirivati, prevlačiti, hvatati prstima i praviti druge pokrete."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"prepoznaje pokrete za otisak prsta"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Moguće je zabilježiti pokrete na senzoru za otisak prsta uređaja."</string>
-    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"pravi snimke ekrana"</string>
-    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Moguće je snimiti ekran."</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"prepoznavati pokrete otiska prsta"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Može zabilježiti pokrete na senzoru za otisak prsta uređaja."</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"praviti snimke ekrana"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Može napraviti snimak ekrana."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"onemogućavanje ili mijenjanje statusne trake"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Dozvoljava aplikaciji onemogućavanje statusne trake ili dodavanje i uklanjanje sistemskih ikona."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"funkcioniranje u vidu statusne trake"</string>

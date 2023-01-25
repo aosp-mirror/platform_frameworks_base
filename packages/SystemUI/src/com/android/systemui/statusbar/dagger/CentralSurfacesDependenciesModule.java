@@ -25,12 +25,15 @@ import android.util.Log;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.AnimationFeatureFlags;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpHandler;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.plugins.ActivityStarter;
@@ -281,7 +284,8 @@ public interface CentralSurfacesDependenciesModule {
     static DialogLaunchAnimator provideDialogLaunchAnimator(IDreamManager dreamManager,
             KeyguardStateController keyguardStateController,
             Lazy<AlternateBouncerInteractor> alternateBouncerInteractor,
-            InteractionJankMonitor interactionJankMonitor) {
+            InteractionJankMonitor interactionJankMonitor,
+            AnimationFeatureFlags animationFeatureFlags) {
         DialogLaunchAnimator.Callback callback = new DialogLaunchAnimator.Callback() {
             @Override
             public boolean isDreaming() {
@@ -303,6 +307,19 @@ public interface CentralSurfacesDependenciesModule {
                 return alternateBouncerInteractor.get().canShowAlternateBouncerForFingerprint();
             }
         };
-        return new DialogLaunchAnimator(callback, interactionJankMonitor);
+        return new DialogLaunchAnimator(callback, interactionJankMonitor, animationFeatureFlags);
+    }
+
+    /**
+     */
+    @Provides
+    @SysUISingleton
+    static AnimationFeatureFlags provideAnimationFeatureFlags(FeatureFlags featureFlags) {
+        return new AnimationFeatureFlags() {
+            @Override
+            public boolean isPredictiveBackQsDialogAnim() {
+                return featureFlags.isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_QS_DIALOG_ANIM);
+            }
+        };
     }
 }
