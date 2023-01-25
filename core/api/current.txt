@@ -41476,9 +41476,7 @@ package android.telecom {
   }
 
   public final class CallEndpointException extends java.lang.RuntimeException implements android.os.Parcelable {
-    ctor public CallEndpointException(@Nullable String);
     ctor public CallEndpointException(@Nullable String, int);
-    ctor public CallEndpointException(@Nullable String, int, @Nullable Throwable);
     method public int describeContents();
     method public int getCode();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
