@@ -1113,6 +1113,7 @@ class BroadcastProcessQueue {
         pw.print(" because ");
         pw.print(reasonToString(mRunnableAtReason));
         pw.println();
+        pw.print("mProcessCached="); pw.println(mProcessCached);
         pw.increaseIndent();
         if (mActive != null) {
             dumpRecord("ACTIVE", now, pw, mActive, mActiveIndex);

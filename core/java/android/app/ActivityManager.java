@@ -5346,6 +5346,20 @@ public class ActivityManager {
     }
 
     /**
+     * Checks if the process represented by the given {@code pid} is frozen.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.DUMP)
+    public boolean isProcessFrozen(int pid) {
+        try {
+            return getService().isProcessFrozen(pid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * @return The reason code of whether or not the given UID should be exempted from background
      * restrictions here.
      *
