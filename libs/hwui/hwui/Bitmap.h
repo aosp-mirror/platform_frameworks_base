@@ -23,6 +23,10 @@
 #include <SkPixelRef.h>
 #include <SkRefCnt.h>
 #include <cutils/compiler.h>
+#include <utils/StrongPointer.h>
+
+#include <optional>
+
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
 #include <android/hardware_buffer.h>
 #endif
@@ -47,6 +51,7 @@ enum class BitmapPalette {
 };
 
 namespace uirenderer {
+class Gainmap;
 namespace renderthread {
 class RenderThread;
 }
@@ -119,6 +124,11 @@ public:
     void getBounds(SkRect* bounds) const;
 
     bool isHardware() const { return mPixelStorageType == PixelStorageType::Hardware; }
+    bool hasGainmap() const { return mGainmap.get() != nullptr; }
+
+    sp<uirenderer::Gainmap> gainmap() const;
+
+    void setGainmap(sp<uirenderer::Gainmap>&& gainmap);
 
     PixelStorageType pixelStorageType() const { return mPixelStorageType; }
 
@@ -192,6 +202,8 @@ private:
     uint32_t mPaletteGenerationId = -1;
 
     bool mHasHardwareMipMap = false;
+
+    sp<uirenderer::Gainmap> mGainmap;
 
     union {
         struct {

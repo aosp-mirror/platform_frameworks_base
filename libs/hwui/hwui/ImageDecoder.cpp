@@ -16,15 +16,20 @@
 
 #include "ImageDecoder.h"
 
-#include <hwui/Bitmap.h>
-#include <log/log.h>
-
+#include <Gainmap.h>
 #include <SkAndroidCodec.h>
 #include <SkBitmap.h>
 #include <SkBlendMode.h>
 #include <SkCanvas.h>
 #include <SkEncodedOrigin.h>
+#include <SkGainmapInfo.h>
 #include <SkPaint.h>
+#include <SkStream.h>
+#include <hwui/Bitmap.h>
+#include <log/log.h>
+#include <utils/Trace.h>
+
+#include <memory>
 
 #undef LOG_TAG
 #define LOG_TAG "ImageDecoder"
@@ -195,7 +200,7 @@ SkImageInfo ImageDecoder::getOutputInfo() const {
 }
 
 bool ImageDecoder::swapWidthHeight() const {
-    return SkEncodedOriginSwapsWidthHeight(mCodec->codec()->getOrigin());
+    return SkEncodedOriginSwapsWidthHeight(getOrigin());
 }
 
 int ImageDecoder::width() const {
@@ -316,7 +321,7 @@ SkCodec::FrameInfo ImageDecoder::getCurrentFrameInfo() {
         info.fFrameRect = SkIRect::MakeSize(dims);
     }
 
-    if (auto origin = mCodec->codec()->getOrigin(); origin != kDefault_SkEncodedOrigin) {
+    if (auto origin = getOrigin(); origin != kDefault_SkEncodedOrigin) {
         if (SkEncodedOriginSwapsWidthHeight(origin)) {
             dims = swapped(dims);
         }
@@ -400,7 +405,7 @@ SkCodec::Result ImageDecoder::decode(void* pixels, size_t rowBytes) {
     // FIXME: Use scanline decoding on only a couple lines to save memory. b/70709380.
     SkBitmap tmp;
     const bool scale = mDecodeSize != mTargetSize;
-    const auto origin = mCodec->codec()->getOrigin();
+    const auto origin = getOrigin();
     const bool handleOrigin = origin != kDefault_SkEncodedOrigin;
     SkMatrix outputMatrix;
     if (scale || handleOrigin || mCropRect) {
@@ -455,12 +460,15 @@ SkCodec::Result ImageDecoder::decode(void* pixels, size_t rowBytes) {
         mOptions.fZeroInitialized = SkCodec::kYes_ZeroInitialized;
     }
 
+    ATRACE_BEGIN("getAndroidPixels");
     auto result = mCodec->getAndroidPixels(decodeInfo, decodePixels, decodeRowBytes, &mOptions);
+    ATRACE_END();
 
     // The next call to decode() may not provide zero initialized memory.
     mOptions.fZeroInitialized = SkCodec::kNo_ZeroInitialized;
 
     if (scale || handleOrigin || mCropRect) {
+        ATRACE_NAME("Handling scale/origin/crop");
         SkBitmap scaledBm;
         if (!scaledBm.installPixels(outputInfo, pixels, rowBytes)) {
             return SkCodec::kInternalError;
@@ -478,3 +486,71 @@ SkCodec::Result ImageDecoder::decode(void* pixels, size_t rowBytes) {
     return result;
 }
 
+SkCodec::Result ImageDecoder::extractGainmap(Bitmap* destination) {
+    ATRACE_CALL();
+    SkGainmapInfo gainmapInfo;
+    std::unique_ptr<SkStream> gainmapStream;
+    {
+        ATRACE_NAME("getAndroidGainmap");
+        if (!mCodec->getAndroidGainmap(&gainmapInfo, &gainmapStream)) {
+            return SkCodec::kSuccess;
+        }
+    }
+    auto gainmapCodec = SkAndroidCodec::MakeFromStream(std::move(gainmapStream));
+    if (!gainmapCodec) {
+        ALOGW("Failed to create codec for gainmap stream");
+        return SkCodec::kInvalidInput;
+    }
+    ImageDecoder decoder{std::move(gainmapCodec)};
+    // Gainmap inherits the origin of the containing image
+    decoder.mOverrideOrigin.emplace(getOrigin());
+
+    const bool isScaled = width() != mTargetSize.width() || height() != mTargetSize.height();
+
+    if (isScaled) {
+        float scaleX = (float)mTargetSize.width() / width();
+        float scaleY = (float)mTargetSize.height() / height();
+        decoder.setTargetSize(decoder.width() * scaleX, decoder.height() * scaleY);
+    }
+
+    if (mCropRect) {
+        float sX = decoder.mTargetSize.width() / (float)mTargetSize.width();
+        float sY = decoder.mTargetSize.height() / (float)mTargetSize.height();
+        SkIRect crop = *mCropRect;
+        // TODO: Tweak rounding?
+        crop.fLeft *= sX;
+        crop.fRight *= sX;
+        crop.fTop *= sY;
+        crop.fBottom *= sY;
+        decoder.setCropRect(&crop);
+    }
+
+    SkImageInfo bitmapInfo = decoder.getOutputInfo();
+
+    SkBitmap bm;
+    if (!bm.setInfo(bitmapInfo)) {
+        ALOGE("Failed to setInfo properly");
+        return SkCodec::kInternalError;
+    }
+
+    // TODO: We don't currently parcel the gainmap, but if we should then also support
+    // the shared allocator
+    sk_sp<Bitmap> nativeBitmap = Bitmap::allocateHeapBitmap(&bm);
+    if (!nativeBitmap) {
+        ALOGE("OOM allocating Bitmap with dimensions %i x %i", bitmapInfo.width(),
+              bitmapInfo.height());
+        return SkCodec::kInternalError;
+    }
+
+    SkCodec::Result result = decoder.decode(bm.getPixels(), bm.rowBytes());
+    bm.setImmutable();
+
+    if (result == SkCodec::kSuccess) {
+        auto gainmap = sp<uirenderer::Gainmap>::make();
+        gainmap->info = gainmapInfo;
+        gainmap->bitmap = std::move(nativeBitmap);
+        destination->setGainmap(std::move(gainmap));
+    }
+
+    return result;
+}
