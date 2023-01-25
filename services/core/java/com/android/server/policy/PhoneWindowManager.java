@@ -975,12 +975,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             powerMultiPressAction(eventTime, interactive, mTriplePressOnPowerBehavior);
         } else if (count > 3 && count <= getMaxMultiPressPowerCount()) {
             Slog.d(TAG, "No behavior defined for power press count " + count);
-        } else if (count == 1 && interactive) {
-            if (beganFromNonInteractive) {
-                // The screen off case, where we might want to start dreaming on power button press.
-                attemptToDreamFromShortPowerButtonPress(false, () -> {});
-                return;
-            }
+        } else if (count == 1 && interactive && !beganFromNonInteractive) {
             if (mSideFpsEventHandler.shouldConsumeSinglePress(eventTime)) {
                 Slog.i(TAG, "Suppressing power key because the user is interacting with the "
                         + "fingerprint sensor");
