@@ -510,6 +510,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
     @Test
     public void managedProfileAdded_tileAdded() {
         when(mAutoAddTracker.isAdded(eq("work"))).thenReturn(false);
+        when(mAutoAddTracker.getRestoredTilePosition(eq("work"))).thenReturn(2);
         mAutoTileManager = createAutoTileManager(mContext);
         Mockito.doAnswer((Answer<Object>) invocation -> {
             mManagedProfileCallback = invocation.getArgument(0);
@@ -520,7 +521,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
 
         mManagedProfileCallback.onManagedProfileChanged();
 
-        verify(mQsTileHost, times(1)).addTile(eq("work"));
+        verify(mQsTileHost, times(1)).addTile(eq("work"), eq(2));
         verify(mAutoAddTracker, times(1)).setTileAdded(eq("work"));
     }
 
