@@ -92,9 +92,11 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
                         getRequestSession.mClientRequest);
         if (filteredRequest != null) {
             BeginGetCredentialRequest beginGetCredentialRequest = constructQueryPhaseRequest(
-                    filteredRequest, getRequestSession.mClientAppInfo);
+                    filteredRequest, getRequestSession.mClientAppInfo,
+                    getRequestSession.mClientRequest.alwaysSendAppInfoToProvider());
             return new ProviderGetSession(context, providerInfo, getRequestSession, userId,
-                    remoteCredentialService, beginGetCredentialRequest, filteredRequest);
+                    remoteCredentialService, beginGetCredentialRequest, filteredRequest,
+                    getRequestSession.mClientAppInfo);
         }
         Log.i(TAG, "Unable to create provider session");
         return null;
@@ -102,16 +104,20 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
 
     private static BeginGetCredentialRequest constructQueryPhaseRequest(
             android.credentials.GetCredentialRequest filteredRequest,
-            CallingAppInfo callingAppInfo
-    ) {
-        return new BeginGetCredentialRequest.Builder(callingAppInfo)
-                .setBeginGetCredentialOptions(
-                        filteredRequest.getCredentialOptions().stream().map(
-                                option -> new BeginGetCredentialOption(
-                                        option.getType(),
-                                        option.getCandidateQueryData())).collect(Collectors
-                                .toList()))
-                .build();
+            CallingAppInfo callingAppInfo,
+            boolean propagateToProvider) {
+        BeginGetCredentialRequest.Builder builder = new BeginGetCredentialRequest.Builder();
+        builder.setBeginGetCredentialOptions(
+                filteredRequest.getCredentialOptions().stream().map(
+                        option -> {
+                            return new BeginGetCredentialOption(
+                                    option.getType(),
+                                    option.getCandidateQueryData());
+                        }).collect(Collectors.toList()));
+        if (propagateToProvider) {
+            builder.setCallingAppInfo(callingAppInfo);
+        }
+        return builder.build();
     }
 
     @Nullable
@@ -145,10 +151,11 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             ProviderInternalCallback<GetCredentialResponse> callbacks,
             int userId, RemoteCredentialService remoteCredentialService,
             BeginGetCredentialRequest beginGetRequest,
-            android.credentials.GetCredentialRequest completeGetRequest) {
+            android.credentials.GetCredentialRequest completeGetRequest,
+            CallingAppInfo callingAppInfo) {
         super(context, info, beginGetRequest, callbacks, userId, remoteCredentialService);
         mCompleteRequest = completeGetRequest;
-        mCallingAppInfo = beginGetRequest.getCallingAppInfo();
+        mCallingAppInfo = callingAppInfo;
         setStatus(Status.PENDING);
     }
 
