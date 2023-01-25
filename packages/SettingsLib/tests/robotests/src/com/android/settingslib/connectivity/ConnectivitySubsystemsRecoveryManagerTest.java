@@ -21,6 +21,7 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
+import android.os.Looper;
 
 import androidx.test.core.app.ApplicationProvider;
 
@@ -42,7 +43,7 @@ public class ConnectivitySubsystemsRecoveryManagerTest {
     @Spy
     Context mContext = ApplicationProvider.getApplicationContext();
     @Spy
-    Handler mMainHandler = ApplicationProvider.getApplicationContext().getMainThreadHandler();
+    Handler mMainHandler = new Handler(Looper.getMainLooper());
     @Mock
     PackageManager mPackageManager;
 
