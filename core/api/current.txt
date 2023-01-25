@@ -48672,7 +48672,7 @@ package android.util {
     field public float density;
     field public int densityDpi;
     field public int heightPixels;
-    field public float scaledDensity;
+    field @Deprecated public float scaledDensity;
     field public int widthPixels;
     field public float xdpi;
     field public float ydpi;
