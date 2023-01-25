@@ -62,12 +62,24 @@ interface UserTracker : UserContentResolverProvider, UserContextProvider {
     fun removeCallback(callback: Callback)
 
     /**
-     * Ćallback for notifying of changes.
+     * Callback for notifying of changes.
      */
     interface Callback {
 
         /**
+         * Notifies that the current user is being changed.
+         * Override this method to run things while the screen is frozen for the user switch.
+         * Please use {@link #onUserChanged} if the task doesn't need to push the unfreezing of the
+         * screen further. Please be aware that code executed in this callback will lengthen the
+         * user switch duration.
+         */
+        @JvmDefault
+        fun onUserChanging(newUser: Int, userContext: Context) {}
+
+        /**
          * Notifies that the current user has changed.
+         * Override this method to run things after the screen is unfrozen for the user switch.
+         * Please see {@link #onUserChanging} if you need to hide jank.
          */
         @JvmDefault
         fun onUserChanged(newUser: Int, userContext: Context) {}
