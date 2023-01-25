@@ -96,7 +96,6 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.Settings;
 import android.service.dreams.IDreamManager;
 import android.service.trust.TrustAgentService;
 import android.telephony.ServiceState;
@@ -831,6 +830,19 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.setAssistantVisible(true);
 
         verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt(), anyBoolean());
+    }
+
+    @Test
+    public void doesNotTryToAuthenticateWhenKeyguardIsNotShowingButOccluded_whenAssistant() {
+        mKeyguardUpdateMonitor.setKeyguardShowing(false, true);
+        mKeyguardUpdateMonitor.setAssistantVisible(true);
+
+        verify(mFaceManager, never()).authenticate(any(),
+                any(),
+                any(),
+                any(),
+                anyInt(),
+                anyBoolean());
     }
 
     @Test

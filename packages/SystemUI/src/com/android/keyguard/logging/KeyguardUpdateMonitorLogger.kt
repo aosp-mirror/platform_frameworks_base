@@ -431,4 +431,20 @@ class KeyguardUpdateMonitorLogger @Inject constructor(
             str1 = PowerManager.wakeReasonToString(pmWakeReason)
         }, { "Skip updating face listening state on wakeup from $str1"})
     }
+
+    fun logTaskStackChangedForAssistant(assistantVisible: Boolean) {
+        logBuffer.log(TAG, VERBOSE, {
+            bool1 = assistantVisible
+        }, {
+            "TaskStackChanged for ACTIVITY_TYPE_ASSISTANT, assistant visible: $bool1"
+        })
+    }
+
+    fun logAssistantVisible(assistantVisible: Boolean) {
+        logBuffer.log(TAG, VERBOSE, {
+            bool1 = assistantVisible
+        }, {
+            "Updating mAssistantVisible to new value: $bool1"
+        })
+    }
 }
