@@ -20166,6 +20166,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         DevicePolicyManager.MTE_ENABLED);
         Preconditions.checkArgument(
                 allowedModes.contains(flags), "Provided mode is not one of the allowed values.");
+        // In general, this API should be available when "bootctl_settings_toggle" is set, which
+        // signals that there is a control for MTE in the user settings and this API fundamentally
+        // is a way for the device admin to override that setting.
+        // Allow bootctl_device_policy_manager as an override, e.g. to offer the
+        // DevicePolicyManager only without a visible user setting.
+        if (!mInjector.systemPropertiesGetBoolean(
+                "ro.arm64.memtag.bootctl_device_policy_manager",
+                mInjector.systemPropertiesGetBoolean(
+                        "ro.arm64.memtag.bootctl_settings_toggle", false))) {
+            throw new UnsupportedOperationException("device does not support MTE");
+        }
         final CallerIdentity caller = getCallerIdentity();
         if (flags == DevicePolicyManager.MTE_DISABLED) {
             Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller));
