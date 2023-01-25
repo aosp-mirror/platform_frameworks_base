@@ -6736,6 +6736,7 @@ package android.app {
     method public static void writePendingIntentOrNullToParcel(@Nullable android.app.PendingIntent, @NonNull android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.PendingIntent> CREATOR;
+    field public static final int FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT = 16777216; // 0x1000000
     field public static final int FLAG_CANCEL_CURRENT = 268435456; // 0x10000000
     field public static final int FLAG_IMMUTABLE = 67108864; // 0x4000000
     field public static final int FLAG_MUTABLE = 33554432; // 0x2000000

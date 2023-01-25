@@ -186,6 +186,7 @@ public final class PendingIntent implements Parcelable {
                     FLAG_IMMUTABLE,
                     FLAG_MUTABLE,
                     FLAG_MUTABLE_UNAUDITED,
+                    FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT,
 
                     Intent.FILL_IN_ACTION,
                     Intent.FILL_IN_DATA,
@@ -278,6 +279,21 @@ public final class PendingIntent implements Parcelable {
     @Deprecated
     @TestApi
     public static final int FLAG_MUTABLE_UNAUDITED = FLAG_MUTABLE;
+
+    /**
+     * Flag indicating that the created PendingIntent with {@link #FLAG_MUTABLE}
+     * is allowed to have an unsafe implicit Intent within. <p>Starting with
+     * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, for apps that
+     * target SDK {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or
+     * higher, creation of a PendingIntent with {@link #FLAG_MUTABLE} and an
+     * implicit Intent within will throw an {@link IllegalArgumentException}
+     * for security reasons. To bypass this check, use
+     * {@link #FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT} when creating a PendingIntent.
+     * However, it is strongly recommended to not to use this flag and make the
+     * Intent explicit or the PendingIntent immutable, thereby making the Intent
+     * safe.
+     */
+    public static final int FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT = 1<<24;
 
     /**
      * Exception thrown when trying to send through a PendingIntent that
@@ -418,12 +434,13 @@ public final class PendingIntent implements Parcelable {
         //   This will be changed to a throw of an exception on the server side once we finish
         //   migrating to safer PendingIntents b/262253127.
         // - Otherwise, warn that it will be blocked from target SDK U.
-        if (isNewMutableImplicitPendingIntent(flags, intent)) {
+        if (isNewMutableDisallowedImplicitPendingIntent(flags, intent)) {
             if (Compatibility.isChangeEnabled(BLOCK_MUTABLE_IMPLICIT_PENDING_INTENT)) {
                 String msg = packageName + ": Targeting U+ (version "
                         + Build.VERSION_CODES.UPSIDE_DOWN_CAKE + " and above) disallows"
                         + " creating or retrieving a PendingIntent with FLAG_MUTABLE,"
-                        + " an implicit Intent within and without FLAG_NO_CREATE for"
+                        + " an implicit Intent within and without FLAG_NO_CREATE and"
+                        + " FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT for"
                         + " security reasons. To retrieve an already existing"
                         + " PendingIntent, use FLAG_NO_CREATE, however, to create a"
                         + " new PendingIntent with an implicit Intent use"
@@ -441,11 +458,15 @@ public final class PendingIntent implements Parcelable {
     }
 
     /** @hide */
-    public static boolean isNewMutableImplicitPendingIntent(int flags, @NonNull Intent intent) {
+    public static boolean isNewMutableDisallowedImplicitPendingIntent(int flags,
+            @NonNull Intent intent) {
         boolean isFlagNoCreateSet = (flags & PendingIntent.FLAG_NO_CREATE) != 0;
         boolean isFlagMutableSet = (flags & PendingIntent.FLAG_MUTABLE) != 0;
         boolean isImplicit = (intent.getComponent() == null) && (intent.getPackage() == null);
-        return !isFlagNoCreateSet && isFlagMutableSet && isImplicit;
+        boolean isFlagAllowUnsafeImplicitIntentSet =
+                (flags & PendingIntent.FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT) != 0;
+        return !isFlagNoCreateSet && isFlagMutableSet && isImplicit
+                && !isFlagAllowUnsafeImplicitIntentSet;
     }
 
     /**
