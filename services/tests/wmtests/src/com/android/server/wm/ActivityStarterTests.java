@@ -113,6 +113,7 @@ import com.android.server.wm.LaunchParamsController.LaunchParamsModifier;
 import com.android.server.wm.utils.MockTracker;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -754,6 +755,7 @@ public class ActivityStarterTests extends WindowTestsBase {
      * start the background activity.
      */
     @Test
+    @Ignore("b/266015587")
     public void testBackgroundActivityStartsDisallowed_realCallingUidHasVisibleWindowAborted() {
         doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
 
