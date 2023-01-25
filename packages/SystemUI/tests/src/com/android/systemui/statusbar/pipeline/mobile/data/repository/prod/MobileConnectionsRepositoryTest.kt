@@ -22,6 +22,7 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED
 import android.net.NetworkCapabilities.TRANSPORT_CELLULAR
+import android.os.ParcelUuid
 import android.provider.Settings
 import android.telephony.CarrierConfigManager
 import android.telephony.SubscriptionInfo
@@ -50,6 +51,7 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
+import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -102,6 +104,17 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
         whenever(logBufferFactory.getOrCreate(anyString(), anyInt())).thenAnswer { _ ->
             mock<TableLogBuffer>()
+        }
+
+        // For convenience, set up the subscription info callbacks
+        whenever(subscriptionManager.getActiveSubscriptionInfo(anyInt())).thenAnswer { invocation ->
+            when (invocation.getArgument(0) as Int) {
+                1 -> SUB_1
+                2 -> SUB_2
+                3 -> SUB_3
+                4 -> SUB_4
+                else -> null
+            }
         }
 
         wifiRepository = FakeWifiRepository()
@@ -686,6 +699,38 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             job.cancel()
         }
 
+    @Test
+    fun `active data change - in same group - emits unit`() =
+        runBlocking(IMMEDIATE) {
+            var latest: Unit? = null
+            val job = underTest.activeSubChangedInGroupEvent.onEach { latest = it }.launchIn(this)
+
+            getTelephonyCallbackForType<ActiveDataSubscriptionIdListener>()
+                .onActiveDataSubscriptionIdChanged(SUB_3_ID_GROUPED)
+            getTelephonyCallbackForType<ActiveDataSubscriptionIdListener>()
+                .onActiveDataSubscriptionIdChanged(SUB_4_ID_GROUPED)
+
+            assertThat(latest).isEqualTo(Unit)
+
+            job.cancel()
+        }
+
+    @Test
+    fun `active data change - not in same group - does not emit`() =
+        runBlocking(IMMEDIATE) {
+            var latest: Unit? = null
+            val job = underTest.activeSubChangedInGroupEvent.onEach { latest = it }.launchIn(this)
+
+            getTelephonyCallbackForType<ActiveDataSubscriptionIdListener>()
+                .onActiveDataSubscriptionIdChanged(SUB_3_ID_GROUPED)
+            getTelephonyCallbackForType<ActiveDataSubscriptionIdListener>()
+                .onActiveDataSubscriptionIdChanged(SUB_1_ID)
+
+            assertThat(latest).isEqualTo(null)
+
+            job.cancel()
+        }
+
     private fun createCapabilities(connected: Boolean, validated: Boolean): NetworkCapabilities =
         mock<NetworkCapabilities>().also {
             whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(connected)
@@ -719,19 +764,50 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
     companion object {
         private val IMMEDIATE = Dispatchers.Main.immediate
+
+        // Subscription 1
         private const val SUB_1_ID = 1
         private val SUB_1 =
-            mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_1_ID) }
+            mock<SubscriptionInfo>().also {
+                whenever(it.subscriptionId).thenReturn(SUB_1_ID)
+                whenever(it.groupUuid).thenReturn(ParcelUuid(UUID.randomUUID()))
+            }
         private val MODEL_1 = SubscriptionModel(subscriptionId = SUB_1_ID)
 
+        // Subscription 2
         private const val SUB_2_ID = 2
         private val SUB_2 =
-            mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_2_ID) }
+            mock<SubscriptionInfo>().also {
+                whenever(it.subscriptionId).thenReturn(SUB_2_ID)
+                whenever(it.groupUuid).thenReturn(ParcelUuid(UUID.randomUUID()))
+            }
         private val MODEL_2 = SubscriptionModel(subscriptionId = SUB_2_ID)
+
+        // Subs 3 and 4 are considered to be in the same group ------------------------------------
+        private val GROUP_ID_3_4 = ParcelUuid(UUID.randomUUID())
+
+        // Subscription 3
+        private const val SUB_3_ID_GROUPED = 3
+        private val SUB_3 =
+            mock<SubscriptionInfo>().also {
+                whenever(it.subscriptionId).thenReturn(SUB_3_ID_GROUPED)
+                whenever(it.groupUuid).thenReturn(GROUP_ID_3_4)
+            }
+
+        // Subscription 4
+        private const val SUB_4_ID_GROUPED = 4
+        private val SUB_4 =
+            mock<SubscriptionInfo>().also {
+                whenever(it.subscriptionId).thenReturn(SUB_4_ID_GROUPED)
+                whenever(it.groupUuid).thenReturn(GROUP_ID_3_4)
+            }
+
+        // Subs 3 and 4 are considered to be in the same group ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
         private const val NET_ID = 123
         private val NETWORK = mock<Network>().apply { whenever(getNetId()).thenReturn(NET_ID) }
 
+        // Carrier merged subscription
         private const val SUB_CM_ID = 5
         private val SUB_CM =
             mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_CM_ID) }
