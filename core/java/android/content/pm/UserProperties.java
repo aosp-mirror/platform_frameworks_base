@@ -61,6 +61,7 @@ public final class UserProperties implements Parcelable {
             "mediaSharedWithParent";
     private static final String ATTR_CREDENTIAL_SHAREABLE_WITH_PARENT =
             "credentialShareableWithParent";
+    private static final String ATTR_DELETE_APP_WITH_PARENT = "deleteAppWithParent";
 
     /** Index values of each property (to indicate whether they are present in this object). */
     @IntDef(prefix = "INDEX_", value = {
@@ -73,7 +74,8 @@ public final class UserProperties implements Parcelable {
             INDEX_CROSS_PROFILE_INTENT_FILTER_ACCESS_CONTROL,
             INDEX_CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY,
             INDEX_MEDIA_SHARED_WITH_PARENT,
-            INDEX_CREDENTIAL_SHAREABLE_WITH_PARENT
+            INDEX_CREDENTIAL_SHAREABLE_WITH_PARENT,
+            INDEX_DELETE_APP_WITH_PARENT,
     })
     @Retention(RetentionPolicy.SOURCE)
     private @interface PropertyIndex {
@@ -88,6 +90,7 @@ public final class UserProperties implements Parcelable {
     private static final int INDEX_CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY = 7;
     private static final int INDEX_MEDIA_SHARED_WITH_PARENT = 8;
     private static final int INDEX_CREDENTIAL_SHAREABLE_WITH_PARENT = 9;
+    private static final int INDEX_DELETE_APP_WITH_PARENT = 10;
     /** A bit set, mapping each PropertyIndex to whether it is present (1) or absent (0). */
     private long mPropertiesPresent = 0;
 
@@ -312,6 +315,7 @@ public final class UserProperties implements Parcelable {
             setCrossProfileIntentFilterAccessControl(
                     orig.getCrossProfileIntentFilterAccessControl());
             setCrossProfileIntentResolutionStrategy(orig.getCrossProfileIntentResolutionStrategy());
+            setDeleteAppWithParent(orig.getDeleteAppWithParent());
         }
         if (hasManagePermission) {
             // Add items that require MANAGE_USERS or stronger.
@@ -416,6 +420,24 @@ public final class UserProperties implements Parcelable {
         setPresent(INDEX_START_WITH_PARENT);
     }
     private boolean mStartWithParent;
+
+    /**
+     * Returns whether an app in the profile should be deleted when the same package in
+     * the parent user is being deleted.
+     * This only applies for users that have parents (i.e. for profiles).
+     * @hide
+     */
+    public boolean getDeleteAppWithParent() {
+        if (isPresent(INDEX_DELETE_APP_WITH_PARENT)) return mDeleteAppWithParent;
+        if (mDefaultProperties != null) return mDefaultProperties.mDeleteAppWithParent;
+        throw new SecurityException("You don't have permission to query deleteAppWithParent");
+    }
+    /** @hide */
+    public void setDeleteAppWithParent(boolean val) {
+        this.mDeleteAppWithParent = val;
+        setPresent(INDEX_DELETE_APP_WITH_PARENT);
+    }
+    private boolean mDeleteAppWithParent;
 
     /**
      * Return whether, and how, select user restrictions or device policies should be inherited
@@ -609,6 +631,7 @@ public final class UserProperties implements Parcelable {
                 + getCrossProfileIntentResolutionStrategy()
                 + ", mMediaSharedWithParent=" + isMediaSharedWithParent()
                 + ", mCredentialShareableWithParent=" + isCredentialShareableWithParent()
+                + ", mDeleteAppWithParent=" + getDeleteAppWithParent()
                 + "}";
     }
 
@@ -634,6 +657,7 @@ public final class UserProperties implements Parcelable {
         pw.println(prefix + "    mMediaSharedWithParent=" + isMediaSharedWithParent());
         pw.println(prefix + "    mCredentialShareableWithParent="
                 + isCredentialShareableWithParent());
+        pw.println(prefix + "    mDeleteAppWithParent=" + getDeleteAppWithParent());
     }
 
     /**
@@ -697,6 +721,9 @@ public final class UserProperties implements Parcelable {
                 case ATTR_CREDENTIAL_SHAREABLE_WITH_PARENT:
                     setCredentialShareableWithParent(parser.getAttributeBoolean(i));
                     break;
+                case ATTR_DELETE_APP_WITH_PARENT:
+                    setDeleteAppWithParent(parser.getAttributeBoolean(i));
+                    break;
                 default:
                     Slog.w(LOG_TAG, "Skipping unknown property " + attributeName);
             }
@@ -752,6 +779,10 @@ public final class UserProperties implements Parcelable {
             serializer.attributeBoolean(null, ATTR_CREDENTIAL_SHAREABLE_WITH_PARENT,
                     mCredentialShareableWithParent);
         }
+        if (isPresent(INDEX_DELETE_APP_WITH_PARENT)) {
+            serializer.attributeBoolean(null, ATTR_DELETE_APP_WITH_PARENT,
+                    mDeleteAppWithParent);
+        }
     }
 
     // For use only with an object that has already had any permission-lacking fields stripped out.
@@ -768,6 +799,7 @@ public final class UserProperties implements Parcelable {
         dest.writeInt(mCrossProfileIntentResolutionStrategy);
         dest.writeBoolean(mMediaSharedWithParent);
         dest.writeBoolean(mCredentialShareableWithParent);
+        dest.writeBoolean(mDeleteAppWithParent);
     }
 
     /**
@@ -788,6 +820,7 @@ public final class UserProperties implements Parcelable {
         mCrossProfileIntentResolutionStrategy = source.readInt();
         mMediaSharedWithParent = source.readBoolean();
         mCredentialShareableWithParent = source.readBoolean();
+        mDeleteAppWithParent = source.readBoolean();
     }
 
     @Override
@@ -825,6 +858,7 @@ public final class UserProperties implements Parcelable {
                 CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY_DEFAULT;
         private boolean mMediaSharedWithParent = false;
         private boolean mCredentialShareableWithParent = false;
+        private boolean mDeleteAppWithParent = false;
 
         public Builder setShowInLauncher(@ShowInLauncher int showInLauncher) {
             mShowInLauncher = showInLauncher;
@@ -886,6 +920,12 @@ public final class UserProperties implements Parcelable {
             return this;
         }
 
+        /** Sets the value for {@link #mDeleteAppWithParent}*/
+        public Builder setDeleteAppWithParent(boolean deleteAppWithParent) {
+            mDeleteAppWithParent = deleteAppWithParent;
+            return this;
+        }
+
         /** Builds a UserProperties object with *all* values populated. */
         public UserProperties build() {
             return new UserProperties(
@@ -898,7 +938,8 @@ public final class UserProperties implements Parcelable {
                     mCrossProfileIntentFilterAccessControl,
                     mCrossProfileIntentResolutionStrategy,
                     mMediaSharedWithParent,
-                    mCredentialShareableWithParent);
+                    mCredentialShareableWithParent,
+                    mDeleteAppWithParent);
         }
     } // end Builder
 
@@ -912,8 +953,8 @@ public final class UserProperties implements Parcelable {
             @CrossProfileIntentFilterAccessControlLevel int crossProfileIntentFilterAccessControl,
             @CrossProfileIntentResolutionStrategy int crossProfileIntentResolutionStrategy,
             boolean mediaSharedWithParent,
-            boolean credentialShareableWithParent) {
-
+            boolean credentialShareableWithParent,
+            boolean deleteAppWithParent) {
         mDefaultProperties = null;
         setShowInLauncher(showInLauncher);
         setStartWithParent(startWithParent);
@@ -925,5 +966,6 @@ public final class UserProperties implements Parcelable {
         setCrossProfileIntentResolutionStrategy(crossProfileIntentResolutionStrategy);
         setMediaSharedWithParent(mediaSharedWithParent);
         setCredentialShareableWithParent(credentialShareableWithParent);
+        setDeleteAppWithParent(deleteAppWithParent);
     }
 }

@@ -136,7 +136,7 @@ public final class UserTypeFactory {
                                 .CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY_NO_FILTERING)
                         .setMediaSharedWithParent(true)
                         .setCredentialShareableWithParent(true)
-                );
+                        .setDeleteAppWithParent(true));
     }
 
     /**

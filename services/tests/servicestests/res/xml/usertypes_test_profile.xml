@@ -38,6 +38,9 @@
             crossProfileIntentResolutionStrategy='0'
             mediaSharedWithParent='true'
             credentialShareableWithParent='false'
+            showInSettings='23'
+            inheritDevicePolicy='450'
+            deleteAppWithParent='false'
         />
     </profile-type>
     <profile-type name='custom.test.1' max-allowed-per-parent='14' />
