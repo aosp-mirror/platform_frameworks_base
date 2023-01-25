@@ -332,7 +332,7 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"நீங்கள் பணியாற்றிக் கொண்டிருக்கும் சாளரத்தின் உள்ளடக்கத்தைப் பார்க்கலாம்."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"தொடுவதன் மூலம் அறிவதை இயக்கும்"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"தட்டிய உள்ளடக்கம் சத்தமாகப் படிக்கப்படும், சைகைகளைப் பயன்படுத்தி திரையில் உலாவலாம்."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"நீங்கள் தட்டச்சு செய்யும் உரையைக் கவனிக்கும்"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"நீங்கள் டைப் செய்யும் வார்த்தையைக் கவனிக்கும்."</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"கிரெடிட் கார்டு எண்கள் மற்றும் கடவுச்சொற்கள் போன்ற தனிப்பட்ட தகவலும் உள்ளடங்கும்."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"திரை பெரிதாவதைக் கட்டுப்படுத்தும்"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"திரையின் ஜூம் அளவையும் நிலையையும் கட்டுப்படுத்தலாம்."</string>

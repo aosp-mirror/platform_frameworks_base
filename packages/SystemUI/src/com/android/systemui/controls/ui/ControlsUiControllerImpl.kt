@@ -60,10 +60,13 @@ import com.android.systemui.controls.management.ControlsEditingActivity
 import com.android.systemui.controls.management.ControlsFavoritingActivity
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.management.ControlsProviderSelectorActivity
+import com.android.systemui.controls.panels.AuthorizedPanelsRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.globalactions.GlobalActionsPopupMenu
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserFileManager
@@ -99,6 +102,8 @@ class ControlsUiControllerImpl @Inject constructor (
         private val userTracker: UserTracker,
         private val taskViewFactory: Optional<TaskViewFactory>,
         private val controlsSettingsRepository: ControlsSettingsRepository,
+        private val authorizedPanelsRepository: AuthorizedPanelsRepository,
+        private val featureFlags: FeatureFlags,
         dumpManager: DumpManager
 ) : ControlsUiController, Dumpable {
 
@@ -160,6 +165,7 @@ class ControlsUiControllerImpl @Inject constructor (
     ): ControlsListingController.ControlsListingCallback {
         return object : ControlsListingController.ControlsListingCallback {
             override fun onServicesUpdated(serviceInfos: List<ControlsServiceInfo>) {
+                val authorizedPanels = authorizedPanelsRepository.getAuthorizedPanels()
                 val lastItems = serviceInfos.map {
                     val uid = it.serviceInfo.applicationInfo.uid
 
@@ -169,7 +175,11 @@ class ControlsUiControllerImpl @Inject constructor (
                             it.loadIcon(),
                             it.componentName,
                             uid,
-                            it.panelActivity
+                            if (it.componentName.packageName in authorizedPanels) {
+                                it.panelActivity
+                            } else {
+                                null
+                            }
                     )
                 }
                 uiExecutor.execute {
@@ -417,14 +427,20 @@ class ControlsUiControllerImpl @Inject constructor (
         val isPanel = selectedItem is SelectedItem.PanelItem
         val selectedStructure = (selectedItem as? SelectedItem.StructureItem)?.structure
                 ?: EMPTY_STRUCTURE
+        val newFlows = featureFlags.isEnabled(Flags.CONTROLS_MANAGEMENT_NEW_FLOWS)
+        val addControlsId = if (newFlows || isPanel) {
+            R.string.controls_menu_add_another_app
+        } else {
+            R.string.controls_menu_add
+        }
 
         val items = if (isPanel) {
             arrayOf(
-                    context.resources.getString(R.string.controls_menu_add),
+                    context.resources.getString(addControlsId),
             )
         } else {
             arrayOf(
-                    context.resources.getString(R.string.controls_menu_add),
+                    context.resources.getString(addControlsId),
                     context.resources.getString(R.string.controls_menu_edit)
             )
         }
@@ -449,7 +465,7 @@ class ControlsUiControllerImpl @Inject constructor (
                             when (pos) {
                                 // 0: Add Control
                                 0 -> {
-                                    if (isPanel) {
+                                    if (isPanel || newFlows) {
                                         startProviderSelectorActivity()
                                     } else {
                                         startFavoritingActivity(selectedStructure)
@@ -610,11 +626,11 @@ class ControlsUiControllerImpl @Inject constructor (
         }
     }
 
-    private fun updatePreferences(si: SelectedItem) {
+    override fun updatePreferences(selectedItem: SelectedItem) {
         sharedPreferences.edit()
-                .putString(PREF_COMPONENT, si.componentName.flattenToString())
-                .putString(PREF_STRUCTURE_OR_APP_NAME, si.name.toString())
-                .putBoolean(PREF_IS_PANEL, si is SelectedItem.PanelItem)
+                .putString(PREF_COMPONENT, selectedItem.componentName.flattenToString())
+                .putString(PREF_STRUCTURE_OR_APP_NAME, selectedItem.name.toString())
+                .putBoolean(PREF_IS_PANEL, selectedItem is SelectedItem.PanelItem)
                 .commit()
     }
 

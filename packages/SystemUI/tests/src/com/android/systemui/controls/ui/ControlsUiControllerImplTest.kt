@@ -39,8 +39,10 @@ import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.controller.StructureInfo
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.management.ControlsProviderSelectorActivity
+import com.android.systemui.controls.panels.AuthorizedPanelsRepository
 import com.android.systemui.controls.settings.FakeControlsSettingsRepository
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
@@ -91,6 +93,8 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
     @Mock lateinit var userTracker: UserTracker
     @Mock lateinit var taskViewFactory: TaskViewFactory
     @Mock lateinit var dumpManager: DumpManager
+    @Mock lateinit var authorizedPanelsRepository: AuthorizedPanelsRepository
+    @Mock lateinit var featureFlags: FeatureFlags
     val sharedPreferences = FakeSharedPreferences()
     lateinit var controlsSettingsRepository: FakeControlsSettingsRepository
 
@@ -132,6 +136,8 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
                 userTracker,
                 Optional.of(taskViewFactory),
                 controlsSettingsRepository,
+                authorizedPanelsRepository,
+                featureFlags,
                 dumpManager
             )
         `when`(
@@ -240,7 +246,9 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
     @Test
     fun testPanelCallsTaskViewFactoryCreate() {
         mockLayoutInflater()
-        val panel = SelectedItem.PanelItem("App name", ComponentName("pkg", "cls"))
+        val packageName = "pkg"
+        `when`(authorizedPanelsRepository.getAuthorizedPanels()).thenReturn(setOf(packageName))
+        val panel = SelectedItem.PanelItem("App name", ComponentName(packageName, "cls"))
         val serviceInfo = setUpPanel(panel)
 
         underTest.show(parent, {}, context)
@@ -258,9 +266,11 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
     @Test
     fun testPanelControllerStartActivityWithCorrectArguments() {
         mockLayoutInflater()
+        val packageName = "pkg"
+        `when`(authorizedPanelsRepository.getAuthorizedPanels()).thenReturn(setOf(packageName))
         controlsSettingsRepository.setAllowActionOnTrivialControlsInLockscreen(true)
 
-        val panel = SelectedItem.PanelItem("App name", ComponentName("pkg", "cls"))
+        val panel = SelectedItem.PanelItem("App name", ComponentName(packageName, "cls"))
         val serviceInfo = setUpPanel(panel)
 
         underTest.show(parent, {}, context)
@@ -290,9 +300,11 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
     @Test
     fun testPendingIntentExtrasAreModified() {
         mockLayoutInflater()
+        val packageName = "pkg"
+        `when`(authorizedPanelsRepository.getAuthorizedPanels()).thenReturn(setOf(packageName))
         controlsSettingsRepository.setAllowActionOnTrivialControlsInLockscreen(true)
 
-        val panel = SelectedItem.PanelItem("App name", ComponentName("pkg", "cls"))
+        val panel = SelectedItem.PanelItem("App name", ComponentName(packageName, "cls"))
         val serviceInfo = setUpPanel(panel)
 
         underTest.show(parent, {}, context)

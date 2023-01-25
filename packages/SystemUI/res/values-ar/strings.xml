@@ -91,10 +91,8 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"الحد السفلى <xliff:g id="PERCENT">%1$d</xliff:g> في المئة"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"الحد الأيسر <xliff:g id="PERCENT">%1$d</xliff:g> في المئة"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"الحد الأيمن <xliff:g id="PERCENT">%1$d</xliff:g> في المئة"</string>
-    <!-- no translation found for screenshot_work_profile_notification (2812417845875653929) -->
-    <skip />
-    <!-- no translation found for screenshot_default_files_app_name (8721579578575161912) -->
-    <skip />
+    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"يتم حفظ لقطات الشاشة الخاصة بالعمل في تطبيق \"<xliff:g id="APP">%1$s</xliff:g>\"."</string>
+    <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"الملفات"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"مسجّل الشاشة"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"جارٍ معالجة تسجيل الشاشة"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"إشعار مستمر لجلسة تسجيل شاشة"</string>
@@ -438,7 +436,7 @@
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"‏تطبيقات العمل الخاصة بك متّصلة بالإنترنت من خلال <xliff:g id="VPN_APP">%1$s</xliff:g>. يمكن لمشرف تكنولوجيا المعلومات ومزوّد خدمة الشبكة الافتراضية الخاصة (VPN) رؤية أنشطة الشبكة في تطبيقات العمل، بما في ذلك الرسائل الإلكترونية وبيانات التصفُّح."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"‏تطبيقاتك الشخصية متّصلة بالإنترنت من خلال <xliff:g id="VPN_APP">%1$s</xliff:g>. تظهر أنشطة الشبكة، بما في ذلك الرسائل الإلكترونية وبيانات التصفُّح، لمزوّد خدمة الشبكة الافتراضية الخاصة (VPN)."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"‏فتح إعدادات الشبكة الافتراضية الخاصة (VPN)"</string>
+    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"‏فتح إعدادات شبكة VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"يتولّى أحد الوالدين إدارة هذا الجهاز. يمكن للوالدين عرض وإدارة معلوماتك، مثلاً التطبيقات التي تستخدمها وموقعك الجغرافي ووقت النظر إلى الشاشة."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"شبكة افتراضية خاصة"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"‏فتح القفل باستمرار بواسطة TrustAgent"</string>
@@ -534,8 +532,10 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"تلقائي"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"بدون صوت أو اهتزاز"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"بدون صوت أو اهتزاز وتظهر في أسفل قسم المحادثات"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"يمكن إصدار رنين أو اهتزاز بناءً على إعدادات الهاتف."</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"يمكن إصدار رنين أو اهتزاز بناءً على إعدادات الهاتف. تظهر المحادثات من <xliff:g id="APP_NAME">%1$s</xliff:g> كفقاعات تلقائيًا."</string>
+    <!-- no translation found for notification_channel_summary_default (777294388712200605) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_default_with_bubbles (3482483084451555344) -->
+    <skip />
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"السماح للنظام بتحديد ما إذا يجب اهتزاز الجهاز أو إصدار رنين عند تلقّي هذا الإشعار"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"‏&lt;b&gt;الحالة:&lt;/b&gt; تمت الترقية إلى الإعداد التلقائي"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"‏&lt;b&gt;الحالة:&lt;/b&gt; تم خفض الترتيب إلى الوضع صامت"</string>
@@ -854,13 +854,11 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"تشغيل <xliff:g id="SONG_NAME">%1$s</xliff:g> من تطبيق <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"تراجع"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"عليك الاقتراب لتشغيل الوسائط على <xliff:g id="DEVICENAME">%1$s</xliff:g>."</string>
-    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
-    <skip />
+    <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"للتشغيل هنا، عليك الاقتراب من \"<xliff:g id="DEVICENAME">%1$s</xliff:g>\"."</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"جارٍ تشغيل الوسائط على <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"حدث خطأ. يُرجى إعادة المحاولة."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"جارٍ التحميل"</string>
-    <!-- no translation found for media_ttt_default_device_type (4457646436153370169) -->
-    <skip />
+    <string name="media_ttt_default_device_type" msgid="4457646436153370169">"جهاز لوحي"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"غير نشط، تحقّق من التطبيق."</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"لم يتم العثور عليه."</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"عنصر التحكّم غير متوفّر"</string>
@@ -884,8 +882,7 @@
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"مستوى الصوت"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"%%<xliff:g id="PERCENTAGE">%1$d</xliff:g>"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"مكبّرات الصوت والشاشات"</string>
-    <!-- no translation found for media_output_group_title_suggested_device (4157186235837903826) -->
-    <skip />
+    <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"الأجهزة المقترَحة"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"كيفية عمل البث"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"البث"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"يمكن للأشخاص القريبين منك الذين لديهم أجهزة متوافقة تتضمّن بلوتوث الاستماع إلى الوسائط التي تبثها."</string>
@@ -1023,8 +1020,17 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"* سيتم إطفاء هذه الشاشة."</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"جهاز قابل للطي يجري فتحه"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"جهاز قابل للطي يجري قلبه"</string>
-    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
+    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"النسبة المئوية المتبقية من شحن البطارية: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"عليك توصيل قلم الشاشة بشاحن."</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"بطارية قلم الشاشة منخفضة"</string>
+    <!-- no translation found for video_camera (7654002575156149298) -->
     <skip />
-    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
+    <!-- no translation found for call_from_work_profile_title (6991157106804289643) -->
+    <skip />
+    <!-- no translation found for call_from_work_profile_text (3458704745640229638) -->
+    <skip />
+    <!-- no translation found for call_from_work_profile_action (2937701298133010724) -->
+    <skip />
+    <!-- no translation found for call_from_work_profile_close (7927067108901068098) -->
     <skip />
 </resources>
