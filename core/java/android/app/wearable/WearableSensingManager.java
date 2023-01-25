@@ -47,6 +47,9 @@ import java.util.function.Consumer;
  * Methods on this class requires the caller to hold and be granted the
  * {@link Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE}.
  *
+ * <p>The use of "Wearable" here is not the same as the Android Wear platform and should be treated
+ * separately. </p>
+ *
  * @hide
  */
 
