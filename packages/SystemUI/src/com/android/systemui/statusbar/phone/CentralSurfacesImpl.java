@@ -1410,12 +1410,14 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         //   to dismiss the lock screen until entering the SIM PIN.
         // - QS is expanded and we're swiping - swiping up now will hide QS, not dismiss the
         //   keyguard.
+        // - Shade is in QQS over keyguard - swiping up should take us back to keyguard
         if (!isKeyguardShowing()
                 || mStatusBarKeyguardViewManager.primaryBouncerIsOrWillBeShowing()
                 || isOccluded()
                 || !mKeyguardStateController.canDismissLockScreen()
                 || mKeyguardViewMediator.isAnySimPinSecure()
-                || (mNotificationPanelViewController.isQsExpanded() && trackingTouch)) {
+                || (mNotificationPanelViewController.isQsExpanded() && trackingTouch)
+                || mNotificationPanelViewController.getBarState() == StatusBarState.SHADE_LOCKED) {
             return;
         }
 
