@@ -1898,6 +1898,18 @@ package android {
     field public static final int system_accent3_700 = 17170522; // 0x106005a
     field public static final int system_accent3_800 = 17170523; // 0x106005b
     field public static final int system_accent3_900 = 17170524; // 0x106005c
+    field public static final int system_background_dark;
+    field public static final int system_background_light;
+    field public static final int system_control_activated_dark;
+    field public static final int system_control_activated_light;
+    field public static final int system_control_highlight_dark;
+    field public static final int system_control_highlight_light;
+    field public static final int system_control_normal_dark;
+    field public static final int system_control_normal_light;
+    field public static final int system_error_container_dark;
+    field public static final int system_error_container_light;
+    field public static final int system_error_dark;
+    field public static final int system_error_light;
     field public static final int system_neutral1_0 = 17170461; // 0x106001d
     field public static final int system_neutral1_10 = 17170462; // 0x106001e
     field public static final int system_neutral1_100 = 17170464; // 0x1060020
@@ -1924,6 +1936,104 @@ package android {
     field public static final int system_neutral2_700 = 17170483; // 0x1060033
     field public static final int system_neutral2_800 = 17170484; // 0x1060034
     field public static final int system_neutral2_900 = 17170485; // 0x1060035
+    field public static final int system_on_background_dark;
+    field public static final int system_on_background_light;
+    field public static final int system_on_error_container_dark;
+    field public static final int system_on_error_container_light;
+    field public static final int system_on_error_dark;
+    field public static final int system_on_error_light;
+    field public static final int system_on_primary_container_dark;
+    field public static final int system_on_primary_container_light;
+    field public static final int system_on_primary_dark;
+    field public static final int system_on_primary_fixed_dark;
+    field public static final int system_on_primary_fixed_light;
+    field public static final int system_on_primary_fixed_variant_dark;
+    field public static final int system_on_primary_fixed_variant_light;
+    field public static final int system_on_primary_light;
+    field public static final int system_on_secondary_container_dark;
+    field public static final int system_on_secondary_container_light;
+    field public static final int system_on_secondary_dark;
+    field public static final int system_on_secondary_fixed_dark;
+    field public static final int system_on_secondary_fixed_light;
+    field public static final int system_on_secondary_fixed_variant_dark;
+    field public static final int system_on_secondary_fixed_variant_light;
+    field public static final int system_on_secondary_light;
+    field public static final int system_on_surface_dark;
+    field public static final int system_on_surface_light;
+    field public static final int system_on_surface_variant_dark;
+    field public static final int system_on_surface_variant_light;
+    field public static final int system_on_tertiary_container_dark;
+    field public static final int system_on_tertiary_container_light;
+    field public static final int system_on_tertiary_dark;
+    field public static final int system_on_tertiary_fixed_dark;
+    field public static final int system_on_tertiary_fixed_light;
+    field public static final int system_on_tertiary_fixed_variant_dark;
+    field public static final int system_on_tertiary_fixed_variant_light;
+    field public static final int system_on_tertiary_light;
+    field public static final int system_outline_dark;
+    field public static final int system_outline_light;
+    field public static final int system_palette_key_color_neutral_dark;
+    field public static final int system_palette_key_color_neutral_light;
+    field public static final int system_palette_key_color_neutral_variant_dark;
+    field public static final int system_palette_key_color_neutral_variant_light;
+    field public static final int system_palette_key_color_primary_dark;
+    field public static final int system_palette_key_color_primary_light;
+    field public static final int system_palette_key_color_secondary_dark;
+    field public static final int system_palette_key_color_secondary_light;
+    field public static final int system_palette_key_color_tertiary_dark;
+    field public static final int system_palette_key_color_tertiary_light;
+    field public static final int system_primary_container_dark;
+    field public static final int system_primary_container_light;
+    field public static final int system_primary_dark;
+    field public static final int system_primary_fixed_dark;
+    field public static final int system_primary_fixed_darker_light;
+    field public static final int system_primary_fixed_light;
+    field public static final int system_primary_fixeder_dark;
+    field public static final int system_primary_light;
+    field public static final int system_secondary_container_dark;
+    field public static final int system_secondary_container_light;
+    field public static final int system_secondary_dark;
+    field public static final int system_secondary_fixed_dark;
+    field public static final int system_secondary_fixed_darker_light;
+    field public static final int system_secondary_fixed_light;
+    field public static final int system_secondary_fixeder_dark;
+    field public static final int system_secondary_light;
+    field public static final int system_surface_bright_dark;
+    field public static final int system_surface_bright_light;
+    field public static final int system_surface_container_dark;
+    field public static final int system_surface_container_high_dark;
+    field public static final int system_surface_container_high_light;
+    field public static final int system_surface_container_highest_dark;
+    field public static final int system_surface_container_highest_light;
+    field public static final int system_surface_container_light;
+    field public static final int system_surface_container_low_dark;
+    field public static final int system_surface_container_low_light;
+    field public static final int system_surface_container_lowest_dark;
+    field public static final int system_surface_container_lowest_light;
+    field public static final int system_surface_dark;
+    field public static final int system_surface_dim_dark;
+    field public static final int system_surface_dim_light;
+    field public static final int system_surface_light;
+    field public static final int system_surface_variant_dark;
+    field public static final int system_surface_variant_light;
+    field public static final int system_tertiary_container_dark;
+    field public static final int system_tertiary_container_light;
+    field public static final int system_tertiary_dark;
+    field public static final int system_tertiary_fixed_dark;
+    field public static final int system_tertiary_fixed_darker_light;
+    field public static final int system_tertiary_fixed_light;
+    field public static final int system_tertiary_fixeder_dark;
+    field public static final int system_tertiary_light;
+    field public static final int system_text_hint_inverse_dark;
+    field public static final int system_text_hint_inverse_light;
+    field public static final int system_text_primary_inverse_dark;
+    field public static final int system_text_primary_inverse_disable_only_dark;
+    field public static final int system_text_primary_inverse_disable_only_light;
+    field public static final int system_text_primary_inverse_light;
+    field public static final int system_text_secondary_and_tertiary_inverse_dark;
+    field public static final int system_text_secondary_and_tertiary_inverse_disabled_dark;
+    field public static final int system_text_secondary_and_tertiary_inverse_disabled_light;
+    field public static final int system_text_secondary_and_tertiary_inverse_light;
     field public static final int tab_indicator_text = 17170441; // 0x1060009
     field @Deprecated public static final int tertiary_text_dark = 17170448; // 0x1060010
     field @Deprecated public static final int tertiary_text_light = 17170449; // 0x1060011
