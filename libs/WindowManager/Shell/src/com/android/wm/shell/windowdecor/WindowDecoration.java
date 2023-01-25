@@ -252,9 +252,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         }
 
         final int captionHeight = loadDimensionPixelSize(resources, params.mCaptionHeightId);
-        final int captionWidth = params.mCaptionWidthId == Resources.ID_NULL
-                ? taskBounds.width()
-                : loadDimensionPixelSize(resources, params.mCaptionWidthId);
+        final int captionWidth = taskBounds.width();
 
         startT.setPosition(
                         mCaptionContainerSurface,
@@ -428,7 +426,6 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         RunningTaskInfo mRunningTaskInfo;
         int mLayoutResId;
         int mCaptionHeightId;
-        int mCaptionWidthId;
         int mShadowRadiusId;
 
         int mOutsetTopId;
@@ -454,7 +451,6 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         void reset() {
             mLayoutResId = Resources.ID_NULL;
             mCaptionHeightId = Resources.ID_NULL;
-            mCaptionWidthId = Resources.ID_NULL;
             mShadowRadiusId = Resources.ID_NULL;
 
             mOutsetTopId = Resources.ID_NULL;
