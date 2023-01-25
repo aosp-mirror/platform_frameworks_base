@@ -866,7 +866,8 @@ public class UsbPortManager implements IBinder.DeathRecipient {
 
 
     public void simulateDisplayPortAltModeInfo(String portId, int partnerSinkStatus,
-            int cableStatus, int numLanes, IndentingPrintWriter pw) {
+            int cableStatus, int numLanes, boolean hpd, int linkTrainingStatus,
+            IndentingPrintWriter pw) {
         synchronized (mLock) {
             final RawPortInfo portInfo = mSimulatedPorts.get(portId);
             if (portInfo == null) {
@@ -875,7 +876,8 @@ public class UsbPortManager implements IBinder.DeathRecipient {
             }
 
             DisplayPortAltModeInfo displayPortAltModeInfo =
-                    new DisplayPortAltModeInfo(partnerSinkStatus, cableStatus, numLanes);
+                    new DisplayPortAltModeInfo(partnerSinkStatus, cableStatus, numLanes, hpd,
+                    linkTrainingStatus);
             portInfo.displayPortAltModeInfo = displayPortAltModeInfo;
             pw.println("Simulating DisplayPort Info: " + displayPortAltModeInfo);
             updatePortsLocked(pw, null);

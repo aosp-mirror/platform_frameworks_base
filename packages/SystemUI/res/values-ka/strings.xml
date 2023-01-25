@@ -543,8 +543,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"ავტომატური"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"ხმისა და ვიბრაციის გარეშე"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ხმისა და ვიბრაციის გარეშე, ჩნდება მიმოწერების სექციის ქვედა ნაწილში"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"დარეკვა ან ვიბრაცია ტელეფონის პარამეტრების მიხედვით"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"დარეკვა ან ვიბრაცია ტელეფონის პარამეტრების მიხედვით. მიმოწერები <xliff:g id="APP_NAME">%1$s</xliff:g>-ის ბუშტიდან, ნაგულისხმევად."</string>
+    <string name="notification_channel_summary_default" msgid="777294388712200605">"დარეკვა ან ვიბრაცია მოწყობილობის პარამეტრების მიხედვით"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"დარეკვა ან ვიბრაცია მოწყობილობის პარამეტრების მიხედვით. მიმოწერები <xliff:g id="APP_NAME">%1$s</xliff:g>-ის ბუშტიდან, ნაგულისხმევად."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"სისტემისთვის ისეთი უფლების მინიჭება, რომ მან განსაზღვროს, ამ შეტყობინებამ ხმოვანი სიგნალი უნდა აამოქმედოს თუ ვიბრაცია"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;სტატუსი:&lt;/b&gt; ნაგულისხმევად გარდაქმნილი"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;სტატუსი:&lt;/b&gt; „უხმო“ სტატუსზე გადასული"</string>
@@ -812,8 +812,7 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"საშუალო"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"პატარა"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"დიდი"</string>
-    <!-- no translation found for accessibility_magnification_done (263349129937348512) -->
-    <skip />
+    <string name="accessibility_magnification_done" msgid="263349129937348512">"მზადაა"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"რედაქტირება"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"გადიდების ფანჯრის პარამეტრები"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"შეეხეთ მარტივი წვდომის ფუნქციების გასახსნელად. მოარგეთ ან შეცვალეთ ეს ღილაკი პარამეტრებში.\n\n"<annotation id="link">"პარამეტრების ნახვა"</annotation></string>
@@ -883,11 +882,10 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"გახსენით <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"დაუკარით <xliff:g id="SONG_NAME">%1$s</xliff:g>, <xliff:g id="ARTIST_NAME">%2$s</xliff:g>, <xliff:g id="APP_LABEL">%3$s</xliff:g>-დან"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"დაუკარით <xliff:g id="SONG_NAME">%1$s</xliff:g> <xliff:g id="APP_LABEL">%2$s</xliff:g>-დან"</string>
-    <string name="media_transfer_undo" msgid="1895606387620728736">"მოქმედების გაუქმება"</string>
+    <string name="media_transfer_undo" msgid="1895606387620728736">"მოქმედ.გაუქმება"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"მიიტანეთ უფრო ახლოს, რომ დაუკრათ <xliff:g id="DEVICENAME">%1$s</xliff:g>-ზე"</string>
-    <!-- no translation found for media_move_closer_to_end_cast (7302555909119374738) -->
-    <skip />
-    <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"მიმდინარეობს დაკვრა <xliff:g id="DEVICENAME">%1$s</xliff:g>-ზე"</string>
+    <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"აქ სათამაშოდ, მიუახლოვდით <xliff:g id="DEVICENAME">%1$s</xliff:g>-ს"</string>
+    <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"უკრავს <xliff:g id="DEVICENAME">%1$s</xliff:g>-ზე"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"რაღაც შეცდომა მოხდა. ცადეთ ხელახლა."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"იტვირთება"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"ტაბლეტი"</string>
@@ -915,6 +913,7 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"დინამიკები და დისპლეები"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"შემოთავაზებული მოწყობილობები"</string>
+    <string name="media_output_status_require_premium" msgid="5691200962588753380">"საჭიროა პრემიუმ-ანგარიში"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ტრანსლირების მუშაობის პრინციპი"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ტრანსლაცია"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"თქვენთან ახლოს მყოფ ხალხს თავსებადი Bluetooth მოწყობილობით შეუძლიათ თქვენ მიერ ტრანსლირებული მედიის მოსმენა"</string>
@@ -1056,8 +1055,12 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ეს ეკრანი გამოირთვება"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"დასაკეცი მოწყობილობა იხსნება"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"დასაკეცი მოწყობილობა ტრიალებს"</string>
-    <!-- no translation found for stylus_battery_low_percentage (1620068112350141558) -->
-    <skip />
-    <!-- no translation found for stylus_battery_low_subtitle (3583843128908823273) -->
-    <skip />
+    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"დარჩენილია ბატარეის <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"დააკავშირეთ თქვენი სტილუსი დამტენს"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"სტილუსის ბატარეა დაცლის პირასაა"</string>
+    <string name="video_camera" msgid="7654002575156149298">"ვიდეოკამერა"</string>
+    <string name="call_from_work_profile_title" msgid="6991157106804289643">"ამ პროფილიდან დარეკვა ვერ ხერხდება"</string>
+    <string name="call_from_work_profile_text" msgid="3458704745640229638">"თქვენი სამსახურის წესები საშუალებას გაძლევთ, სატელეფონო ზარები განახორციელოთ მხოლოდ სამსახურის პროფილიდან"</string>
+    <string name="call_from_work_profile_action" msgid="2937701298133010724">"სამსახურის პროფილზე გადართვა"</string>
+    <string name="call_from_work_profile_close" msgid="7927067108901068098">"დახურვა"</string>
 </resources>

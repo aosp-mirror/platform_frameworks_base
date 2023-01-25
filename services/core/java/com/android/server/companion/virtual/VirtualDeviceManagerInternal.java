@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.companion.virtual.IVirtualDevice;
 import android.os.LocaleList;
+import android.util.ArraySet;
 
 import java.util.Set;
 
@@ -84,7 +85,7 @@ public abstract class VirtualDeviceManagerInternal {
      * *Note* this only checks VirtualDevices, and does not include information about whether
      * the app is running on the default device or not.
      */
-    public abstract @NonNull Set<Integer> getDeviceIdsForUid(int uid);
+    public abstract @NonNull ArraySet<Integer> getDeviceIdsForUid(int uid);
 
     /**
      * Notifies that a virtual display is created.
@@ -132,4 +133,12 @@ public abstract class VirtualDeviceManagerInternal {
      * Returns true if the {@code displayId} is owned by any virtual device
      */
     public abstract boolean isDisplayOwnedByAnyVirtualDevice(int displayId);
+
+    /**
+     * Gets the ids of VirtualDisplays owned by a VirtualDevice.
+     *
+     * @param deviceId which device we're asking about
+     * @return the set of display ids for all VirtualDisplays owned by the device
+     */
+    public abstract @NonNull ArraySet<Integer> getDisplayIdsForDevice(int deviceId);
 }

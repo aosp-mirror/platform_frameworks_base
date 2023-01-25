@@ -26,10 +26,8 @@
     <string name="install_done" msgid="5987363587661783896">"アプリをインストールしました。"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"このアプリをインストールしますか？"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"このアプリを更新しますか？"</string>
-    <!-- no translation found for install_confirm_question_update_owner_changed (4215696609006069124) -->
-    <skip />
-    <!-- no translation found for install_confirm_question_update_owner_reminder (8778026710268011466) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_changed" msgid="4215696609006069124">"このアプリのアップデートは現在 <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g> によって管理されています。\n\n更新すると、今後は代わりに <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g> からアップデートを入手するようになります。"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="8778026710268011466">"このアプリのアップデートは現在 <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g> によって管理されています。\n\nこのアップデートを <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g> からインストールしますか？"</string>
     <string name="install_failed" msgid="5777824004474125469">"アプリはインストールされていません。"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"パッケージのインストールはブロックされています。"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"パッケージが既存のパッケージと競合するため、アプリをインストールできませんでした。"</string>

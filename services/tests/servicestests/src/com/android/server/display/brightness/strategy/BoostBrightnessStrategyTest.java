@@ -44,7 +44,7 @@ public class BoostBrightnessStrategyTest {
     }
 
     @Test
-    public void updateBrightnessWorksAsExpectedWhenBoostBrightnessIsRequested() {
+    public void testUpdateBrightnessWhenBoostBrightnessIsRequested() {
         DisplayManagerInternal.DisplayPowerRequest
                 displayPowerRequest = new DisplayManagerInternal.DisplayPowerRequest();
         displayPowerRequest.boostScreenBrightness = true;

@@ -34,7 +34,6 @@ import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.BcSmartspaceConfigPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
@@ -177,8 +176,6 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        `when`(featureFlags.isEnabled(Flags.SMARTSPACE)).thenReturn(true)
-
         `when`(secureSettings.getUriFor(PRIVATE_LOCKSCREEN_SETTING))
                 .thenReturn(fakePrivateLockscreenSettingUri)
         `when`(secureSettings.getUriFor(NOTIF_ON_LOCKSCREEN_SETTING))
@@ -219,17 +216,6 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
         verify(deviceProvisionedController).addCallback(capture(deviceProvisionedCaptor))
         deviceProvisionedListener = deviceProvisionedCaptor.value
-    }
-
-    @Test(expected = RuntimeException::class)
-    fun testThrowsIfFlagIsDisabled() {
-        // GIVEN the feature flag is disabled
-        `when`(featureFlags.isEnabled(Flags.SMARTSPACE)).thenReturn(false)
-
-        // WHEN we try to build the view
-        controller.buildAndConnectView(fakeParent)
-
-        // THEN an exception is thrown
     }
 
     @Test

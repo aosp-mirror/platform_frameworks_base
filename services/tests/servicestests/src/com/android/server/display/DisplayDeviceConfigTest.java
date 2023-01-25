@@ -164,7 +164,7 @@ public final class DisplayDeviceConfigTest {
         assertArrayEquals(new int[]{-1, 10, 20, 30, 40},
                 mDisplayDeviceConfig.getScreenOffBrightnessSensorValueToLux());
 
-        // Todo(brup): Add asserts for BrightnessThrottlingData, DensityMapping,
+        // Todo: Add asserts for BrightnessThrottlingData, DensityMapping,
         // HighBrightnessModeData AmbientLightSensor, RefreshRateLimitations and ProximitySensor.
     }
 
@@ -236,7 +236,7 @@ public final class DisplayDeviceConfigTest {
         assertArrayEquals(mDisplayDeviceConfig.getHighAmbientBrightnessThresholds(),
                 HIGH_AMBIENT_THRESHOLD_OF_PEAK_REFRESH_RATE);
 
-        // Todo(brup): Add asserts for BrightnessThrottlingData, DensityMapping,
+        // Todo: Add asserts for BrightnessThrottlingData, DensityMapping,
         // HighBrightnessModeData AmbientLightSensor, RefreshRateLimitations and ProximitySensor.
     }
 

@@ -319,9 +319,9 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
     }
 
     @Override
-    public boolean setManualTime(@NonNull ManualTimeSuggestion timeSignal) {
+    public boolean setManualTime(@NonNull ManualTimeSuggestion suggestion) {
         enforceManageTimeDetectorPermission();
-        Objects.requireNonNull(timeSignal);
+        Objects.requireNonNull(suggestion);
 
         // This calls suggestManualTime() as the logic is identical, it only differs in the
         // permission required, which is handled on the line above.
@@ -330,7 +330,7 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
         try {
             final boolean bypassUserPolicyChecks = false;
             return mTimeDetectorStrategy.suggestManualTime(
-                    userId, timeSignal, bypassUserPolicyChecks);
+                    userId, suggestion, bypassUserPolicyChecks);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -363,11 +363,11 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
     /**
      * Suggests network time with permission checks. For use by {@link TimeDetectorShellCommand}.
      */
-    void suggestNetworkTime(@NonNull NetworkTimeSuggestion timeSignal) {
+    void suggestNetworkTime(@NonNull NetworkTimeSuggestion suggestion) {
         enforceSuggestNetworkTimePermission();
-        Objects.requireNonNull(timeSignal);
+        Objects.requireNonNull(suggestion);
 
-        mHandler.post(() -> mTimeDetectorStrategy.suggestNetworkTime(timeSignal));
+        mHandler.post(() -> mTimeDetectorStrategy.suggestNetworkTime(suggestion));
     }
 
     /**

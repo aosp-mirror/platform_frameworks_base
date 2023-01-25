@@ -56,7 +56,7 @@ public interface TimeZoneDetectorInternal {
      * valid but does not change the time zone because it matches the current device time zone is
      * considered accepted.
      */
-    boolean setManualTimeZoneForDpm(@NonNull ManualTimeZoneSuggestion timeZoneSuggestion);
+    boolean setManualTimeZoneForDpm(@NonNull ManualTimeZoneSuggestion suggestion);
 
     /**
      * Handles the supplied {@link LocationAlgorithmEvent}. The detector may ignore the event based

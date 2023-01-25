@@ -100,7 +100,7 @@ constructor(
 
     private val regionSamplingEnabled =
             featureFlags.isEnabled(Flags.REGION_SAMPLING)
-
+    private var isContentUpdatedOnce = false
     private var showNotifications = false
     private var showSensitiveContentForCurrentUser = false
     private var showSensitiveContentForManagedUser = false
@@ -115,19 +115,6 @@ constructor(
         override fun onViewAttachedToWindow(v: View) {
             smartspaceViews.add(v as SmartspaceView)
 
-            if (regionSamplingEnabled) {
-                var regionSampler = RegionSampler(
-                        v,
-                        uiExecutor,
-                        bgExecutor,
-                        regionSamplingEnabled,
-                        updateFun
-                )
-                initializeTextColors(regionSampler)
-                regionSampler.startRegionSampler()
-                regionSamplers.put(v, regionSampler)
-            }
-
             connectSession()
 
             updateTextColorFromWallpaper()
@@ -136,12 +123,6 @@ constructor(
 
         override fun onViewDetachedFromWindow(v: View) {
             smartspaceViews.remove(v as SmartspaceView)
-
-            if (regionSamplingEnabled) {
-                var regionSampler = regionSamplers.getValue(v)
-                regionSampler.stopRegionSampler()
-                regionSamplers.remove(v)
-            }
 
             if (smartspaceViews.isEmpty()) {
                 disconnect()
@@ -153,6 +134,24 @@ constructor(
         execution.assertIsMainThread()
         val filteredTargets = targets.filter(::filterSmartspaceTarget)
         plugin?.onTargetsAvailable(filteredTargets)
+        if (!isContentUpdatedOnce) {
+            for (v in smartspaceViews) {
+                if (regionSamplingEnabled) {
+                    var regionSampler = RegionSampler(
+                        v as View,
+                        uiExecutor,
+                        bgExecutor,
+                        regionSamplingEnabled,
+                        updateFun
+                    )
+                    initializeTextColors(regionSampler)
+                    regionSamplers[v] = regionSampler
+                    regionSampler.startRegionSampler()
+                }
+                updateTextColorFromWallpaper()
+            }
+            isContentUpdatedOnce = true
+        }
     }
 
     private val userTrackerCallback = object : UserTracker.Callback {
@@ -208,7 +207,7 @@ constructor(
     fun isEnabled(): Boolean {
         execution.assertIsMainThread()
 
-        return featureFlags.isEnabled(Flags.SMARTSPACE) && plugin != null
+        return plugin != null
     }
 
     private fun updateBypassEnabled() {
@@ -399,7 +398,8 @@ constructor(
 
     private fun updateTextColorFromWallpaper() {
         val wallpaperManager = WallpaperManager.getInstance(context)
-        if (!regionSamplingEnabled || wallpaperManager.lockScreenWallpaperExists()) {
+        if (!regionSamplingEnabled || wallpaperManager.lockScreenWallpaperExists() ||
+            regionSamplers.isEmpty()) {
             val wallpaperTextColor =
                     Utils.getColorAttrDefaultColor(context, R.attr.wallpaperTextColor)
             smartspaceViews.forEach { it.setPrimaryTextColor(wallpaperTextColor) }

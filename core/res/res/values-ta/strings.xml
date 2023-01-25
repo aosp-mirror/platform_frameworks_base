@@ -328,7 +328,7 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"நீங்கள் பணியாற்றிக் கொண்டிருக்கும் சாளரத்தின் உள்ளடக்கத்தைப் பார்க்கலாம்."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"தொடுவதன் மூலம் அறிவதை இயக்கும்"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"தட்டிய உள்ளடக்கம் சத்தமாகப் படிக்கப்படும், சைகைகளைப் பயன்படுத்தி திரையில் உலாவலாம்."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"நீங்கள் தட்டச்சு செய்யும் உரையைக் கவனிக்கும்"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"நீங்கள் டைப் செய்யும் வார்த்தையைக் கவனிக்கும்."</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"கிரெடிட் கார்டு எண்கள் மற்றும் கடவுச்சொற்கள் போன்ற தனிப்பட்ட தகவலும் உள்ளடங்கும்."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"திரை பெரிதாவதைக் கட்டுப்படுத்தும்"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"திரையின் ஜூம் அளவையும் நிலையையும் கட்டுப்படுத்தலாம்."</string>
@@ -1943,10 +1943,8 @@
     <string name="work_mode_off_title" msgid="961171256005852058">"பணி ஆப்ஸை இயக்கவா?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"உங்கள் பணி ஆப்ஸுக்கும் அறிவிப்புகளுக்குமான அணுகலைப் பெறுங்கள்"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"இயக்கு"</string>
-    <!-- no translation found for work_mode_emergency_call_button (6818855962881612322) -->
-    <skip />
-    <!-- no translation found for work_mode_dialer_off_message (2193299184850387465) -->
-    <skip />
+    <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"அவசர அழைப்பு"</string>
+    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"உங்கள் பணி ஆப்ஸுக்கும் அழைப்புகளுக்குமான அணுகலைப் பெறுங்கள்"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"இந்த ஆப்ஸ் இப்போது கிடைப்பதில்லை"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸ் இப்போது கிடைப்பதில்லை."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> இல்லை"</string>

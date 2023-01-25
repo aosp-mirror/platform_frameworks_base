@@ -69,6 +69,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -239,6 +240,24 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         try {
             synchronized (mLock) {
                 unregisterClientLocked(client, false);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    // Binder call
+    @Override
+    public void showMediaOutputSwitcher(String packageName) {
+        if (!validatePackageName(Binder.getCallingUid(), packageName)) {
+            throw new SecurityException("packageName must match the calling identity");
+        }
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                StatusBarManagerInternal statusBar =
+                        LocalServices.getService(StatusBarManagerInternal.class);
+                statusBar.showMediaOutputSwitcher(packageName);
             }
         } finally {
             Binder.restoreCallingIdentity(token);

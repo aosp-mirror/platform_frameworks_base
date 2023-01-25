@@ -39,6 +39,8 @@ public final class DisplayPortAltModeInfo implements Parcelable {
     private final @DisplayPortAltModeStatus int mPartnerSinkStatus;
     private final @DisplayPortAltModeStatus int mCableStatus;
     private final int mNumLanes;
+    private final boolean mHpd;
+    private final int mLinkTrainingStatus;
 
     /**
      * Port Partners:
@@ -103,14 +105,18 @@ public final class DisplayPortAltModeInfo implements Parcelable {
         mPartnerSinkStatus = DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN;
         mCableStatus = DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN;
         mNumLanes = 0;
+        mHpd = false;
+        mLinkTrainingStatus = 0;
     }
 
     /** @hide */
     public DisplayPortAltModeInfo(int partnerSinkStatus, int cableStatus,
-            int numLanes) {
+            int numLanes, boolean hpd, int linkTrainingStatus) {
         mPartnerSinkStatus = partnerSinkStatus;
         mCableStatus = cableStatus;
         mNumLanes = numLanes;
+        mHpd = hpd;
+        mLinkTrainingStatus = linkTrainingStatus;
     }
 
     /**
@@ -155,6 +161,8 @@ public final class DisplayPortAltModeInfo implements Parcelable {
         dest.writeInt(mPartnerSinkStatus);
         dest.writeInt(mCableStatus);
         dest.writeInt(mNumLanes);
+        dest.writeBoolean(mHpd);
+        dest.writeInt(mLinkTrainingStatus);
     }
 
     @NonNull
@@ -166,6 +174,10 @@ public final class DisplayPortAltModeInfo implements Parcelable {
                 + mCableStatus
                 + " numLanes="
                 + mNumLanes
+                + " hpd="
+                + mHpd
+                + " linkTrainingStatus="
+                + mLinkTrainingStatus
                 + "}";
     }
 
@@ -195,7 +207,10 @@ public final class DisplayPortAltModeInfo implements Parcelable {
             int partnerSinkStatus = in.readInt();
             int cableStatus = in.readInt();
             int numLanes = in.readInt();
-            return new DisplayPortAltModeInfo(partnerSinkStatus, cableStatus, numLanes);
+            boolean hpd = in.readBoolean();
+            int linkTrainingStatus = in.readInt();
+            return new DisplayPortAltModeInfo(partnerSinkStatus, cableStatus, numLanes, hpd,
+                    linkTrainingStatus);
         }
 
         @Override

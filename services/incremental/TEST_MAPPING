@@ -36,5 +36,10 @@
         }
       ]
     }
+  ],
+  "kernel-presubmit": [
+    {
+      "name": "CtsIncrementalInstallHostTestCases"
+    }
   ]
 }

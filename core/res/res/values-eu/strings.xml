@@ -324,19 +324,19 @@
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"atzitu bizi-konstanteei buruzko sentsorearen datuak"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"Jakinarazpenak"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"jakinarazpenak erakutsi"</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Eskuratu leihoko edukia"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Leihoko edukia eskuratu."</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Arakatu irekita daukazun leihoko edukia."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Aktibatu \"Arakatu ukituta\""</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"\"Arakatu ukituta\" aktibatu."</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Sakatutako elementuak ozen irakurriko dira eta pantaila keinu bidez arakatu ahal izango da."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Behatu idazten duzun testua"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Idazten duzun testua behatu."</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Ez da salbuespenik egiten datu pertsonalekin, hala nola kreditu-txartelen zenbakiekin eta pasahitzekin."</string>
-    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Kontrolatu pantailaren zoom-maila"</string>
-    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Kontrolatu pantailaren zoom-maila eta posizioa."</string>
-    <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Egin keinuak"</string>
+    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Pantailaren zoom-maila kontrolatu."</string>
+    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Pantailaren zoom-maila eta posizioa kontrolatu."</string>
+    <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Keinuak egin."</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Sakatu, lerratu, atximurkatu eta beste hainbat keinu egin ditzake."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Hatz-marken keinuak"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Gailuaren hatz-marken sentsorean egindako keinuak atzeman ditzake."</string>
-    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Atera pantaila-argazki bat"</string>
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Pantaila-argazkiak atera."</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Pantaila-argazkiak atera ditzake."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"desgaitu edo aldatu egoera-barra"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Egoera-barra desgaitzea edo sistema-ikonoak gehitzea edo kentzea baimentzen die aplikazioei."</string>
@@ -1943,10 +1943,8 @@
     <string name="work_mode_off_title" msgid="961171256005852058">"Laneko aplikazioak aktibatu nahi dituzu?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"Atzitu laneko aplikazioak eta jakinarazpenak"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Aktibatu"</string>
-    <!-- no translation found for work_mode_emergency_call_button (6818855962881612322) -->
-    <skip />
-    <!-- no translation found for work_mode_dialer_off_message (2193299184850387465) -->
-    <skip />
+    <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Larrialdia"</string>
+    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Atzitu laneko aplikazioak eta deiak"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikazioa ez dago erabilgarri"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ez dago erabilgarri une honetan."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ez dago erabilgarri"</string>

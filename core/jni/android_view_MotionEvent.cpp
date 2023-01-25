@@ -515,7 +515,7 @@ static jstring android_view_MotionEvent_nativeAxisToString(JNIEnv* env, jclass c
 static jint android_view_MotionEvent_nativeAxisFromString(JNIEnv* env, jclass clazz,
         jstring label) {
     ScopedUtfChars axisLabel(env, label);
-    return static_cast<jint>(MotionEvent::getAxisFromLabel(axisLabel.c_str()));
+    return static_cast<jint>(MotionEvent::getAxisFromLabel(axisLabel.c_str()).value_or(-1));
 }
 
 // ---------------- @FastNative ----------------------------------

@@ -96,6 +96,10 @@ public class WifiNl80211Manager {
     public static final String SCANNING_PARAM_ENABLE_6GHZ_RNR =
             "android.net.wifi.nl80211.SCANNING_PARAM_ENABLE_6GHZ_RNR";
 
+    // Extra scanning parameter used to add vendor IEs (byte[]).
+    public static final String EXTRA_SCANNING_PARAM_VENDOR_IES =
+            "android.net.wifi.nl80211.extra.SCANNING_PARAM_VENDOR_IES";
+
     private AlarmManager mAlarmManager;
     private Handler mEventHandler;
 
@@ -1135,6 +1139,7 @@ public class WifiNl80211Manager {
         settings.hiddenNetworks  = new ArrayList<>();
         if (extraScanningParams != null) {
             settings.enable6GhzRnr = extraScanningParams.getBoolean(SCANNING_PARAM_ENABLE_6GHZ_RNR);
+            settings.vendorIes = extraScanningParams.getByteArray(EXTRA_SCANNING_PARAM_VENDOR_IES);
         }
 
         if (freqs != null) {
@@ -1169,7 +1174,7 @@ public class WifiNl80211Manager {
             case IWifiScannerImpl.SCAN_STATUS_FAILED_ABORT:
                 return WifiScanner.REASON_ABORT;
             case IWifiScannerImpl.SCAN_STATUS_FAILED_NODEV:
-                return WifiScanner.REASON_NO_DEV;
+                return WifiScanner.REASON_NO_DEVICE;
             case IWifiScannerImpl.SCAN_STATUS_FAILED_INVALID_ARGS:
                 return WifiScanner.REASON_INVALID_ARGS;
             case IWifiScannerImpl.SCAN_STATUS_FAILED_GENERIC:

@@ -208,7 +208,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         if (DBG) {
             Slog.d(LOG_TAG, "External suggestion received."
                     + " currentUserConfig=" + currentUserConfig
-                    + " newSuggestion=" + suggestion);
+                    + " suggestion=" + suggestion);
         }
         Objects.requireNonNull(suggestion);
 
@@ -230,7 +230,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         if (DBG) {
             Slog.d(LOG_TAG, "GNSS suggestion received."
                     + " currentUserConfig=" + currentUserConfig
-                    + " newSuggestion=" + suggestion);
+                    + " suggestion=" + suggestion);
         }
         Objects.requireNonNull(suggestion);
 
@@ -289,7 +289,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         if (DBG) {
             Slog.d(LOG_TAG, "Network suggestion received."
                     + " currentUserConfig=" + currentUserConfig
-                    + " newSuggestion=" + suggestion);
+                    + " suggestion=" + suggestion);
         }
         Objects.requireNonNull(suggestion);
 
@@ -311,7 +311,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
         // Now perform auto time detection. The new suggestion may be used to modify the system
         // clock.
-        String reason = "New network time suggested. timeSuggestion=" + suggestion;
+        String reason = "New network time suggested. suggestion=" + suggestion;
         doAutoTimeDetection(reason);
     }
 
@@ -396,29 +396,29 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     }
 
     @Override
-    public synchronized void suggestTelephonyTime(@NonNull TelephonyTimeSuggestion timeSuggestion) {
+    public synchronized void suggestTelephonyTime(@NonNull TelephonyTimeSuggestion suggestion) {
         // Empty time suggestion means that telephony network connectivity has been lost.
         // The passage of time is relentless, and we don't expect our users to use a time machine,
         // so we can continue relying on previous suggestions when we lose connectivity. This is
         // unlike time zone, where a user may lose connectivity when boarding a flight and where we
         // do want to "forget" old signals. Suggestions that are too old are discarded later in the
         // detection algorithm.
-        if (timeSuggestion.getUnixEpochTime() == null) {
+        if (suggestion.getUnixEpochTime() == null) {
             return;
         }
 
-        if (!validateAutoSuggestionTime(timeSuggestion.getUnixEpochTime(), timeSuggestion)) {
+        if (!validateAutoSuggestionTime(suggestion.getUnixEpochTime(), suggestion)) {
             return;
         }
 
         // Perform input filtering and record the validated suggestion against the slotIndex.
-        if (!storeTelephonySuggestion(timeSuggestion)) {
+        if (!storeTelephonySuggestion(suggestion)) {
             return;
         }
 
         // Now perform auto time detection. The new suggestion may be used to modify the system
         // clock.
-        String reason = "New telephony time suggested. timeSuggestion=" + timeSuggestion;
+        String reason = "New telephony time suggested. suggestion=" + suggestion;
         doAutoTimeDetection(reason);
     }
 
@@ -623,19 +623,19 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
                             + ", detectionReason=" + detectionReason;
                 }
             } else if (origin == ORIGIN_GNSS) {
-                GnssTimeSuggestion gnssTimeSuggestion = findLatestValidGnssSuggestion();
-                if (gnssTimeSuggestion != null) {
-                    newUnixEpochTime = gnssTimeSuggestion.getUnixEpochTime();
+                GnssTimeSuggestion gnssSuggestion = findLatestValidGnssSuggestion();
+                if (gnssSuggestion != null) {
+                    newUnixEpochTime = gnssSuggestion.getUnixEpochTime();
                     cause = "Found good gnss suggestion."
-                            + ", gnssTimeSuggestion=" + gnssTimeSuggestion
+                            + ", gnssSuggestion=" + gnssSuggestion
                             + ", detectionReason=" + detectionReason;
                 }
             } else if (origin == ORIGIN_EXTERNAL) {
-                ExternalTimeSuggestion externalTimeSuggestion = findLatestValidExternalSuggestion();
-                if (externalTimeSuggestion != null) {
-                    newUnixEpochTime = externalTimeSuggestion.getUnixEpochTime();
+                ExternalTimeSuggestion externalSuggestion = findLatestValidExternalSuggestion();
+                if (externalSuggestion != null) {
+                    newUnixEpochTime = externalSuggestion.getUnixEpochTime();
                     cause = "Found good external suggestion."
-                            + ", externalTimeSuggestion=" + externalTimeSuggestion
+                            + ", externalSuggestion=" + externalSuggestion
                             + ", detectionReason=" + detectionReason;
                 }
             } else {
@@ -742,14 +742,14 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
     private static int scoreTelephonySuggestion(
             @ElapsedRealtimeLong long elapsedRealtimeMillis,
-            @NonNull TelephonyTimeSuggestion timeSuggestion) {
+            @NonNull TelephonyTimeSuggestion suggestion) {
 
         // Validate first.
-        UnixEpochTime unixEpochTime = timeSuggestion.getUnixEpochTime();
+        UnixEpochTime unixEpochTime = suggestion.getUnixEpochTime();
         if (!validateSuggestionUnixEpochTime(elapsedRealtimeMillis, unixEpochTime)) {
             Slog.w(LOG_TAG, "Existing suggestion found to be invalid"
                     + " elapsedRealtimeMillis=" + elapsedRealtimeMillis
-                    + ", timeSuggestion=" + timeSuggestion);
+                    + ", suggestion=" + suggestion);
             return TELEPHONY_INVALID_SCORE;
         }
 

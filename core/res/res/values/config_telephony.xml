@@ -140,10 +140,4 @@
          only single logical modem, by using its data connection in addition to cellular IMS. -->
     <bool name="config_enable_virtual_dsda">false</bool>
     <java-symbol type="bool" name="config_enable_virtual_dsda" />
-
-    <!--  Whether to enable getSubscriptionUserHandle() api.
-          If the value is true, return user handle associated with the subscription.
-          If the value is set to false, return null. -->
-    <bool name="config_enable_get_subscription_user_handle">true</bool>
-    <java-symbol type="bool" name="config_enable_get_subscription_user_handle" />
 </resources>

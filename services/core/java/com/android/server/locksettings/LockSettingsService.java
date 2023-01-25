@@ -114,6 +114,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
+import android.util.FeatureFlagUtils;
 import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -2501,6 +2502,28 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public @Nullable String getKey(@NonNull String alias) throws RemoteException {
         return mRecoverableKeyStoreManager.getKey(alias);
+    }
+
+    /**
+     * Starts a session to verify lock screen credentials provided by a remote device.
+     */
+    public void startRemoteLockscreenValidation() {
+        if (!FeatureFlagUtils.isEnabled(mContext,
+                FeatureFlagUtils.SETTINGS_ENABLE_LOCKSCREEN_TRANSFER_API)) {
+            throw new UnsupportedOperationException("Under development");
+        }
+        mRecoverableKeyStoreManager.startRemoteLockscreenValidation();
+    }
+
+    /**
+     * Verifies credentials guess from a remote device.
+     */
+    public void validateRemoteLockscreen(@NonNull byte[] encryptedCredential) {
+        if (!FeatureFlagUtils.isEnabled(mContext,
+                FeatureFlagUtils.SETTINGS_ENABLE_LOCKSCREEN_TRANSFER_API)) {
+            throw new UnsupportedOperationException("Under development");
+        }
+        mRecoverableKeyStoreManager.validateRemoteLockscreen(encryptedCredential);
     }
 
     // Reading these settings needs the contacts permission

@@ -314,6 +314,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         void unbindImeLocked(AbstractAccessibilityServiceConnection connection);
 
         void attachAccessibilityOverlayToDisplay(int displayId, SurfaceControl sc);
+
+        void setCurrentUserFocusAppearance(int strokeWidth, int color);
+
     }
 
     public AbstractAccessibilityServiceConnection(Context context, ComponentName componentName,

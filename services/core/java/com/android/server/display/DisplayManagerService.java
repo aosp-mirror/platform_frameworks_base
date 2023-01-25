@@ -1655,6 +1655,9 @@ public final class DisplayManagerService extends SystemService {
                 return;
             }
 
+            // TODO (b/265793751): Set this DPC as a follower of the default DPC if needed,
+            // clear this DPC's followers if it's not a lead display
+
             final String uniqueId = device.getUniqueId();
             HighBrightnessModeMetadata hbmMetadata = mHighBrightnessModeMetadataMap.get(uniqueId);
             dpc.onDisplayChanged(hbmMetadata);

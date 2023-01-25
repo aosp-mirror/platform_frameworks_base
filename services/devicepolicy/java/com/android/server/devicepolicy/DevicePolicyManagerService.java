@@ -14316,6 +14316,46 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
+    public void setCredentialManagerPolicy(PackagePolicy policy) {
+        if (!mHasFeature) {
+            return;
+        }
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(canWriteCredentialManagerPolicy(caller));
+
+        synchronized (getLockObject()) {
+            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller.getUserId());
+            if (Objects.equals(admin.mCredentialManagerPolicy, policy)) {
+                return;
+            }
+
+            admin.mCredentialManagerPolicy = policy;
+            saveSettingsLocked(caller.getUserId());
+        }
+    }
+
+    private boolean canWriteCredentialManagerPolicy(CallerIdentity caller) {
+        return (isProfileOwner(caller) && isManagedProfile(caller.getUserId()))
+                        || isDefaultDeviceOwner(caller)
+                        || hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+    }
+
+    @Override
+    public PackagePolicy getCredentialManagerPolicy() {
+        if (!mHasFeature) {
+            return null;
+        }
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(
+                canWriteCredentialManagerPolicy(caller) || canQueryAdminPolicy(caller));
+
+        synchronized (getLockObject()) {
+            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller.getUserId());
+            return (admin != null) ? admin.mCredentialManagerPolicy : null;
+        }
+    }
+
+    @Override
     public void setSystemUpdatePolicy(ComponentName who, SystemUpdatePolicy policy) {
         if (policy != null) {
             // throws exception if policy type is invalid

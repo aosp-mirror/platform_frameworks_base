@@ -27,15 +27,20 @@ import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.compat.annotation.ChangeId;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.ApexStagedEvent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IBackgroundInstallControlService;
+import android.content.pm.IPackageManagerNative;
+import android.content.pm.IStagedApexObserver;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.ModuleInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.Signature;
@@ -51,6 +56,7 @@ import android.hardware.face.FaceSensorProperties;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -62,6 +68,7 @@ import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.text.TextUtils;
 import android.util.PackageUtils;
 import android.util.Slog;
@@ -131,13 +138,17 @@ public class BinaryTransparencyService extends SystemService {
     // used for indicating newly installed MBAs that are updated (but unused currently)
     static final int MBA_STATUS_UPDATED_NEW_INSTALL = 4;
 
+    @VisibleForTesting
+    static final String KEY_ENABLE_BIOMETRIC_PROPERTY_VERIFICATION =
+            "enable_biometric_property_verification";
+
     private static final boolean DEBUG = false;     // toggle this for local debug
 
     private final Context mContext;
     private String mVbmetaDigest;
     // the system time (in ms) the last measurement was taken
     private long mMeasurementsLastRecordedMs;
-    private PackageManagerInternal mPackageManagerInternal;
+    private BiometricLogger mBiometricLogger;
 
     /**
      * Guards whether or not measurements of MBA to be performed. When this change is enabled,
@@ -1049,13 +1060,55 @@ public class BinaryTransparencyService extends SystemService {
     }
     private final BinaryTransparencyServiceImpl mServiceImpl;
 
+    /**
+     * A wrapper of {@link FrameworkStatsLog} for easier testing
+     */
+    @VisibleForTesting
+    public static class BiometricLogger {
+        private static final String TAG = "BiometricLogger";
+
+        private static final BiometricLogger sInstance = new BiometricLogger();
+
+        private BiometricLogger() {}
+
+        public static BiometricLogger getInstance() {
+            return sInstance;
+        }
+
+        /**
+         * A wrapper of {@link FrameworkStatsLog}
+         *
+         * @param sensorId The sensorId of the biometric to be logged
+         * @param modality The modality of the biometric
+         * @param sensorType The sensor type of the biometric
+         * @param sensorStrength The sensor strength of the biometric
+         * @param componentId The component Id of a component of the biometric
+         * @param hardwareVersion The hardware version of a component of the biometric
+         * @param firmwareVersion The firmware version of a component of the biometric
+         * @param serialNumber The serial number of a component of the biometric
+         * @param softwareVersion The software version of a component of the biometric
+         */
+        public void logStats(int sensorId, int modality, int sensorType, int sensorStrength,
+                String componentId, String hardwareVersion, String firmwareVersion,
+                String serialNumber, String softwareVersion) {
+            FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_PROPERTIES_COLLECTED,
+                    sensorId, modality, sensorType, sensorStrength, componentId, hardwareVersion,
+                    firmwareVersion, serialNumber, softwareVersion);
+        }
+    }
+
     public BinaryTransparencyService(Context context) {
+        this(context, BiometricLogger.getInstance());
+    }
+
+    @VisibleForTesting
+    BinaryTransparencyService(Context context, BiometricLogger biometricLogger) {
         super(context);
         mContext = context;
         mServiceImpl = new BinaryTransparencyServiceImpl();
         mVbmetaDigest = VBMETA_DIGEST_UNINITIALIZED;
         mMeasurementsLastRecordedMs = 0;
-        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
+        mBiometricLogger = biometricLogger;
     }
 
     /**
@@ -1070,28 +1123,6 @@ public class BinaryTransparencyService extends SystemService {
         } catch (Throwable t) {
             Slog.e(TAG, "Failed to start BinaryTransparencyService.", t);
         }
-
-        // register a package observer to detect updates to preloads
-        mPackageManagerInternal.getPackageList(new PackageManagerInternal.PackageListObserver() {
-            @Override
-            public void onPackageChanged(String packageName, int uid) {
-                // check if the updated package is a preloaded app.
-                PackageManager pm = mContext.getPackageManager();
-                try {
-                    pm.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(
-                            PackageManager.MATCH_FACTORY_ONLY));
-                } catch (PackageManager.NameNotFoundException e) {
-                    // this means that this package is not a preloaded app
-                    return;
-                }
-
-                Slog.d(TAG, "Preload " + packageName + " was updated. Scheduling measurement...");
-                UpdateMeasurementsJobService.scheduleBinaryMeasurements(mContext,
-                        BinaryTransparencyService.this);
-            }
-        });
-
-        // TODO(b/264428429): Register observer for updates to APEXs.
     }
 
     /**
@@ -1123,6 +1154,8 @@ public class BinaryTransparencyService extends SystemService {
             Slog.i(TAG, "Scheduling measurements to be taken.");
             UpdateMeasurementsJobService.scheduleBinaryMeasurements(mContext,
                     BinaryTransparencyService.this);
+
+            registerAllPackageUpdateObservers();
         }
     }
 
@@ -1301,7 +1334,7 @@ public class BinaryTransparencyService extends SystemService {
         // Note: none of the component info is a device identifier since every device of a given
         // model and build share the same biometric system info (see b/216195167)
         for (ComponentInfo componentInfo : prop.getComponentInfo()) {
-            FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_PROPERTIES_COLLECTED,
+            mBiometricLogger.logStats(
                     sensorId,
                     modality,
                     sensorType,
@@ -1314,7 +1347,19 @@ public class BinaryTransparencyService extends SystemService {
         }
     }
 
-    private void collectBiometricProperties() {
+    @VisibleForTesting
+    void collectBiometricProperties() {
+        // Check the flag to determine whether biometric property verification is enabled. It's
+        // disabled by default.
+        if (!DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_BIOMETRICS,
+                KEY_ENABLE_BIOMETRIC_PROPERTY_VERIFICATION, false)) {
+            if (DEBUG) {
+                Slog.d(TAG, "Do not collect/verify biometric properties. Feature disabled by "
+                        + "DeviceConfig");
+            }
+            return;
+        }
+
         PackageManager pm = mContext.getPackageManager();
         FingerprintManager fpManager = null;
         FaceManager faceManager = null;
@@ -1352,6 +1397,126 @@ public class BinaryTransparencyService extends SystemService {
         mVbmetaDigest = SystemProperties.get(SYSPROP_NAME_VBETA_DIGEST, VBMETA_DIGEST_UNAVAILABLE);
         Slog.d(TAG, String.format("VBMeta Digest: %s", mVbmetaDigest));
         FrameworkStatsLog.write(FrameworkStatsLog.VBMETA_DIGEST_REPORTED, mVbmetaDigest);
+    }
+
+    /**
+     * Listen for APK updates.
+     *
+     * There are two ways available to us to do this:
+     * 1. Register an observer using
+     * {@link PackageManagerInternal#getPackageList(PackageManagerInternal.PackageListObserver)}.
+     * 2. Register broadcast receivers, listening to either {@code ACTION_PACKAGE_ADDED} or
+     * {@code ACTION_PACKAGE_REPLACED}.
+     *
+     * After experimentation, we found that Option #1 does not catch updates to non-staged APEXs.
+     * Thus, we are implementing Option #2 here. More specifically, listening to
+     * {@link Intent#ACTION_PACKAGE_ADDED} allows us to capture all events we care about.
+     *
+     * We did not use {@link Intent#ACTION_PACKAGE_REPLACED} because it unfortunately does not
+     * detect updates to non-staged APEXs. Thus, we rely on {@link Intent#EXTRA_REPLACING} to
+     * filter out new installation from updates instead.
+     */
+    private void registerApkAndNonStagedApexUpdateListener() {
+        Slog.d(TAG, "Registering APK & Non-Staged APEX updates...");
+        IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
+        filter.addDataScheme("package");    // this is somehow necessary
+        mContext.registerReceiver(new PackageUpdatedReceiver(), filter);
+    }
+
+    /**
+     * Listen for staged-APEX updates.
+     *
+     * This method basically covers cases that are not caught by
+     * {@link #registerApkAndNonStagedApexUpdateListener()}, namely updates to APEXs that are staged
+     * for the subsequent reboot.
+     */
+    private void registerStagedApexUpdateObserver() {
+        Slog.d(TAG, "Registering APEX updates...");
+        IPackageManagerNative iPackageManagerNative = IPackageManagerNative.Stub.asInterface(
+                ServiceManager.getService("package_native"));
+        if (iPackageManagerNative == null) {
+            Slog.e(TAG, "IPackageManagerNative is null");
+            return;
+        }
+
+        try {
+            iPackageManagerNative.registerStagedApexObserver(new IStagedApexObserver.Stub() {
+                @Override
+                public void onApexStaged(ApexStagedEvent event) throws RemoteException {
+                    Slog.d(TAG, "A new APEX has been staged for update. There are currently "
+                            + event.stagedApexModuleNames.length + " APEX(s) staged for update. "
+                            + "Scheduling measurement...");
+                    UpdateMeasurementsJobService.scheduleBinaryMeasurements(mContext,
+                            BinaryTransparencyService.this);
+                }
+            });
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to register a StagedApexObserver.");
+        }
+    }
+
+    private boolean isPackagePreloaded(String packageName) {
+        PackageManager pm = mContext.getPackageManager();
+        try {
+            pm.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(
+                    PackageManager.MATCH_FACTORY_ONLY));
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isPackageAnApex(String packageName) {
+        PackageManager pm = mContext.getPackageManager();
+        try {
+            PackageInfo packageInfo = pm.getPackageInfo(packageName,
+                    PackageManager.PackageInfoFlags.of(PackageManager.MATCH_APEX));
+            return packageInfo.isApex;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+
+    private class PackageUpdatedReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!intent.getAction().equals(Intent.ACTION_PACKAGE_ADDED)) {
+                return;
+            }
+
+            Uri data = intent.getData();
+            if (data == null) {
+                Slog.e(TAG, "Shouldn't happen: intent data is null!");
+                return;
+            }
+
+            if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                Slog.d(TAG, "Not an update. Skipping...");
+                return;
+            }
+
+            String packageName = data.getSchemeSpecificPart();
+            // now we've got to check what package is this
+            if (isPackagePreloaded(packageName) || isPackageAnApex(packageName)) {
+                Slog.d(TAG, packageName + " was updated. Scheduling measurement...");
+                UpdateMeasurementsJobService.scheduleBinaryMeasurements(mContext,
+                        BinaryTransparencyService.this);
+            }
+        }
+    }
+
+    /**
+     * Register observers for APK and APEX updates. The current implementation breaks this process
+     * into 2 cases/methods because PackageManager does not offer a unified interface to register
+     * for all package updates in a universal and comprehensive manner.
+     * Thus, the observers will be invoked when either
+     * i) APK or non-staged APEX update; or
+     * ii) APEX staging happens.
+     * This will then be used as signals to schedule measurement for the relevant binaries.
+     */
+    private void registerAllPackageUpdateObservers() {
+        registerApkAndNonStagedApexUpdateListener();
+        registerStagedApexUpdateObserver();
     }
 
     private String translateContentDigestAlgorithmIdToString(int algorithmId) {

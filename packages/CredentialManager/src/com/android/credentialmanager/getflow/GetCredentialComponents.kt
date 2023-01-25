@@ -59,6 +59,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.android.credentialmanager.R
+import com.android.credentialmanager.common.ProviderActivityState
 import com.android.credentialmanager.common.material.ModalBottomSheetLayout
 import com.android.credentialmanager.common.material.ModalBottomSheetValue
 import com.android.credentialmanager.common.material.rememberModalBottomSheetState
@@ -90,30 +91,42 @@ fun GetCredentialScreen(
             modifier = Modifier.background(Color.Transparent),
             sheetState = state,
             sheetContent = {
-                // TODO: hide UI at top level
-                if (!uiState.hidden) {
-                    if (uiState.currentScreenState == GetScreenState.PRIMARY_SELECTION) {
-                        PrimarySelectionCard(
-                            requestDisplayInfo = uiState.requestDisplayInfo,
-                            providerDisplayInfo = uiState.providerDisplayInfo,
-                            providerInfoList = uiState.providerInfoList,
-                            activeEntry = uiState.activeEntry,
-                            onEntrySelected = viewModel::onEntrySelected,
-                            onConfirm = viewModel::onConfirmEntrySelected,
-                            onMoreOptionSelected = viewModel::onMoreOptionSelected,
-                        )
-                    } else {
-                        AllSignInOptionCard(
-                            providerInfoList = uiState.providerInfoList,
-                            providerDisplayInfo = uiState.providerDisplayInfo,
-                            onEntrySelected = viewModel::onEntrySelected,
-                            onBackButtonClicked = viewModel::onBackToPrimarySelectionScreen,
-                            onCancel = viewModel::onCancel,
-                            isNoAccount = uiState.isNoAccount,
-                        )
+                // Hide the sheet content as opposed to the whole bottom sheet to maintain the scrim
+                // background color even when the content should be hidden while waiting for
+                // results from the provider app.
+                when (uiState.providerActivityState) {
+                    ProviderActivityState.NOT_APPLICABLE -> {
+                        if (uiState.currentScreenState == GetScreenState.PRIMARY_SELECTION) {
+                            PrimarySelectionCard(
+                                requestDisplayInfo = uiState.requestDisplayInfo,
+                                providerDisplayInfo = uiState.providerDisplayInfo,
+                                providerInfoList = uiState.providerInfoList,
+                                activeEntry = uiState.activeEntry,
+                                onEntrySelected = viewModel::onEntrySelected,
+                                onConfirm = viewModel::onConfirmEntrySelected,
+                                onMoreOptionSelected = viewModel::onMoreOptionSelected,
+                            )
+                        } else {
+                            AllSignInOptionCard(
+                                providerInfoList = uiState.providerInfoList,
+                                providerDisplayInfo = uiState.providerDisplayInfo,
+                                onEntrySelected = viewModel::onEntrySelected,
+                                onBackButtonClicked = viewModel::onBackToPrimarySelectionScreen,
+                                onCancel = viewModel::onCancel,
+                                isNoAccount = uiState.isNoAccount,
+                            )
+                        }
                     }
-                } else if (uiState.selectedEntry != null && !uiState.providerActivityPending) {
-                    viewModel.launchProviderUi(providerActivityLauncher)
+                    ProviderActivityState.READY_TO_LAUNCH -> {
+                        // Launch only once per providerActivityState change so that the provider
+                        // UI will not be accidentally launched twice.
+                        LaunchedEffect(uiState.providerActivityState) {
+                            viewModel.launchProviderUi(providerActivityLauncher)
+                        }
+                    }
+                    ProviderActivityState.PENDING -> {
+                        // Hide our content when the provider activity is active.
+                    }
                 }
             },
             scrimColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.8f),
@@ -225,7 +238,7 @@ fun PrimarySelectionCard(
                 color = Color.Transparent
             )
             var totalEntriesCount = sortedUserNameToCredentialEntryList
-                .flatMap{ it.sortedCredentialEntryList}.size + authenticationEntryList
+                .flatMap { it.sortedCredentialEntryList }.size + authenticationEntryList
                 .size + providerInfoList.flatMap { it.actionEntryList }.size
             if (providerDisplayInfo.remoteEntry != null) totalEntriesCount += 1
             // Row horizontalArrangement differs on only one actionButton(should place on most
@@ -528,10 +541,10 @@ fun CredentialEntryRow(
                             credentialEntryInfo.credentialTypeDisplayName
                         else
                             credentialEntryInfo.credentialTypeDisplayName +
-                                    stringResource(
-                                        R.string.get_dialog_sign_in_type_username_separator
-                                    ) +
-                                    credentialEntryInfo.displayName
+                                stringResource(
+                                    R.string.get_dialog_sign_in_type_username_separator
+                                ) +
+                                credentialEntryInfo.displayName
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(bottom = 16.dp, start = 5.dp)
@@ -561,7 +574,7 @@ fun AuthenticationEntryRow(
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 5.dp),
-                ) {
+            ) {
                 Column() {
                     // TODO: fix the text values.
                     TextOnSurfaceVariant(

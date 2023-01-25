@@ -5,10 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Cancel"</string>
     <string name="string_continue" msgid="1346732695941131882">"Continue"</string>
     <string name="string_more_options" msgid="7990658711962795124">"More options"</string>
+    <string name="string_learn_more" msgid="4541600451688392447">"Learn more"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Safer with passkeys"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"With passkeys, you don’t need to create or remember complex passwords"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Passkeys are encrypted digital keys you create using your fingerprint, face, or screen lock"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"They are saved to a password manager, so you can sign in on other devices"</string>
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"More about passkeys"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Passwordless technology"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Passkeys allow you to sign in without relying on passwords. You just need to use your fingerprint, face recognition, PIN, or swipe pattern to verify your identity and create a passkey."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Public key cryptography"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Based on FIDO Alliance (which includes Google, Apple, Microsoft, and more) and W3C standards, passkeys use cryptographic key pairs. Unlike the username and string of characters we use for passwords, a private-public key pair is created for an app or website. The private key is safely stored on your device or password manager and it confirms your identity. The public key is shared with the app or website server. With corresponding keys, you can instantly register and sign in."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Improved account security"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Each key is exclusively linked with the app or website they were created for, so you can never sign in to a fraudulent app or website by mistake. Plus, with servers only keeping public keys, hacking is a lot harder."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Seamless transition"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"As we move towards a passwordless future, passwords will still be available alongside passkeys."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Choose where to save your <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Select a password manager to save your info and sign in faster next time"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Create passkey for <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>

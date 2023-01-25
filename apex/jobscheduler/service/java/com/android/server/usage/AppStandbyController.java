@@ -2690,7 +2690,9 @@ public class AppStandbyController
         }
 
         void noteEvent(int event, String packageName, int uid) throws RemoteException {
-            mBatteryStats.noteEvent(event, packageName, uid);
+            if (mBatteryStats != null) {
+                mBatteryStats.noteEvent(event, packageName, uid);
+            }
         }
 
         PackageManagerInternal getPackageManagerInternal() {

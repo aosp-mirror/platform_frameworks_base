@@ -24,8 +24,10 @@ import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.ProcessCapability;
 import static android.app.AppOpsManager.MIN_PRIORITY_UID_STATE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.MODE_FOREGROUND;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_CAMERA;
+import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.app.AppOpsManager.UID_STATE_FOREGROUND_SERVICE;
@@ -124,60 +126,32 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
 
     @Override
     public int evalMode(int uid, int code, int mode) {
-        if (mode != AppOpsManager.MODE_FOREGROUND) {
+        if (mode != MODE_FOREGROUND) {
             return mode;
         }
 
-        int uidStateValue;
-        int capability;
-        boolean visibleAppWidget;
-        boolean pendingTop;
-        boolean tempAllowlist;
-        uidStateValue = getUidState(uid);
-        capability = getUidCapability(uid);
-        visibleAppWidget = getUidVisibleAppWidget(uid);
-        pendingTop = mActivityManagerInternal.isPendingTopUid(uid);
-        tempAllowlist = mActivityManagerInternal.isTempAllowlistedForFgsWhileInUse(uid);
+        int uidState = getUidState(uid);
+        int uidCapability = getUidCapability(uid);
+        int result = evalModeInternal(uid, code, uidState, uidCapability);
 
-        int result = evalMode(uidStateValue, code, mode, capability, visibleAppWidget, pendingTop,
-                tempAllowlist);
-        mEventLog.logEvalForegroundMode(uid, uidStateValue, capability, code, result);
+        mEventLog.logEvalForegroundMode(uid, uidState, uidCapability, code, result);
         return result;
     }
 
-    private static int evalMode(int uidState, int code, int mode, int capability,
-            boolean appWidgetVisible, boolean pendingTop, boolean tempAllowlist) {
-        if (mode != AppOpsManager.MODE_FOREGROUND) {
-            return mode;
-        }
+    private int evalModeInternal(int uid, int code, int uidState, int uidCapability) {
 
-        if (appWidgetVisible || pendingTop || tempAllowlist) {
+        if (getUidVisibleAppWidget(uid) || mActivityManagerInternal.isPendingTopUid(uid)
+                || mActivityManagerInternal.isTempAllowlistedForFgsWhileInUse(uid)) {
             return MODE_ALLOWED;
         }
 
-        switch (code) {
-            case AppOpsManager.OP_FINE_LOCATION:
-            case AppOpsManager.OP_COARSE_LOCATION:
-            case AppOpsManager.OP_MONITOR_LOCATION:
-            case AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION:
-                if ((capability & PROCESS_CAPABILITY_FOREGROUND_LOCATION) == 0) {
-                    return MODE_IGNORED;
-                } else {
-                    return MODE_ALLOWED;
-                }
-            case OP_CAMERA:
-                if ((capability & PROCESS_CAPABILITY_FOREGROUND_CAMERA) == 0) {
-                    return MODE_IGNORED;
-                } else {
-                    return MODE_ALLOWED;
-                }
-            case OP_RECORD_AUDIO:
-            case OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO:
-                if ((capability & PROCESS_CAPABILITY_FOREGROUND_MICROPHONE) == 0) {
-                    return MODE_IGNORED;
-                } else {
-                    return MODE_ALLOWED;
-                }
+        int opCapability = getOpCapability(code);
+        if (opCapability != PROCESS_CAPABILITY_NONE) {
+            if ((uidCapability & opCapability) == 0) {
+                return MODE_IGNORED;
+            } else {
+                return MODE_ALLOWED;
+            }
         }
 
         if (uidState > AppOpsManager.resolveFirstUnrestrictedUidState(code)) {
@@ -185,6 +159,28 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
         }
 
         return MODE_ALLOWED;
+    }
+
+    private int getOpCapability(int opCode) {
+        switch (opCode) {
+            case AppOpsManager.OP_FINE_LOCATION:
+            case AppOpsManager.OP_COARSE_LOCATION:
+            case AppOpsManager.OP_MONITOR_LOCATION:
+            case AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION:
+                return PROCESS_CAPABILITY_FOREGROUND_LOCATION;
+            case OP_CAMERA:
+                return PROCESS_CAPABILITY_FOREGROUND_CAMERA;
+            case OP_RECORD_AUDIO:
+            case OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO:
+                return PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
+            default:
+                return PROCESS_CAPABILITY_NONE;
+        }
+    }
+
+    @Override
+    public boolean isUidInForeground(int uid) {
+        return evalMode(uid, OP_NONE, MODE_FOREGROUND) == MODE_ALLOWED;
     }
 
     @Override
