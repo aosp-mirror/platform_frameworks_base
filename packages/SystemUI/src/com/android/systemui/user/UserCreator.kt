@@ -87,6 +87,10 @@ constructor(
         userManager.setUserAdmin(userId)
     }
 
+    fun isUserAdmin(): Boolean {
+        return userManager.isAdminUser
+    }
+
     fun isMultipleAdminEnabled(): Boolean {
         return UserManager.isMultipleAdminEnabled()
     }
