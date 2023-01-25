@@ -1318,6 +1318,13 @@ public class OomAdjuster {
                     // left sitting around after no longer needed.
                     app.killLocked("isolated not needed", ApplicationExitInfo.REASON_OTHER,
                             ApplicationExitInfo.SUBREASON_ISOLATED_NOT_NEEDED, true);
+                } else if (app.isSdkSandbox && psr.numberOfRunningServices() <= 0
+                        && app.getActiveInstrumentation() == null) {
+                    // If this is an SDK sandbox process and there are no services running it, we
+                    // aggressively kill the sandbox as we usually don't want to re-use the same
+                    // sandbox again.
+                    app.killLocked("sandbox not needed", ApplicationExitInfo.REASON_OTHER,
+                            ApplicationExitInfo.SUBREASON_SDK_SANDBOX_NOT_NEEDED, true);
                 } else {
                     // Keeping this process, update its uid.
                     updateAppUidRecLSP(app);

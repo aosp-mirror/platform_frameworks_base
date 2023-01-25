@@ -1923,6 +1923,7 @@ class ContextImpl extends Context {
 
     private ComponentName startServiceCommon(Intent service, boolean requireForeground,
             UserHandle user) {
+        // Keep this in sync with ActivityManagerLocal.startSdkSandboxService
         try {
             validateServiceIntent(service);
             service.prepareToLeaveProcess(this);
@@ -1964,6 +1965,7 @@ class ContextImpl extends Context {
     }
 
     private boolean stopServiceCommon(Intent service, UserHandle user) {
+        // // Keep this in sync with ActivityManagerLocal.stopSdkSandboxService
         try {
             validateServiceIntent(service);
             service.prepareToLeaveProcess(this);
