@@ -32,6 +32,14 @@ import com.android.internal.util.Preconditions;
 public final class GetCredentialOption implements Parcelable {
 
     /**
+     * Bundle key to the flattened version of the JSON request string. Framework will use this key
+     * to determine which types of Credentials will utilize Credential Registry when filtering
+     * Credential Providers to ping.
+     */
+    public static final String FLATTENED_REQUEST = "android.credentials"
+            + ".GetCredentialOption.FLATTENED_REQUEST_STRING";
+
+    /**
      * The requested credential type.
      */
     @NonNull

@@ -17,7 +17,6 @@
 package android.credentials;
 
 import android.annotation.NonNull;
-import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.service.credentials.CredentialEntry;
@@ -31,9 +30,7 @@ import java.util.Objects;
 
 /**
  * Represents the type and contained data fields of a {@link Credential}.
- * @hide
  */
-@TestApi
 public final class CredentialDescription implements Parcelable {
 
     /**
@@ -59,8 +56,11 @@ public final class CredentialDescription implements Parcelable {
      *
      * @param type the type of the credential returned.
      * @param flattenedRequestString flattened JSON string that will be matched with requests.
-     * @param credentialEntries a list of {@link  CredentialEntry}s that have been returned
-     *                          to the developer upon credential creation.
+     * @param credentialEntries a list of {@link CredentialEntry}s that are to be shown on the
+     *                          account selector if a credential matches with this description.
+     *                          Each entry contains information to be displayed within an
+     *                          entry on the UI, as well as a {@link android.app.PendingIntent}
+     *                          that will be invoked if the user selects this entry.
      *
      * @throws IllegalArgumentException If type is empty.
      */

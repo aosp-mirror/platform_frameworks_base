@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package android.credentials;
+package com.android.server.credentials;
 
 /**
- * Listener for an registerCredentialDescription request.
- *
- * @hide
+ * Thrown when the calling app is not a Credential Provider.
  */
-interface IRegisterCredentialDescriptionCallback {
-    oneway void onResponse();
-    oneway void onError(String errorCode, String message);
+public class NonCredentialProviderCallerException extends RuntimeException {
+
+    private static final String MESSAGE = " is not an existing Credential Provider.";
+
+    public NonCredentialProviderCallerException(String caller) {
+        super(caller + MESSAGE);
+    }
 }

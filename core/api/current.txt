@@ -13343,10 +13343,22 @@ package android.credentials {
     field @NonNull public static final String TYPE_PASSWORD_CREDENTIAL = "android.credentials.TYPE_PASSWORD_CREDENTIAL";
   }
 
+  public final class CredentialDescription implements android.os.Parcelable {
+    ctor public CredentialDescription(@NonNull String, @NonNull String, @NonNull java.util.List<android.service.credentials.CredentialEntry>);
+    method public int describeContents();
+    method @NonNull public java.util.List<android.service.credentials.CredentialEntry> getCredentialEntries();
+    method @NonNull public String getFlattenedRequestString();
+    method @NonNull public String getType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.CredentialDescription> CREATOR;
+  }
+
   public final class CredentialManager {
     method public void clearCredentialState(@NonNull android.credentials.ClearCredentialStateRequest, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.credentials.ClearCredentialStateException>);
     method public void createCredential(@NonNull android.credentials.CreateCredentialRequest, @NonNull android.app.Activity, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.credentials.CreateCredentialResponse,android.credentials.CreateCredentialException>);
     method public void getCredential(@NonNull android.credentials.GetCredentialRequest, @NonNull android.app.Activity, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.credentials.GetCredentialResponse,android.credentials.GetCredentialException>);
+    method public void registerCredentialDescription(@NonNull android.credentials.RegisterCredentialDescriptionRequest);
+    method public void unregisterCredentialDescription(@NonNull android.credentials.UnregisterCredentialDescriptionRequest);
   }
 
   public class GetCredentialException extends java.lang.Exception {
@@ -13370,6 +13382,7 @@ package android.credentials {
     method public boolean isSystemProviderRequired();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.credentials.GetCredentialOption> CREATOR;
+    field public static final String FLATTENED_REQUEST = "android.credentials.GetCredentialOption.FLATTENED_REQUEST_STRING";
   }
 
   public final class GetCredentialRequest implements android.os.Parcelable {
@@ -13393,6 +13406,24 @@ package android.credentials {
     method @NonNull public android.credentials.Credential getCredential();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.credentials.GetCredentialResponse> CREATOR;
+  }
+
+  public final class RegisterCredentialDescriptionRequest implements android.os.Parcelable {
+    ctor public RegisterCredentialDescriptionRequest(@NonNull android.credentials.CredentialDescription);
+    ctor public RegisterCredentialDescriptionRequest(@NonNull java.util.Set<android.credentials.CredentialDescription>);
+    method public int describeContents();
+    method @NonNull public java.util.Set<android.credentials.CredentialDescription> getCredentialDescriptions();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.RegisterCredentialDescriptionRequest> CREATOR;
+  }
+
+  public final class UnregisterCredentialDescriptionRequest implements android.os.Parcelable {
+    ctor public UnregisterCredentialDescriptionRequest(@NonNull android.credentials.CredentialDescription);
+    ctor public UnregisterCredentialDescriptionRequest(@NonNull java.util.List<android.credentials.CredentialDescription>);
+    method public int describeContents();
+    method @NonNull public java.util.List<android.credentials.CredentialDescription> getCredentialDescriptions();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.UnregisterCredentialDescriptionRequest> CREATOR;
   }
 
 }

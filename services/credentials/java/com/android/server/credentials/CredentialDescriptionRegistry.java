@@ -17,11 +17,8 @@
 package com.android.server.credentials;
 
 import android.credentials.CredentialDescription;
-import android.credentials.IRegisterCredentialDescriptionCallback;
-import android.credentials.IUnregisterCredentialDescriptionCallback;
 import android.credentials.RegisterCredentialDescriptionRequest;
 import android.credentials.UnregisterCredentialDescriptionRequest;
-import android.os.RemoteException;
 import android.util.SparseArray;
 
 import java.util.HashMap;
@@ -61,8 +58,7 @@ public class CredentialDescriptionRegistry {
     /** Handle the given {@link RegisterCredentialDescriptionRequest} by creating
      * the appropriate package name mapping. */
     public void executeRegisterRequest(RegisterCredentialDescriptionRequest request,
-            String callingPackageName,
-            IRegisterCredentialDescriptionCallback callback) {
+            String callingPackageName) {
 
         if (!mCredentialDescriptions.containsKey(callingPackageName)
                 && mCredentialDescriptions.size() <= MAX_ALLOWED_CREDENTIAL_DESCRIPTIONS) {
@@ -71,30 +67,17 @@ public class CredentialDescriptionRegistry {
 
         mCredentialDescriptions.get(callingPackageName)
                 .addAll(request.getCredentialDescriptions());
-
-        try {
-            callback.onResponse();
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
     }
 
     /** Handle the given {@link UnregisterCredentialDescriptionRequest} by creating
      * the appropriate package name mapping. */
     public void executeUnregisterRequest(
             UnregisterCredentialDescriptionRequest request,
-            String callingPackageName,
-            IUnregisterCredentialDescriptionCallback callback) {
+            String callingPackageName) {
 
         if (mCredentialDescriptions.containsKey(callingPackageName)) {
             mCredentialDescriptions.get(callingPackageName)
-                    .remove(request.getCredentialDescription());
-        }
-
-        try {
-            callback.onResponse();
-        } catch (RemoteException e) {
-            e.printStackTrace();
+                    .removeAll(request.getCredentialDescriptions());
         }
     }
 
