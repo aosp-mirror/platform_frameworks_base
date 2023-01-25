@@ -50,6 +50,17 @@
 
   </LinearLayout>
 
+  <TextView
+      android:id="@+id/snackbar"
+      android:visibility="gone"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:paddingStart="16dp"
+      android:gravity="center_vertical"
+      android:textColor="@color/colorControlNormal"
+      android:textSize="@dimen/label_text_size"
+      android:background="@color/snackbar_bg_color"/>
+
   <View
       android:id="@+id/bottom_listDivider"
       android:layout_width="match_parent"
