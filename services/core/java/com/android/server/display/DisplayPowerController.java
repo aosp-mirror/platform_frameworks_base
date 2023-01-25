@@ -885,6 +885,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 updatePowerState();
             }
         });
+
+        // TODO (b/265793751): Re-create BrightnessTracker if we're enetering/exiting concurrent
+        // displays mode
     }
 
     /**
@@ -943,6 +946,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         return mDisplayDeviceConfig.getHdrBrightnessFromSdr(sdrBrightness);
                     }
                 });
+        // TODO (b/265793751): Use the appropriate throttling data if we're in concurrent displays
+        // mode
         mBrightnessThrottler.resetThrottlingData(
                 mDisplayDeviceConfig.getBrightnessThrottlingData(), mUniqueDisplayId);
     }
@@ -2048,6 +2053,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private BrightnessThrottler createBrightnessThrottlerLocked() {
         final DisplayDevice device = mLogicalDisplay.getPrimaryDisplayDeviceLocked();
         final DisplayDeviceConfig ddConfig = device.getDisplayDeviceConfig();
+        // TODO (b/265793751): Use the appropriate throttling data if we're in concurrent displays
+        // mode
         final DisplayDeviceConfig.BrightnessThrottlingData data =
                 ddConfig != null ? ddConfig.getBrightnessThrottlingData() : null;
         return new BrightnessThrottler(mHandler, data,
