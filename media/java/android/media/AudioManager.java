@@ -7688,7 +7688,8 @@ public class AudioManager {
         Objects.requireNonNull(device);
         try {
             if (device.getId() == 0) {
-                throw new IllegalArgumentException("In valid device: " + device);
+                Log.w(TAG, "setCommunicationDevice: device not found: " + device);
+                return false;
             }
             return getService().setCommunicationDevice(mICallBack, device.getId());
         } catch (RemoteException e) {
