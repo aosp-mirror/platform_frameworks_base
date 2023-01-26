@@ -991,15 +991,21 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             }
 
             newDisplay.setPositionLocked(displayLayout.getPosition());
+            setLayoutLimitedRefreshRate(newDisplay, device, displayLayout);
             setEnabledLocked(newDisplay, displayLayout.isEnabled());
             newDisplay.setBrightnessThrottlingDataIdLocked(
                     displayLayout.getBrightnessThrottlingMapId() == null
                             ? DisplayDeviceConfig.DEFAULT_BRIGHTNESS_THROTTLING_DATA_ID
                             : displayLayout.getBrightnessThrottlingMapId());
         }
-
     }
 
+    private void setLayoutLimitedRefreshRate(@NonNull LogicalDisplay logicalDisplay,
+            @NonNull DisplayDevice device, @NonNull Layout.Display display) {
+        DisplayDeviceConfig config = device.getDisplayDeviceConfig();
+        DisplayInfo info = logicalDisplay.getDisplayInfoLocked();
+        info.layoutLimitedRefreshRate = config.getRefreshRange(display.getRefreshRateZoneId());
+    }
 
     /**
      * Creates a new logical display for the specified device and display Id and adds it to the list

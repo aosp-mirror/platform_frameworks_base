@@ -337,6 +337,9 @@ public final class DisplayInfo implements Parcelable {
     @Nullable
     public DisplayShape displayShape;
 
+    @Nullable
+    public SurfaceControl.RefreshRateRange layoutLimitedRefreshRate;
+
     public static final @android.annotation.NonNull Creator<DisplayInfo> CREATOR = new Creator<DisplayInfo>() {
         @Override
         public DisplayInfo createFromParcel(Parcel source) {
@@ -411,7 +414,8 @@ public final class DisplayInfo implements Parcelable {
                 && brightnessDefault == other.brightnessDefault
                 && Objects.equals(roundedCorners, other.roundedCorners)
                 && installOrientation == other.installOrientation
-                && Objects.equals(displayShape, other.displayShape);
+                && Objects.equals(displayShape, other.displayShape)
+                && Objects.equals(layoutLimitedRefreshRate, other.layoutLimitedRefreshRate);
     }
 
     @Override
@@ -466,6 +470,7 @@ public final class DisplayInfo implements Parcelable {
         roundedCorners = other.roundedCorners;
         installOrientation = other.installOrientation;
         displayShape = other.displayShape;
+        layoutLimitedRefreshRate = other.layoutLimitedRefreshRate;
     }
 
     public void readFromParcel(Parcel source) {
@@ -526,6 +531,7 @@ public final class DisplayInfo implements Parcelable {
         }
         installOrientation = source.readInt();
         displayShape = source.readTypedObject(DisplayShape.CREATOR);
+        layoutLimitedRefreshRate = source.readTypedObject(SurfaceControl.RefreshRateRange.CREATOR);
     }
 
     @Override
@@ -584,6 +590,7 @@ public final class DisplayInfo implements Parcelable {
         }
         dest.writeInt(installOrientation);
         dest.writeTypedObject(displayShape, flags);
+        dest.writeTypedObject(layoutLimitedRefreshRate, flags);
     }
 
     @Override
@@ -843,6 +850,8 @@ public final class DisplayInfo implements Parcelable {
         sb.append(brightnessDefault);
         sb.append(", installOrientation ");
         sb.append(Surface.rotationToString(installOrientation));
+        sb.append(", layoutLimitedRefreshRate ");
+        sb.append(layoutLimitedRefreshRate);
         sb.append("}");
         return sb.toString();
     }

@@ -133,6 +133,7 @@ class DeviceStateToLayoutMap {
                     } else {
                         display.setPosition(POSITION_UNKNOWN);
                     }
+                    display.setRefreshRateZoneId(d.getRefreshRateZoneId());
                 }
             }
         } catch (IOException | DatatypeConfigurationException | XmlPullParserException e) {

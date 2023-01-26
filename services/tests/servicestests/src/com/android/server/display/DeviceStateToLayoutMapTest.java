@@ -119,6 +119,24 @@ public class DeviceStateToLayoutMapTest {
         assertEquals(Layout.Display.POSITION_REAR, configLayout.getAt(1).getPosition());
     }
 
+    @Test
+    public void testRefreshRateZoneId() {
+        Layout configLayout = mDeviceStateToLayoutMap.get(3);
+
+        Layout testLayout = new Layout();
+        Layout.Display display1 = testLayout.createDisplayLocked(
+                DisplayAddress.fromPhysicalDisplayId(345L), /* isDefault= */ true,
+                /* isEnabled= */ true, mDisplayIdProducerMock,
+                /* brightnessThrottlingMapId= */ null);
+        display1.setRefreshRateZoneId("test1");
+        testLayout.createDisplayLocked(
+                DisplayAddress.fromPhysicalDisplayId(678L), /* isDefault= */ false,
+                /* isEnabled= */ true, mDisplayIdProducerMock,
+                /* brightnessThrottlingMapId= */ null);
+
+        assertEquals(testLayout, configLayout);
+    }
+
     ////////////////////
     // Helper Methods //
     ////////////////////
@@ -164,6 +182,17 @@ public class DeviceStateToLayoutMapTest {
                 +        "<address>678</address>\n"
                 +        "<position>rear</position>\n"
                 +        "<brightnessThrottlingMapId>concurrent</brightnessThrottlingMapId>\n"
+                +      "</display>\n"
+                +    "</layout>\n"
+
+                +    "<layout>\n"
+                +      "<state>3</state> \n"
+                +      "<display enabled=\"true\" defaultDisplay=\"true\" "
+                +                                               "refreshRateZoneId=\"test1\">\n"
+                +        "<address>345</address>\n"
+                +      "</display>\n"
+                +      "<display enabled=\"true\">\n"
+                +        "<address>678</address>\n"
                 +      "</display>\n"
                 +    "</layout>\n"
                 +  "</layouts>\n";

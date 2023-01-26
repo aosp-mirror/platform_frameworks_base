@@ -55,5 +55,6 @@
         </xs:sequence>
         <xs:attribute name="enabled" type="xs:boolean" use="optional" />
         <xs:attribute name="defaultDisplay" type="xs:boolean" use="optional" />
+        <xs:attribute name="refreshRateZoneId" type="xs:string" use="optional" />
     </xs:complexType>
 </xs:schema>
