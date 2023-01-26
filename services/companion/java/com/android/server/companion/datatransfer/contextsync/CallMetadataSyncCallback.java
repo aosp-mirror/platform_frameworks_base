@@ -22,4 +22,6 @@ public abstract class CallMetadataSyncCallback {
     abstract void processCallControlAction(int crossDeviceCallId, int callControlAction);
 
     abstract void requestCrossDeviceSync(int userId);
+
+    abstract void updateStatus(int userId, boolean shouldSyncCallMetadata);
 }
