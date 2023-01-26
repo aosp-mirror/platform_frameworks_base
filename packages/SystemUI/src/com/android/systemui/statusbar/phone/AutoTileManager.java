@@ -279,7 +279,8 @@ public class AutoTileManager implements UserAwareController {
                 public void onManagedProfileChanged() {
                     if (mManagedProfileController.hasActiveProfile()) {
                         if (mAutoTracker.isAdded(WORK)) return;
-                        mHost.addTile(WORK);
+                        final int position = mAutoTracker.getRestoredTilePosition(WORK);
+                        mHost.addTile(WORK, position);
                         mAutoTracker.setTileAdded(WORK);
                     } else {
                         if (!mAutoTracker.isAdded(WORK)) return;

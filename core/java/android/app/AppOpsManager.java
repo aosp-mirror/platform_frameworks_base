@@ -1380,16 +1380,16 @@ public class AppOpsManager {
             AppProtoEnums.APP_OP_SYSTEM_EXEMPT_FROM_APP_STANDBY;
 
     /**
-     * Prevent an app from being placed into forced app standby.
-     * {@link ActivityManager#isBackgroundRestricted()}
-     * {@link #OP_RUN_ANY_IN_BACKGROUND}
+     * Prevent an app from dismissible notifications. Starting from Android U, notifications with
+     * the ongoing parameter can be dismissed by a user on an unlocked device. An app with
+     * this appop will be exempt and cannot be dismissed by a user.
      *
      * Only to be used by the system.
      *
      * @hide
      */
-    public static final int OP_SYSTEM_EXEMPT_FROM_FORCED_APP_STANDBY =
-            AppProtoEnums.APP_OP_SYSTEM_EXEMPT_FROM_FORCED_APP_STANDBY;
+    public static final int OP_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS =
+            AppProtoEnums.APP_OP_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS;
 
     /**
      * An app op for reading/writing health connect data.
@@ -1448,9 +1448,13 @@ public class AppOpsManager {
     public static final int OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD =
             AppProtoEnums.APP_OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD;
 
+    /** @hide Access to wrist temperature sensors. */
+    public static final int OP_BODY_SENSORS_WRIST_TEMPERATURE =
+            AppProtoEnums.APP_OP_BODY_SENSORS_WRIST_TEMPERATURE;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 132;
+    public static final int _NUM_OP = 133;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1969,16 +1973,17 @@ public class AppOpsManager {
             "android:system_exempt_from_app_standby";
 
     /**
-     * Prevent an app from being placed into forced app standby.
-     * {@link ActivityManager#isBackgroundRestricted()}
-     * {@link #OP_RUN_ANY_IN_BACKGROUND}
+     * Allow an application to create non-dismissible notifications. Starting from Android U,
+     * notifications with the ongoing parameter can be dismissed by a user on an unlocked device
+     * unless the application that created the notification is exempt.
+     * An application with this appop will be made exempt.
      *
      * Only to be used by the system.
      *
      * @hide
      */
-    public static final String OPSTR_SYSTEM_EXEMPT_FROM_FORCED_APP_STANDBY =
-            "android:system_exempt_from_forced_app_standby";
+    public static final String OPSTR_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS =
+            "android:system_exempt_from_dismissible_notifications";
 
     /**
      * Start a foreground service with the type "specialUse".
@@ -2029,6 +2034,10 @@ public class AppOpsManager {
     @SystemApi
     public static final String OPSTR_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD =
             "android:capture_consentless_bugreport_on_userdebug_build";
+
+    /** Access to wrist temperature body sensors. */
+    public static final String OPSTR_BODY_SENSORS_WRIST_TEMPERATURE =
+            "android:body_sensors_wrist_temperature";
 
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
@@ -2128,6 +2137,7 @@ public class AppOpsManager {
             OP_READ_MEDIA_VISUAL_USER_SELECTED,
             OP_FOREGROUND_SERVICE_SPECIAL_USE,
             OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
+            OP_BODY_SENSORS_WRIST_TEMPERATURE,
     };
 
     static final AppOpInfo[] sAppOpInfos = new AppOpInfo[]{
@@ -2517,9 +2527,9 @@ public class AppOpsManager {
         new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_APP_STANDBY,
                 OPSTR_SYSTEM_EXEMPT_FROM_APP_STANDBY,
                 "SYSTEM_EXEMPT_FROM_APP_STANDBY").build(),
-        new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_FORCED_APP_STANDBY,
-                OPSTR_SYSTEM_EXEMPT_FROM_FORCED_APP_STANDBY,
-                "SYSTEM_EXEMPT_FROM_FORCED_APP_STANDBY").build(),
+        new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS,
+                OPSTR_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS,
+                "SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS").build(),
         new AppOpInfo.Builder(OP_READ_WRITE_HEALTH_DATA, OPSTR_READ_WRITE_HEALTH_DATA,
                 "READ_WRITE_HEALTH_DATA").setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
         new AppOpInfo.Builder(OP_FOREGROUND_SERVICE_SPECIAL_USE,
@@ -2541,7 +2551,12 @@ public class AppOpsManager {
                 OPSTR_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
                 "CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD")
                 .setPermission(Manifest.permission.CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD)
-                .build()
+                .build(),
+        new AppOpInfo.Builder(OP_BODY_SENSORS_WRIST_TEMPERATURE,
+                OPSTR_BODY_SENSORS_WRIST_TEMPERATURE,
+                "BODY_SENSORS_WRIST_TEMPERATURE")
+                .setPermission(Manifest.permission.BODY_SENSORS_WRIST_TEMPERATURE)
+                .setDefaultMode(AppOpsManager.MODE_ALLOWED).build()
     };
 
     // The number of longs needed to form a full bitmask of app ops

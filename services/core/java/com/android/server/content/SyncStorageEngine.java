@@ -172,6 +172,8 @@ public class SyncStorageEngine {
 
     private volatile boolean mIsClockValid;
 
+    private volatile boolean mIsJobNamespaceMigrated;
+
     static {
         sAuthorityRenames = new HashMap<String, String>();
         sAuthorityRenames.put("contacts", "com.android.contacts");
@@ -834,6 +836,20 @@ public class SyncStorageEngine {
                     ContentResolver.SYNC_EXEMPTION_NONE, callingUid, callingPid);
         }
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS, target);
+    }
+
+    void setJobNamespaceMigrated(boolean migrated) {
+        if (mIsJobNamespaceMigrated == migrated) {
+            return;
+        }
+        mIsJobNamespaceMigrated = migrated;
+        // This isn't urgent enough to write synchronously. Post it to the handler thread so
+        // SyncManager can move on with whatever it was doing.
+        mHandler.sendEmptyMessageDelayed(MSG_WRITE_STATUS, WRITE_STATUS_DELAY);
+    }
+
+    boolean isJobNamespaceMigrated() {
+        return mIsJobNamespaceMigrated;
     }
 
     public Pair<Long, Long> getBackoff(EndPoint info) {
@@ -1585,7 +1601,6 @@ public class SyncStorageEngine {
         }
     }
 
-
     /**
      * Remove an authority associated with a provider. Needs to be a standalone function for
      * backward compatibility.
@@ -2101,6 +2116,10 @@ public class SyncStorageEngine {
                         mSyncStatus.put(status.authorityId, status);
                     }
                     break;
+                case (int) SyncStatusProto.IS_JOB_NAMESPACE_MIGRATED:
+                    mIsJobNamespaceMigrated =
+                            proto.readBoolean(SyncStatusProto.IS_JOB_NAMESPACE_MIGRATED);
+                    break;
                 case ProtoInputStream.NO_MORE_FIELDS:
                     return;
             }
@@ -2368,6 +2387,9 @@ public class SyncStorageEngine {
             }
             proto.end(token);
         }
+
+        proto.write(SyncStatusProto.IS_JOB_NAMESPACE_MIGRATED, mIsJobNamespaceMigrated);
+
         proto.flush();
     }
 

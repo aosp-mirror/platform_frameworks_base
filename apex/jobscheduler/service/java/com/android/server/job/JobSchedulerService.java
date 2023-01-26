@@ -43,6 +43,7 @@ import android.app.job.JobService;
 import android.app.job.JobSnapshot;
 import android.app.job.JobWorkItem;
 import android.app.job.UserVisibleJobSummary;
+import android.app.tare.EconomyManager;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.compat.annotation.ChangeId;
@@ -417,7 +418,8 @@ public class JobSchedulerService extends com.android.server.SystemService
             // Load all the constants.
             synchronized (mLock) {
                 mConstants.updateTareSettingsLocked(
-                        economyManagerInternal.isEnabled(JobSchedulerEconomicPolicy.POLICY_JOB));
+                        economyManagerInternal.getEnabledMode(
+                                JobSchedulerEconomicPolicy.POLICY_JOB));
             }
             onPropertiesChanged(DeviceConfig.getProperties(DeviceConfig.NAMESPACE_JOB_SCHEDULER));
         }
@@ -514,8 +516,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         @Override
-        public void onTareEnabledStateChanged(boolean isTareEnabled) {
-            if (mConstants.updateTareSettingsLocked(isTareEnabled)) {
+        public void onTareEnabledModeChanged(@EconomyManager.EnabledMode int enabledMode) {
+            if (mConstants.updateTareSettingsLocked(enabledMode)) {
                 for (int controller = 0; controller < mControllers.size(); controller++) {
                     final StateController sc = mControllers.get(controller);
                     sc.onConstantsUpdatedLocked();
@@ -962,10 +964,11 @@ public class JobSchedulerService extends com.android.server.SystemService
                                     DEFAULT_RUNTIME_USER_INITIATED_DATA_TRANSFER_LIMIT_MS)));
         }
 
-        private boolean updateTareSettingsLocked(boolean isTareEnabled) {
+        private boolean updateTareSettingsLocked(@EconomyManager.EnabledMode int enabledMode) {
             boolean changed = false;
-            if (USE_TARE_POLICY != isTareEnabled) {
-                USE_TARE_POLICY = isTareEnabled;
+            final boolean useTare = enabledMode == EconomyManager.ENABLED_MODE_ON;
+            if (USE_TARE_POLICY != useTare) {
+                USE_TARE_POLICY = useTare;
                 changed = true;
             }
             return changed;
@@ -3474,23 +3477,6 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     final class LocalService implements JobSchedulerInternal {
-
-        /**
-         * Returns a list of all pending jobs. A running job is not considered pending. Periodic
-         * jobs are always considered pending.
-         */
-        @Override
-        public List<JobInfo> getSystemScheduledPendingJobs() {
-            synchronized (mLock) {
-                final List<JobInfo> pendingJobs = new ArrayList<JobInfo>();
-                mJobs.forEachJob(Process.SYSTEM_UID, (job) -> {
-                    if (job.getJob().isPeriodic() || !mConcurrencyManager.isJobRunningLocked(job)) {
-                        pendingJobs.add(job.getJob());
-                    }
-                });
-                return pendingJobs;
-            }
-        }
 
         @Override
         public void cancelJobsForUid(int uid, boolean includeProxiedJobs,

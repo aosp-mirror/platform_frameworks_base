@@ -140,12 +140,16 @@ import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
+import com.android.systemui.keyguard.ui.binder.KeyguardLongPressViewBinder;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel;
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToOccludedTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel;
@@ -204,7 +208,6 @@ import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaViewController;
-import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardClockPositionAlgorithm;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
@@ -243,6 +246,7 @@ import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
+import kotlin.Unit;
 import kotlinx.coroutines.CoroutineDispatcher;
 
 @CentralSurfacesComponent.CentralSurfacesScope
@@ -698,6 +702,7 @@ public final class NotificationPanelViewController implements Dumpable {
     private LockscreenToOccludedTransitionViewModel mLockscreenToOccludedTransitionViewModel;
 
     private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
+    private final KeyguardInteractor mKeyguardInteractor;
     private CoroutineDispatcher mMainDispatcher;
     private boolean mIsOcclusionTransitionRunning = false;
     private int mDreamingToLockscreenTransitionTranslationY;
@@ -827,7 +832,9 @@ public final class NotificationPanelViewController implements Dumpable {
             LockscreenToOccludedTransitionViewModel lockscreenToOccludedTransitionViewModel,
             @Main CoroutineDispatcher mainDispatcher,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            KeyguardLongPressViewModel keyguardLongPressViewModel,
+            KeyguardInteractor keyguardInteractor) {
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
             public void onKeyguardFadingAwayChanged() {
@@ -848,6 +855,7 @@ public final class NotificationPanelViewController implements Dumpable {
         mGoneToDreamingTransitionViewModel = goneToDreamingTransitionViewModel;
         mLockscreenToOccludedTransitionViewModel = lockscreenToOccludedTransitionViewModel;
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
+        mKeyguardInteractor = keyguardInteractor;
         mView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View v) {
@@ -1000,6 +1008,14 @@ public final class NotificationPanelViewController implements Dumpable {
         updateUserSwitcherFlags();
         mKeyguardBottomAreaViewModel = keyguardBottomAreaViewModel;
         mKeyguardBottomAreaInteractor = keyguardBottomAreaInteractor;
+        KeyguardLongPressViewBinder.bind(
+                mView.requireViewById(R.id.keyguard_long_press),
+                keyguardLongPressViewModel,
+                () -> {
+                    onEmptySpaceClick();
+                    return Unit.INSTANCE;
+                },
+                mFalsingManager);
         onFinishInflate();
         keyguardUnlockAnimationController.addKeyguardUnlockAnimationListener(
                 new KeyguardUnlockAnimationController.KeyguardUnlockAnimationListener() {
@@ -2157,6 +2173,7 @@ public final class NotificationPanelViewController implements Dumpable {
         }
         ValueAnimator animator = createHeightAnimator(target, overshootAmount);
         if (expand) {
+            maybeVibrateOnOpening(true /* openingWithTouch */);
             if (expandBecauseOfFalsing && vel < 0) {
                 vel = 0;
             }
@@ -2167,6 +2184,7 @@ public final class NotificationPanelViewController implements Dumpable {
                 animator.setDuration(SHADE_OPEN_SPRING_OUT_DURATION);
             }
         } else {
+            mHasVibratedOnOpen = false;
             if (shouldUseDismissingAnimation()) {
                 if (vel == 0) {
                     animator.setInterpolator(Interpolators.PANEL_CLOSE_ACCELERATED);
@@ -2516,7 +2534,7 @@ public final class NotificationPanelViewController implements Dumpable {
         if (!mSplitShadeEnabled
                 && computeQsExpansionFraction() <= 0.01 && getExpandedFraction() < 1.0) {
             mShadeLog.logMotionEvent(event,
-                    "handleQsTouch: QQS touched while shade collapsing, QS tracking disabled");
+                    "handleQsTouch: shade touched while collapsing, QS tracking disabled");
             mQsTracking = false;
         }
         if (!mQsExpandImmediate && mQsTracking) {
@@ -3129,6 +3147,7 @@ public final class NotificationPanelViewController implements Dumpable {
                     mQsClipBottom,
                     radius,
                     qsVisible && !mSplitShadeEnabled);
+            mKeyguardInteractor.setQuickSettingsVisible(mQsVisible);
         }
         // The padding on this area is large enough that we can use a cheaper clipping strategy
         mKeyguardStatusViewController.setClipBounds(clipStatusView ? mLastQsClipBounds : null);
@@ -3767,7 +3786,8 @@ public final class NotificationPanelViewController implements Dumpable {
         //   change due to "unlock hint animation." In this case, fading out the bottom area
         //   would also hide the message that says "swipe to unlock," we don't want to do that.
         float expansionAlpha = MathUtils.map(
-                isUnlockHintRunning() ? 0 : KeyguardBouncer.ALPHA_EXPANSION_THRESHOLD, 1f, 0f, 1f,
+                isUnlockHintRunning() ? 0 : KeyguardBouncerConstants.ALPHA_EXPANSION_THRESHOLD, 1f,
+                0f, 1f,
                 getExpandedFraction());
         float alpha = Math.min(expansionAlpha, 1 - computeQsExpansionFraction());
         alpha *= mBottomAreaShadeAlpha;
@@ -6375,7 +6395,7 @@ public final class NotificationPanelViewController implements Dumpable {
                         mShadeLog.logHasVibrated(mHasVibratedOnOpen, mExpandedFraction);
                     }
                     addMovement(event);
-                    if (!isFullyCollapsed()) {
+                    if (!isFullyCollapsed() && !isOnKeyguard()) {
                         maybeVibrateOnOpening(true /* openingWithTouch */);
                     }
                     float h = y - mInitialExpandY;

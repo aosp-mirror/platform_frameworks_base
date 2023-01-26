@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.flags.Flags.MODERN_BOUNCER;
 import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN;
 import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE;
 
@@ -109,7 +108,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock private View mNotificationContainer;
     @Mock private KeyguardBypassController mBypassController;
-    @Mock private KeyguardBouncer.Factory mKeyguardBouncerFactory;
     @Mock private KeyguardMessageAreaController.Factory mKeyguardMessageAreaFactory;
     @Mock private KeyguardMessageAreaController mKeyguardMessageAreaController;
     @Mock private KeyguardMessageArea mKeyguardMessageArea;
@@ -153,8 +151,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 .isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_BOUNCER_ANIM))
                 .thenReturn(true);
 
-        when(mFeatureFlags.isEnabled(MODERN_BOUNCER)).thenReturn(true);
-
         mStatusBarKeyguardViewManager =
                 new StatusBarKeyguardViewManager(
                         getContext(),
@@ -169,7 +165,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mock(NotificationShadeWindowController.class),
                         mKeyguardStateController,
                         mock(NotificationMediaManager.class),
-                        mKeyguardBouncerFactory,
                         mKeyguardMessageAreaFactory,
                         Optional.of(mSysUiUnfoldComponent),
                         () -> mShadeController,
@@ -660,7 +655,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mock(NotificationShadeWindowController.class),
                         mKeyguardStateController,
                         mock(NotificationMediaManager.class),
-                        mKeyguardBouncerFactory,
                         mKeyguardMessageAreaFactory,
                         Optional.of(mSysUiUnfoldComponent),
                         () -> mShadeController,

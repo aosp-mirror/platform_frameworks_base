@@ -77,6 +77,7 @@ import android.app.IAlarmManager;
 import android.app.PendingIntent;
 import android.app.compat.CompatChanges;
 import android.app.role.RoleManager;
+import android.app.tare.EconomyManager;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
@@ -852,7 +853,7 @@ public class AlarmManagerService extends SystemService {
         public boolean KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED =
                 DEFAULT_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED;
 
-        public boolean USE_TARE_POLICY = Settings.Global.DEFAULT_ENABLE_TARE == 1;
+        public int USE_TARE_POLICY = Settings.Global.DEFAULT_ENABLE_TARE;
 
         /**
          * The amount of temporary reserve quota to give apps on receiving the
@@ -892,7 +893,7 @@ public class AlarmManagerService extends SystemService {
                     AlarmManagerEconomicPolicy.POLICY_ALARM);
             onPropertiesChanged(DeviceConfig.getProperties(DeviceConfig.NAMESPACE_ALARM_MANAGER));
             updateTareSettings(
-                    economyManagerInternal.isEnabled(AlarmManagerEconomicPolicy.POLICY_ALARM));
+                    economyManagerInternal.getEnabledMode(AlarmManagerEconomicPolicy.POLICY_ALARM));
         }
 
         public void updateAllowWhileIdleWhitelistDurationLocked() {
@@ -1065,18 +1066,19 @@ public class AlarmManagerService extends SystemService {
         }
 
         @Override
-        public void onTareEnabledStateChanged(boolean isTareEnabled) {
-            updateTareSettings(isTareEnabled);
+        public void onTareEnabledModeChanged(@EconomyManager.EnabledMode int enabledMode) {
+            updateTareSettings(enabledMode);
         }
 
-        private void updateTareSettings(boolean isTareEnabled) {
+        private void updateTareSettings(int enabledMode) {
             synchronized (mLock) {
-                if (USE_TARE_POLICY != isTareEnabled) {
-                    USE_TARE_POLICY = isTareEnabled;
+                if (USE_TARE_POLICY != enabledMode) {
+                    USE_TARE_POLICY = enabledMode;
                     final boolean changed = mAlarmStore.updateAlarmDeliveries(alarm -> {
                         final boolean standbyChanged = adjustDeliveryTimeBasedOnBucketLocked(alarm);
                         final boolean tareChanged = adjustDeliveryTimeBasedOnTareLocked(alarm);
-                        if (USE_TARE_POLICY) {
+                        if (USE_TARE_POLICY == EconomyManager.ENABLED_MODE_ON) {
+                            // Only register listeners if we're going to be acting on the policy.
                             registerTareListener(alarm);
                         } else {
                             mEconomyManagerInternal.unregisterAffordabilityChangeListener(
@@ -1086,7 +1088,7 @@ public class AlarmManagerService extends SystemService {
                         }
                         return standbyChanged || tareChanged;
                     });
-                    if (!USE_TARE_POLICY) {
+                    if (USE_TARE_POLICY != EconomyManager.ENABLED_MODE_ON) {
                         // Remove the cached values so we don't accidentally use them when TARE is
                         // re-enabled.
                         mAffordabilityCache.clear();
@@ -2526,7 +2528,8 @@ public class AlarmManagerService extends SystemService {
      */
     private boolean adjustDeliveryTimeBasedOnBucketLocked(Alarm alarm) {
         final long nowElapsed = mInjector.getElapsedRealtimeMillis();
-        if (mConstants.USE_TARE_POLICY || isExemptFromAppStandby(alarm) || mAppStandbyParole) {
+        if (mConstants.USE_TARE_POLICY == EconomyManager.ENABLED_MODE_ON
+                || isExemptFromAppStandby(alarm) || mAppStandbyParole) {
             return alarm.setPolicyElapsed(APP_STANDBY_POLICY_INDEX, nowElapsed);
         }
 
@@ -2586,7 +2589,7 @@ public class AlarmManagerService extends SystemService {
      */
     private boolean adjustDeliveryTimeBasedOnTareLocked(Alarm alarm) {
         final long nowElapsed = mInjector.getElapsedRealtimeMillis();
-        if (!mConstants.USE_TARE_POLICY
+        if (mConstants.USE_TARE_POLICY != EconomyManager.ENABLED_MODE_ON
                 || isExemptFromTare(alarm) || hasEnoughWealthLocked(alarm)) {
             return alarm.setPolicyElapsed(TARE_POLICY_INDEX, nowElapsed);
         }
@@ -2596,7 +2599,8 @@ public class AlarmManagerService extends SystemService {
     }
 
     private void registerTareListener(Alarm alarm) {
-        if (!mConstants.USE_TARE_POLICY) {
+        if (mConstants.USE_TARE_POLICY != EconomyManager.ENABLED_MODE_ON) {
+            // Only register listeners if we're going to be acting on the policy.
             return;
         }
         mEconomyManagerInternal.registerAffordabilityChangeListener(
@@ -2607,7 +2611,7 @@ public class AlarmManagerService extends SystemService {
     /** Unregister the TARE listener associated with the alarm if it's no longer needed. */
     @GuardedBy("mLock")
     private void maybeUnregisterTareListenerLocked(Alarm alarm) {
-        if (!mConstants.USE_TARE_POLICY) {
+        if (mConstants.USE_TARE_POLICY != EconomyManager.ENABLED_MODE_ON) {
             return;
         }
         final EconomyManagerInternal.ActionBill bill = TareBill.getAppropriateBill(alarm);
@@ -3126,7 +3130,7 @@ public class AlarmManagerService extends SystemService {
             mConstants.dump(pw);
             pw.println();
 
-            if (mConstants.USE_TARE_POLICY) {
+            if (mConstants.USE_TARE_POLICY == EconomyManager.ENABLED_MODE_ON) {
                 pw.println("TARE details:");
                 pw.increaseIndent();
 
@@ -4500,7 +4504,8 @@ public class AlarmManagerService extends SystemService {
     }
 
     private void reportAlarmEventToTare(Alarm alarm) {
-        if (!mConstants.USE_TARE_POLICY) {
+        // Don't bother reporting events if TARE is completely off.
+        if (mConstants.USE_TARE_POLICY == EconomyManager.ENABLED_MODE_OFF) {
             return;
         }
         final boolean allowWhileIdle =
@@ -4805,7 +4810,7 @@ public class AlarmManagerService extends SystemService {
                                 if (a.wakeup) {
                                     wakeupUids.add(a.uid);
                                 }
-                                if (mConstants.USE_TARE_POLICY) {
+                                if (mConstants.USE_TARE_POLICY == EconomyManager.ENABLED_MODE_ON) {
                                     if (!isExemptFromTare(a)) {
                                         triggerPackages.add(UserPackage.of(
                                                 UserHandle.getUserId(a.creatorUid),
@@ -4823,7 +4828,7 @@ public class AlarmManagerService extends SystemService {
                             }
                             deliverAlarmsLocked(triggerList, nowELAPSED);
                             mTemporaryQuotaReserve.cleanUpExpiredQuotas(nowELAPSED);
-                            if (mConstants.USE_TARE_POLICY) {
+                            if (mConstants.USE_TARE_POLICY == EconomyManager.ENABLED_MODE_ON) {
                                 reorderAlarmsBasedOnTare(triggerPackages);
                             } else {
                                 reorderAlarmsBasedOnStandbyBuckets(triggerPackages);

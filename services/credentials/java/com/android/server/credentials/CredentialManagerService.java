@@ -28,6 +28,7 @@ import android.content.pm.PackageManager;
 import android.credentials.ClearCredentialStateRequest;
 import android.credentials.CreateCredentialException;
 import android.credentials.CreateCredentialRequest;
+import android.credentials.CredentialDescription;
 import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialOption;
 import android.credentials.GetCredentialRequest;
@@ -36,9 +37,7 @@ import android.credentials.ICreateCredentialCallback;
 import android.credentials.ICredentialManager;
 import android.credentials.IGetCredentialCallback;
 import android.credentials.IListEnabledProvidersCallback;
-import android.credentials.IRegisterCredentialDescriptionCallback;
 import android.credentials.ISetEnabledProvidersCallback;
-import android.credentials.IUnregisterCredentialDescriptionCallback;
 import android.credentials.ListEnabledProvidersResponse;
 import android.credentials.RegisterCredentialDescriptionRequest;
 import android.credentials.UnregisterCredentialDescriptionRequest;
@@ -274,8 +273,8 @@ public final class CredentialManagerService
                 request.getGetCredentialOptions().stream().map(
                         getCredentialOption -> getCredentialOption
                                         .getCredentialRetrievalData()
-                                        .getString(RegisterCredentialDescriptionRequest
-                                                .FLATTENED_REQUEST_STRING_KEY))
+                                        .getString(GetCredentialOption
+                                                .FLATTENED_REQUEST))
                         .collect(Collectors.toSet());
 
         // All requested credential descriptions based on the given request.
@@ -543,12 +542,10 @@ public final class CredentialManagerService
         }
 
         @Override
-        public ICancellationSignal registerCredentialDescription(
-                RegisterCredentialDescriptionRequest request,
-                IRegisterCredentialDescriptionCallback callback, String callingPackage) {
+        public void registerCredentialDescription(
+                RegisterCredentialDescriptionRequest request, String callingPackage)
+                throws IllegalArgumentException , NonCredentialProviderCallerException {
             Log.i(TAG, "registerCredentialDescription");
-            ICancellationSignal cancelTransport = CancellationSignal.createTransport();
-
 
             List<CredentialProviderInfo> services =
                     CredentialProviderInfo.getAvailableServices(mContext,
@@ -557,31 +554,37 @@ public final class CredentialManagerService
             List<String> providers = services.stream()
                     .map(credentialProviderInfo
                             -> credentialProviderInfo.getServiceInfo().packageName).toList();
+
             if (!providers.contains(callingPackage)) {
-                try {
-                    callback.onError("UNKNOWN",
-                            "Not an existing provider.");
-                } catch (RemoteException e) {
-                    Log.i(
-                            TAG,
-                            "Issue invoking onError on IRegisterCredentialDescriptionCallback "
-                                    + "callback: "
-                                    + e.getMessage());
-                }
+                throw new NonCredentialProviderCallerException(callingPackage);
+            }
+
+            List<CredentialProviderInfo> matchingService = services.stream().filter(
+                    credentialProviderInfo ->
+                            credentialProviderInfo.getServiceInfo()
+                                    .packageName.equals(callingPackage)).toList();
+
+            CredentialProviderInfo credentialProviderInfo = matchingService.get(0);
+
+            Set<String> supportedTypes = request.getCredentialDescriptions()
+                    .stream().map(CredentialDescription::getType).filter(
+                            credentialProviderInfo::hasCapability).collect(Collectors.toSet());
+
+            if (supportedTypes.size() != request.getCredentialDescriptions().size()) {
+                throw new IllegalArgumentException("CredentialProvider does not support one or more"
+                        + "of the registered types. Check your XML entry.");
             }
 
             CredentialDescriptionRegistry session = CredentialDescriptionRegistry
                     .forUser(UserHandle.getCallingUserId());
 
-            session.executeRegisterRequest(request, callingPackage, callback);
-
-            return cancelTransport;
+            session.executeRegisterRequest(request, callingPackage);
         }
 
         @Override
-        public ICancellationSignal unRegisterCredentialDescription(
-                UnregisterCredentialDescriptionRequest request,
-                IUnregisterCredentialDescriptionCallback callback, String callingPackage) {
+        public void unregisterCredentialDescription(
+                UnregisterCredentialDescriptionRequest request, String callingPackage)
+                throws IllegalArgumentException {
             Log.i(TAG, "registerCredentialDescription");
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();
 
@@ -594,24 +597,13 @@ public final class CredentialManagerService
                             -> credentialProviderInfo.getServiceInfo().packageName).toList();
 
             if (!providers.contains(callingPackage)) {
-                try {
-                    callback.onError("UNKNOWN",
-                            "Not an existing provider.");
-                } catch (RemoteException e) {
-                    Log.i(
-                            TAG,
-                            "Issue invoking onError on IRegisterCredentialDescriptionCallback "
-                                    + "callback: "
-                                    + e.getMessage());
-                }
+                throw new NonCredentialProviderCallerException(callingPackage);
             }
 
             CredentialDescriptionRegistry session = CredentialDescriptionRegistry
                     .forUser(UserHandle.getCallingUserId());
 
-            session.executeUnregisterRequest(request, callingPackage, callback);
-
-            return cancelTransport;
+            session.executeUnregisterRequest(request, callingPackage);
         }
     }
 }

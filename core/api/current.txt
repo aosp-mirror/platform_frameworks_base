@@ -64,6 +64,8 @@ package android {
     field public static final String BLUETOOTH_SCAN = "android.permission.BLUETOOTH_SCAN";
     field public static final String BODY_SENSORS = "android.permission.BODY_SENSORS";
     field public static final String BODY_SENSORS_BACKGROUND = "android.permission.BODY_SENSORS_BACKGROUND";
+    field public static final String BODY_SENSORS_WRIST_TEMPERATURE = "android.permission.BODY_SENSORS_WRIST_TEMPERATURE";
+    field public static final String BODY_SENSORS_WRIST_TEMPERATURE_BACKGROUND = "android.permission.BODY_SENSORS_WRIST_TEMPERATURE_BACKGROUND";
     field public static final String BROADCAST_PACKAGE_REMOVED = "android.permission.BROADCAST_PACKAGE_REMOVED";
     field public static final String BROADCAST_SMS = "android.permission.BROADCAST_SMS";
     field public static final String BROADCAST_STICKY = "android.permission.BROADCAST_STICKY";
@@ -4845,6 +4847,7 @@ package android.app {
     field public static final String OPSTR_ADD_VOICEMAIL = "android:add_voicemail";
     field public static final String OPSTR_ANSWER_PHONE_CALLS = "android:answer_phone_calls";
     field public static final String OPSTR_BODY_SENSORS = "android:body_sensors";
+    field public static final String OPSTR_BODY_SENSORS_WRIST_TEMPERATURE = "android:body_sensors_wrist_temperature";
     field public static final String OPSTR_CALL_PHONE = "android:call_phone";
     field public static final String OPSTR_CAMERA = "android:camera";
     field public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -6736,6 +6739,7 @@ package android.app {
     method public static void writePendingIntentOrNullToParcel(@Nullable android.app.PendingIntent, @NonNull android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.PendingIntent> CREATOR;
+    field public static final int FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT = 16777216; // 0x1000000
     field public static final int FLAG_CANCEL_CURRENT = 268435456; // 0x10000000
     field public static final int FLAG_IMMUTABLE = 67108864; // 0x4000000
     field public static final int FLAG_MUTABLE = 33554432; // 0x2000000
@@ -9266,8 +9270,10 @@ package android.companion {
     method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public void addOnAssociationsChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.companion.CompanionDeviceManager.OnAssociationsChangedListener);
     method @RequiresPermission(anyOf={android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH, android.Manifest.permission.REQUEST_COMPANION_PROFILE_COMPUTER, android.Manifest.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING, android.Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION}, conditional=true) public void associate(@NonNull android.companion.AssociationRequest, @NonNull android.companion.CompanionDeviceManager.Callback, @Nullable android.os.Handler);
     method @RequiresPermission(anyOf={android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH, android.Manifest.permission.REQUEST_COMPANION_PROFILE_COMPUTER, android.Manifest.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING, android.Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION}, conditional=true) public void associate(@NonNull android.companion.AssociationRequest, @NonNull java.util.concurrent.Executor, @NonNull android.companion.CompanionDeviceManager.Callback);
+    method @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES) public void attachSystemDataTransport(int, @NonNull java.io.InputStream, @NonNull java.io.OutputStream) throws android.companion.DeviceNotAssociatedException;
     method @Nullable public android.content.IntentSender buildAssociationCancellationIntent();
     method @Nullable public android.content.IntentSender buildPermissionTransferUserConsentIntent(int) throws android.companion.DeviceNotAssociatedException;
+    method @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES) public void detachSystemDataTransport(int) throws android.companion.DeviceNotAssociatedException;
     method public void disableSystemDataSync(int, int);
     method @Deprecated public void disassociate(@NonNull String);
     method public void disassociate(int);
@@ -9279,6 +9285,7 @@ package android.companion {
     method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public void removeOnAssociationsChangedListener(@NonNull android.companion.CompanionDeviceManager.OnAssociationsChangedListener);
     method public void requestNotificationAccess(android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE) public void startObservingDevicePresence(@NonNull String) throws android.companion.DeviceNotAssociatedException;
+    method public void startSystemDataTransfer(int, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.companion.CompanionException>) throws android.companion.DeviceNotAssociatedException;
     method @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE) public void stopObservingDevicePresence(@NonNull String) throws android.companion.DeviceNotAssociatedException;
     field public static final String EXTRA_ASSOCIATION = "android.companion.extra.ASSOCIATION";
     field @Deprecated public static final String EXTRA_DEVICE = "android.companion.extra.DEVICE";
@@ -9304,12 +9311,17 @@ package android.companion {
 
   public abstract class CompanionDeviceService extends android.app.Service {
     ctor public CompanionDeviceService();
+    method @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES) public final void attachSystemDataTransport(int, @NonNull java.io.InputStream, @NonNull java.io.OutputStream) throws android.companion.DeviceNotAssociatedException;
+    method @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES) public final void detachSystemDataTransport(int) throws android.companion.DeviceNotAssociatedException;
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method @Deprecated @MainThread public void onDeviceAppeared(@NonNull String);
     method @MainThread public void onDeviceAppeared(@NonNull android.companion.AssociationInfo);
     method @Deprecated @MainThread public void onDeviceDisappeared(@NonNull String);
     method @MainThread public void onDeviceDisappeared(@NonNull android.companion.AssociationInfo);
     field public static final String SERVICE_INTERFACE = "android.companion.CompanionDeviceService";
+  }
+
+  public class CompanionException extends java.lang.RuntimeException {
   }
 
   public interface DeviceFilter<D extends android.os.Parcelable> extends android.os.Parcelable {
@@ -12738,7 +12750,7 @@ package android.content.pm {
     field @RequiresPermission(allOf={android.Manifest.permission.FOREGROUND_SERVICE_CAMERA}, anyOf={android.Manifest.permission.CAMERA}, conditional=true) public static final int FOREGROUND_SERVICE_TYPE_CAMERA = 64; // 0x40
     field @RequiresPermission(allOf={android.Manifest.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE}, anyOf={android.Manifest.permission.BLUETOOTH_ADVERTISE, android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_SCAN, android.Manifest.permission.CHANGE_NETWORK_STATE, android.Manifest.permission.CHANGE_WIFI_STATE, android.Manifest.permission.CHANGE_WIFI_MULTICAST_STATE, android.Manifest.permission.NFC, android.Manifest.permission.TRANSMIT_IR, android.Manifest.permission.UWB_RANGING}, conditional=true) public static final int FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE = 16; // 0x10
     field @RequiresPermission(value=android.Manifest.permission.FOREGROUND_SERVICE_DATA_SYNC, conditional=true) public static final int FOREGROUND_SERVICE_TYPE_DATA_SYNC = 1; // 0x1
-    field @RequiresPermission(allOf={android.Manifest.permission.FOREGROUND_SERVICE_HEALTH}, anyOf={android.Manifest.permission.ACTIVITY_RECOGNITION, android.Manifest.permission.BODY_SENSORS, android.Manifest.permission.HIGH_SAMPLING_RATE_SENSORS}) public static final int FOREGROUND_SERVICE_TYPE_HEALTH = 256; // 0x100
+    field @RequiresPermission(allOf={android.Manifest.permission.FOREGROUND_SERVICE_HEALTH}, anyOf={android.Manifest.permission.ACTIVITY_RECOGNITION, android.Manifest.permission.BODY_SENSORS, android.Manifest.permission.BODY_SENSORS_WRIST_TEMPERATURE, android.Manifest.permission.HIGH_SAMPLING_RATE_SENSORS}) public static final int FOREGROUND_SERVICE_TYPE_HEALTH = 256; // 0x100
     field @RequiresPermission(allOf={android.Manifest.permission.FOREGROUND_SERVICE_LOCATION}, anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}, conditional=true) public static final int FOREGROUND_SERVICE_TYPE_LOCATION = 8; // 0x8
     field public static final int FOREGROUND_SERVICE_TYPE_MANIFEST = -1; // 0xffffffff
     field @RequiresPermission(value=android.Manifest.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK, conditional=true) public static final int FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK = 2; // 0x2
@@ -13343,10 +13355,22 @@ package android.credentials {
     field @NonNull public static final String TYPE_PASSWORD_CREDENTIAL = "android.credentials.TYPE_PASSWORD_CREDENTIAL";
   }
 
+  public final class CredentialDescription implements android.os.Parcelable {
+    ctor public CredentialDescription(@NonNull String, @NonNull String, @NonNull java.util.List<android.service.credentials.CredentialEntry>);
+    method public int describeContents();
+    method @NonNull public java.util.List<android.service.credentials.CredentialEntry> getCredentialEntries();
+    method @NonNull public String getFlattenedRequestString();
+    method @NonNull public String getType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.CredentialDescription> CREATOR;
+  }
+
   public final class CredentialManager {
     method public void clearCredentialState(@NonNull android.credentials.ClearCredentialStateRequest, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.credentials.ClearCredentialStateException>);
     method public void createCredential(@NonNull android.credentials.CreateCredentialRequest, @NonNull android.app.Activity, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.credentials.CreateCredentialResponse,android.credentials.CreateCredentialException>);
     method public void getCredential(@NonNull android.credentials.GetCredentialRequest, @NonNull android.app.Activity, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.credentials.GetCredentialResponse,android.credentials.GetCredentialException>);
+    method public void registerCredentialDescription(@NonNull android.credentials.RegisterCredentialDescriptionRequest);
+    method public void unregisterCredentialDescription(@NonNull android.credentials.UnregisterCredentialDescriptionRequest);
   }
 
   public class GetCredentialException extends java.lang.Exception {
@@ -13370,6 +13394,7 @@ package android.credentials {
     method public boolean isSystemProviderRequired();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.credentials.GetCredentialOption> CREATOR;
+    field public static final String FLATTENED_REQUEST = "android.credentials.GetCredentialOption.FLATTENED_REQUEST_STRING";
   }
 
   public final class GetCredentialRequest implements android.os.Parcelable {
@@ -13393,6 +13418,24 @@ package android.credentials {
     method @NonNull public android.credentials.Credential getCredential();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.credentials.GetCredentialResponse> CREATOR;
+  }
+
+  public final class RegisterCredentialDescriptionRequest implements android.os.Parcelable {
+    ctor public RegisterCredentialDescriptionRequest(@NonNull android.credentials.CredentialDescription);
+    ctor public RegisterCredentialDescriptionRequest(@NonNull java.util.Set<android.credentials.CredentialDescription>);
+    method public int describeContents();
+    method @NonNull public java.util.Set<android.credentials.CredentialDescription> getCredentialDescriptions();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.RegisterCredentialDescriptionRequest> CREATOR;
+  }
+
+  public final class UnregisterCredentialDescriptionRequest implements android.os.Parcelable {
+    ctor public UnregisterCredentialDescriptionRequest(@NonNull android.credentials.CredentialDescription);
+    ctor public UnregisterCredentialDescriptionRequest(@NonNull java.util.List<android.credentials.CredentialDescription>);
+    method public int describeContents();
+    method @NonNull public java.util.List<android.credentials.CredentialDescription> getCredentialDescriptions();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.UnregisterCredentialDescriptionRequest> CREATOR;
   }
 
 }
@@ -42832,6 +42875,7 @@ package android.telephony {
     field public static final String KEY_PREMIUM_CAPABILITY_SUPPORTED_ON_LTE_BOOL = "premium_capability_supported_on_lte_bool";
     field public static final String KEY_PREVENT_CLIR_ACTIVATION_AND_DEACTIVATION_CODE_BOOL = "prevent_clir_activation_and_deactivation_code_bool";
     field public static final String KEY_RADIO_RESTART_FAILURE_CAUSES_INT_ARRAY = "radio_restart_failure_causes_int_array";
+    field public static final String KEY_RATCHET_NR_ADVANCED_BANDWIDTH_IF_RRC_IDLE_BOOL = "ratchet_nr_advanced_bandwidth_if_rrc_idle_bool";
     field public static final String KEY_RCS_CONFIG_SERVER_URL_STRING = "rcs_config_server_url_string";
     field public static final String KEY_READ_ONLY_APN_FIELDS_STRING_ARRAY = "read_only_apn_fields_string_array";
     field public static final String KEY_READ_ONLY_APN_TYPES_STRING_ARRAY = "read_only_apn_types_string_array";
@@ -48637,7 +48681,7 @@ package android.util {
     field public float density;
     field public int densityDpi;
     field public int heightPixels;
-    field public float scaledDensity;
+    field @Deprecated public float scaledDensity;
     field public int widthPixels;
     field public float xdpi;
     field public float ydpi;
@@ -49551,6 +49595,7 @@ package android.view {
     field public static final int HDR_TYPE_HDR10 = 2; // 0x2
     field public static final int HDR_TYPE_HDR10_PLUS = 4; // 0x4
     field public static final int HDR_TYPE_HLG = 3; // 0x3
+    field public static final int HDR_TYPE_INVALID = -1; // 0xffffffff
     field public static final float INVALID_LUMINANCE = -1.0f;
   }
 

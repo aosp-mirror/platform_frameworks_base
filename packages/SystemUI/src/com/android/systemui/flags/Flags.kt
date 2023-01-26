@@ -221,6 +221,15 @@ object Flags {
     val WALLPAPER_FULLSCREEN_PREVIEW =
         unreleasedFlag(227, "wallpaper_fullscreen_preview", teamfood = true)
 
+    /** Whether the long-press gesture to open wallpaper picker is enabled. */
+    // TODO(b/266242192): Tracking Bug
+    @JvmField
+    val LOCK_SCREEN_LONG_PRESS_ENABLED =
+        unreleasedFlag(
+            228,
+            "lock_screen_long_press_enabled",
+        )
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")
@@ -265,10 +274,11 @@ object Flags {
     // 600- status bar
 
     // TODO(b/256614753): Tracking Bug
-    val NEW_STATUS_BAR_MOBILE_ICONS = unreleasedFlag(606, "new_status_bar_mobile_icons")
+    val NEW_STATUS_BAR_MOBILE_ICONS =
+        unreleasedFlag(606, "new_status_bar_mobile_icons", teamfood = true)
 
     // TODO(b/256614210): Tracking Bug
-    val NEW_STATUS_BAR_WIFI_ICON = unreleasedFlag(607, "new_status_bar_wifi_icon")
+    val NEW_STATUS_BAR_WIFI_ICON = unreleasedFlag(607, "new_status_bar_wifi_icon", teamfood = true)
 
     // TODO(b/256614751): Tracking Bug
     val NEW_STATUS_BAR_MOBILE_ICONS_BACKEND =
@@ -368,7 +378,7 @@ object Flags {
     @Keep
     @JvmField
     val WM_ENABLE_SHELL_TRANSITIONS =
-        sysPropBooleanFlag(1100, "persist.wm.debug.shell_transit", default = false)
+        sysPropBooleanFlag(1100, "persist.wm.debug.shell_transit", default = true)
 
     // TODO(b/254513207): Tracking Bug
     @Keep

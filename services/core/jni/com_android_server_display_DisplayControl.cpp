@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <android/gui/IHdrConversionConstants.h>
 #include <android_util_Binder.h>
 #include <gui/SurfaceComposerClient.h>
 #include <jni.h>
@@ -55,6 +56,58 @@ static void nativeOverrideHdrTypes(JNIEnv* env, jclass clazz, jobject tokenObjec
     }
 }
 
+static void nativeSetHdrConversionMode(JNIEnv* env, jclass clazz, jint hdrConversionMode,
+                                       jint preferredHdrOutputType, jintArray autoHdrOutputTypes,
+                                       jint autoHdrOutputTypesLength) {
+    gui::HdrConversionStrategy hdrConversionStrategy;
+    switch (hdrConversionMode) {
+        case gui::IHdrConversionConstants::HdrConversionModePassthrough: {
+            hdrConversionStrategy.set<gui::HdrConversionStrategy::Tag::passthrough>(true);
+            break;
+        }
+        case gui::IHdrConversionConstants::HdrConversionModeAuto: {
+            jint* autoHdrOutputTypesArray = env->GetIntArrayElements(autoHdrOutputTypes, 0);
+            std::vector<int> autoHdrOutputTypesVector(autoHdrOutputTypesLength);
+            for (int i = 0; i < autoHdrOutputTypesLength; i++) {
+                autoHdrOutputTypesVector[i] = autoHdrOutputTypesArray[i];
+            }
+            hdrConversionStrategy.set<gui::HdrConversionStrategy::Tag::autoAllowedHdrTypes>(
+                    autoHdrOutputTypesVector);
+            break;
+        }
+        case gui::IHdrConversionConstants::HdrConversionModeForce: {
+            hdrConversionStrategy.set<gui::HdrConversionStrategy::Tag::forceHdrConversion>(
+                    preferredHdrOutputType);
+            break;
+        }
+    }
+
+    SurfaceComposerClient::setHdrConversionStrategy(hdrConversionStrategy);
+}
+
+static jintArray nativeGetSupportedHdrOutputTypes(JNIEnv* env, jclass clazz) {
+    std::vector<gui::HdrConversionCapability> hdrConversionCapabilities;
+    SurfaceComposerClient::getHdrConversionCapabilities(&hdrConversionCapabilities);
+
+    // Extract unique HDR output types.
+    std::set<int> hdrOutputTypes;
+    for (const auto& hdrConversionCapability : hdrConversionCapabilities) {
+        hdrOutputTypes.insert(hdrConversionCapability.outputType);
+    }
+    jintArray array = env->NewIntArray(hdrOutputTypes.size());
+    if (array == nullptr) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", nullptr);
+        return nullptr;
+    }
+    jint* arrayValues = env->GetIntArrayElements(array, 0);
+    int index = 0;
+    for (auto hdrOutputType : hdrOutputTypes) {
+        arrayValues[index++] = static_cast<jint>(hdrOutputType);
+    }
+    env->ReleaseIntArrayElements(array, arrayValues, 0);
+    return array;
+}
+
 static jlongArray nativeGetPhysicalDisplayIds(JNIEnv* env, jclass clazz) {
     const auto displayIds = SurfaceComposerClient::getPhysicalDisplayIds();
     ScopedLongArrayRW values(env, env->NewLongArray(displayIds.size()));
@@ -91,6 +144,10 @@ static const JNINativeMethod sDisplayMethods[] = {
             (void*)nativeGetPhysicalDisplayIds },
     {"nativeGetPhysicalDisplayToken", "(J)Landroid/os/IBinder;",
             (void*)nativeGetPhysicalDisplayToken },
+    {"nativeSetHdrConversionMode", "(II[II)V",
+            (void*)nativeSetHdrConversionMode },
+    {"nativeGetSupportedHdrOutputTypes", "()[I",
+            (void*)nativeGetSupportedHdrOutputTypes },
         // clang-format on
 };
 

@@ -19,7 +19,6 @@ package android.credentials;
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
-import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -28,19 +27,17 @@ import com.android.internal.util.AnnotationValidations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 /**
  * A request to register a {@link ComponentName} that contains an actively provisioned
  * {@link Credential} represented by a {@link CredentialDescription}.
  *
- * @hide
  */
-@TestApi
 public final class RegisterCredentialDescriptionRequest implements Parcelable {
-
-    public static final String FLATTENED_REQUEST_STRING_KEY = "flattened_request_string";
 
     @NonNull
     private final List<CredentialDescription> mCredentialDescriptions;
@@ -51,7 +48,7 @@ public final class RegisterCredentialDescriptionRequest implements Parcelable {
     }
 
     public RegisterCredentialDescriptionRequest(
-            @NonNull List<CredentialDescription> credentialDescriptions) {
+            @NonNull Set<CredentialDescription> credentialDescriptions) {
         mCredentialDescriptions = new ArrayList<>(requireNonNull(credentialDescriptions));
     }
 
@@ -89,7 +86,7 @@ public final class RegisterCredentialDescriptionRequest implements Parcelable {
     }
 
     @NonNull
-    public List<CredentialDescription> getCredentialDescriptions() {
-        return mCredentialDescriptions;
+    public Set<CredentialDescription> getCredentialDescriptions() {
+        return new HashSet<>(mCredentialDescriptions);
     }
 }

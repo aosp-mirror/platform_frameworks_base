@@ -53,9 +53,12 @@ import android.hardware.biometrics.SensorProperties;
 import android.hardware.biometrics.SensorProperties.ComponentInfo;
 import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorProperties;
+import android.hardware.face.FaceSensorPropertiesInternal;
+import android.hardware.face.IFaceAuthenticatorsRegisteredCallback;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -100,7 +103,6 @@ import java.util.stream.Collectors;
  */
 public class BinaryTransparencyService extends SystemService {
     private static final String TAG = "TransparencyService";
-    private static final String EXTRA_SERVICE = "service";
 
     @VisibleForTesting
     static final String VBMETA_DIGEST_UNINITIALIZED = "vbmeta-digest-uninitialized";
@@ -254,31 +256,30 @@ public class BinaryTransparencyService extends SystemService {
         /**
          * Measures and records digests for *all* covered binaries/packages.
          *
-         * This method will be called in a Job scheduled to take measurements periodically.
+         * This method will be called in a Job scheduled to take measurements periodically. If the
+         * last measurement was performaned recently (less than RECORD_MEASUREMENT_COOLDOWN_MS
+         * ago), the measurement and recording will be skipped.
          *
          * Packages that are covered so far are:
          * - all APEXs (introduced in Android T)
          * - all mainline modules (introduced in Android T)
          * - all preloaded apps and their update(s) (new in Android U)
          * - dynamically installed mobile bundled apps (MBAs) (new in Android U)
-         *
-         * @return a {@code List<Bundle>}. Each Bundle item contains values as
-         *          defined by the return value of {@link #measurePackage(PackageInfo)}.
          */
-        public List getMeasurementsForAllPackages() {
-            List<Bundle> results = new ArrayList<>();
-            PackageManager pm = mContext.getPackageManager();
-            Set<String> packagesMeasured = new HashSet<>();
-
+        public void recordMeasurementsForAllPackages() {
             // check if we should record the resulting measurements
             long currentTimeMs = System.currentTimeMillis();
-            boolean record = false;
-            if ((currentTimeMs - mMeasurementsLastRecordedMs) >= RECORD_MEASUREMENTS_COOLDOWN_MS) {
-                Slog.d(TAG, "Measurement was last taken at " + mMeasurementsLastRecordedMs
-                        + " and is now updated to: " + currentTimeMs);
-                mMeasurementsLastRecordedMs = currentTimeMs;
-                record = true;
+            if ((currentTimeMs - mMeasurementsLastRecordedMs) < RECORD_MEASUREMENTS_COOLDOWN_MS) {
+                Slog.d(TAG, "Skip measurement since the last measurement was only taken at "
+                        + mMeasurementsLastRecordedMs + " within the cooldown period");
+                return;
             }
+            Slog.d(TAG, "Measurement was last taken at " + mMeasurementsLastRecordedMs
+                    + " and is now updated to: " + currentTimeMs);
+            mMeasurementsLastRecordedMs = currentTimeMs;
+
+            PackageManager pm = mContext.getPackageManager();
+            Set<String> packagesMeasured = new HashSet<>();
 
             // measure all APEXs first
             if (DEBUG) {
@@ -288,22 +289,17 @@ public class BinaryTransparencyService extends SystemService {
                 packagesMeasured.add(packageInfo.packageName);
 
                 Bundle apexMeasurement = measurePackage(packageInfo);
-                results.add(apexMeasurement);
 
-                if (record) {
-                    // compute digests of signing info
-                    String[] signerDigestHexStrings = computePackageSignerSha256Digests(
-                            packageInfo.signingInfo);
+                var apexInfo = new IBinaryTransparencyService.ApexInfo();
+                apexInfo.packageName = packageInfo.packageName;
+                apexInfo.longVersion = packageInfo.getLongVersionCode();
+                apexInfo.digest = apexMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST);
+                apexInfo.digestAlgorithm =
+                        apexMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM);
+                apexInfo.signerDigests =
+                        computePackageSignerSha256Digests(packageInfo.signingInfo);
 
-                    // log to statsd
-                    FrameworkStatsLog.write(FrameworkStatsLog.APEX_INFO_GATHERED,
-                                            packageInfo.packageName,
-                                            packageInfo.getLongVersionCode(),
-                                            HexEncoding.encodeToString(apexMeasurement.getByteArray(
-                                                    BUNDLE_CONTENT_DIGEST), false),
-                                            apexMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM),
-                                            signerDigestHexStrings);
-                }
+                recordApexInfo(apexInfo);
             }
             if (DEBUG) {
                 Slog.d(TAG, "Measured " + packagesMeasured.size()
@@ -319,11 +315,11 @@ public class BinaryTransparencyService extends SystemService {
                 }
                 packagesMeasured.add(packageInfo.packageName);
 
-                int mba_status = MBA_STATUS_PRELOADED;
+                int mbaStatus = MBA_STATUS_PRELOADED;
                 if (packageInfo.signingInfo == null) {
                     Slog.d(TAG, "Preload " + packageInfo.packageName  + " at "
                             + packageInfo.applicationInfo.sourceDir + " has likely been updated.");
-                    mba_status = MBA_STATUS_UPDATED_PRELOAD;
+                    mbaStatus = MBA_STATUS_UPDATED_PRELOAD;
 
                     PackageInfo origPackageInfo = packageInfo;
                     try {
@@ -334,33 +330,24 @@ public class BinaryTransparencyService extends SystemService {
                         Slog.e(TAG, "Failed to obtain an updated PackageInfo of "
                                 + origPackageInfo.packageName, e);
                         packageInfo = origPackageInfo;
-                        mba_status = MBA_STATUS_ERROR;
+                        mbaStatus = MBA_STATUS_ERROR;
                     }
                 }
 
+                if (mbaStatus == MBA_STATUS_UPDATED_PRELOAD) {
+                    Bundle packageMeasurement = measurePackage(packageInfo);
 
-                Bundle packageMeasurement = measurePackage(packageInfo);
-                results.add(packageMeasurement);
+                    var appInfo = new IBinaryTransparencyService.AppInfo();
+                    appInfo.packageName = packageInfo.packageName;
+                    appInfo.longVersion = packageInfo.getLongVersionCode();
+                    appInfo.digest = packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST);
+                    appInfo.digestAlgorithm =
+                            packageMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM);
+                    appInfo.signerDigests =
+                            computePackageSignerSha256Digests(packageInfo.signingInfo);
+                    appInfo.mbaStatus = mbaStatus;
 
-                if (record && (mba_status == MBA_STATUS_UPDATED_PRELOAD)) {
-                    // compute digests of signing info
-                    String[] signerDigestHexStrings = computePackageSignerSha256Digests(
-                            packageInfo.signingInfo);
-
-                    // now we should have all the bits for the atom
-                    byte[] cDigest = packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST);
-                    FrameworkStatsLog.write(FrameworkStatsLog.MOBILE_BUNDLED_APP_INFO_GATHERED,
-                            packageInfo.packageName,
-                            packageInfo.getLongVersionCode(),
-                            (cDigest != null) ? HexEncoding.encodeToString(cDigest, false) : null,
-                            packageMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM),
-                            signerDigestHexStrings, // signer_cert_digest
-                            mba_status,             // mba_status
-                            null,                   // initiator
-                            null,                   // initiator_signer_digest
-                            null,                   // installer
-                            null                    // originator
-                    );
+                    writeAppInfoToLog(appInfo);
                 }
             }
             if (DEBUG) {
@@ -377,54 +364,37 @@ public class BinaryTransparencyService extends SystemService {
                     packagesMeasured.add(packageInfo.packageName);
 
                     Bundle packageMeasurement = measurePackage(packageInfo);
-                    results.add(packageMeasurement);
 
-                    if (record) {
-                        // compute digests of signing info
-                        String[] signerDigestHexStrings = computePackageSignerSha256Digests(
-                                packageInfo.signingInfo);
-
-                        // then extract package's InstallSourceInfo
-                        if (DEBUG) {
-                            Slog.d(TAG,
-                                    "Extracting InstallSourceInfo for " + packageInfo.packageName);
-                        }
-                        InstallSourceInfo installSourceInfo = getInstallSourceInfo(
-                                packageInfo.packageName);
-                        String initiator = null;
-                        SigningInfo initiatorSignerInfo = null;
-                        String[] initiatorSignerInfoDigest = null;
-                        String installer = null;
-                        String originator = null;
-
-                        if (installSourceInfo != null) {
-                            initiator = installSourceInfo.getInitiatingPackageName();
-                            initiatorSignerInfo =
-                                    installSourceInfo.getInitiatingPackageSigningInfo();
-                            if (initiatorSignerInfo != null) {
-                                initiatorSignerInfoDigest = computePackageSignerSha256Digests(
-                                        initiatorSignerInfo);
-                            }
-                            installer = installSourceInfo.getInstallingPackageName();
-                            originator = installSourceInfo.getOriginatingPackageName();
-                        }
-
-                        // we should now have all the info needed for the atom
-                        byte[] cDigest = packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST);
-                        FrameworkStatsLog.write(FrameworkStatsLog.MOBILE_BUNDLED_APP_INFO_GATHERED,
-                                packageInfo.packageName,
-                                packageInfo.getLongVersionCode(),
-                                (cDigest != null) ? HexEncoding.encodeToString(cDigest, false)
-                                        : null,
-                                packageMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM),
-                                signerDigestHexStrings,
-                                MBA_STATUS_NEW_INSTALL,   // mba_status
-                                initiator,
-                                initiatorSignerInfoDigest,
-                                installer,
-                                originator
-                        );
+                    if (DEBUG) {
+                        Slog.d(TAG,
+                                "Extracting InstallSourceInfo for " + packageInfo.packageName);
                     }
+                    var appInfo = new IBinaryTransparencyService.AppInfo();
+                    appInfo.packageName = packageInfo.packageName;
+                    appInfo.longVersion = packageInfo.getLongVersionCode();
+                    appInfo.digest = packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST);
+                    appInfo.digestAlgorithm =
+                            packageMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM);
+                    appInfo.signerDigests =
+                            computePackageSignerSha256Digests(packageInfo.signingInfo);
+                    appInfo.mbaStatus = MBA_STATUS_NEW_INSTALL;
+
+                    // extract package's InstallSourceInfo
+                    InstallSourceInfo installSourceInfo = getInstallSourceInfo(
+                            packageInfo.packageName);
+                    if (installSourceInfo != null) {
+                        appInfo.initiator = installSourceInfo.getInitiatingPackageName();
+                        SigningInfo initiatorSignerInfo =
+                                installSourceInfo.getInitiatingPackageSigningInfo();
+                        if (initiatorSignerInfo != null) {
+                            appInfo.initiatorSignerDigests =
+                                    computePackageSignerSha256Digests(initiatorSignerInfo);
+                        }
+                        appInfo.installer = installSourceInfo.getInstallingPackageName();
+                        appInfo.originator = installSourceInfo.getOriginatingPackageName();
+                    }
+
+                    writeAppInfoToLog(appInfo);
                 }
             }
             if (DEBUG) {
@@ -432,8 +402,31 @@ public class BinaryTransparencyService extends SystemService {
                 Slog.d(TAG, "Measured " + packagesMeasured.size()
                         + " packages altogether in " + timeSpentMeasuring + "ms");
             }
+        }
 
-            return results;
+        private void recordApexInfo(IBinaryTransparencyService.ApexInfo apexInfo) {
+            FrameworkStatsLog.write(FrameworkStatsLog.APEX_INFO_GATHERED,
+                    apexInfo.packageName,
+                    apexInfo.longVersion,
+                    (apexInfo.digest != null) ? HexEncoding.encodeToString(apexInfo.digest, false)
+                            : null,
+                    apexInfo.digestAlgorithm,
+                    apexInfo.signerDigests);
+        }
+
+        private void writeAppInfoToLog(IBinaryTransparencyService.AppInfo appInfo) {
+            FrameworkStatsLog.write(FrameworkStatsLog.MOBILE_BUNDLED_APP_INFO_GATHERED,
+                    appInfo.packageName,
+                    appInfo.longVersion,
+                    (appInfo.digest != null) ? HexEncoding.encodeToString(appInfo.digest, false)
+                            : null,
+                    appInfo.digestAlgorithm,
+                    appInfo.signerDigests,
+                    appInfo.mbaStatus,
+                    appInfo.initiator,
+                    appInfo.initiatorSignerDigests,
+                    appInfo.installer,
+                    appInfo.originator);
         }
 
         /**
@@ -1179,14 +1172,11 @@ public class BinaryTransparencyService extends SystemService {
             // where this operation might take longer than expected, and so that we don't block
             // system_server's main thread.
             Executors.defaultThreadFactory().newThread(() -> {
-                // we discard the return value of getMeasurementsForAllPackages() as the
-                // results of the measurements will be recorded, and that is what we're aiming
-                // for with this job.
                 IBinder b = ServiceManager.getService(Context.BINARY_TRANSPARENCY_SERVICE);
                 IBinaryTransparencyService iBtsService =
                         IBinaryTransparencyService.Stub.asInterface(b);
                 try {
-                    iBtsService.getMeasurementsForAllPackages();
+                    iBtsService.recordMeasurementsForAllPackages();
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Taking binary measurements was interrupted.", e);
                     return;
@@ -1371,25 +1361,51 @@ public class BinaryTransparencyService extends SystemService {
         }
 
         if (fpManager != null) {
-            // Log data for each fingerprint sensor
-            for (FingerprintSensorPropertiesInternal propInternal :
-                    fpManager.getSensorPropertiesInternal()) {
-                final FingerprintSensorProperties prop =
-                        FingerprintSensorProperties.from(propInternal);
-                logBiometricProperties(prop,
-                        FrameworkStatsLog
-                                .BIOMETRIC_PROPERTIES_COLLECTED__MODALITY__MODALITY_FINGERPRINT,
-                        toFingerprintSensorType(prop.getSensorType()));
-            }
+            final int fpModality = FrameworkStatsLog
+                    .BIOMETRIC_PROPERTIES_COLLECTED__MODALITY__MODALITY_FINGERPRINT;
+            fpManager.addAuthenticatorsRegisteredCallback(
+                    new IFingerprintAuthenticatorsRegisteredCallback.Stub() {
+                        @Override
+                        public void onAllAuthenticatorsRegistered(
+                                List<FingerprintSensorPropertiesInternal> sensors) {
+                            if (DEBUG) {
+                                Slog.d(TAG, "Retrieve fingerprint sensor properties. "
+                                        + "sensors.size()=" + sensors.size());
+                            }
+                            // Log data for each fingerprint sensor
+                            for (FingerprintSensorPropertiesInternal propInternal : sensors) {
+                                final FingerprintSensorProperties prop =
+                                        FingerprintSensorProperties.from(propInternal);
+                                logBiometricProperties(prop,
+                                        fpModality,
+                                        toFingerprintSensorType(prop.getSensorType()));
+                            }
+                        }
+                    });
         }
 
         if (faceManager != null) {
-            // Log data for each face sensor
-            for (FaceSensorProperties prop : faceManager.getSensorProperties()) {
-                logBiometricProperties(prop,
-                        FrameworkStatsLog.BIOMETRIC_PROPERTIES_COLLECTED__MODALITY__MODALITY_FACE,
-                        toFaceSensorType(prop.getSensorType()));
-            }
+            final int faceModality = FrameworkStatsLog
+                    .BIOMETRIC_PROPERTIES_COLLECTED__MODALITY__MODALITY_FACE;
+            faceManager.addAuthenticatorsRegisteredCallback(
+                    new IFaceAuthenticatorsRegisteredCallback.Stub() {
+                        @Override
+                        public void onAllAuthenticatorsRegistered(
+                                List<FaceSensorPropertiesInternal> sensors) {
+                            if (DEBUG) {
+                                Slog.d(TAG, "Retrieve face sensor properties. sensors.size()="
+                                        + sensors.size());
+                            }
+                            // Log data for each face sensor
+                            for (FaceSensorPropertiesInternal propInternal : sensors) {
+                                final FaceSensorProperties prop =
+                                        FaceSensorProperties.from(propInternal);
+                                logBiometricProperties(prop,
+                                        faceModality,
+                                        toFaceSensorType(prop.getSensorType()));
+                            }
+                        }
+                    });
         }
     }
 

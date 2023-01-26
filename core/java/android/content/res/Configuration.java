@@ -98,6 +98,14 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     /**
      * Current user preference for the scaling factor for fonts, relative
      * to the base density scaling.
+     *
+     * <p>Note: Please do not use this to hardcode font size equations. The equation for font
+     * scaling is now non-linear; this coefficient is no longer used as a direct multiplier to
+     * determine font size. It exists for informational purposes only.
+     *
+     * <p>Please use {@link android.util.TypedValue#applyDimension(int, float, DisplayMetrics)} or
+     * {@link android.util.TypedValue#deriveDimension(int, float, DisplayMetrics)} to convert
+     * between scaled font size dimensions and pixels.
      */
     public float fontScale;
 

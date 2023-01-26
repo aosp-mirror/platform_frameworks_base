@@ -484,6 +484,7 @@ public class AutomaticBrightnessControllerTest {
         // Sensor reads 100 lux. We should get max brightness.
         listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, (int) lux));
         assertEquals(BRIGHTNESS_MAX_FLOAT, mController.getAutomaticScreenBrightness(), 0.0f);
+        assertEquals(BRIGHTNESS_MAX_FLOAT, mController.getRawAutomaticScreenBrightness(), 0.0f);
 
         // Apply throttling and notify ABC (simulates DisplayPowerController#updatePowerState())
         final float throttledBrightness = 0.123f;
@@ -494,6 +495,8 @@ public class AutomaticBrightnessControllerTest {
                 0 /* adjustment= */, false /* userChanged= */, DisplayPowerRequest.POLICY_BRIGHT,
                 /* shouldResetShortTermModel= */ true);
         assertEquals(throttledBrightness, mController.getAutomaticScreenBrightness(), 0.0f);
+        // The raw brightness value should not have throttling applied
+        assertEquals(BRIGHTNESS_MAX_FLOAT, mController.getRawAutomaticScreenBrightness(), 0.0f);
 
         // Remove throttling and notify ABC again
         when(mBrightnessThrottler.getBrightnessCap()).thenReturn(BRIGHTNESS_MAX_FLOAT);
@@ -503,6 +506,7 @@ public class AutomaticBrightnessControllerTest {
                 0 /* adjustment= */, false /* userChanged= */, DisplayPowerRequest.POLICY_BRIGHT,
                 /* shouldResetShortTermModel= */ true);
         assertEquals(BRIGHTNESS_MAX_FLOAT, mController.getAutomaticScreenBrightness(), 0.0f);
+        assertEquals(BRIGHTNESS_MAX_FLOAT, mController.getRawAutomaticScreenBrightness(), 0.0f);
     }
 
     @Test

@@ -93,6 +93,7 @@ public final class Bitmap implements Parcelable {
     private boolean mRecycled;
 
     private ColorSpace mColorSpace;
+    private Gainmap mGainmap;
 
     /*package*/ int mDensity = getDefaultDensity();
 
@@ -1897,6 +1898,27 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
+     * Returns whether or not this Bitmap contains a Gainmap.
+     * @hide
+     */
+    public boolean hasGainmap() {
+        checkRecycled("Bitmap is recycled");
+        return nativeHasGainmap(mNativePtr);
+    }
+
+    /**
+     * Returns the gainmap or null if the bitmap doesn't contain a gainmap
+     * @hide
+     */
+    public @Nullable Gainmap getGainmap() {
+        checkRecycled("Bitmap is recycled");
+        if (mGainmap == null) {
+            mGainmap = nativeExtractGainmap(mNativePtr);
+        }
+        return mGainmap;
+    }
+
+    /**
      * Fills the bitmap's pixels with the specified {@link Color}.
      *
      * @throws IllegalStateException if the bitmap is not mutable.
@@ -2380,6 +2402,8 @@ public final class Bitmap implements Parcelable {
 
     private static native void nativeSetImmutable(long nativePtr);
 
+    private static native Gainmap nativeExtractGainmap(long nativePtr);
+
     // ---------------- @CriticalNative -------------------
 
     @CriticalNative
@@ -2387,4 +2411,7 @@ public final class Bitmap implements Parcelable {
 
     @CriticalNative
     private static native boolean nativeIsBackedByAshmem(long nativePtr);
+
+    @CriticalNative
+    private static native boolean nativeHasGainmap(long nativePtr);
 }

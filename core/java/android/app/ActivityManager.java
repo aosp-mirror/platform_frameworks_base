@@ -5346,6 +5346,20 @@ public class ActivityManager {
     }
 
     /**
+     * Checks if the process represented by the given {@code pid} is frozen.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.DUMP)
+    public boolean isProcessFrozen(int pid) {
+        try {
+            return getService().isProcessFrozen(pid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * @return The reason code of whether or not the given UID should be exempted from background
      * restrictions here.
      *
@@ -5364,6 +5378,31 @@ public class ActivityManager {
             e.rethrowFromSystemServer();
         }
         return PowerExemptionManager.REASON_DENIED;
+    }
+
+    /**
+     * Notifies {@link #getRunningAppProcesses app processes} that the system properties
+     * have changed.
+     *
+     * @see SystemProperties#addChangeCallback
+     *
+     * @hide
+     */
+    @TestApi
+    public void notifySystemPropertiesChanged() {
+        // Note: this cannot use {@link ServiceManager#listServices()} to notify all the services,
+        // as that is not available from tests.
+        final var binder = ActivityManager.getService().asBinder();
+        if (binder != null) {
+            var data = Parcel.obtain();
+            try {
+                binder.transact(IBinder.SYSPROPS_TRANSACTION, data, null /* reply */,
+                        0 /* flags */);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            data.recycle();
+        }
     }
 
     /**
