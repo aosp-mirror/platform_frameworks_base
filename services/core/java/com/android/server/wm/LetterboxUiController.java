@@ -17,11 +17,20 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.content.pm.ActivityInfo.OVERRIDE_ANY_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION;
+import static android.content.pm.ActivityInfo.OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE;
+import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR;
+import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.content.pm.ActivityInfo.isFixedOrientation;
+import static android.content.pm.ActivityInfo.isFixedOrientationLandscape;
 import static android.content.pm.ActivityInfo.screenOrientationToString;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -29,6 +38,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION;
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH;
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
+import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__BOTTOM;
@@ -110,6 +120,20 @@ final class LetterboxUiController {
      * rounded corners above the expanded taskbar.
      */
     private final float mExpandedTaskBarHeight;
+
+    // TODO(b/265576778): Cache other overrides as well.
+
+    // Corresponds to OVERRIDE_ANY_ORIENTATION
+    private final boolean mIsOverrideAnyOrientationEnabled;
+    // Corresponds to OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT
+    private final boolean mIsOverrideToPortraitOrientationEnabled;
+    // Corresponds to OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR
+    private final boolean mIsOverrideToNosensorOrientationEnabled;
+    // Corresponds to OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE
+    private final boolean mIsOverrideToReverseLandscapeOrientationEnabled;
+
+    @Nullable
+    private final Boolean mBooleanPropertyAllowOrientationOverride;
 
     /*
      * WindowContainerListener responsible to make translucent activities inherit
@@ -193,6 +217,19 @@ final class LetterboxUiController {
 
         mExpandedTaskBarHeight =
                 getResources().getDimensionPixelSize(R.dimen.taskbar_frame_height);
+
+        mBooleanPropertyAllowOrientationOverride =
+                readComponentProperty(packageManager, mActivityRecord.packageName,
+                        /* gatingCondition */ null,
+                        PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE);
+
+        mIsOverrideAnyOrientationEnabled = isCompatChangeEnabled(OVERRIDE_ANY_ORIENTATION);
+        mIsOverrideToPortraitOrientationEnabled =
+                isCompatChangeEnabled(OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT);
+        mIsOverrideToReverseLandscapeOrientationEnabled =
+                isCompatChangeEnabled(OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE);
+        mIsOverrideToNosensorOrientationEnabled =
+                isCompatChangeEnabled(OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR);
     }
 
     /**
@@ -207,8 +244,8 @@ final class LetterboxUiController {
      */
     @Nullable
     private static Boolean readComponentProperty(PackageManager packageManager, String packageName,
-            BooleanSupplier gatingCondition, String propertyName) {
-        if (!gatingCondition.getAsBoolean()) {
+            @Nullable BooleanSupplier gatingCondition, String propertyName) {
+        if (gatingCondition != null && !gatingCondition.getAsBoolean()) {
             return null;
         }
         try {
@@ -307,6 +344,41 @@ final class LetterboxUiController {
         mIsRefreshAfterRotationRequested = isRequested;
     }
 
+    @ScreenOrientation
+    int overrideOrientationIfNeeded(@ScreenOrientation int candidate) {
+        if (Boolean.FALSE.equals(mBooleanPropertyAllowOrientationOverride)) {
+            return candidate;
+        }
+
+        if (mIsOverrideToReverseLandscapeOrientationEnabled
+                && (isFixedOrientationLandscape(candidate) || mIsOverrideAnyOrientationEnabled)) {
+            Slog.w(TAG, "Requested orientation  " + screenOrientationToString(candidate) + " for "
+                    + mActivityRecord + " is overridden to "
+                    + screenOrientationToString(SCREEN_ORIENTATION_REVERSE_LANDSCAPE));
+            return SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+        }
+
+        if (!mIsOverrideAnyOrientationEnabled && isFixedOrientation(candidate)) {
+            return candidate;
+        }
+
+        if (mIsOverrideToPortraitOrientationEnabled) {
+            Slog.w(TAG, "Requested orientation  " + screenOrientationToString(candidate) + " for "
+                    + mActivityRecord + " is overridden to "
+                    + screenOrientationToString(SCREEN_ORIENTATION_PORTRAIT));
+            return SCREEN_ORIENTATION_PORTRAIT;
+        }
+
+        if (mIsOverrideToNosensorOrientationEnabled) {
+            Slog.w(TAG, "Requested orientation  " + screenOrientationToString(candidate) + " for "
+                    + mActivityRecord + " is overridden to "
+                    + screenOrientationToString(SCREEN_ORIENTATION_NOSENSOR));
+            return SCREEN_ORIENTATION_NOSENSOR;
+        }
+
+        return candidate;
+    }
+
     /**
      * Whether activity is eligible for activity "refresh" after camera compat force rotation
      * treatment. See {@link DisplayRotationCompatPolicy} for context.
@@ -367,6 +439,10 @@ final class LetterboxUiController {
                 mBooleanPropertyCameraCompatAllowForceRotation);
     }
 
+    private boolean isCompatChangeEnabled(long overrideChangeId) {
+        return mActivityRecord.info.isChangeEnabled(overrideChangeId);
+    }
+
     /**
      * Returns {@code true} when the following conditions are met:
      * <ul>
@@ -383,8 +459,7 @@ final class LetterboxUiController {
         if (!gatingCondition.getAsBoolean()) {
             return false;
         }
-        return !Boolean.FALSE.equals(property)
-                && !mActivityRecord.info.isChangeEnabled(overrideChangeId);
+        return !Boolean.FALSE.equals(property) && !isCompatChangeEnabled(overrideChangeId);
     }
 
     /**
@@ -393,7 +468,7 @@ final class LetterboxUiController {
      *     <li>{@code gatingCondition} isn't {@code false}
      *     <li>App developers didn't opt out with a component {@code property}
      *     <li>App developers opted in with a component {@code property} or an OEM opted in with a
-     *     component {@code property}
+     *     {@code overrideChangeId} override
      * </ul>
      *
      * <p>This is used for the treatments that are enabled only on per-app basis.
@@ -406,8 +481,7 @@ final class LetterboxUiController {
         if (Boolean.FALSE.equals(property)) {
             return false;
         }
-        return Boolean.TRUE.equals(property)
-                || mActivityRecord.info.isChangeEnabled(overrideChangeId);
+        return Boolean.TRUE.equals(property) || isCompatChangeEnabled(overrideChangeId);
     }
 
     boolean hasWallpaperBackgroundForLetterbox() {
@@ -1224,7 +1298,8 @@ final class LetterboxUiController {
         // To avoid wrong behaviour, we're not forcing orientation for activities with not
         // fixed orientation (e.g. permission dialogs).
         return hasInheritedLetterboxBehavior()
-                && mActivityRecord.mOrientation != SCREEN_ORIENTATION_UNSPECIFIED;
+                && mActivityRecord.getOverrideOrientation()
+                        != SCREEN_ORIENTATION_UNSPECIFIED;
     }
 
     float getInheritedMinAspectRatio() {

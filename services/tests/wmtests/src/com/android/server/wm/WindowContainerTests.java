@@ -1665,7 +1665,7 @@ public class WindowContainerTests extends WindowTestsBase {
 
         @Override
         int getOrientation() {
-            return getOrientation(super.mOrientation);
+            return getOrientation(super.getOverrideOrientation());
         }
 
         @Override

@@ -1844,8 +1844,9 @@ public class DisplayRotation {
                 if (source != null) {
                     mLastOrientationSource = source.toString();
                     final WindowState w = source.asWindowState();
-                    mSourceOrientation =
-                            w != null ? w.mAttrs.screenOrientation : source.mOrientation;
+                    mSourceOrientation = w != null
+                            ? w.mAttrs.screenOrientation
+                            : source.getOverrideOrientation();
                 } else {
                     mLastOrientationSource = null;
                     mSourceOrientation = SCREEN_ORIENTATION_UNSET;
