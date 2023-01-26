@@ -310,6 +310,7 @@ constructor(
         lockScreenShadeTransitionController.udfpsKeyguardViewController = this
         activityLaunchAnimator.addListener(activityLaunchAnimatorListener)
         view.mUseExpandedOverlay = useExpandedOverlay
+        view.startIconAsyncInflate()
     }
 
     override fun onViewDetached() {

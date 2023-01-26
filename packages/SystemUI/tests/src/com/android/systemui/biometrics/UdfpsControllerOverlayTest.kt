@@ -105,6 +105,7 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     @Mock private lateinit var udfpsController: UdfpsController
     @Mock private lateinit var udfpsView: UdfpsView
     @Mock private lateinit var udfpsEnrollView: UdfpsEnrollView
+    @Mock private lateinit var udfpsKeyguardView: UdfpsKeyguardView
     @Mock private lateinit var activityLaunchAnimator: ActivityLaunchAnimator
     @Mock private lateinit var featureFlags: FeatureFlags
     @Mock private lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
@@ -125,7 +126,7 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
         whenever(inflater.inflate(R.layout.udfps_bp_view, null))
             .thenReturn(mock(UdfpsBpView::class.java))
         whenever(inflater.inflate(R.layout.udfps_keyguard_view, null))
-            .thenReturn(mock(UdfpsKeyguardView::class.java))
+            .thenReturn(udfpsKeyguardView)
         whenever(inflater.inflate(R.layout.udfps_fpm_empty_view, null))
             .thenReturn(mock(UdfpsFpmEmptyView::class.java))
         whenever(udfpsEnrollView.context).thenReturn(context)
@@ -152,7 +153,10 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     fun showUdfpsOverlay_bp() = withReason(REASON_AUTH_BP) { showUdfpsOverlay() }
 
     @Test
-    fun showUdfpsOverlay_keyguard() = withReason(REASON_AUTH_KEYGUARD) { showUdfpsOverlay() }
+    fun showUdfpsOverlay_keyguard() = withReason(REASON_AUTH_KEYGUARD) {
+        showUdfpsOverlay()
+        verify(udfpsKeyguardView).updateSensorLocation(eq(overlayParams.sensorBounds))
+    }
 
     @Test
     fun showUdfpsOverlay_settings() = withReason(REASON_AUTH_SETTINGS) { showUdfpsOverlay() }

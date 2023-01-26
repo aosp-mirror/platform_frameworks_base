@@ -262,7 +262,9 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
             }
             REASON_AUTH_KEYGUARD -> {
                 UdfpsKeyguardViewController(
-                    view.addUdfpsView(R.layout.udfps_keyguard_view),
+                    view.addUdfpsView(R.layout.udfps_keyguard_view) {
+                        updateSensorLocation(sensorBounds)
+                    },
                     statusBarStateController,
                     shadeExpansionStateManager,
                     statusBarKeyguardViewManager,

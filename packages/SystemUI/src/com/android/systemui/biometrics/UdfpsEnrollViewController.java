@@ -68,10 +68,7 @@ public class UdfpsEnrollViewController extends UdfpsAnimationViewController<Udfp
         mEnrollHelper = enrollHelper;
         mView.setEnrollHelper(mEnrollHelper);
         mView.setProgressBarRadius(mEnrollProgressBarRadius);
-
-        if (featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)) {
-            mView.mUseExpandedOverlay = true;
-        }
+        mView.mUseExpandedOverlay = featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION);
     }
 
     @Override
