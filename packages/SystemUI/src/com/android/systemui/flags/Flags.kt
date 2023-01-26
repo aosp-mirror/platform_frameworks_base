@@ -524,7 +524,7 @@ object Flags {
     @JvmField val NOTE_TASKS = unreleasedFlag(1900, "keycode_flag")
 
     // 2000 - device controls
-    @Keep @JvmField val USE_APP_PANELS = unreleasedFlag(2000, "use_app_panels", teamfood = true)
+    @Keep @JvmField val USE_APP_PANELS = releasedFlag(2000, "use_app_panels", teamfood = true)
 
     @JvmField
     val APP_PANELS_ALL_APPS_ALLOWED =
