@@ -692,6 +692,19 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
         assertThat(captor.value.getResId()).isEqualTo(R.xml.large_screen_shade_header)
     }
 
+    @Test
+    fun `carrier left padding is set when clock layout changes`() {
+        val width = 200
+        whenever(clock.width).thenReturn(width)
+        whenever(clock.scaleX).thenReturn(2.57f) // 2.57 comes from qs_header.xml
+        val captor = ArgumentCaptor.forClass(View.OnLayoutChangeListener::class.java)
+
+        verify(clock).addOnLayoutChangeListener(capture(captor))
+        captor.value.onLayoutChange(clock, 0, 0, width, 0, 0, 0, 0, 0)
+
+        verify(carrierGroup).setPaddingRelative(514, 0, 0, 0)
+    }
+
     private fun View.executeLayoutChange(
             left: Int,
             top: Int,
