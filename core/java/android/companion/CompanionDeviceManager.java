@@ -30,6 +30,8 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.UserHandleAware;
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
@@ -41,6 +43,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.net.MacAddress;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.OutcomeReceiver;
 import android.os.ParcelFileDescriptor;
@@ -53,6 +56,7 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.CollectionUtils;
+import com.android.server.LocalServices;
 
 import libcore.io.IoUtils;
 
@@ -989,6 +993,15 @@ public final class CompanionDeviceManager {
             ExceptionUtils.propagateIfInstanceOf(e.getCause(), DeviceNotAssociatedException.class);
             throw e.rethrowFromSystemServer();
         }
+        int callingUid = Binder.getCallingUid();
+        int callingPid = Binder.getCallingPid();
+        ActivityManagerInternal managerInternal =
+                LocalServices.getService(ActivityManagerInternal.class);
+        if (managerInternal != null) {
+            managerInternal
+                    .logFgsApiBegin(ActivityManager.FOREGROUND_SERVICE_API_TYPE_CDM,
+                            callingUid, callingPid);
+        }
     }
 
     /**
@@ -1020,6 +1033,15 @@ public final class CompanionDeviceManager {
                     mContext.getPackageName(), mContext.getUserId());
         } catch (RemoteException e) {
             ExceptionUtils.propagateIfInstanceOf(e.getCause(), DeviceNotAssociatedException.class);
+        }
+        int callingUid = Binder.getCallingUid();
+        int callingPid = Binder.getCallingPid();
+        ActivityManagerInternal managerInternal =
+                LocalServices.getService(ActivityManagerInternal.class);
+        if (managerInternal != null) {
+            managerInternal
+                    .logFgsApiEnd(ActivityManager.FOREGROUND_SERVICE_API_TYPE_CDM,
+                            callingUid, callingPid);
         }
     }
 
