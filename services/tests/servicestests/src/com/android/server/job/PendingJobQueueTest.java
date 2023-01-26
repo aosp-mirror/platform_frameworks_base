@@ -201,6 +201,32 @@ public class PendingJobQueueTest {
             }
         }
         assertNull(jobQueue.next());
+        assertEquals(0, jobQueue.size());
+    }
+
+    @Test
+    public void testRemove_duringIteration() {
+        List<JobStatus> jobs = new ArrayList<>();
+        jobs.add(createJobStatus("testRemove", createJobInfo(1), 1));
+        jobs.add(createJobStatus("testRemove", createJobInfo(2), 2));
+        jobs.add(createJobStatus("testRemove", createJobInfo(3).setExpedited(true), 3));
+        jobs.add(createJobStatus("testRemove", createJobInfo(4), 4));
+        jobs.add(createJobStatus("testRemove", createJobInfo(5).setExpedited(true), 5));
+
+        PendingJobQueue jobQueue = new PendingJobQueue();
+        jobQueue.addAll(jobs);
+
+        ArraySet<JobStatus> removed = new ArraySet<>();
+        JobStatus job;
+        jobQueue.resetIterator();
+        while ((job = jobQueue.next()) != null) {
+            jobQueue.remove(job);
+            removed.add(job);
+            assertFalse("Queue retained a removed job " + testJobToString(job),
+                    jobQueue.contains(job));
+        }
+        assertNull(jobQueue.next());
+        assertEquals(0, jobQueue.size());
     }
 
     @Test
