@@ -1462,7 +1462,7 @@ public class AudioService extends IAudioService.Stub
 
         mNm = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        mSoundDoseHelper.configureSafeMediaVolume(/*forced=*/true, TAG);
+        mSoundDoseHelper.configureSafeMedia(/*forced=*/true, TAG);
 
         initA11yMonitoring();
 
@@ -10224,7 +10224,7 @@ public class AudioService extends IAudioService.Stub
             // reading new configuration "safely" (i.e. under try catch) in case anything
             // goes wrong.
             Configuration config = context.getResources().getConfiguration();
-            mSoundDoseHelper.configureSafeMediaVolume(/*forced*/false, TAG);
+            mSoundDoseHelper.configureSafeMedia(/*forced*/false, TAG);
 
             boolean cameraSoundForced = readCameraSoundForced();
             synchronized (mSettingsLock) {

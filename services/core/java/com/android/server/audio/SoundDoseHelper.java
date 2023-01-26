@@ -38,6 +38,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.MathUtils;
 
@@ -55,6 +56,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Safe media volume management.
@@ -77,14 +79,16 @@ public class SoundDoseHelper {
     // SAFE_MEDIA_VOLUME_DISABLED according to country option. If not SAFE_MEDIA_VOLUME_DISABLED, it
     // can be set to SAFE_MEDIA_VOLUME_INACTIVE by calling AudioService.disableSafeMediaVolume()
     // (when user opts out).
+    // Note: when CSD calculation is enabled the state is set to SAFE_MEDIA_VOLUME_DISABLED
     private static final int SAFE_MEDIA_VOLUME_NOT_CONFIGURED = 0;
     private static final int SAFE_MEDIA_VOLUME_DISABLED = 1;
     private static final int SAFE_MEDIA_VOLUME_INACTIVE = 2;  // confirmed
     private static final int SAFE_MEDIA_VOLUME_ACTIVE = 3;  // unconfirmed
 
-    private static final int MSG_CONFIGURE_SAFE_MEDIA_VOLUME = SAFE_MEDIA_VOLUME_MSG_START + 1;
+    private static final int MSG_CONFIGURE_SAFE_MEDIA = SAFE_MEDIA_VOLUME_MSG_START + 1;
     private static final int MSG_PERSIST_SAFE_VOLUME_STATE = SAFE_MEDIA_VOLUME_MSG_START + 2;
     private static final int MSG_PERSIST_MUSIC_ACTIVE_MS = SAFE_MEDIA_VOLUME_MSG_START + 3;
+    private static final int MSG_PERSIST_CSD_VALUES = SAFE_MEDIA_VOLUME_MSG_START + 4;
 
     private static final int UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX = (20 * 3600 * 1000); // 20 hours
 
@@ -100,14 +104,16 @@ public class SoundDoseHelper {
     private static final int CSD_WARNING_TIMEOUT_MS_ACCUMULATION_START = -1;
     private static final int CSD_WARNING_TIMEOUT_MS_MOMENTARY_EXPOSURE = 5000;
 
+    private static final String PERSIST_CSD_RECORD_FIELD_SEPARATOR = ",";
+    private static final String PERSIST_CSD_RECORD_SEPARATOR_CHAR = "|";
+    private static final String PERSIST_CSD_RECORD_SEPARATOR = "\\|";
+
     private final EventLogger mLogger = new EventLogger(AudioService.LOG_NB_EVENTS_SOUND_DOSE,
             "CSD updates");
 
     private int mMcc = 0;
 
-    private final boolean mEnableCsd;
-
-    final Object mSafeMediaVolumeStateLock = new Object();
+    private final Object mSafeMediaVolumeStateLock = new Object();
     private int mSafeMediaVolumeState;
 
     // Used when safe volume warning message display is requested by setStreamVolume(). In this
@@ -148,10 +154,18 @@ public class SoundDoseHelper {
     @NonNull private final AudioHandler mAudioHandler;
     @NonNull private final ISafeHearingVolumeController mVolumeController;
 
+    private final boolean mEnableCsd;
+
     private ISoundDose mSoundDose;
+
+    private final Object mCsdStateLock = new Object();
+
+    @GuardedBy("mCsdStateLock")
     private float mCurrentCsd = 0.f;
     // dose at which the next dose reached warning occurs
+    @GuardedBy("mCsdStateLock")
     private float mNextCsdWarning = 1.0f;
+    @GuardedBy("mCsdStateLock")
     private final List<SoundDoseRecord> mDoseRecords = new ArrayList<>();
 
     private final Context mContext;
@@ -169,11 +183,16 @@ public class SoundDoseHelper {
         }
 
         public void onNewCsdValue(float currentCsd, SoundDoseRecord[] records) {
+            if (!mEnableCsd) {
+                Log.w(TAG, "onNewCsdValue: csd not supported, ignoring value");
+                return;
+            }
+
             Log.i(TAG, "onNewCsdValue: " + currentCsd);
-            if (mCurrentCsd < currentCsd) {
-                // dose increase: going over next threshold?
-                if ((mCurrentCsd < mNextCsdWarning) && (currentCsd >= mNextCsdWarning)) {
-                    if (mEnableCsd) {
+            synchronized (mCsdStateLock) {
+                if (mCurrentCsd < currentCsd) {
+                    // dose increase: going over next threshold?
+                    if ((mCurrentCsd < mNextCsdWarning) && (currentCsd >= mNextCsdWarning)) {
                         if (mNextCsdWarning == 5.0f) {
                             // 500% dose repeat
                             mVolumeController.postDisplayCsdWarning(
@@ -188,17 +207,18 @@ public class SoundDoseHelper {
                                     getTimeoutMsForWarning(
                                             AudioManager.CSD_WARNING_DOSE_REACHED_1X));
                         }
+                        mNextCsdWarning += 1.0f;
                     }
-                    mNextCsdWarning += 1.0f;
+                } else {
+                    // dose decrease: dropping below previous threshold of warning?
+                    if ((currentCsd < mNextCsdWarning - 1.0f) && (
+                            mNextCsdWarning >= 2.0f)) {
+                        mNextCsdWarning -= 1.0f;
+                    }
                 }
-            } else {
-                // dose decrease: dropping below previous threshold of warning?
-                if ((currentCsd < mNextCsdWarning - 1.0f) && (mNextCsdWarning >= 2.0f)) {
-                    mNextCsdWarning -= 1.0f;
-                }
+                mCurrentCsd = currentCsd;
+                updateSoundDoseRecords_l(records, currentCsd);
             }
-            mCurrentCsd = currentCsd;
-            updateSoundDoseRecords(records, currentCsd);
         }
     };
 
@@ -213,20 +233,22 @@ public class SoundDoseHelper {
 
         mContext = context;
 
-        mSafeMediaVolumeState = mSettings.getGlobalInt(audioService.getContentResolver(),
-                Settings.Global.AUDIO_SAFE_VOLUME_STATE, 0);
-
         mEnableCsd = mContext.getResources().getBoolean(R.bool.config_audio_csd_enabled_default);
+        if (mEnableCsd) {
+            mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_DISABLED;
+        } else {
+            mSafeMediaVolumeState = mSettings.getGlobalInt(audioService.getContentResolver(),
+                    Settings.Global.AUDIO_SAFE_VOLUME_STATE, 0);
+        }
 
         // The default safe volume index read here will be replaced by the actual value when
-        // the mcc is read by onConfigureSafeVolume()
+        // the mcc is read by onConfigureSafeMedia()
+        // For now we use the same index for RS2 initial warning with CSD
         mSafeMediaVolumeIndex = mContext.getResources().getInteger(
                 R.integer.config_safe_media_volume_index) * 10;
 
         mAlarmManager = (AlarmManager) mContext.getSystemService(
                 Context.ALARM_SERVICE);
-
-        initCsd();
     }
 
     float getRs2Value() {
@@ -455,8 +477,8 @@ public class SoundDoseHelper {
         }
     }
 
-    /*package*/ void configureSafeMediaVolume(boolean forced, String caller) {
-        int msg = MSG_CONFIGURE_SAFE_MEDIA_VOLUME;
+    /*package*/ void configureSafeMedia(boolean forced, String caller) {
+        int msg = MSG_CONFIGURE_SAFE_MEDIA;
         mAudioHandler.removeMessages(msg);
 
         long time = 0;
@@ -506,8 +528,8 @@ public class SoundDoseHelper {
 
     /*package*/ void handleMessage(Message msg) {
         switch (msg.what) {
-            case MSG_CONFIGURE_SAFE_MEDIA_VOLUME:
-                onConfigureSafeVolume((msg.arg1 == 1), (String) msg.obj);
+            case MSG_CONFIGURE_SAFE_MEDIA:
+                onConfigureSafeMedia((msg.arg1 == 1), (String) msg.obj);
                 break;
             case MSG_PERSIST_SAFE_VOLUME_STATE:
                 onPersistSafeVolumeState(msg.arg1);
@@ -518,8 +540,13 @@ public class SoundDoseHelper {
                         Settings.Secure.UNSAFE_VOLUME_MUSIC_ACTIVE_MS, musicActiveMs,
                         UserHandle.USER_CURRENT);
                 break;
+            case MSG_PERSIST_CSD_VALUES:
+                onPersistSoundDoseRecords();
+                break;
+            default:
+                Log.e(TAG, "Unexpected msg to handle: " + msg.what);
+                break;
         }
-
     }
 
     /*package*/ void dump(PrintWriter pw) {
@@ -539,33 +566,44 @@ public class SoundDoseHelper {
 
     /*package*/void reset() {
         Log.d(TAG, "Reset the sound dose helper");
-        initCsd();
-    }
-
-    private void initCsd() {
-        synchronized (mSafeMediaVolumeStateLock) {
-            if (mEnableCsd) {
-                Log.v(TAG, "Initializing sound dose");
-
-                mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_DISABLED;
-                mSoundDose = AudioSystem.getSoundDoseInterface(mSoundDoseCallback);
-                try {
-                    if (mSoundDose != null && mSoundDose.asBinder().isBinderAlive()) {
-                        if (mCurrentCsd != 0.f) {
-                            Log.d(TAG, "Resetting the saved sound dose value " + mCurrentCsd);
-                            SoundDoseRecord[] records = mDoseRecords.toArray(
-                                    new SoundDoseRecord[0]);
-                            mSoundDose.resetCsd(mCurrentCsd, records);
-                        }
+        mSoundDose = AudioSystem.getSoundDoseInterface(mSoundDoseCallback);
+        synchronized (mCsdStateLock) {
+            try {
+                if (mSoundDose != null && mSoundDose.asBinder().isBinderAlive()) {
+                    if (mCurrentCsd != 0.f) {
+                        Log.d(TAG,
+                                "Resetting the saved sound dose value " + mCurrentCsd);
+                        SoundDoseRecord[] records = mDoseRecords.toArray(
+                                new SoundDoseRecord[0]);
+                        mSoundDose.resetCsd(mCurrentCsd, records);
                     }
-                } catch (RemoteException e) {
-                    // noop
                 }
+            } catch (RemoteException e) {
+                // noop
             }
         }
     }
 
-    private void onConfigureSafeVolume(boolean force, String caller) {
+    private void initCsd() {
+        if (mEnableCsd) {
+            Log.v(TAG, "Initializing sound dose");
+
+            synchronized (mCsdStateLock) {
+                // Restore persisted values
+                mCurrentCsd = parseGlobalSettingFloat(
+                        Settings.Global.AUDIO_SAFE_CSD_CURRENT_VALUE, /* defaultValue= */0.f);
+                mNextCsdWarning = parseGlobalSettingFloat(
+                        Settings.Global.AUDIO_SAFE_CSD_NEXT_WARNING, /* defaultValue= */1.f);
+                mDoseRecords.addAll(persistedStringToRecordList(
+                        mSettings.getGlobalString(mAudioService.getContentResolver(),
+                                Settings.Global.AUDIO_SAFE_CSD_DOSE_RECORDS)));
+            }
+
+            reset();
+        }
+    }
+
+    private void onConfigureSafeMedia(boolean force, String caller) {
         synchronized (mSafeMediaVolumeStateLock) {
             int mcc = mContext.getResources().getConfiguration().mcc;
             if ((mMcc != mcc) || ((mMcc == 0) && force)) {
@@ -610,6 +648,10 @@ public class SoundDoseHelper {
                                 persistedState, /*arg2=*/0,
                                 /*obj=*/null), /*delay=*/0);
             }
+        }
+
+        if (mEnableCsd) {
+            initCsd();
         }
     }
 
@@ -701,7 +743,8 @@ public class SoundDoseHelper {
         return null;
     }
 
-    private void updateSoundDoseRecords(SoundDoseRecord[] newRecords, float currentCsd) {
+    @GuardedBy("mCsdStateLock")
+    private void updateSoundDoseRecords_l(SoundDoseRecord[] newRecords, float currentCsd) {
         long totalDuration = 0;
         for (SoundDoseRecord record : newRecords) {
             Log.i(TAG, "  new record: " + record);
@@ -721,7 +764,85 @@ public class SoundDoseHelper {
             }
         }
 
+        mAudioHandler.sendMessageAtTime(mAudioHandler.obtainMessage(MSG_PERSIST_CSD_VALUES,
+                /* arg1= */0, /* arg2= */0, /* obj= */null), /* delay= */0);
+
         mLogger.enqueue(SoundDoseEvent.getDoseUpdateEvent(currentCsd, totalDuration));
+    }
+
+    private void onPersistSoundDoseRecords() {
+        synchronized (mCsdStateLock) {
+            mSettings.putGlobalString(mAudioService.getContentResolver(),
+                    Settings.Global.AUDIO_SAFE_CSD_CURRENT_VALUE,
+                    Float.toString(mCurrentCsd));
+            mSettings.putGlobalString(mAudioService.getContentResolver(),
+                    Settings.Global.AUDIO_SAFE_CSD_NEXT_WARNING,
+                    Float.toString(mNextCsdWarning));
+            mSettings.putGlobalString(mAudioService.getContentResolver(),
+                    Settings.Global.AUDIO_SAFE_CSD_DOSE_RECORDS,
+                    mDoseRecords.stream().map(
+                            SoundDoseHelper::recordToPersistedString).collect(
+                            Collectors.joining(PERSIST_CSD_RECORD_SEPARATOR_CHAR)));
+        }
+    }
+
+    private static String recordToPersistedString(SoundDoseRecord record) {
+        return record.timestamp
+                + PERSIST_CSD_RECORD_FIELD_SEPARATOR + record.duration
+                + PERSIST_CSD_RECORD_FIELD_SEPARATOR + record.value
+                + PERSIST_CSD_RECORD_FIELD_SEPARATOR + record.averageMel;
+    }
+
+    private static List<SoundDoseRecord> persistedStringToRecordList(String records) {
+        if (records == null || records.isEmpty()) {
+            return null;
+        }
+        return Arrays.stream(TextUtils.split(records, PERSIST_CSD_RECORD_SEPARATOR)).map(
+                SoundDoseHelper::persistedStringToRecord).filter(Objects::nonNull).collect(
+                Collectors.toList());
+    }
+
+    private static SoundDoseRecord persistedStringToRecord(String record) {
+        if (record == null || record.isEmpty()) {
+            return null;
+        }
+        final String[] fields = TextUtils.split(record, PERSIST_CSD_RECORD_FIELD_SEPARATOR);
+        if (fields.length != 4) {
+            Log.w(TAG, "Expecting 4 fields for a SoundDoseRecord, parsed " + fields.length);
+            return null;
+        }
+
+        final SoundDoseRecord sdRecord = new SoundDoseRecord();
+        try {
+            sdRecord.timestamp = Long.parseLong(fields[0]);
+            sdRecord.duration = Integer.parseInt(fields[1]);
+            sdRecord.value = Float.parseFloat(fields[2]);
+            sdRecord.averageMel = Float.parseFloat(fields[3]);
+        } catch (NumberFormatException e) {
+            Log.e(TAG, "Unable to parse persisted SoundDoseRecord: " + record, e);
+            return null;
+        }
+
+        return sdRecord;
+    }
+
+    private float parseGlobalSettingFloat(String audioSafeCsdCurrentValue, float defaultValue) {
+        String stringValue = mSettings.getGlobalString(mAudioService.getContentResolver(),
+                audioSafeCsdCurrentValue);
+        if (stringValue == null || stringValue.isEmpty()) {
+            Log.v(TAG, "No value stored in settings " + audioSafeCsdCurrentValue);
+            return defaultValue;
+        }
+
+        float value;
+        try {
+            value = Float.parseFloat(stringValue);
+        } catch (NumberFormatException e) {
+            Log.e(TAG, "Error parsing float from settings " + audioSafeCsdCurrentValue, e);
+            value = defaultValue;
+        }
+
+        return value;
     }
 
     // StreamVolumeCommand contains the information needed to defer the process of
