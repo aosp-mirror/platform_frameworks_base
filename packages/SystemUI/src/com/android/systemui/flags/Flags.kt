@@ -528,7 +528,6 @@ object Flags {
         unreleasedFlag(1600, "a11y_floating_menu_fling_spring_animations")
 
     // 1700 - clipboard
-    @JvmField val CLIPBOARD_OVERLAY_REFACTOR = releasedFlag(1700, "clipboard_overlay_refactor")
     @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = releasedFlag(1701, "clipboard_remote_behavior")
 
     // 1800 - shade container
