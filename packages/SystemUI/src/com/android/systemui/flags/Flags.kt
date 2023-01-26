@@ -446,6 +446,12 @@ object Flags {
             teamfood = false
         )
 
+    // TODO(b/198643358): Tracking bug
+    @Keep
+    @JvmField
+    val ENABLE_PIP_SIZE_LARGE_SCREEN =
+        sysPropBooleanFlag(1114, "persist.wm.debug.enable_pip_size_large_screen", default = false)
+
     // 1200 - predictive back
     @Keep
     @JvmField
