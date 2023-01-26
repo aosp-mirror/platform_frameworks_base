@@ -26,6 +26,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricFaceConstants;
@@ -87,6 +88,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     private CryptoObject mCryptoObject;
     private Face mRemovalFace;
     private Handler mHandler;
+    private List<FaceSensorPropertiesInternal> mProps = new ArrayList<>();
 
     private final IFaceServiceReceiver mServiceReceiver = new IFaceServiceReceiver.Stub() {
 
@@ -168,6 +170,16 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             Slog.v(TAG, "FaceAuthenticationManagerService was null");
         }
         mHandler = new MyHandler(context);
+        if (context.checkCallingOrSelfPermission(USE_BIOMETRIC_INTERNAL)
+                == PackageManager.PERMISSION_GRANTED) {
+            addAuthenticatorsRegisteredCallback(new IFaceAuthenticatorsRegisteredCallback.Stub() {
+                @Override
+                public void onAllAuthenticatorsRegistered(
+                        @NonNull List<FaceSensorPropertiesInternal> sensors) {
+                    mProps = sensors;
+                }
+            });
+        }
     }
 
     /**
@@ -664,14 +676,14 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     @NonNull
     public List<FaceSensorPropertiesInternal> getSensorPropertiesInternal() {
         try {
-            if (mService == null) {
-                return new ArrayList<>();
+            if (!mProps.isEmpty() || mService == null) {
+                return mProps;
             }
             return mService.getSensorPropertiesInternal(mContext.getOpPackageName());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
-        return new ArrayList<>();
+        return mProps;
     }
 
     /**

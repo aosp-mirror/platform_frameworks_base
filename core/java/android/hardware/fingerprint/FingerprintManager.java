@@ -153,6 +153,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     @Nullable private RemoveTracker mRemoveTracker;
     private Handler mHandler;
     @Nullable private float[] mEnrollStageThresholds;
+    private List<FingerprintSensorPropertiesInternal> mProps = new ArrayList<>();
 
     /**
      * Retrieves a list of properties for all fingerprint sensors on the device.
@@ -1185,8 +1186,8 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     @NonNull
     public List<FingerprintSensorPropertiesInternal> getSensorPropertiesInternal() {
         try {
-            if (mService == null) {
-                return new ArrayList<>();
+            if (!mProps.isEmpty() || mService == null) {
+                return mProps;
             }
             return mService.getSensorPropertiesInternal(mContext.getOpPackageName());
         } catch (RemoteException e) {
@@ -1502,6 +1503,17 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             Slog.v(TAG, "FingerprintService was null");
         }
         mHandler = new MyHandler(context);
+        if (context.checkCallingOrSelfPermission(USE_BIOMETRIC_INTERNAL)
+                == PackageManager.PERMISSION_GRANTED) {
+            addAuthenticatorsRegisteredCallback(
+                    new IFingerprintAuthenticatorsRegisteredCallback.Stub() {
+                        @Override
+                        public void onAllAuthenticatorsRegistered(
+                                @NonNull List<FingerprintSensorPropertiesInternal> sensors) {
+                            mProps = sensors;
+                        }
+                    });
+        }
     }
 
     private int getCurrentUserId() {
