@@ -298,6 +298,18 @@ public class DisplayModeDirectorTest {
         assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(60);
         assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(60);
         assertThat(desiredSpecs.baseModeId).isEqualTo(60);
+
+        votes.clear();
+        votes.put(Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE,
+                Vote.forRenderFrameRates(0, 60 - error));
+        votes.put(Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE,
+                Vote.forRenderFrameRates(60 + error, Float.POSITIVE_INFINITY));
+        director.injectVotesByDisplay(votesByDisplay);
+        desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
+
+        assertThat(desiredSpecs.primary.render.min).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.primary.render.max).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.baseModeId).isEqualTo(60);
     }
 
     @Test
