@@ -157,7 +157,7 @@ interface IAccessibilityServiceConnection {
     void setInstalledAndEnabledServices(in List<AccessibilityServiceInfo> infos);
 
     List<AccessibilityServiceInfo> getInstalledAndEnabledServices();
-    void attachAccessibilityOverlayToDisplay(int displayId, in SurfaceControl sc);
+    void attachAccessibilityOverlayToDisplay(int interactionId, int displayId, in SurfaceControl sc, IAccessibilityInteractionConnectionCallback callback);
 
-    void attachAccessibilityOverlayToWindow(int accessibilityWindowId, in SurfaceControl sc);
+    void attachAccessibilityOverlayToWindow(int interactionId, int accessibilityWindowId, in SurfaceControl sc, IAccessibilityInteractionConnectionCallback callback);
 }

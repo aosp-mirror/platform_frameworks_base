@@ -68,4 +68,9 @@ oneway interface IAccessibilityInteractionConnectionCallback {
     * Sends an error code for a window screenshot request to the requesting client.
     */
     void sendTakeScreenshotOfWindowError(int errorCode, int interactionId);
+
+    /**
+    * Sends an result code for an attach overlay request to the requesting client.
+    */
+    void sendAttachOverlayResult(int result, int interactionId);
 }

@@ -383,6 +383,9 @@ public class PipAccessibilityInteractionConnection {
         }
 
         @Override
-    public void attachAccessibilityOverlayToWindow(SurfaceControl sc) {}
+        public void attachAccessibilityOverlayToWindow(
+                SurfaceControl sc,
+                int interactionId,
+                IAccessibilityInteractionConnectionCallback callback) {}
 }
 }

@@ -131,6 +131,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowAttributes;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
+import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 import android.view.accessibility.IAccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
 import android.view.accessibility.IWindowMagnificationConnection;
@@ -5343,16 +5344,27 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
-    public void attachAccessibilityOverlayToDisplay(int displayId, SurfaceControl sc) {
+    public void attachAccessibilityOverlayToDisplay(
+            int interactionId,
+            int displayId,
+            SurfaceControl sc,
+            IAccessibilityInteractionConnectionCallback callback) {
         mMainHandler.sendMessage(
                 obtainMessage(
                         AccessibilityManagerService::attachAccessibilityOverlayToDisplayInternal,
                         this,
+                        interactionId,
                         displayId,
-                        sc));
+                        sc,
+                        callback));
     }
 
-    void attachAccessibilityOverlayToDisplayInternal(int displayId, SurfaceControl sc) {
+    void attachAccessibilityOverlayToDisplayInternal(
+            int interactionId,
+            int displayId,
+            SurfaceControl sc,
+            IAccessibilityInteractionConnectionCallback callback) {
+        int result;
         if (!mA11yOverlayLayers.contains(displayId)) {
             mA11yOverlayLayers.put(displayId, mWindowManagerService.getA11yOverlayLayer(displayId));
         }
@@ -5360,10 +5372,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         if (parent == null) {
             Slog.e(LOG_TAG, "Unable to get accessibility overlay SurfaceControl.");
             mA11yOverlayLayers.remove(displayId);
-            return;
+            result = AccessibilityService.OVERLAY_RESULT_INVALID;
+        } else {
+            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+            t.reparent(sc, parent).setTrustedOverlay(sc, true).apply();
+            t.close();
+            result = AccessibilityService.OVERLAY_RESULT_SUCCESS;
         }
-        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-        t.reparent(sc, parent).setTrustedOverlay(sc, true).apply();
-        t.close();
+        // Send the result back to the service.
+        try {
+            callback.sendAttachOverlayResult(result, interactionId);
+        } catch (RemoteException re) {
+            Slog.e(LOG_TAG, "Exception while attaching overlay.", re);
+            // the other side will time out
+        }
     }
 }

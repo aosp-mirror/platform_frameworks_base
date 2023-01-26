@@ -16,6 +16,7 @@
 
 package com.android.server.accessibility;
 
+import android.accessibilityservice.AccessibilityService;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -280,5 +281,12 @@ public class ActionReplacingCallback extends IAccessibilityInteractionConnection
             info.setLongClickable(mNodeWithReplacementActions.isLongClickable());
             info.setDismissable(mNodeWithReplacementActions.isDismissable());
         }
+    }
+
+    @Override
+    public void sendAttachOverlayResult(
+            @AccessibilityService.AttachOverlayResult int result, int interactionId)
+            throws RemoteException {
+        mServiceCallback.sendAttachOverlayResult(result, interactionId);
     }
 }
