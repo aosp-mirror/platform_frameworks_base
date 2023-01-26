@@ -126,7 +126,7 @@ public class EconomyManager {
     public static final String KEY_ENABLE_TARE_MODE = "enable_tare_mode";
     public static final String KEY_ENABLE_POLICY_ALARM = "enable_policy_alarm";
     public static final String KEY_ENABLE_POLICY_JOB_SCHEDULER = "enable_policy_job";
-    public static final int DEFAULT_ENABLE_TARE_MODE = ENABLED_MODE_ON;
+    public static final int DEFAULT_ENABLE_TARE_MODE = ENABLED_MODE_OFF;
     public static final boolean DEFAULT_ENABLE_POLICY_ALARM = true;
     public static final boolean DEFAULT_ENABLE_POLICY_JOB_SCHEDULER = true;
 
