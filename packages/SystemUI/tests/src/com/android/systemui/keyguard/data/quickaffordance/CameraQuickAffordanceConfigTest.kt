@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.data.quickaffordance
 
 import android.app.StatusBarManager
 import android.content.Context
+import android.content.pm.PackageManager
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.camera.CameraGestureHelper
@@ -32,7 +33,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import org.mockito.Mock
-import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -43,16 +43,19 @@ class CameraQuickAffordanceConfigTest : SysuiTestCase() {
 
     @Mock private lateinit var cameraGestureHelper: CameraGestureHelper
     @Mock private lateinit var context: Context
+    @Mock private lateinit var packageManager: PackageManager
 
     private lateinit var underTest: CameraQuickAffordanceConfig
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        setLaunchable(true)
 
         underTest =
             CameraQuickAffordanceConfig(
                 context,
+                packageManager,
             ) {
                 cameraGestureHelper
             }
@@ -86,6 +89,7 @@ class CameraQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     private fun setLaunchable(isLaunchable: Boolean) {
-        whenever(cameraGestureHelper.canCameraGestureBeLaunched(anyInt())).thenReturn(isLaunchable)
+        whenever(packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY))
+            .thenReturn(isLaunchable)
     }
 }
