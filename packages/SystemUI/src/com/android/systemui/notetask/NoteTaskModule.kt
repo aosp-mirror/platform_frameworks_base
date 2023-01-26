@@ -51,7 +51,7 @@ internal interface NoteTaskModule {
             featureFlags: FeatureFlags,
             roleManager: RoleManager,
         ): Boolean {
-            val isRoleAvailable = roleManager.isRoleAvailable(NoteTaskIntentResolver.NOTE_ROLE)
+            val isRoleAvailable = roleManager.isRoleAvailable(NoteTaskIntentResolver.ROLE_NOTES)
             val isFeatureEnabled = featureFlags.isEnabled(Flags.NOTE_TASKS)
             return isRoleAvailable && isFeatureEnabled
         }
