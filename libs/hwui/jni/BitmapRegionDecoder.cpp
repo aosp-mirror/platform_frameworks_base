@@ -17,17 +17,7 @@
 #undef LOG_TAG
 #define LOG_TAG "BitmapRegionDecoder"
 
-#include "BitmapFactory.h"
-#include "CreateJavaOutputStreamAdaptor.h"
-#include "GraphicsJNI.h"
-#include "Utils.h"
-
 #include "BitmapRegionDecoder.h"
-#include "SkBitmap.h"
-#include "SkCodec.h"
-#include "SkColorSpace.h"
-#include "SkData.h"
-#include "SkStream.h"
 
 #include <HardwareBitmapUploader.h>
 #include <androidfw/Asset.h>
@@ -35,10 +25,131 @@
 
 #include <memory>
 
+#include "BitmapFactory.h"
+#include "CreateJavaOutputStreamAdaptor.h"
+#include "Gainmap.h"
+#include "GraphicsJNI.h"
+#include "SkBitmap.h"
+#include "SkCodec.h"
+#include "SkColorSpace.h"
+#include "SkData.h"
+#include "SkGainmapInfo.h"
+#include "SkStream.h"
+#include "SkStreamPriv.h"
+#include "Utils.h"
+
 using namespace android;
 
+namespace android {
+class BitmapRegionDecoderWrapper {
+public:
+    static std::unique_ptr<BitmapRegionDecoderWrapper> Make(sk_sp<SkData> data) {
+        std::unique_ptr<skia::BitmapRegionDecoder> mainImageBRD =
+                skia::BitmapRegionDecoder::Make(std::move(data));
+        if (!mainImageBRD) {
+            return nullptr;
+        }
+
+        SkGainmapInfo gainmapInfo;
+        std::unique_ptr<SkStream> gainmapStream;
+        std::unique_ptr<skia::BitmapRegionDecoder> gainmapBRD = nullptr;
+        if (mainImageBRD->getAndroidGainmap(&gainmapInfo, &gainmapStream)) {
+            sk_sp<SkData> data = nullptr;
+            if (gainmapStream->getMemoryBase()) {
+                // It is safe to make without copy because we'll hold onto the stream.
+                data = SkData::MakeWithoutCopy(gainmapStream->getMemoryBase(),
+                                               gainmapStream->getLength());
+            } else {
+                data = SkCopyStreamToData(gainmapStream.get());
+                // We don't need to hold the stream anymore
+                gainmapStream = nullptr;
+            }
+            gainmapBRD = skia::BitmapRegionDecoder::Make(std::move(data));
+        }
+
+        return std::unique_ptr<BitmapRegionDecoderWrapper>(
+                new BitmapRegionDecoderWrapper(std::move(mainImageBRD), std::move(gainmapBRD),
+                                               gainmapInfo, std::move(gainmapStream)));
+    }
+
+    SkEncodedImageFormat getEncodedFormat() { return mMainImageBRD->getEncodedFormat(); }
+
+    SkColorType computeOutputColorType(SkColorType requestedColorType) {
+        return mMainImageBRD->computeOutputColorType(requestedColorType);
+    }
+
+    sk_sp<SkColorSpace> computeOutputColorSpace(SkColorType outputColorType,
+                                                sk_sp<SkColorSpace> prefColorSpace = nullptr) {
+        return mMainImageBRD->computeOutputColorSpace(outputColorType, prefColorSpace);
+    }
+
+    bool decodeRegion(SkBitmap* bitmap, skia::BRDAllocator* allocator, const SkIRect& desiredSubset,
+                      int sampleSize, SkColorType colorType, bool requireUnpremul,
+                      sk_sp<SkColorSpace> prefColorSpace) {
+        return mMainImageBRD->decodeRegion(bitmap, allocator, desiredSubset, sampleSize, colorType,
+                                           requireUnpremul, prefColorSpace);
+    }
+
+    bool decodeGainmapRegion(sp<uirenderer::Gainmap>* outGainmap, const SkIRect& desiredSubset,
+                             int sampleSize, bool requireUnpremul) {
+        SkColorType decodeColorType = mGainmapBRD->computeOutputColorType(kN32_SkColorType);
+        sk_sp<SkColorSpace> decodeColorSpace =
+                mGainmapBRD->computeOutputColorSpace(decodeColorType, nullptr);
+        SkBitmap bm;
+        HeapAllocator heapAlloc;
+        if (!mGainmapBRD->decodeRegion(&bm, &heapAlloc, desiredSubset, sampleSize, decodeColorType,
+                                       requireUnpremul, decodeColorSpace)) {
+            ALOGE("Error decoding Gainmap region");
+            return false;
+        }
+        sk_sp<Bitmap> nativeBitmap(heapAlloc.getStorageObjAndReset());
+        if (!nativeBitmap) {
+            ALOGE("OOM allocating Bitmap for Gainmap");
+            return false;
+        }
+        auto gainmap = sp<uirenderer::Gainmap>::make();
+        if (!gainmap) {
+            ALOGE("OOM allocating Gainmap");
+            return false;
+        }
+        gainmap->info = mGainmapInfo;
+        gainmap->bitmap = std::move(nativeBitmap);
+        *outGainmap = std::move(gainmap);
+        return true;
+    }
+
+    SkIRect calculateGainmapRegion(const SkIRect& mainImageRegion) {
+        const float scaleX = ((float)mGainmapBRD->width()) / mMainImageBRD->width();
+        const float scaleY = ((float)mGainmapBRD->height()) / mMainImageBRD->height();
+        // TODO: Account for rounding error?
+        return SkIRect::MakeLTRB(mainImageRegion.left() * scaleX, mainImageRegion.top() * scaleY,
+                                 mainImageRegion.right() * scaleX,
+                                 mainImageRegion.bottom() * scaleY);
+    }
+
+    bool hasGainmap() { return mGainmapBRD != nullptr; }
+
+    int width() const { return mMainImageBRD->width(); }
+    int height() const { return mMainImageBRD->height(); }
+
+private:
+    BitmapRegionDecoderWrapper(std::unique_ptr<skia::BitmapRegionDecoder> mainImageBRD,
+                               std::unique_ptr<skia::BitmapRegionDecoder> gainmapBRD,
+                               SkGainmapInfo info, std::unique_ptr<SkStream> stream)
+            : mMainImageBRD(std::move(mainImageBRD))
+            , mGainmapBRD(std::move(gainmapBRD))
+            , mGainmapInfo(info)
+            , mGainmapStream(std::move(stream)) {}
+
+    std::unique_ptr<skia::BitmapRegionDecoder> mMainImageBRD;
+    std::unique_ptr<skia::BitmapRegionDecoder> mGainmapBRD;
+    SkGainmapInfo mGainmapInfo;
+    std::unique_ptr<SkStream> mGainmapStream;
+};
+}  // namespace android
+
 static jobject createBitmapRegionDecoder(JNIEnv* env, sk_sp<SkData> data) {
-    auto brd = skia::BitmapRegionDecoder::Make(std::move(data));
+    auto brd = android::BitmapRegionDecoderWrapper::Make(std::move(data));
     if (!brd) {
         doThrowIOE(env, "Image format not supported");
         return nullObjectReturn("CreateBitmapRegionDecoder returned null");
@@ -136,7 +247,7 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
         recycledBytes = recycledBitmap->getAllocationByteCount();
     }
 
-    auto* brd = reinterpret_cast<skia::BitmapRegionDecoder*>(brdHandle);
+    auto* brd = reinterpret_cast<BitmapRegionDecoderWrapper*>(brdHandle);
     SkColorType decodeColorType = brd->computeOutputColorType(colorType);
 
     if (isHardware) {
@@ -196,9 +307,22 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
                 GraphicsJNI::getColorSpace(env, decodeColorSpace.get(), decodeColorType));
     }
 
+    sp<uirenderer::Gainmap> gainmap;
+    bool hasGainmap = brd->hasGainmap();
+    if (hasGainmap) {
+        SkIRect gainmapSubset = brd->calculateGainmapRegion(subset);
+        if (!brd->decodeGainmapRegion(&gainmap, gainmapSubset, sampleSize, requireUnpremul)) {
+            // If there is an error decoding Gainmap - we don't fail. We just don't provide Gainmap
+            hasGainmap = false;
+        }
+    }
+
     // If we may have reused a bitmap, we need to indicate that the pixels have changed.
     if (javaBitmap) {
         recycleAlloc.copyIfNecessary();
+        if (hasGainmap) {
+            recycledBitmap->setGainmap(std::move(gainmap));
+        }
         bitmap::reinitBitmap(env, javaBitmap, recycledBitmap->info(), !requireUnpremul);
         return javaBitmap;
     }
@@ -209,23 +333,30 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
     }
     if (isHardware) {
         sk_sp<Bitmap> hardwareBitmap = Bitmap::allocateHardwareBitmap(bitmap);
+        if (hasGainmap) {
+            hardwareBitmap->setGainmap(std::move(gainmap));
+        }
         return bitmap::createBitmap(env, hardwareBitmap.release(), bitmapCreateFlags);
     }
-    return android::bitmap::createBitmap(env, heapAlloc.getStorageObjAndReset(), bitmapCreateFlags);
+    Bitmap* heapBitmap = heapAlloc.getStorageObjAndReset();
+    if (hasGainmap && heapBitmap != nullptr) {
+        heapBitmap->setGainmap(std::move(gainmap));
+    }
+    return android::bitmap::createBitmap(env, heapBitmap, bitmapCreateFlags);
 }
 
 static jint nativeGetHeight(JNIEnv* env, jobject, jlong brdHandle) {
-    auto* brd = reinterpret_cast<skia::BitmapRegionDecoder*>(brdHandle);
+    auto* brd = reinterpret_cast<BitmapRegionDecoderWrapper*>(brdHandle);
     return static_cast<jint>(brd->height());
 }
 
 static jint nativeGetWidth(JNIEnv* env, jobject, jlong brdHandle) {
-    auto* brd = reinterpret_cast<skia::BitmapRegionDecoder*>(brdHandle);
+    auto* brd = reinterpret_cast<BitmapRegionDecoderWrapper*>(brdHandle);
     return static_cast<jint>(brd->width());
 }
 
 static void nativeClean(JNIEnv* env, jobject, jlong brdHandle) {
-    auto* brd = reinterpret_cast<skia::BitmapRegionDecoder*>(brdHandle);
+    auto* brd = reinterpret_cast<BitmapRegionDecoderWrapper*>(brdHandle);
     delete brd;
 }
 
