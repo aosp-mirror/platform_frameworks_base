@@ -327,7 +327,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
         // appropriately.
         activeViews.remove(displayInfo)
         listeners.forEach {
-            it.onInfoPermanentlyRemoved(id)
+            it.onInfoPermanentlyRemoved(id, removalReason)
         }
 
         // No need to time the view out since it's already gone
@@ -393,7 +393,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
             activeViews.remove(it)
             logger.logViewExpiration(it.info)
             listeners.forEach { listener ->
-                listener.onInfoPermanentlyRemoved(it.info.id)
+                listener.onInfoPermanentlyRemoved(it.info.id, REMOVAL_REASON_TIME_EXPIRED)
             }
         }
     }
@@ -457,7 +457,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
          * Called whenever a [DisplayInfo] with the given [id] has been removed and will never be
          * displayed again (unless another call to [updateView] is made).
          */
-        fun onInfoPermanentlyRemoved(id: String)
+        fun onInfoPermanentlyRemoved(id: String, reason: String)
     }
 
     /** A container for all the display-related state objects. */
@@ -494,6 +494,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
 }
 
 private const val REMOVAL_REASON_TIMEOUT = "TIMEOUT"
+private const val REMOVAL_REASON_TIME_EXPIRED = "TIMEOUT_EXPIRED_BEFORE_REDISPLAY"
 private const val MIN_REQUIRED_TIME_FOR_REDISPLAY = 1000
 
 private data class IconInfo(

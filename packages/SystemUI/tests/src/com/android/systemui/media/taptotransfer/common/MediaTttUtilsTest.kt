@@ -25,7 +25,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.temporarydisplay.TemporaryViewInfo
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -41,7 +40,6 @@ class MediaTttUtilsTest : SysuiTestCase() {
     private lateinit var appIconFromPackageName: Drawable
     @Mock private lateinit var packageManager: PackageManager
     @Mock private lateinit var applicationInfo: ApplicationInfo
-    @Mock private lateinit var logger: MediaTttLogger<TemporaryViewInfo>
 
     @Before
     fun setUp() {
@@ -67,18 +65,28 @@ class MediaTttUtilsTest : SysuiTestCase() {
 
     @Test
     fun getIconInfoFromPackageName_nullPackageName_returnsDefault() {
-        val iconInfo =
-            MediaTttUtils.getIconInfoFromPackageName(context, appPackageName = null, logger)
+        val iconInfo = MediaTttUtils.getIconInfoFromPackageName(context, appPackageName = null) {}
 
         assertThat(iconInfo.isAppIcon).isFalse()
         assertThat(iconInfo.contentDescription.loadContentDescription(context))
             .isEqualTo(context.getString(R.string.media_output_dialog_unknown_launch_app_name))
         assertThat(iconInfo.icon).isEqualTo(MediaTttIcon.Resource(R.drawable.ic_cast))
+    }
+
+    @Test
+    fun getIconInfoFromPackageName_nullPackageName_exceptionFnNotTriggered() {
+        var exceptionTriggered = false
+
+        MediaTttUtils.getIconInfoFromPackageName(context, appPackageName = null) {
+            exceptionTriggered = true
+        }
+
+        assertThat(exceptionTriggered).isFalse()
     }
 
     @Test
     fun getIconInfoFromPackageName_invalidPackageName_returnsDefault() {
-        val iconInfo = MediaTttUtils.getIconInfoFromPackageName(context, "fakePackageName", logger)
+        val iconInfo = MediaTttUtils.getIconInfoFromPackageName(context, "fakePackageName") {}
 
         assertThat(iconInfo.isAppIcon).isFalse()
         assertThat(iconInfo.contentDescription.loadContentDescription(context))
@@ -87,12 +95,34 @@ class MediaTttUtilsTest : SysuiTestCase() {
     }
 
     @Test
+    fun getIconInfoFromPackageName_invalidPackageName_exceptionFnTriggered() {
+        var exceptionTriggered = false
+
+        MediaTttUtils.getIconInfoFromPackageName(context, appPackageName = "fakePackageName") {
+            exceptionTriggered = true
+        }
+
+        assertThat(exceptionTriggered).isTrue()
+    }
+
+    @Test
     fun getIconInfoFromPackageName_validPackageName_returnsAppInfo() {
-        val iconInfo = MediaTttUtils.getIconInfoFromPackageName(context, PACKAGE_NAME, logger)
+        val iconInfo = MediaTttUtils.getIconInfoFromPackageName(context, PACKAGE_NAME) {}
 
         assertThat(iconInfo.isAppIcon).isTrue()
         assertThat(iconInfo.icon).isEqualTo(MediaTttIcon.Loaded(appIconFromPackageName))
         assertThat(iconInfo.contentDescription.loadContentDescription(context)).isEqualTo(APP_NAME)
+    }
+
+    @Test
+    fun getIconInfoFromPackageName_validPackageName_exceptionFnNotTriggered() {
+        var exceptionTriggered = false
+
+        MediaTttUtils.getIconInfoFromPackageName(context, PACKAGE_NAME) {
+            exceptionTriggered = true
+        }
+
+        assertThat(exceptionTriggered).isFalse()
     }
 
     @Test
