@@ -128,13 +128,6 @@ object Flags {
     val LOCKSCREEN_CUSTOM_CLOCKS = unreleasedFlag(207, "lockscreen_custom_clocks", teamfood = true)
 
     /**
-     * Flag to enable the usage of the new bouncer data source. This is a refactor of and eventual
-     * replacement of KeyguardBouncer.java.
-     */
-    // TODO(b/254512385): Tracking Bug
-    @JvmField val MODERN_BOUNCER = releasedFlag(208, "modern_bouncer")
-
-    /**
      * Whether the clock on a wide lock screen should use the new "stepping" animation for moving
      * the digits when the clock moves.
      */
