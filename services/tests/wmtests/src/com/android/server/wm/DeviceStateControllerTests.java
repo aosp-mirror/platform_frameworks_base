@@ -16,13 +16,12 @@
 
 package com.android.server.wm;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -32,9 +31,10 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.R;
+
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 
 import java.util.function.Consumer;
 
@@ -48,92 +48,76 @@ import java.util.function.Consumer;
 @Presubmit
 public class DeviceStateControllerTests {
 
-    private DeviceStateController.FoldStateListener mFoldStateListener;
     private DeviceStateController mTarget;
     private DeviceStateControllerBuilder mBuilder;
 
     private Context mMockContext;
-    private Handler mMockHandler;
-    private Resources mMockRes;
     private DeviceStateManager mMockDeviceStateManager;
-
-    private Consumer<DeviceStateController.FoldState> mDelegate;
-    private DeviceStateController.FoldState mCurrentState = DeviceStateController.FoldState.UNKNOWN;
+    private DeviceStateController.DeviceState mCurrentState =
+            DeviceStateController.DeviceState.UNKNOWN;
 
     @Before
     public void setUp() {
         mBuilder = new DeviceStateControllerBuilder();
-        mCurrentState = DeviceStateController.FoldState.UNKNOWN;
+        mCurrentState = DeviceStateController.DeviceState.UNKNOWN;
     }
 
-    private void initialize(boolean supportFold, boolean supportHalfFold) throws Exception {
+    private void initialize(boolean supportFold, boolean supportHalfFold) {
         mBuilder.setSupportFold(supportFold, supportHalfFold);
-        mDelegate = (newFoldState) -> {
+        Consumer<DeviceStateController.DeviceState> delegate = (newFoldState) -> {
             mCurrentState = newFoldState;
         };
-        mBuilder.setDelegate(mDelegate);
+        mBuilder.setDelegate(delegate);
         mBuilder.build();
-        verifyFoldStateListenerRegistration(1);
+        verify(mMockDeviceStateManager).registerCallback(any(), any());
     }
 
     @Test
-    public void testInitialization() throws Exception {
+    public void testInitialization() {
         initialize(true /* supportFold */, true /* supportHalfFolded */);
-        mFoldStateListener.onStateChanged(mUnfoldedStates[0]);
-        assertEquals(mCurrentState, DeviceStateController.FoldState.OPEN);
+        mTarget.onStateChanged(mOpenDeviceStates[0]);
+        assertEquals(DeviceStateController.DeviceState.OPEN, mCurrentState);
     }
 
     @Test
-    public void testInitializationWithNoFoldSupport() throws Exception {
+    public void testInitializationWithNoFoldSupport() {
         initialize(false /* supportFold */, false /* supportHalfFolded */);
-        mFoldStateListener.onStateChanged(mFoldedStates[0]);
+        mTarget.onStateChanged(mFoldedStates[0]);
         // Note that the folded state is ignored.
-        assertEquals(mCurrentState, DeviceStateController.FoldState.OPEN);
+        assertEquals(DeviceStateController.DeviceState.UNKNOWN, mCurrentState);
     }
 
     @Test
-    public void testWithFoldSupported() throws Exception {
+    public void testWithFoldSupported() {
         initialize(true /* supportFold */, false /* supportHalfFolded */);
-        mFoldStateListener.onStateChanged(mUnfoldedStates[0]);
-        assertEquals(mCurrentState, DeviceStateController.FoldState.OPEN);
-        mFoldStateListener.onStateChanged(mFoldedStates[0]);
-        assertEquals(mCurrentState, DeviceStateController.FoldState.FOLDED);
-        mFoldStateListener.onStateChanged(mHalfFoldedStates[0]);
-        assertEquals(mCurrentState, DeviceStateController.FoldState.OPEN); // Ignored
+        mTarget.onStateChanged(mOpenDeviceStates[0]);
+        assertEquals(DeviceStateController.DeviceState.OPEN, mCurrentState);
+        mTarget.onStateChanged(mFoldedStates[0]);
+        assertEquals(DeviceStateController.DeviceState.FOLDED, mCurrentState);
+        mTarget.onStateChanged(mHalfFoldedStates[0]);
+        assertEquals(DeviceStateController.DeviceState.UNKNOWN, mCurrentState); // Ignored
     }
 
     @Test
-    public void testWithHalfFoldSupported() throws Exception {
+    public void testWithHalfFoldSupported() {
         initialize(true /* supportFold */, true /* supportHalfFolded */);
-        mFoldStateListener.onStateChanged(mUnfoldedStates[0]);
-        assertEquals(mCurrentState, DeviceStateController.FoldState.OPEN);
-        mFoldStateListener.onStateChanged(mFoldedStates[0]);
-        assertEquals(mCurrentState, DeviceStateController.FoldState.FOLDED);
-        mFoldStateListener.onStateChanged(mHalfFoldedStates[0]);
-        assertEquals(mCurrentState, DeviceStateController.FoldState.HALF_FOLDED);
+        mTarget.onStateChanged(mOpenDeviceStates[0]);
+        assertEquals(DeviceStateController.DeviceState.OPEN, mCurrentState);
+        mTarget.onStateChanged(mFoldedStates[0]);
+        assertEquals(DeviceStateController.DeviceState.FOLDED, mCurrentState);
+        mTarget.onStateChanged(mHalfFoldedStates[0]);
+        assertEquals(DeviceStateController.DeviceState.HALF_FOLDED, mCurrentState);
     }
-
 
     private final int[] mFoldedStates = {0};
-    private final int[] mUnfoldedStates = {1};
+    private final int[] mOpenDeviceStates = {1};
     private final int[] mHalfFoldedStates = {2};
-
-
-    private void verifyFoldStateListenerRegistration(int numOfInvocation) {
-        final ArgumentCaptor<DeviceStateController.FoldStateListener> listenerCaptor =
-                ArgumentCaptor.forClass(DeviceStateController.FoldStateListener.class);
-        verify(mMockDeviceStateManager, times(numOfInvocation)).registerCallback(
-                any(),
-                listenerCaptor.capture());
-        if (numOfInvocation > 0) {
-            mFoldStateListener = listenerCaptor.getValue();
-        }
-    }
+    private final int[] mRearDisplayStates = {3};
 
     private class DeviceStateControllerBuilder {
         private boolean mSupportFold = false;
         private boolean mSupportHalfFold = false;
-        private Consumer<DeviceStateController.FoldState> mDelegate;
+        private Consumer<DeviceStateController.DeviceState> mDelegate;
 
         DeviceStateControllerBuilder setSupportFold(
                 boolean supportFold, boolean supportHalfFold) {
@@ -143,34 +127,44 @@ public class DeviceStateControllerTests {
         }
 
         DeviceStateControllerBuilder setDelegate(
-                Consumer<DeviceStateController.FoldState> delegate) {
+                Consumer<DeviceStateController.DeviceState> delegate) {
             mDelegate = delegate;
             return this;
         }
 
         private void mockFold(boolean enableFold, boolean enableHalfFold) {
+            if (enableFold || enableHalfFold) {
+                when(mMockContext.getResources()
+                        .getIntArray(R.array.config_openDeviceStates))
+                        .thenReturn(mOpenDeviceStates);
+                when(mMockContext.getResources()
+                        .getIntArray(R.array.config_rearDisplayDeviceStates))
+                        .thenReturn(mRearDisplayStates);
+            }
+
             if (enableFold) {
-                when(mMockContext.getResources().getIntArray(
-                        com.android.internal.R.array.config_foldedDeviceStates))
+                when(mMockContext.getResources()
+                        .getIntArray(R.array.config_foldedDeviceStates))
                         .thenReturn(mFoldedStates);
             }
             if (enableHalfFold) {
-                when(mMockContext.getResources().getIntArray(
-                        com.android.internal.R.array.config_halfFoldedDeviceStates))
+                when(mMockContext.getResources()
+                        .getIntArray(R.array.config_halfFoldedDeviceStates))
                         .thenReturn(mHalfFoldedStates);
             }
         }
 
-        private void build() throws Exception {
+        private void build() {
             mMockContext = mock(Context.class);
-            mMockRes = mock(Resources.class);
-            when(mMockContext.getResources()).thenReturn((mMockRes));
             mMockDeviceStateManager = mock(DeviceStateManager.class);
             when(mMockContext.getSystemService(DeviceStateManager.class))
                     .thenReturn(mMockDeviceStateManager);
+            Resources mockRes = mock(Resources.class);
+            when(mMockContext.getResources()).thenReturn((mockRes));
             mockFold(mSupportFold, mSupportHalfFold);
-            mMockHandler = mock(Handler.class);
-            mTarget = new DeviceStateController(mMockContext, mMockHandler, mDelegate);
+            Handler mockHandler = mock(Handler.class);
+            mTarget = new DeviceStateController(mMockContext, mockHandler);
+            mTarget.registerDeviceStateCallback(mDelegate);
         }
     }
 }

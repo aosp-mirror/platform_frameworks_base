@@ -642,6 +642,16 @@
          The default is false. -->
     <bool name="config_lidControlsSleep">false</bool>
 
+    <!-- The device states (supplied by DeviceStateManager) that should be treated as open by the
+         device fold controller. Default is empty. -->
+    <integer-array name="config_openDeviceStates">
+        <!-- Example:
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        -->
+    </integer-array>
+
     <!-- The device states (supplied by DeviceStateManager) that should be treated as folded by the
          display fold controller. Default is empty. -->
     <integer-array name="config_foldedDeviceStates">
@@ -655,6 +665,16 @@
     <!-- The device states (supplied by DeviceStateManager) that should be treated as half-folded by
      the display fold controller. Default is empty. -->
     <integer-array name="config_halfFoldedDeviceStates">
+        <!-- Example:
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        -->
+    </integer-array>
+
+    <!-- The device states (supplied by DeviceStateManager) that should be treated as a rear display
+     state. Default is empty. -->
+    <integer-array name="config_rearDisplayDeviceStates">
         <!-- Example:
         <item>0</item>
         <item>1</item>
