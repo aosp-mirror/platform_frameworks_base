@@ -1004,9 +1004,10 @@ DrmPlugin::SecurityLevel jintToSecurityLevel(jint jlevel) {
 
 static jbyteArray android_media_MediaDrm_getSupportedCryptoSchemesNative(JNIEnv *env) {
     sp<IDrm> drm = android::DrmUtils::MakeDrm();
+    if (drm == NULL) return env->NewByteArray(0);
+
     std::vector<uint8_t> bv;
     drm->getSupportedSchemes(bv);
-
     jbyteArray jUuidBytes = env->NewByteArray(bv.size());
     env->SetByteArrayRegion(jUuidBytes, 0, bv.size(), reinterpret_cast<const jbyte *>(bv.data()));
     return jUuidBytes;
