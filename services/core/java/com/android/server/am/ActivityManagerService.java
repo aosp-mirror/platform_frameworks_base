@@ -2314,7 +2314,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         mUiContext = null;
         mAppErrors = null;
         mPackageWatchdog = null;
-        mAppOpsService = mInjector.getAppOpsService(null /* file */, null /* handler */);
+        mAppOpsService = mInjector.getAppOpsService(null /* recentAccessesFile */,
+            null /* storageFile */, null /* handler */);
         mBatteryStatsService = mInjector.getBatteryStatsService();
         mHandler = new MainHandler(handlerThread.getLooper());
         mHandlerThread = handlerThread;
@@ -2443,7 +2444,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mProcessStats = new ProcessStatsService(this, new File(systemDir, "procstats"));
 
-        mAppOpsService = mInjector.getAppOpsService(new File(systemDir, "appops.xml"), mHandler);
+        mAppOpsService = mInjector.getAppOpsService(new File(systemDir, "appops_accesses.xml"),
+                new File(systemDir, "appops.xml"), mHandler);
 
         mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
 
@@ -19001,8 +19003,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             return mContext;
         }
 
-        public AppOpsService getAppOpsService(File file, Handler handler) {
-            return new AppOpsService(file, handler, getContext());
+        public AppOpsService getAppOpsService(File recentAccessesFile, File storageFile,
+                Handler handler) {
+            return new AppOpsService(recentAccessesFile, storageFile, handler, getContext());
         }
 
         public Handler getUiHandler(ActivityManagerService service) {
