@@ -14,27 +14,25 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "UsbMidiDeviceJNI"
+#define LOG_TAG "UsbAlsaMidiDeviceJNI"
 #define LOG_NDEBUG 0
-#include "utils/Log.h"
-
-#include "jni.h"
-#include <nativehelper/JNIPlatformHelp.h>
-#include <nativehelper/ScopedLocalRef.h>
-#include "android_runtime/AndroidRuntime.h"
-#include "android_runtime/Log.h"
-
 #include <asm/byteorder.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <nativehelper/JNIPlatformHelp.h>
+#include <nativehelper/ScopedLocalRef.h>
 #include <sound/asound.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
-namespace android
-{
+#include "android_runtime/AndroidRuntime.h"
+#include "android_runtime/Log.h"
+#include "jni.h"
+#include "utils/Log.h"
+
+namespace android {
 
 static jclass sFileDescriptorClass;
 static jfieldID sPipeFDField;
@@ -46,10 +44,10 @@ static jfieldID sPipeFDField;
 // 1. Input O_RDONLY file descriptor
 // 2. Special input file descriptor to block the input thread
 // 3. Output O_WRONLY file descriptor
-static jobjectArray android_server_UsbMidiDevice_open(JNIEnv *env, jobject thiz, jint card,
-                                                      jint device, jint numInputs,
-                                                      jint numOutputs) {
-    char    path[100];
+static jobjectArray android_server_UsbAlsaMidiDevice_open(JNIEnv *env, jobject thiz, jint card,
+                                                          jint device, jint numInputs,
+                                                          jint numOutputs) {
+    char path[100];
     int fd;
 
     snprintf(path, sizeof(path), "/dev/snd/midiC%dD%d", card, device);
@@ -126,9 +124,7 @@ release_fds:
     return NULL;
 }
 
-static void
-android_server_UsbMidiDevice_close(JNIEnv *env, jobject thiz, jobjectArray fds)
-{
+static void android_server_UsbAlsaMidiDevice_close(JNIEnv *env, jobject thiz, jobjectArray fds) {
     // write to mPipeFD to unblock input thread
     jint pipeFD = env->GetIntField(thiz, sPipeFDField);
     write(pipeFD, &pipeFD, sizeof(pipeFD));
@@ -144,12 +140,12 @@ android_server_UsbMidiDevice_close(JNIEnv *env, jobject thiz, jobjectArray fds)
 
 static JNINativeMethod method_table[] = {
         {"nativeOpen", "(IIII)[Ljava/io/FileDescriptor;",
-         (void *)android_server_UsbMidiDevice_open},
-        {"nativeClose", "([Ljava/io/FileDescriptor;)V", (void *)android_server_UsbMidiDevice_close},
+         (void *)android_server_UsbAlsaMidiDevice_open},
+        {"nativeClose", "([Ljava/io/FileDescriptor;)V",
+         (void *)android_server_UsbAlsaMidiDevice_close},
 };
 
-int register_android_server_UsbMidiDevice(JNIEnv *env)
-{
+int register_android_server_UsbAlsaMidiDevice(JNIEnv *env) {
     jclass clazz = env->FindClass("java/io/FileDescriptor");
     if (clazz == NULL) {
         ALOGE("Can't find java/io/FileDescriptor");
@@ -157,19 +153,19 @@ int register_android_server_UsbMidiDevice(JNIEnv *env)
     }
     sFileDescriptorClass = (jclass)env->NewGlobalRef(clazz);
 
-    clazz = env->FindClass("com/android/server/usb/UsbMidiDevice");
+    clazz = env->FindClass("com/android/server/usb/UsbAlsaMidiDevice");
     if (clazz == NULL) {
-        ALOGE("Can't find com/android/server/usb/UsbMidiDevice");
+        ALOGE("Can't find com/android/server/usb/UsbAlsaMidiDevice");
         return -1;
     }
     sPipeFDField = env->GetFieldID(clazz, "mPipeFD", "I");
     if (sPipeFDField == NULL) {
-        ALOGE("Can't find UsbMidiDevice.mPipeFD");
+        ALOGE("Can't find UsbAlsaMidiDevice.mPipeFD");
         return -1;
     }
 
-    return jniRegisterNativeMethods(env, "com/android/server/usb/UsbMidiDevice",
-            method_table, NELEM(method_table));
+    return jniRegisterNativeMethods(env, "com/android/server/usb/UsbAlsaMidiDevice", method_table,
+                                    NELEM(method_table));
 }
 
-};
+}; // namespace android

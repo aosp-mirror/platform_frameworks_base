@@ -10,7 +10,7 @@
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions an
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
@@ -24,7 +24,7 @@ import android.media.midi.MidiDeviceStatus;
 import android.media.midi.MidiManager;
 import android.media.midi.MidiReceiver;
 import android.os.Bundle;
-import android.service.usb.UsbMidiDeviceProto;
+import android.service.usb.UsbAlsaMidiDeviceProto;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -43,8 +43,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public final class UsbMidiDevice implements Closeable {
-    private static final String TAG = "UsbMidiDevice";
+/**
+ * Opens device connections to MIDI 1.0 endpoints.
+ * These endpoints will use ALSA.
+ */
+public final class UsbAlsaMidiDevice implements Closeable {
+    private static final String TAG = "UsbAlsaMidiDevice";
 
     private final int mAlsaCard;
     private final int mAlsaDevice;
@@ -142,13 +146,13 @@ public final class UsbMidiDevice implements Closeable {
     }
 
     /**
-     * Creates an UsbMidiDevice based on the input parameters. Read/Write streams
+     * Creates an UsbAlsaMidiDevice based on the input parameters. Read/Write streams
      * will be created individually as some devices don't have the same number of
      * inputs and outputs.
      */
-    public static UsbMidiDevice create(Context context, Bundle properties, int card,
+    public static UsbAlsaMidiDevice create(Context context, Bundle properties, int card,
             int device, int numInputs, int numOutputs) {
-        UsbMidiDevice midiDevice = new UsbMidiDevice(card, device, numInputs, numOutputs);
+        UsbAlsaMidiDevice midiDevice = new UsbAlsaMidiDevice(card, device, numInputs, numOutputs);
         if (!midiDevice.register(context, properties)) {
             IoUtils.closeQuietly(midiDevice);
             Log.e(TAG, "createDeviceServer failed");
@@ -157,7 +161,7 @@ public final class UsbMidiDevice implements Closeable {
         return midiDevice;
     }
 
-    private UsbMidiDevice(int card, int device, int numInputs, int numOutputs) {
+    private UsbAlsaMidiDevice(int card, int device, int numInputs, int numOutputs) {
         mAlsaCard = card;
         mAlsaDevice = device;
         mNumInputs = numInputs;
@@ -217,7 +221,7 @@ public final class UsbMidiDevice implements Closeable {
 
         if (inputStreamCount > 0) {
             // Create input thread which will read from all output ports of the physical device
-            new Thread("UsbMidiDevice input thread") {
+            new Thread("UsbAlsaMidiDevice input thread") {
                 @Override
                 public void run() {
                     byte[] buffer = new byte[BUFFER_SIZE];
@@ -272,13 +276,13 @@ public final class UsbMidiDevice implements Closeable {
             final FileOutputStream outputStreamF = mOutputStreams[port];
             final int portF = port;
 
-            new Thread("UsbMidiDevice output thread " + port) {
+            new Thread("UsbAlsaMidiDevice output thread " + port) {
                 @Override
                 public void run() {
                     while (true) {
                         MidiEvent event;
                         try {
-                            event = (MidiEvent)eventSchedulerF.waitNextEvent();
+                            event = (MidiEvent) eventSchedulerF.waitNextEvent();
                         } catch (InterruptedException e) {
                             // try again
                             continue;
@@ -303,9 +307,9 @@ public final class UsbMidiDevice implements Closeable {
     }
 
     private boolean register(Context context, Bundle properties) {
-        MidiManager midiManager = (MidiManager)context.getSystemService(Context.MIDI_SERVICE);
+        MidiManager midiManager = context.getSystemService(MidiManager.class);
         if (midiManager == null) {
-            Log.e(TAG, "No MidiManager in UsbMidiDevice.register()");
+            Log.e(TAG, "No MidiManager in UsbAlsaMidiDevice.register()");
             return false;
         }
 
@@ -365,9 +369,9 @@ public final class UsbMidiDevice implements Closeable {
             long id) {
         long token = dump.start(idName, id);
 
-        dump.write("device_address", UsbMidiDeviceProto.DEVICE_ADDRESS, deviceAddr);
-        dump.write("card", UsbMidiDeviceProto.CARD, mAlsaCard);
-        dump.write("device", UsbMidiDeviceProto.DEVICE, mAlsaDevice);
+        dump.write("device_address", UsbAlsaMidiDeviceProto.DEVICE_ADDRESS, deviceAddr);
+        dump.write("card", UsbAlsaMidiDeviceProto.CARD, mAlsaCard);
+        dump.write("device", UsbAlsaMidiDeviceProto.DEVICE, mAlsaDevice);
 
         dump.end(token);
     }
