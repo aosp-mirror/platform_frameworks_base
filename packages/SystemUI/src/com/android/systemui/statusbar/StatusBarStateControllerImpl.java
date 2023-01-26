@@ -129,6 +129,11 @@ public class StatusBarStateControllerImpl implements
     private boolean mIsDozing;
 
     /**
+     * If the device is currently dreaming or not.
+     */
+    private boolean mIsDreaming;
+
+    /**
      * If the status bar is currently expanded or not.
      */
     private boolean mIsExpanded;
@@ -286,6 +291,29 @@ public class StatusBarStateControllerImpl implements
             DejankUtils.startDetectingBlockingIpcs(tag);
             for (RankedListener rl : new ArrayList<>(mListeners)) {
                 rl.mListener.onDozingChanged(isDozing);
+            }
+            DejankUtils.stopDetectingBlockingIpcs(tag);
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean setIsDreaming(boolean isDreaming) {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "setIsDreaming:" + isDreaming);
+        }
+        if (mIsDreaming == isDreaming) {
+            return false;
+        }
+
+        mIsDreaming = isDreaming;
+
+        synchronized (mListeners) {
+            String tag = getClass().getSimpleName() + "#setIsDreaming";
+            DejankUtils.startDetectingBlockingIpcs(tag);
+            for (RankedListener rl : new ArrayList<>(mListeners)) {
+                rl.mListener.onDreamingChanged(isDreaming);
             }
             DejankUtils.stopDetectingBlockingIpcs(tag);
         }
