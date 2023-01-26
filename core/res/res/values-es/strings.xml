@@ -459,6 +459,14 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Permite que la aplicación acceda a datos del sensor corporal, como la frecuencia cardiaca, la temperatura y el porcentaje de oxígeno en sangre, mientras se usa."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Acceso en segundo plano a datos del sensor corporal, como la frecuencia cardiaca"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Permite que la aplicación acceda a datos del sensor corporal, como la frecuencia cardiaca, la temperatura y el porcentaje de oxígeno en sangre, mientras está en segundo plano."</string>
+    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
+    <skip />
+    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Leer eventos y detalles del calendario"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Esta aplicación puede leer los eventos de calendario almacenados en tu tablet y compartir o guardar los datos de tu calendario."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Esta aplicación puede ver los eventos de calendario almacenados en tu dispositivo Android TV y compartir o guardar los datos de tu calendario."</string>

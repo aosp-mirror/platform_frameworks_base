@@ -458,6 +458,14 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Nagpapahintulot sa app na i-access ang data ng sensor ng katawan, gaya ng bilis ng tibok ng puso, temperatura, at porsyento ng oxygen sa dugo, habang ginagamit ang app."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"I-access ang data ng sensor ng katawan gaya ng heart rate habang nasa background"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Nagpapahintulot sa app na i-access ang data ng sensor ng katawan, gaya ng bilis ng tibok ng puso, temperatura, at porsyento ng oxygen sa dugo, habang nasa background ang app."</string>
+    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
+    <skip />
+    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Magbasa ng mga event sa kalendaryo at detalye"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Mababasa ng app na ito ang lahat ng event sa kalendaryo na naka-store sa iyong tablet at maibabahagi o mase-save nito ang data ng iyong kalendaryo."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Mababasa ng app na ito ang lahat ng event sa kalendaryo na naka-store sa iyong Android TV device at maibabahagi o mase-save nito ang data ng kalendaryo mo."</string>
