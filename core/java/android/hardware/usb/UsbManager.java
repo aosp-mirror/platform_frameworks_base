@@ -37,8 +37,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.hardware.usb.gadget.V1_0.GadgetFunction;
-import android.hardware.usb.gadget.V1_2.UsbSpeed;
+import android.hardware.usb.gadget.GadgetFunction;
+import android.hardware.usb.gadget.UsbSpeed;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -54,15 +54,12 @@ import com.android.internal.annotations.GuardedBy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.Executor;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This class allows you to access the state of USB and communicate with USB devices.
@@ -78,7 +75,7 @@ import java.util.function.Consumer;
 public class UsbManager {
     private static final String TAG = "UsbManager";
 
-   /**
+    /**
      * Broadcast Action:  A sticky broadcast for USB state change events when in device mode.
      *
      * This is a sticky broadcast for clients that includes USB connected/disconnected state,
@@ -104,7 +101,7 @@ public class UsbManager {
      * MIDI function is enabled
      * </ul>
      * If the sticky intent has not been found, that indicates USB is disconnected,
-     * USB is not configued, MTP function is enabled, and all the other functions are disabled.
+     * USB is not configured, MTP function is enabled, and all the other functions are disabled.
      *
      * @hide
      */
@@ -124,7 +121,7 @@ public class UsbManager {
     public static final String ACTION_USB_PORT_CHANGED =
             "android.hardware.usb.action.USB_PORT_CHANGED";
 
-     /**
+    /**
      * Broadcast Action: A broadcast for USB compliance warning changes.
      *
      * This intent is sent when a port partner's
@@ -137,7 +134,7 @@ public class UsbManager {
     public static final String ACTION_USB_PORT_COMPLIANCE_CHANGED =
             "android.hardware.usb.action.USB_PORT_COMPLIANCE_CHANGED";
 
-   /**
+    /**
      * Activity intent sent when user attaches a USB device.
      *
      * This intent is sent when a USB device is attached to the USB bus when in host mode.
@@ -150,7 +147,7 @@ public class UsbManager {
     public static final String ACTION_USB_DEVICE_ATTACHED =
             "android.hardware.usb.action.USB_DEVICE_ATTACHED";
 
-   /**
+    /**
      * Broadcast Action:  A broadcast for USB device detached event.
      *
      * This intent is sent when a USB device is detached from the USB bus when in host mode.
@@ -163,7 +160,7 @@ public class UsbManager {
     public static final String ACTION_USB_DEVICE_DETACHED =
             "android.hardware.usb.action.USB_DEVICE_DETACHED";
 
-   /**
+    /**
      * Activity intent sent when user attaches a USB accessory.
      *
      * <ul>
@@ -175,7 +172,7 @@ public class UsbManager {
     public static final String ACTION_USB_ACCESSORY_ATTACHED =
             "android.hardware.usb.action.USB_ACCESSORY_ATTACHED";
 
-   /**
+    /**
      * Broadcast Action:  A broadcast for USB accessory detached event.
      *
      * This intent is sent when a USB accessory is detached.
@@ -616,6 +613,7 @@ public class UsbManager {
 
     /**
      * Code for the charging usb function. Passed into {@link #setCurrentFunctions(long)}
+     * Must be equal to {@link GadgetFunction#NONE}
      * @hide
      */
     @SystemApi
@@ -623,55 +621,63 @@ public class UsbManager {
 
     /**
      * Code for the mtp usb function. Passed as a mask into {@link #setCurrentFunctions(long)}
+     * Must be equal to {@link GadgetFunction#MTP}
      * @hide
      */
     @SystemApi
-    public static final long FUNCTION_MTP = GadgetFunction.MTP;
+    public static final long FUNCTION_MTP = 1 << 2;
 
     /**
      * Code for the ptp usb function. Passed as a mask into {@link #setCurrentFunctions(long)}
+     * Must be equal to {@link GadgetFunction#PTP}
      * @hide
      */
     @SystemApi
-    public static final long FUNCTION_PTP = GadgetFunction.PTP;
+    public static final long FUNCTION_PTP = 1 << 4;
 
     /**
      * Code for the rndis usb function. Passed as a mask into {@link #setCurrentFunctions(long)}
+     * Must be equal to {@link GadgetFunction#RNDIS}
      * @hide
      */
     @SystemApi
-    public static final long FUNCTION_RNDIS = GadgetFunction.RNDIS;
+    public static final long FUNCTION_RNDIS = 1 << 5;
 
     /**
      * Code for the midi usb function. Passed as a mask into {@link #setCurrentFunctions(long)}
+     * Must be equal to {@link GadgetFunction#MIDI}
      * @hide
      */
     @SystemApi
-    public static final long FUNCTION_MIDI = GadgetFunction.MIDI;
+    public static final long FUNCTION_MIDI = 1 << 3;
 
     /**
      * Code for the accessory usb function.
+     * Must be equal to {@link GadgetFunction#ACCESSORY}
      * @hide
      */
     @SystemApi
-    public static final long FUNCTION_ACCESSORY = GadgetFunction.ACCESSORY;
+    public static final long FUNCTION_ACCESSORY = 1 << 1;
 
     /**
      * Code for the audio source usb function.
+     * Must be equal to {@link GadgetFunction#AUDIO_SOURCE}
      * @hide
      */
     @SystemApi
-    public static final long FUNCTION_AUDIO_SOURCE = GadgetFunction.AUDIO_SOURCE;
+    public static final long FUNCTION_AUDIO_SOURCE = 1 << 6;
 
     /**
      * Code for the adb usb function.
+     * Must be equal to {@link GadgetFunction#ADB}
      * @hide
      */
     @SystemApi
-    public static final long FUNCTION_ADB = GadgetFunction.ADB;
+    public static final long FUNCTION_ADB = 1;
 
     /**
      * Code for the ncm source usb function.
+     * Must be equal to {@link GadgetFunction#NCM}
      * @hide
      */
     @SystemApi
@@ -998,7 +1004,7 @@ public class UsbManager {
         }
     }
 
-   /**
+    /**
      * Requests temporary permission for the given package to access the device.
      * This may result in a system dialog being displayed to the user
      * if permission had not already been granted.
