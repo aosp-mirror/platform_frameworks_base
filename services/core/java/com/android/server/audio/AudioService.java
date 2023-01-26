@@ -6118,7 +6118,8 @@ public class AudioService extends IAudioService.Stub
         if (portId != 0) {
             device = AudioManager.getDeviceForPortId(portId, AudioManager.GET_DEVICES_OUTPUTS);
             if (device == null) {
-                throw new IllegalArgumentException("invalid portID " + portId);
+                Log.w(TAG, "setCommunicationDevice: invalid portID " + portId);
+                return false;
             }
             if (!isValidCommunicationDevice(device)) {
                 if (!device.isSink()) {
