@@ -20,13 +20,13 @@ import android.view.ViewGroup;
 
 import com.android.keyguard.KeyguardHostViewController;
 import com.android.systemui.dagger.qualifiers.RootView;
-import com.android.systemui.statusbar.phone.KeyguardBouncer;
+import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
 
 /**
- * Dagger Subcomponent for the {@link KeyguardBouncer}.
+ * Dagger Subcomponent for the {@link PrimaryBouncerInteractor}.
  */
 @Subcomponent(modules = {KeyguardBouncerModule.class})
 @KeyguardBouncerScope
