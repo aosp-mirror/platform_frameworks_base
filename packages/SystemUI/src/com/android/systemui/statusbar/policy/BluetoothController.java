@@ -16,12 +16,15 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.bluetooth.BluetoothAdapter;
+
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.policy.BluetoothController.Callback;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 public interface BluetoothController extends CallbackController<Callback>, Dumpable {
     boolean isBluetoothSupported();
@@ -43,6 +46,11 @@ public interface BluetoothController extends CallbackController<Callback>, Dumpa
     int getMaxConnectionState(CachedBluetoothDevice device);
     int getBondState(CachedBluetoothDevice device);
     List<CachedBluetoothDevice> getConnectedDevices();
+
+    void addOnMetadataChangedListener(CachedBluetoothDevice device, Executor executor,
+            BluetoothAdapter.OnMetadataChangedListener listener);
+    void removeOnMetadataChangedListener(CachedBluetoothDevice device,
+            BluetoothAdapter.OnMetadataChangedListener listener);
 
     public interface Callback {
         void onBluetoothStateChange(boolean enabled);
