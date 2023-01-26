@@ -23,8 +23,8 @@ import com.android.systemui.shade.NotificationShadeWindowState.Buffer
 import com.android.systemui.statusbar.StatusBarState
 
 /**
- * Represents state of shade window, used by [NotificationShadeWindowControllerImpl].
- * Contains nested class [Buffer] for pretty table logging in bug reports.
+ * Represents state of shade window, used by [NotificationShadeWindowControllerImpl]. Contains
+ * nested class [Buffer] for pretty table logging in bug reports.
  */
 class NotificationShadeWindowState(
     @JvmField var keyguardShowing: Boolean = false,
@@ -55,6 +55,7 @@ class NotificationShadeWindowState(
     @JvmField var remoteInputActive: Boolean = false,
     @JvmField var forcePluginOpen: Boolean = false,
     @JvmField var dozing: Boolean = false,
+    @JvmField var dreaming: Boolean = false,
     @JvmField var scrimsVisibility: Int = 0,
     @JvmField var backgroundBlurRadius: Int = 0,
 ) {
