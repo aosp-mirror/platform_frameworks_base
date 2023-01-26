@@ -163,7 +163,7 @@ final class PolicyEnforcerCallbacks {
             try {
                 if (!(policyKey instanceof IntentFilterPolicyKey)) {
                     throw new IllegalArgumentException("policyKey is not of type "
-                            + "PersistentPreferredActivityPolicyKey");
+                            + "IntentFilterPolicyKey");
                 }
                 IntentFilterPolicyKey parsedKey =
                         (IntentFilterPolicyKey) policyKey;
@@ -191,7 +191,7 @@ final class PolicyEnforcerCallbacks {
         return Boolean.TRUE.equals(Binder.withCleanCallingIdentity(() -> {
             if (!(policyKey instanceof PackagePolicyKey)) {
                 throw new IllegalArgumentException("policyKey is not of type "
-                        + "PackageSpecificPolicyKey");
+                        + "PackagePolicyKey");
             }
             PackagePolicyKey parsedKey = (PackagePolicyKey) policyKey;
             String packageName = Objects.requireNonNull(parsedKey.getPackageName());

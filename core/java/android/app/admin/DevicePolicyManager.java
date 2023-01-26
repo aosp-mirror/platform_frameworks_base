@@ -4051,6 +4051,12 @@ public class DevicePolicyManager {
      */
     public static final String PACKAGE_UNINSTALL_BLOCKED_POLICY = "packageUninstallBlocked";
 
+    // TODO: Expose this as SystemAPI once we add the query API
+    /**
+     * @hide
+     */
+    public static final String APPLICATION_RESTRICTIONS_POLICY = "applicationRestrictions";
+
     /**
      * This object is a single place to tack on invalidation and disable calls.  All
      * binder caches in this class derive from this Config, so all can be invalidated or

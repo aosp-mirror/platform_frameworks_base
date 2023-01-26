@@ -599,6 +599,13 @@ package android.app.admin {
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.FlagUnion> CREATOR;
   }
 
+  public final class MostRecent<V> extends android.app.admin.ResolutionMechanism<V> {
+    ctor public MostRecent();
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.MostRecent> CREATOR;
+  }
+
   public final class MostRestrictive<V> extends android.app.admin.ResolutionMechanism<V> {
     method public int describeContents();
     method public void writeToParcel(@NonNull android.os.Parcel, int);

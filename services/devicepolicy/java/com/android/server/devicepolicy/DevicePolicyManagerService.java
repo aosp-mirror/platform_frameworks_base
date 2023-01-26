@@ -208,6 +208,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.app.admin.BooleanPolicyValue;
+import android.app.admin.BundlePolicyValue;
 import android.app.admin.ComponentNamePolicyValue;
 import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DeviceAdminReceiver;
@@ -241,6 +242,7 @@ import android.app.admin.ParcelableResource;
 import android.app.admin.PasswordMetrics;
 import android.app.admin.PasswordPolicy;
 import android.app.admin.PolicyKey;
+import android.app.admin.PolicyValue;
 import android.app.admin.PreferentialNetworkServiceConfig;
 import android.app.admin.SecurityLog;
 import android.app.admin.SecurityLog.SecurityEvent;
@@ -290,6 +292,7 @@ import android.content.pm.Signature;
 import android.content.pm.StringParceledListSlice;
 import android.content.pm.UserInfo;
 import android.content.pm.UserPackage;
+import android.content.pm.parsing.FrameworkParsingPackageUtils;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.database.Cursor;
@@ -442,6 +445,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -10515,23 +10519,77 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void setApplicationRestrictions(ComponentName who, String callerPackage,
-            String packageName, Bundle settings) {
+            String packageName, Bundle restrictions) {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
         Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                 && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)))
                 || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_APP_RESTRICTIONS)));
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_APPLICATION_RESTRICTIONS);
 
+        if (useDevicePolicyEngine(caller, DELEGATION_APP_RESTRICTIONS)) {
+            // This check is eventually made in UMS, checking here to fail early.
+            String validationResult =
+                    FrameworkParsingPackageUtils.validateName(packageName, false, false);
+            if (validationResult != null) {
+                throw new IllegalArgumentException("Invalid package name: " + validationResult);
+            }
+
+            EnforcingAdmin admin = EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                    who == null
+                            ? new ComponentName(caller.getPackageName(), "Delegate")
+                            : who,
+                    caller.getUserId());
+
+            if (restrictions == null || restrictions.isEmpty()) {
+                mDevicePolicyEngine.removeLocalPolicy(
+                        PolicyDefinition.APPLICATION_RESTRICTIONS(packageName),
+                        admin,
+                        caller.getUserId());
+            } else {
+                mDevicePolicyEngine.setLocalPolicy(
+                        PolicyDefinition.APPLICATION_RESTRICTIONS(packageName),
+                        admin,
+                        new BundlePolicyValue(restrictions),
+                        caller.getUserId());
+            }
+            setBackwardsCompatibleAppRestrictions(
+                    packageName, restrictions, caller.getUserHandle());
+        } else {
+            mInjector.binderWithCleanCallingIdentity(() -> {
+                mUserManager.setApplicationRestrictions(packageName, restrictions,
+                        caller.getUserHandle());
+            });
+        }
+
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_APPLICATION_RESTRICTIONS)
+                .setAdmin(caller.getPackageName())
+                .setBoolean(/* isDelegate */ who == null)
+                .setStrings(packageName)
+                .write();
+    }
+
+    /**
+     * Set app restrictions in user manager to keep backwards compatibility for the old
+     * getApplicationRestrictions API.
+     */
+    private void setBackwardsCompatibleAppRestrictions(
+            String packageName, Bundle restrictions, UserHandle userHandle) {
+        Bundle restrictionsToApply = restrictions == null || restrictions.isEmpty()
+                ? getAppRestrictionsSetByAnyAdmin(packageName, userHandle)
+                : restrictions;
         mInjector.binderWithCleanCallingIdentity(() -> {
-            mUserManager.setApplicationRestrictions(packageName, settings,
-                    caller.getUserHandle());
-            DevicePolicyEventLogger
-                    .createEvent(DevicePolicyEnums.SET_APPLICATION_RESTRICTIONS)
-                    .setAdmin(caller.getPackageName())
-                    .setBoolean(/* isDelegate */ who == null)
-                    .setStrings(packageName)
-                    .write();
+            mUserManager.setApplicationRestrictions(packageName, restrictionsToApply, userHandle);
         });
+    }
+
+    private Bundle getAppRestrictionsSetByAnyAdmin(String packageName, UserHandle userHandle) {
+        LinkedHashMap<EnforcingAdmin, PolicyValue<Bundle>> policies =
+                mDevicePolicyEngine.getLocalPoliciesSetByAdmins(
+                        PolicyDefinition.APPLICATION_RESTRICTIONS(packageName),
+                        userHandle.getIdentifier());
+        return policies.isEmpty()
+                ? null : policies.entrySet().stream().findAny().get().getValue().getValue();
     }
 
     @Override
@@ -11742,13 +11800,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)))
                 || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_APP_RESTRICTIONS)));
 
-        return mInjector.binderWithCleanCallingIdentity(() -> {
-            Bundle bundle = mUserManager.getApplicationRestrictions(packageName,
-                    caller.getUserHandle());
-           // if no restrictions were saved, mUserManager.getApplicationRestrictions
-           // returns null, but DPM method should return an empty Bundle as per JavaDoc
-           return bundle != null ? bundle : Bundle.EMPTY;
-        });
+        if (useDevicePolicyEngine(caller, DELEGATION_APP_RESTRICTIONS)) {
+            EnforcingAdmin admin = EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                    who != null ? who : new ComponentName(callerPackage, "Delegate"),
+                    caller.getUserId());
+
+            LinkedHashMap<EnforcingAdmin, PolicyValue<Bundle>> policies =
+                    mDevicePolicyEngine.getLocalPoliciesSetByAdmins(
+                            PolicyDefinition.APPLICATION_RESTRICTIONS(packageName),
+                            caller.getUserId());
+            if (policies.isEmpty() || !policies.containsKey(admin)) {
+                return Bundle.EMPTY;
+            }
+            return policies.get(admin).getValue();
+        } else {
+            return mInjector.binderWithCleanCallingIdentity(() -> {
+                Bundle bundle = mUserManager.getApplicationRestrictions(packageName,
+                        caller.getUserHandle());
+                // if no restrictions were saved, mUserManager.getApplicationRestrictions
+                // returns null, but DPM method should return an empty Bundle as per JavaDoc
+                return bundle != null ? bundle : Bundle.EMPTY;
+            });
+        }
     }
 
     /**
@@ -14265,6 +14338,37 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     NAMESPACE_DEVICE_POLICY_MANAGER,
                     APPLICATION_EXEMPTIONS_FLAG,
                     DEFAULT_APPLICATION_EXEMPTIONS_FLAG);
+        }
+
+        @Override
+        public Map<String, Bundle> getApplicationRestrictionsPerAdmin(
+                String packageName, int userId) {
+            LinkedHashMap<EnforcingAdmin, PolicyValue<Bundle>> policies =
+                    mDevicePolicyEngine.getLocalPoliciesSetByAdmins(
+                            PolicyDefinition.APPLICATION_RESTRICTIONS(packageName),
+                            userId);
+            Map<String, Bundle> restrictions = new HashMap<>();
+            for (EnforcingAdmin admin : policies.keySet()) {
+                restrictions.put(admin.getPackageName(), policies.get(admin).getValue());
+            }
+            if (!restrictions.isEmpty()) {
+                return restrictions;
+            }
+
+            return mInjector.binderWithCleanCallingIdentity(() -> {
+                // Could be a device that hasn't migrated yet, so just return any restrictions saved
+                // in userManager.
+                Bundle bundle = mUserManager.getApplicationRestrictions(
+                        packageName, UserHandle.of(userId));
+                if (bundle == null || bundle.isEmpty()) {
+                    return new HashMap<>();
+                }
+                ActiveAdmin admin = getMostProbableDPCAdminForLocalPolicy(userId);
+                if (admin == null) {
+                    return new HashMap<>();
+                }
+                return Map.of(admin.info.getPackageName(), bundle);
+            });
         }
     }
 

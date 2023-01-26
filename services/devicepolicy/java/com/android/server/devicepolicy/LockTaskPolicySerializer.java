@@ -18,6 +18,7 @@ package com.android.server.devicepolicy;
 
 import android.annotation.NonNull;
 import android.app.admin.LockTaskPolicy;
+import android.app.admin.PolicyKey;
 import android.util.Log;
 
 import com.android.modules.utils.TypedXmlPullParser;
@@ -36,7 +37,7 @@ final class LockTaskPolicySerializer extends PolicySerializer<LockTaskPolicy> {
     private static final String ATTR_FLAGS = ":flags";
 
     @Override
-    void saveToXml(TypedXmlSerializer serializer, String attributeNamePrefix,
+    void saveToXml(PolicyKey policyKey, TypedXmlSerializer serializer, String attributeNamePrefix,
             @NonNull LockTaskPolicy value) throws IOException {
         Objects.requireNonNull(value);
         if (value.getPackages() == null || value.getPackages().isEmpty()) {

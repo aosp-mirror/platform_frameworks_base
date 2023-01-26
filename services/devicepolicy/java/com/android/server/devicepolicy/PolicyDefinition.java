@@ -19,11 +19,11 @@ package com.android.server.devicepolicy;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.BooleanPolicyValue;
-import android.app.admin.NoArgsPolicyKey;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.IntegerPolicyValue;
 import android.app.admin.IntentFilterPolicyKey;
 import android.app.admin.LockTaskPolicy;
+import android.app.admin.NoArgsPolicyKey;
 import android.app.admin.PackagePermissionPolicyKey;
 import android.app.admin.PackagePolicyKey;
 import android.app.admin.PolicyKey;
@@ -31,6 +31,7 @@ import android.app.admin.PolicyValue;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.os.Bundle;
 
 import com.android.internal.util.function.QuadFunction;
 import com.android.modules.utils.TypedXmlPullParser;
@@ -56,6 +57,15 @@ final class PolicyDefinition<V> {
     // Only use this flag if a policy is inheritable by child profile from parent.
     private static final int POLICY_FLAG_INHERITABLE = 1 << 2;
 
+    // Use this flag if admin policies should be treated independently of each other and should not
+    // have any resolution logic applied, this should only be used for very limited policies were
+    // this would make sense and the enforcing logic should handle it appropriately, e.g.
+    // application restrictions set by different admins for a single package should not be merged,
+    // but saved and queried independent of each other.
+    // Currently, support is  added for local only policies, if you need to add a non coexistable
+    // global policy please add support.
+    private static final int POLICY_FLAG_NON_COEXISTABLE_POLICY = 1 << 3;
+
     private static final MostRestrictive<Boolean> FALSE_MORE_RESTRICTIVE = new MostRestrictive<>(
             List.of(new BooleanPolicyValue(false), new BooleanPolicyValue(true)));
 
@@ -72,7 +82,7 @@ final class PolicyDefinition<V> {
             new BooleanPolicySerializer());
 
     // This is saved in the static map sPolicyDefinitions so that we're able to reconstruct the
-    // actual permission grant policy with the correct arguments (packageName and permission name)
+    // actual policy with the correct arguments (packageName and permission name)
     // when reading the policies from xml.
     static final PolicyDefinition<Integer> GENERIC_PERMISSION_GRANT =
             new PolicyDefinition<>(
@@ -128,8 +138,8 @@ final class PolicyDefinition<V> {
                     new StringSetPolicySerializer());
 
     // This is saved in the static map sPolicyDefinitions so that we're able to reconstruct the
-    // actual permission grant policy with the correct arguments (packageName and permission name)
-    // when reading the policies from xml.
+    // actual policy with the correct arguments (i.e. packageName) when reading the policies from
+    // xml.
     static PolicyDefinition<ComponentName> GENERIC_PERSISTENT_PREFERRED_ACTIVITY =
             new PolicyDefinition<>(
                     new IntentFilterPolicyKey(
@@ -157,8 +167,8 @@ final class PolicyDefinition<V> {
     }
 
     // This is saved in the static map sPolicyDefinitions so that we're able to reconstruct the
-    // actual uninstall blocked policy with the correct arguments (i.e. packageName)
-    // when reading the policies from xml.
+    // actual policy with the correct arguments (i.e. packageName) when reading the policies from
+    // xml.
     static PolicyDefinition<Boolean> GENERIC_PACKAGE_UNINSTALL_BLOCKED =
             new PolicyDefinition<>(
                     new PackagePolicyKey(
@@ -182,6 +192,35 @@ final class PolicyDefinition<V> {
                         DevicePolicyManager.PACKAGE_UNINSTALL_BLOCKED_POLICY, packageName));
     }
 
+    // This is saved in the static map sPolicyDefinitions so that we're able to reconstruct the
+    // actual policy with the correct arguments (i.e. packageName) when reading the policies from
+    // xml.
+    static PolicyDefinition<Bundle> GENERIC_APPLICATION_RESTRICTIONS =
+            new PolicyDefinition<>(
+                    new PackagePolicyKey(
+                            DevicePolicyManager.APPLICATION_RESTRICTIONS_POLICY),
+                    new MostRecent<>(),
+                    POLICY_FLAG_LOCAL_ONLY_POLICY | POLICY_FLAG_NON_COEXISTABLE_POLICY,
+                    // Application restrictions are now stored and retrieved from DPMS, so no
+                    // enforcing is required, however DPMS calls into UM to set restrictions for
+                    // backwards compatibility.
+                    (Bundle value, Context context, Integer userId, PolicyKey policyKey) -> true,
+                    new BundlePolicySerializer());
+
+    /**
+     * Passing in {@code null} for {@code packageName} will return
+     * {@link #GENERIC_APPLICATION_RESTRICTIONS}.
+     */
+    static PolicyDefinition<Bundle> APPLICATION_RESTRICTIONS(
+            String packageName) {
+        if (packageName == null) {
+            return GENERIC_APPLICATION_RESTRICTIONS;
+        }
+        return GENERIC_APPLICATION_RESTRICTIONS.createPolicyDefinition(
+                new PackagePolicyKey(
+                        DevicePolicyManager.APPLICATION_RESTRICTIONS_POLICY, packageName));
+    }
+
     private static final Map<String, PolicyDefinition<?>> sPolicyDefinitions = Map.of(
             DevicePolicyManager.AUTO_TIMEZONE_POLICY, AUTO_TIMEZONE,
             DevicePolicyManager.PERMISSION_GRANT_POLICY, GENERIC_PERMISSION_GRANT,
@@ -190,7 +229,8 @@ final class PolicyDefinition<V> {
             USER_CONTROLLED_DISABLED_PACKAGES,
             DevicePolicyManager.PERSISTENT_PREFERRED_ACTIVITY_POLICY,
             GENERIC_PERSISTENT_PREFERRED_ACTIVITY,
-            DevicePolicyManager.PACKAGE_UNINSTALL_BLOCKED_POLICY, GENERIC_PACKAGE_UNINSTALL_BLOCKED
+            DevicePolicyManager.PACKAGE_UNINSTALL_BLOCKED_POLICY, GENERIC_PACKAGE_UNINSTALL_BLOCKED,
+            DevicePolicyManager.APPLICATION_RESTRICTIONS_POLICY, GENERIC_APPLICATION_RESTRICTIONS
     );
 
 
@@ -237,6 +277,14 @@ final class PolicyDefinition<V> {
         return (mPolicyFlags & POLICY_FLAG_INHERITABLE) != 0;
     }
 
+    /**
+     * Returns {@code true} if the policy engine should not try to resolve policies set by different
+     * admins and should just store it and pass it on to the enforcing logic.
+     */
+    boolean isNonCoexistablePolicy() {
+        return (mPolicyFlags & POLICY_FLAG_NON_COEXISTABLE_POLICY) != 0;
+    }
+
     @Nullable
     PolicyValue<V> resolvePolicy(LinkedHashMap<EnforcingAdmin, PolicyValue<V>> adminsPolicy) {
         return mResolutionMechanism.resolve(adminsPolicy);
@@ -274,6 +322,10 @@ final class PolicyDefinition<V> {
         mPolicyEnforcerCallback = policyEnforcerCallback;
         mPolicySerializer = policySerializer;
 
+        if (isNonCoexistablePolicy() && !isLocalOnlyPolicy()) {
+            throw new UnsupportedOperationException("Non-coexistable global policies not supported,"
+                    + "please add support.");
+        }
         // TODO: maybe use this instead of manually adding to the map
 //        sPolicyDefinitions.put(policyDefinitionKey, this);
     }
@@ -304,7 +356,7 @@ final class PolicyDefinition<V> {
 
     void savePolicyValueToXml(TypedXmlSerializer serializer, String attributeName, V value)
             throws IOException {
-        mPolicySerializer.saveToXml(serializer, attributeName, value);
+        mPolicySerializer.saveToXml(mPolicyKey, serializer, attributeName, value);
     }
 
     @Nullable
