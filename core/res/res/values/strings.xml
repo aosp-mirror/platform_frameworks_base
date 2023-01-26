@@ -5142,6 +5142,14 @@
     <!-- Cling help message confirmation button when hiding the navigation bar entering immersive mode [CHAR LIMIT=30] -->
     <string name="immersive_cling_positive">Got it</string>
 
+    <!-- Text on a toast shown after the system rotates the screen for camera app
+         compatibility. [CHAR LIMIT=NONE] -->
+    <string name="display_rotation_camera_compat_toast_after_rotation">Rotate for a better view</string>
+
+    <!-- Text on a toast shown when a camera view is started within the app that may not be able
+         to display the camera preview correctly while in split screen. [CHAR LIMIT=NONE] -->
+    <string name="display_rotation_camera_compat_toast_in_split_screen">Exit split screen for a better view</string>
+
     <!-- Label for button to confirm chosen date or time [CHAR LIMIT=30] -->
     <string name="done_label">Done</string>
     <!--
