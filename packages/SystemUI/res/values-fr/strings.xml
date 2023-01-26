@@ -543,10 +543,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automatique"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Ni son, ni vibreur"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Ni son, ni vibreur ; s\'affiche plus bas dans la section des conversations"</string>
-    <!-- no translation found for notification_channel_summary_default (777294388712200605) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_default_with_bubbles (3482483084451555344) -->
-    <skip />
+    <string name="notification_channel_summary_default" msgid="777294388712200605">"Peut sonner ou vibrer en fonction des paramètres de l\'appareil"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Peut sonner ou vibrer en fonction des paramètres de l\'appareil. Les conversations provenant de <xliff:g id="APP_NAME">%1$s</xliff:g> s\'affichent sous forme de bulles par défaut."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Laisser le système déterminer si cette notification doit être accompagnée d\'un son ou d\'une vibration"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;État :&lt;/b&gt; Élevée à la catégorie \"Par défaut\""</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;État :&lt;/b&gt; Abaissée à la catégorie \"Silencieux\""</string>
@@ -814,8 +812,7 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Moyen"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Petit"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"Grand"</string>
-    <!-- no translation found for accessibility_magnification_done (263349129937348512) -->
-    <skip />
+    <string name="accessibility_magnification_done" msgid="263349129937348512">"OK"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Modifier"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Paramètres de la fenêtre d\'agrandissement"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Appuyez pour ouvrir fonctionnalités d\'accessibilité. Personnalisez ou remplacez bouton dans paramètres.\n\n"<annotation id="link">"Voir paramètres"</annotation></string>
@@ -835,6 +832,10 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"Sélectionnez l\'appli pour laquelle ajouter des commandes"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# commande ajoutée.}one{# commande ajoutée.}many{# commandes ajoutées.}other{# commandes ajoutées.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Supprimé"</string>
+    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
+    <skip />
+    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
+    <skip />
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Ajouté aux favoris"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Ajouté aux favoris, en position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Supprimé des favoris"</string>
@@ -901,6 +902,8 @@
     <string name="controls_error_failed" msgid="960228639198558525">"Erreur. Veuillez réessayer."</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Ajouter des commandes"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Modifier des commandes"</string>
+    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
+    <skip />
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Ajouter des sorties"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Groupe"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 appareil sélectionné"</string>
@@ -916,8 +919,7 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Enceintes et écrans"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Appareils suggérés"</string>
-    <!-- no translation found for media_output_status_require_premium (5691200962588753380) -->
-    <skip />
+    <string name="media_output_status_require_premium" msgid="5691200962588753380">"Nécessite un compte premium"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Fonctionnement des annonces"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Annonce"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Les personnes à proximité équipées d\'appareils Bluetooth compatibles peuvent écouter le contenu multimédia que vous diffusez"</string>
@@ -1062,14 +1064,11 @@
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> de batterie restante"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Connectez votre stylet à un chargeur"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"La batterie du stylet est faible"</string>
-    <!-- no translation found for video_camera (7654002575156149298) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_title (6991157106804289643) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_text (3458704745640229638) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_action (2937701298133010724) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_close (7927067108901068098) -->
+    <string name="video_camera" msgid="7654002575156149298">"Caméra vidéo"</string>
+    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Impossible d\'appeler depuis ce profil"</string>
+    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Votre règle professionnelle ne vous permet de passer des appels que depuis le profil professionnel"</string>
+    <string name="call_from_work_profile_action" msgid="2937701298133010724">"Passer au profil professionnel"</string>
+    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Fermer"</string>
+    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
     <skip />
 </resources>
