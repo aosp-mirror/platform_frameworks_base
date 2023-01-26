@@ -565,7 +565,7 @@ void CanvasContext::draw() {
             const auto inputEventId =
                     static_cast<int32_t>(mCurrentFrameInfo->get(FrameInfoIndex::InputEventId));
             native_window_set_frame_timeline_info(
-                    mNativeSurface->getNativeWindow(), vsyncId, inputEventId,
+                    mNativeSurface->getNativeWindow(), frameCompleteNr, vsyncId, inputEventId,
                     mCurrentFrameInfo->get(FrameInfoIndex::FrameStartTime));
         }
     }
