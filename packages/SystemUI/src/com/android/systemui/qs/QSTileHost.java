@@ -314,7 +314,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
         if (!TILES_SETTING.equals(key)) {
             return;
         }
-        Log.d(TAG, "Recreating tiles");
         if (newValue == null && UserManager.isDeviceInDemoMode(mContext)) {
             newValue = mContext.getResources().getString(R.string.quick_settings_tiles_retail_mode);
         }
@@ -327,6 +326,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
             }
         }
         if (tileSpecs.equals(mTileSpecs) && currentUser == mCurrentUser) return;
+        Log.d(TAG, "Recreating tiles: " + tileSpecs);
         mTiles.entrySet().stream().filter(tile -> !tileSpecs.contains(tile.getKey())).forEach(
                 tile -> {
                     Log.d(TAG, "Destroying tile: " + tile.getKey());
@@ -372,6 +372,8 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
                             Log.d(TAG, "Destroying not available tile: " + tileSpec);
                             mQSLogger.logTileDestroyed(tileSpec, "Tile not available");
                         }
+                    } else {
+                        Log.d(TAG, "No factory for a spec: " + tileSpec);
                     }
                 } catch (Throwable t) {
                     Log.w(TAG, "Error creating tile for spec: " + tileSpec, t);
