@@ -24,6 +24,7 @@ import com.android.launcher3.icons.IconFactory
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.media.MediaProjectionAppSelectorActivity
 import com.android.systemui.media.MediaProjectionAppSelectorActivity.Companion.EXTRA_HOST_APP_USER_HANDLE
+import com.android.systemui.media.MediaProjectionPermissionActivity
 import com.android.systemui.mediaprojection.appselector.data.ActivityTaskManagerLabelLoader
 import com.android.systemui.mediaprojection.appselector.data.ActivityTaskManagerThumbnailLoader
 import com.android.systemui.mediaprojection.appselector.data.AppIconLoader
@@ -45,10 +46,10 @@ import dagger.Provides
 import dagger.Subcomponent
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
-import javax.inject.Qualifier
-import javax.inject.Scope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import javax.inject.Qualifier
+import javax.inject.Scope
 
 @Qualifier @Retention(AnnotationRetention.BINARY) annotation class MediaProjectionAppSelector
 
@@ -67,6 +68,11 @@ interface MediaProjectionModule {
     fun provideMediaProjectionAppSelectorActivity(
         activity: MediaProjectionAppSelectorActivity
     ): Activity
+
+    @Binds
+    @IntoMap
+    @ClassKey(MediaProjectionPermissionActivity::class)
+    fun bindsMediaProjectionPermissionActivity(impl: MediaProjectionPermissionActivity): Activity
 }
 
 /**
@@ -149,6 +155,7 @@ interface MediaProjectionAppSelectorComponent {
 
     val controller: MediaProjectionAppSelectorController
     val recentsViewController: MediaProjectionRecentsViewController
+    val emptyStateProvider: MediaProjectionBlockerEmptyStateProvider
     @get:HostUserHandle val hostUserHandle: UserHandle
     @get:PersonalProfile val personalProfileUserHandle: UserHandle
 
