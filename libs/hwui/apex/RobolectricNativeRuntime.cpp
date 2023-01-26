@@ -39,7 +39,9 @@ int register_android_graphics_PathEffect(JNIEnv* env);
 int register_android_graphics_RenderEffect(JNIEnv* env);
 int register_android_graphics_Shader(JNIEnv* env);
 int register_android_graphics_Typeface(JNIEnv* env);
+#ifdef __linux__
 int register_android_graphics_drawable_AnimatedImageDrawable(JNIEnv* env);
+#endif
 
 namespace android {
 
@@ -101,7 +103,9 @@ static const RegJNIRec graphicsJNI[] = {
         REG_JNI(register_android_graphics_Region),
         REG_JNI(register_android_graphics_animation_RenderNodeAnimator),
         REG_JNI(register_android_graphics_animation_NativeInterpolatorFactory),
+#ifdef __linux__
         REG_JNI(register_android_graphics_drawable_AnimatedImageDrawable),
+#endif
         REG_JNI(register_android_graphics_drawable_AnimatedVectorDrawable),
         REG_JNI(register_android_graphics_drawable_VectorDrawable),
         REG_JNI(register_android_graphics_RenderEffect),

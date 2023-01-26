@@ -118,7 +118,7 @@ cc_library {
                 "libz",
             ],
         },
-        linux_glibc: {
+        not_windows: {
             srcs: [
                 "CursorWindow.cpp",
             ],
