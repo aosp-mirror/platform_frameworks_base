@@ -41,10 +41,10 @@ import java.util.concurrent.Future;
 public class BatteryStatsHistoryIteratorTest {
     private static final int APP_UID = Process.FIRST_APPLICATION_UID + 42;
 
-    private MockClock mMockClock = new MockClock();
+    private final MockClock mMockClock = new MockClock();
     private MockBatteryStatsImpl mBatteryStats;
-    private Random mRandom = new Random();
-    private MockExternalStatsSync mExternalStatsSync = new MockExternalStatsSync();
+    private final Random mRandom = new Random();
+    private final MockExternalStatsSync mExternalStatsSync = new MockExternalStatsSync();
 
     @Before
     public void setup() {
@@ -184,28 +184,26 @@ public class BatteryStatsHistoryIteratorTest {
                 100, /* plugType */ 0, 90, 72, 3700, 3_600_000, 4_000_000, 0,
                 1_000_000, 1_000_000, 1_000_000);
 
-        assertThat(mExternalStatsSync.mSyncScheduled).isTrue();
-        mBatteryStats.finishAddingCpuLocked(100, 0, 0, 0, 0, 0, 0, 0);
-        mExternalStatsSync.mSyncScheduled = false;
+        mExternalStatsSync.updateCpuStats(100, 1_100_000, 1_100_000);
 
         // Device was suspended for 3_000 seconds, note the difference in elapsed time and uptime
         mBatteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING,
                 100, /* plugType */ 0, 80, 72, 3700, 2_400_000, 4_000_000, 0,
                 5_000_000, 2_000_000, 5_000_000);
 
-        assertThat(mExternalStatsSync.mSyncScheduled).isTrue();
-        mBatteryStats.finishAddingCpuLocked(200, 0, 0, 0, 0, 0, 0, 0);
-        mExternalStatsSync.mSyncScheduled = false;
+        mExternalStatsSync.updateCpuStats(200, 5_100_000, 2_100_000);
 
         // Battery level is unchanged, so we don't write battery level details in history
         mBatteryStats.noteAlarmStartLocked("wakeup", null, APP_UID, 6_000_000, 3_000_000);
 
-        assertThat(mExternalStatsSync.mSyncScheduled).isFalse();
+        assertThat(mExternalStatsSync.isSyncScheduled()).isFalse();
 
         // Battery level drops, so we write the accumulated battery level details
         mBatteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING,
                 100, /* plugType */ 0, 79, 72, 3700, 2_000_000, 4_000_000, 0,
                 7_000_000, 4_000_000, 6_000_000);
+
+        mExternalStatsSync.updateCpuStats(300, 7_100_000, 4_100_000);
 
         final BatteryStatsHistoryIterator iterator = mBatteryStats.iterateBatteryStatsHistory();
 
@@ -220,6 +218,10 @@ public class BatteryStatsHistoryIteratorTest {
 
         assertThat(item = iterator.next()).isNotNull();
         assertThat(item.batteryLevel).isEqualTo(90);
+        assertThat(item.eventCode).isEqualTo(BatteryStats.HistoryItem.EVENT_COLLECT_EXTERNAL_STATS);
+
+        assertThat(item = iterator.next()).isNotNull();
+        assertThat(item.batteryLevel).isEqualTo(90);
         assertThat(item.states & BatteryStats.HistoryItem.STATE_CPU_RUNNING_FLAG).isEqualTo(0);
         assertThat(item.stepDetails.userTime).isEqualTo(100);
 
@@ -230,6 +232,10 @@ public class BatteryStatsHistoryIteratorTest {
 
         assertThat(item = iterator.next()).isNotNull();
         assertThat(item.batteryLevel).isEqualTo(80);
+        assertThat(item.eventCode).isEqualTo(BatteryStats.HistoryItem.EVENT_COLLECT_EXTERNAL_STATS);
+
+        assertThat(item = iterator.next()).isNotNull();
+        assertThat(item.batteryLevel).isEqualTo(80);
         assertThat(item.eventCode).isEqualTo(BatteryStats.HistoryItem.EVENT_ALARM_START);
         assertThat(item.stepDetails).isNull();
 
@@ -237,6 +243,10 @@ public class BatteryStatsHistoryIteratorTest {
         assertThat(item.batteryLevel).isEqualTo(79);
         assertThat(item.states & BatteryStats.HistoryItem.STATE_CPU_RUNNING_FLAG).isNotEqualTo(0);
         assertThat(item.stepDetails.userTime).isEqualTo(200);
+
+        assertThat(item = iterator.next()).isNotNull();
+        assertThat(item.batteryLevel).isEqualTo(79);
+        assertThat(item.eventCode).isEqualTo(BatteryStats.HistoryItem.EVENT_COLLECT_EXTERNAL_STATS);
 
         assertThat(item = iterator.next()).isNull();
     }
@@ -258,13 +268,26 @@ public class BatteryStatsHistoryIteratorTest {
         assertThat(item.time).isEqualTo(elapsedTimeMs);
     }
 
-    private static class MockExternalStatsSync extends MockBatteryStatsImpl.DummyExternalStatsSync {
+    private class MockExternalStatsSync extends MockBatteryStatsImpl.DummyExternalStatsSync {
         private boolean mSyncScheduled;
 
         @Override
         public Future<?> scheduleCpuSyncDueToWakelockChange(long delayMillis) {
             mSyncScheduled = true;
             return null;
+        }
+
+        public boolean isSyncScheduled() {
+            return mSyncScheduled;
+        }
+
+        public void updateCpuStats(int totalUTimeMs, long elapsedRealtime, long uptime) {
+            assertThat(mExternalStatsSync.mSyncScheduled).isTrue();
+            mBatteryStats.recordHistoryEventLocked(elapsedRealtime, uptime,
+                    BatteryStats.HistoryItem.EVENT_COLLECT_EXTERNAL_STATS, "wakelock-update", 0);
+            mBatteryStats.addCpuStatsLocked(totalUTimeMs, 0, 0, 0, 0, 0, 0, 0);
+            mBatteryStats.finishAddingCpuStatsLocked();
+            mExternalStatsSync.mSyncScheduled = false;
         }
     }
 }

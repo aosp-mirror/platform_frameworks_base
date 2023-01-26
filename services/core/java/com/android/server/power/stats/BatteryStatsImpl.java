@@ -3925,6 +3925,7 @@ public class BatteryStatsImpl extends BatteryStats {
         private final HistoryStepDetails mDetails = new HistoryStepDetails();
 
         private boolean mHasHistoryStepDetails;
+        private boolean mUpdateRequested;
 
         /**
          * Total time (in milliseconds) spent executing in user code.
@@ -3954,15 +3955,20 @@ public class BatteryStatsImpl extends BatteryStats {
 
         @Override
         public HistoryStepDetails getHistoryStepDetails() {
-            // Perform a CPU update right after we do this collection, so we have started
-            // collecting good data for the next step.
-            requestImmediateCpuUpdate();
+            if (!mUpdateRequested) {
+                mUpdateRequested = true;
+                // Perform a CPU update right after we do this collection, so we have started
+                // collecting good data for the next step.
+                requestImmediateCpuUpdate();
 
-            if (mPlatformIdleStateCallback != null) {
-                mDetails.statSubsystemPowerState =
-                        mPlatformIdleStateCallback.getSubsystemLowPowerStats();
-                if (DEBUG) Slog.i(TAG, "WRITE SubsystemPowerState:" +
-                        mDetails.statSubsystemPowerState);
+                if (mPlatformIdleStateCallback != null) {
+                    mDetails.statSubsystemPowerState =
+                            mPlatformIdleStateCallback.getSubsystemLowPowerStats();
+                    if (DEBUG) {
+                        Slog.i(TAG,
+                                "WRITE SubsystemPowerState:" + mDetails.statSubsystemPowerState);
+                    }
+                }
             }
 
             if (!mHasHistoryStepDetails) {
@@ -4072,7 +4078,11 @@ public class BatteryStatsImpl extends BatteryStats {
             mCurStepStatIrqTimeMs += statIrqTimeMs;
             mCurStepStatSoftIrqTimeMs += statSoftIrqTimeMs;
             mCurStepStatIdleTimeMs += statIdleTimeMs;
+        }
+
+        public void finishAddingCpuLocked() {
             mHasHistoryStepDetails = true;
+            mUpdateRequested = false;
         }
 
         @Override
@@ -4953,18 +4963,26 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @GuardedBy("this")
-    public boolean startAddingCpuLocked() {
+    public boolean startAddingCpuStatsLocked() {
         mExternalSync.cancelCpuSyncDueToWakelockChange();
         return mOnBatteryInternal;
     }
 
     @GuardedBy("this")
-    public void finishAddingCpuLocked(int totalUTimeMs, int totalSTimeMs, int statUserTimeMs,
+    public void addCpuStatsLocked(int totalUTimeMs, int totalSTimeMs, int statUserTimeMs,
             int statSystemTimeMs, int statIOWaitTimeMs, int statIrqTimeMs,
             int statSoftIrqTimeMs, int statIdleTimeMs) {
         mStepDetailsCalculator.addCpuStats(totalUTimeMs, totalSTimeMs, statUserTimeMs,
                 statSystemTimeMs, statIOWaitTimeMs, statIrqTimeMs,
                 statSoftIrqTimeMs, statIdleTimeMs);
+    }
+
+    /**
+     * Called after {@link #addCpuStatsLocked} has been invoked for all active apps.
+     */
+    @GuardedBy("this")
+    public void finishAddingCpuStatsLocked() {
+        mStepDetailsCalculator.finishAddingCpuLocked();
     }
 
     public void noteProcessDiedLocked(int uid, int pid) {
