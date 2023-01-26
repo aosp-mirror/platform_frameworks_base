@@ -937,7 +937,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         @Override
         public void run() {
             mLogger.logRetryAfterFpHwUnavailable(mHardwareFingerprintUnavailableRetryCount);
-            if (mFpm.isHardwareDetected()) {
+            if (!mFingerprintSensorProperties.isEmpty()) {
                 updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
             } else if (mHardwareFingerprintUnavailableRetryCount < HAL_ERROR_RETRY_MAX) {
                 mHardwareFingerprintUnavailableRetryCount++;
@@ -2352,14 +2352,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     private void updateFaceEnrolled(int userId) {
-        mIsFaceEnrolled = whitelistIpcs(
-                () -> mFaceManager != null && mFaceManager.isHardwareDetected()
-                        && mBiometricEnabledForUser.get(userId))
+        mIsFaceEnrolled = mFaceManager != null && !mFaceSensorProperties.isEmpty()
+                && mBiometricEnabledForUser.get(userId)
                 && mAuthController.isFaceAuthEnrolled(userId);
     }
 
     public boolean isFaceSupported() {
-        return mFaceManager != null && mFaceManager.isHardwareDetected();
+        return mFaceManager != null && !mFaceSensorProperties.isEmpty();
     }
 
     /**
@@ -2975,7 +2974,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     @VisibleForTesting
     boolean isUnlockWithFingerprintPossible(int userId) {
         // TODO (b/242022358), make this rely on onEnrollmentChanged event and update it only once.
-        mIsUnlockWithFingerprintPossible.put(userId, mFpm != null && mFpm.isHardwareDetected()
+        mIsUnlockWithFingerprintPossible.put(userId, mFpm != null
+                && !mFingerprintSensorProperties.isEmpty()
                 && !isFingerprintDisabled(userId) && mFpm.hasEnrolledTemplates(userId));
         return mIsUnlockWithFingerprintPossible.get(userId);
     }
@@ -3895,7 +3895,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         for (int subId : mServiceStates.keySet()) {
             pw.println("    " + subId + "=" + mServiceStates.get(subId));
         }
-        if (mFpm != null && mFpm.isHardwareDetected()) {
+        if (mFpm != null && !mFingerprintSensorProperties.isEmpty()) {
             final int userId = mUserTracker.getUserId();
             final int strongAuthFlags = mStrongAuthTracker.getStrongAuthForUser(userId);
             BiometricAuthenticated fingerprint = mUserFingerprintAuthenticated.get(userId);
@@ -3944,7 +3944,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     mFingerprintListenBuffer.toList()
             ).printTableData(pw);
         }
-        if (mFaceManager != null && mFaceManager.isHardwareDetected()) {
+        if (mFaceManager != null && !mFaceSensorProperties.isEmpty()) {
             final int userId = mUserTracker.getUserId();
             final int strongAuthFlags = mStrongAuthTracker.getStrongAuthForUser(userId);
             BiometricAuthenticated face = mUserFaceAuthenticated.get(userId);

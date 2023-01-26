@@ -96,7 +96,6 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.Settings;
 import android.service.dreams.IDreamManager;
 import android.service.trust.TrustAgentService;
 import android.telephony.ServiceState;
@@ -700,7 +699,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         setKeyguardBouncerVisibility(true);
 
         verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt(), anyBoolean());
-        verify(mFaceManager).isHardwareDetected();
         verify(mFaceManager, never()).hasEnrolledTemplates(anyInt());
     }
 
