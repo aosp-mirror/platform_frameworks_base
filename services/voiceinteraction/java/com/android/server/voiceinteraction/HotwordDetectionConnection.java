@@ -445,9 +445,15 @@ final class HotwordDetectionConnection {
         // Recreate connection to reset the cache.
         mRestartCount++;
 
-        mRemoteHotwordDetectionService = mHotwordDetectionServiceConnectionFactory.createLocked();
-        mRemoteVisualQueryDetectionService =
-                mVisualQueryDetectionServiceConnectionFactory.createLocked();
+        if (oldHotwordConnection != null) {
+            mRemoteHotwordDetectionService =
+                    mHotwordDetectionServiceConnectionFactory.createLocked();
+        }
+
+        if (oldVisualQueryDetectionConnection != null) {
+            mRemoteVisualQueryDetectionService =
+                    mVisualQueryDetectionServiceConnectionFactory.createLocked();
+        }
 
         Slog.v(TAG, "Started the new process, dispatching processRestarted to detector");
         runForEachDetectorSessionLocked((session) -> {
