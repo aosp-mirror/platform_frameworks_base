@@ -45,7 +45,7 @@ class ConnectivityPipelineLoggerTest : SysuiTestCase() {
 
     @Test
     fun testLogNetworkCapsChange_bufferHasInfo() {
-        logger.logOnCapabilitiesChanged(NET_1, NET_1_CAPS)
+        logger.logOnCapabilitiesChanged(NET_1, NET_1_CAPS, isDefaultNetworkCallback = true)
 
         val stringWriter = StringWriter()
         buffer.dump(PrintWriter(stringWriter), tailLength = 0)
@@ -54,6 +54,7 @@ class ConnectivityPipelineLoggerTest : SysuiTestCase() {
         val expectedNetId = NET_1_ID.toString()
         val expectedCaps = NET_1_CAPS.toString()
 
+        assertThat(actualString).contains("true")
         assertThat(actualString).contains(expectedNetId)
         assertThat(actualString).contains(expectedCaps)
     }
