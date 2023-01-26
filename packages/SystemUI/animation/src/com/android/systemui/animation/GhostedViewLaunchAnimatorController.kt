@@ -195,13 +195,15 @@ open class GhostedViewLaunchAnimatorController @JvmOverloads constructor(
         backgroundDrawable = WrappedDrawable(background)
         backgroundView?.background = backgroundDrawable
 
+        // Delay the calls to `ghostedView.setVisibility()` during the animation. This must be
+        // called before `GhostView.addGhost()` is called because the latter will change the
+        // *transition* visibility, which won't be blocked and will affect the normal View
+        // visibility that is saved by `setShouldBlockVisibilityChanges()` for a later restoration.
+        (ghostedView as? LaunchableView)?.setShouldBlockVisibilityChanges(true)
+
         // Create a ghost of the view that will be moving and fading out. This allows to fade out
         // the content before fading out the background.
         ghostView = GhostView.addGhost(ghostedView, launchContainer)
-
-        // The ghost was just created, so ghostedView is currently invisible. We need to make sure
-        // that it stays invisible as long as we are animating.
-        (ghostedView as? LaunchableView)?.setShouldBlockVisibilityChanges(true)
 
         val matrix = ghostView?.animationMatrix ?: Matrix.IDENTITY_MATRIX
         matrix.getValues(initialGhostViewMatrixValues)
@@ -297,14 +299,19 @@ open class GhostedViewLaunchAnimatorController @JvmOverloads constructor(
         backgroundDrawable?.wrapped?.alpha = startBackgroundAlpha
 
         GhostView.removeGhost(ghostedView)
-        (ghostedView as? LaunchableView)?.setShouldBlockVisibilityChanges(false)
         launchContainerOverlay.remove(backgroundView)
 
-        // Make sure that the view is considered VISIBLE by accessibility by first making it
-        // INVISIBLE then VISIBLE (see b/204944038#comment17 for more info).
-        ghostedView.visibility = View.INVISIBLE
-        ghostedView.visibility = View.VISIBLE
-        ghostedView.invalidate()
+        if (ghostedView is LaunchableView) {
+            // Restore the ghosted view visibility.
+            ghostedView.setShouldBlockVisibilityChanges(false)
+        } else {
+            // Make the ghosted view visible. We ensure that the view is considered VISIBLE by
+            // accessibility by first making it INVISIBLE then VISIBLE (see b/204944038#comment17
+            // for more info).
+            ghostedView.visibility = View.INVISIBLE
+            ghostedView.visibility = View.VISIBLE
+            ghostedView.invalidate()
+        }
     }
 
     companion object {
