@@ -92,6 +92,7 @@ import com.android.internal.util.UserIcons;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.settingslib.Utils;
+import com.android.settingslib.drawable.CircleFramedDrawable;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
@@ -999,8 +1000,10 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
         private Drawable findUserIcon(int userId) {
             Bitmap userIcon = UserManager.get(mView.getContext()).getUserIcon(userId);
             if (userIcon != null) {
-                return new BitmapDrawable(userIcon);
+                return CircleFramedDrawable.getInstance(mView.getContext(),
+                        userIcon);
             }
+
             return UserIcons.getDefaultUserIcon(mResources, userId, false);
         }
 
