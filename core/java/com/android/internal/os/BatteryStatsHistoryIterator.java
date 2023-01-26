@@ -215,7 +215,7 @@ public class BatteryStatsHistoryIterator implements Iterator<BatteryStats.Histor
             cur.eventCode = BatteryStats.HistoryItem.EVENT_NONE;
         }
 
-        if ((batteryLevelInt & BatteryStatsHistory.BATTERY_DELTA_LEVEL_FLAG) != 0) {
+        if ((batteryLevelInt & BatteryStatsHistory.BATTERY_LEVEL_DETAILS_FLAG) != 0) {
             cur.stepDetails = mReadHistoryStepDetails;
             cur.stepDetails.readFromParcel(src);
         } else {
