@@ -71,6 +71,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     public static final int LOGICAL_DISPLAY_EVENT_SWAPPED = 4;
     public static final int LOGICAL_DISPLAY_EVENT_FRAME_RATE_OVERRIDES_CHANGED = 5;
     public static final int LOGICAL_DISPLAY_EVENT_DEVICE_STATE_TRANSITION = 6;
+    public static final int LOGICAL_DISPLAY_EVENT_HDR_SDR_RATIO_CHANGED = 7;
 
     public static final int DISPLAY_GROUP_EVENT_ADDED = 1;
     public static final int DISPLAY_GROUP_EVENT_CHANGED = 2;
@@ -221,14 +222,6 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                 handleDisplayDeviceAddedLocked(device);
                 break;
 
-            case DisplayDeviceRepository.DISPLAY_DEVICE_EVENT_CHANGED:
-                if (DEBUG) {
-                    Slog.d(TAG, "Display device changed: " + device.getDisplayDeviceInfoLocked());
-                }
-                finishStateTransitionLocked(false /*force*/);
-                updateLogicalDisplaysLocked();
-                break;
-
             case DisplayDeviceRepository.DISPLAY_DEVICE_EVENT_REMOVED:
                 if (DEBUG) {
                     Slog.d(TAG, "Display device removed: " + device.getDisplayDeviceInfoLocked());
@@ -237,6 +230,15 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                 updateLogicalDisplaysLocked();
                 break;
         }
+    }
+
+    @Override
+    public void onDisplayDeviceChangedLocked(DisplayDevice device, int diff) {
+        if (DEBUG) {
+            Slog.d(TAG, "Display device changed: " + device.getDisplayDeviceInfoLocked());
+        }
+        finishStateTransitionLocked(false /*force*/);
+        updateLogicalDisplaysLocked(diff);
     }
 
     @Override
@@ -649,13 +651,20 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         }
     }
 
+    private void updateLogicalDisplaysLocked() {
+        updateLogicalDisplaysLocked(DisplayDeviceInfo.DIFF_EVERYTHING);
+    }
+
     /**
      * Updates the rest of the display system once all the changes are applied for display
      * devices and logical displays. The includes releasing invalid/empty LogicalDisplays,
      * creating/adjusting/removing DisplayGroups, and notifying the rest of the system of the
      * relevant changes.
+     *
+     * @param diff The DisplayDeviceInfo.DIFF_* of what actually changed to enable finer-grained
+     *             display update listeners
      */
-    private void updateLogicalDisplaysLocked() {
+    private void updateLogicalDisplaysLocked(int diff) {
         // Go through all the displays and figure out if they need to be updated.
         // Loops in reverse so that displays can be removed during the loop without affecting the
         // rest of the loop.
@@ -709,7 +718,13 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             } else if (!mTempDisplayInfo.equals(newDisplayInfo)) {
                 // FLAG_OWN_DISPLAY_GROUP could have changed, recalculate just in case
                 assignDisplayGroupLocked(display);
-                mLogicalDisplaysToUpdate.put(displayId, LOGICAL_DISPLAY_EVENT_CHANGED);
+                // If only the hdr/sdr ratio changed, then send just the event for that case
+                if ((diff == DisplayDeviceInfo.DIFF_HDR_SDR_RATIO)) {
+                    mLogicalDisplaysToUpdate.put(displayId,
+                            LOGICAL_DISPLAY_EVENT_HDR_SDR_RATIO_CHANGED);
+                } else {
+                    mLogicalDisplaysToUpdate.put(displayId, LOGICAL_DISPLAY_EVENT_CHANGED);
+                }
 
             // The display is involved in a display layout transition
             } else if (updateState == UPDATE_STATE_TRANSITION) {
@@ -768,6 +783,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         sendUpdatesForDisplaysLocked(LOGICAL_DISPLAY_EVENT_FRAME_RATE_OVERRIDES_CHANGED);
         sendUpdatesForDisplaysLocked(LOGICAL_DISPLAY_EVENT_SWAPPED);
         sendUpdatesForDisplaysLocked(LOGICAL_DISPLAY_EVENT_ADDED);
+        sendUpdatesForDisplaysLocked(LOGICAL_DISPLAY_EVENT_HDR_SDR_RATIO_CHANGED);
         sendUpdatesForGroupsLocked(DISPLAY_GROUP_EVENT_CHANGED);
         sendUpdatesForGroupsLocked(DISPLAY_GROUP_EVENT_REMOVED);
 
@@ -1110,6 +1126,8 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                 return "swapped";
             case LOGICAL_DISPLAY_EVENT_REMOVED:
                 return "removed";
+            case LOGICAL_DISPLAY_EVENT_HDR_SDR_RATIO_CHANGED:
+                return "hdr_sdr_ratio_changed";
         }
         return null;
     }

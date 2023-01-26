@@ -38,6 +38,7 @@ import android.hardware.graphics.common.DisplayDecorationSupport;
 import android.media.projection.IMediaProjection;
 import android.media.projection.MediaProjection;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -56,11 +57,12 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Manager communication with the display manager service on behalf of
@@ -82,11 +84,12 @@ public final class DisplayManagerGlobal {
     // orientation change before the display info cache has actually been invalidated.
     private static final boolean USE_CACHE = false;
 
-    @IntDef(prefix = {"SWITCHING_TYPE_"}, value = {
+    @IntDef(prefix = {"EVENT_DISPLAY_"}, flag = true, value = {
             EVENT_DISPLAY_ADDED,
             EVENT_DISPLAY_CHANGED,
             EVENT_DISPLAY_REMOVED,
-            EVENT_DISPLAY_BRIGHTNESS_CHANGED
+            EVENT_DISPLAY_BRIGHTNESS_CHANGED,
+            EVENT_DISPLAY_HDR_SDR_RATIO_CHANGED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DisplayEvent {}
@@ -95,6 +98,7 @@ public final class DisplayManagerGlobal {
     public static final int EVENT_DISPLAY_CHANGED = 2;
     public static final int EVENT_DISPLAY_REMOVED = 3;
     public static final int EVENT_DISPLAY_BRIGHTNESS_CHANGED = 4;
+    public static final int EVENT_DISPLAY_HDR_SDR_RATIO_CHANGED = 5;
 
     @UnsupportedAppUsage
     private static DisplayManagerGlobal sInstance;
@@ -109,7 +113,8 @@ public final class DisplayManagerGlobal {
 
     private DisplayManagerCallback mCallback;
     private @EventsMask long mRegisteredEventsMask = 0;
-    private final ArrayList<DisplayListenerDelegate> mDisplayListeners = new ArrayList<>();
+    private final CopyOnWriteArrayList<DisplayListenerDelegate> mDisplayListeners =
+            new CopyOnWriteArrayList<>();
 
     private final SparseArray<DisplayInfo> mDisplayInfoCache = new SparseArray<>();
     private final ColorSpace mWideColorSpace;
@@ -315,6 +320,19 @@ public final class DisplayManagerGlobal {
      */
     public void registerDisplayListener(@NonNull DisplayListener listener,
             @Nullable Handler handler, @EventsMask long eventsMask) {
+        Looper looper = getLooperForHandler(handler);
+        Handler springBoard = new Handler(looper);
+        registerDisplayListener(listener, new HandlerExecutor(springBoard), eventsMask);
+    }
+
+    /**
+     * Register a listener for display-related changes.
+     *
+     * @param listener The listener that will be called when display changes occur.
+     * @param executor Executor for the thread that will be receiving the callbacks. Cannot be null.
+     */
+    public void registerDisplayListener(@NonNull DisplayListener listener,
+            @NonNull Executor executor, @EventsMask long eventsMask) {
         if (listener == null) {
             throw new IllegalArgumentException("listener must not be null");
         }
@@ -326,8 +344,7 @@ public final class DisplayManagerGlobal {
         synchronized (mLock) {
             int index = findDisplayListenerLocked(listener);
             if (index < 0) {
-                Looper looper = getLooperForHandler(handler);
-                mDisplayListeners.add(new DisplayListenerDelegate(listener, looper, eventsMask));
+                mDisplayListeners.add(new DisplayListenerDelegate(listener, executor, eventsMask));
                 registerCallbackIfNeededLocked();
             } else {
                 mDisplayListeners.get(index).setEventsMask(eventsMask);
@@ -408,6 +425,7 @@ public final class DisplayManagerGlobal {
     }
 
     private void handleDisplayEvent(int displayId, @DisplayEvent int event) {
+        final DisplayInfo info;
         synchronized (mLock) {
             if (USE_CACHE) {
                 mDisplayInfoCache.remove(displayId);
@@ -417,11 +435,7 @@ public final class DisplayManagerGlobal {
                 }
             }
 
-            final int numListeners = mDisplayListeners.size();
-            DisplayInfo info = getDisplayInfo(displayId);
-            for (int i = 0; i < numListeners; i++) {
-                mDisplayListeners.get(i).sendDisplayEvent(displayId, event, info);
-            }
+            info = getDisplayInfoLocked(displayId);
             if (event == EVENT_DISPLAY_CHANGED && mDispatchNativeCallbacks) {
                 // Choreographer only supports a single display, so only dispatch refresh rate
                 // changes for the default display.
@@ -437,6 +451,11 @@ public final class DisplayManagerGlobal {
                     }
                 }
             }
+        }
+        // Accepting an Executor means the listener may be synchronously invoked, so we must
+        // not be holding mLock when we do so
+        for (DisplayListenerDelegate listener : mDisplayListeners) {
+            listener.sendDisplayEvent(displayId, event, info);
         }
     }
 
@@ -1075,34 +1094,42 @@ public final class DisplayManagerGlobal {
         }
     }
 
-    private static final class DisplayListenerDelegate extends Handler {
+    private static final class DisplayListenerDelegate {
         public final DisplayListener mListener;
         public volatile long mEventsMask;
 
         private final DisplayInfo mDisplayInfo = new DisplayInfo();
+        private final Executor mExecutor;
+        private AtomicLong mGenerationId = new AtomicLong(1);
 
-        DisplayListenerDelegate(DisplayListener listener, @NonNull Looper looper,
+        DisplayListenerDelegate(DisplayListener listener, @NonNull Executor executor,
                 @EventsMask long eventsMask) {
-            super(looper, null, true /*async*/);
+            mExecutor = executor;
             mListener = listener;
             mEventsMask = eventsMask;
         }
 
         public void sendDisplayEvent(int displayId, @DisplayEvent int event, DisplayInfo info) {
-            Message msg = obtainMessage(event, displayId, 0, info);
-            sendMessage(msg);
+            long generationId = mGenerationId.get();
+            Message msg = Message.obtain(null, event, displayId, 0, info);
+            mExecutor.execute(() -> {
+                // If the generation id's don't match we were canceled but still need to recycle()
+                if (generationId == mGenerationId.get()) {
+                    handleMessage(msg);
+                }
+                msg.recycle();
+            });
         }
 
         public void clearEvents() {
-            removeCallbacksAndMessages(null);
+            mGenerationId.incrementAndGet();
         }
 
         public void setEventsMask(@EventsMask long newEventsMask) {
             mEventsMask = newEventsMask;
         }
 
-        @Override
-        public void handleMessage(Message msg) {
+        private void handleMessage(Message msg) {
             if (DEBUG) {
                 Trace.beginSection(
                         "DisplayListenerDelegate(" + eventToString(msg.what)
@@ -1132,6 +1159,11 @@ public final class DisplayManagerGlobal {
                 case EVENT_DISPLAY_REMOVED:
                     if ((mEventsMask & DisplayManager.EVENT_FLAG_DISPLAY_REMOVED) != 0) {
                         mListener.onDisplayRemoved(msg.arg1);
+                    }
+                    break;
+                case EVENT_DISPLAY_HDR_SDR_RATIO_CHANGED:
+                    if ((mEventsMask & DisplayManager.EVENT_FLAG_HDR_SDR_RATIO_CHANGED) != 0) {
+                        mListener.onDisplayChanged(msg.arg1);
                     }
                     break;
             }
@@ -1255,6 +1287,8 @@ public final class DisplayManagerGlobal {
                 return "REMOVED";
             case EVENT_DISPLAY_BRIGHTNESS_CHANGED:
                 return "BRIGHTNESS_CHANGED";
+            case EVENT_DISPLAY_HDR_SDR_RATIO_CHANGED:
+                return "HDR_SDR_RATIO_CHANGED";
         }
         return "UNKNOWN";
     }

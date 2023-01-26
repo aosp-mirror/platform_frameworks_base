@@ -56,6 +56,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * Provides information about the size and density of a logical display.
@@ -110,6 +112,8 @@ public final class Display {
     private long mLastCachedAppSizeUpdate;
     private int mCachedAppWidthCompat;
     private int mCachedAppHeightCompat;
+
+    private ArrayList<HdrSdrRatioListenerWrapper> mHdrSdrRatioListeners = new ArrayList<>();
 
     /**
      * The default Display id, which is the id of the primary display assuming there is one.
@@ -1288,6 +1292,102 @@ public final class Display {
                 return false;
             }
             return !(hdrCapabilities.getSupportedHdrTypes().length == 0);
+        }
+    }
+
+    /**
+     * @return Whether the display supports reporting an hdr/sdr ratio. If this is false,
+     *         {@link #getHdrSdrRatio()} will always be 1.0f
+     * @hide
+     * TODO: make public
+     */
+    public boolean isHdrSdrRatioAvailable() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            return !Float.isNaN(mDisplayInfo.hdrSdrRatio);
+        }
+    }
+
+    /**
+     * @return The current hdr/sdr ratio expressed as the ratio of targetHdrPeakBrightnessInNits /
+     *         targetSdrWhitePointInNits. If {@link #isHdrSdrRatioAvailable()} is false, this
+     *         always returns 1.0f.
+     *
+     * @hide
+     * TODO: make public
+     */
+    public float getHdrSdrRatio() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            return Float.isNaN(mDisplayInfo.hdrSdrRatio)
+                    ? 1.0f : mDisplayInfo.hdrSdrRatio;
+        }
+    }
+
+    private int findHdrSdrRatioListenerLocked(Consumer<Display> listener) {
+        for (int i = 0; i < mHdrSdrRatioListeners.size(); i++) {
+            final HdrSdrRatioListenerWrapper wrapper = mHdrSdrRatioListeners.get(i);
+            if (wrapper.mListener == listener) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Registers a listener that will be invoked whenever the display's hdr/sdr ratio has changed.
+     * After receiving the callback on the specified Executor, call {@link #getHdrSdrRatio()} to
+     * get the updated value.
+     * If {@link #isHdrSdrRatioAvailable()} is false, then an IllegalStateException will be thrown
+     *
+     * @see #unregisterHdrSdrRatioChangedListener(Consumer)
+     * @param executor The executor to invoke the listener on
+     * @param listener The listener to invoke when the HDR/SDR ratio changes
+     * @throws IllegalStateException if {@link #isHdrSdrRatioAvailable()} is false
+     * @hide
+     * TODO: Make public
+     */
+    public void registerHdrSdrRatioChangedListener(@NonNull Executor executor,
+            @NonNull Consumer<Display> listener) {
+        if (!isHdrSdrRatioAvailable()) {
+            throw new IllegalStateException("HDR/SDR ratio changed not available");
+        }
+        HdrSdrRatioListenerWrapper toRegister = null;
+        synchronized (mLock) {
+            if (findHdrSdrRatioListenerLocked(listener) == -1) {
+                toRegister = new HdrSdrRatioListenerWrapper(listener);
+                mHdrSdrRatioListeners.add(toRegister);
+            } // else already listening, don't do anything
+        }
+        if (toRegister != null) {
+            // Although we only care about the HDR/SDR ratio changing, that can also come in the
+            // form of the larger DISPLAY_CHANGED event
+            mGlobal.registerDisplayListener(toRegister, executor,
+                    DisplayManager.EVENT_FLAG_HDR_SDR_RATIO_CHANGED
+                            | DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
+        }
+
+    }
+
+    /**
+     * @param listener  The previously
+     *                  {@link #registerHdrSdrRatioChangedListener(Executor, Consumer) registered}
+     *                  hdr/sdr ratio listener to remove.
+     *
+     * @see #registerHdrSdrRatioChangedListener(Executor, Consumer)
+     * @hide
+     * TODO: Make public
+     */
+    public void unregisterHdrSdrRatioChangedListener(Consumer<Display> listener) {
+        HdrSdrRatioListenerWrapper toRemove = null;
+        synchronized (mLock) {
+            int index = findHdrSdrRatioListenerLocked(listener);
+            if (index != -1) {
+                toRemove = mHdrSdrRatioListeners.remove(index);
+            }
+        }
+        if (toRemove != null) {
+            mGlobal.unregisterDisplayListener(toRemove);
         }
     }
 
@@ -2525,6 +2625,35 @@ public final class Display {
                     return "HDR_TYPE_HDR10_PLUS";
                 default:
                     return "HDR_TYPE_INVALID";
+            }
+        }
+    }
+
+    private class HdrSdrRatioListenerWrapper implements DisplayManager.DisplayListener {
+        Consumer<Display> mListener;
+        float mLastReportedRatio = 1.f;
+
+        private HdrSdrRatioListenerWrapper(Consumer<Display> listener) {
+            mListener = listener;
+        }
+
+        @Override
+        public void onDisplayAdded(int displayId) {
+            // don't care
+        }
+
+        @Override
+        public void onDisplayRemoved(int displayId) {
+            // don't care
+        }
+
+        @Override
+        public void onDisplayChanged(int displayId) {
+            if (displayId == getDisplayId()) {
+                float newRatio = getHdrSdrRatio();
+                if (newRatio != mLastReportedRatio) {
+                    mListener.accept(Display.this);
+                }
             }
         }
     }

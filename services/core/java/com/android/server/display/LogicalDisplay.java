@@ -448,6 +448,7 @@ final class LogicalDisplay {
             mBaseDisplayInfo.brightnessMinimum = deviceInfo.brightnessMinimum;
             mBaseDisplayInfo.brightnessMaximum = deviceInfo.brightnessMaximum;
             mBaseDisplayInfo.brightnessDefault = deviceInfo.brightnessDefault;
+            mBaseDisplayInfo.hdrSdrRatio = deviceInfo.hdrSdrRatio;
             mBaseDisplayInfo.roundedCorners = deviceInfo.roundedCorners;
             mBaseDisplayInfo.installOrientation = deviceInfo.installOrientation;
             mBaseDisplayInfo.displayShape = deviceInfo.displayShape;

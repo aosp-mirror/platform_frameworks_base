@@ -540,7 +540,8 @@ public final class DisplayManager {
             EVENT_FLAG_DISPLAY_ADDED,
             EVENT_FLAG_DISPLAY_CHANGED,
             EVENT_FLAG_DISPLAY_REMOVED,
-            EVENT_FLAG_DISPLAY_BRIGHTNESS
+            EVENT_FLAG_DISPLAY_BRIGHTNESS,
+            EVENT_FLAG_HDR_SDR_RATIO_CHANGED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventsMask {}
@@ -582,6 +583,19 @@ public final class DisplayManager {
      * @hide
      */
     public static final long EVENT_FLAG_DISPLAY_BRIGHTNESS = 1L << 3;
+
+    /**
+     * Event flag to register for a display's hdr/sdr ratio changes. This notification is sent
+     * through the {@link DisplayListener#onDisplayChanged} callback method. New hdr/sdr
+     * values can be retrieved via {@link Display#getHdrSdrRatio()}.
+     *
+     * Requires that {@link Display#isHdrSdrRatioAvailable()} is true.
+     *
+     * @see #registerDisplayListener(DisplayListener, Handler, long)
+     *
+     * @hide
+     */
+    public static final long EVENT_FLAG_HDR_SDR_RATIO_CHANGED = 1L << 4;
 
     /** @hide */
     public DisplayManager(Context context) {

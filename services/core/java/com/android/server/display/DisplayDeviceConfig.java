@@ -447,7 +447,7 @@ public class DisplayDeviceConfig {
     // so -2 is used instead
     private static final float INVALID_BRIGHTNESS_IN_CONFIG = -2f;
 
-    private static final float NITS_INVALID = -1;
+    static final float NITS_INVALID = -1;
 
     // Length of the ambient light horizon used to calculate the long term estimate of ambient
     // light.
@@ -828,7 +828,7 @@ public class DisplayDeviceConfig {
     /**
      * Calculates the nits value for the specified backlight value if a mapping exists.
      *
-     * @return The mapped nits or 0 if no mapping exits.
+     * @return The mapped nits or {@link #NITS_INVALID} if no mapping exits.
      */
     public float getNitsFromBacklight(float backlight) {
         if (mBacklightToNitsSpline == null) {
