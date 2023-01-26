@@ -56,6 +56,7 @@ import android.util.PrintWriterPrinter;
 import com.android.internal.annotations.GuardedBy;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -434,6 +435,48 @@ import java.util.concurrent.atomic.AtomicBoolean;
         return device;
     }
 
+    private static final int[] VALID_COMMUNICATION_DEVICE_TYPES = {
+            AudioDeviceInfo.TYPE_BUILTIN_SPEAKER,
+            AudioDeviceInfo.TYPE_BLUETOOTH_SCO,
+            AudioDeviceInfo.TYPE_WIRED_HEADSET,
+            AudioDeviceInfo.TYPE_USB_HEADSET,
+            AudioDeviceInfo.TYPE_BUILTIN_EARPIECE,
+            AudioDeviceInfo.TYPE_WIRED_HEADPHONES,
+            AudioDeviceInfo.TYPE_HEARING_AID,
+            AudioDeviceInfo.TYPE_BLE_HEADSET,
+            AudioDeviceInfo.TYPE_USB_DEVICE,
+            AudioDeviceInfo.TYPE_BLE_SPEAKER,
+            AudioDeviceInfo.TYPE_LINE_ANALOG,
+            AudioDeviceInfo.TYPE_HDMI,
+            AudioDeviceInfo.TYPE_AUX_LINE
+    };
+
+    /*package */ static boolean isValidCommunicationDevice(AudioDeviceInfo device) {
+        for (int type : VALID_COMMUNICATION_DEVICE_TYPES) {
+            if (device.getType() == type) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /* package */ static List<AudioDeviceInfo> getAvailableCommunicationDevices() {
+        ArrayList<AudioDeviceInfo> commDevices = new ArrayList<>();
+        AudioDeviceInfo[] allDevices =
+                AudioManager.getDevicesStatic(AudioManager.GET_DEVICES_OUTPUTS);
+        for (AudioDeviceInfo device : allDevices) {
+            if (isValidCommunicationDevice(device)) {
+                commDevices.add(device);
+            }
+        }
+        return commDevices;
+    }
+
+    private @Nullable AudioDeviceInfo getCommunicationDeviceOfType(int type) {
+        return getAvailableCommunicationDevices().stream().filter(d -> d.getType() == type)
+                .findFirst().orElse(null);
+    }
+
     /**
      * Returns the device currently requested for communication use case.
      * @return AudioDeviceInfo the requested device for communication.
@@ -441,7 +484,29 @@ import java.util.concurrent.atomic.AtomicBoolean;
     /* package */ AudioDeviceInfo getCommunicationDevice() {
         synchronized (mDeviceStateLock) {
             updateActiveCommunicationDevice();
-            return mActiveCommunicationDevice;
+            AudioDeviceInfo device = mActiveCommunicationDevice;
+            // make sure we return a valid communication device (i.e. a device that is allowed by
+            // setCommunicationDevice()) for consistency.
+            if (device != null) {
+                // a digital dock is used instead of the speaker in speakerphone mode and should
+                // be reflected as such
+                if (device.getType() == AudioDeviceInfo.TYPE_DOCK) {
+                    device = getCommunicationDeviceOfType(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER);
+                }
+            }
+            // Try to default to earpiece when current communication device is not valid. This can
+            // happen for instance if no call is active. If no earpiece device is available take the
+            // first valid communication device
+            if (device == null || !AudioDeviceBroker.isValidCommunicationDevice(device)) {
+                device = getCommunicationDeviceOfType(AudioDeviceInfo.TYPE_BUILTIN_EARPIECE);
+                if (device == null) {
+                    List<AudioDeviceInfo> commDevices = getAvailableCommunicationDevices();
+                    if (!commDevices.isEmpty()) {
+                        device = commDevices.get(0);
+                    }
+                }
+            }
+            return device;
         }
     }
 
@@ -918,8 +983,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
     @GuardedBy("mDeviceStateLock")
     private void dispatchCommunicationDevice() {
-        int portId = (mActiveCommunicationDevice == null) ? 0
-                : mActiveCommunicationDevice.getId();
+        AudioDeviceInfo device = getCommunicationDevice();
+        int portId = device != null ? device.getId() : 0;
         if (portId == mCurCommunicationPortId) {
             return;
         }
@@ -935,6 +1000,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
         }
         mCommDevDispatchers.finishBroadcast();
     }
+
 
     //---------------------------------------------------------------------
     // Communication with (to) AudioService
