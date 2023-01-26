@@ -1695,10 +1695,28 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     private void stopUserVisibleJobsInternal(@NonNull String packageName, int userId) {
+        final int packageUid = mLocalPM.getPackageUid(packageName, 0, userId);
+        if (packageUid < 0) {
+            Slog.wtf(TAG, "Asked to stop jobs of an unknown package");
+            return;
+        }
         synchronized (mLock) {
             mConcurrencyManager.stopUserVisibleJobsLocked(userId, packageName,
                     JobParameters.STOP_REASON_USER,
                     JobParameters.INTERNAL_STOP_REASON_USER_UI_STOP);
+            final ArraySet<JobStatus> jobs = mJobs.getJobsByUid(packageUid);
+            for (int i = jobs.size() - 1; i >= 0; i--) {
+                final JobStatus job = jobs.valueAt(i);
+
+                // For now, demote all jobs of the app. However, if the app was only doing work
+                // on behalf of another app and the user wanted just that work to stop, this
+                // unfairly penalizes any other jobs that may be scheduled.
+                // For example, if apps A & B ask app C to do something (thus A & B are "source"
+                // and C is "calling"), but only A's work was under way and the user wanted
+                // to stop only that work, B's jobs would be demoted as well.
+                // TODO(255768978): make it possible to demote only the relevant subset of jobs
+                job.addInternalFlags(JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER);
+            }
         }
     }
 
@@ -2352,7 +2370,7 @@ public class JobSchedulerService extends com.android.server.SystemService
      */
     @VisibleForTesting
     JobStatus getRescheduleJobForFailureLocked(JobStatus failureToReschedule,
-            int internalStopReason) {
+            @JobParameters.StopReason int stopReason, int internalStopReason) {
         final long elapsedNowMillis = sElapsedRealtimeClock.millis();
         final JobInfo job = failureToReschedule.getJob();
 
@@ -2360,9 +2378,11 @@ public class JobSchedulerService extends com.android.server.SystemService
         int numFailures = failureToReschedule.getNumFailures();
         int numSystemStops = failureToReschedule.getNumSystemStops();
         // We should back off slowly if JobScheduler keeps stopping the job,
-        // but back off immediately if the issue appeared to be the app's fault.
+        // but back off immediately if the issue appeared to be the app's fault
+        // or the user stopped the job somehow.
         if (internalStopReason == JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH
-                || internalStopReason == JobParameters.INTERNAL_STOP_REASON_TIMEOUT) {
+                || internalStopReason == JobParameters.INTERNAL_STOP_REASON_TIMEOUT
+                || stopReason == JobParameters.STOP_REASON_USER) {
             numFailures++;
         } else {
             numSystemStops++;
@@ -2393,11 +2413,14 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
         delayMillis =
                 Math.min(delayMillis, JobInfo.MAX_BACKOFF_DELAY_MILLIS);
-        // TODO(255767350): demote all jobs to regular for user stops so they don't keep privileges
         JobStatus newJob = new JobStatus(failureToReschedule,
                 elapsedNowMillis + delayMillis,
                 JobStatus.NO_LATEST_RUNTIME, numFailures, numSystemStops,
                 failureToReschedule.getLastSuccessfulRunTime(), sSystemClock.millis());
+        if (stopReason == JobParameters.STOP_REASON_USER) {
+            // Demote all jobs to regular for user stops so they don't keep privileges.
+            newJob.addInternalFlags(JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER);
+        }
         if (job.isPeriodic()) {
             newJob.setOriginalLatestRunTimeElapsed(
                     failureToReschedule.getOriginalLatestRunTimeElapsed());
@@ -2518,8 +2541,8 @@ public class JobSchedulerService extends com.android.server.SystemService
      * @param needsReschedule Whether the implementing class should reschedule this job.
      */
     @Override
-    public void onJobCompletedLocked(JobStatus jobStatus, int debugStopReason,
-            boolean needsReschedule) {
+    public void onJobCompletedLocked(JobStatus jobStatus, @JobParameters.StopReason int stopReason,
+            int debugStopReason, boolean needsReschedule) {
         if (DEBUG) {
             Slog.d(TAG, "Completed " + jobStatus + ", reason=" + debugStopReason
                     + ", reschedule=" + needsReschedule);
@@ -2546,7 +2569,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         // job so we can transfer any appropriate state over from the previous job when
         // we stop it.
         final JobStatus rescheduledJob = needsReschedule
-                ? getRescheduleJobForFailureLocked(jobStatus, debugStopReason) : null;
+                ? getRescheduleJobForFailureLocked(jobStatus, stopReason, debugStopReason) : null;
         if (rescheduledJob != null
                 && !rescheduledJob.shouldTreatAsUserInitiatedJob()
                 && (debugStopReason == JobParameters.INTERNAL_STOP_REASON_TIMEOUT
