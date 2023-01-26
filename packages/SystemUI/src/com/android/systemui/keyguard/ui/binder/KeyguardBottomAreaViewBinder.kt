@@ -66,6 +66,8 @@ import kotlinx.coroutines.launch
 object KeyguardBottomAreaViewBinder {
 
     private const val EXIT_DOZE_BUTTON_REVEAL_ANIMATION_DURATION_MS = 250L
+    private const val SCALE_SELECTED_BUTTON = 1.23f
+    private const val DIM_ALPHA = 0.3f
 
     /**
      * Defines interface for an object that acts as the binding between the view and its view-model.
@@ -315,6 +317,12 @@ object KeyguardBottomAreaViewBinder {
             } else {
                 null
             }
+        view
+            .animate()
+            .scaleX(if (viewModel.isSelected) SCALE_SELECTED_BUTTON else 1f)
+            .scaleY(if (viewModel.isSelected) SCALE_SELECTED_BUTTON else 1f)
+            .alpha(if (viewModel.isDimmed) DIM_ALPHA else 1f)
+            .start()
 
         view.isClickable = viewModel.isClickable
         if (viewModel.isClickable) {

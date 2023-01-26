@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade
 
+import android.animation.Animator
 import android.annotation.IdRes
 import android.app.StatusBarManager
 import android.content.res.Configuration
@@ -45,7 +46,6 @@ import com.android.systemui.qs.HeaderPrivacyIconsController
 import com.android.systemui.qs.carrier.QSCarrierGroup
 import com.android.systemui.qs.carrier.QSCarrierGroupController
 import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.HEADER_TRANSITION_ID
-import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.LARGE_SCREEN_HEADER_CONSTRAINT
 import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.QQS_HEADER_CONSTRAINT
 import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.QS_HEADER_CONSTRAINT
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
@@ -176,9 +176,13 @@ class LargeScreenShadeHeaderController @Inject constructor(
     var shadeExpandedFraction = -1f
         set(value) {
             if (field != value) {
+                val oldAlpha = header.alpha
                 header.alpha = ShadeInterpolation.getContentAlpha(value)
                 field = value
-                updateVisibility()
+                if ((oldAlpha == 0f && header.alpha > 0f) ||
+                        (oldAlpha > 0f && header.alpha == 0f)) {
+                    updateVisibility()
+                }
             }
         }
 
@@ -305,6 +309,8 @@ class LargeScreenShadeHeaderController @Inject constructor(
                 val newPivot = if (v.isLayoutRtl) v.width.toFloat() else 0f
                 v.pivotX = newPivot
                 v.pivotY = v.height.toFloat() / 2
+
+                qsCarrierGroup.setPaddingRelative((v.width * v.scaleX).toInt(), 0, 0, 0)
             }
         }
 
@@ -335,7 +341,26 @@ class LargeScreenShadeHeaderController @Inject constructor(
                 .setUpdateListener {
                     updateVisibility()
                 }
+                .setListener(endAnimationListener)
                 .start()
+    }
+
+    private val endAnimationListener = object : Animator.AnimatorListener {
+        override fun onAnimationCancel(animation: Animator?) {
+            clearListeners()
+        }
+
+        override fun onAnimationEnd(animation: Animator?) {
+            clearListeners()
+        }
+
+        override fun onAnimationRepeat(animation: Animator?) {}
+
+        override fun onAnimationStart(animation: Animator?) {}
+
+        private fun clearListeners() {
+            header.animate().setListener(null).setUpdateListener(null)
+        }
     }
 
     private fun loadConstraints() {
