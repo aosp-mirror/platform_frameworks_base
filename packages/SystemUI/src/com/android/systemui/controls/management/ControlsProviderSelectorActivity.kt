@@ -189,9 +189,9 @@ open class ControlsProviderSelectorActivity @Inject constructor(
                     authorizedPanelsRepository.addAuthorizedPanels(
                             setOf(serviceInfo.componentName.packageName)
                     )
-                    animateExitAndFinish()
                     val selected = SelectedItem.PanelItem(appName, componentName)
                     controlsController.setPreferredSelection(selected)
+                    animateExitAndFinish()
                     openControlsOrigin()
                 }
                 dialog = null
