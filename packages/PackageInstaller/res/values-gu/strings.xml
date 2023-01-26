@@ -70,6 +70,8 @@
     <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ને અનઇન્સ્ટૉલ કરી રહ્યાં છીએ…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"અનઇન્સ્ટૉલ કરવાનું સમાપ્ત થયું."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> અનઇન્સ્ટૉલ કર્યું"</string>
+    <!-- no translation found for uninstall_done_clone_app (5578308154544195413) -->
+    <skip />
     <string name="uninstall_failed" msgid="1847750968168364332">"અનઇન્સ્ટૉલ કરવું નિષ્ફળ રહ્યું."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ને અનઇન્સ્ટૉલ કરવું અસફળ રહ્યું."</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ની ક્લોન ડિલીટ કરી રહ્યાં છીએ…"</string>

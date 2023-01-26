@@ -55,7 +55,7 @@
     <string name="uninstall_application_title" msgid="4045420072401428123">"Desinstalar app"</string>
     <string name="uninstall_update_title" msgid="824411791011583031">"Desinstalar atualização"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> é parte do seguinte app:"</string>
-    <string name="uninstall_application_text" msgid="3816830743706143980">"Quer desinstalar este app?"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"Você quer desinstalar este app?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Quer desinstalar este app para "<b>"todos"</b>" os usuários? O aplicativo e os dados dele serão removidos para "<b>"todos"</b>" os usuários do dispositivo."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Quer desinstalar este app para o usuário <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Você quer desinstalar esse app do seu perfil de trabalho?"</string>
@@ -70,6 +70,8 @@
     <string name="uninstalling_app" msgid="8866082646836981397">"Desinstalando <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Desinstalação concluída."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> desinstalado"</string>
+    <!-- no translation found for uninstall_done_clone_app (5578308154544195413) -->
+    <skip />
     <string name="uninstall_failed" msgid="1847750968168364332">"Falha na desinstalação."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Falha na desinstalação de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Excluindo o clone <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
