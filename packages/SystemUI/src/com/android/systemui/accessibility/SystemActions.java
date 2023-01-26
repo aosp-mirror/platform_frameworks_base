@@ -207,7 +207,8 @@ public class SystemActions implements CoreStartable {
         // Saving in instance variable since to prevent GC since
         // NotificationShadeWindowController.registerCallback() only keeps weak references.
         mNotificationShadeCallback =
-                (keyguardShowing, keyguardOccluded, bouncerShowing, mDozing, panelExpanded) ->
+                (keyguardShowing, keyguardOccluded, bouncerShowing, mDozing, panelExpanded,
+                            isDreaming) ->
                         registerOrUnregisterDismissNotificationShadeAction();
         mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
     }

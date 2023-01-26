@@ -429,7 +429,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * @see #ENABLE_SHELL_TRANSITIONS
      */
     public static final boolean sEnableShellTransitions =
-            SystemProperties.getBoolean(ENABLE_SHELL_TRANSITIONS, false);
+            SystemProperties.getBoolean(ENABLE_SHELL_TRANSITIONS, true);
 
     /**
      * Allows a fullscreen windowing mode activity to launch in its desired orientation directly
@@ -3132,7 +3132,7 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void notifyKeyguardTrustedChanged() {
         synchronized (mGlobalLock) {
-            if (mAtmService.mKeyguardController.isKeyguardShowing(DEFAULT_DISPLAY)) {
+            if (mAtmService.mKeyguardController.isLocksScreenShowing(DEFAULT_DISPLAY)) {
                 mRoot.ensureActivitiesVisible(null, 0, false /* preserveWindows */);
             }
         }

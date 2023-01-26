@@ -265,15 +265,9 @@ class BroadcastProcessQueue {
      */
     private boolean replaceBroadcast(@NonNull BroadcastRecord record, int recordIndex,
             @NonNull BroadcastConsumer replacedBroadcastConsumer, boolean wouldBeSkipped) {
-        final int count = mPendingQueues.size();
-        for (int i = 0; i < count; ++i) {
-            final ArrayDeque<SomeArgs> queue = mPendingQueues.get(i);
-            if (replaceBroadcastInQueue(queue, record, recordIndex,
-                    replacedBroadcastConsumer, wouldBeSkipped)) {
-                return true;
-            }
-        }
-        return false;
+        final ArrayDeque<SomeArgs> queue = getQueueForBroadcast(record);
+        return replaceBroadcastInQueue(queue, record, recordIndex,
+                replacedBroadcastConsumer, wouldBeSkipped);
     }
 
     /**
@@ -1113,6 +1107,7 @@ class BroadcastProcessQueue {
         pw.print(" because ");
         pw.print(reasonToString(mRunnableAtReason));
         pw.println();
+        pw.print("mProcessCached="); pw.println(mProcessCached);
         pw.increaseIndent();
         if (mActive != null) {
             dumpRecord("ACTIVE", now, pw, mActive, mActiveIndex);

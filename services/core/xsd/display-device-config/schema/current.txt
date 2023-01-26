@@ -237,7 +237,9 @@ package com.android.server.display.config {
   public class ThermalThrottling {
     ctor public ThermalThrottling();
     method @NonNull public final com.android.server.display.config.BrightnessThrottlingMap getBrightnessThrottlingMap();
+    method public final com.android.server.display.config.BrightnessThrottlingMap getConcurrentDisplaysBrightnessThrottlingMap();
     method public final void setBrightnessThrottlingMap(@NonNull com.android.server.display.config.BrightnessThrottlingMap);
+    method public final void setConcurrentDisplaysBrightnessThrottlingMap(com.android.server.display.config.BrightnessThrottlingMap);
   }
 
   public class ThresholdPoint {

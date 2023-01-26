@@ -117,7 +117,7 @@ message KeyguardControllerProto {
     repeated KeyguardOccludedProto keyguard_occluded_states = 2 [deprecated=true];
     optional bool aod_showing = 3;
     repeated KeyguardPerDisplayProto keyguard_per_display = 4;
-    optional bool keyguard_going_away = 5;
+    optional bool keyguard_going_away = 5 [deprecated=true];
 }
 
 message KeyguardOccludedProto {
@@ -134,7 +134,7 @@ message KeyguardPerDisplayProto {
     optional bool keyguard_showing = 2;
     optional bool aod_showing = 3;
     optional bool keyguard_occluded = 4;
-    optional bool keyguard_going_away = 5;
+    optional bool keyguard_going_away = 5 [deprecated=true];
 }
 
 /* represents PhoneWindowManager */

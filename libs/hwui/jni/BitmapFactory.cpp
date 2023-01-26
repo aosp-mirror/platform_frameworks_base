@@ -22,7 +22,6 @@
 #include "SkSize.h"
 #include "SkStream.h"
 #include "SkString.h"
-#include "SkUtils.h"
 #include "Utils.h"
 
 #include <HardwareBitmapUploader.h>

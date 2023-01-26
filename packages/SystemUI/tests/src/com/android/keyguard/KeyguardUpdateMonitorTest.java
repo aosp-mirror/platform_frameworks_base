@@ -18,7 +18,6 @@ package com.android.keyguard;
 
 import static android.app.StatusBarManager.SESSION_KEYGUARD;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
-import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT_PERMANENT;
 import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_POWER_BUTTON;
@@ -42,7 +41,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -96,7 +94,6 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.Settings;
 import android.service.dreams.IDreamManager;
 import android.service.trust.TrustAgentService;
 import android.telephony.ServiceState;
@@ -238,8 +235,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private SessionTracker mSessionTracker;
     @Mock
     private UiEventLogger mUiEventLogger;
-    @Mock
-    private PowerManager mPowerManager;
     @Mock
     private GlobalSettings mGlobalSettings;
     private FaceWakeUpTriggersConfig mFaceWakeUpTriggersConfig;
@@ -831,6 +826,19 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.setAssistantVisible(true);
 
         verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt(), anyBoolean());
+    }
+
+    @Test
+    public void doesNotTryToAuthenticateWhenKeyguardIsNotShowingButOccluded_whenAssistant() {
+        mKeyguardUpdateMonitor.setKeyguardShowing(false, true);
+        mKeyguardUpdateMonitor.setAssistantVisible(true);
+
+        verify(mFaceManager, never()).authenticate(any(),
+                any(),
+                any(),
+                any(),
+                anyInt(),
+                anyBoolean());
     }
 
     @Test
@@ -1872,28 +1880,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
-    public void testFingerAcquired_wakesUpPowerManager() {
-        cleanupKeyguardUpdateMonitor();
-        mContext.getOrCreateTestableResources().addOverride(
-                com.android.internal.R.bool.kg_wake_on_acquire_start, true);
-        mKeyguardUpdateMonitor = new TestableKeyguardUpdateMonitor(mContext);
-        fingerprintAcquireStart();
-
-        verify(mPowerManager).wakeUp(anyLong(), anyInt(), anyString());
-    }
-
-    @Test
-    public void testFingerAcquired_doesNotWakeUpPowerManager() {
-        cleanupKeyguardUpdateMonitor();
-        mContext.getOrCreateTestableResources().addOverride(
-                com.android.internal.R.bool.kg_wake_on_acquire_start, false);
-        mKeyguardUpdateMonitor = new TestableKeyguardUpdateMonitor(mContext);
-        fingerprintAcquireStart();
-
-        verify(mPowerManager, never()).wakeUp(anyLong(), anyInt(), anyString());
-    }
-
-    @Test
     public void testDreamingStopped_faceDoesNotRun() {
         mKeyguardUpdateMonitor.dispatchDreamingStopped();
         mTestableLooper.processAllMessages();
@@ -2374,11 +2360,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 .onAuthenticationError(FINGERPRINT_ERROR_LOCKOUT, "Fingerprint locked out");
     }
 
-    private void fingerprintAcquireStart() {
-        mKeyguardUpdateMonitor.mFingerprintAuthenticationCallback
-                .onAuthenticationAcquired(FINGERPRINT_ACQUIRED_START);
-    }
-
     private void deviceInPostureStateOpened() {
         mKeyguardUpdateMonitor.mPostureCallback.onPostureChanged(DEVICE_POSTURE_OPENED);
     }
@@ -2525,7 +2506,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     mAuthController, mTelephonyListenerManager,
                     mInteractionJankMonitor, mLatencyTracker, mActiveUnlockConfig,
                     mKeyguardUpdateMonitorLogger, mUiEventLogger, () -> mSessionTracker,
-                    mPowerManager, mTrustManager, mSubscriptionManager, mUserManager,
+                    mTrustManager, mSubscriptionManager, mUserManager,
                     mDreamManager, mDevicePolicyManager, mSensorPrivacyManager, mTelephonyManager,
                     mPackageManager, mFaceManager, mFingerprintManager, mBiometricManager,
                     mFaceWakeUpTriggersConfig, mDevicePostureController,

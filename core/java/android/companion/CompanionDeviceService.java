@@ -216,7 +216,6 @@ public abstract class CompanionDeviceService extends Service {
      *            associated device
      * @param out already connected stream of data outgoing to remote associated
      *            device
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES)
     public final void attachSystemDataTransport(int associationId, @NonNull InputStream in,
@@ -232,7 +231,6 @@ public abstract class CompanionDeviceService extends Service {
      * through {@link #attachSystemDataTransport}.
      *
      * @param associationId id of the associated device
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES)
     public final void detachSystemDataTransport(int associationId)

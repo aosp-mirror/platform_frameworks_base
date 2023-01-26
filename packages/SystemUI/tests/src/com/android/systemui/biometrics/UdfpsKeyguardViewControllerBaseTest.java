@@ -37,7 +37,6 @@ import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shade.ShadeExpansionListener;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
-import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
@@ -71,7 +70,6 @@ public class UdfpsKeyguardViewControllerBaseTest extends SysuiTestCase {
     protected @Mock SystemUIDialogManager mDialogManager;
     protected @Mock UdfpsController mUdfpsController;
     protected @Mock ActivityLaunchAnimator mActivityLaunchAnimator;
-    protected @Mock KeyguardBouncer mBouncer;
     protected @Mock PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     protected @Mock AlternateBouncerInteractor mAlternateBouncerInteractor;
 
@@ -152,8 +150,6 @@ public class UdfpsKeyguardViewControllerBaseTest extends SysuiTestCase {
         mFeatureFlags.set(Flags.MODERN_BOUNCER, useModernBouncer);
         mFeatureFlags.set(Flags.MODERN_ALTERNATE_BOUNCER, useModernBouncer);
         mFeatureFlags.set(Flags.UDFPS_NEW_TOUCH_DETECTION, useExpandedOverlay);
-        when(mStatusBarKeyguardViewManager.getPrimaryBouncer()).thenReturn(
-                useModernBouncer ? null : mBouncer);
         UdfpsKeyguardViewController controller = new UdfpsKeyguardViewController(
                 mView,
                 mStatusBarStateController,
