@@ -575,7 +575,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"به برنامه اجازه می‌دهد مکان‌ها را از مجموعه رسانه‌تان بخواند."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"استفاده از زیست‌سنجشی"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"استفاده از زیست‌سنجشی یا قفل صفحه"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"تأیید کنید این شما هستید"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"تأیید کنید این شمایید"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"برای ادامه، از زیست‌سنجشی استفاده کنید"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"برای ادامه، از زیست‌سنجشی یا قفل صفحه استفاده کنید"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"سخت‌افزار زیست‌سنجی دردسترس نیست"</string>
@@ -1840,6 +1840,10 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"مشاهده در حالت تمام صفحه"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"برای خروج، انگشتتان را از بالای صفحه به پایین بکشید."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"متوجه شدم"</string>
+    <!-- no translation found for display_rotation_camera_compat_toast_after_rotation (7600891546249829854) -->
+    <skip />
+    <!-- no translation found for display_rotation_camera_compat_toast_in_split_screen (8393302456336805466) -->
+    <skip />
     <string name="done_label" msgid="7283767013231718521">"تمام"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"لغزنده دایره‌ای ساعت"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"لغزنده دایره‌ای دقیقه"</string>
