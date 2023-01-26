@@ -33,7 +33,6 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.ActivityStarter
@@ -118,9 +117,6 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
     @Mock
     private lateinit var configPlugin: BcSmartspaceConfigPlugin
-
-    @Mock
-    private lateinit var dumpManager: DumpManager
 
     @Mock
     private lateinit var controllerListener: SmartspaceTargetListener
@@ -213,7 +209,6 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
                 statusBarStateController,
                 deviceProvisionedController,
                 keyguardBypassController,
-                dumpManager,
                 execution,
                 executor,
                 bgExecutor,

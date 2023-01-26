@@ -36,12 +36,10 @@ import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
 import com.android.settingslib.Utils
-import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.ActivityStarter
@@ -59,14 +57,15 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.util.concurrency.Execution
 import com.android.systemui.util.settings.SecureSettings
-import java.io.PrintWriter
 import java.util.Optional
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
 /** Controller for managing the smartspace view on the lockscreen */
 @SysUISingleton
-class LockscreenSmartspaceController @Inject constructor(
+class LockscreenSmartspaceController
+@Inject
+constructor(
         private val context: Context,
         private val featureFlags: FeatureFlags,
         private val smartspaceManager: SmartspaceManager,
@@ -79,14 +78,13 @@ class LockscreenSmartspaceController @Inject constructor(
         private val statusBarStateController: StatusBarStateController,
         private val deviceProvisionedController: DeviceProvisionedController,
         private val bypassController: KeyguardBypassController,
-        private val dumpManager: DumpManager,
         private val execution: Execution,
         @Main private val uiExecutor: Executor,
         @Background private val bgExecutor: Executor,
         @Main private val handler: Handler,
         optionalPlugin: Optional<BcSmartspaceDataPlugin>,
         optionalConfigPlugin: Optional<BcSmartspaceConfigPlugin>,
-        ) : Dumpable {
+) {
     companion object {
         private const val TAG = "LockscreenSmartspaceController"
     }
@@ -203,7 +201,6 @@ class LockscreenSmartspaceController @Inject constructor(
 
     init {
         deviceProvisionedController.addCallback(deviceProvisionedListener)
-        dumpManager.registerDumpable(this)
     }
 
     fun isEnabled(): Boolean {
@@ -443,12 +440,5 @@ class LockscreenSmartspaceController @Inject constructor(
             }
         }
         return null
-    }
-
-    override fun dump(pw: PrintWriter, args: Array<out String>) {
-        pw.println("Region Samplers: ${regionSamplers.size}")
-        regionSamplers.map { (_, sampler) ->
-            sampler.dump(pw)
-        }
     }
 }
