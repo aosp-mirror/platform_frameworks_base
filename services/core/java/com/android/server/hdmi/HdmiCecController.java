@@ -727,7 +727,7 @@ final class HdmiCecController {
     void sendCommand(final HdmiCecMessage cecMessage,
             final HdmiControlService.SendMessageCallback callback) {
         assertRunOnServiceThread();
-        addCecMessageToHistory(false /* isReceived */, cecMessage);
+        List<String> sendResults = new ArrayList<>();
         runOnIoThread(new Runnable() {
             @Override
             public void run() {
@@ -738,6 +738,12 @@ final class HdmiCecController {
                 do {
                     errorCode = mNativeWrapperImpl.nativeSendCecCommand(
                         cecMessage.getSource(), cecMessage.getDestination(), body);
+                    switch (errorCode) {
+                        case SendMessageResult.SUCCESS: sendResults.add("ACK"); break;
+                        case SendMessageResult.FAIL: sendResults.add("FAIL"); break;
+                        case SendMessageResult.NACK: sendResults.add("NACK"); break;
+                        case SendMessageResult.BUSY: sendResults.add("BUSY"); break;
+                    }
                     if (errorCode == SendMessageResult.SUCCESS) {
                         break;
                     }
@@ -763,6 +769,8 @@ final class HdmiCecController {
                 });
             }
         });
+
+        addCecMessageToHistory(false /* isReceived */, cecMessage, sendResults);
     }
 
     /**
@@ -785,7 +793,7 @@ final class HdmiCecController {
         }
 
         HdmiLogger.debug("[R]:" + command);
-        addCecMessageToHistory(true /* isReceived */, command);
+        addCecMessageToHistory(true /* isReceived */, command, null);
 
         mHdmiCecAtomWriter.messageReported(command,
                 incomingMessageDirection(srcAddress, dstAddress), getCallingUid());
@@ -836,9 +844,10 @@ final class HdmiCecController {
     }
 
     @ServiceThreadOnly
-    private void addCecMessageToHistory(boolean isReceived, HdmiCecMessage message) {
+    private void addCecMessageToHistory(boolean isReceived, HdmiCecMessage message,
+            List<String> sendResults) {
         assertRunOnServiceThread();
-        addEventToHistory(new MessageHistoryRecord(isReceived, message));
+        addEventToHistory(new MessageHistoryRecord(isReceived, message, sendResults));
     }
 
     private void addEventToHistory(Dumpable event) {
@@ -1720,11 +1729,13 @@ final class HdmiCecController {
     private static final class MessageHistoryRecord extends Dumpable {
         private final boolean mIsReceived; // true if received message and false if sent message
         private final HdmiCecMessage mMessage;
+        private final List<String> mSendResults;
 
-        MessageHistoryRecord(boolean isReceived, HdmiCecMessage message) {
+        MessageHistoryRecord(boolean isReceived, HdmiCecMessage message, List<String> sendResults) {
             super();
             mIsReceived = isReceived;
             mMessage = message;
+            mSendResults = sendResults;
         }
 
         @Override
@@ -1733,7 +1744,16 @@ final class HdmiCecController {
             pw.print(" time=");
             pw.print(sdf.format(new Date(mTime)));
             pw.print(" message=");
-            pw.println(mMessage);
+            pw.print(mMessage);
+
+            StringBuilder results = new StringBuilder();
+            if (!mIsReceived && mSendResults != null) {
+                results.append(" (");
+                results.append(String.join(", ", mSendResults));
+                results.append(")");
+            }
+
+            pw.println(results);
         }
     }
 
