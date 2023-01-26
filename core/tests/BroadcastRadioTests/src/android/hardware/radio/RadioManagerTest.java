@@ -30,7 +30,6 @@ import static org.mockito.Mockito.when;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.ArrayMap;
@@ -49,8 +48,6 @@ import java.util.Set;
 
 @RunWith(MockitoJUnitRunner.class)
 public final class RadioManagerTest {
-
-    private static final int TEST_TARGET_SDK_VERSION = Build.VERSION_CODES.CUR_DEVELOPMENT;
 
     private static final int REGION = RadioManager.REGION_ITU_2;
     private static final int FM_LOWER_LIMIT = 87500;
@@ -1043,14 +1040,13 @@ public final class RadioManagerTest {
         mRadioManager.openTuner(moduleId, FM_BAND_CONFIG, withAudio, mCallbackMock,
                 /* handler= */ null);
 
-        verify(mRadioServiceMock).openTuner(eq(moduleId), eq(FM_BAND_CONFIG), eq(withAudio), any(),
-                anyInt());
+        verify(mRadioServiceMock).openTuner(eq(moduleId), eq(FM_BAND_CONFIG), eq(withAudio), any());
     }
 
     @Test
     public void openTuner_whenServiceDied_returnsNull() throws Exception {
         createRadioManager();
-        when(mRadioServiceMock.openTuner(anyInt(), any(), anyBoolean(), any(), anyInt()))
+        when(mRadioServiceMock.openTuner(anyInt(), any(), anyBoolean(), any()))
                 .thenThrow(new RemoteException());
 
         RadioTuner nullTuner = mRadioManager.openTuner(/* moduleId= */ 0, FM_BAND_CONFIG,
@@ -1166,7 +1162,6 @@ public final class RadioManagerTest {
     }
 
     private void createRadioManager() throws RemoteException {
-        mApplicationInfo.targetSdkVersion = TEST_TARGET_SDK_VERSION;
         when(mContextMock.getApplicationInfo()).thenReturn(mApplicationInfo);
         when(mRadioServiceMock.listModules()).thenReturn(Arrays.asList(AMFM_PROPERTIES));
         when(mRadioServiceMock.addAnnouncementListener(any(), any())).thenReturn(mCloseHandleMock);

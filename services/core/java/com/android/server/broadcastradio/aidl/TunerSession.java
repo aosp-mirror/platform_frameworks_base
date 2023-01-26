@@ -24,6 +24,7 @@ import android.hardware.radio.ITuner;
 import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
+import android.os.Binder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -46,7 +47,7 @@ final class TunerSession extends ITuner.Stub {
     private final RadioLogger mLogger;
     private final RadioModule mModule;
     final android.hardware.radio.ITunerCallback mCallback;
-    private final int mTargetSdkVersion;
+    private final int mUid;
     private final IBroadcastRadio mService;
 
     @GuardedBy("mLock")
@@ -61,11 +62,11 @@ final class TunerSession extends ITuner.Stub {
     private RadioManager.BandConfig mPlaceHolderConfig;
 
     TunerSession(RadioModule radioModule, IBroadcastRadio service,
-            android.hardware.radio.ITunerCallback callback, int targetSdkVersion) {
+            android.hardware.radio.ITunerCallback callback) {
         mModule = Objects.requireNonNull(radioModule, "radioModule cannot be null");
         mService = Objects.requireNonNull(service, "service cannot be null");
         mCallback = Objects.requireNonNull(callback, "callback cannot be null");
-        mTargetSdkVersion = targetSdkVersion;
+        mUid = Binder.getCallingUid();
         mLogger = new RadioLogger(TAG, TUNER_EVENT_LOGGER_QUEUE_SIZE);
     }
 
@@ -130,7 +131,7 @@ final class TunerSession extends ITuner.Stub {
             mPlaceHolderConfig = Objects.requireNonNull(config, "config cannot be null");
         }
         Slogf.i(TAG, "Ignoring setConfiguration - not applicable for broadcastradio HAL AIDL");
-        mModule.fanoutAidlCallback((cb, sdkVersion) -> cb.onConfigurationChanged(config));
+        mModule.fanoutAidlCallback((cb, mUid) -> cb.onConfigurationChanged(config));
     }
 
     @Override
@@ -254,7 +255,7 @@ final class TunerSession extends ITuner.Stub {
             Slogf.w(TAG, "Cannot start background scan on AIDL HAL client from non-current user");
             return false;
         }
-        mModule.fanoutAidlCallback((cb, sdkVersion) -> {
+        mModule.fanoutAidlCallback((cb, mUid) -> {
             cb.onBackgroundScanComplete();
         });
         return true;
@@ -284,8 +285,8 @@ final class TunerSession extends ITuner.Stub {
         mModule.onTunerSessionProgramListFilterChanged(this);
     }
 
-    int getTargetSdkVersion() {
-        return mTargetSdkVersion;
+    int getUid() {
+        return mUid;
     }
 
     ProgramList.Filter getProgramListFilter() {
@@ -323,10 +324,9 @@ final class TunerSession extends ITuner.Stub {
         }
         for (int i = 0; i < chunks.size(); i++) {
             try {
-                if (!ConversionUtils.isAtLeastU(getTargetSdkVersion())) {
+                if (!ConversionUtils.isAtLeastU(getUid())) {
                     ProgramList.Chunk downgradedChunk =
-                            ConversionUtils.convertChunkToTargetSdkVersion(chunks.get(i),
-                                    getTargetSdkVersion());
+                            ConversionUtils.convertChunkToTargetSdkVersion(chunks.get(i), getUid());
                     mCallback.onProgramListUpdated(downgradedChunk);
                 } else {
                     mCallback.onProgramListUpdated(chunks.get(i));

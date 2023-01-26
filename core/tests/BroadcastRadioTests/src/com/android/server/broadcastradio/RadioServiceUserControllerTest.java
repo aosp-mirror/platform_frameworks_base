@@ -24,6 +24,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.app.compat.CompatChanges;
 import android.os.Binder;
 import android.os.UserHandle;
 
@@ -46,8 +47,8 @@ public final class RadioServiceUserControllerTest extends ExtendedRadioMockitoTe
 
     @Override
     protected void initializeSession(StaticMockitoSessionBuilder builder) {
-        builder.spyStatic(ActivityManager.class)
-                .spyStatic(Binder.class);
+        builder.spyStatic(ActivityManager.class).spyStatic(Binder.class)
+                .spyStatic(CompatChanges.class);
     }
 
     @Before

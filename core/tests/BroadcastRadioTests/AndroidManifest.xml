@@ -18,6 +18,8 @@
     package="com.android.frameworks.broadcastradiotests">
 
     <uses-permission android:name="android.permission.ACCESS_BROADCAST_RADIO" />
+    <uses-permission android:name="android.permission.LOG_COMPAT_CHANGE" />
+    <uses-permission android:name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
 
     <application android:debuggable="true">
         <uses-library android:name="android.test.runner" />

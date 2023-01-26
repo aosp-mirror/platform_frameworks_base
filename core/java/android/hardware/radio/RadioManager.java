@@ -1796,7 +1796,7 @@ public class RadioManager {
         ITuner tuner;
         TunerCallbackAdapter halCallback = new TunerCallbackAdapter(callback, handler);
         try {
-            tuner = mService.openTuner(moduleId, config, withAudio, halCallback, mTargetSdkVersion);
+            tuner = mService.openTuner(moduleId, config, withAudio, halCallback);
         } catch (RemoteException | IllegalArgumentException | IllegalStateException ex) {
             Log.e(TAG, "Failed to open tuner", ex);
             return null;
@@ -1873,7 +1873,6 @@ public class RadioManager {
 
     @NonNull private final Context mContext;
     @NonNull private final IRadioService mService;
-    private final int mTargetSdkVersion;
 
     /**
      * @hide
@@ -1890,6 +1889,5 @@ public class RadioManager {
     public RadioManager(Context context, IRadioService service) {
         mContext = context;
         mService = service;
-        mTargetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
     }
 }

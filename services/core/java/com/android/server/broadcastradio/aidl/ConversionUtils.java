@@ -17,6 +17,10 @@
 package com.android.server.broadcastradio.aidl;
 
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.hardware.broadcastradio.AmFmRegionConfig;
 import android.hardware.broadcastradio.Announcement;
 import android.hardware.broadcastradio.DabTableEntry;
@@ -57,16 +61,24 @@ import java.util.Set;
  * {@link android.hardware.radio}
  */
 final class ConversionUtils {
-    // TODO(b/241118988): Add unit test for ConversionUtils class
     private static final String TAG = "BcRadioAidlSrv.convert";
+
+    /**
+     * With RADIO_U_VERSION_REQUIRED enabled, 44-bit DAB identifier
+     * {@link IdentifierType#DAB_SID_EXT} from broadcast radio HAL can be passed as
+     * {@link ProgramSelector#IDENTIFIER_TYPE_DAB_DMB_SID_EXT} to {@link RadioTuner}.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public static final long RADIO_U_VERSION_REQUIRED = 261770108L;
 
     private ConversionUtils() {
         throw new UnsupportedOperationException("ConversionUtils class is noninstantiable");
     }
 
-    static boolean isAtLeastU(int targetSdkVersion) {
-        // TODO(b/261770108): Use version code for U.
-        return targetSdkVersion >= Build.VERSION_CODES.CUR_DEVELOPMENT;
+    @SuppressLint("AndroidFrameworkRequiresPermission")
+    static boolean isAtLeastU(int uid) {
+        return CompatChanges.isChangeEnabled(RADIO_U_VERSION_REQUIRED, uid);
     }
 
     static RuntimeException throwOnError(RuntimeException halException, String action) {
@@ -584,9 +596,8 @@ final class ConversionUtils {
         return id.getType() == ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT;
     }
 
-    static boolean programSelectorMeetsSdkVersionRequirement(ProgramSelector sel,
-            int targetSdkVersion) {
-        if (isAtLeastU(targetSdkVersion)) {
+    static boolean programSelectorMeetsSdkVersionRequirement(ProgramSelector sel, int uid) {
+        if (isAtLeastU(uid)) {
             return true;
         }
         if (sel.getPrimaryId().getType() == ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT) {
@@ -601,12 +612,11 @@ final class ConversionUtils {
         return true;
     }
 
-    static boolean programInfoMeetsSdkVersionRequirement(RadioManager.ProgramInfo info,
-            int targetSdkVersion) {
-        if (isAtLeastU(targetSdkVersion)) {
+    static boolean programInfoMeetsSdkVersionRequirement(RadioManager.ProgramInfo info, int uid) {
+        if (isAtLeastU(uid)) {
             return true;
         }
-        if (!programSelectorMeetsSdkVersionRequirement(info.getSelector(), targetSdkVersion)) {
+        if (!programSelectorMeetsSdkVersionRequirement(info.getSelector(), uid)) {
             return false;
         }
         if (isNewIdentifierInU(info.getLogicallyTunedTo())
@@ -622,16 +632,15 @@ final class ConversionUtils {
         return true;
     }
 
-    static ProgramList.Chunk convertChunkToTargetSdkVersion(ProgramList.Chunk chunk,
-            int targetSdkVersion) {
-        if (isAtLeastU(targetSdkVersion)) {
+    static ProgramList.Chunk convertChunkToTargetSdkVersion(ProgramList.Chunk chunk, int uid) {
+        if (isAtLeastU(uid)) {
             return chunk;
         }
         Set<RadioManager.ProgramInfo> modified = new ArraySet<>();
         Iterator<RadioManager.ProgramInfo> modifiedIterator = chunk.getModified().iterator();
         while (modifiedIterator.hasNext()) {
             RadioManager.ProgramInfo info = modifiedIterator.next();
-            if (programInfoMeetsSdkVersionRequirement(info, targetSdkVersion)) {
+            if (programInfoMeetsSdkVersionRequirement(info, uid)) {
                 modified.add(info);
             }
         }

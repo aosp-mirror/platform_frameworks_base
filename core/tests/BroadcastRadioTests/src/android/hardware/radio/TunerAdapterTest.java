@@ -86,7 +86,7 @@ public final class TunerAdapterTest {
         doAnswer(invocation -> {
             mTunerCallback = (ITunerCallback) invocation.getArguments()[3];
             return mTunerMock;
-        }).when(mRadioServiceMock).openTuner(anyInt(), any(), anyBoolean(), any(), anyInt());
+        }).when(mRadioServiceMock).openTuner(anyInt(), any(), anyBoolean(), any());
 
         doAnswer(invocation -> {
             ProgramSelector program = (ProgramSelector) invocation.getArguments()[0];
