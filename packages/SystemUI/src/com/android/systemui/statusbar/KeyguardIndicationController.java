@@ -43,6 +43,7 @@ import static com.android.systemui.keyguard.ScreenLifecycle.SCREEN_ON;
 import static com.android.systemui.plugins.FalsingManager.LOW_PENALTY;
 import static com.android.systemui.plugins.log.LogLevel.ERROR;
 
+import android.app.AlarmManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -98,6 +99,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.AlarmTimeout;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.wakelock.SettableWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
@@ -127,10 +129,8 @@ public class KeyguardIndicationController {
     private static final String TAG = "KeyguardIndication";
     private static final boolean DEBUG_CHARGING_SPEED = false;
 
-    private static final int MSG_HIDE_TRANSIENT = 1;
-    private static final int MSG_SHOW_ACTION_TO_UNLOCK = 2;
-    private static final int MSG_HIDE_BIOMETRIC_MESSAGE = 3;
-    private static final int MSG_RESET_ERROR_MESSAGE_ON_SCREEN_ON = 4;
+    private static final int MSG_SHOW_ACTION_TO_UNLOCK = 1;
+    private static final int MSG_RESET_ERROR_MESSAGE_ON_SCREEN_ON = 2;
     private static final long TRANSIENT_BIOMETRIC_ERROR_TIMEOUT = 1300;
     public static final long DEFAULT_HIDE_DELAY_MS =
             3500 + KeyguardIndicationTextView.Y_IN_DURATION;
@@ -212,6 +212,11 @@ public class KeyguardIndicationController {
     };
     private boolean mFaceLockedOutThisAuthSession;
 
+    // Use AlarmTimeouts to guarantee that the events are handled even if scheduled and
+    // triggered while the device is asleep
+    private final AlarmTimeout mHideTransientMessageHandler;
+    private final AlarmTimeout mHideBiometricMessageHandler;
+
     /**
      * Creates a new KeyguardIndicationController and registers callbacks.
      */
@@ -238,7 +243,9 @@ public class KeyguardIndicationController {
             AccessibilityManager accessibilityManager,
             FaceHelpMessageDeferral faceHelpMessageDeferral,
             KeyguardLogger keyguardLogger,
-            AlternateBouncerInteractor alternateBouncerInteractor) {
+            AlternateBouncerInteractor alternateBouncerInteractor,
+            AlarmManager alarmManager
+    ) {
         mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;
         mDevicePolicyManager = devicePolicyManager;
@@ -273,17 +280,26 @@ public class KeyguardIndicationController {
         mHandler = new Handler(mainLooper) {
             @Override
             public void handleMessage(Message msg) {
-                if (msg.what == MSG_HIDE_TRANSIENT) {
-                    hideTransientIndication();
-                } else if (msg.what == MSG_SHOW_ACTION_TO_UNLOCK) {
+                if (msg.what == MSG_SHOW_ACTION_TO_UNLOCK) {
                     showActionToUnlock();
-                } else if (msg.what == MSG_HIDE_BIOMETRIC_MESSAGE) {
-                    hideBiometricMessage();
                 } else if (msg.what == MSG_RESET_ERROR_MESSAGE_ON_SCREEN_ON) {
                     mBiometricErrorMessageToShowOnScreenOn = null;
                 }
             }
         };
+
+        mHideTransientMessageHandler = new AlarmTimeout(
+                alarmManager,
+                this::hideTransientIndication,
+                TAG,
+                mHandler
+        );
+        mHideBiometricMessageHandler = new AlarmTimeout(
+                alarmManager,
+                this::hideBiometricMessage,
+                TAG,
+                mHandler
+        );
     }
 
     /** Call this after construction to finish setting up the instance. */
@@ -335,6 +351,8 @@ public class KeyguardIndicationController {
      */
     public void destroy() {
         mHandler.removeCallbacksAndMessages(null);
+        mHideBiometricMessageHandler.cancel();
+        mHideTransientMessageHandler.cancel();
         mBroadcastDispatcher.unregisterReceiver(mBroadcastReceiver);
     }
 
@@ -679,7 +697,7 @@ public class KeyguardIndicationController {
         if (visible) {
             // If this is called after an error message was already shown, we should not clear it.
             // Otherwise the error message won't be shown
-            if (!mHandler.hasMessages(MSG_HIDE_TRANSIENT)) {
+            if (!mHideTransientMessageHandler.isScheduled()) {
                 hideTransientIndication();
             }
             updateDeviceEntryIndication(false);
@@ -727,16 +745,14 @@ public class KeyguardIndicationController {
      * Hides transient indication in {@param delayMs}.
      */
     public void hideTransientIndicationDelayed(long delayMs) {
-        mHandler.sendMessageDelayed(
-                mHandler.obtainMessage(MSG_HIDE_TRANSIENT), delayMs);
+        mHideTransientMessageHandler.schedule(delayMs, AlarmTimeout.MODE_RESCHEDULE_IF_SCHEDULED);
     }
 
     /**
      * Hides biometric indication in {@param delayMs}.
      */
     public void hideBiometricMessageDelayed(long delayMs) {
-        mHandler.sendMessageDelayed(
-                mHandler.obtainMessage(MSG_HIDE_BIOMETRIC_MESSAGE), delayMs);
+        mHideBiometricMessageHandler.schedule(delayMs, AlarmTimeout.MODE_RESCHEDULE_IF_SCHEDULED);
     }
 
     /**
@@ -751,7 +767,6 @@ public class KeyguardIndicationController {
      */
     private void showTransientIndication(CharSequence transientIndication) {
         mTransientIndication = transientIndication;
-        mHandler.removeMessages(MSG_HIDE_TRANSIENT);
         hideTransientIndicationDelayed(DEFAULT_HIDE_DELAY_MS);
 
         updateTransient();
@@ -777,7 +792,6 @@ public class KeyguardIndicationController {
         mBiometricMessageFollowUp = biometricMessageFollowUp;
 
         mHandler.removeMessages(MSG_SHOW_ACTION_TO_UNLOCK);
-        mHandler.removeMessages(MSG_HIDE_BIOMETRIC_MESSAGE);
         hideBiometricMessageDelayed(
                 mBiometricMessageFollowUp != null
                         ? IMPORTANT_MSG_MIN_DURATION * 2
@@ -791,7 +805,7 @@ public class KeyguardIndicationController {
         if (mBiometricMessage != null || mBiometricMessageFollowUp != null) {
             mBiometricMessage = null;
             mBiometricMessageFollowUp = null;
-            mHandler.removeMessages(MSG_HIDE_BIOMETRIC_MESSAGE);
+            mHideBiometricMessageHandler.cancel();
             updateBiometricMessage();
         }
     }
@@ -802,7 +816,7 @@ public class KeyguardIndicationController {
     public void hideTransientIndication() {
         if (mTransientIndication != null) {
             mTransientIndication = null;
-            mHandler.removeMessages(MSG_HIDE_TRANSIENT);
+            mHideTransientMessageHandler.cancel();
             updateTransient();
         }
     }
