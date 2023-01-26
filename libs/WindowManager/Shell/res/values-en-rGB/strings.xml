@@ -84,6 +84,11 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Double-tap outside an app to reposition it"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Got it"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Expand for more information."</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Restart for a better view?"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"You can restart the app so that it looks better on your screen, but you may lose your progress or any unsaved changes"</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Cancel"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"Restart"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Don\'t show again"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Maximise"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Minimise"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Close"</string>
