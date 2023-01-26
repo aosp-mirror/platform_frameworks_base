@@ -278,16 +278,54 @@ public class BinaryTransparencyService extends SystemService {
                     + " and is now updated to: " + currentTimeMs);
             mMeasurementsLastRecordedMs = currentTimeMs;
 
-            PackageManager pm = mContext.getPackageManager();
             Set<String> packagesMeasured = new HashSet<>();
 
             // measure all APEXs first
             if (DEBUG) {
                 Slog.d(TAG, "Measuring APEXs...");
             }
-            for (PackageInfo packageInfo : getCurrentInstalledApexs()) {
-                packagesMeasured.add(packageInfo.packageName);
+            List<IBinaryTransparencyService.ApexInfo> allApexInfo = collectAllApexInfo();
+            for (IBinaryTransparencyService.ApexInfo apexInfo : allApexInfo) {
+                packagesMeasured.add(apexInfo.packageName);
 
+                recordApexInfo(apexInfo);
+            }
+            if (DEBUG) {
+                Slog.d(TAG, "Measured " + packagesMeasured.size()
+                        + " packages after considering APEXs.");
+            }
+
+            // proceed with all preloaded apps
+            List<IBinaryTransparencyService.AppInfo> allUpdatedPreloadInfo =
+                    collectAllUpdatedPreloadInfo(packagesMeasured);
+            for (IBinaryTransparencyService.AppInfo appInfo : allUpdatedPreloadInfo) {
+                packagesMeasured.add(appInfo.packageName);
+                writeAppInfoToLog(appInfo);
+            }
+            if (DEBUG) {
+                Slog.d(TAG, "Measured " + packagesMeasured.size()
+                        + " packages after considering preloads");
+            }
+
+            if (CompatChanges.isChangeEnabled(LOG_MBA_INFO)) {
+                // lastly measure all newly installed MBAs
+                List<IBinaryTransparencyService.AppInfo> allMbaInfo =
+                        collectAllMbaInfo(packagesMeasured);
+                for (IBinaryTransparencyService.AppInfo appInfo : allUpdatedPreloadInfo) {
+                    packagesMeasured.add(appInfo.packageName);
+                    writeAppInfoToLog(appInfo);
+                }
+            }
+            if (DEBUG) {
+                long timeSpentMeasuring = System.currentTimeMillis() - currentTimeMs;
+                Slog.d(TAG, "Measured " + packagesMeasured.size()
+                        + " packages altogether in " + timeSpentMeasuring + "ms");
+            }
+        }
+
+        private List<IBinaryTransparencyService.ApexInfo> collectAllApexInfo() {
+            var results = new ArrayList<IBinaryTransparencyService.ApexInfo>();
+            for (PackageInfo packageInfo : getCurrentInstalledApexs()) {
                 Bundle apexMeasurement = measurePackage(packageInfo);
 
                 var apexInfo = new IBinaryTransparencyService.ApexInfo();
@@ -299,22 +337,21 @@ public class BinaryTransparencyService extends SystemService {
                 apexInfo.signerDigests =
                         computePackageSignerSha256Digests(packageInfo.signingInfo);
 
-                recordApexInfo(apexInfo);
+                results.add(apexInfo);
             }
-            if (DEBUG) {
-                Slog.d(TAG, "Measured " + packagesMeasured.size()
-                        + " packages after considering APEXs.");
-            }
+            return results;
+        }
 
-            // proceed with all preloaded apps
+        private List<IBinaryTransparencyService.AppInfo> collectAllUpdatedPreloadInfo(
+                Set<String> packagesToSkip) {
+            var results = new ArrayList<IBinaryTransparencyService.AppInfo>();
+            PackageManager pm = mContext.getPackageManager();
             for (PackageInfo packageInfo : pm.getInstalledPackages(
                     PackageManager.PackageInfoFlags.of(PackageManager.MATCH_FACTORY_ONLY
                             | PackageManager.GET_SIGNING_CERTIFICATES))) {
-                if (packagesMeasured.contains(packageInfo.packageName)) {
+                if (packagesToSkip.contains(packageInfo.packageName)) {
                     continue;
                 }
-                packagesMeasured.add(packageInfo.packageName);
-
                 int mbaStatus = MBA_STATUS_PRELOADED;
                 if (packageInfo.signingInfo == null) {
                     Slog.d(TAG, "Preload " + packageInfo.packageName  + " at "
@@ -347,61 +384,53 @@ public class BinaryTransparencyService extends SystemService {
                             computePackageSignerSha256Digests(packageInfo.signingInfo);
                     appInfo.mbaStatus = mbaStatus;
 
-                    writeAppInfoToLog(appInfo);
+                    results.add(appInfo);
                 }
             }
-            if (DEBUG) {
-                Slog.d(TAG, "Measured " + packagesMeasured.size()
-                        + " packages after considering preloads");
-            }
+            return results;
+        }
 
-            if (CompatChanges.isChangeEnabled(LOG_MBA_INFO)) {
-                // lastly measure all newly installed MBAs
-                for (PackageInfo packageInfo : getNewlyInstalledMbas()) {
-                    if (packagesMeasured.contains(packageInfo.packageName)) {
-                        continue;
-                    }
-                    packagesMeasured.add(packageInfo.packageName);
-
-                    Bundle packageMeasurement = measurePackage(packageInfo);
-
-                    if (DEBUG) {
-                        Slog.d(TAG,
-                                "Extracting InstallSourceInfo for " + packageInfo.packageName);
-                    }
-                    var appInfo = new IBinaryTransparencyService.AppInfo();
-                    appInfo.packageName = packageInfo.packageName;
-                    appInfo.longVersion = packageInfo.getLongVersionCode();
-                    appInfo.digest = packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST);
-                    appInfo.digestAlgorithm =
-                            packageMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM);
-                    appInfo.signerDigests =
-                            computePackageSignerSha256Digests(packageInfo.signingInfo);
-                    appInfo.mbaStatus = MBA_STATUS_NEW_INSTALL;
-
-                    // extract package's InstallSourceInfo
-                    InstallSourceInfo installSourceInfo = getInstallSourceInfo(
-                            packageInfo.packageName);
-                    if (installSourceInfo != null) {
-                        appInfo.initiator = installSourceInfo.getInitiatingPackageName();
-                        SigningInfo initiatorSignerInfo =
-                                installSourceInfo.getInitiatingPackageSigningInfo();
-                        if (initiatorSignerInfo != null) {
-                            appInfo.initiatorSignerDigests =
-                                    computePackageSignerSha256Digests(initiatorSignerInfo);
-                        }
-                        appInfo.installer = installSourceInfo.getInstallingPackageName();
-                        appInfo.originator = installSourceInfo.getOriginatingPackageName();
-                    }
-
-                    writeAppInfoToLog(appInfo);
+        private List<IBinaryTransparencyService.AppInfo> collectAllMbaInfo(
+                Set<String> packagesToSkip) {
+            var results = new ArrayList<IBinaryTransparencyService.AppInfo>();
+            for (PackageInfo packageInfo : getNewlyInstalledMbas()) {
+                if (packagesToSkip.contains(packageInfo.packageName)) {
+                    continue;
                 }
+
+                Bundle packageMeasurement = measurePackage(packageInfo);
+                if (DEBUG) {
+                    Slog.d(TAG,
+                            "Extracting InstallSourceInfo for " + packageInfo.packageName);
+                }
+                var appInfo = new IBinaryTransparencyService.AppInfo();
+                appInfo.packageName = packageInfo.packageName;
+                appInfo.longVersion = packageInfo.getLongVersionCode();
+                appInfo.digest = packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST);
+                appInfo.digestAlgorithm =
+                    packageMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM);
+                appInfo.signerDigests =
+                    computePackageSignerSha256Digests(packageInfo.signingInfo);
+                appInfo.mbaStatus = MBA_STATUS_NEW_INSTALL;
+
+                // extract package's InstallSourceInfo
+                InstallSourceInfo installSourceInfo = getInstallSourceInfo(
+                        packageInfo.packageName);
+                if (installSourceInfo != null) {
+                    appInfo.initiator = installSourceInfo.getInitiatingPackageName();
+                    SigningInfo initiatorSignerInfo =
+                            installSourceInfo.getInitiatingPackageSigningInfo();
+                    if (initiatorSignerInfo != null) {
+                        appInfo.initiatorSignerDigests =
+                            computePackageSignerSha256Digests(initiatorSignerInfo);
+                    }
+                    appInfo.installer = installSourceInfo.getInstallingPackageName();
+                    appInfo.originator = installSourceInfo.getOriginatingPackageName();
+                }
+
+                results.add(appInfo);
             }
-            if (DEBUG) {
-                long timeSpentMeasuring = System.currentTimeMillis() - currentTimeMs;
-                Slog.d(TAG, "Measured " + packagesMeasured.size()
-                        + " packages altogether in " + timeSpentMeasuring + "ms");
-            }
+            return results;
         }
 
         private void recordApexInfo(IBinaryTransparencyService.ApexInfo apexInfo) {
