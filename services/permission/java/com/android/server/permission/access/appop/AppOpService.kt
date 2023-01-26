@@ -71,6 +71,10 @@ class AppOpService(
         return opNameMapToOpIntMap(getUidModes(uid))
     }
 
+    override fun getNonDefaultPackageModes(packageName: String, userId: Int): SparseIntArray {
+        return opNameMapToOpIntMap(getPackageModes(packageName, userId))
+    }
+
     override fun getUidMode(uid: Int, op: Int): Int {
         val appId = UserHandle.getAppId(uid)
         val userId = UserHandle.getUserId(uid)
