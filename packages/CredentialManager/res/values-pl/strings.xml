@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Anuluj"</string>
     <string name="string_continue" msgid="1346732695941131882">"Dalej"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Więcej opcji"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"Więcej informacji"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Klucze zwiększają Twoje bezpieczeństwo"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Dzięki kluczom nie musisz tworzyć ani zapamiętywać skomplikowanych haseł"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Klucze są szyfrowanymi kluczami cyfrowymi, które tworzysz za pomocą funkcji rozpoznawania odcisku palca lub twarzy bądź blokady ekranu"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Klucze są zapisane w menedżerze haseł, dzięki czemu możesz logować się na innych urządzeniach"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Więcej informacji o kluczach"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Technologia niewymagająca haseł"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Klucze umożliwiają logowanie się bez konieczności stosowania haseł. Wystarczy użyć odcisku palca, rozpoznawania twarzy, kodu PIN lub wzoru, aby potwierdzić tożsamość i utworzyć klucz."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Kryptografia klucza publicznego"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Zgodnie z zasadami FIDO Alliance (stowarzyszenia zrzeszającego m.in. Google, Apple i Microsoft) oraz standardami W3C klucze opierają się kluczach kryptograficznych. W odróżnieniu od nazw użytkownika i ciągów znaków stanowiących hasła pary kluczy prywatnych i publicznych są tworzone dla konkretnych aplikacji i stron. Klucz prywatny jest bezpiecznie przechowywany na urządzeniu lub w menedżerze haseł i potwierdza Twoją tożsamość. Klucz publiczny jest udostępniany serwerowi aplikacji lub strony. Mając odpowiednie klucze, od razu się zarejestrujesz i zalogujesz."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Zwiększone bezpieczeństwo konta"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Każdy klucz jest połączony wyłącznie z aplikacją lub stroną, dla której został utworzony, więc nie zalogujesz się przypadkowo w fałszywej aplikacji ani na fałszywej stronie. Ponadto na serwerach są przechowywane wyłącznie klucze publiczne, co znacznie utrudnia hakowanie."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Płynne przechodzenie"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"W czasie przechodzenia na technologie niewymagające haseł możliwość stosowania haseł – niezależnie od kluczy – wciąż będzie dostępna."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Wybierz, gdzie zapisywać <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Wybierz menedżera haseł, aby zapisywać informacje i logować się szybciej"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Utworzyć klucz dla aplikacji <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>

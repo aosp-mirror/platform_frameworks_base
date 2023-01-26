@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Otkaži"</string>
     <string name="string_continue" msgid="1346732695941131882">"Nastavi"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Još opcija"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"Saznajte više"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Bezbednije uz pristupne kodove"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Uz pristupne kodove nema potrebe da pravite ili pamtite složene lozinke"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Pristupni kodovi su šifrovani digitalni kodovi koje pravite pomoću otiska prsta, lica ili zaključavanja ekrana"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Čuvaju se u menadžeru lozinki da biste mogli da se prijavljujete na drugim uređajima"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Više o pristupnim kodovima"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Tehnologija bez lozinke"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Pristupni kodovi vam omogućavaju da se prijavite bez oslanjanja na lozinke. Dovoljno je samo da koristite otisak prsta, prepoznavanje lica, PIN ili šablon da biste verifikovali identitet i napravili pristupni kôd."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Kriptografija preko javnog ključa"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Na osnovu standarda udruženja FIDO (Google, Apple, Microsoft i drugi) i W3C, pristupni kodovi koriste parove ključeva za šifrovanje. Za razliku od korisničkog imena i stringa znakova koji koristimo za lozinke, za aplikaciju ili sajt prave se parovi privatnih i javnih ključeva. Privatni ključ se bezbedno čuva na uređaju ili u menadžeru lozinki i potvrđuje vaš identitet. Javni ključ se deli sa serverom aplikacije ili veb-sajta. Pomoću odgovarajućih ključeva možete trenutno da se registrujete i prijavite."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Poboljšana bezbednost naloga"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Svaki ključ je isključivo povezan sa aplikacijom ili veb-sajtom za koje je napravljen, pa nikad ne možete greškom da se prijavite u aplikaciju ili na veb-sajt koji služe za prevaru. Osim toga, sa serverima koji čuvaju samo javne ključeve hakovanje je mnogo teže."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Besprekoran prelaz"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Kako se krećemo ka budućnosti bez lozinki, lozinke će i dalje biti dostupne uz pristupne kodove."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Odaberite gde ćete sačuvati stavke <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Izaberite menadžera lozinki da biste sačuvali podatke i brže se prijavili sledeći put"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Želite da napravite pristupni kôd za: <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>

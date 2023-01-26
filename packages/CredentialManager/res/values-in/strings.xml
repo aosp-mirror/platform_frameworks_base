@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Batal"</string>
     <string name="string_continue" msgid="1346732695941131882">"Lanjutkan"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Opsi lainnya"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"Pelajari lebih lanjut"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Lebih aman dengan kunci sandi"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Dengan kunci sandi, Anda tidak perlu membuat atau mengingat sandi yang rumit"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Kunci sandi adalah kunci digital terenkripsi yang Anda buat menggunakan sidik jari, wajah, atau kunci layar"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Kunci sandi disimpan ke pengelola sandi, sehingga Anda dapat login di perangkat lainnya"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Selengkapnya tentang kunci sandi"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Teknologi tanpa sandi"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Kunci sandi memungkinkan Anda login tanpa mengandalkan sandi. Anda hanya perlu menggunakan sidik jari, pengenalan wajah, PIN, atau pola geser untuk memverifikasi identitas Anda dan membuat kunci sandi."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Kriptografi kunci publik"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Berdasarkan FIDO Alliance (yang mencakup Google, Apple, Microsoft, dan lainnya) dan standar W3C, kunci sandi menggunakan pasangan kunci kriptografis. Tidak seperti nama pengguna dan string karakter yang digunakan untuk sandi, pasangan kunci pribadi-publik dibuat untuk aplikasi atau situs. Kunci pribadi disimpan dengan aman di perangkat atau pengelola sandi dan mengonfirmasi identitas Anda. Kunci publik dibagikan ke server aplikasi atau situs. Dengan kunci yang sesuai, Anda dapat langsung mendaftar dan login."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Keamanan akun yang ditingkatkan"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Setiap kunci ditautkan secara eksklusif dengan aplikasi atau situs tempatnya dibuat, sehingga Anda tidak akan login ke aplikasi atau situs yang menipu secara tidak sengaja. Selain itu, peretasan lebih sulit dilakukan karena server hanya menyimpan kunci publik."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Transisi yang lancar"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Seiring kita menuju masa depan tanpa sandi, sandi akan tetap tersedia bersama kunci sandi."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Pilih tempat penyimpanan <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Pilih pengelola sandi untuk menyimpan info Anda dan login lebih cepat pada waktu berikutnya"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Buat kunci sandi untuk <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>

@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Ləğv edin"</string>
     <string name="string_continue" msgid="1346732695941131882">"Davam edin"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Digər seçimlər"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"Ətraflı məlumat"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Giriş açarları ilə daha təhlükəsiz"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Giriş açarları ilə mürəkkəb parollar yaratmağa və ya yadda saxlamağa ehtiyac yoxdur"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Giriş açarları barmaq izi, üz və ya ekran kilidindən istifadə edərək yaratdığınız şifrələnmiş rəqəmsal açarlardır"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Onlar parol menecerində saxlanılır ki, digər cihazlarda daxil ola biləsiniz"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Giriş açarları haqqında ətraflı"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Parolsuz texnologiya"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Giriş açarları parollara etibar etmədən daxil olmağa imkan verir. Kimliyinizi doğrulamaq və giriş açarı yaratmaq üçün sadəcə barmaq izi, üz tanıma, PIN və ya sürüşdürmə modelindən istifadə etməlisiniz."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"İctimai açar kriptoqrafiyası"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"FIDO Alliance (Google, Apple, Microsoft və s. daxildir) və W3C standartlarına əsaslanaraq giriş açarları kriptoqrafik açar cütlərindən istifadə edir. İstifadəçi adı və parollar üçün istifadə etdiyimiz simvol sətrindən fərqli olaraq, tətbiq və ya vebsayt üçün şəxsi-ictimai açar cütü yaradılır. Şəxsi açar cihazınızda və ya parol menecerinizdə təhlükəsiz şəkildə saxlanılır və kimliyinizi təsdiq edir. İctimai açar tətbiq və ya vebsayt serveri ilə paylaşılır. Müvafiq açarlarla dərhal qeydiyyatdan keçə və daxil ola bilərsiniz."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Təkmilləşdirilmiş hesab təhlükəsizliyi"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Hər bir açar eksklüziv olaraq onların yaradıldığı tətbiq və ya vebsaytla əlaqələndirilib, ona görə də heç vaxt səhvən saxta tətbiqə və ya vebsayta daxil ola bilməzsiniz. Üstəlik, yalnız ictimai açarları saxlayan serverlərlə hekinq daha çətindir."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Rahat keçid"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Parolsuz gələcəyə doğru irəlilədikcə parollar hələ də giriş açarları ilə yanaşı əlçatan olacaq."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"<xliff:g id="CREATETYPES">%1$s</xliff:g> elementinin saxlanacağı yeri seçin"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Məlumatlarınızı yadda saxlamaq və növbəti dəfə daha sürətli daxil olmaq üçün parol meneceri seçin"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> üçün giriş açarı yaradılsın?"</string>

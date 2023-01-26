@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"বাতিল কৰক"</string>
     <string name="string_continue" msgid="1346732695941131882">"অব্যাহত ৰাখক"</string>
     <string name="string_more_options" msgid="7990658711962795124">"অধিক বিকল্প"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"অধিক জানক"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"পাছকীৰ জৰিয়তে অধিক সুৰক্ষিত"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"পাছকী ব্যৱহাৰ কৰিলে আপুনি জটিল পাছৱৰ্ড সৃষ্টি কৰিব অথবা মনত ৰাখিব নালাগে"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"পাছকীসমূহ হৈছে আপুনি আপোনাৰ ফিংগাৰপ্ৰিণ্ট, মুখাৱয়ব অথবা স্ক্ৰীন লক ব্যৱহাৰ কৰি সৃষ্টি কৰা এনক্ৰিপ্ট কৰা ডিজিটেল চাবি"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"সেইসমূহ এটা পাছৱৰ্ড পৰিচালকত ছেভ কৰা হয়, যাতে আপুনি অন্য ডিভাইচসমূহত ছাইন ইন কৰিব পাৰে"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"পাছকীৰ বিষয়ে অধিক"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"পাছৱৰ্ডবিহীন প্ৰযুক্তি"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"পাছকীসমূহে আপোনাক পাছৱৰ্ডৰ ওপৰত নিৰ্ভৰ নকৰাকৈ ছাইন ইন কৰাৰ অনুমতি দিয়ে। আপুনি আপোনাৰ পৰিচয় সত্যাপন কৰিবলৈ আৰু এটা পাছকী সৃষ্টি কৰিবলৈ কেৱল আপোনাৰ ফিংগাৰপ্ৰিণ্ট, মুখাৱয়ব চিনাক্তকৰণ, পিন অথবা ছোৱাইপ কৰাৰ আৰ্হি ব্যৱহাৰ কৰিলেই হ’ল।"</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"ৰাজহুৱা চাবি ক্ৰিপ্ট’গ্ৰাফী"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"FIDO জোঁট (য’ত Google, Apple, Microsoft আৰু অধিক অন্তৰ্ভুক্ত) আৰু W3C মানকসমূহৰ ওপৰত ভিত্তি কৰি, পাছকীসমূহে ক্ৰিপ্ট’গ্ৰাফিক চাবিৰ যোৰা ব্যৱহাৰ কৰে। আমি পাছৱৰ্ডৰ বাবে ব্যৱহাৰ কৰা ব্যৱহাৰকাৰীৰ নাম আৰু বৰ্ণৰ ষ্ট্ৰিঙৰ বিপৰীতে, এটা এপ্‌ অথবা ৱেবছাইটৰ বাবে এটা ব্যক্তিগত-ৰাজহুৱা কীৰ যোৰা সৃষ্টি কৰা হয়। ব্যক্তিগত চাবিটো আপোনাৰ ডিভাইচ অথবা পাছৱৰ্ড পৰিচালকত সুৰক্ষিতভাৱে ষ্ট’ৰ কৰা হয় আৰু ই আপোনাৰ পৰিচয় নিশ্চিত কৰে। ৰাজহুৱা চাবিটো এপ্‌ অথবা ৱেবছাইটৰ ছাৰ্ভাৰৰ সৈতে শ্বেয়াৰ কৰা হয়। সংশ্লিষ্ট চাবিসমূহৰ জৰিয়তে আপুনি তাৎক্ষণিকভাৱে পঞ্জীয়ন আৰু ছাইন ইন কৰিব পাৰিব।"</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"একাউণ্টৰ উন্নত সুৰক্ষা"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"প্ৰতিটো চাবি বিশেষভাৱে সেই এপ্‌ অথবা ৱেবছাইটৰ সৈতে লিংক কৰা হয় যাৰ বাবে সেইটো সৃষ্টি কৰা হৈছে, সেয়ে আপুনি কেতিয়াও ভুলতে কোনো প্ৰৱঞ্চনামূলক এপ্‌ অথবা ৱেবছাইটত ছাইন ইন কৰিব নোৱাৰে। ইয়াৰ উপৰিও, কেৱল ৰাজহুৱা চাবিসমূহ ৰখা ছাৰ্ভাৰৰ ক্ষেত্ৰত হেক কৰাটো বহুত কঠিন হৈ পৰে।"</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"বাধাহীন স্থানান্তৰণ"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"আমি পাছৱৰ্ডবিহীন ভৱিষ্যতৰ দিশে আগবঢ়াৰ লগে লগে পাছকীৰ লগতে পাছৱৰ্ডসমূহো উপলব্ধ হ’ব।"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"আপোনাৰ <xliff:g id="CREATETYPES">%1$s</xliff:g> ক’ত ছেভ কৰিব লাগে সেয়া বাছনি কৰক"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"আপোনাৰ তথ্য ছেভ কৰি পৰৱৰ্তী সময়ত দ্ৰুতভাৱে ছাইন ইন কৰিবলৈ এটা পাছৱৰ্ড পৰিচালক বাছনি কৰক"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g>ৰ বাবে পাছকী সৃষ্টি কৰিবনে?"</string>

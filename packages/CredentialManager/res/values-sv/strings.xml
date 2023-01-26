@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Avbryt"</string>
     <string name="string_continue" msgid="1346732695941131882">"Fortsätt"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Fler alternativ"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"Läs mer"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Säkrare med nycklar"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Med nycklar behöver du inte skapa eller komma ihop invecklade lösenord"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Nycklar är krypterade digitala nycklar som du skapar med ditt fingeravtryck, ansikte eller skärmlås"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"De sparas i lösenordshanteraren så att du kan logga in på andra enheter"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Mer om nycklar"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Lösenordslös teknik"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Nycklar gör det möjligt för dig att logga in utan att förlita dig på lösenord. Du behöver bara använda ditt fingeravtryck, svepmönster, din ansiktsigenkänning eller pinkod för att verifiera din identitet och skapa en nyckel."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Kryptering med offentlig nyckel"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Kryptografiska nyckelpar används enligt standarder från FIDO Alliance (som inkluderar Google, Apple, Microsoft m.fl.) och W3C. Ett nyckelpar (en offentlig och en privat) skapas för appen eller webbplatsen, till skillnad från användarnamnet och teckensträngen som används som lösenord. Den privata nyckeln lagras säkert på enheten eller i Lösenordshantering. Den bekräftar din identitet. Den offentliga nyckeln delas med app- eller webbplatsservern. Med motsvarande nycklar kan du snabbt logga in."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Förbättrad kontosäkerhet"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Varje nyckel är exklusivt länkad till appen eller webbplatsen den skapades för, så du kan aldrig logga in i en bedräglig app eller webbplats av misstag. Hackning blir dessutom mycket svårare eftersom servrar bara behåller offentliga nycklar."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"En sömlös övergång"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Medan vi beger oss mot en lösenordslös framtid kommer lösenord fortfarande att vara tillgängliga utöver nycklar."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Välj var du vill spara <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Välj en lösenordshanterare för att spara dina uppgifter och logga in snabbare nästa gång"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Vill du skapa en nyckel för <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>

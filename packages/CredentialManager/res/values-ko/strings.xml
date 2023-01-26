@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"취소"</string>
     <string name="string_continue" msgid="1346732695941131882">"계속"</string>
     <string name="string_more_options" msgid="7990658711962795124">"옵션 더보기"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"자세히 알아보기"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"패스키로 더 안전하게"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"패스키를 사용하면 복잡한 비밀번호를 만들거나 기억하지 않아도 됩니다."</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"패스키는 지문, 얼굴 또는 화면 잠금으로 생성하는 암호화된 디지털 키입니다."</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"비밀번호 관리자에 저장되므로 다른 기기에서 로그인할 수 있습니다."</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"패스키 자세히 알아보기"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"비밀번호 없는 기술"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"패스키를 이용하면 비밀번호에 의존하지 않고 로그인할 수 있습니다. 지문, 얼굴 인식, PIN 또는 스와이프 패턴만으로 본인 인증을 하고 패스키를 만들 수 있습니다."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"공개 키 암호화"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"FIDO 연합(Google, Apple, Microsoft 등 포함) 및 W3C 표준을 토대로 패스키는 암호화 키 쌍을 사용합니다. 사용자 이름과 비밀번호로 사용하는 문자열과는 달리 비공개-공개 키 쌍은 특정 앱 또는 웹사이트를 대상으로 생성됩니다. 비공개 키는 안전하게 기기 또는 비밀번호 관리자에 저장되며 사용자 본인 인증에 사용됩니다. 공개 키는 앱 또는 웹사이트 서버와 공유됩니다. 해당하는 키를 사용하면 즉시 등록하고 로그인할 수 있습니다."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"계정 보안 향상"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"각 키는 생성 시 대상으로 설정된 앱 또는 웹사이트와 단독으로 연결되어 있으므로 실수로 사기 앱 또는 웹사이트에 로그인할 일이 없습니다. 또한 서버에만 공개 키가 보관되므로 해킹이 더욱 까다롭습니다."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"원활한 이전"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"비밀번호 없는 미래로 나아가는 과정에서 비밀번호는 여전히 패스키와 함께 사용될 것입니다."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"<xliff:g id="CREATETYPES">%1$s</xliff:g> 저장 위치 선택"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"정보를 저장해서 다음에 더 빠르게 로그인하려면 비밀번호 관리자를 선택하세요."</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g>의 패스키를 만드시겠습니까?"</string>

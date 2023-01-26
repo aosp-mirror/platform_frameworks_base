@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"لغو"</string>
     <string name="string_continue" msgid="1346732695941131882">"ادامه"</string>
     <string name="string_more_options" msgid="7990658711962795124">"گزینه‌های بیشتر"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"بیشتر بدانید"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"فضایی ایمن‌تر با گذرکلید"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"با گذرکلیدها، لازم نیست گذرواژه پیچیده‌ای بسازید یا آن را به‌خاطر بسپارید"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"گذرکلیدها کلیدهای دیجیتالی رمزگذاری‌شده‌ای هستند که بااستفاده از اثر انگشت، چهره، یا قفل صفحه ایجاد می‌کنید"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"گذرکلیدها در «مدیر گذرواژه» ذخیره می‌شود تا بتوانید در دستگاه‌های دیگر به سیستم وارد شوید"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"اطلاعات بیشتر درباره گذرکلیدها"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"فناوری بدون گذرواژه"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"گذرکلیدها به شما اجازه می‌دهند بدون اتکا به گذرواژه به سیستم وارد شوید. برای به‌تأیید رساندن هویت خود و ایجاد گذرکلید، کافی است از اثر انگشت، تشخیص چهره، پین، یا الگوی کشیدنی استفاده کنید."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"رمزنگاری کلید عمومی"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"‏براساس «اتحاد FIDO» (که شامل Google،‏ Apple،‏ Microsoft، و غیره می‌شود) و استانداردهای W3C، گذرکلیدها از جفت کلیدهای رمزنگاری‌شده استفاده می‌کنند. برخلاف نام کاربری و رشته نویسه‌هایی که برای گذرواژه‌ها استفاده می‌کنیم، یک جفت کلید خصوصی-عمومی برای برنامه یا وب‌سایت ایجاد می‌شود. کلید خصوصی به‌طور امن در دستگاه یا مدیر گذرواژه شما ذخیره می‌شود و هویت شما را تأیید می‌کند. کلید عمومی با سرور وب‌سایت یا برنامه هم‌رسانی می‌شود. با کلیدهای مربوطه می‌توانید بی‌درنگ ثبت‌نام کنید و به سیستم وارد شوید."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"بهبود امنیت حساب"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"هر کلید با برنامه یا وب‌سایتی که برای آن ایجاد شده است پیوند انحصاری دارد، بنابراین هرگز نمی‌توانید به‌اشتباه به سیستم برنامه یا وب‌سایتی جعلی وارد شوید. به‌علاوه، با سرورهایی که فقط کلیدهای عمومی را نگه می‌دارند رخنه‌گری بسیار سخت‌تر است."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"انتقال یک‌پارچه"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"با اینکه به‌سوی آینده‌ای بدون گذرواژه حرکت می‌کنیم، گذرواژه‌ها همچنان در کنار گذرکلیدها دردسترس خواهند بود."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"جایی را برای ذخیره کردن <xliff:g id="CREATETYPES">%1$s</xliff:g> انتخاب کنید"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"مدیر گذرواژه‌ای انتخاب کنید تا اطلاعاتتان ذخیره شود و دفعه بعدی سریع‌تر به سیستم وارد شوید"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"برای <xliff:g id="APPNAME">%1$s</xliff:g> گذرکلید ایجاد شود؟"</string>

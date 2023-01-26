@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Avbryt"</string>
     <string name="string_continue" msgid="1346732695941131882">"Fortsett"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Flere alternativer"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"Finn ut mer"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Tryggere med tilgangsnøkler"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Med tilgangsnøkler trenger du ikke å lage eller huske kompliserte passord"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Tilgangsnøkler er krypterte digitale nøkler du oppretter med fingeravtrykket, ansiktet eller skjermlåsen"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"De lagres i et verktøy for passordlagring, slik at du kan logge på andre enheter"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Mer om tilgangsnøkler"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Passordfri teknologi"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Med tilgangsnøkler kan du logge på uten å bruke passord. Du trenger bare å bruke et fingeravtrykk, ansiktsgjenkjenning, en PIN-kode eller et sveipemønster for å bekrefte hvem du er, og lage en tilgangsnøkkel."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Kryptografi for offentlige nøkler"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Tilgangsnøkler er basert på FIDO Alliance (med bl.a. Google, Apple og Microsoft) og W3C-standardene og bruker kryptografiske nøkkelpar. I stedet for brukernavn og strenger med tegn som brukes som passord, opprettes det et privat-offentlig nøkkelpar per app eller nettsted. Den private nøkkelen lagres trygt på enheten eller i passordlagringen og bekrefter hvem du er. Den offentlige nøkkelen deles med app- eller nettstedstjeneren. Med korresponderende nøkler kan du raskt registrere deg og logge på."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Forbedret kontosikkerhet"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Hver nøkkel er eksklusivt tilknyttet appen eller nettstedet den er laget for. Dermed kan du aldri logge på falske apper eller nettsteder ved et uhell. Og siden tjenerne bare har offentlige nøkler, blir det mye vanskeligere å hacke deg."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Sømløs overgang"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Vi går mot en fremtid uten passord, men passord fortsetter å være tilgjengelige ved siden av tilgangsnøkler."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Velg hvor du vil lagre <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Velg et verktøy for passordlagring for å lagre informasjonen din og logge på raskere neste gang"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Vil du opprette en tilgangsnøkkel for <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>

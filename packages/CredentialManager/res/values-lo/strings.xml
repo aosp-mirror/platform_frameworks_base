@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"ຍົກເລີກ"</string>
     <string name="string_continue" msgid="1346732695941131882">"ສືບຕໍ່"</string>
     <string name="string_more_options" msgid="7990658711962795124">"ຕົວເລືອກເພີ່ມເຕີມ"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"ສຶກສາເພີ່ມເຕີມ"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"ປອດໄພຂຶ້ນດ້ວຍກະແຈຜ່ານ"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"ໂດຍການໃຊ້ກະແຈຜ່ານ, ທ່ານບໍ່ຈຳເປັນຕ້ອງສ້າງ ຫຼື ຈື່ລະຫັດຜ່ານທີ່ຊັບຊ້ອນ"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"ກະແຈຜ່ານແມ່ນກະແຈດິຈິຕອນທີ່ໄດ້ຖືກເຂົ້າລະຫັດໄວ້ເຊິ່ງທ່ານສ້າງຂຶ້ນໂດຍໃຊ້ລາຍນິ້ວມື, ໃບໜ້າ ຫຼື ການລັອກໜ້າຈໍຂອງທ່ານ"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"ພວກມັນຖືກບັນທຶກໄວ້ຢູ່ໃນຕົວຈັດການລະຫັດຜ່ານ, ດັ່ງນັ້ນທ່ານສາມາດເຂົ້າສູ່ລະບົບຢູ່ອຸປະກອນອື່ນໆໄດ້"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"ເພີ່ມເຕີມກ່ຽວກັບກະແຈຜ່ານ"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"ເທັກໂນໂລຢີທີ່ບໍ່ມີລະຫັດຜ່ານ"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"ກະແຈຜ່ານເຮັດໃຫ້ທ່ານສາມາດເຂົ້າສູ່ລະບົບໄດ້ໂດຍບໍ່ຕ້ອງອີງອາໄສລະຫັດຜ່ານ. ທ່ານພຽງແຕ່ຕ້ອງໃຊ້ລາຍນິ້ວມືຂອງທ່ານ, ການຈຳແນກໃບໜ້າ, PIN ຫຼື ຮູບແບບການປັດເພື່ອຢັ້ງຢືນຕົວຕົນຂອງທ່ານ ແລະ ສ້າງກະແຈຜ່ານ."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"ການເຂົ້າລະຫັດກະແຈສາທາລະນະ"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"ໂດຍອ້າງອີງໃສ່ພັນທະມິດ FIDO (ເຊິ່ງຮວມມີ Google, Apple, Microsoft ແລະ ອື່ນໆ) ແລະ ມາດຕະຖານ W3C, ກະແຈຜ່ານຈະໃຊ້ຈັບຄູ່ກະແຈການເຂົ້າລະຫັດ. ບໍ່ຄືກັນກັບຊື່ຜູ້ໃຊ້ ແລະ ສະຕຣິງຕົວອັກສອນທີ່ພວກເຮົາໃຊ້ສຳລັບລະຫັດຜ່ານ, ກະແຈສາທາລະນະ-ສ່ວນຕົວແມ່ນຖືກສ້າງມາສຳລັບແອັບ ຫຼື ເວັບໄຊ. ກະແຈສ່ວນຕົວແມ່ນຖືກຈັດເກັບໄວ້ຢ່າງປອດໄພຢູ່ອຸປະກອນຂອງທ່ານ ຫຼື ຕົວຈັດການລະຫັດຜ່ານ ແລະ ມັນຢືນຢັນຕົວຕົນຂອງທ່ານ. ກະແຈສາທາລະນະແມ່ນແບ່ງປັນກັບແອັບ ຫຼື ເຊີບເວີເວັບໄຊ. ດ້ວຍກະແຈທີ່ກົງກັນ, ທ່ານຈະສາມາດລົງທະບຽນ ແລະ ເຂົ້າສູ່ລະບົບໄດ້ທັນທີ."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"ປັບປຸງຄວາມປອດໄພບັນຊີ"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"ກະແຈແຕ່ລະອັນແມ່ນລິ້ງເຈາະຈົງກັບແອັບ ຫຼື ເວັບໄຊທີ່ພວກມັນຖືກສ້າງໃຫ້, ດັ່ງນັ້ນທ່ານຈະບໍ່ສາມາດເຂົ້າສູ່ລະບົບຫາແອັບ ຫຼື ເວັບໄຊສໍ້ໂກງຕ່າງໆໂດຍບໍ່ໄດ້ຕັ້ງໃຈໄດ້. ນອກຈາກນັ້ນ, ເຊີບເວີຍັງມີການເກັບກະແຈສາທາລະນະໄວ້ເທົ່ານັ້ນ, ການແຮັກຈຶ່ງເປັນເລື່ອງຍາກຂຶ້ນຫຼາຍ."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"ການປ່ຽນຜ່ານທີ່ຕໍ່ເນື່ອງ"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"ໃນຂະນະທີ່ພວກເຮົາກ້າວໄປສູ່ອະນາຄົດທີ່ບໍ່ຕ້ອງໃຊ້ລະຫັດຜ່ານ, ລະຫັດຜ່ານຈະຍັງຄົງໃຊ້ໄດ້ຄວບຄູ່ໄປກັບລະຫັດຜ່ານ."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"ເລືອກບ່ອນທີ່ຈະບັນທຶກ <xliff:g id="CREATETYPES">%1$s</xliff:g> ຂອງທ່ານ"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"ເລືອກຕົວຈັດການລະຫັດຜ່ານເພື່ອບັນທຶກຂໍ້ມູນຂອງທ່ານ ແລະ ເຂົ້າສູ່ລະບົບໄວຂຶ້ນໃນເທື່ອຕໍ່ໄປ"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"ສ້າງກະແຈຜ່ານສຳລັບ <xliff:g id="APPNAME">%1$s</xliff:g> ບໍ?"</string>

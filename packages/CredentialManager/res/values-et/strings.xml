@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Tühista"</string>
     <string name="string_continue" msgid="1346732695941131882">"Jätka"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Rohkem valikuid"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"Lisateave"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Pääsuvõtmed suurendavad turvalisust"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Pääsuvõtmetega ei pea te looma ega meelde jätma keerukaid paroole"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Pääsuvõtmed on digitaalsed krüpteeritud võtmed, mille loote sõrmejälje, näo või ekraanilukuga"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Need salvestatakse paroolihaldurisse, et saaksite teistes seadmetes sisse logida"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Rohkem pääsuvõtmete kohta"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Paroolivaba tehnoloogia"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Pääsuvõtmed võimaldavad teil sisse logida ilma paroole kasutamata. Peate vaid kasutama oma sõrmejälge, näotuvastust, PIN-koodi või pühkimismustrit, et oma isik kinnitada ja pääsuvõti luua."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Avaliku võtme krüptograafia"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Pääsuvõtmed kasutavad FIDO Alliance\'i (hõlmab Google\'it, Apple\'it, Microsofti jt) ja W3C standardite põhjal krüptograafilisi võtmepaare. Erinevalt paroolide puhul kasutatavast kasutajanimest ja tähemärkide stringist luuakse rakenduse või veebisaidi jaoks privaatne-avalik võtmepaar. Privaatne võti salvestatakse turvaliselt seadmesse või paroolihaldurisse ja see kinnitab teie isiku. Avalikku võtit jagatakse rakenduse või veebisaidi serveriga. Õigete võtmete abil saate kohe registreeruda ja sisse logida."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Konto täiustatud turvalisus"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Iga võti on lingitud vaid rakenduse või veebisaidiga, mille jaoks see loodi, seega ei saa te petturlikku rakendusse või veebisaidile kunagi kogemata sisse logida. Ja kuna serverid säilitavad vaid avalikke võtmeid, on häkkimine palju keerulisem."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Sujuv üleminek"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Liikudes paroolivaba tuleviku poole, jäävad paroolid pääsuvõtmete kõrval siiski kättesaadavaks."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Valige, kuhu soovite oma <xliff:g id="CREATETYPES">%1$s</xliff:g> salvestada"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Valige paroolihaldur, et salvestada oma teave ja järgmisel korral kiiremini sisse logida"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Kas luua rakenduse <xliff:g id="APPNAME">%1$s</xliff:g> jaoks pääsuvõti?"</string>

@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"ਰੱਦ ਕਰੋ"</string>
     <string name="string_continue" msgid="1346732695941131882">"ਜਾਰੀ ਰੱਖੋ"</string>
     <string name="string_more_options" msgid="7990658711962795124">"ਹੋਰ ਵਿਕਲਪ"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"ਹੋਰ ਜਾਣੋ"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"ਪਾਸਕੀਆਂ ਨਾਲ ਸੁਰੱਖਿਅਤ"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"ਪਾਸਕੀਆਂ ਨਾਲ, ਤੁਹਾਨੂੰ ਜਟਿਲ ਪਾਸਵਰਡ ਬਣਾਉਣ ਜਾਂ ਯਾਦ ਰੱਖਣ ਦੀ ਲੋੜ ਨਹੀਂ ਹੁੰਦੀ"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"ਪਾਸਕੀਆਂ ਇਨਕ੍ਰਿਪਟਡ ਡਿਜੀਟਲ ਕੁੰਜੀਆਂ ਹੁੰਦੀਆਂ ਹਨ ਜੋ ਤੁਹਾਡੇ ਵੱਲੋਂ ਤੁਹਾਡੇ ਫਿੰਗਰਪ੍ਰਿੰਟ, ਚਿਹਰੇ ਜਾਂ ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਵਰਤੋਂ ਕਰ ਕੇ ਬਣਾਈਆਂ ਜਾਂਦੀਆਂ ਹਨ"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"ਉਨ੍ਹਾਂ ਨੂੰ ਪਾਸਵਰਡ ਪ੍ਰਬੰਧਕ \'ਤੇ ਰੱਖਿਅਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਤਾਂ ਜੋ ਤੁਸੀਂ ਹੋਰ ਡੀਵਾਈਸਾਂ \'ਤੇ ਸਾਈਨ-ਇਨ ਕਰ ਸਕੋ"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"ਪਾਸਕੀਆਂ ਬਾਰੇ ਹੋਰ ਜਾਣੋ"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"ਪਾਸਵਰਡ ਰਹਿਤ ਤਕਨਾਲੋਜੀ"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"ਪਾਸਕੀਆਂ ਤੁਹਾਨੂੰ ਪਾਸਵਰਡਾਂ \'ਤੇ ਭਰੋਸਾ ਕੀਤੇ ਬਿਨਾਂ ਸਾਈਨ-ਇਨ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀਆਂ ਹਨ। ਤੁਹਾਨੂੰ ਆਪਣੀ ਪਛਾਣ ਦੀ ਪੁਸ਼ਟੀ ਕਰਨ ਅਤੇ ਪਾਸਕੀ ਬਣਾਉਣ ਲਈ ਸਿਰਫ਼ ਆਪਣੇ ਫਿੰਗਰਪ੍ਰਿੰਟ, ਚਿਹਰਾ ਪਛਾਣ, ਪਿੰਨ ਜਾਂ ਸਵਾਈਪ ਪੈਟਰਨ ਦੀ ਵਰਤੋਂ ਕਰਨ ਦੀ ਲੋੜ ਹੈ।"</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"ਜਨਤਕ ਕੁੰਜੀ ਕ੍ਰਿਪਟੋਗ੍ਰਾਫ਼ੀ"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"FIDO ਗਠਜੋੜ (ਜਿਸ ਵਿੱਚ Google, Apple, Microsoft ਅਤੇ ਹੋਰ ਸ਼ਾਮਲ ਹਨ) ਅਤੇ W3C ਮਿਆਰਾਂ ਦੇ ਆਧਾਰ \'ਤੇ ਪਾਸਕੀਆਂ ਕ੍ਰਿਪਟੋਗ੍ਰਾਫ਼ਿਕ ਕੁੰਜੀਆਂ ਦੇ ਜੋੜੇ ਵਰਤਦੀਆਂ ਹਨ। ਪਾਸਵਰਡ ਲਈ ਵਰਤੇ ਜਾਂਦੇ ਵਰਤੋਂਕਾਰ ਨਾਮ ਅਤੇ ਅੱਖਰ-ਚਿੰਨ੍ਹਾਂ ਦੀ ਸਤਰ ਤੋਂ ਅਲੱਗ, ਐਪ ਜਾਂ ਵੈੱਬਸਾਈਟ ਲਈ ਨਿੱਜੀ-ਜਨਤਕ ਕੁੰਜੀ ਜੋੜਾ ਬਣਾਇਆ ਜਾਂਦਾ ਹੈ। ਨਿੱਜੀ ਕੁੰਜੀ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਜਾਂ ਪਾਸਵਰਡ ਪ੍ਰਬੰਧਕ \'ਤੇ ਸੁਰੱਖਿਅਤ ਢੰਗ ਨਾਲ ਸਟੋਰ ਕੀਤੀ ਜਾਂਦੀ ਹੈ ਅਤੇ ਇਹ ਤੁਹਾਡੀ ਪਛਾਣ ਦੀ ਪੁਸ਼ਟੀ ਕਰਦੀ ਹੈ। ਜਨਤਕ ਕੁੰਜੀ ਐਪ ਜਾਂ ਵੈੱਬਸਾਈਟ ਸਰਵਰ ਨਾਲ ਸਾਂਝੀ ਕੀਤੀ ਜਾਂਦੀ ਹੈ। ਸੰਬੰਧਿਤ ਕੁੰਜੀਆਂ ਨਾਲ, ਤੁਸੀਂ ਤੁਰੰਤ ਰਜਿਸਟਰ ਅਤੇ ਸਾਈਨ-ਇਨ ਕਰ ਸਕਦੇ ਹੋ।"</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"ਬਿਹਤਰ ਖਾਤਾ ਸੁਰੱਖਿਆ"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"ਹਰੇਕ ਕੁੰਜੀ ਖਾਸ ਤੌਰ \'ਤੇ ਉਸ ਐਪ ਜਾਂ ਵੈੱਬਸਾਈਟ ਨਾਲ ਲਿੰਕ ਹੁੰਦੀ ਹੈ ਜਿਸ ਲਈ ਉਹ ਬਣਾਈ ਗਈ ਸੀ, ਇਸ ਲਈ ਤੁਸੀਂ ਕਦੇ ਵੀ ਗਲਤੀ ਨਾਲ ਕਿਸੇ ਧੋਖਾਧੜੀ ਵਾਲੀ ਐਪ ਜਾਂ ਵੈੱਬਸਾਈਟ \'ਤੇ ਸਾਈਨ-ਇਨ ਨਹੀਂ ਕਰ ਸਕਦੇ। ਇਸ ਤੋਂ ਇਲਾਵਾ, ਸਿਰਫ਼ ਜਨਤਕ ਕੁੰਜੀਆਂ ਵਾਲੇ ਸਰਵਰਾਂ \'ਤੇ, ਹੈਕਿੰਗ ਕਰਨਾ ਬਹੁਤ ਔਖਾ ਹੁੰਦਾ ਹੈ।"</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"ਸਹਿਜ ਪਰਿਵਰਤਨ"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"ਜਦੋਂ ਕਿ ਅਸੀਂ ਪਾਸਵਰਡ ਰਹਿਤ ਭਵਿੱਖ ਵੱਲ ਵਧ ਰਹੇ ਹਾਂ, ਪਰ ਪਾਸਕੀਆਂ ਦੇ ਨਾਲ ਪਾਸਵਰਡ ਹਾਲੇ ਵੀ ਉਪਲਬਧ ਹੋਣਗੇ।"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"ਚੁਣੋ ਕਿ ਆਪਣੇ <xliff:g id="CREATETYPES">%1$s</xliff:g> ਨੂੰ ਕਿੱਥੇ ਰੱਖਿਅਤ ਕਰਨਾ ਹੈ"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"ਆਪਣੀ ਜਾਣਕਾਰੀ ਨੂੰ ਰੱਖਿਅਤ ਕਰਨ ਅਤੇ ਅਗਲੀ ਵਾਰ ਤੇਜ਼ੀ ਨਾਲ ਸਾਈਨ-ਇਨ ਕਰਨ ਲਈ ਪਾਸਵਰਡ ਪ੍ਰਬੰਧਕ ਚੁਣੋ"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"ਕੀ <xliff:g id="APPNAME">%1$s</xliff:g> ਲਈ ਪਾਸਕੀ ਬਣਾਉਣੀ ਹੈ?"</string>

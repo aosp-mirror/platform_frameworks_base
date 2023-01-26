@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"रद्द करें"</string>
     <string name="string_continue" msgid="1346732695941131882">"जारी रखें"</string>
     <string name="string_more_options" msgid="7990658711962795124">"ज़्यादा विकल्प"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"ज़्यादा जानें"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"पासकी के साथ सुरक्षित रहें"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"पासकी होने पर, आपको जटिल पासवर्ड बनाने या याद रखने की ज़रूरत नहीं पड़ती"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"पासकी, एन्क्रिप्ट (सुरक्षित) की गई डिजिटल की होती हैं. इन्हें फ़िंगरप्रिंट, चेहरे या स्क्रीन लॉक का इस्तेमाल करके बनाया जाता है"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"पासकी को पासवर्ड मैनेजर में सेव किया जाता है, ताकि इनका इस्तेमाल करके आप अन्य डिवाइसों में साइन इन कर सकें"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"पासकी के बारे में ज़्यादा जानकारी"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"बिना पासवर्ड वाली टेक्नोलॉजी"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"पासकी की मदद से, पासवर्ड के बिना साइन इन किया जा सकता है. अपनी पहचान की पुष्टि करने और पासकी बनाने के लिए, फ़िंगरप्रिंट, चेहरे की पहचान करने की सुविधा, पिन या स्वाइप पैटर्न का इस्तेमाल करें."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"सार्वजनिक कुंजी क्रिप्टोग्राफ़ी"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"W3C के तय मानकों और FIDO एलायंस (Google, Apple, Microsoft वगैरह) के मुताबिक, पासकी में क्रिप्टोग्राफ़िक कुंजी के जोड़े इस्तेमाल किए जाते हैं. पासवर्ड में उपयोगकर्ता नाम और वर्णों की स्ट्रिंग इस्तेमाल की जाती है, जबकि ऐप्लिकेशन या वेबसाइट के लिए निजी-सार्वजनिक कुंजी का जोड़ा बनाया जाता है. निजी कुंजी, Password Manager या डिवाइस में सुरक्षित रहती है और आपकी पहचान की पुष्टि करती है. सार्वजनिक कुंजी, ऐप्लिकेशन या वेबसाइट सर्वर के साथ शेयर होती है. दोनों कुंजियों से, ऐप्लिकेशन या वेबसाइट पर तुरंत रजिस्टर और साइन इन किया जा सकता है."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"खाते की बेहतर सुरक्षा"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"हर कुंजी खास तौर पर उस ऐप्लिकेशन या वेबसाइट से लिंक होती है जिसके लिए उसे बनाया गया है. ऐसा इसलिए किया जाता है, ताकि कोई भी व्यक्ति धोखाधड़ी करने वाले ऐप्लिकेशन या वेबसाइट पर कभी भी गलती से साइन इन न करे. साथ ही, जिन सर्वर के पास सिर्फ़ सार्वजनिक कुंजी होती हैं उन्हें हैक करना काफ़ी मुश्किल होता है."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"अपने-आप होने वाला ट्रांज़िशन"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"आने वाले समय में टेक्नोलॉजी का इस्तेमाल बिना पासवर्ड के किया जा सकेगा. हालांकि, पासकी के साथ पासवर्ड भी इस्तेमाल किए जा सकेंगे."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"चुनें कि अपनी <xliff:g id="CREATETYPES">%1$s</xliff:g> कहां सेव करनी हैं"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"अपनी जानकारी सेव करने के लिए, कोई पासवर्ड मैनेजर चुनें और अगली बार तेज़ी से साइन इन करें"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"क्या आपको <xliff:g id="APPNAME">%1$s</xliff:g> के लिए पासकी बनानी है?"</string>
