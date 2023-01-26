@@ -28,5 +28,26 @@ interface IBinaryTransparencyService {
 
     List getApexInfo();
 
-    List getMeasurementsForAllPackages();
+    void recordMeasurementsForAllPackages();
+
+    parcelable ApexInfo {
+        String packageName;
+        long longVersion;
+        byte[] digest;
+        int digestAlgorithm;
+        String[] signerDigests;
+    }
+
+    parcelable AppInfo {
+        String packageName;
+        long longVersion;
+        byte[] digest;
+        int digestAlgorithm;
+        String[] signerDigests;
+        int mbaStatus;
+        String initiator;
+        String[] initiatorSignerDigests;
+        String installer;
+        String originator;
+    }
 }
