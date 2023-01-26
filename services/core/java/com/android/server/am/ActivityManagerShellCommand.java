@@ -3830,9 +3830,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Print this help text.");
             pw.println("  start-activity [-D] [-N] [-W] [-P <FILE>] [--start-profiler <FILE>]");
             pw.println("          [--sampling INTERVAL] [--streaming] [-R COUNT] [-S]");
-            pw.println("          [--track-allocation] [--user <USER_ID> | current] <INTENT>");
+            pw.println("          [--track-allocation] [--user <USER_ID> | current] [--suspend]");
+            pw.println("          <INTENT>");
             pw.println("      Start an Activity.  Options are:");
             pw.println("      -D: enable debugging");
+            pw.println("      --suspend: debugged app suspend threads at startup (only with -D)");
             pw.println("      -N: enable native debugging");
             pw.println("      -W: wait for launch to complete");
             pw.println("      --start-profiler <FILE>: start profiler and send results to <FILE>");
