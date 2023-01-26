@@ -3884,7 +3884,7 @@
          <p>Should only be requested by the System, should be required by
          TileService declarations.-->
     <permission android:name="android.permission.BIND_QUICK_SETTINGS_TILE"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|recents" />
 
     <!-- Allows SystemUI to request third party controls.
          <p>Should only be requested by the System and required by
