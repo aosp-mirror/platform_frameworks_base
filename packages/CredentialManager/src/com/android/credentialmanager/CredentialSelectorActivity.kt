@@ -31,6 +31,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.android.credentialmanager.common.Constants
 import com.android.credentialmanager.common.DialogState
 import com.android.credentialmanager.common.ProviderActivityResult
 import com.android.credentialmanager.createflow.CreateCredentialScreen
@@ -45,11 +46,15 @@ class CredentialSelectorActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val credManRepo = CredentialManagerRepo(this, intent)
         UserConfigRepo.setup(this)
-        val requestInfo = credManRepo.requestInfo
-        setContent {
-            CredentialSelectorTheme {
-                CredentialManagerBottomSheet(requestInfo.type, credManRepo)
+        try {
+            setContent {
+                CredentialSelectorTheme {
+                    CredentialManagerBottomSheet(credManRepo.requestInfo.type, credManRepo)
+                }
             }
+        } catch (e: Exception) {
+            Log.e(Constants.LOG_TAG, "Failed to show the credential selector", e)
+            reportInstantiationErrorAndFinishActivity(credManRepo)
         }
     }
 
@@ -65,7 +70,22 @@ class CredentialSelectorActivity : ComponentActivity() {
         when (requestType) {
             RequestInfo.TYPE_CREATE -> {
                 val viewModel: CreateCredentialViewModel = viewModel {
-                    CreateCredentialViewModel(credManRepo)
+                    val vm = CreateCredentialViewModel.newInstance(
+                        credManRepo = credManRepo,
+                        providerEnableListUiState =
+                        credManRepo.getCreateProviderEnableListInitialUiState(),
+                        providerDisableListUiState =
+                        credManRepo.getCreateProviderDisableListInitialUiState(),
+                        requestDisplayInfoUiState =
+                        credManRepo.getCreateRequestDisplayInfoInitialUiState()
+                    )
+                    if (vm == null) {
+                        // Input parsing failed. Close the activity.
+                        reportInstantiationErrorAndFinishActivity(credManRepo)
+                        throw IllegalStateException()
+                    } else {
+                        vm
+                    }
                 }
                 LaunchedEffect(viewModel.uiState.dialogState) {
                     handleDialogState(viewModel.uiState.dialogState)
@@ -74,11 +94,21 @@ class CredentialSelectorActivity : ComponentActivity() {
                     viewModel.onProviderActivityResult(it)
                     providerActivityResult.value = null
                 }
-                CreateCredentialScreen(viewModel = viewModel, providerActivityLauncher = launcher)
+                CreateCredentialScreen(
+                    viewModel = viewModel,
+                    providerActivityLauncher = launcher
+                )
             }
             RequestInfo.TYPE_GET -> {
                 val viewModel: GetCredentialViewModel = viewModel {
-                    GetCredentialViewModel(credManRepo)
+                    val initialUiState = credManRepo.getCredentialInitialUiState()
+                    if (initialUiState == null) {
+                        // Input parsing failed. Close the activity.
+                        reportInstantiationErrorAndFinishActivity(credManRepo)
+                        throw IllegalStateException()
+                    } else {
+                        GetCredentialViewModel(credManRepo, initialUiState)
+                    }
                 }
                 LaunchedEffect(viewModel.uiState.dialogState) {
                     handleDialogState(viewModel.uiState.dialogState)
@@ -90,18 +120,24 @@ class CredentialSelectorActivity : ComponentActivity() {
                 GetCredentialScreen(viewModel = viewModel, providerActivityLauncher = launcher)
             }
             else -> {
-                Log.w("AccountSelector", "Unknown type, not rendering any UI")
-                this.finish()
+                Log.d(Constants.LOG_TAG, "Unknown type, not rendering any UI")
+                reportInstantiationErrorAndFinishActivity(credManRepo)
             }
         }
     }
 
+    private fun reportInstantiationErrorAndFinishActivity(credManRepo: CredentialManagerRepo) {
+        Log.w(Constants.LOG_TAG, "Finishing the activity due to instantiation failure.")
+        credManRepo.onParsingFailureCancel()
+        this@CredentialSelectorActivity.finish()
+    }
+
     private fun handleDialogState(dialogState: DialogState) {
         if (dialogState == DialogState.COMPLETE) {
-            Log.i("AccountSelector", "Received signal to finish the activity.")
+            Log.d(Constants.LOG_TAG, "Received signal to finish the activity.")
             this@CredentialSelectorActivity.finish()
         } else if (dialogState == DialogState.CANCELED_FOR_SETTINGS) {
-            Log.i("AccountSelector", "Received signal to finish the activity and launch settings.")
+            Log.d(Constants.LOG_TAG, "Received signal to finish the activity and launch settings.")
             this@CredentialSelectorActivity.startActivity(Intent(Settings.ACTION_SYNC_SETTINGS))
             this@CredentialSelectorActivity.finish()
         }

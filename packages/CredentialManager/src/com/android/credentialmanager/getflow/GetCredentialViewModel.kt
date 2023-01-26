@@ -26,6 +26,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.android.credentialmanager.CredentialManagerRepo
+import com.android.credentialmanager.common.Constants
 import com.android.credentialmanager.common.DialogState
 import com.android.credentialmanager.common.ProviderActivityResult
 import com.android.credentialmanager.common.ProviderActivityState
@@ -45,13 +46,16 @@ data class GetCredentialUiState(
     val dialogState: DialogState = DialogState.ACTIVE,
 )
 
-class GetCredentialViewModel(private val credManRepo: CredentialManagerRepo) : ViewModel() {
+class GetCredentialViewModel(
+    private val credManRepo: CredentialManagerRepo,
+    initialUiState: GetCredentialUiState,
+) : ViewModel() {
 
-    var uiState by mutableStateOf(credManRepo.getCredentialInitialUiState())
+    var uiState by mutableStateOf(initialUiState)
         private set
 
     fun onEntrySelected(entry: EntryInfo) {
-        Log.d("Account Selector", "credential selected: {provider=${entry.providerId}" +
+        Log.d(Constants.LOG_TAG, "credential selected: {provider=${entry.providerId}" +
             ", key=${entry.entryKey}, subkey=${entry.entrySubkey}}")
         if (entry.pendingIntent != null) {
             uiState = uiState.copy(
@@ -69,9 +73,9 @@ class GetCredentialViewModel(private val credManRepo: CredentialManagerRepo) : V
         if (activeEntry != null) {
             onEntrySelected(activeEntry)
         } else {
-            Log.w("Account Selector",
+            Log.d(Constants.LOG_TAG,
                 "Illegal state: confirm is pressed but activeEntry isn't set.")
-            uiState = uiState.copy(dialogState = DialogState.COMPLETE)
+            onInternalError()
         }
     }
 
@@ -80,14 +84,23 @@ class GetCredentialViewModel(private val credManRepo: CredentialManagerRepo) : V
     ) {
         val entry = uiState.selectedEntry
         if (entry != null && entry.pendingIntent != null) {
-            Log.d("credentials", "Launching provider activity")
+            Log.d(Constants.LOG_TAG, "Launching provider activity")
             uiState = uiState.copy(providerActivityState = ProviderActivityState.PENDING)
             val intentSenderRequest = IntentSenderRequest.Builder(entry.pendingIntent)
                 .setFillInIntent(entry.fillInIntent).build()
             launcher.launch(intentSenderRequest)
         } else {
-            Log.w("Account Selector", "No provider UI to launch")
+            Log.d(Constants.LOG_TAG, "No provider UI to launch")
+            onInternalError()
         }
+    }
+
+    // When the view model runs into unexpected illegal state, reports the error back and close
+    // the activity gracefully.
+    private fun onInternalError() {
+        Log.w(Constants.LOG_TAG, "UI closed due to illegal internal state")
+        credManRepo.onParsingFailureCancel()
+        uiState = uiState.copy(dialogState = DialogState.COMPLETE)
     }
 
     fun onProviderActivityResult(providerActivityResult: ProviderActivityResult) {
@@ -96,7 +109,7 @@ class GetCredentialViewModel(private val credManRepo: CredentialManagerRepo) : V
         val resultData = providerActivityResult.data
         if (resultCode == Activity.RESULT_CANCELED) {
             // Re-display the CredMan UI if the user canceled from the provider UI.
-            Log.d("Account Selector", "The provider activity was cancelled," +
+            Log.d(Constants.LOG_TAG, "The provider activity was cancelled," +
                 " re-displaying our UI.")
             uiState = uiState.copy(
                 selectedEntry = null,
@@ -104,7 +117,8 @@ class GetCredentialViewModel(private val credManRepo: CredentialManagerRepo) : V
             )
         } else {
             if (entry != null) {
-                Log.d("Account Selector", "Got provider activity result: {provider=" +
+                Log.d(
+                    Constants.LOG_TAG, "Got provider activity result: {provider=" +
                     "${entry.providerId}, key=${entry.entryKey}, subkey=${entry.entrySubkey}" +
                     ", resultCode=$resultCode, resultData=$resultData}"
                 )
@@ -112,23 +126,24 @@ class GetCredentialViewModel(private val credManRepo: CredentialManagerRepo) : V
                     entry.providerId, entry.entryKey, entry.entrySubkey,
                     resultCode, resultData,
                 )
+                uiState = uiState.copy(dialogState = DialogState.COMPLETE)
             } else {
-                Log.w("Account Selector",
+                Log.w(Constants.LOG_TAG,
                     "Illegal state: received a provider result but found no matching entry.")
+                onInternalError()
             }
-            uiState = uiState.copy(dialogState = DialogState.COMPLETE)
         }
     }
 
     fun onMoreOptionSelected() {
-        Log.d("Account Selector", "More Option selected")
+        Log.d(Constants.LOG_TAG, "More Option selected")
         uiState = uiState.copy(
             currentScreenState = GetScreenState.ALL_SIGN_IN_OPTIONS
         )
     }
 
     fun onMoreOptionOnSnackBarSelected(isNoAccount: Boolean) {
-        Log.d("Account Selector", "More Option on snackBar selected")
+        Log.d(Constants.LOG_TAG, "More Option on snackBar selected")
         uiState = uiState.copy(
             currentScreenState = GetScreenState.ALL_SIGN_IN_OPTIONS,
             isNoAccount = isNoAccount,
