@@ -45,13 +45,15 @@ public final class BrightnessUtils {
      * A utility to construct the DisplayBrightnessState
      */
     public static DisplayBrightnessState constructDisplayBrightnessState(
-            int brightnessChangeReason, float brightness, float sdrBrightness) {
+            int brightnessChangeReason, float brightness, float sdrBrightness,
+            String displayBrightnessStrategyName) {
         BrightnessReason brightnessReason = new BrightnessReason();
         brightnessReason.setReason(brightnessChangeReason);
         return new DisplayBrightnessState.Builder()
                 .setBrightness(brightness)
                 .setSdrBrightness(sdrBrightness)
                 .setBrightnessReason(brightnessReason)
+                .setDisplayBrightnessStrategyName(displayBrightnessStrategyName)
                 .build();
     }
 }

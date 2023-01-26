@@ -33,7 +33,7 @@ public class OverrideBrightnessStrategy implements DisplayBrightnessStrategy {
         // the brightness
         return BrightnessUtils.constructDisplayBrightnessState(BrightnessReason.REASON_OVERRIDE,
                 displayPowerRequest.screenBrightnessOverride,
-                displayPowerRequest.screenBrightnessOverride);
+                displayPowerRequest.screenBrightnessOverride, getName());
     }
 
     @Override

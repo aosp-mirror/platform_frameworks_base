@@ -48,7 +48,7 @@ public class FollowerBrightnessStrategy implements DisplayBrightnessStrategy {
         // Todo(b/241308599): Introduce a validator class and add validations before setting
         // the brightness
         return BrightnessUtils.constructDisplayBrightnessState(BrightnessReason.REASON_FOLLOWER,
-                mBrightnessToFollow, mBrightnessToFollow);
+                mBrightnessToFollow, mBrightnessToFollow, getName());
     }
 
     @Override

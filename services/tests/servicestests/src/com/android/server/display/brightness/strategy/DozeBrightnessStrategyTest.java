@@ -52,6 +52,7 @@ public class DozeBrightnessStrategyTest {
                         .setBrightness(dozeScreenBrightness)
                         .setBrightnessReason(brightnessReason)
                         .setSdrBrightness(dozeScreenBrightness)
+                        .setDisplayBrightnessStrategyName(mDozeBrightnessModeStrategy.getName())
                         .build();
         DisplayBrightnessState updatedDisplayBrightnessState =
                 mDozeBrightnessModeStrategy.updateBrightness(displayPowerRequest);
