@@ -11299,7 +11299,7 @@ public class BatteryStatsImpl extends BatteryStats {
      */
     @Override
     public BatteryStatsHistoryIterator iterateBatteryStatsHistory() {
-        return mHistory.iterate();
+        return mHistory.copy().iterate();
     }
 
     @Override
@@ -14054,7 +14054,8 @@ public class BatteryStatsImpl extends BatteryStats {
                     && (oldStatus == BatteryManager.BATTERY_STATUS_FULL
                     || level >= 90
                     || (mDischargeCurrentLevel < 20 && level >= 80)
-                    || getHighDischargeAmountSinceCharge() >= 200)) {
+                    || getHighDischargeAmountSinceCharge() >= 200)
+                    && mHistory.isResetEnabled()) {
                 Slog.i(TAG, "Resetting battery stats: level=" + level + " status=" + oldStatus
                         + " dischargeLevel=" + mDischargeCurrentLevel
                         + " lowAmount=" + getLowDischargeAmountSinceCharge()
@@ -16604,7 +16605,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @GuardedBy("this")
-    public void dumpLocked(Context context, PrintWriter pw, int flags, int reqUid, long histStart) {
+    public void dump(Context context, PrintWriter pw, int flags, int reqUid, long histStart) {
         if (DEBUG) {
             pw.println("mOnBatteryTimeBase:");
             mOnBatteryTimeBase.dump(pw, "  ");
@@ -16676,36 +16677,39 @@ public class BatteryStatsImpl extends BatteryStats {
             pr.println("*** Camera timer:");
             mCameraOnTimer.logState(pr, "  ");
         }
-        super.dumpLocked(context, pw, flags, reqUid, histStart);
+        super.dump(context, pw, flags, reqUid, histStart);
 
-        pw.print("Per process state tracking available: ");
-        pw.println(trackPerProcStateCpuTimes());
-        pw.print("Total cpu time reads: ");
-        pw.println(mNumSingleUidCpuTimeReads);
-        pw.print("Batching Duration (min): ");
-        pw.println((mClock.uptimeMillis() - mCpuTimeReadsTrackingStartTimeMs) / (60 * 1000));
-        pw.print("All UID cpu time reads since the later of device start or stats reset: ");
-        pw.println(mNumAllUidCpuTimeReads);
-        pw.print("UIDs removed since the later of device start or stats reset: ");
-        pw.println(mNumUidsRemoved);
+        synchronized (this) {
+            pw.print("Per process state tracking available: ");
+            pw.println(trackPerProcStateCpuTimes());
+            pw.print("Total cpu time reads: ");
+            pw.println(mNumSingleUidCpuTimeReads);
+            pw.print("Batching Duration (min): ");
+            pw.println((mClock.uptimeMillis() - mCpuTimeReadsTrackingStartTimeMs) / (60 * 1000));
+            pw.print("All UID cpu time reads since the later of device start or stats reset: ");
+            pw.println(mNumAllUidCpuTimeReads);
+            pw.print("UIDs removed since the later of device start or stats reset: ");
+            pw.println(mNumUidsRemoved);
 
-        pw.println("Currently mapped isolated uids:");
-        final int numIsolatedUids = mIsolatedUids.size();
-        for (int i = 0; i < numIsolatedUids; i++) {
-            final int isolatedUid = mIsolatedUids.keyAt(i);
-            final int ownerUid = mIsolatedUids.valueAt(i);
-            final int refCount = mIsolatedUidRefCounts.get(isolatedUid);
-            pw.println("  " + isolatedUid + "->" + ownerUid + " (ref count = " + refCount + ")");
+            pw.println("Currently mapped isolated uids:");
+            final int numIsolatedUids = mIsolatedUids.size();
+            for (int i = 0; i < numIsolatedUids; i++) {
+                final int isolatedUid = mIsolatedUids.keyAt(i);
+                final int ownerUid = mIsolatedUids.valueAt(i);
+                final int refCount = mIsolatedUidRefCounts.get(isolatedUid);
+                pw.println(
+                        "  " + isolatedUid + "->" + ownerUid + " (ref count = " + refCount + ")");
+            }
+
+            pw.println();
+            dumpConstantsLocked(pw);
+
+            pw.println();
+            dumpCpuPowerBracketsLocked(pw);
+
+            pw.println();
+            dumpEnergyConsumerStatsLocked(pw);
         }
-
-        pw.println();
-        dumpConstantsLocked(pw);
-
-        pw.println();
-        dumpCpuPowerBracketsLocked(pw);
-
-        pw.println();
-        dumpEnergyConsumerStatsLocked(pw);
     }
 
     @Override
