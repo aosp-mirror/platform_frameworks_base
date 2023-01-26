@@ -19,6 +19,25 @@ package com.android.credentialmanager.createflow
 import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.drawable.Drawable
+import com.android.credentialmanager.common.DialogState
+import com.android.credentialmanager.common.ProviderActivityState
+
+data class CreateCredentialUiState(
+  val enabledProviders: List<EnabledProviderInfo>,
+  val disabledProviders: List<DisabledProviderInfo>? = null,
+  val currentScreenState: CreateScreenState,
+  val requestDisplayInfo: RequestDisplayInfo,
+  val sortedCreateOptionsPairs: List<Pair<CreateOptionInfo, EnabledProviderInfo>>,
+  // Should not change with the real time update of default provider, only determine whether
+  // we're showing provider selection page at the beginning
+  val hasDefaultProvider: Boolean,
+  val activeEntry: ActiveEntry? = null,
+  val selectedEntry: EntryInfo? = null,
+  val providerActivityState: ProviderActivityState =
+    ProviderActivityState.NOT_APPLICABLE,
+  val isFromProviderSelection: Boolean? = null,
+  val dialogState: DialogState = DialogState.ACTIVE,
+)
 
 open class ProviderInfo(
   val icon: Drawable,
@@ -28,17 +47,17 @@ open class ProviderInfo(
 
 class EnabledProviderInfo(
   icon: Drawable,
-  name: String,
+  id: String,
   displayName: String,
   var createOptions: List<CreateOptionInfo>,
   var remoteEntry: RemoteInfo?,
-) : ProviderInfo(icon, name, displayName)
+) : ProviderInfo(icon, id, displayName)
 
 class DisabledProviderInfo(
   icon: Drawable,
-  name: String,
+  id: String,
   displayName: String,
-) : ProviderInfo(icon, name, displayName)
+) : ProviderInfo(icon, id, displayName)
 
 open class EntryInfo (
   val providerId: String,
