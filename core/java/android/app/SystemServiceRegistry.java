@@ -116,7 +116,7 @@ import android.hardware.location.ContextHubManager;
 import android.hardware.radio.RadioManager;
 import android.hardware.usb.IUsbManager;
 import android.hardware.usb.UsbManager;
-import android.healthconnect.HealthServicesInitializer;
+import android.health.connect.HealthServicesInitializer;
 import android.location.CountryDetector;
 import android.location.ICountryDetector;
 import android.location.ILocationManager;

@@ -6151,10 +6151,10 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
-     * {@link android.healthconnect.HealthConnectManager}.
+     * {@link android.health.connect.HealthConnectManager}.
      *
      * @see #getSystemService(String)
-     * @see android.healthconnect.HealthConnectManager
+     * @see android.health.connect.HealthConnectManager
      */
     public static final String HEALTHCONNECT_SERVICE = "healthconnect";
 
