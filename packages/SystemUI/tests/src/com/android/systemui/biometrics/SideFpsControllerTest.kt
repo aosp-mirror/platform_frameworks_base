@@ -51,14 +51,24 @@ import android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG
 import android.view.WindowMetrics
 import androidx.test.filters.SmallTest
 import com.airbnb.lottie.LottieAnimationView
+import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.ViewMediatorCallback
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.SysuiTestableContext
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags.MODERN_ALTERNATE_BOUNCER
+import com.android.systemui.keyguard.data.repository.FakeBiometricRepository
+import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
+import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
+import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.recents.OverviewProxyService
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -101,6 +111,9 @@ class SideFpsControllerTest : SysuiTestCase() {
     @Captor lateinit var overlayCaptor: ArgumentCaptor<View>
     @Captor lateinit var overlayViewParamsCaptor: ArgumentCaptor<WindowManager.LayoutParams>
 
+    private lateinit var keyguardBouncerRepository: KeyguardBouncerRepository
+    private lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
+    private val featureFlags = FakeFeatureFlags()
     private val executor = FakeExecutor(FakeSystemClock())
     private lateinit var overlayController: ISidefpsController
     private lateinit var sideFpsController: SideFpsController
@@ -121,6 +134,24 @@ class SideFpsControllerTest : SysuiTestCase() {
 
     @Before
     fun setup() {
+        featureFlags.set(MODERN_ALTERNATE_BOUNCER, true)
+        keyguardBouncerRepository =
+            KeyguardBouncerRepository(
+                mock(ViewMediatorCallback::class.java),
+                FakeSystemClock(),
+                TestCoroutineScope(),
+                mock(TableLogBuffer::class.java),
+            )
+        alternateBouncerInteractor =
+            AlternateBouncerInteractor(
+                keyguardBouncerRepository,
+                FakeBiometricRepository(),
+                FakeDeviceEntryFingerprintAuthRepository(),
+                FakeSystemClock(),
+                mock(KeyguardUpdateMonitor::class.java),
+                featureFlags,
+            )
+
         context.addMockSystemService(DisplayManager::class.java, displayManager)
         context.addMockSystemService(WindowManager::class.java, windowManager)
 
@@ -217,7 +248,10 @@ class SideFpsControllerTest : SysuiTestCase() {
                 displayManager,
                 executor,
                 handler,
-                dumpManager
+                alternateBouncerInteractor,
+                TestCoroutineScope(),
+                featureFlags,
+                dumpManager,
             )
 
         overlayController =
@@ -507,6 +541,26 @@ class SideFpsControllerTest : SysuiTestCase() {
 
     private fun verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible: Boolean) {
         sideFpsController.overlayOffsets = sensorLocation
+    }
+
+    fun alternateBouncerVisibility_showAndHideSideFpsUI() = testWithDisplay {
+        // WHEN alternate bouncer is visible
+        keyguardBouncerRepository.setAlternateVisible(true)
+        executor.runAllReady()
+
+        // THEN side fps shows UI
+        verify(windowManager).addView(any(), any())
+        verify(windowManager, never()).removeView(any())
+
+        // WHEN alternate bouncer is no longer visible
+        keyguardBouncerRepository.setAlternateVisible(false)
+        executor.runAllReady()
+
+        // THEN side fps UI is hidden
+        verify(windowManager).removeView(any())
+    }
+
+    private fun hidesWithTaskbar(visible: Boolean) {
         overlayController.show(SENSOR_ID, REASON_UNKNOWN)
         executor.runAllReady()
 
@@ -515,7 +569,7 @@ class SideFpsControllerTest : SysuiTestCase() {
 
         verify(windowManager).addView(any(), any())
         verify(windowManager, never()).removeView(any())
-        verify(sideFpsView).visibility = if (sfpsViewVisible) View.VISIBLE else View.GONE
+        verify(sideFpsView).visibility = if (visible) View.VISIBLE else View.GONE
     }
 
     /**
