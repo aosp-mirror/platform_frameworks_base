@@ -146,6 +146,7 @@ class UidPermissionPolicy : SchemePolicy() {
             addPermissions(packageState, changedPermissionNames)
             trimPermissions(packageState.packageName, changedPermissionNames)
             trimPermissionStates(packageState.appId)
+            revokePermissionsOnPackageUpdate(packageState.appId)
         }
         changedPermissionNames.forEachIndexed { _, permissionName ->
             evaluatePermissionStateForAllPackages(permissionName, null)
@@ -175,10 +176,10 @@ class UidPermissionPolicy : SchemePolicy() {
         adoptPermissions(packageState, changedPermissionNames)
         addPermissionGroups(packageState)
         addPermissions(packageState, changedPermissionNames)
-        // TODO: revokeStoragePermissionsIfScopeExpandedInternal()
         // TODO: revokeSystemAlertWindowIfUpgradedPast23()
         trimPermissions(packageState.packageName, changedPermissionNames)
         trimPermissionStates(packageState.appId)
+        revokePermissionsOnPackageUpdate(packageState.appId)
         changedPermissionNames.forEachIndexed { _, permissionName ->
             evaluatePermissionStateForAllPackages(permissionName, null)
         }
@@ -602,6 +603,40 @@ class UidPermissionPolicy : SchemePolicy() {
         }
     }
 
+    private fun MutateStateScope.revokePermissionsOnPackageUpdate(appId: Int) {
+        // If the app is updated, and has scoped storage permissions, then it is possible that the
+        // app updated in an attempt to get unscoped storage. If so, revoke all storage permissions.
+        newState.userStates.forEachIndexed { _, userId, userState ->
+            userState.uidPermissionFlags[appId]?.forEachReversedIndexed {
+                _, permissionName, oldFlags ->
+                if (permissionName !in STORAGE_AND_MEDIA_PERMISSIONS || oldFlags == 0) {
+                    return@forEachReversedIndexed
+                }
+                val oldTargetSdkVersion = getAppIdTargetSdkVersion(appId, permissionName, oldState)
+                val newTargetSdkVersion = getAppIdTargetSdkVersion(appId, permissionName, newState)
+                val isTargetSdkVersionDowngraded = oldTargetSdkVersion >= Build.VERSION_CODES.Q &&
+                    newTargetSdkVersion < Build.VERSION_CODES.Q
+                val isTargetSdkVersionUpgraded = oldTargetSdkVersion < Build.VERSION_CODES.Q &&
+                    newTargetSdkVersion >= Build.VERSION_CODES.Q
+                val oldIsRequestLegacyExternalStorage = anyPackageInAppId(appId, oldState) {
+                    it.androidPackage!!.isRequestLegacyExternalStorage
+                }
+                val newIsRequestLegacyExternalStorage = anyPackageInAppId(appId, newState) {
+                    it.androidPackage!!.isRequestLegacyExternalStorage
+                }
+                val isNewlyRequestingLegacyExternalStorage = !isTargetSdkVersionUpgraded &&
+                    !oldIsRequestLegacyExternalStorage && newIsRequestLegacyExternalStorage
+                if ((isNewlyRequestingLegacyExternalStorage || isTargetSdkVersionDowngraded) &&
+                    oldFlags.hasBits(PermissionFlags.RUNTIME_GRANTED)) {
+                    val newFlags = oldFlags andInv (
+                        PermissionFlags.RUNTIME_GRANTED or USER_SETTABLE_MASK
+                    )
+                    setPermissionFlags(appId, userId, permissionName, newFlags)
+                }
+            }
+        }
+    }
+
     private fun MutateStateScope.evaluatePermissionStateForAllPackages(
         permissionName: String,
         installedPackageState: PackageState?
@@ -1002,9 +1037,13 @@ class UidPermissionPolicy : SchemePolicy() {
         }
     }
 
-    private fun MutateStateScope.getAppIdTargetSdkVersion(appId: Int, permissionName: String): Int {
+    private fun MutateStateScope.getAppIdTargetSdkVersion(
+        appId: Int,
+        permissionName: String,
+        state: AccessState = newState
+    ): Int {
         var targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT
-        forEachPackageInAppId(appId) { packageState ->
+        forEachPackageInAppId(appId, state) { packageState ->
             val androidPackage = packageState.androidPackage!!
             if (permissionName in androidPackage.requestedPermissions) {
                 targetSdkVersion = targetSdkVersion.coerceAtMost(androidPackage.targetSdkVersion)
@@ -1354,6 +1393,16 @@ class UidPermissionPolicy : SchemePolicy() {
 
         private val NOTIFICATIONS_PERMISSIONS = indexedSetOf(
             Manifest.permission.POST_NOTIFICATIONS
+        )
+
+        private val STORAGE_AND_MEDIA_PERMISSIONS = indexedSetOf(
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_MEDIA_AUDIO,
+            Manifest.permission.READ_MEDIA_VIDEO,
+            Manifest.permission.READ_MEDIA_IMAGES,
+            Manifest.permission.ACCESS_MEDIA_LOCATION,
+            Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
         )
 
         /**
