@@ -64,7 +64,7 @@ import java.util.Map;
  * The {@link MediaProjectionManagerService} manages the creation and lifetime of MediaProjections,
  * as well as the capabilities they grant. Any service using MediaProjection tokens as permission
  * grants <b>must</b> validate the token before use by calling {@link
- * IMediaProjectionService#isValidMediaProjection}.
+ * IMediaProjectionService#isCurrentProjection}.
  */
 public final class MediaProjectionManagerService extends SystemService
         implements Watchdog.Monitor {
@@ -228,7 +228,7 @@ public final class MediaProjectionManagerService extends SystemService
         mCallbackDelegate.dispatchStop(projection);
     }
 
-    private boolean isValidMediaProjection(IBinder token) {
+    private boolean isCurrentProjection(IBinder token) {
         synchronized (mLock) {
             if (mProjectionToken != null) {
                 return mProjectionToken.equals(token);
@@ -313,8 +313,8 @@ public final class MediaProjectionManagerService extends SystemService
         }
 
         @Override // Binder call
-        public boolean isValidMediaProjection(IMediaProjection projection) {
-            return MediaProjectionManagerService.this.isValidMediaProjection(
+        public boolean isCurrentProjection(IMediaProjection projection) {
+            return MediaProjectionManagerService.this.isCurrentProjection(
                     projection == null ? null : projection.asBinder());
         }
 
@@ -357,7 +357,7 @@ public final class MediaProjectionManagerService extends SystemService
                 throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION in order to notify "
                         + "on captured content resize");
             }
-            if (!isValidMediaProjection(mProjectionGrant)) {
+            if (!isCurrentProjection(mProjectionGrant)) {
                 return;
             }
             final long token = Binder.clearCallingIdentity();
@@ -377,7 +377,7 @@ public final class MediaProjectionManagerService extends SystemService
                 throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION in order to notify "
                         + "on captured content resize");
             }
-            if (!isValidMediaProjection(mProjectionGrant)) {
+            if (!isCurrentProjection(mProjectionGrant)) {
                 return;
             }
             final long token = Binder.clearCallingIdentity();
@@ -429,8 +429,9 @@ public final class MediaProjectionManagerService extends SystemService
             final long origId = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    if (!isValidMediaProjection(projection)) {
-                        throw new SecurityException("Invalid media projection");
+                    if (!isCurrentProjection(projection)) {
+                        throw new SecurityException("Unable to set ContentRecordingSession on "
+                                + "non-current MediaProjection");
                     }
                     if (!LocalServices.getService(
                             WindowManagerInternal.class).setContentRecordingSession(
@@ -536,7 +537,7 @@ public final class MediaProjectionManagerService extends SystemService
                 throw new IllegalArgumentException("callback must not be null");
             }
             synchronized (mLock) {
-                if (isValidMediaProjection(asBinder())) {
+                if (isCurrentProjection(asBinder())) {
                     Slog.w(TAG, "UID " + Binder.getCallingUid()
                             + " attempted to start already started MediaProjection");
                     return;
@@ -603,7 +604,7 @@ public final class MediaProjectionManagerService extends SystemService
         @Override // Binder call
         public void stop() {
             synchronized (mLock) {
-                if (!isValidMediaProjection(asBinder())) {
+                if (!isCurrentProjection(asBinder())) {
                     Slog.w(TAG, "Attempted to stop inactive MediaProjection "
                             + "(uid=" + Binder.getCallingUid() + ", "
                             + "pid=" + Binder.getCallingPid() + ")");

@@ -33,7 +33,7 @@ interface IMediaProjectionManager {
     IMediaProjection createProjection(int uid, String packageName, int type,
             boolean permanentGrant);
 
-    boolean isValidMediaProjection(IMediaProjection projection);
+    boolean isCurrentProjection(IMediaProjection projection);
 
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
