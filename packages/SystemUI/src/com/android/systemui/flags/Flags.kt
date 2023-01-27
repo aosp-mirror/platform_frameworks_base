@@ -524,9 +524,18 @@ object Flags {
     val QUICK_TAP_FLOW_FRAMEWORK =
         unreleasedFlag(1401, "quick_tap_flow_framework", teamfood = false)
 
-    // 1500 - chooser
+    // 1500 - chooser aka sharesheet
     // TODO(b/254512507): Tracking Bug
     val CHOOSER_UNBUNDLED = unreleasedFlag(1500, "chooser_unbundled", teamfood = true)
+
+    // TODO(b/266983432) Tracking Bug
+    val SHARESHEET_CUSTOM_ACTIONS = unreleasedFlag(1501, "sharesheet_custom_actions")
+
+    // TODO(b/266982749) Tracking Bug
+    val SHARESHEET_RESELECTION_ACTION = unreleasedFlag(1502, "sharesheet_reselection_action")
+
+    // TODO(b/266983474) Tracking Bug
+    val SHARESHEET_IMAGE_AND_TEXT_PREVIEW = unreleasedFlag(1503, "sharesheet_image_text_preview")
 
     // 1600 - accessibility
     @JvmField
