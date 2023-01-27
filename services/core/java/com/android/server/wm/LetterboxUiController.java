@@ -25,6 +25,7 @@ import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_REQU
 import static android.content.pm.ActivityInfo.OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE;
 import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR;
 import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT;
+import static android.content.pm.ActivityInfo.OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
@@ -38,6 +39,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION;
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH;
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
+import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 
@@ -71,6 +73,9 @@ import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_VERTICAL_RE
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP;
 import static com.android.server.wm.LetterboxConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
 import static com.android.server.wm.LetterboxConfiguration.letterboxBackgroundTypeToString;
+
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager.TaskDescription;
@@ -131,9 +136,23 @@ final class LetterboxUiController {
     private final boolean mIsOverrideToNosensorOrientationEnabled;
     // Corresponds to OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE
     private final boolean mIsOverrideToReverseLandscapeOrientationEnabled;
+    // Corresponds to OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION
+    private final boolean mIsOverrideUseDisplayLandscapeNaturalOrientationEnabled;
+
+    // Corresponds to OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION
+    private final boolean mIsOverrideCameraCompatDisableForceRotationEnabled;
+    // Corresponds to OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH
+    private final boolean mIsOverrideCameraCompatDisableRefreshEnabled;
+    // Corresponds to OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE
+    private final boolean mIsOverrideCameraCompatEnableRefreshViaPauseEnabled;
+
+    // Corresponds to OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION
+    private final boolean mIsOverrideEnableCompatIgnoreRequestedOrientationEnabled;
 
     @Nullable
     private final Boolean mBooleanPropertyAllowOrientationOverride;
+    @Nullable
+    private final Boolean mBooleanPropertyAllowDisplayOrientationOverride;
 
     /*
      * WindowContainerListener responsible to make translucent activities inherit
@@ -222,6 +241,10 @@ final class LetterboxUiController {
                 readComponentProperty(packageManager, mActivityRecord.packageName,
                         /* gatingCondition */ null,
                         PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE);
+        mBooleanPropertyAllowDisplayOrientationOverride =
+                readComponentProperty(packageManager, mActivityRecord.packageName,
+                        /* gatingCondition */ null,
+                        PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE);
 
         mIsOverrideAnyOrientationEnabled = isCompatChangeEnabled(OVERRIDE_ANY_ORIENTATION);
         mIsOverrideToPortraitOrientationEnabled =
@@ -230,6 +253,18 @@ final class LetterboxUiController {
                 isCompatChangeEnabled(OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE);
         mIsOverrideToNosensorOrientationEnabled =
                 isCompatChangeEnabled(OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR);
+        mIsOverrideUseDisplayLandscapeNaturalOrientationEnabled =
+                isCompatChangeEnabled(OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION);
+
+        mIsOverrideCameraCompatDisableForceRotationEnabled =
+                isCompatChangeEnabled(OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION);
+        mIsOverrideCameraCompatDisableRefreshEnabled =
+                isCompatChangeEnabled(OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH);
+        mIsOverrideCameraCompatEnableRefreshViaPauseEnabled =
+                isCompatChangeEnabled(OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE);
+
+        mIsOverrideEnableCompatIgnoreRequestedOrientationEnabled =
+                isCompatChangeEnabled(OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION);
     }
 
     /**
@@ -299,7 +334,7 @@ final class LetterboxUiController {
         if (!shouldEnableWithOverrideAndProperty(
                 /* gatingCondition */ mLetterboxConfiguration
                         ::isPolicyForIgnoringRequestedOrientationEnabled,
-                OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION,
+                mIsOverrideEnableCompatIgnoreRequestedOrientationEnabled,
                 mBooleanPropertyIgnoreRequestedOrientation)) {
             return false;
         }
@@ -344,9 +379,34 @@ final class LetterboxUiController {
         mIsRefreshAfterRotationRequested = isRequested;
     }
 
+    /**
+     * Whether should fix display orientation to landscape natural orientation when a task is
+     * fullscreen and the display is ignoring orientation requests.
+     *
+     * <p>This treatment is enabled when the following conditions are met:
+     * <ul>
+     *     <li>Opt-out component property isn't enabled
+     *     <li>Opt-in per-app override is enabled
+     *     <li>Task is in fullscreen.
+     *     <li>{@link DisplayContent#getIgnoreOrientationRequest} is enabled
+     *     <li>Natural orientation of the display is landscape.
+     * </ul>
+     */
+    boolean shouldUseDisplayLandscapeNaturalOrientation() {
+        return shouldEnableWithOptInOverrideAndOptOutProperty(
+                /* gatingCondition */ () -> mActivityRecord.mDisplayContent != null
+                        && mActivityRecord.getTask() != null
+                        && mActivityRecord.mDisplayContent.getIgnoreOrientationRequest()
+                        && !mActivityRecord.getTask().inMultiWindowMode()
+                        && mActivityRecord.mDisplayContent.getNaturalOrientation()
+                                == ORIENTATION_LANDSCAPE,
+                mIsOverrideUseDisplayLandscapeNaturalOrientationEnabled,
+                mBooleanPropertyAllowDisplayOrientationOverride);
+    }
+
     @ScreenOrientation
     int overrideOrientationIfNeeded(@ScreenOrientation int candidate) {
-        if (Boolean.FALSE.equals(mBooleanPropertyAllowOrientationOverride)) {
+        if (FALSE.equals(mBooleanPropertyAllowOrientationOverride)) {
             return candidate;
         }
 
@@ -394,7 +454,7 @@ final class LetterboxUiController {
         return shouldEnableWithOptOutOverrideAndProperty(
                 /* gatingCondition */ () -> mLetterboxConfiguration
                         .isCameraCompatTreatmentEnabled(/* checkDeviceConfig */ true),
-                OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH,
+                mIsOverrideCameraCompatDisableRefreshEnabled,
                 mBooleanPropertyCameraCompatAllowRefresh);
     }
 
@@ -416,7 +476,7 @@ final class LetterboxUiController {
         return shouldEnableWithOverrideAndProperty(
                 /* gatingCondition */ () -> mLetterboxConfiguration
                         .isCameraCompatTreatmentEnabled(/* checkDeviceConfig */ true),
-                OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE,
+                mIsOverrideCameraCompatEnableRefreshViaPauseEnabled,
                 mBooleanPropertyCameraCompatEnableRefreshViaPause);
     }
 
@@ -435,7 +495,7 @@ final class LetterboxUiController {
         return shouldEnableWithOptOutOverrideAndProperty(
                 /* gatingCondition */ () -> mLetterboxConfiguration
                         .isCameraCompatTreatmentEnabled(/* checkDeviceConfig */ true),
-                OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION,
+                mIsOverrideCameraCompatDisableForceRotationEnabled,
                 mBooleanPropertyCameraCompatAllowForceRotation);
     }
 
@@ -447,7 +507,7 @@ final class LetterboxUiController {
      * Returns {@code true} when the following conditions are met:
      * <ul>
      *     <li>{@code gatingCondition} isn't {@code false}
-     *     <li>OEM didn't opt out with a {@code overrideChangeId} override
+     *     <li>OEM didn't opt out with a per-app override
      *     <li>App developers didn't opt out with a component {@code property}
      * </ul>
      *
@@ -455,11 +515,30 @@ final class LetterboxUiController {
      * disabled on per-app basis by OEMs or app developers.
      */
     private boolean shouldEnableWithOptOutOverrideAndProperty(BooleanSupplier gatingCondition,
-            long overrideChangeId, Boolean property) {
+            boolean isOverrideChangeEnabled, Boolean property) {
         if (!gatingCondition.getAsBoolean()) {
             return false;
         }
-        return !Boolean.FALSE.equals(property) && !isCompatChangeEnabled(overrideChangeId);
+        return !FALSE.equals(property) && !isOverrideChangeEnabled;
+    }
+
+    /**
+     * Returns {@code true} when the following conditions are met:
+     * <ul>
+     *     <li>{@code gatingCondition} isn't {@code false}
+     *     <li>OEM did opt in with a per-app override
+     *     <li>App developers didn't opt out with a component {@code property}
+     * </ul>
+     *
+     * <p>This is used for the treatments that are enabled based with the heuristic but can be
+     * disabled on per-app basis by OEMs or app developers.
+     */
+    private boolean shouldEnableWithOptInOverrideAndOptOutProperty(BooleanSupplier gatingCondition,
+            boolean isOverrideChangeEnabled, Boolean property) {
+        if (!gatingCondition.getAsBoolean()) {
+            return false;
+        }
+        return !FALSE.equals(property) && isOverrideChangeEnabled;
     }
 
     /**
@@ -468,20 +547,20 @@ final class LetterboxUiController {
      *     <li>{@code gatingCondition} isn't {@code false}
      *     <li>App developers didn't opt out with a component {@code property}
      *     <li>App developers opted in with a component {@code property} or an OEM opted in with a
-     *     {@code overrideChangeId} override
+     *     per-app override
      * </ul>
      *
      * <p>This is used for the treatments that are enabled only on per-app basis.
      */
     private boolean shouldEnableWithOverrideAndProperty(BooleanSupplier gatingCondition,
-            long overrideChangeId, Boolean property) {
+            boolean isOverrideChangeEnabled, Boolean property) {
         if (!gatingCondition.getAsBoolean()) {
             return false;
         }
-        if (Boolean.FALSE.equals(property)) {
+        if (FALSE.equals(property)) {
             return false;
         }
-        return Boolean.TRUE.equals(property) || isCompatChangeEnabled(overrideChangeId);
+        return TRUE.equals(property) || isOverrideChangeEnabled;
     }
 
     boolean hasWallpaperBackgroundForLetterbox() {
