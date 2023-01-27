@@ -32,6 +32,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -254,7 +255,8 @@ public final class RouteListingPreference implements Parcelable {
                     DISABLE_REASON_SUBSCRIPTION_REQUIRED,
                     DISABLE_REASON_DOWNLOADED_CONTENT,
                     DISABLE_REASON_AD,
-                    DISABLE_REASON_IN_APP_ONLY
+                    DISABLE_REASON_IN_APP_ONLY,
+                    DISABLE_REASON_CUSTOM
                 })
         public @interface DisableReason {}
 
@@ -280,6 +282,15 @@ public final class RouteListingPreference implements Parcelable {
          * will take the user to the app.
          */
         public static final int DISABLE_REASON_IN_APP_ONLY = 4;
+        /**
+         * The corresponding route is not available because of the reason described by {@link
+         * #getCustomDisableReasonMessage()}.
+         *
+         * <p>Applications should strongly prefer one of the other disable reasons (for the full
+         * list, see {@link #getDisableReason()}) in order to guarantee correct localization and
+         * rendering across all form factors.
+         */
+        public static final int DISABLE_REASON_CUSTOM = 5;
 
         @NonNull
         public static final Creator<Item> CREATOR =
@@ -299,12 +310,15 @@ public final class RouteListingPreference implements Parcelable {
         @Flags private final int mFlags;
         @DisableReason private final int mDisableReason;
         private final int mSessionParticipantCount;
+        @Nullable private final CharSequence mCustomDisableReasonMessage;
 
         private Item(@NonNull Builder builder) {
             mRouteId = builder.mRouteId;
             mFlags = builder.mFlags;
             mDisableReason = builder.mDisableReason;
             mSessionParticipantCount = builder.mSessionParticipantCount;
+            mCustomDisableReasonMessage = builder.mCustomDisableReasonMessage;
+            validateCustomDisableReasonMessage();
         }
 
         private Item(Parcel in) {
@@ -314,6 +328,8 @@ public final class RouteListingPreference implements Parcelable {
             mDisableReason = in.readInt();
             mSessionParticipantCount = in.readInt();
             Preconditions.checkArgument(mSessionParticipantCount >= 0);
+            mCustomDisableReasonMessage = in.readCharSequence();
+            validateCustomDisableReasonMessage();
         }
 
         /**
@@ -346,6 +362,7 @@ public final class RouteListingPreference implements Parcelable {
          * @see #DISABLE_REASON_DOWNLOADED_CONTENT
          * @see #DISABLE_REASON_AD
          * @see #DISABLE_REASON_IN_APP_ONLY
+         * @see #DISABLE_REASON_CUSTOM
          */
         @DisableReason
         public int getDisableReason() {
@@ -363,6 +380,25 @@ public final class RouteListingPreference implements Parcelable {
             return mSessionParticipantCount;
         }
 
+        /**
+         * Returns a human-readable {@link CharSequence} describing the reason for this route to be
+         * disabled. May be null if {@link #getDisableReason()} is not {@link
+         * #DISABLE_REASON_CUSTOM}.
+         *
+         * <p>This value is ignored if the {@link #getDisableReason() disable reason} for this item
+         * is not {@link #DISABLE_REASON_CUSTOM}.
+         *
+         * <p>Applications must provide a localized message that matches the system's locale. See
+         * {@link Locale#getDefault()}.
+         *
+         * <p>This message is a hint for the system. Applications should strongly prefer one of the
+         * other disable reasons listed in {@link #getDisableReason()}.
+         */
+        @Nullable
+        public CharSequence getCustomDisableReasonMessage() {
+            return mCustomDisableReasonMessage;
+        }
+
         // Item Parcelable implementation.
 
         @Override
@@ -376,6 +412,7 @@ public final class RouteListingPreference implements Parcelable {
             dest.writeInt(mFlags);
             dest.writeInt(mDisableReason);
             dest.writeInt(mSessionParticipantCount);
+            dest.writeCharSequence(mCustomDisableReasonMessage);
         }
 
         // Equals and hashCode.
@@ -392,12 +429,28 @@ public final class RouteListingPreference implements Parcelable {
             return mRouteId.equals(item.mRouteId)
                     && mFlags == item.mFlags
                     && mDisableReason == item.mDisableReason
-                    && mSessionParticipantCount == item.mSessionParticipantCount;
+                    && mSessionParticipantCount == item.mSessionParticipantCount
+                    && TextUtils.equals(
+                            mCustomDisableReasonMessage, item.mCustomDisableReasonMessage);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(mRouteId, mFlags, mDisableReason, mSessionParticipantCount);
+            return Objects.hash(
+                    mRouteId,
+                    mFlags,
+                    mDisableReason,
+                    mSessionParticipantCount,
+                    mCustomDisableReasonMessage);
+        }
+
+        private void validateCustomDisableReasonMessage() {
+            if (mDisableReason == DISABLE_REASON_CUSTOM) {
+                Preconditions.checkArgument(
+                        !TextUtils.isEmpty(mCustomDisableReasonMessage),
+                        "customDisableReasonMessage must not be null or empty if disable reason is"
+                                + " DISABLE_REASON_CUSTOM.");
+            }
         }
 
         /** Builder for {@link Item}. */
@@ -407,6 +460,7 @@ public final class RouteListingPreference implements Parcelable {
             private int mFlags;
             private int mDisableReason;
             private int mSessionParticipantCount;
+            private CharSequence mCustomDisableReasonMessage;
 
             /**
              * Constructor.
@@ -441,6 +495,14 @@ public final class RouteListingPreference implements Parcelable {
                         sessionParticipantCount >= 0,
                         "sessionParticipantCount must be non-negative.");
                 mSessionParticipantCount = sessionParticipantCount;
+                return this;
+            }
+
+            /** See {@link Item#getCustomDisableReasonMessage()}. */
+            @NonNull
+            public Builder setCustomDisableReasonMessage(
+                    @Nullable CharSequence customDisableReasonMessage) {
+                mCustomDisableReasonMessage = customDisableReasonMessage;
                 return this;
             }
 
