@@ -52358,6 +52358,7 @@ package android.view {
 
   public static interface View.OnLongClickListener {
     method public boolean onLongClick(android.view.View);
+    method public default boolean onLongClickUseDefaultHapticFeedback(@NonNull android.view.View);
   }
 
   public static interface View.OnScrollChangeListener {
