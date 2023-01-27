@@ -33,6 +33,8 @@ import java.util.Objects;
  */
 public final class CredentialDescription implements Parcelable {
 
+    private static final int MAX_ALLOWED_ENTRIES_PER_DESCRIPTION = 16;
+
     /**
      * The credential type.
      */
@@ -70,6 +72,11 @@ public final class CredentialDescription implements Parcelable {
         mType = Preconditions.checkStringNotEmpty(type, "type must not be empty");
         mFlattenedRequestString = Preconditions.checkStringNotEmpty(flattenedRequestString);
         mCredentialEntries = Objects.requireNonNull(credentialEntries);
+        Preconditions.checkArgument(credentialEntries.size()
+                        <= MAX_ALLOWED_ENTRIES_PER_DESCRIPTION,
+                "The number of Credential Entries exceed 16.");
+        Preconditions.checkArgument(compareEntryTypes(type, credentialEntries) == 0,
+                "Credential Entry type(s) do not match the request type.");
     }
 
     private CredentialDescription(@NonNull Parcel in) {
@@ -86,6 +93,14 @@ public final class CredentialDescription implements Parcelable {
         mCredentialEntries = entries;
         AnnotationValidations.validate(android.annotation.NonNull.class, null,
                 mCredentialEntries);
+    }
+
+    private static int compareEntryTypes(@NonNull String type,
+            @NonNull List<CredentialEntry> credentialEntries) {
+        return credentialEntries.stream()
+                .filter(credentialEntry ->
+                        !credentialEntry.getType().equals(type)).toList().size();
+
     }
 
     public static final @NonNull Parcelable.Creator<CredentialDescription> CREATOR =
