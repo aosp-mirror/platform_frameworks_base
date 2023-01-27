@@ -3762,7 +3762,9 @@ public class AudioService extends IAudioService.Stub
                 throw new IllegalArgumentException("No volume group for id " + groupId);
             }
             VolumeGroupState vgs = sVolumeGroupStates.get(groupId);
-            return vgs.isMuted() ? vgs.getMinIndex() : vgs.getVolumeIndex();
+            // Return 0 when muted, not min index since for e.g. Voice Call, it has a non zero
+            // min but it mutable on permission condition.
+            return vgs.isMuted() ? 0 : vgs.getVolumeIndex();
         }
     }
 
@@ -3874,6 +3876,7 @@ public class AudioService extends IAudioService.Stub
         }
         VolumeGroupState vgs = sVolumeGroupStates.get(groupId);
         // For compatibility reason, use stream API if group linked to a valid stream
+        boolean fallbackOnStream = false;
         for (int stream : vgs.getLegacyStreamTypes()) {
             try {
                 ensureValidStreamType(stream);
@@ -3882,13 +3885,20 @@ public class AudioService extends IAudioService.Stub
                         + "), do not change associated stream volume");
                 continue;
             }
-            // Call only for the first valid stream, legacy API will propagate to aliased streams.
             // Note: Group and Stream does not share same convention, 0 is mute for stream,
             // min index is acting as mute for Groups
             if (vgs.isVssMuteBijective(stream)) {
                 adjustStreamVolume(stream, direction, flags, callingPackage);
-                return;
+                if (isMuteAdjust(direction)) {
+                    // will be propagated to all aliased streams
+                    return;
+                }
+                fallbackOnStream = true;
             }
+        }
+        if (fallbackOnStream) {
+            // Handled by at least one stream, will be propagated to group, bailing out.
+            return;
         }
         sVolumeLogger.log(new VolumeEvent(VolumeEvent.VOL_ADJUST_GROUP_VOL, vgs.name(),
                 direction, flags, callingPackage));
@@ -5099,7 +5109,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void setRingerMode(int ringerMode, String caller, boolean external) {
-        if (mUseFixedVolume || mIsSingleVolume) {
+        if (mUseFixedVolume || mIsSingleVolume || mUseVolumeGroupAliases) {
             return;
         }
         if (caller == null || caller.length() == 0) {
@@ -7567,7 +7577,13 @@ public class AudioService extends IAudioService.Stub
             synchronized (VolumeStreamState.class) {
                 int device = getDeviceForVolume();
                 int previousIndex = getIndex(device);
-
+                if (isMuteAdjust(direction) && !isMutable()) {
+                    // Non mutable volume group
+                    if (DEBUG_VOL) {
+                        Log.d(TAG, "invalid mute on unmutable volume group " + name());
+                    }
+                    return;
+                }
                 switch (direction) {
                     case AudioManager.ADJUST_TOGGLE_MUTE: {
                         // Note: If muted by volume 0, unmute will restore volume 0.
