@@ -1055,6 +1055,47 @@ public class TvInteractiveAppView extends ViewGroup {
                 @NonNull String algorithm, @NonNull String alias, @NonNull byte[] data) {
         }
 
+        /**
+         * This is called when {@link TvInteractiveAppService.Session#setTvRecordingInfo(String,
+         * TvRecordingInfo)} is called.
+         *
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         * @param recordingId The ID of the recording to set the info for. This is provided by the
+         *     TV app in {@link TvInteractiveAppView#notifyRecordingStarted(String)}
+         * @param recordingInfo The {@link TvRecordingInfo} to set to the recording.
+         */
+        public void onSetTvRecordingInfo(
+                @NonNull String iAppServiceId,
+                @NonNull String recordingId,
+                @NonNull TvRecordingInfo recordingInfo) {
+        }
+
+        /**
+         * This is called when
+         * {@link TvInteractiveAppService.Session#requestTvRecordingInfo(String)} is
+         * called.
+         *
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         * @param recordingId The ID of the recording to get the info for. This is provided by the
+         *                    TV app in {@link TvInteractiveAppView#notifyRecordingStarted(String)}
+         */
+        public void onRequestTvRecordingInfo(
+                @NonNull String iAppServiceId,
+                @NonNull String recordingId) {
+        }
+
+        /**
+         * This is called when
+         * {@link TvInteractiveAppService.Session#requestTvRecordingInfoList(int)} is
+         * called.
+         *
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         * @param type The type of recording requested to retrieve.
+         */
+        public void onRequestTvRecordingInfoList(
+                @NonNull String iAppServiceId,
+                @NonNull @TvRecordingInfo.TvRecordingListType int type) {
+        }
     }
 
     /**
@@ -1436,6 +1477,51 @@ public class TvInteractiveAppView extends ViewGroup {
             }
             if (mCallback != null) {
                 mCallback.onRequestStopRecording(mIAppServiceId, recordingId);
+            }
+        }
+
+        @Override
+        public void onSetTvRecordingInfo(
+                Session session, String recordingId, TvRecordingInfo recordingInfo) {
+            if (DEBUG) {
+                Log.d(TAG, "onSetRecordingInfo");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onSetRecordingInfo - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onSetTvRecordingInfo(mIAppServiceId, recordingId, recordingInfo);
+            }
+        }
+
+        @Override
+        public void onRequestTvRecordingInfo(Session session,
+                String recordingId) {
+            if (DEBUG) {
+                Log.d(TAG, "onRequestRecordingInfo");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onRequestRecordingInfo - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onRequestTvRecordingInfo(mIAppServiceId, recordingId);
+            }
+        }
+
+        @Override
+        public void onRequestTvRecordingInfoList(Session session,
+                int type) {
+            if (DEBUG) {
+                Log.d(TAG, "onRequestRecordingInfoList");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onRequestRecordingInfoList - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onRequestTvRecordingInfoList(mIAppServiceId, type);
             }
         }
 
