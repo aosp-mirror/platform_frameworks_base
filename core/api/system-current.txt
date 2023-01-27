@@ -973,19 +973,8 @@ package android.app {
   }
 
   public static final class Notification.TvExtender implements android.app.Notification.Extender {
-    ctor public Notification.TvExtender();
-    ctor public Notification.TvExtender(android.app.Notification);
-    method public android.app.Notification.Builder extend(android.app.Notification.Builder);
-    method public String getChannelId();
-    method public android.app.PendingIntent getContentIntent();
-    method public android.app.PendingIntent getDeleteIntent();
     method public boolean getSuppressShowOverApps();
-    method public boolean isAvailableOnTv();
     method public android.app.Notification.TvExtender setChannel(String);
-    method public android.app.Notification.TvExtender setChannelId(String);
-    method public android.app.Notification.TvExtender setContentIntent(android.app.PendingIntent);
-    method public android.app.Notification.TvExtender setDeleteIntent(android.app.PendingIntent);
-    method public android.app.Notification.TvExtender setSuppressShowOverApps(boolean);
   }
 
   public final class NotificationChannel implements android.os.Parcelable {
