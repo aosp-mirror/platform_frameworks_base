@@ -34,6 +34,7 @@ import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.BcSmartspaceConfigPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
@@ -112,6 +113,9 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     private lateinit var handler: Handler
 
     @Mock
+    private lateinit var weatherPlugin: BcSmartspaceDataPlugin
+
+    @Mock
     private lateinit var plugin: BcSmartspaceDataPlugin
 
     @Mock
@@ -151,6 +155,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         KeyguardBypassController.OnBypassStateChangedListener
     private lateinit var deviceProvisionedListener: DeviceProvisionedListener
 
+    private lateinit var weatherSmartspaceView: SmartspaceView
     private lateinit var smartspaceView: SmartspaceView
 
     private val clock = FakeSystemClock()
@@ -176,16 +181,22 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
+        // Todo(b/261760571): flip the flag value here when feature is launched, and update relevant
+        //  tests.
+        `when`(featureFlags.isEnabled(Flags.SMARTSPACE_DATE_WEATHER_DECOUPLED)).thenReturn(false)
+
         `when`(secureSettings.getUriFor(PRIVATE_LOCKSCREEN_SETTING))
                 .thenReturn(fakePrivateLockscreenSettingUri)
         `when`(secureSettings.getUriFor(NOTIF_ON_LOCKSCREEN_SETTING))
                 .thenReturn(fakeNotifOnLockscreenSettingUri)
         `when`(smartspaceManager.createSmartspaceSession(any())).thenReturn(smartspaceSession)
+        `when`(weatherPlugin.getView(any())).thenReturn(
+                createWeatherSmartspaceView(), createWeatherSmartspaceView())
         `when`(plugin.getView(any())).thenReturn(createSmartspaceView(), createSmartspaceView())
         `when`(userTracker.userProfiles).thenReturn(userList)
         `when`(statusBarStateController.dozeAmount).thenReturn(0.5f)
-        `when`(deviceProvisionedController.isDeviceProvisioned()).thenReturn(true)
-        `when`(deviceProvisionedController.isCurrentUserSetup()).thenReturn(true)
+        `when`(deviceProvisionedController.isDeviceProvisioned).thenReturn(true)
+        `when`(deviceProvisionedController.isCurrentUserSetup).thenReturn(true)
 
         setActiveUser(userHandlePrimary)
         setAllowPrivateNotifications(userHandlePrimary, true)
@@ -210,6 +221,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
                 executor,
                 bgExecutor,
                 handler,
+                Optional.of(weatherPlugin),
                 Optional.of(plugin),
                 Optional.of(configPlugin),
         )
@@ -218,11 +230,22 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         deviceProvisionedListener = deviceProvisionedCaptor.value
     }
 
+    @Test(expected = RuntimeException::class)
+    fun testBuildAndConnectWeatherView_throwsIfDecouplingDisabled() {
+        // GIVEN the feature flag is disabled
+        `when`(featureFlags.isEnabled(Flags.SMARTSPACE_DATE_WEATHER_DECOUPLED)).thenReturn(false)
+
+        // WHEN we try to build the view
+        controller.buildAndConnectWeatherView(fakeParent)
+
+        // THEN an exception is thrown
+    }
+
     @Test
-    fun connectOnlyAfterDeviceIsProvisioned() {
+    fun testBuildAndConnectView_connectsOnlyAfterDeviceIsProvisioned() {
         // GIVEN an unprovisioned device and an attempt to connect
-        `when`(deviceProvisionedController.isDeviceProvisioned()).thenReturn(false)
-        `when`(deviceProvisionedController.isCurrentUserSetup()).thenReturn(false)
+        `when`(deviceProvisionedController.isDeviceProvisioned).thenReturn(false)
+        `when`(deviceProvisionedController.isCurrentUserSetup).thenReturn(false)
 
         // WHEN a connection attempt is made and view is attached
         val view = controller.buildAndConnectView(fakeParent)
@@ -232,8 +255,8 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         verify(smartspaceManager, never()).createSmartspaceSession(any())
 
         // WHEN it does become provisioned
-        `when`(deviceProvisionedController.isDeviceProvisioned()).thenReturn(true)
-        `when`(deviceProvisionedController.isCurrentUserSetup()).thenReturn(true)
+        `when`(deviceProvisionedController.isDeviceProvisioned).thenReturn(true)
+        `when`(deviceProvisionedController.isCurrentUserSetup).thenReturn(true)
         deviceProvisionedListener.onUserSetupChanged()
 
         // THEN the session is created
@@ -243,7 +266,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testListenersAreRegistered() {
+    fun testAddListener_registersListenersForPlugin() {
         // GIVEN a listener is added after a session is created
         connectSession()
 
@@ -252,10 +275,12 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
         // THEN the listener is registered to the underlying plugin
         verify(plugin).registerListener(controllerListener)
+        // The listener is registered only for the plugin, not the weather plugin.
+        verify(weatherPlugin, never()).registerListener(any())
     }
 
     @Test
-    fun testEarlyRegisteredListenersAreAttachedAfterConnected() {
+    fun testAddListener_earlyRegisteredListenersAreAttachedAfterConnected() {
         // GIVEN a listener that is registered before the session is created
         controller.addListener(controllerListener)
 
@@ -264,10 +289,12 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
         // THEN the listener is subsequently registered
         verify(plugin).registerListener(controllerListener)
+        // The listener is registered only for the plugin, not the weather plugin.
+        verify(weatherPlugin, never()).registerListener(any())
     }
 
     @Test
-    fun testEmptyListIsEmittedAndNotifierRemovedAfterDisconnect() {
+    fun testDisconnect_emitsEmptyListAndRemovesNotifier() {
         // GIVEN a registered listener on an active session
         connectSession()
         clearInvocations(plugin)
@@ -279,10 +306,12 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         // THEN the listener receives an empty list of targets and unregisters the notifier
         verify(plugin).onTargetsAvailable(emptyList())
         verify(plugin).registerSmartspaceEventNotifier(null)
+        verify(weatherPlugin).onTargetsAvailable(emptyList())
+        verify(weatherPlugin).registerSmartspaceEventNotifier(null)
     }
 
     @Test
-    fun testUserChangeReloadsSmartspace() {
+    fun testUserChange_reloadsSmartspace() {
         // GIVEN a connected smartspace session
         connectSession()
 
@@ -294,7 +323,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testSettingsChangeReloadsSmartspace() {
+    fun testSettingsChange_reloadsSmartspace() {
         // GIVEN a connected smartspace session
         connectSession()
 
@@ -306,7 +335,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testThemeChangeUpdatesTextColor() {
+    fun testThemeChange_updatesTextColor() {
         // GIVEN a connected smartspace session
         connectSession()
 
@@ -318,7 +347,22 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testDozeAmountChangeUpdatesView() {
+    fun testThemeChange_ifDecouplingEnabled_updatesTextColor() {
+        `when`(featureFlags.isEnabled(Flags.SMARTSPACE_DATE_WEATHER_DECOUPLED)).thenReturn(true)
+
+        // GIVEN a connected smartspace session
+        connectSession()
+
+        // WHEN the theme changes
+        configChangeListener.onThemeChanged()
+
+        // We update the new text color to match the wallpaper color
+        verify(weatherSmartspaceView).setPrimaryTextColor(anyInt())
+        verify(smartspaceView).setPrimaryTextColor(anyInt())
+    }
+
+    @Test
+    fun testDozeAmountChange_updatesView() {
         // GIVEN a connected smartspace session
         connectSession()
 
@@ -330,7 +374,22 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testKeyguardBypassEnabledUpdatesView() {
+    fun testDozeAmountChange_ifDecouplingEnabled_updatesViews() {
+        `when`(featureFlags.isEnabled(Flags.SMARTSPACE_DATE_WEATHER_DECOUPLED)).thenReturn(true)
+
+        // GIVEN a connected smartspace session
+        connectSession()
+
+        // WHEN the doze amount changes
+        statusBarStateListener.onDozeAmountChanged(0.1f, 0.7f)
+
+        // We pass that along to the view
+        verify(weatherSmartspaceView).setDozeAmount(0.7f)
+        verify(smartspaceView).setDozeAmount(0.7f)
+    }
+
+    @Test
+    fun testKeyguardBypassEnabled_updatesView() {
         // GIVEN a connected smartspace session
         connectSession()
         `when`(keyguardBypassController.bypassEnabled).thenReturn(true)
@@ -425,6 +484,27 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testSessionListener_ifDecouplingEnabled_weatherTargetIsFilteredOut() {
+        `when`(featureFlags.isEnabled(Flags.SMARTSPACE_DATE_WEATHER_DECOUPLED)).thenReturn(true)
+        connectSession()
+
+        // WHEN we receive a list of targets
+        val targets = listOf(
+                makeTarget(1, userHandlePrimary, isSensitive = true),
+                makeTarget(2, userHandlePrimary),
+                makeTarget(3, userHandleManaged),
+                makeTarget(4, userHandlePrimary, featureType = SmartspaceTarget.FEATURE_WEATHER)
+        )
+
+        sessionListener.onTargetsAvailable(targets)
+
+        // THEN all non-sensitive content is still shown
+        verify(plugin).onTargetsAvailable(eq(listOf(targets[0], targets[1], targets[2])))
+        // No filtering is applied for the weather plugin
+        verify(weatherPlugin).onTargetsAvailable(eq(targets))
+    }
+
+    @Test
     fun testSettingsAreReloaded() {
         // GIVEN a connected session where the privacy settings later flip to false
         connectSession()
@@ -515,6 +595,16 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testWeatherViewUsesSameSession() {
+        `when`(featureFlags.isEnabled(Flags.SMARTSPACE_DATE_WEATHER_DECOUPLED)).thenReturn(true)
+        // GIVEN a connected session
+        connectSession()
+
+        // No checks is needed here, since connectSession() already checks internally that
+        // createSmartspaceSession is invoked only once.
+    }
+
+    @Test
     fun testViewGetInitializedWithBypassEnabledState() {
         // GIVEN keyguard bypass is enabled.
         `when`(keyguardBypassController.bypassEnabled).thenReturn(true)
@@ -531,8 +621,8 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     fun testConnectAttemptBeforeInitializationShouldNotCreateSession() {
         // GIVEN an uninitalized smartspaceView
         // WHEN the device is provisioned
-        `when`(deviceProvisionedController.isDeviceProvisioned()).thenReturn(true)
-        `when`(deviceProvisionedController.isCurrentUserSetup()).thenReturn(true)
+        `when`(deviceProvisionedController.isDeviceProvisioned).thenReturn(true)
+        `when`(deviceProvisionedController.isCurrentUserSetup).thenReturn(true)
         deviceProvisionedListener.onDeviceProvisionedChanged()
 
         // THEN no calls to createSmartspaceSession should occur
@@ -542,9 +632,23 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     }
 
     private fun connectSession() {
+        if (controller.isDateWeatherDecoupled()) {
+            val weatherView = controller.buildAndConnectWeatherView(fakeParent)
+            weatherSmartspaceView = weatherView as SmartspaceView
+            fakeParent.addView(weatherView)
+            controller.stateChangeListener.onViewAttachedToWindow(weatherView)
+
+            verify(weatherSmartspaceView).setUiSurface(
+                    BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
+            verify(weatherSmartspaceView).registerDataProvider(weatherPlugin)
+
+            verify(weatherSmartspaceView).setPrimaryTextColor(anyInt())
+            verify(weatherSmartspaceView).setDozeAmount(0.5f)
+        }
+
         val view = controller.buildAndConnectView(fakeParent)
         smartspaceView = view as SmartspaceView
-
+        fakeParent.addView(view)
         controller.stateChangeListener.onViewAttachedToWindow(view)
 
         verify(smartspaceView).setUiSurface(BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
@@ -553,6 +657,8 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         verify(smartspaceSession)
                 .addOnTargetsAvailableListener(any(), capture(sessionListenerCaptor))
         sessionListener = sessionListenerCaptor.value
+
+        verify(smartspaceManager).createSmartspaceSession(any())
 
         verify(userTracker).addCallback(capture(userTrackerCaptor), any())
         userListener = userTrackerCaptor.value
@@ -578,9 +684,11 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
         verify(smartspaceView).setPrimaryTextColor(anyInt())
         verify(smartspaceView).setDozeAmount(0.5f)
-        clearInvocations(view)
 
-        fakeParent.addView(view)
+        if (controller.isDateWeatherDecoupled()) {
+            clearInvocations(weatherSmartspaceView)
+        }
+        clearInvocations(smartspaceView)
     }
 
     private fun setActiveUser(userHandle: UserHandle) {
@@ -626,6 +734,31 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         ).thenReturn(if (value) 1 else 0)
     }
 
+    // Separate function for the weather view, which doesn't implement all functions in interface.
+    private fun createWeatherSmartspaceView(): SmartspaceView {
+        return spy(object : View(context), SmartspaceView {
+            override fun registerDataProvider(plugin: BcSmartspaceDataPlugin?) {
+            }
+
+            override fun setPrimaryTextColor(color: Int) {
+            }
+
+            override fun setIsDreaming(isDreaming: Boolean) {
+            }
+
+            override fun setUiSurface(uiSurface: String) {
+            }
+
+            override fun setDozeAmount(amount: Float) {
+            }
+
+            override fun setIntentStarter(intentStarter: BcSmartspaceDataPlugin.IntentStarter?) {
+            }
+
+            override fun setFalsingManager(falsingManager: FalsingManager?) {
+            }
+        })
+    }
     private fun createSmartspaceView(): SmartspaceView {
         return spy(object : View(context), SmartspaceView {
             override fun registerDataProvider(plugin: BcSmartspaceDataPlugin?) {

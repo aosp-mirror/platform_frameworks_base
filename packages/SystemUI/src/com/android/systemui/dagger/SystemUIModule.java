@@ -107,6 +107,8 @@ import com.android.wm.shell.bubbles.Bubbles;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
+import javax.inject.Named;
+
 import dagger.Binds;
 import dagger.BindsOptionalOf;
 import dagger.Module;
@@ -213,6 +215,10 @@ public abstract class SystemUIModule {
 
     @BindsOptionalOf
     abstract BcSmartspaceConfigPlugin optionalBcSmartspaceConfigPlugin();
+
+    @BindsOptionalOf
+    @Named(SmartspaceModule.WEATHER_SMARTSPACE_DATA_PLUGIN)
+    abstract BcSmartspaceDataPlugin optionalWeatherSmartspaceConfigPlugin();
 
     @BindsOptionalOf
     abstract Recents optionalRecents();
