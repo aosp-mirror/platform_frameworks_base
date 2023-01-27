@@ -49,9 +49,10 @@ import java.util.UUID;
  * not voice-based. The voice-based recognition models should utilize the {@link
  * VoiceInteractionService} instead. Access to this class is protected by a permission
  * granted only to system or privileged apps.
- *
+ * @deprecated use {@link SoundTriggerManager} directly
  * @hide
  */
+@Deprecated
 @SystemApi
 public final class SoundTriggerDetector {
     private static final boolean DBG = false;
@@ -292,8 +293,10 @@ public final class SoundTriggerDetector {
     /**
      * Starts recognition on the associated sound model. Result is indicated via the
      * {@link Callback}.
+     * @deprecated use {@link SoundTriggerManager} directly
      * @return Indicates whether the call succeeded or not.
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     public boolean startRecognition(@RecognitionFlags int recognitionFlags) {
         if (DBG) {
@@ -329,7 +332,9 @@ public final class SoundTriggerDetector {
 
     /**
      * Stops recognition for the associated model.
+     * @deprecated use {@link SoundTriggerManager} directly
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
     public boolean stopRecognition() {
         int status = STATUS_OK;
