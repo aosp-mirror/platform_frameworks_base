@@ -506,8 +506,7 @@ object Flags {
     // 1300 - screenshots
     // TODO(b/254513155): Tracking Bug
     @JvmField
-    val SCREENSHOT_WORK_PROFILE_POLICY =
-        unreleasedFlag(1301, "screenshot_work_profile_policy", teamfood = true)
+    val SCREENSHOT_WORK_PROFILE_POLICY = releasedFlag(1301, "screenshot_work_profile_policy")
 
     // TODO(b/264916608): Tracking Bug
     @JvmField val SCREENSHOT_METADATA = unreleasedFlag(1302, "screenshot_metadata")
