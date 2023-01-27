@@ -1635,7 +1635,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             return false;
         }
 
-        if (event.isAccessibilityDataPrivate()
+        if (event.isAccessibilityDataSensitive()
                 && (mFetchFlags & AccessibilityNodeInfo.FLAG_SERVICE_IS_ACCESSIBILITY_TOOL) == 0) {
             return false;
         }

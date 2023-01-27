@@ -114,7 +114,7 @@
     <public name="handwritingBoundsOffsetTop" />
     <public name="handwritingBoundsOffsetRight" />
     <public name="handwritingBoundsOffsetBottom" />
-    <public name="accessibilityDataPrivate" />
+    <public name="accessibilityDataSensitive" />
     <public name="enableTextStylingShortcuts" />
     <public name="requiredDisplayCategory"/>
     <public name="removed_maxConcurrentSessionsCount" />

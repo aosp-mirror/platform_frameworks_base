@@ -3201,8 +3201,8 @@
 
         <!-- Describes whether this view should allow interactions from AccessibilityServices only
              if the service sets the isAccessibilityTool property. -->
-        <attr name="accessibilityDataPrivate" format="integer">
-            <!-- The system determines whether the view's accessibility data is private
+        <attr name="accessibilityDataSensitive" format="integer">
+            <!-- The system determines whether the view's accessibility data is sensitive
                  - default (recommended). -->
             <enum name="auto" value="0" />
             <!-- Allow interactions from AccessibilityServices only if the service sets the
