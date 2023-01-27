@@ -276,5 +276,13 @@ class TypedValueTest {
         assertThat(dimenValueToTest)
             .isWithin(0.05f)
             .of(actualDimenValue)
+
+        // Also test the alias functions
+        assertThat(TypedValue.convertDimensionToPixels(dimenType, dimenValueToTest, metrics))
+            .isWithin(0.05f)
+            .of(actualPx)
+        assertThat(TypedValue.convertPixelsToDimension(dimenType, actualPx, metrics))
+            .isWithin(0.05f)
+            .of(actualDimenValue)
     }
 }
