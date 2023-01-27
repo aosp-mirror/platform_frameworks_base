@@ -504,6 +504,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private boolean mIsEnabled;
     private boolean mIsInTransition;
 
+    private String mBrightnessThrottlingDataId;
+
     // DPCs following the brightness of this DPC. This is used in concurrent displays mode - there
     // is one lead display, the additional displays follow the brightness value of the lead display.
     @GuardedBy("mLock")
@@ -539,6 +541,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mHandler = new DisplayControllerHandler(handler.getLooper());
         mLastBrightnessEvent = new BrightnessEvent(mDisplayId);
         mTempBrightnessEvent = new BrightnessEvent(mDisplayId);
+        mBrightnessThrottlingDataId = logicalDisplay.getBrightnessThrottlingDataIdLocked();
 
         if (mDisplayId == Display.DEFAULT_DISPLAY) {
             mBatteryStats = BatteryStatsService.getService();
@@ -860,6 +863,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         final boolean isEnabled = mLogicalDisplay.isEnabledLocked();
         final boolean isInTransition = mLogicalDisplay.isInTransitionLocked();
+        final String brightnessThrottlingDataId =
+                mLogicalDisplay.getBrightnessThrottlingDataIdLocked();
         mHandler.post(() -> {
             boolean changed = false;
             if (mDisplayDevice != device) {
@@ -868,12 +873,19 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mUniqueDisplayId = uniqueId;
                 mDisplayStatsId = mUniqueDisplayId.hashCode();
                 mDisplayDeviceConfig = config;
+                mBrightnessThrottlingDataId = brightnessThrottlingDataId;
                 loadFromDisplayDeviceConfig(token, info, hbmMetadata);
 
                 /// Since the underlying display-device changed, we really don't know the
                 // last command that was sent to change it's state. Lets assume it is unknown so
                 // that we trigger a change immediately.
                 mPowerState.resetScreenState();
+            } else if (!mBrightnessThrottlingDataId.equals(brightnessThrottlingDataId)) {
+                changed = true;
+                mBrightnessThrottlingDataId = brightnessThrottlingDataId;
+                mBrightnessThrottler.resetThrottlingData(
+                        config.getBrightnessThrottlingData(mBrightnessThrottlingDataId),
+                        mUniqueDisplayId);
             }
             if (mIsEnabled != isEnabled || mIsInTransition != isInTransition) {
                 changed = true;
@@ -885,9 +897,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 updatePowerState();
             }
         });
-
-        // TODO (b/265793751): Re-create BrightnessTracker if we're enetering/exiting concurrent
-        // displays mode
     }
 
     /**
@@ -924,7 +933,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private void loadFromDisplayDeviceConfig(IBinder token, DisplayDeviceInfo info,
-                                             HighBrightnessModeMetadata hbmMetadata) {
+            HighBrightnessModeMetadata hbmMetadata) {
         // All properties that depend on the associated DisplayDevice and the DDC must be
         // updated here.
         loadBrightnessRampRates();
@@ -946,10 +955,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         return mDisplayDeviceConfig.getHdrBrightnessFromSdr(sdrBrightness);
                     }
                 });
-        // TODO (b/265793751): Use the appropriate throttling data if we're in concurrent displays
-        // mode
         mBrightnessThrottler.resetThrottlingData(
-                mDisplayDeviceConfig.getBrightnessThrottlingData(), mUniqueDisplayId);
+                mDisplayDeviceConfig.getBrightnessThrottlingData(mBrightnessThrottlingDataId),
+                mUniqueDisplayId);
     }
 
     private void sendUpdatePowerState() {
@@ -2053,11 +2061,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private BrightnessThrottler createBrightnessThrottlerLocked() {
         final DisplayDevice device = mLogicalDisplay.getPrimaryDisplayDeviceLocked();
         final DisplayDeviceConfig ddConfig = device.getDisplayDeviceConfig();
-        // TODO (b/265793751): Use the appropriate throttling data if we're in concurrent displays
-        // mode
-        final DisplayDeviceConfig.BrightnessThrottlingData data =
-                ddConfig != null ? ddConfig.getBrightnessThrottlingData() : null;
-        return new BrightnessThrottler(mHandler, data,
+        return new BrightnessThrottler(mHandler,
+                ddConfig.getBrightnessThrottlingData(mBrightnessThrottlingDataId),
                 () -> {
                     sendUpdatePowerState();
                     postBrightnessChangeRunnable();

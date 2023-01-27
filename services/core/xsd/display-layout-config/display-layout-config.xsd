@@ -51,6 +51,7 @@
         <xs:sequence>
             <xs:element name="address" type="xs:nonNegativeInteger"/>
             <xs:element name="position" type="xs:string" minOccurs="0" maxOccurs="1" />
+            <xs:element name="brightnessThrottlingMapId" type="xs:string" minOccurs="0" maxOccurs="1" />
         </xs:sequence>
         <xs:attribute name="enabled" type="xs:boolean" use="optional" />
         <xs:attribute name="defaultDisplay" type="xs:boolean" use="optional" />

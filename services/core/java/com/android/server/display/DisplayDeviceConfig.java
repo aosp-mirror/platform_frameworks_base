@@ -74,8 +74,10 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 
@@ -411,6 +413,8 @@ public class DisplayDeviceConfig {
 
     public static final String QUIRK_CAN_SET_BRIGHTNESS_VIA_HWC = "canSetBrightnessViaHwc";
 
+    static final String DEFAULT_BRIGHTNESS_THROTTLING_DATA_ID = "default";
+
     private static final float BRIGHTNESS_DEFAULT = 0.5f;
     private static final String ETC_DIR = "etc";
     private static final String DISPLAY_CONFIG_DIR = "displayconfig";
@@ -627,13 +631,7 @@ public class DisplayDeviceConfig {
     private int[] mHighDisplayBrightnessThresholds = DEFAULT_BRIGHTNESS_THRESHOLDS;
     private int[] mHighAmbientBrightnessThresholds = DEFAULT_BRIGHTNESS_THRESHOLDS;
 
-    // Brightness Throttling data may be updated via the DeviceConfig. Here we store the original
-    // data, which comes from the ddc, and the current one, which may be the DeviceConfig
-    // overwritten value.
-    private BrightnessThrottlingData mBrightnessThrottlingData;
-    private BrightnessThrottlingData mOriginalBrightnessThrottlingData;
-    // The concurrent displays mode might need a stricter throttling policy
-    private BrightnessThrottlingData mConcurrentDisplaysBrightnessThrottlingData;
+    private Map<String, BrightnessThrottlingData> mBrightnessThrottlingDataMap = new HashMap();
 
     @Nullable
     private HostUsiVersion mHostUsiVersion;
@@ -777,10 +775,6 @@ public class DisplayDeviceConfig {
         int port = physicalAddress.getPort();
         config = getConfigFromSuffix(context, baseDirectory, PORT_SUFFIX_FORMAT, port);
         return config;
-    }
-
-    void setBrightnessThrottlingData(BrightnessThrottlingData brightnessThrottlingData) {
-        mBrightnessThrottlingData = brightnessThrottlingData;
     }
 
     /**
@@ -1282,18 +1276,11 @@ public class DisplayDeviceConfig {
     }
 
     /**
+     * @param id The ID of the throttling data
      * @return brightness throttling configuration data for the display.
      */
-    public BrightnessThrottlingData getBrightnessThrottlingData() {
-        return BrightnessThrottlingData.create(mBrightnessThrottlingData);
-    }
-
-    /**
-     * @return brightness throttling configuration data for the display for the concurrent
-     * displays mode.
-     */
-    public BrightnessThrottlingData getConcurrentDisplaysBrightnessThrottlingData() {
-        return BrightnessThrottlingData.create(mConcurrentDisplaysBrightnessThrottlingData);
+    public BrightnessThrottlingData getBrightnessThrottlingData(String id) {
+        return BrightnessThrottlingData.create(mBrightnessThrottlingDataMap.get(id));
     }
 
     /**
@@ -1411,8 +1398,7 @@ public class DisplayDeviceConfig {
                 + ", isHbmEnabled=" + mIsHighBrightnessModeEnabled
                 + ", mHbmData=" + mHbmData
                 + ", mSdrToHdrRatioSpline=" + mSdrToHdrRatioSpline
-                + ", mBrightnessThrottlingData=" + mBrightnessThrottlingData
-                + ", mOriginalBrightnessThrottlingData=" + mOriginalBrightnessThrottlingData
+                + ", mBrightnessThrottlingData=" + mBrightnessThrottlingDataMap
                 + "\n"
                 + ", mBrightnessRampFastDecrease=" + mBrightnessRampFastDecrease
                 + ", mBrightnessRampFastIncrease=" + mBrightnessRampFastIncrease
@@ -1545,8 +1531,7 @@ public class DisplayDeviceConfig {
                 loadBrightnessDefaultFromDdcXml(config);
                 loadBrightnessConstraintsFromConfigXml();
                 loadBrightnessMap(config);
-                loadBrightnessThrottlingMap(config);
-                loadConcurrentDisplaysBrightnessThrottlingMap(config);
+                loadBrightnessThrottlingMaps(config);
                 loadHighBrightnessModeData(config);
                 loadQuirks(config);
                 loadBrightnessRamps(config);
@@ -1756,76 +1741,47 @@ public class DisplayDeviceConfig {
         return Spline.createSpline(nits, ratios);
     }
 
-    private void loadBrightnessThrottlingMap(DisplayConfiguration config) {
+    private void loadBrightnessThrottlingMaps(DisplayConfiguration config) {
         final ThermalThrottling throttlingConfig = config.getThermalThrottling();
         if (throttlingConfig == null) {
             Slog.i(TAG, "No thermal throttling config found");
             return;
         }
 
-        final BrightnessThrottlingMap map = throttlingConfig.getBrightnessThrottlingMap();
-        if (map == null) {
+        final List<BrightnessThrottlingMap> maps = throttlingConfig.getBrightnessThrottlingMap();
+        if (maps == null || maps.isEmpty()) {
             Slog.i(TAG, "No brightness throttling map found");
             return;
         }
 
-        final List<BrightnessThrottlingPoint> points = map.getBrightnessThrottlingPoint();
-        // At least 1 point is guaranteed by the display device config schema
-        List<BrightnessThrottlingData.ThrottlingLevel> throttlingLevels =
-                new ArrayList<>(points.size());
+        for (BrightnessThrottlingMap map : maps) {
+            final List<BrightnessThrottlingPoint> points = map.getBrightnessThrottlingPoint();
+            // At least 1 point is guaranteed by the display device config schema
+            List<BrightnessThrottlingData.ThrottlingLevel> throttlingLevels =
+                    new ArrayList<>(points.size());
 
-        boolean badConfig = false;
-        for (BrightnessThrottlingPoint point : points) {
-            ThermalStatus status = point.getThermalStatus();
-            if (!thermalStatusIsValid(status)) {
-                badConfig = true;
-                break;
+            boolean badConfig = false;
+            for (BrightnessThrottlingPoint point : points) {
+                ThermalStatus status = point.getThermalStatus();
+                if (!thermalStatusIsValid(status)) {
+                    badConfig = true;
+                    break;
+                }
+
+                throttlingLevels.add(new BrightnessThrottlingData.ThrottlingLevel(
+                        convertThermalStatus(status), point.getBrightness().floatValue()));
             }
 
-            throttlingLevels.add(new BrightnessThrottlingData.ThrottlingLevel(
-                    convertThermalStatus(status), point.getBrightness().floatValue()));
-        }
-
-        if (!badConfig) {
-            mBrightnessThrottlingData = BrightnessThrottlingData.create(throttlingLevels);
-            mOriginalBrightnessThrottlingData = mBrightnessThrottlingData;
-        }
-    }
-
-    private void loadConcurrentDisplaysBrightnessThrottlingMap(DisplayConfiguration config) {
-        final ThermalThrottling throttlingConfig = config.getThermalThrottling();
-        if (throttlingConfig == null) {
-            Slog.i(TAG, "No concurrent displays thermal throttling config found");
-            return;
-        }
-
-        final BrightnessThrottlingMap map =
-                throttlingConfig.getConcurrentDisplaysBrightnessThrottlingMap();
-        if (map == null) {
-            Slog.i(TAG, "No concurrent displays brightness throttling map found");
-            return;
-        }
-
-        final List<BrightnessThrottlingPoint> points = map.getBrightnessThrottlingPoint();
-        // At least 1 point is guaranteed by the display device config schema
-        List<BrightnessThrottlingData.ThrottlingLevel> throttlingLevels =
-                new ArrayList<>(points.size());
-
-        boolean badConfig = false;
-        for (BrightnessThrottlingPoint point : points) {
-            ThermalStatus status = point.getThermalStatus();
-            if (!thermalStatusIsValid(status)) {
-                badConfig = true;
-                break;
+            if (!badConfig) {
+                String id = map.getId() == null ? DEFAULT_BRIGHTNESS_THROTTLING_DATA_ID
+                        : map.getId();
+                if (mBrightnessThrottlingDataMap.containsKey(id)) {
+                    throw new RuntimeException("Brightness throttling data with ID " + id
+                            + " already exists");
+                }
+                mBrightnessThrottlingDataMap.put(id,
+                        BrightnessThrottlingData.create(throttlingLevels));
             }
-
-            throttlingLevels.add(new BrightnessThrottlingData.ThrottlingLevel(
-                    convertThermalStatus(status), point.getBrightness().floatValue()));
-        }
-
-        if (!badConfig) {
-            mConcurrentDisplaysBrightnessThrottlingData =
-                    BrightnessThrottlingData.create(throttlingLevels);
         }
     }
 

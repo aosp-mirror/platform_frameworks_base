@@ -296,9 +296,9 @@ public class LogicalDisplayMapperTest {
 
         Layout layout1 = new Layout();
         layout1.createDisplayLocked(info(device1).address, /* isDefault= */ true,
-                /* isEnabled= */ true, mIdProducer);
+                /* isEnabled= */ true, mIdProducer, /* brightnessThrottlingMapId= */ null);
         layout1.createDisplayLocked(info(device2).address, /* isDefault= */ false,
-                /* isEnabled= */ true, mIdProducer);
+                /* isEnabled= */ true, mIdProducer, /* brightnessThrottlingMapId= */ null);
         when(mDeviceStateToLayoutMapSpy.get(STATE_DEFAULT)).thenReturn(layout1);
         assertThat(layout1.size()).isEqualTo(2);
         final int logicalId2 = layout1.getByAddress(info(device2).address).getLogicalDisplayId();
@@ -331,17 +331,17 @@ public class LogicalDisplayMapperTest {
         add(device3);
 
         Layout layout1 = new Layout();
-        layout1.createDisplayLocked(info(device1).address,
-                /* isDefault= */ true, /* isEnabled= */ true, mIdProducer);
+        layout1.createDisplayLocked(info(device1).address, /* isDefault= */ true,
+                /* isEnabled= */ true, mIdProducer, /* brightnessThrottlingMapId= */ null);
         when(mDeviceStateToLayoutMapSpy.get(STATE_DEFAULT)).thenReturn(layout1);
 
         final int layoutState2 = 2;
         Layout layout2 = new Layout();
-        layout2.createDisplayLocked(info(device2).address,
-                /* isDefault= */ false, /* isEnabled= */ true, mIdProducer);
+        layout2.createDisplayLocked(info(device2).address, /* isDefault= */ false,
+                /* isEnabled= */ true, mIdProducer, /* brightnessThrottlingMapId= */ null);
         // Device3 is the default display.
-        layout2.createDisplayLocked(info(device3).address,
-                /* isDefault= */ true, /* isEnabled= */ true, mIdProducer);
+        layout2.createDisplayLocked(info(device3).address, /* isDefault= */ true,
+                /* isEnabled= */ true, mIdProducer, /* brightnessThrottlingMapId= */ null);
         when(mDeviceStateToLayoutMapSpy.get(layoutState2)).thenReturn(layout2);
         assertThat(layout2.size()).isEqualTo(2);
         final int logicalId2 = layout2.getByAddress(info(device2).address).getLogicalDisplayId();
@@ -563,16 +563,18 @@ public class LogicalDisplayMapperTest {
 
         Layout layout = new Layout();
         layout.createDisplayLocked(device1.getDisplayDeviceInfoLocked().address,
-                true, true, mIdProducer);
+                true, true, mIdProducer,
+                /* brightnessThrottlingMapId= */ "concurrent");
         layout.createDisplayLocked(device2.getDisplayDeviceInfoLocked().address,
-                false, true, mIdProducer);
+                false, true, mIdProducer,
+                /* brightnessThrottlingMapId= */ "concurrent");
         when(mDeviceStateToLayoutMapSpy.get(0)).thenReturn(layout);
 
         layout = new Layout();
         layout.createDisplayLocked(device1.getDisplayDeviceInfoLocked().address,
-                false, false, mIdProducer);
+                false, false, mIdProducer, /* brightnessThrottlingMapId= */ null);
         layout.createDisplayLocked(device2.getDisplayDeviceInfoLocked().address,
-                true, true, mIdProducer);
+                true, true, mIdProducer, /* brightnessThrottlingMapId= */ null);
         when(mDeviceStateToLayoutMapSpy.get(1)).thenReturn(layout);
         when(mDeviceStateToLayoutMapSpy.get(2)).thenReturn(layout);
 
@@ -599,6 +601,10 @@ public class LogicalDisplayMapperTest {
         assertTrue(mLogicalDisplayMapper.getDisplayLocked(device2).isEnabledLocked());
         assertFalse(mLogicalDisplayMapper.getDisplayLocked(device1).isInTransitionLocked());
         assertFalse(mLogicalDisplayMapper.getDisplayLocked(device2).isInTransitionLocked());
+        assertEquals("concurrent", mLogicalDisplayMapper.getDisplayLocked(device1)
+                .getBrightnessThrottlingDataIdLocked());
+        assertEquals("concurrent", mLogicalDisplayMapper.getDisplayLocked(device2)
+                .getBrightnessThrottlingDataIdLocked());
 
         mLogicalDisplayMapper.setDeviceStateLocked(1, false);
         advanceTime(1000);
@@ -606,6 +612,12 @@ public class LogicalDisplayMapperTest {
         assertTrue(mLogicalDisplayMapper.getDisplayLocked(device2).isEnabledLocked());
         assertFalse(mLogicalDisplayMapper.getDisplayLocked(device1).isInTransitionLocked());
         assertFalse(mLogicalDisplayMapper.getDisplayLocked(device2).isInTransitionLocked());
+        assertEquals(DisplayDeviceConfig.DEFAULT_BRIGHTNESS_THROTTLING_DATA_ID,
+                mLogicalDisplayMapper.getDisplayLocked(device1)
+                        .getBrightnessThrottlingDataIdLocked());
+        assertEquals(DisplayDeviceConfig.DEFAULT_BRIGHTNESS_THROTTLING_DATA_ID,
+                mLogicalDisplayMapper.getDisplayLocked(device2)
+                        .getBrightnessThrottlingDataIdLocked());
 
         mLogicalDisplayMapper.setDeviceStateLocked(2, false);
         advanceTime(1000);
@@ -613,6 +625,12 @@ public class LogicalDisplayMapperTest {
         assertTrue(mLogicalDisplayMapper.getDisplayLocked(device2).isEnabledLocked());
         assertFalse(mLogicalDisplayMapper.getDisplayLocked(device1).isInTransitionLocked());
         assertFalse(mLogicalDisplayMapper.getDisplayLocked(device2).isInTransitionLocked());
+        assertEquals(DisplayDeviceConfig.DEFAULT_BRIGHTNESS_THROTTLING_DATA_ID,
+                mLogicalDisplayMapper.getDisplayLocked(device1)
+                        .getBrightnessThrottlingDataIdLocked());
+        assertEquals(DisplayDeviceConfig.DEFAULT_BRIGHTNESS_THROTTLING_DATA_ID,
+                mLogicalDisplayMapper.getDisplayLocked(device2)
+                        .getBrightnessThrottlingDataIdLocked());
     }
 
     @Test
@@ -633,17 +651,20 @@ public class LogicalDisplayMapperTest {
                 displayAddressOne,
                 /* isDefault= */ true,
                 /* isEnabled= */ true,
-                mIdProducer);
+                mIdProducer,
+                /* brightnessThrottlingMapId= */ null);
         threeDevicesEnabledLayout.createDisplayLocked(
                 displayAddressTwo,
                 /* isDefault= */ false,
                 /* isEnabled= */ true,
-                mIdProducer);
+                mIdProducer,
+                /* brightnessThrottlingMapId= */ null);
         threeDevicesEnabledLayout.createDisplayLocked(
                 displayAddressThree,
                 /* isDefault= */ false,
                 /* isEnabled= */ true,
-                mIdProducer);
+                mIdProducer,
+                /* brightnessThrottlingMapId= */ null);
 
         when(mDeviceStateToLayoutMapSpy.get(STATE_DEFAULT))
                 .thenReturn(threeDevicesEnabledLayout);
@@ -678,17 +699,20 @@ public class LogicalDisplayMapperTest {
                 displayAddressOne,
                 /* isDefault= */ true,
                 /* isEnabled= */ true,
-                mIdProducer);
+                mIdProducer,
+                /* brightnessThrottlingMapId= */ null);
         oneDeviceEnabledLayout.createDisplayLocked(
                 displayAddressTwo,
                 /* isDefault= */ false,
                 /* isEnabled= */ false,
-                mIdProducer);
+                mIdProducer,
+                /* brightnessThrottlingMapId= */ null);
         oneDeviceEnabledLayout.createDisplayLocked(
                 displayAddressThree,
                 /* isDefault= */ false,
                 /* isEnabled= */ false,
-                mIdProducer);
+                mIdProducer,
+                /* brightnessThrottlingMapId= */ null);
 
         when(mDeviceStateToLayoutMapSpy.get(0)).thenReturn(oneDeviceEnabledLayout);
         when(mDeviceStateToLayoutMapSpy.get(1)).thenReturn(threeDevicesEnabledLayout);
