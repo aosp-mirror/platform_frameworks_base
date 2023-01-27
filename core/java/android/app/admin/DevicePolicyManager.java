@@ -3877,13 +3877,24 @@ public class DevicePolicyManager {
     public static final int EXEMPT_FROM_APP_STANDBY =  0;
 
     /**
+     * Prevent an app from dismissible notifications. Starting from Android U, notifications with
+     * the ongoing parameter can be dismissed by a user on an unlocked device. An app with
+     * this exemption can create non-dismissable notifications.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS =  1;
+
+    /**
      * Exemptions to platform restrictions, given to an application through
      * {@link #setApplicationExemptions(String, Set)}.
      *
      * @hide
      */
     @IntDef(prefix = { "EXEMPT_FROM_"}, value = {
-            EXEMPT_FROM_APP_STANDBY
+            EXEMPT_FROM_APP_STANDBY,
+            EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApplicationExemptionConstants {}

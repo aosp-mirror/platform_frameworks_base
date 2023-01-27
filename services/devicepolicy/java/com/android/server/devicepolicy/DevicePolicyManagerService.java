@@ -30,6 +30,7 @@ import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.OPSTR_SYSTEM_EXEMPT_FROM_APP_STANDBY;
+import static android.app.AppOpsManager.OPSTR_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS;
 import static android.app.admin.DeviceAdminInfo.HEADLESS_DEVICE_OWNER_MODE_AFFILIATED;
 import static android.app.admin.DeviceAdminReceiver.ACTION_COMPLIANCE_ACKNOWLEDGEMENT_REQUIRED;
 import static android.app.admin.DeviceAdminReceiver.EXTRA_TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE;
@@ -55,6 +56,7 @@ import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_DEFAULT;
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
 import static android.app.admin.DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER;
 import static android.app.admin.DevicePolicyManager.EXEMPT_FROM_APP_STANDBY;
+import static android.app.admin.DevicePolicyManager.EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS;
 import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_ACCOUNT_TO_MIGRATE;
 import static android.app.admin.DevicePolicyManager.EXTRA_RESOURCE_IDS;
 import static android.app.admin.DevicePolicyManager.EXTRA_RESOURCE_TYPE;
@@ -703,6 +705,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     static {
         APPLICATION_EXEMPTION_CONSTANTS_TO_APP_OPS.put(
                 EXEMPT_FROM_APP_STANDBY, OPSTR_SYSTEM_EXEMPT_FROM_APP_STANDBY);
+        APPLICATION_EXEMPTION_CONSTANTS_TO_APP_OPS.put(
+                EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS,
+                OPSTR_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS);
     }
 
     /**
@@ -749,6 +754,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     // TODO(b/261999445) remove the flag after rollout.
     private static final String HEADLESS_FLAG = "headless";
     private static final boolean DEFAULT_HEADLESS_FLAG = true;
+
+    // TODO(b/266831522) remove the flag after rollout.
+    private static final String APPLICATION_EXEMPTIONS_FLAG = "application_exemptions";
+    private static final boolean DEFAULT_APPLICATION_EXEMPTIONS_FLAG = true;
 
     /**
      * This feature flag is checked once after boot and this value us used until the next reboot to
@@ -14188,6 +14197,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         @Override
         public boolean isUserOrganizationManaged(@UserIdInt int userHandle) {
             return getDeviceStateCache().isUserOrganizationManaged(userHandle);
+        }
+
+        @Override
+        public boolean isApplicationExemptionsFlagEnabled() {
+            return DeviceConfig.getBoolean(
+                    NAMESPACE_DEVICE_POLICY_MANAGER,
+                    APPLICATION_EXEMPTIONS_FLAG,
+                    DEFAULT_APPLICATION_EXEMPTIONS_FLAG);
         }
     }
 
