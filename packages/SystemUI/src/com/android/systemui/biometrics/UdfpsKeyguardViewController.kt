@@ -32,7 +32,6 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
-import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -144,21 +143,6 @@ constructor(
 
             override fun onStateChanged(statusBarState: Int) {
                 this@UdfpsKeyguardViewController.statusBarState = statusBarState
-                updateAlpha()
-                updatePauseAuth()
-            }
-        }
-
-    private val mPrimaryBouncerExpansionCallback: PrimaryBouncerExpansionCallback =
-        object : PrimaryBouncerExpansionCallback {
-            override fun onExpansionChanged(expansion: Float) {
-                inputBouncerHiddenAmount = expansion
-                updateAlpha()
-                updatePauseAuth()
-            }
-
-            override fun onVisibilityChanged(isVisible: Boolean) {
-                updateBouncerHiddenAmount()
                 updateAlpha()
                 updatePauseAuth()
             }
@@ -315,14 +299,6 @@ constructor(
         statusBarState = statusBarStateController.state
         qsExpansion = keyguardViewManager.qsExpansion
         keyguardViewManager.addCallback(statusBarKeyguardViewManagerCallback)
-        if (!isModernBouncerEnabled) {
-            val bouncer = keyguardViewManager.primaryBouncer
-            bouncer?.expansion?.let {
-                mPrimaryBouncerExpansionCallback.onExpansionChanged(it)
-                bouncer.addBouncerExpansionCallback(mPrimaryBouncerExpansionCallback)
-            }
-            updateBouncerHiddenAmount()
-        }
         configurationController.addCallback(configurationListener)
         shadeExpansionStateManager.addExpansionListener(shadeExpansionListener)
         updateScaleFactor()
@@ -352,11 +328,6 @@ constructor(
         }
         activityLaunchAnimator.removeListener(activityLaunchAnimatorListener)
         keyguardViewManager.removeCallback(statusBarKeyguardViewManagerCallback)
-        if (!isModernBouncerEnabled) {
-            keyguardViewManager.primaryBouncer?.removeBouncerExpansionCallback(
-                mPrimaryBouncerExpansionCallback
-            )
-        }
     }
 
     override fun dump(pw: PrintWriter, args: Array<String>) {

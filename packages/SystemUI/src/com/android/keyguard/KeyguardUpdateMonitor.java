@@ -26,7 +26,6 @@ import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_LOCKOUT_N
 import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_LOCKOUT_PERMANENT;
 import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_LOCKOUT_TIMED;
 import static android.hardware.biometrics.BiometricConstants.LockoutMode;
-import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START;
 import static android.hardware.biometrics.BiometricSourceType.FACE;
 import static android.hardware.biometrics.BiometricSourceType.FINGERPRINT;
 import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
@@ -352,7 +351,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final Executor mBackgroundExecutor;
     private final SensorPrivacyManager mSensorPrivacyManager;
     private final ActiveUnlockConfig mActiveUnlockConfig;
-    private final PowerManager mPowerManager;
     private final IDreamManager mDreamManager;
     private final TelephonyManager mTelephonyManager;
     @Nullable
@@ -360,7 +358,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     @Nullable
     private final FaceManager mFaceManager;
     private final LockPatternUtils mLockPatternUtils;
-    private final boolean mWakeOnFingerprintAcquiredStart;
     @VisibleForTesting
     @DevicePostureController.DevicePostureInt
     protected int mConfigFaceAuthSupportedPosture;
@@ -884,11 +881,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private void handleFingerprintAcquired(
             @BiometricFingerprintConstants.FingerprintAcquired int acquireInfo) {
         Assert.isMainThread();
-        if (mWakeOnFingerprintAcquiredStart && acquireInfo == FINGERPRINT_ACQUIRED_START) {
-            mPowerManager.wakeUp(
-                    SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_BIOMETRIC,
-                    "com.android.systemui.keyguard:FINGERPRINT_ACQUIRED_START");
-        }
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -1945,6 +1937,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             }
         }
         mGoingToSleep = true;
+        // Resetting assistant visibility state as the device is going to sleep now.
+        // TaskStackChangeListener gets triggered a little late when we transition to AoD,
+        // which results in face auth running once on AoD.
+        mAssistantVisible = false;
+        mLogger.d("Started going to sleep, mGoingToSleep=true, mAssistantVisible=false");
         updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE, FACE_AUTH_UPDATED_GOING_TO_SLEEP);
     }
 
@@ -2050,7 +2047,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             UiEventLogger uiEventLogger,
             // This has to be a provider because SessionTracker depends on KeyguardUpdateMonitor :(
             Provider<SessionTracker> sessionTrackerProvider,
-            PowerManager powerManager,
             TrustManager trustManager,
             SubscriptionManager subscriptionManager,
             UserManager userManager,
@@ -2087,7 +2083,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mLogger = logger;
         mUiEventLogger = uiEventLogger;
         mSessionTrackerProvider = sessionTrackerProvider;
-        mPowerManager = powerManager;
         mTrustManager = trustManager;
         mUserManager = userManager;
         mDreamManager = dreamManager;
@@ -2098,8 +2093,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mFpm = fingerprintManager;
         mFaceManager = faceManager;
         mActiveUnlockConfig.setKeyguardUpdateMonitor(this);
-        mWakeOnFingerprintAcquiredStart = context.getResources()
-                        .getBoolean(com.android.internal.R.bool.kg_wake_on_acquire_start);
         mFaceAcquiredInfoIgnoreList = Arrays.stream(
                 mContext.getResources().getIntArray(
                         R.array.config_face_acquire_device_entry_ignorelist))
@@ -3342,7 +3335,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     /**
      * Handle {@link #MSG_KEYGUARD_RESET}
      */
-    private void handleKeyguardReset() {
+    @VisibleForTesting
+    protected void handleKeyguardReset() {
         mLogger.d("handleKeyguardReset");
         updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE,
                 FACE_AUTH_UPDATED_KEYGUARD_RESET);
@@ -3882,7 +3876,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         pw.println("  getUserHasTrust()=" + getUserHasTrust(getCurrentUser()));
         pw.println("  getUserUnlockedWithBiometric()="
                 + getUserUnlockedWithBiometric(getCurrentUser()));
-        pw.println("  mWakeOnFingerprintAcquiredStart=" + mWakeOnFingerprintAcquiredStart);
         pw.println("  SIM States:");
         for (SimData data : mSimDatas.values()) {
             pw.println("    " + data.toString());

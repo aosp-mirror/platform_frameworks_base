@@ -22,14 +22,18 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 
 /** Encapsulates state about device entry fingerprint auth mechanism. */
 interface DeviceEntryFingerprintAuthRepository {
     /** Whether the device entry fingerprint auth is locked out. */
-    val isLockedOut: Flow<Boolean>
+    val isLockedOut: StateFlow<Boolean>
 }
 
 /**
@@ -44,29 +48,34 @@ class DeviceEntryFingerprintAuthRepositoryImpl
 @Inject
 constructor(
     val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+    @Application scope: CoroutineScope,
 ) : DeviceEntryFingerprintAuthRepository {
 
-    override val isLockedOut: Flow<Boolean> = conflatedCallbackFlow {
-        val sendLockoutUpdate =
-            fun() {
-                trySendWithFailureLogging(
-                    keyguardUpdateMonitor.isFingerprintLockedOut,
-                    TAG,
-                    "onLockedOutStateChanged"
-                )
-            }
-        val callback =
-            object : KeyguardUpdateMonitorCallback() {
-                override fun onLockedOutStateChanged(biometricSourceType: BiometricSourceType?) {
-                    if (biometricSourceType == BiometricSourceType.FINGERPRINT) {
-                        sendLockoutUpdate()
+    override val isLockedOut: StateFlow<Boolean> =
+        conflatedCallbackFlow {
+                val sendLockoutUpdate =
+                    fun() {
+                        trySendWithFailureLogging(
+                            keyguardUpdateMonitor.isFingerprintLockedOut,
+                            TAG,
+                            "onLockedOutStateChanged"
+                        )
                     }
-                }
+                val callback =
+                    object : KeyguardUpdateMonitorCallback() {
+                        override fun onLockedOutStateChanged(
+                            biometricSourceType: BiometricSourceType?
+                        ) {
+                            if (biometricSourceType == BiometricSourceType.FINGERPRINT) {
+                                sendLockoutUpdate()
+                            }
+                        }
+                    }
+                keyguardUpdateMonitor.registerCallback(callback)
+                sendLockoutUpdate()
+                awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
             }
-        keyguardUpdateMonitor.registerCallback(callback)
-        sendLockoutUpdate()
-        awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
-    }
+            .stateIn(scope, started = SharingStarted.Eagerly, initialValue = false)
 
     companion object {
         const val TAG = "DeviceEntryFingerprintAuthRepositoryImpl"

@@ -142,6 +142,7 @@ import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteracto
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.keyguard.ui.binder.KeyguardLongPressViewBinder;
@@ -207,7 +208,6 @@ import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaViewController;
-import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardClockPositionAlgorithm;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
@@ -3786,7 +3786,8 @@ public final class NotificationPanelViewController implements Dumpable {
         //   change due to "unlock hint animation." In this case, fading out the bottom area
         //   would also hide the message that says "swipe to unlock," we don't want to do that.
         float expansionAlpha = MathUtils.map(
-                isUnlockHintRunning() ? 0 : KeyguardBouncer.ALPHA_EXPANSION_THRESHOLD, 1f, 0f, 1f,
+                isUnlockHintRunning() ? 0 : KeyguardBouncerConstants.ALPHA_EXPANSION_THRESHOLD, 1f,
+                0f, 1f,
                 getExpandedFraction());
         float alpha = Math.min(expansionAlpha, 1 - computeQsExpansionFraction());
         alpha *= mBottomAreaShadeAlpha;

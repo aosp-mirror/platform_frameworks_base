@@ -1125,14 +1125,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     mWmService.mAtmService.getRecentTasks().getInputListener());
         }
 
+        mDeviceStateController = new DeviceStateController(mWmService.mContext, mWmService.mH);
+
         mDisplayPolicy = new DisplayPolicy(mWmService, this);
         mDisplayRotation = new DisplayRotation(mWmService, this, mDisplayInfo.address);
 
-        mDeviceStateController = new DeviceStateController(mWmService.mContext, mWmService.mH,
-                newFoldState -> {
+        final Consumer<DeviceStateController.DeviceState> deviceStateConsumer =
+                (@NonNull DeviceStateController.DeviceState newFoldState) -> {
                     mDisplaySwitchTransitionLauncher.foldStateChanged(newFoldState);
                     mDisplayRotation.foldStateChanged(newFoldState);
-                });
+                };
+        mDeviceStateController.registerDeviceStateCallback(deviceStateConsumer);
 
         mCloseToSquareMaxAspectRatio = mWmService.mContext.getResources().getFloat(
                 R.dimen.config_closeToSquareDisplayMaxAspectRatio);

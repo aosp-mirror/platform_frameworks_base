@@ -26,7 +26,6 @@ import com.android.systemui.keyguard.shared.model.KeyguardBouncerModel
 import com.android.systemui.log.dagger.BouncerLog
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
-import com.android.systemui.statusbar.phone.KeyguardBouncer
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
