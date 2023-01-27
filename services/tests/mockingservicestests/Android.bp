@@ -92,7 +92,10 @@ android_test {
 
     certificate: "platform",
     platform_apis: true,
-    test_suites: ["device-tests"],
+    test_suites: [
+        "device-tests",
+        "automotive-tests",
+    ],
 
     optimize: {
         enabled: false,
