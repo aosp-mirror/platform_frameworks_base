@@ -276,8 +276,6 @@ class Task extends TaskFragment {
 
     private static final int DEFAULT_MIN_TASK_SIZE_DP = 220;
 
-    private float mShadowRadius = 0;
-
     /**
      * The modes to control how root task is moved to the front when calling {@link Task#reparent}.
      */
