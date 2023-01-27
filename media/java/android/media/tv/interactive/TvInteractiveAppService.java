@@ -903,10 +903,14 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
-         * Called when a tv message is received
-         * @hide
+         * Called when a TV message is received
+         *
+         * @param type The type of message received, such as
+         * {@link TvInputManager#TV_MESSAGE_TYPE_WATERMARK}
+         * @param data The raw data of the message
          */
-        public void onTvMessage(@NonNull String type, @NonNull Bundle data) {
+        public void onTvMessage(@NonNull @TvInputManager.TvMessageType String type,
+                @NonNull Bundle data) {
         }
 
         @Override

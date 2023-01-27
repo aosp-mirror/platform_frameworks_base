@@ -27023,6 +27023,8 @@ package android.media.tv {
     field public static final int TIME_SHIFT_STATUS_UNAVAILABLE = 2; // 0x2
     field public static final int TIME_SHIFT_STATUS_UNKNOWN = 0; // 0x0
     field public static final int TIME_SHIFT_STATUS_UNSUPPORTED = 1; // 0x1
+    field public static final String TV_MESSAGE_TYPE_CLOSED_CAPTION = "CC";
+    field public static final String TV_MESSAGE_TYPE_WATERMARK = "Watermark";
     field public static final int VIDEO_UNAVAILABLE_REASON_AUDIO_ONLY = 4; // 0x4
     field public static final int VIDEO_UNAVAILABLE_REASON_BUFFERING = 3; // 0x3
     field public static final int VIDEO_UNAVAILABLE_REASON_CAS_BLACKOUT = 16; // 0x10
@@ -27109,6 +27111,7 @@ package android.media.tv {
     method public void notifyTrackSelected(int, String);
     method public void notifyTracksChanged(java.util.List<android.media.tv.TvTrackInfo>);
     method public void notifyTuned(@NonNull android.net.Uri);
+    method public void notifyTvMessage(@NonNull String, @NonNull android.os.Bundle);
     method public void notifyVideoAvailable();
     method public void notifyVideoUnavailable(int);
     method public void onAppPrivateCommand(@NonNull String, android.os.Bundle);
@@ -27129,6 +27132,7 @@ package android.media.tv {
     method public void onSetInteractiveAppNotificationEnabled(boolean);
     method public abstract void onSetStreamVolume(@FloatRange(from=0.0, to=1.0) float);
     method public abstract boolean onSetSurface(@Nullable android.view.Surface);
+    method public void onSetTvMessageEnabled(@NonNull String, boolean);
     method public void onSurfaceChanged(int, int, int);
     method public long onTimeShiftGetCurrentPosition();
     method public long onTimeShiftGetStartPosition();
@@ -27268,6 +27272,7 @@ package android.media.tv {
     method public void setOnUnhandledInputEventListener(android.media.tv.TvView.OnUnhandledInputEventListener);
     method public void setStreamVolume(@FloatRange(from=0.0, to=1.0) float);
     method public void setTimeShiftPositionCallback(@Nullable android.media.tv.TvView.TimeShiftPositionCallback);
+    method public void setTvMessageEnabled(@NonNull String, boolean);
     method public void setZOrderMediaOverlay(boolean);
     method public void setZOrderOnTop(boolean);
     method public void timeShiftPause();
@@ -27304,6 +27309,7 @@ package android.media.tv {
     method public void onTrackSelected(String, int, String);
     method public void onTracksChanged(String, java.util.List<android.media.tv.TvTrackInfo>);
     method public void onTuned(@NonNull String, @NonNull android.net.Uri);
+    method public void onTvMessage(@NonNull String, @NonNull String, @NonNull android.os.Bundle);
     method public void onVideoAvailable(String);
     method public void onVideoSizeChanged(String, int, int);
     method public void onVideoUnavailable(String, int);
@@ -27435,6 +27441,7 @@ package android.media.tv.interactive {
     method public boolean onTrackballEvent(@NonNull android.view.MotionEvent);
     method public void onTracksChanged(@NonNull java.util.List<android.media.tv.TvTrackInfo>);
     method public void onTuned(@NonNull android.net.Uri);
+    method public void onTvMessage(@NonNull String, @NonNull android.os.Bundle);
     method public void onTvRecordingInfo(@Nullable android.media.tv.TvRecordingInfo);
     method public void onTvRecordingInfoList(@NonNull java.util.List<android.media.tv.TvRecordingInfo>);
     method public void onVideoAvailable();
@@ -27484,6 +27491,7 @@ package android.media.tv.interactive {
     method public void notifyError(@NonNull String, @NonNull android.os.Bundle);
     method public void notifyRecordingStarted(@NonNull String);
     method public void notifyRecordingStopped(@NonNull String);
+    method public void notifyTvMessage(@NonNull String, @NonNull android.os.Bundle);
     method public void onAttachedToWindow();
     method public void onDetachedFromWindow();
     method public void onLayout(boolean, int, int, int, int);

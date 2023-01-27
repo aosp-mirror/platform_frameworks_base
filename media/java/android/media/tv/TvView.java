@@ -722,14 +722,14 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Enables or disables TV message detecting in the streams of bound TV input.
+     * Enables or disables TV message detection in the stream of the bound TV input.
      *
      * @param type The type of {@link android.media.tv.TvInputManager.TvMessageType}
-     * @param enabled {@code true} if you want to enable TV message detecting
+     * @param enabled {@code true} if you want to enable TV message detection
      *                {@code false} otherwise.
-     * @hide
      */
-    public void setTvMessageEnabled(@TvInputManager.TvMessageType String type, boolean enabled) {
+    public void setTvMessageEnabled(@NonNull @TvInputManager.TvMessageType String type,
+            boolean enabled) {
     }
 
     @Override
@@ -1233,14 +1233,14 @@ public class TvView extends ViewGroup {
         }
 
         /**
-         * This is called when the session has been tuned to the given channel.
+         * This is called when a new TV Message has been received.
          *
+         * @param inputId The ID of the TV input bound to this view.
          * @param type The type of {@link android.media.tv.TvInputManager.TvMessageType}
          * @param data The raw data of the message
-         * @hide
          */
-        public void onTvMessage(@NonNull String inputId, @TvInputManager.TvMessageType String type,
-                Bundle data) {
+        public void onTvMessage(@NonNull String inputId,
+                @NonNull @TvInputManager.TvMessageType String type, @NonNull Bundle data) {
         }
     }
 

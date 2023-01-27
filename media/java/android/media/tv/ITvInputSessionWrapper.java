@@ -77,6 +77,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_NOTIFY_AD_BUFFER = 28;
     private static final int DO_SELECT_AUDIO_PRESENTATION = 29;
     private static final int DO_TIME_SHIFT_SET_MODE = 30;
+    private static final int DO_SET_TV_MESSAGE_ENABLED = 31;
 
     private final boolean mIsRecordingSession;
     private final HandlerCaller mCaller;
@@ -261,6 +262,11 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
             }
             case DO_SET_IAPP_NOTIFICATION_ENABLED: {
                 mTvInputSessionImpl.setInteractiveAppNotificationEnabled((Boolean) msg.obj);
+                break;
+            }
+            case DO_SET_TV_MESSAGE_ENABLED: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                mTvInputSessionImpl.setTvMessageEnabled((String) args.arg1, (Boolean) args.arg2);
                 break;
             }
             case DO_REQUEST_AD: {
