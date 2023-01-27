@@ -17,7 +17,6 @@
 package android.view.inputmethod;
 
 import android.annotation.IntDef;
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.RectF;
 
@@ -98,7 +97,7 @@ public final class TextBoundsInfoResult {
      * is null.
      */
     public TextBoundsInfoResult(@ResultCode int resultCode,
-            @NonNull TextBoundsInfo textBoundsInfo) {
+            @Nullable TextBoundsInfo textBoundsInfo) {
         if (resultCode == CODE_SUCCESS && textBoundsInfo == null) {
             throw new IllegalStateException("TextBoundsInfo must be provided when the resultCode "
                     + "is CODE_SUCCESS.");

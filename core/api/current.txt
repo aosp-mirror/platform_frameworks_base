@@ -55257,7 +55257,7 @@ package android.view.inputmethod {
 
   public final class TextBoundsInfoResult {
     ctor public TextBoundsInfoResult(int);
-    ctor public TextBoundsInfoResult(int, @NonNull android.view.inputmethod.TextBoundsInfo);
+    ctor public TextBoundsInfoResult(int, @Nullable android.view.inputmethod.TextBoundsInfo);
     method public int getResultCode();
     method @Nullable public android.view.inputmethod.TextBoundsInfo getTextBoundsInfo();
     field public static final int CODE_CANCELLED = 3; // 0x3
