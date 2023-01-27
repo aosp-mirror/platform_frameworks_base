@@ -469,6 +469,7 @@ public class BinaryTransparencyService extends SystemService {
         }
 
         private void recordApexInfo(IBinaryTransparencyService.ApexInfo apexInfo) {
+            // Must order by the proto's field number.
             FrameworkStatsLog.write(FrameworkStatsLog.APEX_INFO_GATHERED,
                     apexInfo.packageName,
                     apexInfo.longVersion,
@@ -479,6 +480,7 @@ public class BinaryTransparencyService extends SystemService {
         }
 
         private void writeAppInfoToLog(IBinaryTransparencyService.AppInfo appInfo) {
+            // Must order by the proto's field number.
             FrameworkStatsLog.write(FrameworkStatsLog.MOBILE_BUNDLED_APP_INFO_GATHERED,
                     appInfo.packageName,
                     appInfo.longVersion,
@@ -490,7 +492,8 @@ public class BinaryTransparencyService extends SystemService {
                     appInfo.initiator,
                     appInfo.initiatorSignerDigests,
                     appInfo.installer,
-                    appInfo.originator);
+                    appInfo.originator,
+                    appInfo.splitName);
         }
 
         /**
