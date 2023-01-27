@@ -29,8 +29,12 @@ import android.util.Pair;
 import com.android.internal.annotations.GuardedBy;
 
 import java.io.PrintWriter;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -60,8 +64,12 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
     private String[] mMethodNames = {"getDevicesForAttributes"};
 
     private static final boolean USE_CACHE_FOR_GETDEVICES = true;
+    private static final Object sDeviceCacheLock = new Object();
+    @GuardedBy("sDeviceCacheLock")
     private ConcurrentHashMap<Pair<AudioAttributes, Boolean>, ArrayList<AudioDeviceAttributes>>
             mDevicesForAttrCache;
+    @GuardedBy("sDeviceCacheLock")
+    private long mDevicesForAttributesCacheClearTimeMs = System.currentTimeMillis();
     private int[] mMethodCacheHit;
     private static final Object sRoutingListenerLock = new Object();
     @GuardedBy("sRoutingListenerLock")
@@ -147,9 +155,11 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
             AudioSystem.setRoutingCallback(sSingletonDefaultAdapter);
             AudioSystem.setVolumeRangeInitRequestCallback(sSingletonDefaultAdapter);
             if (USE_CACHE_FOR_GETDEVICES) {
-                sSingletonDefaultAdapter.mDevicesForAttrCache =
-                        new ConcurrentHashMap<>(AudioSystem.getNumStreamTypes());
-                sSingletonDefaultAdapter.mMethodCacheHit = new int[NB_MEASUREMENTS];
+                synchronized (sDeviceCacheLock) {
+                    sSingletonDefaultAdapter.mDevicesForAttrCache =
+                            new ConcurrentHashMap<>(AudioSystem.getNumStreamTypes());
+                    sSingletonDefaultAdapter.mMethodCacheHit = new int[NB_MEASUREMENTS];
+                }
             }
             if (ENABLE_GETDEVICES_STATS) {
                 sSingletonDefaultAdapter.mMethodCallCounter = new int[NB_MEASUREMENTS];
@@ -163,8 +173,9 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
         if (DEBUG_CACHE) {
             Log.d(TAG, "---- clearing cache ----------");
         }
-        if (mDevicesForAttrCache != null) {
-            synchronized (mDevicesForAttrCache) {
+        synchronized (sDeviceCacheLock) {
+            if (mDevicesForAttrCache != null) {
+                mDevicesForAttributesCacheClearTimeMs = System.currentTimeMillis();
                 mDevicesForAttrCache.clear();
             }
         }
@@ -193,7 +204,7 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
         if (USE_CACHE_FOR_GETDEVICES) {
             ArrayList<AudioDeviceAttributes> res;
             final Pair<AudioAttributes, Boolean> key = new Pair(attributes, forVolume);
-            synchronized (mDevicesForAttrCache) {
+            synchronized (sDeviceCacheLock) {
                 res = mDevicesForAttrCache.get(key);
                 if (res == null) {
                     // result from AudioSystem guaranteed non-null, but could be invalid
@@ -508,23 +519,31 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
      */
     public void dump(PrintWriter pw) {
         pw.println("\nAudioSystemAdapter:");
-        pw.println(" mDevicesForAttrCache:");
-        if (mDevicesForAttrCache != null) {
-            for (Map.Entry<Pair<AudioAttributes, Boolean>, ArrayList<AudioDeviceAttributes>>
-                    entry : mDevicesForAttrCache.entrySet()) {
-                final AudioAttributes attributes = entry.getKey().first;
-                try {
-                    final int stream = attributes.getVolumeControlStream();
-                    pw.println("\t" + attributes + " forVolume: " + entry.getKey().second
-                            + " stream: "
-                            + AudioSystem.STREAM_NAMES[stream] + "(" + stream + ")");
-                    for (AudioDeviceAttributes devAttr : entry.getValue()) {
-                        pw.println("\t\t" + devAttr);
+        final DateTimeFormatter formatter = DateTimeFormatter
+                .ofPattern("MM-dd HH:mm:ss:SSS")
+                .withLocale(Locale.US)
+                .withZone(ZoneId.systemDefault());
+        synchronized (sDeviceCacheLock) {
+            pw.println(" last cache clear time: " + formatter.format(
+                    Instant.ofEpochMilli(mDevicesForAttributesCacheClearTimeMs)));
+            pw.println(" mDevicesForAttrCache:");
+            if (mDevicesForAttrCache != null) {
+                for (Map.Entry<Pair<AudioAttributes, Boolean>, ArrayList<AudioDeviceAttributes>>
+                        entry : mDevicesForAttrCache.entrySet()) {
+                    final AudioAttributes attributes = entry.getKey().first;
+                    try {
+                        final int stream = attributes.getVolumeControlStream();
+                        pw.println("\t" + attributes + " forVolume: " + entry.getKey().second
+                                + " stream: "
+                                + AudioSystem.STREAM_NAMES[stream] + "(" + stream + ")");
+                        for (AudioDeviceAttributes devAttr : entry.getValue()) {
+                            pw.println("\t\t" + devAttr);
+                        }
+                    } catch (IllegalArgumentException e) {
+                        // dump could fail if attributes do not map to a stream.
+                        pw.println("\t dump failed for attributes: " + attributes);
+                        Log.e(TAG, "dump failed", e);
                     }
-                } catch (IllegalArgumentException e) {
-                    // dump could fail if attributes do not map to a stream.
-                    pw.println("\t dump failed for attributes: " + attributes);
-                    Log.e(TAG, "dump failed", e);
                 }
             }
         }
