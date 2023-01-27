@@ -16,8 +16,6 @@
 
 package com.android.systemui.navigationbar.gestural;
 
-import static android.view.Display.DEFAULT_DISPLAY;
-
 import static com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler.DEBUG_MISSING_GESTURE;
 import static com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler.DEBUG_MISSING_GESTURE_TAG;
 
@@ -55,9 +53,9 @@ import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.dagger.qualifiers.Background;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.MotionEventsHandlerBase;
 import com.android.systemui.plugins.NavigationEdgeBackPlugin;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shared.navigationbar.RegionSamplingHelper;
 import com.android.systemui.statusbar.VibratorHelper;
 
@@ -291,7 +289,8 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
             Context context,
             LatencyTracker latencyTracker,
             VibratorHelper vibratorHelper,
-            @Background Executor backgroundExecutor) {
+            @Background Executor backgroundExecutor,
+            DisplayTracker displayTracker) {
         super(context);
 
         mWindowManager = context.getSystemService(WindowManager.class);
@@ -367,7 +366,7 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
 
         setVisibility(GONE);
 
-        boolean isPrimaryDisplay = mContext.getDisplayId() == DEFAULT_DISPLAY;
+        boolean isPrimaryDisplay = mContext.getDisplayId() == displayTracker.getDefaultDisplayId();
         mRegionSamplingHelper = new RegionSamplingHelper(this,
                 new RegionSamplingHelper.SamplingCallback() {
                     @Override

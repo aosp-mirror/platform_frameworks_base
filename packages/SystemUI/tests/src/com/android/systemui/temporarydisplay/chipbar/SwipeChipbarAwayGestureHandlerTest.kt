@@ -22,6 +22,7 @@ import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.settings.FakeDisplayTracker
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -36,7 +37,7 @@ class SwipeChipbarAwayGestureHandlerTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        underTest = SwipeChipbarAwayGestureHandler(context, mock())
+        underTest = SwipeChipbarAwayGestureHandler(context, FakeDisplayTracker(mContext), mock())
     }
 
     @Test

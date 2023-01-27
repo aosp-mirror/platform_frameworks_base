@@ -64,6 +64,7 @@ import com.android.systemui.qs.footer.dagger.FooterActionsModule;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.screenshot.dagger.ScreenshotModule;
 import com.android.systemui.security.data.repository.SecurityRepositoryModule;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.smartspace.dagger.SmartspaceModule;
 import com.android.systemui.statusbar.CommandQueue;
@@ -198,8 +199,8 @@ public abstract class SystemUIModule {
 
     @SysUISingleton
     @Provides
-    static SysUiState provideSysUiState(DumpManager dumpManager) {
-        final SysUiState state = new SysUiState();
+    static SysUiState provideSysUiState(DisplayTracker displayTracker, DumpManager dumpManager) {
+        final SysUiState state = new SysUiState(displayTracker);
         dumpManager.registerDumpable(state);
         return state;
     }

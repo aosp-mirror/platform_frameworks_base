@@ -137,6 +137,7 @@ public class ScreenshotView extends FrameLayout implements
     private final AccessibilityManager mAccessibilityManager;
     private final GestureDetector mSwipeDetector;
 
+    private int mDefaultDisplay = Display.DEFAULT_DISPLAY;
     private int mNavMode;
     private boolean mOrientationPortrait;
     private boolean mDirectionLTR;
@@ -333,7 +334,7 @@ public class ScreenshotView extends FrameLayout implements
 
     private void startInputListening() {
         stopInputListening();
-        mInputMonitor = new InputMonitorCompat("Screenshot", Display.DEFAULT_DISPLAY);
+        mInputMonitor = new InputMonitorCompat("Screenshot", mDefaultDisplay);
         mInputEventReceiver = mInputMonitor.getInputReceiver(
                 Looper.getMainLooper(), Choreographer.getInstance(), ev -> {
                     if (ev instanceof MotionEvent) {
@@ -489,6 +490,10 @@ public class ScreenshotView extends FrameLayout implements
 
     void setPackageName(String packageName) {
         mPackageName = packageName;
+    }
+
+    void setDefaultDisplay(int displayId) {
+        mDefaultDisplay = displayId;
     }
 
     void updateInsets(WindowInsets insets) {

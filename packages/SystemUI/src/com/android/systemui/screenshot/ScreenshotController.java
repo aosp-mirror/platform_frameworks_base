@@ -17,7 +17,6 @@
 package com.android.systemui.screenshot;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 
 import static com.android.systemui.flags.Flags.SCREENSHOT_WORK_PROFILE_POLICY;
@@ -102,6 +101,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ActionTransition;
 import com.android.systemui.screenshot.TakeScreenshotService.RequestCallback;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.util.Assert;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -273,6 +273,7 @@ public class ScreenshotController {
     private final ScrollCaptureClient mScrollCaptureClient;
     private final PhoneWindow mWindow;
     private final DisplayManager mDisplayManager;
+    private final DisplayTracker mDisplayTracker;
     private final ScrollCaptureController mScrollCaptureController;
     private final LongScreenshotData mLongScreenshotHolder;
     private final boolean mIsLowRamDevice;
@@ -331,7 +332,8 @@ public class ScreenshotController {
             ActionIntentExecutor actionExecutor,
             UserManager userManager,
             WorkProfileMessageController workProfileMessageController,
-            AssistContentRequester assistContentRequester
+            AssistContentRequester assistContentRequester,
+            DisplayTracker displayTracker
     ) {
         mScreenshotSmartActions = screenshotSmartActions;
         mNotificationsController = screenshotNotificationsController;
@@ -357,6 +359,7 @@ public class ScreenshotController {
         });
 
         mDisplayManager = requireNonNull(context.getSystemService(DisplayManager.class));
+        mDisplayTracker = displayTracker;
         final Context displayContext = context.createDisplayContext(getDefaultDisplay());
         mContext = (WindowContext) displayContext.createWindowContext(TYPE_SCREENSHOT, null);
         mWindowManager = mContext.getSystemService(WindowManager.class);
@@ -400,7 +403,8 @@ public class ScreenshotController {
         mCurrentRequestCallback = requestCallback;
         if (screenshot.getType() == WindowManager.TAKE_SCREENSHOT_FULLSCREEN) {
             Rect bounds = getFullScreenRect();
-            screenshot.setBitmap(mImageCapture.captureDisplay(DEFAULT_DISPLAY, bounds));
+            screenshot.setBitmap(
+                    mImageCapture.captureDisplay(mDisplayTracker.getDefaultDisplayId(), bounds));
             screenshot.setScreenBounds(bounds);
         }
 
@@ -667,6 +671,7 @@ public class ScreenshotController {
                 setWindowFocusable(false);
             }
         }, mActionExecutor, mFlags);
+        mScreenshotView.setDefaultDisplay(mDisplayTracker.getDefaultDisplayId());
         mScreenshotView.setDefaultTimeoutMillis(mScreenshotHandler.getDefaultTimeoutMillis());
 
         mScreenshotView.setOnKeyListener((v, keyCode, event) -> {
@@ -700,7 +705,8 @@ public class ScreenshotController {
 
         // copy the input Rect, since SurfaceControl.screenshot can mutate it
         Rect screenRect = new Rect(crop);
-        Bitmap screenshot = mImageCapture.captureDisplay(DEFAULT_DISPLAY, crop);
+        Bitmap screenshot = mImageCapture.captureDisplay(mDisplayTracker.getDefaultDisplayId(),
+                crop);
 
         if (screenshot == null) {
             Log.e(TAG, "takeScreenshotInternal: Screenshot bitmap was null");
@@ -856,7 +862,7 @@ public class ScreenshotController {
             mLastScrollCaptureRequest.cancel(true);
         }
         final ListenableFuture<ScrollCaptureResponse> future =
-                mScrollCaptureClient.request(DEFAULT_DISPLAY);
+                mScrollCaptureClient.request(mDisplayTracker.getDefaultDisplayId());
         mLastScrollCaptureRequest = future;
         mLastScrollCaptureRequest.addListener(() ->
                 onScrollCaptureResponseReady(future, owner), mMainExecutor);
@@ -887,7 +893,8 @@ public class ScreenshotController {
             mScreenshotView.showScrollChip(response.getPackageName(), /* onClick */ () -> {
                 DisplayMetrics displayMetrics = new DisplayMetrics();
                 getDefaultDisplay().getRealMetrics(displayMetrics);
-                Bitmap newScreenshot = mImageCapture.captureDisplay(DEFAULT_DISPLAY,
+                Bitmap newScreenshot = mImageCapture.captureDisplay(
+                        mDisplayTracker.getDefaultDisplayId(),
                         new Rect(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels));
 
                 mScreenshotView.prepareScrollingTransition(response, mScreenBitmap, newScreenshot,
@@ -951,7 +958,8 @@ public class ScreenshotController {
                     SCREENSHOT_REMOTE_RUNNER, 0, 0);
             try {
                 WindowManagerGlobal.getWindowManagerService()
-                        .overridePendingAppTransitionRemote(runner, DEFAULT_DISPLAY);
+                        .overridePendingAppTransitionRemote(runner,
+                                mDisplayTracker.getDefaultDisplayId());
             } catch (Exception e) {
                 Log.e(TAG, "Error overriding screenshot app transition", e);
             }
@@ -1289,7 +1297,7 @@ public class ScreenshotController {
     }
 
     private Display getDefaultDisplay() {
-        return mDisplayManager.getDisplay(DEFAULT_DISPLAY);
+        return mDisplayManager.getDisplay(mDisplayTracker.getDefaultDisplayId());
     }
 
     private boolean allowLongScreenshots() {
