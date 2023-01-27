@@ -508,7 +508,8 @@ public class UserBackupManagerService {
 
     @VisibleForTesting
     UserBackupManagerService(Context context, PackageManager packageManager,
-            LifecycleOperationStorage operationStorage, TransportManager transportManager) {
+            LifecycleOperationStorage operationStorage, TransportManager transportManager,
+            BackupHandler backupHandler, BackupManagerConstants backupManagerConstants) {
         mContext = context;
 
         mUserId = 0;
@@ -516,6 +517,9 @@ public class UserBackupManagerService {
         mPackageManager = packageManager;
         mOperationStorage = operationStorage;
         mTransportManager = transportManager;
+        mFullBackupQueue = new ArrayList<>();
+        mBackupHandler = backupHandler;
+        mConstants = backupManagerConstants;
 
         mBaseStateDir = null;
         mDataDir = null;
@@ -527,9 +531,7 @@ public class UserBackupManagerService {
         mAgentTimeoutParameters = null;
         mActivityManagerInternal = null;
         mAlarmManager = null;
-        mConstants = null;
         mWakelock = null;
-        mBackupHandler = null;
         mBackupPreferences = null;
         mBackupPasswordManager = null;
         mPackageManagerBinder = null;

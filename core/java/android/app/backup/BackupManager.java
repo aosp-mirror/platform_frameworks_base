@@ -37,6 +37,8 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.util.Pair;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.List;
 
 /**
@@ -199,8 +201,15 @@ public class BackupManager {
     public static final int ERROR_TRANSPORT_INVALID = -2;
 
     private Context mContext;
+
+    /**
+     * @hide Making this package private is not sufficient for the test to access it, that's because
+     * the test is in the same package but is loaded with a different class loader. Package
+     * private members are not accessible across class loaders. So we make it public and @hide it.
+     */
     @UnsupportedAppUsage
-    private static IBackupManager sService;
+    @VisibleForTesting
+    public static IBackupManager sService;
 
     @UnsupportedAppUsage
     private static void checkServiceBinder() {

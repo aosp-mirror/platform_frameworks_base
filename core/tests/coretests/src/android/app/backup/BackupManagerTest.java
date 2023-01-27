@@ -19,11 +19,14 @@ package android.app.backup;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.backup.BackupAnnotations.BackupDestination;
 import android.app.backup.BackupAnnotations.OperationType;
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 
@@ -31,7 +34,6 @@ import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -43,14 +45,28 @@ import java.io.IOException;
 public class BackupManagerTest {
     private BackupManager mBackupManager;
 
+    private static final int USER_ID = 12;
+
     @Mock
     Context mContext;
+    @Mock
+    IBackupManager mIBackupManager;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         mBackupManager = new BackupManager(mContext);
+        BackupManager.sService = mIBackupManager;
+    }
+
+    @Test
+    public void testSetFrameworkSchedulingEnabled_delegatesToService() throws RemoteException {
+        when(mContext.getUserId()).thenReturn(USER_ID);
+        mBackupManager.setFrameworkSchedulingEnabled(true);
+
+        verify(mIBackupManager).setFrameworkSchedulingEnabledForUser(
+                USER_ID, /* isEnabled= */true);
     }
 
     @Test

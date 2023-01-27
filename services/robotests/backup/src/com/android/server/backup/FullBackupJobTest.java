@@ -16,6 +16,8 @@
 
 package com.android.server.backup;
 
+import static com.android.server.backup.FullBackupJob.getJobIdForUserId;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.when;
@@ -151,10 +153,5 @@ public class FullBackupJobTest {
 
         assertThat(mShadowJobScheduler.getPendingJob(getJobIdForUserId(mUserOneId))).isNull();
         assertThat(mShadowJobScheduler.getPendingJob(getJobIdForUserId(mUserTwoId))).isNotNull();
-    }
-
-    private static int getJobIdForUserId(int userId) {
-        return JobIdManager.getJobIdForUserId(FullBackupJob.MIN_JOB_ID, FullBackupJob.MAX_JOB_ID,
-                userId);
     }
 }
