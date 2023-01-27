@@ -911,6 +911,7 @@ package android.app {
 
   public class KeyguardManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_WEAK_ESCROW_TOKEN) public long addWeakEscrowToken(@NonNull byte[], @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull android.app.KeyguardManager.WeakEscrowTokenActivatedListener);
+    method @NonNull @RequiresPermission(android.Manifest.permission.CHECK_REMOTE_LOCKSCREEN) public android.content.Intent createConfirmDeviceCredentialForRemoteValidationIntent(@NonNull android.app.StartLockscreenValidationRequest, @NonNull android.content.ComponentName, @Nullable CharSequence, @Nullable CharSequence, @Nullable CharSequence, @Nullable CharSequence);
     method public android.content.Intent createConfirmFactoryResetCredentialIntent(CharSequence, CharSequence, CharSequence);
     method @RequiresPermission("android.permission.SET_INITIAL_LOCK") public int getMinLockLength(boolean, int);
     method @RequiresPermission(android.Manifest.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS) public boolean getPrivateNotificationsAllowed();
