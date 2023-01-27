@@ -2086,8 +2086,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     // When the Task is entering picture-in-picture, we should clear all override
                     // from the client organizer, so the PIP activity can get the correct config
                     // from the Task, and prevent conflict with the PipTaskOrganizer.
+                    // TaskFragmentOrganizer may have requested relative bounds, so reset the
+                    // relative bounds before update configuration.
+                    tf.setRelativeEmbeddedBounds(new Rect());
                     tf.updateRequestedOverrideConfiguration(EMPTY);
-                    tf.updateRelativeEmbeddedBounds();
                 }
             });
             rootTask.setWindowingMode(WINDOWING_MODE_PINNED);

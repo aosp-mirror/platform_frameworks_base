@@ -243,6 +243,15 @@ class TaskContainer {
             return mConfiguration;
         }
 
+        /** Translates the given absolute bounds to relative bounds in this Task coordinate. */
+        void translateAbsoluteBoundsToRelativeBounds(@NonNull Rect inOutBounds) {
+            if (inOutBounds.isEmpty()) {
+                return;
+            }
+            final Rect taskBounds = mConfiguration.windowConfiguration.getBounds();
+            inOutBounds.offset(-taskBounds.left, -taskBounds.top);
+        }
+
         /**
          * Obtains the {@link TaskProperties} for the task that the provided {@link Activity} is
          * associated with.

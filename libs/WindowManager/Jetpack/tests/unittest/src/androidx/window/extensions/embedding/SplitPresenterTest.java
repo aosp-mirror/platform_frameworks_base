@@ -75,6 +75,7 @@ import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentOperation;
 import android.window.WindowContainerTransaction;
 
+import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -148,13 +149,13 @@ public class SplitPresenterTest {
         mPresenter.resizeTaskFragment(mTransaction, container.getTaskFragmentToken(), TASK_BOUNDS);
 
         assertTrue(container.areLastRequestedBoundsEqual(TASK_BOUNDS));
-        verify(mTransaction).setBounds(any(), eq(TASK_BOUNDS));
+        verify(mTransaction).setRelativeBounds(any(), eq(TASK_BOUNDS));
 
         // No request to set the same bounds.
         clearInvocations(mTransaction);
         mPresenter.resizeTaskFragment(mTransaction, container.getTaskFragmentToken(), TASK_BOUNDS);
 
-        verify(mTransaction, never()).setBounds(any(), any());
+        verify(mTransaction, never()).setRelativeBounds(any(), any());
     }
 
     @Test
@@ -226,7 +227,7 @@ public class SplitPresenterTest {
     }
 
     @Test
-    public void testGetBoundsForPosition_expandContainers() {
+    public void testGetRelBoundsForPosition_expandContainers() {
         final TaskContainer.TaskProperties taskProperties = getTaskProperty();
         final SplitAttributes splitAttributes = new SplitAttributes.Builder()
                 .setSplitType(new SplitAttributes.SplitType.ExpandContainersSplitType())
@@ -234,18 +235,40 @@ public class SplitPresenterTest {
 
         assertEquals("Task bounds must be reported.",
                 new Rect(),
-                mPresenter.getBoundsForPosition(POSITION_START, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_START, taskProperties,
+                        splitAttributes));
 
         assertEquals("Task bounds must be reported.",
                 new Rect(),
-                mPresenter.getBoundsForPosition(POSITION_END, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_END, taskProperties, splitAttributes));
         assertEquals("Task bounds must be reported.",
                 new Rect(),
-                mPresenter.getBoundsForPosition(POSITION_FILL, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_FILL, taskProperties, splitAttributes));
     }
 
     @Test
-    public void testGetBoundsForPosition_splitVertically() {
+    public void testGetRelBoundsForPosition_expandContainers_isRelativeToParent() {
+        final TaskContainer.TaskProperties taskProperties = getTaskProperty(
+                new Rect(100, 100, 500, 1000));
+        final SplitAttributes splitAttributes = new SplitAttributes.Builder()
+                .setSplitType(new SplitAttributes.SplitType.ExpandContainersSplitType())
+                .build();
+
+        assertEquals("Task bounds must be reported.",
+                new Rect(),
+                mPresenter.getRelBoundsForPosition(POSITION_START, taskProperties,
+                        splitAttributes));
+
+        assertEquals("Task bounds must be reported.",
+                new Rect(),
+                mPresenter.getRelBoundsForPosition(POSITION_END, taskProperties, splitAttributes));
+        assertEquals("Task bounds must be reported.",
+                new Rect(),
+                mPresenter.getRelBoundsForPosition(POSITION_FILL, taskProperties, splitAttributes));
+    }
+
+    @Test
+    public void testGetRelBoundsForPosition_splitVertically() {
         final Rect primaryBounds = getSplitBounds(true /* isPrimary */,
                 false /* splitHorizontally */);
         final Rect secondaryBounds = getSplitBounds(false /* isPrimary */,
@@ -258,14 +281,15 @@ public class SplitPresenterTest {
 
         assertEquals("Primary bounds must be reported.",
                 primaryBounds,
-                mPresenter.getBoundsForPosition(POSITION_START, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_START, taskProperties,
+                        splitAttributes));
 
         assertEquals("Secondary bounds must be reported.",
                 secondaryBounds,
-                mPresenter.getBoundsForPosition(POSITION_END, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_END, taskProperties, splitAttributes));
         assertEquals("Task bounds must be reported.",
                 new Rect(),
-                mPresenter.getBoundsForPosition(POSITION_FILL, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_FILL, taskProperties, splitAttributes));
 
         splitAttributes = new SplitAttributes.Builder()
                 .setSplitType(SplitAttributes.SplitType.RatioSplitType.splitEqually())
@@ -274,14 +298,15 @@ public class SplitPresenterTest {
 
         assertEquals("Secondary bounds must be reported.",
                 secondaryBounds,
-                mPresenter.getBoundsForPosition(POSITION_START, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_START, taskProperties,
+                        splitAttributes));
 
         assertEquals("Primary bounds must be reported.",
                 primaryBounds,
-                mPresenter.getBoundsForPosition(POSITION_END, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_END, taskProperties, splitAttributes));
         assertEquals("Task bounds must be reported.",
                 new Rect(),
-                mPresenter.getBoundsForPosition(POSITION_FILL, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_FILL, taskProperties, splitAttributes));
 
         splitAttributes = new SplitAttributes.Builder()
                 .setSplitType(SplitAttributes.SplitType.RatioSplitType.splitEqually())
@@ -292,18 +317,85 @@ public class SplitPresenterTest {
 
         assertEquals("Secondary bounds must be reported.",
                 secondaryBounds,
-                mPresenter.getBoundsForPosition(POSITION_START, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_START, taskProperties,
+                        splitAttributes));
 
         assertEquals("Primary bounds must be reported.",
                 primaryBounds,
-                mPresenter.getBoundsForPosition(POSITION_END, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_END, taskProperties, splitAttributes));
         assertEquals("Task bounds must be reported.",
                 new Rect(),
-                mPresenter.getBoundsForPosition(POSITION_FILL, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_FILL, taskProperties, splitAttributes));
     }
 
     @Test
-    public void testGetBoundsForPosition_splitHorizontally() {
+    public void testGetRelBoundsForPosition_splitVertically_isRelativeToParent() {
+        // Calculate based on TASK_BOUNDS.
+        final Rect primaryBounds = getSplitBounds(true /* isPrimary */,
+                false /* splitHorizontally */);
+        final Rect secondaryBounds = getSplitBounds(false /* isPrimary */,
+                false /* splitHorizontally */);
+
+        // Offset TaskBounds to 100, 100. The returned rel bounds shouldn't be affected.
+        final Rect taskBounds = new Rect(TASK_BOUNDS);
+        taskBounds.offset(100, 100);
+        final TaskContainer.TaskProperties taskProperties = getTaskProperty(taskBounds);
+        SplitAttributes splitAttributes = new SplitAttributes.Builder()
+                .setSplitType(SplitAttributes.SplitType.RatioSplitType.splitEqually())
+                .setLayoutDirection(SplitAttributes.LayoutDirection.LEFT_TO_RIGHT)
+                .build();
+
+        assertEquals("Primary bounds must be reported.",
+                primaryBounds,
+                mPresenter.getRelBoundsForPosition(POSITION_START, taskProperties,
+                        splitAttributes));
+
+        assertEquals("Secondary bounds must be reported.",
+                secondaryBounds,
+                mPresenter.getRelBoundsForPosition(POSITION_END, taskProperties, splitAttributes));
+        assertEquals("Task bounds must be reported.",
+                new Rect(),
+                mPresenter.getRelBoundsForPosition(POSITION_FILL, taskProperties, splitAttributes));
+
+        splitAttributes = new SplitAttributes.Builder()
+                .setSplitType(SplitAttributes.SplitType.RatioSplitType.splitEqually())
+                .setLayoutDirection(SplitAttributes.LayoutDirection.RIGHT_TO_LEFT)
+                .build();
+
+        assertEquals("Secondary bounds must be reported.",
+                secondaryBounds,
+                mPresenter.getRelBoundsForPosition(POSITION_START, taskProperties,
+                        splitAttributes));
+
+        assertEquals("Primary bounds must be reported.",
+                primaryBounds,
+                mPresenter.getRelBoundsForPosition(POSITION_END, taskProperties, splitAttributes));
+        assertEquals("Task bounds must be reported.",
+                new Rect(),
+                mPresenter.getRelBoundsForPosition(POSITION_FILL, taskProperties, splitAttributes));
+
+        splitAttributes = new SplitAttributes.Builder()
+                .setSplitType(SplitAttributes.SplitType.RatioSplitType.splitEqually())
+                .setLayoutDirection(SplitAttributes.LayoutDirection.LOCALE)
+                .build();
+        // Layout direction should follow screen layout for SplitAttributes.LayoutDirection.LOCALE.
+        taskProperties.getConfiguration().screenLayout |= Configuration.SCREENLAYOUT_LAYOUTDIR_RTL;
+
+        assertEquals("Secondary bounds must be reported.",
+                secondaryBounds,
+                mPresenter.getRelBoundsForPosition(POSITION_START, taskProperties,
+                        splitAttributes));
+
+        assertEquals("Primary bounds must be reported.",
+                primaryBounds,
+                mPresenter.getRelBoundsForPosition(POSITION_END, taskProperties, splitAttributes));
+        assertEquals("Task bounds must be reported.",
+                new Rect(),
+                mPresenter.getRelBoundsForPosition(POSITION_FILL, taskProperties, splitAttributes));
+    }
+
+    @Test
+    public void testGetRelBoundsForPosition_splitHorizontally() {
         final Rect primaryBounds = getSplitBounds(true /* isPrimary */,
                 true /* splitHorizontally */);
         final Rect secondaryBounds = getSplitBounds(false /* isPrimary */,
@@ -316,14 +408,15 @@ public class SplitPresenterTest {
 
         assertEquals("Primary bounds must be reported.",
                 primaryBounds,
-                mPresenter.getBoundsForPosition(POSITION_START, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_START, taskProperties,
+                        splitAttributes));
 
         assertEquals("Secondary bounds must be reported.",
                 secondaryBounds,
-                mPresenter.getBoundsForPosition(POSITION_END, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_END, taskProperties, splitAttributes));
         assertEquals("Task bounds must be reported.",
                 new Rect(),
-                mPresenter.getBoundsForPosition(POSITION_FILL, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_FILL, taskProperties, splitAttributes));
 
         splitAttributes = new SplitAttributes.Builder()
                 .setSplitType(SplitAttributes.SplitType.RatioSplitType.splitEqually())
@@ -332,18 +425,19 @@ public class SplitPresenterTest {
 
         assertEquals("Secondary bounds must be reported.",
                 secondaryBounds,
-                mPresenter.getBoundsForPosition(POSITION_START, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_START, taskProperties,
+                        splitAttributes));
 
         assertEquals("Primary bounds must be reported.",
                 primaryBounds,
-                mPresenter.getBoundsForPosition(POSITION_END, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_END, taskProperties, splitAttributes));
         assertEquals("Task bounds must be reported.",
                 new Rect(),
-                mPresenter.getBoundsForPosition(POSITION_FILL, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_FILL, taskProperties, splitAttributes));
     }
 
     @Test
-    public void testGetBoundsForPosition_useHingeFallback() {
+    public void testGetRelBoundsForPosition_useHingeFallback() {
         final Rect primaryBounds = getSplitBounds(true /* isPrimary */,
                 false /* splitHorizontally */);
         final Rect secondaryBounds = getSplitBounds(false /* isPrimary */,
@@ -361,14 +455,15 @@ public class SplitPresenterTest {
 
         assertEquals("PrimaryBounds must be reported.",
                 primaryBounds,
-                mPresenter.getBoundsForPosition(POSITION_START, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_START, taskProperties,
+                        splitAttributes));
 
         assertEquals("SecondaryBounds must be reported.",
                 secondaryBounds,
-                mPresenter.getBoundsForPosition(POSITION_END, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_END, taskProperties, splitAttributes));
         assertEquals("Task bounds must be reported.",
                 new Rect(),
-                mPresenter.getBoundsForPosition(POSITION_FILL, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_FILL, taskProperties, splitAttributes));
 
         // Hinge is reported, but the host task is in multi-window mode. Still use fallback
         // splitType.
@@ -379,14 +474,15 @@ public class SplitPresenterTest {
 
         assertEquals("PrimaryBounds must be reported.",
                 primaryBounds,
-                mPresenter.getBoundsForPosition(POSITION_START, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_START, taskProperties,
+                        splitAttributes));
 
         assertEquals("SecondaryBounds must be reported.",
                 secondaryBounds,
-                mPresenter.getBoundsForPosition(POSITION_END, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_END, taskProperties, splitAttributes));
         assertEquals("Task bounds must be reported.",
                 new Rect(),
-                mPresenter.getBoundsForPosition(POSITION_FILL, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_FILL, taskProperties, splitAttributes));
 
         // Hinge is reported, and the host task is in fullscreen, but layout direction doesn't match
         // folding area orientation. Still use fallback splitType.
@@ -397,18 +493,19 @@ public class SplitPresenterTest {
 
         assertEquals("PrimaryBounds must be reported.",
                 primaryBounds,
-                mPresenter.getBoundsForPosition(POSITION_START, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_START, taskProperties,
+                        splitAttributes));
 
         assertEquals("SecondaryBounds must be reported.",
                 secondaryBounds,
-                mPresenter.getBoundsForPosition(POSITION_END, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_END, taskProperties, splitAttributes));
         assertEquals("Task bounds must be reported.",
                 new Rect(),
-                mPresenter.getBoundsForPosition(POSITION_FILL, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_FILL, taskProperties, splitAttributes));
     }
 
     @Test
-    public void testGetBoundsForPosition_fallbackToExpandContainers() {
+    public void testGetRelBoundsForPosition_fallbackToExpandContainers() {
         final TaskContainer.TaskProperties taskProperties = getTaskProperty();
         final SplitAttributes splitAttributes = new SplitAttributes.Builder()
                 .setSplitType(new SplitAttributes.SplitType.HingeSplitType(
@@ -418,18 +515,19 @@ public class SplitPresenterTest {
 
         assertEquals("Task bounds must be reported.",
                 new Rect(),
-                mPresenter.getBoundsForPosition(POSITION_START, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_START, taskProperties,
+                        splitAttributes));
 
         assertEquals("Task bounds must be reported.",
                 new Rect(),
-                mPresenter.getBoundsForPosition(POSITION_END, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_END, taskProperties, splitAttributes));
         assertEquals("Task bounds must be reported.",
                 new Rect(),
-                mPresenter.getBoundsForPosition(POSITION_FILL, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_FILL, taskProperties, splitAttributes));
     }
 
     @Test
-    public void testGetBoundsForPosition_useHingeSplitType() {
+    public void testGetRelBoundsForPosition_useHingeSplitType() {
         final TaskContainer.TaskProperties taskProperties = getTaskProperty();
         final SplitAttributes splitAttributes = new SplitAttributes.Builder()
                 .setSplitType(new SplitAttributes.SplitType.HingeSplitType(
@@ -455,14 +553,15 @@ public class SplitPresenterTest {
 
         assertEquals("PrimaryBounds must be reported.",
                 primaryBounds,
-                mPresenter.getBoundsForPosition(POSITION_START, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_START, taskProperties,
+                        splitAttributes));
 
         assertEquals("SecondaryBounds must be reported.",
                 secondaryBounds,
-                mPresenter.getBoundsForPosition(POSITION_END, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_END, taskProperties, splitAttributes));
         assertEquals("Task bounds must be reported.",
                 new Rect(),
-                mPresenter.getBoundsForPosition(POSITION_FILL, taskProperties, splitAttributes));
+                mPresenter.getRelBoundsForPosition(POSITION_FILL, taskProperties, splitAttributes));
     }
 
     @Test
@@ -601,8 +700,12 @@ public class SplitPresenterTest {
     }
 
     private static TaskContainer.TaskProperties getTaskProperty() {
+        return getTaskProperty(TASK_BOUNDS);
+    }
+
+    private static TaskContainer.TaskProperties getTaskProperty(@NonNull Rect taskBounds) {
         final Configuration configuration = new Configuration();
-        configuration.windowConfiguration.setBounds(TASK_BOUNDS);
+        configuration.windowConfiguration.setBounds(taskBounds);
         return new TaskContainer.TaskProperties(DEFAULT_DISPLAY, configuration);
     }
 }
