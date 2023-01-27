@@ -353,6 +353,7 @@ enum RuntimeFlags : uint32_t {
     GWP_ASAN_LEVEL_NEVER = 0 << 21,
     GWP_ASAN_LEVEL_LOTTERY = 1 << 21,
     GWP_ASAN_LEVEL_ALWAYS = 2 << 21,
+    GWP_ASAN_LEVEL_DEFAULT = 3 << 21,
     NATIVE_HEAP_ZERO_INIT_ENABLED = 1 << 23,
     PROFILEABLE = 1 << 24,
 };
@@ -1932,6 +1933,13 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
     gwp_asan_options.program_name = nice_name_ptr ?: process_name;
     switch (runtime_flags & RuntimeFlags::GWP_ASAN_LEVEL_MASK) {
         default:
+        case RuntimeFlags::GWP_ASAN_LEVEL_DEFAULT:
+            // TODO(b/247012630): Switch this to Action::TURN_ON_FOR_APP_SAMPLED_NON_CRASHING once
+            // performance and syshealth testing is completed, making the default for non-system
+            // apps that don't specify a `gwpAsanMode` in their manifest to be sampled-recoverable.
+            gwp_asan_options.desire = Action::DONT_TURN_ON_UNLESS_OVERRIDDEN;
+            android_mallopt(M_INITIALIZE_GWP_ASAN, &gwp_asan_options, sizeof(gwp_asan_options));
+            break;
         case RuntimeFlags::GWP_ASAN_LEVEL_NEVER:
             gwp_asan_options.desire = Action::DONT_TURN_ON_UNLESS_OVERRIDDEN;
             android_mallopt(M_INITIALIZE_GWP_ASAN, &gwp_asan_options, sizeof(gwp_asan_options));
