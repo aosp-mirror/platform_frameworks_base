@@ -66,8 +66,6 @@ public final class CachedAppOptimizer {
     // Flags stored in the DeviceConfig API.
     @VisibleForTesting static final String KEY_USE_COMPACTION = "use_compaction";
     @VisibleForTesting static final String KEY_USE_FREEZER = "use_freezer";
-    @VisibleForTesting static final String KEY_COMPACT_ACTION_1 = "compact_action_1";
-    @VisibleForTesting static final String KEY_COMPACT_ACTION_2 = "compact_action_2";
     @VisibleForTesting static final String KEY_COMPACT_THROTTLE_1 = "compact_throttle_1";
     @VisibleForTesting static final String KEY_COMPACT_THROTTLE_2 = "compact_throttle_2";
     @VisibleForTesting static final String KEY_COMPACT_THROTTLE_3 = "compact_throttle_3";
@@ -99,15 +97,6 @@ public final class CachedAppOptimizer {
     private static final int RSS_ANON_INDEX = 2;
     private static final int RSS_SWAP_INDEX = 3;
 
-    // Phenotype sends int configurations and we map them to the strings we'll use on device,
-    // preventing a weird string value entering the kernel.
-    private static final int COMPACT_ACTION_NONE = 0;
-    private static final int COMPACT_ACTION_FILE = 1;
-    private static final int COMPACT_ACTION_ANON = 2;
-    private static final int COMPACT_ACTION_ALL = 3;
-
-    private static final String COMPACT_ACTION_STRING[] = {"", "file", "anon", "all"};
-
     // Keeps these flags in sync with services/core/jni/com_android_server_am_CachedAppOptimizer.cpp
     private static final int COMPACT_ACTION_FILE_FLAG = 1;
     private static final int COMPACT_ACTION_ANON_FLAG = 2;
@@ -120,8 +109,6 @@ public final class CachedAppOptimizer {
     // Defaults for phenotype flags.
     @VisibleForTesting static final Boolean DEFAULT_USE_COMPACTION = true;
     @VisibleForTesting static final Boolean DEFAULT_USE_FREEZER = true;
-    @VisibleForTesting static final int DEFAULT_COMPACT_ACTION_2 = COMPACT_ACTION_ALL;
-    @VisibleForTesting static final int DEFAULT_COMPACT_ACTION_1 = COMPACT_ACTION_FILE;
     @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_1 = 5_000;
     @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_2 = 10_000;
     @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_3 = 500;
@@ -240,9 +227,6 @@ public final class CachedAppOptimizer {
                         for (String name : properties.getKeyset()) {
                             if (KEY_USE_COMPACTION.equals(name)) {
                                 updateUseCompaction();
-                            } else if (KEY_COMPACT_ACTION_1.equals(name)
-                                    || KEY_COMPACT_ACTION_2.equals(name)) {
-                                updateCompactionActions();
                             } else if (KEY_COMPACT_THROTTLE_1.equals(name)
                                     || KEY_COMPACT_THROTTLE_2.equals(name)
                                     || KEY_COMPACT_THROTTLE_3.equals(name)
@@ -313,12 +297,6 @@ public final class CachedAppOptimizer {
     final Object mPhenotypeFlagLock = new Object();
 
     // Configured by phenotype. Updates from the server take effect immediately.
-    @GuardedBy("mPhenotypeFlagLock")
-    @VisibleForTesting
-    volatile CompactAction mCompactActionSome = compactActionIntToAction(DEFAULT_COMPACT_ACTION_1);
-    @GuardedBy("mPhenotypeFlagLock")
-    @VisibleForTesting
-    volatile CompactAction mCompactActionFull = compactActionIntToAction(DEFAULT_COMPACT_ACTION_2);
     @GuardedBy("mPhenotypeFlagLock")
     @VisibleForTesting volatile long mCompactThrottleSomeSome = DEFAULT_COMPACT_THROTTLE_1;
     @GuardedBy("mPhenotypeFlagLock")
@@ -542,7 +520,6 @@ public final class CachedAppOptimizer {
                 CACHED_APP_FREEZER_ENABLED_URI, false, mSettingsObserver);
         synchronized (mPhenotypeFlagLock) {
             updateUseCompaction();
-            updateCompactionActions();
             updateCompactionThrottles();
             updateCompactStatsdSampleRate();
             updateFreezerStatsdSampleRate();
@@ -587,8 +564,6 @@ public final class CachedAppOptimizer {
         pw.println("CachedAppOptimizer settings");
         synchronized (mPhenotypeFlagLock) {
             pw.println("  " + KEY_USE_COMPACTION + "=" + mUseCompaction);
-            pw.println("  " + KEY_COMPACT_ACTION_1 + "=" + mCompactActionSome);
-            pw.println("  " + KEY_COMPACT_ACTION_2 + "=" + mCompactActionFull);
             pw.println("  " + KEY_COMPACT_THROTTLE_1 + "=" + mCompactThrottleSomeSome);
             pw.println("  " + KEY_COMPACT_THROTTLE_2 + "=" + mCompactThrottleSomeFull);
             pw.println("  " + KEY_COMPACT_THROTTLE_3 + "=" + mCompactThrottleFullSome);
@@ -759,21 +734,6 @@ public final class CachedAppOptimizer {
                             + app.mOptRecord.getReqCompactSource().name());
         }
         return false;
-    }
-
-    private CompactAction resolveCompactActionForProfile(CompactProfile profile) {
-        CompactAction action;
-        switch (profile) {
-            case SOME:
-                action = CompactAction.FILE;
-                break;
-            case FULL:
-                action = CompactAction.ALL;
-                break;
-            default:
-                action = CompactAction.NONE;
-        }
-        return action;
     }
 
     private AggregatedProcessCompactionStats getPerProcessAggregatedCompactStat(
@@ -1051,18 +1011,6 @@ public final class CachedAppOptimizer {
     }
 
     @GuardedBy("mPhenotypeFlagLock")
-    private void updateCompactionActions() {
-        int compactAction1 = DeviceConfig.getInt(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                KEY_COMPACT_ACTION_1, DEFAULT_COMPACT_ACTION_1);
-
-        int compactAction2 = DeviceConfig.getInt(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                KEY_COMPACT_ACTION_2, DEFAULT_COMPACT_ACTION_2);
-
-        mCompactActionSome = compactActionIntToAction(compactAction1);
-        mCompactActionFull = compactActionIntToAction(compactAction2);
-    }
-
-    @GuardedBy("mPhenotypeFlagLock")
     private void updateCompactionThrottles() {
         boolean useThrottleDefaults = false;
         // TODO: improve efficiency by calling DeviceConfig only once for all flags.
@@ -1233,14 +1181,6 @@ public final class CachedAppOptimizer {
             }
         }
         return true;
-    }
-
-    static CompactAction compactActionIntToAction(int action) {
-        if (action < 0 || action >= CompactAction.values().length) {
-            return CompactAction.NONE;
-        }
-
-        return CompactAction.values()[action];
     }
 
     // This will ensure app will be out of the freezer for at least mFreezerDebounceTimeout.
