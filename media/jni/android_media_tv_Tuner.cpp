@@ -132,6 +132,11 @@
 #include <aidl/android/hardware/tv/tuner/FrontendIsdbtPartialReceptionFlag.h>
 #include <aidl/android/hardware/tv/tuner/FrontendIsdbtSettings.h>
 #include <aidl/android/hardware/tv/tuner/FrontendIsdbtTimeInterleaveMode.h>
+#include <aidl/android/hardware/tv/tuner/FrontendIptvSettings.h>
+#include <aidl/android/hardware/tv/tuner/FrontendIptvSettingsFec.h>
+#include <aidl/android/hardware/tv/tuner/FrontendIptvSettingsProtocol.h>
+#include <aidl/android/hardware/tv/tuner/FrontendIptvSettingsIgmp.h>
+#include <aidl/android/hardware/tv/tuner/FrontendIptvSettingsFecType.h>
 #include <aidl/android/hardware/tv/tuner/FrontendModulation.h>
 #include <aidl/android/hardware/tv/tuner/FrontendModulationStatus.h>
 #include <aidl/android/hardware/tv/tuner/FrontendRollOff.h>
@@ -283,6 +288,11 @@ using ::aidl::android::hardware::tv::tuner::FrontendIsdbtModulation;
 using ::aidl::android::hardware::tv::tuner::FrontendIsdbtPartialReceptionFlag;
 using ::aidl::android::hardware::tv::tuner::FrontendIsdbtSettings;
 using ::aidl::android::hardware::tv::tuner::FrontendIsdbtTimeInterleaveMode;
+using ::aidl::android::hardware::tv::tuner::FrontendIptvSettings;
+using ::aidl::android::hardware::tv::tuner::FrontendIptvSettingsFec;
+using ::aidl::android::hardware::tv::tuner::FrontendIptvSettingsProtocol;
+using ::aidl::android::hardware::tv::tuner::FrontendIptvSettingsIgmp;
+using ::aidl::android::hardware::tv::tuner::FrontendIptvSettingsFecType;
 using ::aidl::android::hardware::tv::tuner::FrontendModulation;
 using ::aidl::android::hardware::tv::tuner::FrontendModulationStatus;
 using ::aidl::android::hardware::tv::tuner::FrontendRollOff;
@@ -3430,6 +3440,106 @@ static FrontendSettings getDtmbFrontendSettings(JNIEnv *env, const jobject &sett
     return frontendSettings;
 }
 
+static DemuxIpAddress getDemuxIpAddress(JNIEnv *env, const jobject& config, const char* className) {
+    jclass clazz = env->FindClass(className);
+
+    jbyteArray jsrcIpAddress = static_cast<jbyteArray>(
+            env->GetObjectField(config, env->GetFieldID(clazz, "mSrcIpAddress", "[B")));
+    jsize srcSize = env->GetArrayLength(jsrcIpAddress);
+    jbyteArray jdstIpAddress = static_cast<jbyteArray>(
+            env->GetObjectField(config, env->GetFieldID(clazz, "mDstIpAddress", "[B")));
+    jsize dstSize = env->GetArrayLength(jdstIpAddress);
+
+    DemuxIpAddress res;
+
+    if (srcSize != dstSize) {
+        // should never happen. Validated on Java size.
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+            "IP address lengths don't match. srcLength=%d, dstLength=%d", srcSize, dstSize);
+        return res;
+    }
+
+    if (srcSize == IP_V4_LENGTH) {
+        vector<uint8_t> srcAddr;
+        vector<uint8_t> dstAddr;
+        srcAddr.resize(IP_V4_LENGTH);
+        dstAddr.resize(IP_V4_LENGTH);
+        env->GetByteArrayRegion(jsrcIpAddress, 0, srcSize, reinterpret_cast<jbyte *>(&srcAddr[0]));
+        env->GetByteArrayRegion(jdstIpAddress, 0, dstSize, reinterpret_cast<jbyte *>(&dstAddr[0]));
+        res.srcIpAddress.set<DemuxIpAddressIpAddress::Tag::v4>(srcAddr);
+        res.dstIpAddress.set<DemuxIpAddressIpAddress::Tag::v4>(dstAddr);
+    } else if (srcSize == IP_V6_LENGTH) {
+        vector<uint8_t> srcAddr;
+        vector<uint8_t> dstAddr;
+        srcAddr.resize(IP_V6_LENGTH);
+        dstAddr.resize(IP_V6_LENGTH);
+        env->GetByteArrayRegion(jsrcIpAddress, 0, srcSize, reinterpret_cast<jbyte *>(&srcAddr[0]));
+        env->GetByteArrayRegion(jdstIpAddress, 0, dstSize, reinterpret_cast<jbyte *>(&dstAddr[0]));
+        res.srcIpAddress.set<DemuxIpAddressIpAddress::Tag::v6>(srcAddr);
+        res.dstIpAddress.set<DemuxIpAddressIpAddress::Tag::v6>(dstAddr);
+    } else {
+        // should never happen. Validated on Java size.
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+            "Invalid IP address length %d", srcSize);
+        return res;
+    }
+
+    res.srcPort = env->GetIntField(config, env->GetFieldID(clazz, "mSrcPort", "I"));
+    res.dstPort = env->GetIntField(config, env->GetFieldID(clazz, "mDstPort", "I"));
+
+    return res;
+}
+
+static FrontendIptvSettingsFec getIptvFrontendSettingsFec(JNIEnv *env, const jobject &settings) {
+    jclass clazz = env->FindClass("android/media/tv/tuner/frontend/IptvFrontendSettings");
+    jobject fec = env->GetObjectField(settings, env->GetFieldID(clazz, "mFec",
+            "[Landroid/media/tv/tuner/frontend/IptvFrontendSettingsFec;"));
+    jclass fecClazz = env->FindClass("android/media/tv/tuner/frontend/IptvFrontendSettingsFec");
+    FrontendIptvSettingsFecType fecType =
+            static_cast<FrontendIptvSettingsFecType>(
+                    env->GetIntField(fec, env->GetFieldID(fecClazz, "mFec", "I")));
+    int32_t fecColNum = env->GetIntField(fec, env->GetFieldID(fecClazz, "mFecColNum", "I"));
+    int32_t fecRowNum = env->GetIntField(fec, env->GetFieldID(fecClazz, "mFecRowNum", "I"));
+
+    FrontendIptvSettingsFec frontendIptvSettingsFec {
+        .type = fecType,
+        .fecColNum = fecColNum,
+        .fecRowNum = fecRowNum,
+    };
+
+    return frontendIptvSettingsFec;
+}
+
+static FrontendSettings getIptvFrontendSettings(JNIEnv *env, const jobject &settings) {
+    FrontendSettings frontendSettings;
+    const char *clazzName = "android/media/tv/tuner/frontend/IptvFrontendSettings";
+    jclass clazz = env->FindClass(clazzName);
+    FrontendIptvSettingsProtocol protocol =
+            static_cast<FrontendIptvSettingsProtocol>(
+                    env->GetIntField(settings, env->GetFieldID(clazz, "mProtocol", "I")));
+    FrontendIptvSettingsIgmp igmp =
+            static_cast<FrontendIptvSettingsIgmp>(
+                    env->GetIntField(settings, env->GetFieldID(clazz, "mIgmp", "I")));
+    FrontendIptvSettingsFec fec = getIptvFrontendSettingsFec(env, settings);
+    int64_t bitrate = env->GetIntField(settings, env->GetFieldID(clazz, "mBitrate", "J"));
+    jstring contentUrlJString = (jstring) env->GetObjectField(settings, env->GetFieldID(
+                                clazz, "mContentUrl",
+                                "[Landroid/media/tv/tuner/frontend/IptvFrontendSettings;"));
+    const char *contentUrl = env->GetStringUTFChars(contentUrlJString, 0);
+    DemuxIpAddress ipAddr = getDemuxIpAddress(env, settings, clazzName);
+
+    FrontendIptvSettings frontendIptvSettings{
+            .protocol = protocol,
+            .fec = fec,
+            .igmp = igmp,
+            .bitrate = bitrate,
+            .ipAddr = ipAddr,
+            .contentUrl = contentUrl,
+    };
+    frontendSettings.set<FrontendSettings::Tag::iptv>(frontendIptvSettings);
+    return frontendSettings;
+}
+
 static FrontendSettings getFrontendSettings(JNIEnv *env, int type, jobject settings) {
     ALOGV("getFrontendSettings %d", type);
     FrontendType feType = static_cast<FrontendType>(type);
@@ -3454,6 +3564,8 @@ static FrontendSettings getFrontendSettings(JNIEnv *env, int type, jobject setti
             return getIsdbtFrontendSettings(env, settings);
         case FrontendType::DTMB:
             return getDtmbFrontendSettings(env, settings);
+        case FrontendType::IPTV:
+            return getIptvFrontendSettings(env, settings);
         default:
             // should never happen because a type is associated with a subclass of
             // FrontendSettings and not set by users
@@ -3943,56 +4055,6 @@ static DemuxFilterDownloadSettings getFilterDownloadSettings(JNIEnv *env, const 
     return filterDownloadSettings;
 }
 
-static DemuxIpAddress getDemuxIpAddress(JNIEnv *env, const jobject& config) {
-    jclass clazz = env->FindClass("android/media/tv/tuner/filter/IpFilterConfiguration");
-
-    jbyteArray jsrcIpAddress = static_cast<jbyteArray>(
-            env->GetObjectField(config, env->GetFieldID(clazz, "mSrcIpAddress", "[B")));
-    jsize srcSize = env->GetArrayLength(jsrcIpAddress);
-    jbyteArray jdstIpAddress = static_cast<jbyteArray>(
-            env->GetObjectField(config, env->GetFieldID(clazz, "mDstIpAddress", "[B")));
-    jsize dstSize = env->GetArrayLength(jdstIpAddress);
-
-    DemuxIpAddress res;
-
-    if (srcSize != dstSize) {
-        // should never happen. Validated on Java size.
-        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
-            "IP address lengths don't match. srcLength=%d, dstLength=%d", srcSize, dstSize);
-        return res;
-    }
-
-    if (srcSize == IP_V4_LENGTH) {
-        vector<uint8_t> srcAddr;
-        vector<uint8_t> dstAddr;
-        srcAddr.resize(IP_V4_LENGTH);
-        dstAddr.resize(IP_V4_LENGTH);
-        env->GetByteArrayRegion(jsrcIpAddress, 0, srcSize, reinterpret_cast<jbyte *>(&srcAddr[0]));
-        env->GetByteArrayRegion(jdstIpAddress, 0, dstSize, reinterpret_cast<jbyte *>(&dstAddr[0]));
-        res.srcIpAddress.set<DemuxIpAddressIpAddress::Tag::v4>(srcAddr);
-        res.dstIpAddress.set<DemuxIpAddressIpAddress::Tag::v4>(dstAddr);
-    } else if (srcSize == IP_V6_LENGTH) {
-        vector<uint8_t> srcAddr;
-        vector<uint8_t> dstAddr;
-        srcAddr.resize(IP_V6_LENGTH);
-        dstAddr.resize(IP_V6_LENGTH);
-        env->GetByteArrayRegion(jsrcIpAddress, 0, srcSize, reinterpret_cast<jbyte *>(&srcAddr[0]));
-        env->GetByteArrayRegion(jdstIpAddress, 0, dstSize, reinterpret_cast<jbyte *>(&dstAddr[0]));
-        res.srcIpAddress.set<DemuxIpAddressIpAddress::Tag::v6>(srcAddr);
-        res.dstIpAddress.set<DemuxIpAddressIpAddress::Tag::v6>(dstAddr);
-    } else {
-        // should never happen. Validated on Java size.
-        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
-            "Invalid IP address length %d", srcSize);
-        return res;
-    }
-
-    res.srcPort = env->GetIntField(config, env->GetFieldID(clazz, "mSrcPort", "I"));
-    res.dstPort = env->GetIntField(config, env->GetFieldID(clazz, "mDstPort", "I"));
-
-    return res;
-}
-
 static DemuxFilterSettings getFilterConfiguration(
         JNIEnv *env, int type, int subtype, jobject filterConfigObj) {
     DemuxFilterSettings filterSettings;
@@ -4088,7 +4150,8 @@ static DemuxFilterSettings getFilterConfiguration(
             break;
         }
         case DemuxFilterMainType::IP: {
-            DemuxIpAddress ipAddr = getDemuxIpAddress(env, filterConfigObj);
+            DemuxIpAddress ipAddr = getDemuxIpAddress(env, filterConfigObj,
+                                    "android/media/tv/tuner/filter/IpFilterConfiguration");
             DemuxIpFilterSettings ipFilterSettings {
                 .ipAddr = ipAddr,
             };
