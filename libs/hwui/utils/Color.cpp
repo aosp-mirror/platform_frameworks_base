@@ -155,23 +155,12 @@ android_dataspace ColorSpaceToADataSpace(SkColorSpace* colorSpace, SkColorType c
 
     skcms_TransferFunction fn;
     if (!colorSpace->isNumericalTransferFn(&fn)) {
-        // pq with the default white point
-        auto rec2020PQ = SkColorSpace::MakeRGB(GetPQSkTransferFunction(), SkNamedGamut::kRec2020);
-        if (SkColorSpace::Equals(colorSpace, rec2020PQ.get())) {
+        auto res = skcms_TransferFunction_getType(&fn);
+        if (res == skcms_TFType_PQish) {
             return HAL_DATASPACE_BT2020_PQ;
         }
-        // standard PQ
-        rec2020PQ = SkColorSpace::MakeRGB(SkNamedTransferFn::kPQ, SkNamedGamut::kRec2020);
-        if (SkColorSpace::Equals(colorSpace, rec2020PQ.get())) {
-            return HAL_DATASPACE_BT2020_PQ;
-        }
-        // HLG
-        const auto hlgFn = GetHLGScaleTransferFunction();
-        if (hlgFn.has_value()) {
-            auto rec2020HLG = SkColorSpace::MakeRGB(hlgFn.value(), SkNamedGamut::kRec2020);
-            if (SkColorSpace::Equals(colorSpace, rec2020HLG.get())) {
-                return static_cast<android_dataspace>(HAL_DATASPACE_BT2020_HLG);
-            }
+        if (res == skcms_TFType_HLGish) {
+            return static_cast<android_dataspace>(HAL_DATASPACE_BT2020_HLG);
         }
         LOG_ALWAYS_FATAL("Only select non-numerical transfer functions are supported");
     }

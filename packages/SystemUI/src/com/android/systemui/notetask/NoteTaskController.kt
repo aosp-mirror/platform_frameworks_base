@@ -17,10 +17,12 @@
 package com.android.systemui.notetask
 
 import android.app.KeyguardManager
+import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.UserManager
+import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
 import com.android.systemui.util.kotlin.getOrNull
@@ -57,7 +59,7 @@ constructor(
      * If the keyguard is locked, notes will open as a full screen experience. A locked device has
      * no contextual information which let us use the whole screen space available.
      *
-     * If no in multi-window or the keyguard is unlocked, notes will open as a bubble OR it will be
+     * If not in multi-window or the keyguard is unlocked, notes will open as a bubble OR it will be
      * collapsed if the notes bubble is already opened.
      *
      * That will let users open other apps in full screen, and take contextual notes.
@@ -68,16 +70,23 @@ constructor(
         val bubbles = optionalBubbles.getOrNull() ?: return
         val keyguardManager = optionalKeyguardManager.getOrNull() ?: return
         val userManager = optionalUserManager.getOrNull() ?: return
-        val intent = intentResolver.resolveIntent() ?: return
 
         // TODO(b/249954038): We should handle direct boot (isUserUnlocked). For now, we do nothing.
         if (!userManager.isUserUnlocked) return
 
-        if (isInMultiWindowMode || keyguardManager.isKeyguardLocked) {
-            context.startActivity(intent)
-        } else {
-            // TODO(b/254606432): Should include Intent.EXTRA_FLOATING_WINDOW_MODE parameter.
-            bubbles.showOrHideAppBubble(intent)
+        val intent = intentResolver.resolveIntent() ?: return
+
+        // TODO(b/266686199): We should handle when app not available. For now, we log.
+        try {
+            if (isInMultiWindowMode || keyguardManager.isKeyguardLocked) {
+                context.startActivity(intent)
+            } else {
+                bubbles.showOrHideAppBubble(intent)
+            }
+        } catch (e: ActivityNotFoundException) {
+            val message =
+                "Activity not found for action: ${NoteTaskIntentResolver.ACTION_CREATE_NOTE}."
+            Log.e(TAG, message, e)
         }
     }
 
@@ -106,6 +115,8 @@ constructor(
     }
 
     companion object {
+        private val TAG = NoteTaskController::class.simpleName.orEmpty()
+
         // TODO(b/254604589): Use final KeyEvent.KEYCODE_* instead.
         const val NOTE_TASK_KEY_EVENT = 311
     }

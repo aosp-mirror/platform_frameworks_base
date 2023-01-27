@@ -41,7 +41,7 @@ typedef void (*APH_updateTargetWorkDuration)(APerformanceHintSession*, int64_t);
 typedef void (*APH_reportActualWorkDuration)(APerformanceHintSession*, int64_t);
 typedef void (*APH_closeSession)(APerformanceHintSession* session);
 typedef void (*APH_sendHint)(APerformanceHintSession*, int32_t);
-typedef void (*APH_setThreads)(APerformanceHintSession*, const int32_t*, size_t);
+typedef void (*APH_setThreads)(APerformanceHintSession*, const pid_t*, size_t);
 typedef void (*APH_getThreadIds)(APerformanceHintSession*, int32_t* const, size_t* const);
 
 bool gAPerformanceHintBindingInitialized = false;

@@ -54,12 +54,18 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.recents.OverviewProxyService
 import com.android.systemui.util.concurrency.DelayableExecutor
 import java.io.PrintWriter
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 private const val TAG = "SideFpsController"
 
@@ -79,6 +85,9 @@ constructor(
     displayManager: DisplayManager,
     @Main private val mainExecutor: DelayableExecutor,
     @Main private val handler: Handler,
+    private val alternateBouncerInteractor: AlternateBouncerInteractor,
+    @Application private val scope: CoroutineScope,
+    private val featureFlags: FeatureFlags,
     dumpManager: DumpManager
 ) : Dumpable {
     val requests: HashSet<SideFpsUiRequestSource> = HashSet()
@@ -168,7 +177,24 @@ constructor(
             }
         )
         overviewProxyService.addCallback(overviewProxyListener)
+        listenForAlternateBouncerVisibility()
+
         dumpManager.registerDumpable(this)
+    }
+
+    private fun listenForAlternateBouncerVisibility() {
+        alternateBouncerInteractor.setAlternateBouncerUIAvailable(true)
+        if (featureFlags.isEnabled(Flags.MODERN_ALTERNATE_BOUNCER)) {
+            scope.launch {
+                alternateBouncerInteractor.isVisible.collect { isVisible: Boolean ->
+                    if (isVisible) {
+                        show(SideFpsUiRequestSource.ALTERNATE_BOUNCER)
+                    } else {
+                        hide(SideFpsUiRequestSource.ALTERNATE_BOUNCER)
+                    }
+                }
+            }
+        }
     }
 
     /** Shows the side fps overlay if not already shown. */
@@ -423,4 +449,5 @@ enum class SideFpsUiRequestSource {
     AUTO_SHOW,
     /** Pin, pattern or password bouncer */
     PRIMARY_BOUNCER,
+    ALTERNATE_BOUNCER
 }

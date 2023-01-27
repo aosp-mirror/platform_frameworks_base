@@ -16,6 +16,7 @@
 
 package com.android.server.pm.permission;
 
+import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
 import static android.Manifest.permission.CAPTURE_AUDIO_OUTPUT;
 import static android.Manifest.permission.RECORD_AUDIO;
@@ -1379,14 +1380,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             boolean permissionGranted = context.checkPermission(permission, /*pid*/ -1,
                     uid) == PackageManager.PERMISSION_GRANTED;
 
-            // Override certain permissions checks for the HotwordDetectionService. This service is
-            // an isolated service, which ordinarily cannot hold permissions.
+            // Override certain permissions checks for the shared isolated process for both
+            // HotwordDetectionService and VisualQueryDetectionService, which ordinarily cannot hold
+            // any permissions.
             // There's probably a cleaner, more generalizable way to do this. For now, this is
             // the only use case for this, so simply override here.
             if (!permissionGranted
                     && Process.isIsolated(uid) // simple check which fails-fast for the common case
                     && (permission.equals(RECORD_AUDIO) || permission.equals(CAPTURE_AUDIO_HOTWORD)
-                    || permission.equals(CAPTURE_AUDIO_OUTPUT))) {
+                    || permission.equals(CAPTURE_AUDIO_OUTPUT) || permission.equals(CAMERA))) {
                 HotwordDetectionServiceProvider hotwordServiceProvider =
                         permissionManagerServiceInt.getHotwordDetectionServiceProvider();
                 permissionGranted = hotwordServiceProvider != null

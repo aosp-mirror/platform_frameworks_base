@@ -219,6 +219,8 @@ class PendingJobQueue {
             ajq.clear();
             mAppJobQueuePool.release(ajq);
         } else if (prevTimestamp != ajq.peekNextTimestamp()) {
+            // Removing the job changed the "next timestamp" in the queue, so we need to reinsert
+            // it to fix the ordering.
             mOrderedQueues.remove(ajq);
             mOrderedQueues.offer(ajq);
         }

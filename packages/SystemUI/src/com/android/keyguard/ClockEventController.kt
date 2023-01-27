@@ -28,10 +28,12 @@ import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags.DOZING_MIGRATION_1
 import com.android.systemui.flags.Flags.REGION_SAMPLING
@@ -77,8 +79,9 @@ open class ClockEventController @Inject constructor(
     @Background private val bgExecutor: Executor,
     @KeyguardSmallClockLog private val smallLogBuffer: LogBuffer?,
     @KeyguardLargeClockLog private val largeLogBuffer: LogBuffer?,
-    private val featureFlags: FeatureFlags
-) {
+    private val featureFlags: FeatureFlags,
+    private val dumpManager: DumpManager
+) : Dumpable {
     var clock: ClockController? = null
         set(value) {
             field = value
@@ -275,6 +278,7 @@ open class ClockEventController @Inject constructor(
         configurationController.addCallback(configListener)
         batteryController.addCallback(batteryCallback)
         keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
+        dumpManager.registerDumpable(this)
         disposableHandle = parent.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 listenForDozing(this)
@@ -300,6 +304,7 @@ open class ClockEventController @Inject constructor(
         batteryController.removeCallback(batteryCallback)
         keyguardUpdateMonitor.removeCallback(keyguardUpdateMonitorCallback)
         regionSampler?.stopRegionSampler()
+        dumpManager.unregisterDumpable(javaClass.simpleName)
     }
 
     private fun updateFontSizes() {
@@ -312,7 +317,7 @@ open class ClockEventController @Inject constructor(
     /**
      * Dump information for debugging
      */
-    fun dump(pw: PrintWriter) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println(this)
         clock?.dump(pw)
         regionSampler?.dump(pw)

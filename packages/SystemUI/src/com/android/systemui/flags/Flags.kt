@@ -199,8 +199,7 @@ object Flags {
 
     /** A different path for unocclusion transitions back to keyguard */
     // TODO(b/262859270): Tracking Bug
-    @JvmField
-    val UNOCCLUSION_TRANSITION = unreleasedFlag(223, "unocclusion_transition", teamfood = true)
+    @JvmField val UNOCCLUSION_TRANSITION = releasedFlag(223, "unocclusion_transition")
 
     // flag for controlling auto pin confirmation and material u shapes in bouncer
     @JvmField
@@ -446,6 +445,12 @@ object Flags {
             teamfood = false
         )
 
+    // TODO(b/198643358): Tracking bug
+    @Keep
+    @JvmField
+    val ENABLE_PIP_SIZE_LARGE_SCREEN =
+        sysPropBooleanFlag(1114, "persist.wm.debug.enable_pip_size_large_screen", default = false)
+
     // 1200 - predictive back
     @Keep
     @JvmField
@@ -523,7 +528,6 @@ object Flags {
         releasedFlag(1600, "a11y_floating_menu_fling_spring_animations")
 
     // 1700 - clipboard
-    @JvmField val CLIPBOARD_OVERLAY_REFACTOR = releasedFlag(1700, "clipboard_overlay_refactor")
     @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = releasedFlag(1701, "clipboard_remote_behavior")
 
     // 1800 - shade container

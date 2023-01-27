@@ -52,6 +52,10 @@ A picker experience may:
 * Unselect an already-selected quick affordance from a slot
 * Unselect all already-selected quick affordances from a slot
 
+## Testing
+* Add a unit test for your implementation of `KeyguardQuickAffordanceConfig`
+* Manually verify that your implementation works in multi-user environments from both the main user and a secondary user
+
 ## Debugging
 To see the current state of the system, you can run `dumpsys`:
 

@@ -579,6 +579,14 @@ static void nativeSetDataSpace(JNIEnv* env, jclass clazz, jlong transactionObj, 
     transaction->setDataspace(ctrl, dataspace);
 }
 
+static void nativeSetExtendedRangeBrightness(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                             jlong nativeObject, float currentBufferRatio,
+                                             float desiredRatio) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    transaction->setExtendedRangeBrightness(ctrl, currentBufferRatio, desiredRatio);
+}
+
 static void nativeSetBlurRegions(JNIEnv* env, jclass clazz, jlong transactionObj,
                                  jlong nativeObject, jobjectArray regions, jint regionsLength) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
@@ -2086,6 +2094,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
     {"nativeSetBufferTransform", "(JJI)V", (void*) nativeSetBufferTransform},
     {"nativeSetDataSpace", "(JJI)V",
             (void*)nativeSetDataSpace },
+    {"nativeSetExtendedRangeBrightness", "(JJFF)V",
+            (void*)nativeSetExtendedRangeBrightness },
     {"nativeAddWindowInfosReportedListener", "(JLjava/lang/Runnable;)V",
             (void*)nativeAddWindowInfosReportedListener },
     {"nativeGetDisplayBrightnessSupport", "(Landroid/os/IBinder;)Z",

@@ -114,6 +114,10 @@ class OpenAppFromLockNotificationWithLockOverlayApp(flicker: FlickerTest) :
     @Test
     override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
+    @FlakyTest(bugId = 266730606)
+    @Test
+    override fun entireScreenCovered() = super.entireScreenCovered()
+
     companion object {
         /**
          * Creates the test configurations.

@@ -636,7 +636,8 @@ class FgsManagerControllerImpl @Inject constructor(
                 isRunning: Boolean
         ) {
             synchronized(lock) {
-                val userPackageKey = UserPackage(summary.sourceUserId, summary.sourcePackageName)
+                val userPackageKey = UserPackage(
+                        UserHandle.getUserId(summary.callingUid), summary.callingPackageName)
                 if (isRunning) {
                     runningTaskIdentifiers
                             .getOrPut(userPackageKey) { StartTimeAndIdentifiers(systemClock) }

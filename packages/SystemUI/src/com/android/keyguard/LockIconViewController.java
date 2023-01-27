@@ -431,6 +431,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         pw.println(" mStatusBarState: " + StatusBarState.toString(mStatusBarState));
         pw.println(" mInterpolatedDarkAmount: " + mInterpolatedDarkAmount);
         pw.println(" mSensorTouchLocation: " + mSensorTouchLocation);
+        pw.println(" mDefaultPaddingPx: " + mDefaultPaddingPx);
 
         if (mView != null) {
             mView.dump(pw, args);

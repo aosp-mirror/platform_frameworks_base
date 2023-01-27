@@ -30,6 +30,8 @@ import java.util.Objects;
  */
 public class UserVisibleJobSummary implements Parcelable {
     private final int mCallingUid;
+    @NonNull
+    private final String mCallingPackageName;
     private final int mSourceUserId;
     @NonNull
     private final String mSourcePackageName;
@@ -37,9 +39,11 @@ public class UserVisibleJobSummary implements Parcelable {
     private final String mNamespace;
     private final int mJobId;
 
-    public UserVisibleJobSummary(int callingUid, int sourceUserId,
-            @NonNull String sourcePackageName, String namespace, int jobId) {
+    public UserVisibleJobSummary(int callingUid, @NonNull String callingPackageName,
+            int sourceUserId, @NonNull String sourcePackageName,
+            @Nullable String namespace, int jobId) {
         mCallingUid = callingUid;
+        mCallingPackageName = callingPackageName;
         mSourceUserId = sourceUserId;
         mSourcePackageName = sourcePackageName;
         mNamespace = namespace;
@@ -48,10 +52,16 @@ public class UserVisibleJobSummary implements Parcelable {
 
     protected UserVisibleJobSummary(Parcel in) {
         mCallingUid = in.readInt();
+        mCallingPackageName = in.readString();
         mSourceUserId = in.readInt();
         mSourcePackageName = in.readString();
         mNamespace = in.readString();
         mJobId = in.readInt();
+    }
+
+    @NonNull
+    public String getCallingPackageName() {
+        return mCallingPackageName;
     }
 
     public int getCallingUid() {
@@ -62,6 +72,7 @@ public class UserVisibleJobSummary implements Parcelable {
         return mJobId;
     }
 
+    @Nullable
     public String getNamespace() {
         return mNamespace;
     }
@@ -70,6 +81,7 @@ public class UserVisibleJobSummary implements Parcelable {
         return mSourceUserId;
     }
 
+    @NonNull
     public String getSourcePackageName() {
         return mSourcePackageName;
     }
@@ -80,6 +92,7 @@ public class UserVisibleJobSummary implements Parcelable {
         if (!(o instanceof UserVisibleJobSummary)) return false;
         UserVisibleJobSummary that = (UserVisibleJobSummary) o;
         return mCallingUid == that.mCallingUid
+                && mCallingPackageName.equals(that.mCallingPackageName)
                 && mSourceUserId == that.mSourceUserId
                 && mSourcePackageName.equals(that.mSourcePackageName)
                 && Objects.equals(mNamespace, that.mNamespace)
@@ -90,6 +103,7 @@ public class UserVisibleJobSummary implements Parcelable {
     public int hashCode() {
         int result = 0;
         result = 31 * result + mCallingUid;
+        result = 31 * result + mCallingPackageName.hashCode();
         result = 31 * result + mSourceUserId;
         result = 31 * result + mSourcePackageName.hashCode();
         if (mNamespace != null) {
@@ -103,6 +117,7 @@ public class UserVisibleJobSummary implements Parcelable {
     public String toString() {
         return "UserVisibleJobSummary{"
                 + "callingUid=" + mCallingUid
+                + ", callingPackageName='" + mCallingPackageName + "'"
                 + ", sourceUserId=" + mSourceUserId
                 + ", sourcePackageName='" + mSourcePackageName + "'"
                 + ", namespace=" + mNamespace
@@ -118,6 +133,7 @@ public class UserVisibleJobSummary implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mCallingUid);
+        dest.writeString(mCallingPackageName);
         dest.writeInt(mSourceUserId);
         dest.writeString(mSourcePackageName);
         dest.writeString(mNamespace);

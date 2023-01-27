@@ -171,7 +171,7 @@ enum class Style(internal val coreSpec: CoreSpec) {
             a1 = TonalSpec(HueSource(), ChromaConstant(36.0)),
             a2 = TonalSpec(HueSource(), ChromaConstant(16.0)),
             a3 = TonalSpec(HueAdd(60.0), ChromaConstant(24.0)),
-            n1 = TonalSpec(HueSource(), ChromaConstant(6.0)),
+            n1 = TonalSpec(HueSource(), ChromaConstant(4.0)),
             n2 = TonalSpec(HueSource(), ChromaConstant(8.0))
     )),
     VIBRANT(CoreSpec(

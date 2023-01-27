@@ -567,11 +567,6 @@ public final class SystemUiDeviceConfigFlags {
     public static final String VOLUME_SEPARATE_NOTIFICATION = "volume_separate_notification";
 
     /**
-     * (boolean) Whether the clipboard overlay is enabled.
-     */
-    public static final String CLIPBOARD_OVERLAY_ENABLED = "clipboard_overlay_enabled";
-
-    /**
      * (boolean) Whether widget provider info would be saved to / loaded from system persistence
      * layer as opposed to individual manifests in respective apps.
      */

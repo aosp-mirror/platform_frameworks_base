@@ -39,6 +39,8 @@ public class CallMetadataSyncInCallService extends InCallService {
 
     @VisibleForTesting
     final Map<Call, CrossDeviceCall> mCurrentCalls = new HashMap<>();
+    @VisibleForTesting
+    boolean mShouldSync;
     final Call.Callback mTelecomCallback = new Call.Callback() {
         @Override
         public void onDetailsChanged(Call call, Call.Details details) {
@@ -92,12 +94,29 @@ public class CallMetadataSyncInCallService extends InCallService {
         @Override
         void requestCrossDeviceSync(int userId) {
         }
+
+        @Override
+        void updateStatus(int userId, boolean shouldSyncCallMetadata) {
+            if (userId == getUserId()) {
+                mShouldSync = shouldSyncCallMetadata;
+                if (shouldSyncCallMetadata) {
+                    initializeCalls();
+                } else {
+                    mCurrentCalls.clear();
+                }
+            }
+        }
     };
 
     @Override
     public void onCreate() {
         super.onCreate();
-        if (CompanionDeviceConfig.isEnabled(CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
+        initializeCalls();
+    }
+
+    private void initializeCalls() {
+        if (CompanionDeviceConfig.isEnabled(CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)
+                && mShouldSync) {
             mCurrentCalls.putAll(getCalls().stream().collect(Collectors.toMap(call -> call,
                     call -> new CrossDeviceCall(getPackageManager(), call, getCallAudioState()))));
         }
@@ -119,7 +138,8 @@ public class CallMetadataSyncInCallService extends InCallService {
 
     @Override
     public void onCallAdded(Call call) {
-        if (CompanionDeviceConfig.isEnabled(CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
+        if (CompanionDeviceConfig.isEnabled(CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)
+                && mShouldSync) {
             mCurrentCalls.put(call,
                     new CrossDeviceCall(getPackageManager(), call, getCallAudioState()));
         }
@@ -127,21 +147,24 @@ public class CallMetadataSyncInCallService extends InCallService {
 
     @Override
     public void onCallRemoved(Call call) {
-        if (CompanionDeviceConfig.isEnabled(CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
+        if (CompanionDeviceConfig.isEnabled(CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)
+                && mShouldSync) {
             mCurrentCalls.remove(call);
         }
     }
 
     @Override
     public void onMuteStateChanged(boolean isMuted) {
-        if (CompanionDeviceConfig.isEnabled(CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
+        if (CompanionDeviceConfig.isEnabled(CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)
+                && mShouldSync) {
             mCurrentCalls.values().forEach(call -> call.updateMuted(isMuted));
         }
     }
 
     @Override
     public void onSilenceRinger() {
-        if (CompanionDeviceConfig.isEnabled(CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
+        if (CompanionDeviceConfig.isEnabled(CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)
+                && mShouldSync) {
             mCurrentCalls.values().forEach(call -> call.updateSilencedIfRinging());
         }
     }

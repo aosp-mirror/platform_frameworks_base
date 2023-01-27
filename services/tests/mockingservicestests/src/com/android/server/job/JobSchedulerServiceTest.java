@@ -30,6 +30,7 @@ import static com.android.server.job.JobSchedulerService.RARE_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -370,11 +371,12 @@ public class JobSchedulerServiceTest {
     }
 
     /**
-     * Confirm that {@link JobSchedulerService#getRescheduleJobForFailureLocked(JobStatus, int)}
+     * Confirm that
+     * {@link JobSchedulerService#getRescheduleJobForFailureLocked(JobStatus, int, int)}
      * returns a job with the correct delay and deadline constraints.
      */
     @Test
-    public void testGetRescheduleJobForFailure() {
+    public void testGetRescheduleJobForFailure_timingCalculations() {
         final long nowElapsed = sElapsedRealtimeClock.millis();
         final long initialBackoffMs = MINUTE_IN_MILLIS;
         mService.mConstants.SYSTEM_STOP_TO_FAILURE_RATIO = 3;
@@ -387,15 +389,18 @@ public class JobSchedulerServiceTest {
 
         // failure = 0, systemStop = 1
         JobStatus rescheduledJob = mService.getRescheduleJobForFailureLocked(originalJob,
+                JobParameters.STOP_REASON_DEVICE_STATE,
                 JobParameters.INTERNAL_STOP_REASON_DEVICE_THERMAL);
         assertEquals(nowElapsed + initialBackoffMs, rescheduledJob.getEarliestRunTime());
         assertEquals(JobStatus.NO_LATEST_RUNTIME, rescheduledJob.getLatestRunTimeElapsed());
 
         // failure = 0, systemStop = 2
         rescheduledJob = mService.getRescheduleJobForFailureLocked(rescheduledJob,
+                JobParameters.STOP_REASON_DEVICE_STATE,
                 JobParameters.INTERNAL_STOP_REASON_PREEMPT);
         // failure = 0, systemStop = 3
         rescheduledJob = mService.getRescheduleJobForFailureLocked(rescheduledJob,
+                JobParameters.STOP_REASON_CONSTRAINT_CHARGING,
                 JobParameters.INTERNAL_STOP_REASON_CONSTRAINTS_NOT_SATISFIED);
         assertEquals(nowElapsed + initialBackoffMs, rescheduledJob.getEarliestRunTime());
         assertEquals(JobStatus.NO_LATEST_RUNTIME, rescheduledJob.getLatestRunTimeElapsed());
@@ -403,6 +408,7 @@ public class JobSchedulerServiceTest {
         // failure = 0, systemStop = 2 * SYSTEM_STOP_TO_FAILURE_RATIO
         for (int i = 0; i < mService.mConstants.SYSTEM_STOP_TO_FAILURE_RATIO; ++i) {
             rescheduledJob = mService.getRescheduleJobForFailureLocked(rescheduledJob,
+                    JobParameters.STOP_REASON_SYSTEM_PROCESSING,
                     JobParameters.INTERNAL_STOP_REASON_RTC_UPDATED);
         }
         assertEquals(nowElapsed + 2 * initialBackoffMs, rescheduledJob.getEarliestRunTime());
@@ -410,15 +416,49 @@ public class JobSchedulerServiceTest {
 
         // failure = 1, systemStop = 2 * SYSTEM_STOP_TO_FAILURE_RATIO
         rescheduledJob = mService.getRescheduleJobForFailureLocked(rescheduledJob,
+                JobParameters.STOP_REASON_TIMEOUT,
                 JobParameters.INTERNAL_STOP_REASON_TIMEOUT);
         assertEquals(nowElapsed + 3 * initialBackoffMs, rescheduledJob.getEarliestRunTime());
         assertEquals(JobStatus.NO_LATEST_RUNTIME, rescheduledJob.getLatestRunTimeElapsed());
 
         // failure = 2, systemStop = 2 * SYSTEM_STOP_TO_FAILURE_RATIO
         rescheduledJob = mService.getRescheduleJobForFailureLocked(rescheduledJob,
+                JobParameters.STOP_REASON_UNDEFINED,
                 JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH);
         assertEquals(nowElapsed + 4 * initialBackoffMs, rescheduledJob.getEarliestRunTime());
         assertEquals(JobStatus.NO_LATEST_RUNTIME, rescheduledJob.getLatestRunTimeElapsed());
+    }
+
+    /**
+     * Confirm that
+     * {@link JobSchedulerService#getRescheduleJobForFailureLocked(JobStatus, int, int)}
+     * returns a job that is correctly marked as demoted by the user.
+     */
+    @Test
+    public void testGetRescheduleJobForFailure_userDemotion() {
+        JobStatus originalJob = createJobStatus("testGetRescheduleJobForFailure", createJobInfo());
+        assertEquals(0, originalJob.getInternalFlags() & JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER);
+
+        // Reschedule for a non-user reason
+        JobStatus rescheduledJob = mService.getRescheduleJobForFailureLocked(originalJob,
+                JobParameters.STOP_REASON_DEVICE_STATE,
+                JobParameters.INTERNAL_STOP_REASON_DEVICE_THERMAL);
+        assertEquals(0,
+                rescheduledJob.getInternalFlags() & JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER);
+
+        // Reschedule for a user reason
+        rescheduledJob = mService.getRescheduleJobForFailureLocked(rescheduledJob,
+                JobParameters.STOP_REASON_USER,
+                JobParameters.INTERNAL_STOP_REASON_USER_UI_STOP);
+        assertNotEquals(0,
+                rescheduledJob.getInternalFlags() & JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER);
+
+        // Reschedule a previously demoted job for a non-user reason
+        rescheduledJob = mService.getRescheduleJobForFailureLocked(rescheduledJob,
+                JobParameters.STOP_REASON_CONSTRAINT_CHARGING,
+                JobParameters.INTERNAL_STOP_REASON_CONSTRAINTS_NOT_SATISFIED);
+        assertNotEquals(0,
+                rescheduledJob.getInternalFlags() & JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER);
     }
 
     /**
@@ -731,6 +771,7 @@ public class JobSchedulerServiceTest {
         JobStatus job = createJobStatus("testGetRescheduleJobForPeriodic_insideWindow_failedJob",
                 createJobInfo().setPeriodic(HOUR_IN_MILLIS));
         JobStatus failedJob = mService.getRescheduleJobForFailureLocked(job,
+                JobParameters.STOP_REASON_UNDEFINED,
                 JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH);
 
         JobStatus rescheduledJob = mService.getRescheduleJobForPeriodic(failedJob);
@@ -739,6 +780,7 @@ public class JobSchedulerServiceTest {
 
         advanceElapsedClock(5 * MINUTE_IN_MILLIS); // now + 5 minutes
         failedJob = mService.getRescheduleJobForFailureLocked(job,
+                JobParameters.STOP_REASON_UNDEFINED,
                 JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH);
         advanceElapsedClock(5 * MINUTE_IN_MILLIS); // now + 10 minutes
 
@@ -748,6 +790,7 @@ public class JobSchedulerServiceTest {
 
         advanceElapsedClock(35 * MINUTE_IN_MILLIS); // now + 45 minutes
         failedJob = mService.getRescheduleJobForFailureLocked(job,
+                JobParameters.STOP_REASON_UNDEFINED,
                 JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH);
         advanceElapsedClock(10 * MINUTE_IN_MILLIS); // now + 55 minutes
 
@@ -759,6 +802,7 @@ public class JobSchedulerServiceTest {
 
         advanceElapsedClock(2 * MINUTE_IN_MILLIS); // now + 57 minutes
         failedJob = mService.getRescheduleJobForFailureLocked(job,
+                JobParameters.STOP_REASON_UNDEFINED,
                 JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH);
         advanceElapsedClock(2 * MINUTE_IN_MILLIS); // now + 59 minutes
 
@@ -856,6 +900,7 @@ public class JobSchedulerServiceTest {
         JobStatus job = createJobStatus("testGetRescheduleJobForPeriodic_outsideWindow_failedJob",
                 createJobInfo().setPeriodic(HOUR_IN_MILLIS));
         JobStatus failedJob = mService.getRescheduleJobForFailureLocked(job,
+                JobParameters.STOP_REASON_UNDEFINED,
                 JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH);
         long now = sElapsedRealtimeClock.millis();
         long nextWindowStartTime = now + HOUR_IN_MILLIS;
@@ -893,6 +938,7 @@ public class JobSchedulerServiceTest {
                 "testGetRescheduleJobForPeriodic_outsideWindow_flex_failedJob",
                 createJobInfo().setPeriodic(HOUR_IN_MILLIS, 30 * MINUTE_IN_MILLIS));
         JobStatus failedJob = mService.getRescheduleJobForFailureLocked(job,
+                JobParameters.STOP_REASON_UNDEFINED,
                 JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH);
         // First window starts 30 minutes from now.
         advanceElapsedClock(30 * MINUTE_IN_MILLIS);
@@ -935,6 +981,7 @@ public class JobSchedulerServiceTest {
                 "testGetRescheduleJobForPeriodic_outsideWindow_flex_failedJob_longPeriod",
                 createJobInfo().setPeriodic(7 * DAY_IN_MILLIS, 9 * HOUR_IN_MILLIS));
         JobStatus failedJob = mService.getRescheduleJobForFailureLocked(job,
+                JobParameters.STOP_REASON_UNDEFINED,
                 JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH);
         // First window starts 6.625 days from now.
         advanceElapsedClock(6 * DAY_IN_MILLIS + 15 * HOUR_IN_MILLIS);
