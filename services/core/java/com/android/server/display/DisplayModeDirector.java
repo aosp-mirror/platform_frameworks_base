@@ -635,7 +635,9 @@ public class DisplayModeDirector {
             //     which is within the render rate range
             //   - 90hz is not in range as none of the even divisors (i.e. 90, 45, 30)
             //     fall within the acceptable render range.
-            final int divisor = (int) Math.ceil(physicalRefreshRate / summary.maxRenderFrameRate);
+            final int divisor =
+                    (int) Math.ceil((physicalRefreshRate / summary.maxRenderFrameRate)
+                            - FLOAT_TOLERANCE);
             float adjustedPhysicalRefreshRate = physicalRefreshRate / divisor;
             if (adjustedPhysicalRefreshRate < (summary.minRenderFrameRate - FLOAT_TOLERANCE)) {
                 if (mLoggingEnabled) {
