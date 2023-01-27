@@ -1297,6 +1297,13 @@ public class Tuner implements AutoCloseable  {
                         return RESULT_UNAVAILABLE;
                     }
                 }
+                if (mFrontendType == FrontendSettings.TYPE_IPTV) {
+                    if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
+                            TunerVersionChecker.TUNER_VERSION_3_0,
+                            "Tuner with IPTV Frontend")) {
+                        return RESULT_UNAVAILABLE;
+                    }
+                }
                 if (checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND,
                           mFrontendLock)) {
                     mScanCallback = scanCallback;
