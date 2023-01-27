@@ -144,7 +144,9 @@ public final class UserManagerTest {
 
     @Test
     public void testCloneUser() throws Exception {
-
+        assumeCloneEnabled();
+        UserHandle mainUser = mUserManager.getMainUser();
+        assumeTrue("Main user is null", mainUser != null);
         // Get the default properties for clone user type.
         final UserTypeDetails userTypeDetails =
                 UserTypeFactory.getUserTypes().get(UserManager.USER_TYPE_PROFILE_CLONE);
@@ -153,7 +155,7 @@ public final class UserManagerTest {
         final UserProperties typeProps = userTypeDetails.getDefaultUserPropertiesReference();
 
         // Test that only one clone user can be created
-        final int mainUserId = mUserManager.getMainUser().getIdentifier();
+        final int mainUserId = mainUser.getIdentifier();
         UserInfo userInfo = createProfileForUser("Clone user1",
                 UserManager.USER_TYPE_PROFILE_CLONE,
                 mainUserId);
@@ -536,6 +538,7 @@ public final class UserManagerTest {
     @Test
     public void testRemoveUserWhenPossible_withProfiles() throws Exception {
         assumeHeadlessModeEnabled();
+        assumeCloneEnabled();
         final UserInfo parentUser = createUser("Human User", /* flags= */ 0);
         final UserInfo cloneProfileUser = createProfileForUser("Clone Profile user",
                 UserManager.USER_TYPE_PROFILE_CLONE,
@@ -1537,6 +1540,12 @@ public final class UserManagerTest {
         // assume headless mode is enabled
         assumeTrue("Device doesn't have headless mode enabled",
                 UserManager.isHeadlessSystemUserMode());
+    }
+
+    private void assumeCloneEnabled() {
+        // assume clone profile is supported on the device
+        assumeTrue("Device doesn't support clone profiles ",
+                mUserManager.isUserTypeEnabled(UserManager.USER_TYPE_PROFILE_CLONE));
     }
 
     private boolean isAutomotive() {
