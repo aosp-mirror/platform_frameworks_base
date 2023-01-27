@@ -1016,9 +1016,9 @@
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Annulla"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Gira ora"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Apri il telefono per un selfie migliore"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Girare su display frontale per un selfie migliore?"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Passare al display frontale per un selfie migliore?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Utilizza la fotocamera posteriore per una foto più ampia con maggiore risoluzione."</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Questo schermo verrà disattivato"</b></string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Questo schermo verrà spento"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Dispositivo pieghevole che viene aperto"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Dispositivo pieghevole che viene capovolto"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> batteria rimanente"</string>

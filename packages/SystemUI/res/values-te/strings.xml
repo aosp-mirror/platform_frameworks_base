@@ -1020,7 +1020,7 @@
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"ఇప్పుడే తిప్పండి"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"మెరుగైన సెల్ఫీ కోసం ఫోన్‌ను అన్‌ఫోల్డ్ చేయండి"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"మంచి సెల్ఫీ కోసం ముందు వైపు డిస్‌ప్లేకు తిప్పాలా?"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"అధిక రిజల్యూషన్‌తో పెద్ద ఫోటో కోసం వెనుక వైపున ఉన్న కెమెరాను ఉపయోగించండి."</string>
+    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"వెనుక వైపున ఉన్న కెమెరాను ఉపయోగించి అధిక రిజల్యూషన్ గల, మరింత వెడల్పైన ఫోటోను పొందండి."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ఈ స్క్రీన్ ఆఫ్ అవుతుంది"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"మడవగల పరికరం విప్పబడుతోంది"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"మడవగల పరికరం చుట్టూ తిప్పబడుతోంది"</string>
