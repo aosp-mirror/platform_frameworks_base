@@ -130,6 +130,7 @@ public class SecureSettings {
         Settings.Secure.ACTIVE_UNLOCK_ON_FACE_ERRORS,
         Settings.Secure.ACTIVE_UNLOCK_ON_FACE_ACQUIRE_INFO,
         Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT_WHEN_BIOMETRIC_ENROLLED,
+        Settings.Secure.ACTIVE_UNLOCK_WAKEUPS_CONSIDERED_UNLOCK_INTENTS,
         Settings.Secure.VR_DISPLAY_MODE,
         Settings.Secure.NOTIFICATION_BADGING,
         Settings.Secure.NOTIFICATION_DISMISS_RTL,

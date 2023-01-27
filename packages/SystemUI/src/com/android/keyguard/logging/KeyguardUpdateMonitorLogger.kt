@@ -372,7 +372,7 @@ class KeyguardUpdateMonitorLogger @Inject constructor(
     }
 
     fun logUserRequestedUnlock(
-        requestOrigin: ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN,
+        requestOrigin: ActiveUnlockConfig.ActiveUnlockRequestOrigin,
         reason: String?,
         dismissKeyguard: Boolean
     ) {
