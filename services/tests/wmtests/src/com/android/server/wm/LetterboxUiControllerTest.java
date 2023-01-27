@@ -16,14 +16,27 @@
 
 package com.android.server.wm;
 
+import static android.content.pm.ActivityInfo.OVERRIDE_ANY_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION;
+import static android.content.pm.ActivityInfo.OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE;
+import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR;
+import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT;
+import static android.content.pm.ActivityInfo.OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION;
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH;
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
+import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE;
+import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -89,6 +102,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     public TestRule compatChangeRule = new PlatformCompatChangeRule();
 
     private ActivityRecord mActivity;
+    private Task mTask;
     private DisplayContent mDisplayContent;
     private LetterboxUiController mController;
     private LetterboxConfiguration mLetterboxConfiguration;
@@ -488,12 +502,142 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         return mainWindow;
     }
 
+    // overrideOrientationIfNeeded
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT})
+    public void testOverrideOrientationIfNeeded_portraitOverrideEnabled_returnsPortrait()
+            throws Exception {
+        assertEquals(mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED), SCREEN_ORIENTATION_PORTRAIT);
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR})
+    public void testOverrideOrientationIfNeeded_portraitOverrideEnabled_returnsNosensor() {
+        assertEquals(mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED), SCREEN_ORIENTATION_NOSENSOR);
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR})
+    public void testOverrideOrientationIfNeeded_nosensorOverride_orientationFixed_returnsUnchanged() {
+        assertEquals(mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_PORTRAIT), SCREEN_ORIENTATION_PORTRAIT);
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE})
+    public void testOverrideOrientationIfNeeded_reverseLandscapeOverride_orientationPortraitOrUndefined_returnsUnchanged() {
+        assertEquals(mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_PORTRAIT), SCREEN_ORIENTATION_PORTRAIT);
+        assertEquals(mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED), SCREEN_ORIENTATION_UNSPECIFIED);
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE})
+    public void testOverrideOrientationIfNeeded_reverseLandscapeOverride_orientationLandscape_returnsReverseLandscape() {
+        assertEquals(mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_LANDSCAPE),
+                SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT})
+    public void testOverrideOrientationIfNeeded_portraitOverride_orientationFixed_returnsUnchanged() {
+        assertEquals(mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_NOSENSOR), SCREEN_ORIENTATION_NOSENSOR);
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT, OVERRIDE_ANY_ORIENTATION})
+    public void testOverrideOrientationIfNeeded_portraitAndIgnoreFixedOverrides_returnsPortrait() {
+        assertEquals(mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_NOSENSOR), SCREEN_ORIENTATION_PORTRAIT);
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR, OVERRIDE_ANY_ORIENTATION})
+    public void testOverrideOrientationIfNeeded_noSensorAndIgnoreFixedOverrides_returnsNosensor() {
+        assertEquals(mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_PORTRAIT), SCREEN_ORIENTATION_NOSENSOR);
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT})
+    public void testOverrideOrientationIfNeeded_propertyIsFalse_returnsUnchanged()
+            throws Exception {
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE, /* value */ false);
+
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertEquals(mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED), SCREEN_ORIENTATION_UNSPECIFIED);
+    }
+
+    // shouldUseDisplayLandscapeNaturalOrientation
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION})
+    public void testShouldUseDisplayLandscapeNaturalOrientation_override_returnsTrue() {
+        prepareActivityThatShouldUseDisplayLandscapeNaturalOrientation();
+        assertTrue(mController.shouldUseDisplayLandscapeNaturalOrientation());
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION})
+    public void testShouldUseDisplayLandscapeNaturalOrientation_overrideAndFalseProperty_returnsFalse()
+            throws Exception {
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE, /* value */ false);
+
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        prepareActivityThatShouldUseDisplayLandscapeNaturalOrientation();
+        assertFalse(mController.shouldUseDisplayLandscapeNaturalOrientation());
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION})
+    public void testShouldUseDisplayLandscapeNaturalOrientation_portraitNaturalOrientation_returnsFalse() {
+        prepareActivityThatShouldUseDisplayLandscapeNaturalOrientation();
+        doReturn(ORIENTATION_PORTRAIT).when(mDisplayContent).getNaturalOrientation();
+
+        assertFalse(mController.shouldUseDisplayLandscapeNaturalOrientation());
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION})
+    public void testShouldUseDisplayLandscapeNaturalOrientation_disabledIgnoreOrientationRequest_returnsFalse() {
+        prepareActivityThatShouldUseDisplayLandscapeNaturalOrientation();
+        mDisplayContent.setIgnoreOrientationRequest(false);
+
+        assertFalse(mController.shouldUseDisplayLandscapeNaturalOrientation());
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION})
+    public void testShouldUseDisplayLandscapeNaturalOrientation_inMultiWindowMode_returnsFalse() {
+        prepareActivityThatShouldUseDisplayLandscapeNaturalOrientation();
+
+        spyOn(mTask);
+        doReturn(true).when(mTask).inMultiWindowMode();
+
+        assertFalse(mController.shouldUseDisplayLandscapeNaturalOrientation());
+    }
+
     private void mockThatProperty(String propertyName, boolean value) throws Exception {
         Property property = new Property(propertyName, /* value */ value, /* packageName */ "",
                  /* className */ "");
         PackageManager pm = mWm.mContext.getPackageManager();
         spyOn(pm);
         doReturn(property).when(pm).getProperty(eq(propertyName), anyString());
+    }
+
+    private void prepareActivityThatShouldUseDisplayLandscapeNaturalOrientation() {
+        spyOn(mDisplayContent);
+        doReturn(ORIENTATION_LANDSCAPE).when(mDisplayContent).getNaturalOrientation();
+        mDisplayContent.setIgnoreOrientationRequest(true);
     }
 
     private void prepareActivityThatShouldIgnoreRequestedOrientationDuringRelaunch() {
@@ -505,10 +649,10 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     private ActivityRecord setUpActivityWithComponent() {
         mDisplayContent = new TestDisplayContent
                 .Builder(mAtm, /* dw */ 1000, /* dh */ 2000).build();
-        Task task = new TaskBuilder(mSupervisor).setDisplay(mDisplayContent).build();
+        mTask = new TaskBuilder(mSupervisor).setDisplay(mDisplayContent).build();
         final ActivityRecord activity = new ActivityBuilder(mAtm)
                 .setOnTop(true)
-                .setTask(task)
+                .setTask(mTask)
                 // Set the component to be that of the test class in order to enable compat changes
                 .setComponent(ComponentName.createRelative(mContext,
                         com.android.server.wm.LetterboxUiControllerTest.class.getName()))

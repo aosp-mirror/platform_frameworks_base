@@ -1187,6 +1187,79 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @Overridable
     public static final long OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS = 263259275L;
 
+    // Compat framework that per-app overrides rely on only supports booleans. That's why we have
+    // multiple OVERRIDE_*_ORIENTATION_* change ids below instead of just one override with
+    // the integer value.
+
+    /**
+     * Enables {@link #SCREEN_ORIENTATION_PORTRAIT}. Unless OVERRIDE_ANY_ORIENTATION
+     * is enabled, this override is used only when no other fixed orientation was specified by the
+     * activity.
+     * @hide
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT = 265452344L;
+
+    /**
+     * Enables {@link #SCREEN_ORIENTATION_NOSENSOR}. Unless OVERRIDE_ANY_ORIENTATION
+     * is enabled, this override is used only when no other fixed orientation was specified by the
+     * activity.
+     * @hide
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR = 265451093L;
+
+    /**
+     * Enables {@link #SCREEN_ORIENTATION_REVERSE_LANDSCAPE}. Unless OVERRIDE_ANY_ORIENTATION
+     * is enabled, this override is used only when activity specify landscape orientation.
+     * This can help apps that assume that landscape display orientation corresponds to {@link
+     * android.view.Surface#ROTATION_90}, while on some devices it can be {@link
+     * android.view.Surface#ROTATION_270}.
+     * @hide
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE = 266124927L;
+
+    /**
+     * When enabled, allows OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE,
+     * OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR and OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT
+     * to override any orientation requested by the activity.
+     * @hide
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long OVERRIDE_ANY_ORIENTATION = 265464455L;
+
+    /**
+     * This override fixes display orientation to landscape natural orientation when a task is
+     * fullscreen. While display rotation is fixed to landscape, the orientation requested by the
+     * activity will be still respected by bounds resolution logic. For instance, if an activity
+     * requests portrait orientation and this override is set, then activity will appear in the
+     * letterbox mode for fixed orientation with the display rotated to the lanscape natural
+     * orientation.
+     *
+     * <p>This override is applicable only when natural orientation of the device is
+     * landscape and display ignores orientation requestes.
+     *
+     * <p>Main use case for this override are camera-using activities that are portrait-only and
+     * assume alignment with natural device orientation. Such activities can automatically be
+     * rotated with com.android.server.wm.DisplayRotationCompatPolicy but not all of them can
+     * handle dynamic rotation and thus can benefit from this override.
+     *
+     * @hide
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION = 255940284L;
+
     /**
      * Compares activity window layout min width/height with require space for multi window to
      * determine if it can be put into multi window mode.
@@ -1405,8 +1478,19 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * @hide
      */
     public boolean isFixedOrientation() {
-        return isFixedOrientationLandscape() || isFixedOrientationPortrait()
-                || screenOrientation == SCREEN_ORIENTATION_LOCKED;
+        return isFixedOrientation(screenOrientation);
+    }
+
+    /**
+     * Returns true if the passed activity's orientation is fixed.
+     * @hide
+     */
+    public static boolean isFixedOrientation(@ScreenOrientation int orientation) {
+        return orientation == SCREEN_ORIENTATION_LOCKED
+                // Orientation is fixed to natural display orientation
+                || orientation == SCREEN_ORIENTATION_NOSENSOR
+                || isFixedOrientationLandscape(orientation)
+                || isFixedOrientationPortrait(orientation);
     }
 
     /**
