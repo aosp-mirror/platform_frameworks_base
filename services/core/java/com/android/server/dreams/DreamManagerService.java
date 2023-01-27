@@ -499,7 +499,12 @@ public final class DreamManagerService extends SystemService {
         }
 
         synchronized (mLock) {
-            if (mCurrentDream != null && mCurrentDream.token == token && mCurrentDream.isDozing) {
+            if (mCurrentDream == null) {
+                return;
+            }
+
+            final boolean sameDream = mCurrentDream.token == token;
+            if ((sameDream && mCurrentDream.isDozing) || (!sameDream && !mCurrentDream.isDozing)) {
                 mCurrentDream.isDozing = false;
                 mDozeWakeLock.release();
                 mPowerManagerInternal.setDozeOverrideFromDreamManager(
@@ -767,6 +772,11 @@ public final class DreamManagerService extends SystemService {
                     cleanupDreamLocked();
                 }
             }
+        }
+
+        @Override
+        public void stopDozing(Binder token) {
+            stopDozingInternal(token);
         }
     };
 
