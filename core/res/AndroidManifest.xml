@@ -4534,6 +4534,15 @@
     <permission android:name="android.permission.BIND_AUTOFILL_SERVICE"
         android:protectionLevel="signature" />
 
+    <!-- Must be required by a
+         {@link android.service.assist.classification.FieldClassificationService},
+         to ensure that only the system can bind to it.
+         @SystemApi @hide This is not a third-party API (intended for OEMs and system apps).
+         <p>Protection level: signature
+    -->
+    <permission android:name="android.permission.BIND_FIELD_CLASSIFICATION_SERVICE"
+                android:protectionLevel="signature" />
+
     <!-- Must be required by a CredentialProviderService to ensure that only the
          system can bind to it.
          <p>Protection level: signature

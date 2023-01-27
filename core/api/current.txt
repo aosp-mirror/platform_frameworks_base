@@ -39293,6 +39293,19 @@ package android.security.keystore {
 
 }
 
+package android.service.assist.classification {
+
+  public final class FieldClassification implements android.os.Parcelable {
+    ctor public FieldClassification(@NonNull android.view.autofill.AutofillId, @NonNull java.util.Set<java.lang.String>);
+    method public int describeContents();
+    method @NonNull public android.view.autofill.AutofillId getAutofillId();
+    method @NonNull public java.util.Set<java.lang.String> getHints();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.assist.classification.FieldClassification> CREATOR;
+  }
+
+}
+
 package android.service.autofill {
 
   public abstract class AutofillService extends android.app.Service {

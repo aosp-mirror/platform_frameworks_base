@@ -55,6 +55,7 @@ package android {
     field public static final String BIND_DOMAIN_VERIFICATION_AGENT = "android.permission.BIND_DOMAIN_VERIFICATION_AGENT";
     field public static final String BIND_EUICC_SERVICE = "android.permission.BIND_EUICC_SERVICE";
     field public static final String BIND_EXTERNAL_STORAGE_SERVICE = "android.permission.BIND_EXTERNAL_STORAGE_SERVICE";
+    field public static final String BIND_FIELD_CLASSIFICATION_SERVICE = "android.permission.BIND_FIELD_CLASSIFICATION_SERVICE";
     field public static final String BIND_GBA_SERVICE = "android.permission.BIND_GBA_SERVICE";
     field public static final String BIND_HOTWORD_DETECTION_SERVICE = "android.permission.BIND_HOTWORD_DETECTION_SERVICE";
     field public static final String BIND_IMS_SERVICE = "android.permission.BIND_IMS_SERVICE";
@@ -11544,6 +11545,39 @@ package android.service.appprediction {
     method @MainThread public void onStartPredictionUpdates();
     method @MainThread public void onStopPredictionUpdates();
     method public final void updatePredictions(@NonNull android.app.prediction.AppPredictionSessionId, @NonNull java.util.List<android.app.prediction.AppTarget>);
+  }
+
+}
+
+package android.service.assist.classification {
+
+  public final class FieldClassification implements android.os.Parcelable {
+    ctor public FieldClassification(@NonNull android.view.autofill.AutofillId, @NonNull java.util.Set<java.lang.String>, @NonNull java.util.Set<java.lang.String>);
+    method @NonNull public java.util.Set<java.lang.String> getGroupHints();
+  }
+
+  public final class FieldClassificationRequest implements android.os.Parcelable {
+    ctor public FieldClassificationRequest(@NonNull android.app.assist.AssistStructure);
+    method public int describeContents();
+    method @NonNull public android.app.assist.AssistStructure getAssistStructure();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.assist.classification.FieldClassificationRequest> CREATOR;
+  }
+
+  public final class FieldClassificationResponse implements android.os.Parcelable {
+    ctor public FieldClassificationResponse(@NonNull java.util.Set<android.service.assist.classification.FieldClassification>);
+    method public int describeContents();
+    method @NonNull public java.util.Set<android.service.assist.classification.FieldClassification> getClassifications();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.assist.classification.FieldClassificationResponse> CREATOR;
+  }
+
+  public abstract class FieldClassificationService extends android.app.Service {
+    ctor public FieldClassificationService();
+    method public abstract void onClassificationRequest(@NonNull android.service.assist.classification.FieldClassificationRequest, @NonNull android.os.CancellationSignal, @NonNull android.os.OutcomeReceiver<android.service.assist.classification.FieldClassificationResponse,java.lang.Exception>);
+    method public void onConnected();
+    method public void onDisconnected();
+    field public static final String SERVICE_INTERFACE = "android.service.assist.classification.FieldClassificationService";
   }
 
 }

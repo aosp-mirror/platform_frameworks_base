@@ -4154,11 +4154,18 @@
     <bool name="config_quickSettingsSupported">true</bool>
 
     <!-- The component name, flattened to a string, for the default autofill service
-         to  enabled for an user. This service must be trusted, as it can be activated
+         to  enabled for a user. This service must be trusted, as it can be activated
          without explicit consent of the user. If no autofill service with the
           specified name exists on the device, autofill will be disabled by default.
     -->
     <string name="config_defaultAutofillService" translatable="false"></string>
+
+    <!-- The component name, flattened to a string, for the default field classification service
+         to  enabled for a user. This service must be trusted, as it can be activated
+         without explicit consent of the user. If no field classification service with the
+         specified name exists on the device, field classification will be disabled by default.
+    -->
+    <string name="config_defaultFieldClassificationService" translatable="false"></string>
 
     <!-- The package name for the OEM custom system textclassifier service.
          This service must be trusted, as it can be activated without explicit consent of the user.
