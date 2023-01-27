@@ -3289,6 +3289,20 @@ public class ApplicationPackageManager extends PackageManager {
      * @hide
      */
     @Override
+    public boolean removeCrossProfileIntentFilter(IntentFilter filter, int sourceUserId,
+            int targetUserId, int flags) {
+        try {
+            return mPM.removeCrossProfileIntentFilter(filter, mContext.getOpPackageName(),
+                    sourceUserId, targetUserId, flags);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
     public void clearCrossProfileIntentFilters(int sourceUserId) {
         try {
             mPM.clearCrossProfileIntentFilters(sourceUserId, mContext.getOpPackageName());

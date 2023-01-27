@@ -396,6 +396,8 @@ import com.android.server.SystemService;
 import com.android.server.devicepolicy.ActiveAdmin.TrustAgentInfo;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.net.NetworkPolicyManagerInternal;
+import com.android.server.pm.DefaultCrossProfileIntentFilter;
+import com.android.server.pm.DefaultCrossProfileIntentFiltersUtils;
 import com.android.server.pm.RestrictionsSet;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerInternal.UserRestrictionsListener;
@@ -3132,8 +3134,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             unregisterOnSubscriptionsChangedListener();
             int policyType = getManagedSubscriptionsPolicy().getPolicyType();
             if (policyType == ManagedSubscriptionsPolicy.TYPE_ALL_PERSONAL_SUBSCRIPTIONS) {
+                final int parentUserId = getProfileParentId(copeProfileUserId);
                 // By default, assign all current and future subs to system user on COPE devices.
-                registerListenerToAssignSubscriptionsToUser(UserHandle.USER_SYSTEM);
+                registerListenerToAssignSubscriptionsToUser(parentUserId);
             } else if (policyType == ManagedSubscriptionsPolicy.TYPE_ALL_MANAGED_SUBSCRIPTIONS) {
                 // Add listener to assign all current and future subs to managed profile.
                 registerListenerToAssignSubscriptionsToUser(copeProfileUserId);
@@ -7022,6 +7025,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         if (isWorkProfileTelephonyFlagEnabled()) {
             clearManagedSubscriptionsPolicy();
+            updateTelephonyCrossProfileIntentFilters(parentId, UserHandle.USER_NULL, false);
         }
         Slogf.i(LOG_TAG, "Cleaning up device-wide policies done.");
     }
@@ -7035,6 +7039,33 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         int[] subscriptionIds = subscriptionManager.getActiveSubscriptionIdList(false);
         for (int subId : subscriptionIds) {
             subscriptionManager.setSubscriptionUserHandle(subId, null);
+        }
+    }
+
+    private void updateTelephonyCrossProfileIntentFilters(int parentUserId, int profileUserId,
+            boolean enableWorkTelephony) {
+        try {
+            String packageName = mContext.getOpPackageName();
+            if (enableWorkTelephony) {
+                // Reset call/sms cross profile intent filters to be handled by managed profile.
+                for (DefaultCrossProfileIntentFilter filter :
+                        DefaultCrossProfileIntentFiltersUtils
+                                .getDefaultManagedProfileTelephonyFilters()) {
+                    IntentFilter intentFilter = filter.filter.getIntentFilter();
+                    if (!mIPackageManager.removeCrossProfileIntentFilter(intentFilter, packageName,
+                            profileUserId, parentUserId, filter.flags)) {
+                        Slogf.w(LOG_TAG,
+                                "Failed to remove cross-profile intent filter: " + intentFilter);
+                    }
+
+                    mIPackageManager.addCrossProfileIntentFilter(intentFilter, packageName,
+                            parentUserId, profileUserId, PackageManager.SKIP_CURRENT_PROFILE);
+                }
+            } else {
+                mIPackageManager.clearCrossProfileIntentFilters(parentUserId, packageName);
+            }
+        } catch (RemoteException re) {
+            Slogf.wtf(LOG_TAG, "Error updating telephony cross profile intent filters", re);
         }
     }
 
@@ -20285,6 +20316,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             try {
                 int parentUserId = getProfileParentId(caller.getUserId());
                 installOemDefaultDialerAndMessagesApp(parentUserId, caller.getUserId());
+                updateTelephonyCrossProfileIntentFilters(parentUserId, caller.getUserId(), true);
             } finally {
                 mInjector.binderRestoreCallingIdentity(id);
             }

@@ -203,6 +203,11 @@ public class DpmMockContext extends MockContext {
     }
 
     @Override
+    public String getOpPackageName() {
+        return getPackageName();
+    }
+
+    @Override
     public ApplicationInfo getApplicationInfo() {
         if (applicationInfo != null) {
             return applicationInfo;

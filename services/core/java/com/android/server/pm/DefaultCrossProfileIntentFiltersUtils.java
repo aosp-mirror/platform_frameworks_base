@@ -321,6 +321,15 @@ public class DefaultCrossProfileIntentFiltersUtils {
     }
 
     /**
+     * Returns default telephony related intent filters for managed profile.
+     */
+    public static List<DefaultCrossProfileIntentFilter> getDefaultManagedProfileTelephonyFilters() {
+        return Arrays.asList(
+                DIAL_DATA,
+                SMS_MMS);
+    }
+
+    /**
      * Clone profile's DefaultCrossProfileIntentFilter
      */
 
