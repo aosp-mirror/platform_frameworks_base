@@ -43,9 +43,12 @@ class ActivitySecurityModelFeatureFlags {
     static final String DOC_LINK = "go/android-asm";
 
     private static final String NAMESPACE = NAMESPACE_WINDOW_MANAGER;
-    private static final String KEY_ASM_RESTRICTIONS_ENABLED = "asm_restrictions_enabled";
-    private static final String KEY_ASM_TOASTS_ENABLED = "asm_toasts_enabled";
-    private static final String KEY_ASM_EXEMPTED_PACKAGES = "asm_exempted_packages";
+    private static final String KEY_ASM_PREFIX = "ActivitySecurity__";
+    private static final String KEY_ASM_RESTRICTIONS_ENABLED = KEY_ASM_PREFIX
+            + "asm_restrictions_enabled";
+    private static final String KEY_ASM_TOASTS_ENABLED = KEY_ASM_PREFIX + "asm_toasts_enabled";
+    private static final String KEY_ASM_EXEMPTED_PACKAGES = KEY_ASM_PREFIX
+            + "asm_exempted_packages";
     private static final int VALUE_DISABLE = 0;
     private static final int VALUE_ENABLE_FOR_U = 1;
     private static final int VALUE_ENABLE_FOR_ALL = 2;
