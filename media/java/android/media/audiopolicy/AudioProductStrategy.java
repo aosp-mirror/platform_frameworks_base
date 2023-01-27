@@ -233,7 +233,7 @@ public final class AudioProductStrategy implements Parcelable {
 
     /**
      * @hide
-     * @return the product strategy ID (which is the generalisation of Car Audio Usage / legacy
+     * @return the product strategy name (which is the generalisation of Car Audio Usage / legacy
      *         routing_strategy linked to {@link AudioAttributes#getUsage()}).
      */
     @SystemApi
