@@ -27024,6 +27024,7 @@ package android.media.tv {
     method @Nullable public android.media.tv.TvInputService.RecordingSession onCreateRecordingSession(@NonNull String, @NonNull String);
     method @Nullable public abstract android.media.tv.TvInputService.Session onCreateSession(@NonNull String);
     method @Nullable public android.media.tv.TvInputService.Session onCreateSession(@NonNull String, @NonNull String);
+    method @Nullable public android.media.tv.TvInputService.Session onCreateSession(@NonNull String, @NonNull String, @NonNull android.content.AttributionSource);
     field public static final int PRIORITY_HINT_USE_CASE_TYPE_BACKGROUND = 100; // 0x64
     field public static final int PRIORITY_HINT_USE_CASE_TYPE_LIVE = 400; // 0x190
     field public static final int PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK = 300; // 0x12c
@@ -27217,6 +27218,7 @@ package android.media.tv {
     method public String getSelectedTrack(int);
     method public java.util.List<android.media.tv.TvTrackInfo> getTracks(int);
     method public boolean onUnhandledInputEvent(android.view.InputEvent);
+    method public void overrideTvAppAttributionSource(@NonNull android.content.AttributionSource);
     method public void reset();
     method public void selectTrack(int, String);
     method public void sendAppPrivateCommand(@NonNull String, android.os.Bundle);

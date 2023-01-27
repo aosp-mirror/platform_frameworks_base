@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Rect;
@@ -63,7 +64,7 @@ interface ITvInputManager {
     void addBlockedRating(in String rating, int userId);
     void removeBlockedRating(in String rating, int userId);
 
-    void createSession(in ITvInputClient client, in String inputId, boolean isRecordingSession,
+    void createSession(in ITvInputClient client, in String inputId, in AttributionSource tvAppAttributionSource, boolean isRecordingSession,
             int seq, int userId);
     void releaseSession(in IBinder sessionToken, int userId);
     int getClientPid(in String sessionId);
