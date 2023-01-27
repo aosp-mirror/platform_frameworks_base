@@ -53,6 +53,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.pip.phone.PhonePipMenuController;
+import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import org.junit.Before;
@@ -86,6 +87,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
     private PipBoundsState mPipBoundsState;
     private PipTransitionState mPipTransitionState;
     private PipBoundsAlgorithm mPipBoundsAlgorithm;
+    private PipSizeSpecHandler mPipSizeSpecHandler;
 
     private ComponentName mComponent1;
     private ComponentName mComponent2;
@@ -95,10 +97,12 @@ public class PipTaskOrganizerTest extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
         mComponent1 = new ComponentName(mContext, "component1");
         mComponent2 = new ComponentName(mContext, "component2");
-        mPipBoundsState = new PipBoundsState(mContext);
+        mPipSizeSpecHandler = new PipSizeSpecHandler(mContext);
+        mPipBoundsState = new PipBoundsState(mContext, mPipSizeSpecHandler);
         mPipTransitionState = new PipTransitionState();
         mPipBoundsAlgorithm = new PipBoundsAlgorithm(mContext, mPipBoundsState,
-                new PipSnapAlgorithm(), new PipKeepClearAlgorithmInterface() {});
+                new PipSnapAlgorithm(), new PipKeepClearAlgorithmInterface() {},
+                mPipSizeSpecHandler);
         mMainExecutor = new TestShellExecutor();
         mPipTaskOrganizer = new PipTaskOrganizer(mContext,
                 mMockSyncTransactionQueue, mPipTransitionState, mPipBoundsState,
@@ -253,8 +257,10 @@ public class PipTaskOrganizerTest extends ShellTestCase {
 
     private void preparePipTaskOrg() {
         final DisplayInfo info = new DisplayInfo();
-        mPipBoundsState.setDisplayLayout(new DisplayLayout(info,
-                mContext.getResources(), true, true));
+        DisplayLayout layout = new DisplayLayout(info,
+                mContext.getResources(), true, true);
+        mPipBoundsState.setDisplayLayout(layout);
+        mPipSizeSpecHandler.setDisplayLayout(layout);
         mPipTaskOrganizer.setOneShotAnimationType(PipAnimationController.ANIM_TYPE_ALPHA);
         mPipTaskOrganizer.setSurfaceControlTransactionFactory(
                 MockSurfaceControlHelper::createMockSurfaceControlTransaction);
