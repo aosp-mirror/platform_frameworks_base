@@ -25,4 +25,5 @@ object KeyguardBouncerConstants {
      */
     const val EXPANSION_HIDDEN = 1f
     const val EXPANSION_VISIBLE = 0f
+    const val ALPHA_EXPANSION_THRESHOLD = 0.95f
 }

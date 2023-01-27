@@ -114,13 +114,17 @@ constructor(
                             network: Network,
                             networkCapabilities: NetworkCapabilities
                         ) {
+                            logger.logOnCapabilitiesChanged(
+                                network,
+                                networkCapabilities,
+                                isDefaultNetworkCallback = true,
+                            )
+
                             // This method will always be called immediately after the network
                             // becomes the default, in addition to any time the capabilities change
                             // while the network is the default.
-                            // If this network contains valid wifi info, then wifi is the default
-                            // network.
-                            val wifiInfo = networkCapabilitiesToWifiInfo(networkCapabilities)
-                            trySend(wifiInfo != null)
+                            // If this network is a wifi network, then wifi is the default network.
+                            trySend(isWifiNetwork(networkCapabilities))
                         }
 
                         override fun onLost(network: Network) {
@@ -152,7 +156,11 @@ constructor(
                             network: Network,
                             networkCapabilities: NetworkCapabilities
                         ) {
-                            logger.logOnCapabilitiesChanged(network, networkCapabilities)
+                            logger.logOnCapabilitiesChanged(
+                                network,
+                                networkCapabilities,
+                                isDefaultNetworkCallback = false,
+                            )
 
                             wifiNetworkChangeEvents.tryEmit(Unit)
 
@@ -253,13 +261,27 @@ constructor(
             networkCapabilities: NetworkCapabilities
         ): WifiInfo? {
             return when {
-                networkCapabilities.hasTransport(TRANSPORT_WIFI) ->
-                    networkCapabilities.transportInfo as WifiInfo?
                 networkCapabilities.hasTransport(TRANSPORT_CELLULAR) ->
                     // Sometimes, cellular networks can act as wifi networks (known as VCN --
                     // virtual carrier network). So, see if this cellular network has wifi info.
                     Utils.tryGetWifiInfoForVcn(networkCapabilities)
+                networkCapabilities.hasTransport(TRANSPORT_WIFI) ->
+                    if (networkCapabilities.transportInfo is WifiInfo) {
+                        networkCapabilities.transportInfo as WifiInfo
+                    } else {
+                        null
+                    }
                 else -> null
+            }
+        }
+
+        /** True if these capabilities represent a wifi network. */
+        private fun isWifiNetwork(networkCapabilities: NetworkCapabilities): Boolean {
+            return when {
+                networkCapabilities.hasTransport(TRANSPORT_WIFI) -> true
+                networkCapabilities.hasTransport(TRANSPORT_CELLULAR) ->
+                    Utils.tryGetWifiInfoForVcn(networkCapabilities) != null
+                else -> false
             }
         }
 

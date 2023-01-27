@@ -40,6 +40,7 @@ public final class UsbDescriptorParser {
     private UsbDeviceDescriptor mDeviceDescriptor;
     private UsbConfigDescriptor mCurConfigDescriptor;
     private UsbInterfaceDescriptor mCurInterfaceDescriptor;
+    private UsbEndpointDescriptor mCurEndpointDescriptor;
 
     // The AudioClass spec implemented by the AudioClass Interfaces
     // This may well be different than the overall USB Spec.
@@ -165,7 +166,7 @@ public final class UsbDescriptorParser {
                 break;
 
             case UsbDescriptor.DESCRIPTORTYPE_ENDPOINT:
-                descriptor = new UsbEndpointDescriptor(length, type);
+                descriptor = mCurEndpointDescriptor = new UsbEndpointDescriptor(length, type);
                 if (mCurInterfaceDescriptor != null) {
                     mCurInterfaceDescriptor.addEndpointDescriptor(
                             (UsbEndpointDescriptor) descriptor);
@@ -264,6 +265,9 @@ public final class UsbDescriptorParser {
                             Log.w(TAG, "  Unparsed Class-specific Endpoint:0x"
                                     + Integer.toHexString(subClass));
                             break;
+                    }
+                    if (mCurEndpointDescriptor != null && descriptor != null) {
+                        mCurEndpointDescriptor.setClassSpecificEndpointDescriptor(descriptor);
                     }
                 }
                 break;
@@ -793,6 +797,84 @@ public final class UsbDescriptorParser {
             }
         }
         return count;
+    }
+
+    /**
+     * @hide
+     */
+    private int calculateNumLegacyMidiPorts(boolean isOutput) {
+        // Only look at the first config.
+        UsbConfigDescriptor configDescriptor = null;
+        for (UsbDescriptor descriptor : mDescriptors) {
+            if (descriptor.getType() == UsbDescriptor.DESCRIPTORTYPE_CONFIG) {
+                if (descriptor instanceof UsbConfigDescriptor) {
+                    configDescriptor = (UsbConfigDescriptor) descriptor;
+                    break;
+                } else {
+                    Log.w(TAG, "Unrecognized Config l: " + descriptor.getLength()
+                            + " t:0x" + Integer.toHexString(descriptor.getType()));
+                }
+            }
+        }
+        if (configDescriptor == null) {
+            Log.w(TAG, "Config not found");
+            return 0;
+        }
+
+        ArrayList<UsbInterfaceDescriptor> legacyMidiInterfaceDescriptors =
+                new ArrayList<UsbInterfaceDescriptor>();
+        for (UsbInterfaceDescriptor interfaceDescriptor
+                : configDescriptor.getInterfaceDescriptors()) {
+            if (interfaceDescriptor.getUsbClass() == UsbDescriptor.CLASSID_AUDIO) {
+                if (interfaceDescriptor.getUsbSubclass() == UsbDescriptor.AUDIO_MIDISTREAMING) {
+                    UsbDescriptor midiHeaderDescriptor =
+                            interfaceDescriptor.getMidiHeaderInterfaceDescriptor();
+                    if (midiHeaderDescriptor != null) {
+                        if (midiHeaderDescriptor instanceof UsbMSMidiHeader) {
+                            UsbMSMidiHeader midiHeader =
+                                    (UsbMSMidiHeader) midiHeaderDescriptor;
+                            if (midiHeader.getMidiStreamingClass() == MS_MIDI_1_0) {
+                                legacyMidiInterfaceDescriptors.add(interfaceDescriptor);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        int count = 0;
+        for (UsbInterfaceDescriptor interfaceDescriptor : legacyMidiInterfaceDescriptors) {
+            for (int i = 0; i < interfaceDescriptor.getNumEndpoints(); i++) {
+                UsbEndpointDescriptor endpoint =
+                        interfaceDescriptor.getEndpointDescriptor(i);
+                // 0 is output, 1 << 7 is input.
+                if ((endpoint.getDirection() == 0) == isOutput) {
+                    UsbDescriptor classSpecificEndpointDescriptor =
+                            endpoint.getClassSpecificEndpointDescriptor();
+                    if (classSpecificEndpointDescriptor != null
+                            && (classSpecificEndpointDescriptor instanceof UsbACMidi10Endpoint)) {
+                        UsbACMidi10Endpoint midiEndpoint =
+                                (UsbACMidi10Endpoint) classSpecificEndpointDescriptor;
+                        count += midiEndpoint.getNumJacks();
+                    }
+                }
+            }
+        }
+        return count;
+    }
+
+    /**
+     * @hide
+     */
+    public int calculateNumLegacyMidiInputs() {
+        return calculateNumLegacyMidiPorts(false /*isOutput*/);
+    }
+
+    /**
+     * @hide
+     */
+    public int calculateNumLegacyMidiOutputs() {
+        return calculateNumLegacyMidiPorts(true /*isOutput*/);
     }
 
     /**

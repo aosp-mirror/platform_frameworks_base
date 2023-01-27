@@ -98,7 +98,7 @@ import androidx.test.filters.MediumTest;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.internal.statusbar.LetterboxDetails;
 import com.android.server.statusbar.StatusBarManagerInternal;
-import com.android.server.wm.DeviceStateController.FoldState;
+import com.android.server.wm.DeviceStateController.DeviceState;
 
 import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
 import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
@@ -3186,9 +3186,9 @@ public class SizeCompatTests extends WindowTestsBase {
     private void setFoldablePosture(boolean isHalfFolded, boolean isTabletop) {
         final DisplayRotation r = mActivity.mDisplayContent.getDisplayRotation();
         doReturn(isHalfFolded).when(r).isDisplaySeparatingHinge();
-        doReturn(false).when(r).isDeviceInPosture(any(FoldState.class), anyBoolean());
+        doReturn(false).when(r).isDeviceInPosture(any(DeviceState.class), anyBoolean());
         if (isHalfFolded) {
-            doReturn(true).when(r).isDeviceInPosture(FoldState.HALF_FOLDED, isTabletop);
+            doReturn(true).when(r).isDeviceInPosture(DeviceState.HALF_FOLDED, isTabletop);
         }
         mActivity.recomputeConfiguration();
     }

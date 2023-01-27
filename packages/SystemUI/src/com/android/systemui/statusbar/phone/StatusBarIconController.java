@@ -501,7 +501,7 @@ public interface StatusBarIconController {
         @VisibleForTesting
         protected StatusIconDisplayable addWifiIcon(int index, String slot, WifiIconState state) {
             if (mStatusBarPipelineFlags.useNewWifiIcon()) {
-                throw new IllegalStateException("Attempting to add a mobile icon while the new "
+                throw new IllegalStateException("Attempting to add a wifi icon while the new "
                         + "icons are enabled is not supported");
             }
 

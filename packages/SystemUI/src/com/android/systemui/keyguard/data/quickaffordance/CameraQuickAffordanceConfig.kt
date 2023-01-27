@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.data.quickaffordance
 
 import android.app.StatusBarManager
 import android.content.Context
+import android.content.pm.PackageManager
 import com.android.systemui.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.camera.CameraGestureHelper
@@ -26,7 +27,6 @@ import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.statusbar.StatusBarState
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -37,6 +37,7 @@ class CameraQuickAffordanceConfig
 @Inject
 constructor(
     @Application private val context: Context,
+    private val packageManager: PackageManager,
     private val cameraGestureHelper: Lazy<CameraGestureHelper>,
 ) : KeyguardQuickAffordanceConfig {
 
@@ -79,6 +80,6 @@ constructor(
     }
 
     private fun isLaunchable(): Boolean {
-        return cameraGestureHelper.get().canCameraGestureBeLaunched(StatusBarState.KEYGUARD)
+        return packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
     }
 }

@@ -97,15 +97,20 @@ constructor(
         )
     }
 
-    fun logOnCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
+    fun logOnCapabilitiesChanged(
+        network: Network,
+        networkCapabilities: NetworkCapabilities,
+        isDefaultNetworkCallback: Boolean,
+    ) {
         buffer.log(
             SB_LOGGING_TAG,
             LogLevel.INFO,
             {
+                bool1 = isDefaultNetworkCallback
                 int1 = network.getNetId()
                 str1 = networkCapabilities.toString()
             },
-            { "onCapabilitiesChanged: net=$int1 capabilities=$str1" }
+            { "onCapabilitiesChanged[default=$bool1]: net=$int1 capabilities=$str1" }
         )
     }
 

@@ -30,6 +30,7 @@ import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_UNL
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_WINDOW_CORNER_RADIUS;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DEVICE_DOZING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DEVICE_DREAMING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_TRACING_ENABLED;
@@ -652,13 +653,14 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     }
 
     private void onStatusBarStateChanged(boolean keyguardShowing, boolean keyguardOccluded,
-            boolean bouncerShowing, boolean isDozing, boolean panelExpanded) {
+            boolean bouncerShowing, boolean isDozing, boolean panelExpanded, boolean isDreaming) {
         mSysUiState.setFlag(SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING,
                         keyguardShowing && !keyguardOccluded)
                 .setFlag(SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED,
                         keyguardShowing && keyguardOccluded)
                 .setFlag(SYSUI_STATE_BOUNCER_SHOWING, bouncerShowing)
                 .setFlag(SYSUI_STATE_DEVICE_DOZING, isDozing)
+                .setFlag(SYSUI_STATE_DEVICE_DREAMING, isDreaming)
                 .commitUpdate(mContext.getDisplayId());
     }
 

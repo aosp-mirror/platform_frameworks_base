@@ -182,6 +182,18 @@ constructor(
             }
     }
 
+    /**
+     * Ends the dream content and dream overlay animations, if they're currently running.
+     * @see [AnimatorSet.end]
+     */
+    fun endAnimations() {
+        mAnimator =
+            mAnimator?.let {
+                it.end()
+                null
+            }
+    }
+
     private fun blurAnimator(
         view: View,
         fromBlurRadius: Float,
