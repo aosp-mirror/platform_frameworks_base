@@ -532,10 +532,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automaatne"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Ilma heli ja vibreerimiseta"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Ilma heli ja vibreerimiseta, kuvatakse vestluste jaotises allpool"</string>
-    <!-- no translation found for notification_channel_summary_default (777294388712200605) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_default_with_bubbles (3482483084451555344) -->
-    <skip />
+    <string name="notification_channel_summary_default" msgid="777294388712200605">"Võib seadme seadete põhjal heliseda või vibreerida"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Võib seadme seadete põhjal heliseda või vibreerida. Rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> vestlused kuvatakse vaikimisi mullis."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Laske süsteemil määrata, kas selle märguande puhul peaks esitama heli või vibreerima"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Olek:&lt;/b&gt; määrati prioriteet Vaikimisi"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Olek:&lt;/b&gt; määrati prioriteet Vaikne"</string>
@@ -802,6 +800,10 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"Valige juhtelementide lisamiseks rakendus"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Lisati # juhtnupp.}other{Lisati # juhtnuppu.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Eemaldatud"</string>
+    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
+    <skip />
+    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
+    <skip />
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Lisatud lemmikuks"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Lisatud lemmikuks, positsioon <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Eemaldatud lemmikute hulgast"</string>
@@ -868,6 +870,8 @@
     <string name="controls_error_failed" msgid="960228639198558525">"Ilmnes viga, proovige uuesti"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Lisa juhtelemente"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Muuda juhtelemente"</string>
+    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
+    <skip />
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Väljundite lisamine"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Grupp"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 seade on valitud"</string>
@@ -1023,14 +1027,11 @@
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Akutase on <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Ühendage elektronpliiats laadijaga"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Elektronpliiatsi akutase on madal"</string>
-    <!-- no translation found for video_camera (7654002575156149298) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_title (6991157106804289643) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_text (3458704745640229638) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_action (2937701298133010724) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_close (7927067108901068098) -->
+    <string name="video_camera" msgid="7654002575156149298">"Videokaamera"</string>
+    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Sellelt profiililt ei saa helistada"</string>
+    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Teie töökoha eeskirjad lubavad teil helistada ainult tööprofiililt"</string>
+    <string name="call_from_work_profile_action" msgid="2937701298133010724">"Lülitu tööprofiilile"</string>
+    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Sule"</string>
+    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
     <skip />
 </resources>

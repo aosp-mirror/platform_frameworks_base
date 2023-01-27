@@ -532,10 +532,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automatycznie"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Bez dźwięku i wibracji"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Brak dźwięku i wibracji, wyświetla się niżej w sekcji rozmów"</string>
-    <!-- no translation found for notification_channel_summary_default (777294388712200605) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_default_with_bubbles (3482483084451555344) -->
-    <skip />
+    <string name="notification_channel_summary_default" msgid="777294388712200605">"Może włączać dzwonek lub wibracje w zależności od ustawień urządzenia"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Może włączyć dzwonek lub wibracje w zależności od ustawień urządzenia. Rozmowy z aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g> są domyślnie wyświetlane jako dymki."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Pozwól systemowi decydować, czy o powiadomieniu powinien informować dźwięk czy wibracja"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Stan:&lt;/b&gt; zmieniony na Domyślny"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Stan:&lt;/b&gt; zmieniono na Ciche"</string>
@@ -802,6 +800,10 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"Wybierz aplikację, do której chcesz dodać elementy sterujące"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Dodano # element sterujący.}few{Dodano # elementy sterujące.}many{Dodano # elementów sterujących.}other{Dodano # elementu sterującego.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Usunięto"</string>
+    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
+    <skip />
+    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
+    <skip />
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Dodano do ulubionych"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Dodano do ulubionych, pozycja <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Usunięto z ulubionych"</string>
@@ -868,6 +870,8 @@
     <string name="controls_error_failed" msgid="960228639198558525">"Błąd, spróbuj ponownie"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Dodaj elementy sterujące"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Edytuj elementy sterujące"</string>
+    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
+    <skip />
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Dodaj urządzenia wyjściowe"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Grupa"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Wybrano 1 urządzenie"</string>
@@ -1023,14 +1027,11 @@
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Pozostało <xliff:g id="PERCENTAGE">%s</xliff:g> baterii"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Podłącz rysik do ładowarki"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Słaba bateria w rysiku"</string>
-    <!-- no translation found for video_camera (7654002575156149298) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_title (6991157106804289643) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_text (3458704745640229638) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_action (2937701298133010724) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_close (7927067108901068098) -->
+    <string name="video_camera" msgid="7654002575156149298">"Kamera"</string>
+    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Nie można nawiązać połączenia z tego profilu"</string>
+    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Zasady obowiązujące w firmie zezwalają na nawiązywanie połączeń telefonicznych tylko w profilu służbowym"</string>
+    <string name="call_from_work_profile_action" msgid="2937701298133010724">"Przełącz na profil służbowy"</string>
+    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Zamknij"</string>
+    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
     <skip />
 </resources>

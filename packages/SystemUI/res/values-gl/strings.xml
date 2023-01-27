@@ -802,6 +802,10 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"Escolle unha aplicación para engadir controis"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Engadiuse # control.}other{Engadíronse # controis.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Quitouse"</string>
+    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
+    <skip />
+    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
+    <skip />
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Está entre os controis favoritos"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Está entre os controis favoritos (posición: <xliff:g id="NUMBER">%d</xliff:g>)"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Non está entre os controis favoritos"</string>
@@ -868,6 +872,8 @@
     <string name="controls_error_failed" msgid="960228639198558525">"Erro. Téntao de novo"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Engadir controis"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Editar controis"</string>
+    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
+    <skip />
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Engadir saídas"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Grupo"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Seleccionouse 1 dispositivo"</string>
@@ -1032,5 +1038,7 @@
     <!-- no translation found for call_from_work_profile_action (2937701298133010724) -->
     <skip />
     <!-- no translation found for call_from_work_profile_close (7927067108901068098) -->
+    <skip />
+    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
     <skip />
 </resources>

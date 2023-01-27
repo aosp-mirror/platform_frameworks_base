@@ -532,10 +532,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"자동"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"소리 또는 진동 없음"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"소리나 진동이 울리지 않으며 대화 섹션 하단에 표시됨"</string>
-    <!-- no translation found for notification_channel_summary_default (777294388712200605) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_default_with_bubbles (3482483084451555344) -->
-    <skip />
+    <string name="notification_channel_summary_default" msgid="777294388712200605">"기기 설정에 따라 벨소리나 진동이 울릴 수 있음"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"기기 설정에 따라 벨소리나 진동이 울릴 수 있습니다. 기본적으로 <xliff:g id="APP_NAME">%1$s</xliff:g>의 대화는 대화창으로 표시됩니다."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"시스템에서 알림 시 소리 또는 진동을 사용할지 결정하도록 허용합니다."</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;상태:&lt;/b&gt; 기본으로 높임"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;상태:&lt;/b&gt; 무음으로 낮춤"</string>
@@ -802,6 +800,10 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"컨트롤을 추가할 앱을 선택하세요"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{설정이 #개 추가되었습니다.}other{설정이 #개 추가되었습니다.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"삭제됨"</string>
+    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
+    <skip />
+    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
+    <skip />
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"즐겨찾기에 추가됨"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"즐겨찾기에 추가됨, 위치 <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"즐겨찾기에서 삭제됨"</string>
@@ -868,6 +870,8 @@
     <string name="controls_error_failed" msgid="960228639198558525">"오류. 다시 시도하세요."</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"컨트롤 추가"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"컨트롤 수정"</string>
+    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
+    <skip />
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"출력 추가"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"그룹"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"기기 1대 선택됨"</string>
@@ -1023,14 +1027,11 @@
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"배터리 <xliff:g id="PERCENTAGE">%s</xliff:g> 남음"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"스타일러스를 충전기에 연결하세요"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"스타일러스 배터리 부족"</string>
-    <!-- no translation found for video_camera (7654002575156149298) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_title (6991157106804289643) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_text (3458704745640229638) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_action (2937701298133010724) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_close (7927067108901068098) -->
+    <string name="video_camera" msgid="7654002575156149298">"비디오 카메라"</string>
+    <string name="call_from_work_profile_title" msgid="6991157106804289643">"이 프로필에서 전화를 걸 수 없음"</string>
+    <string name="call_from_work_profile_text" msgid="3458704745640229638">"직장 정책이 직장 프로필에서만 전화를 걸도록 허용합니다."</string>
+    <string name="call_from_work_profile_action" msgid="2937701298133010724">"직장 프로필로 전환"</string>
+    <string name="call_from_work_profile_close" msgid="7927067108901068098">"닫기"</string>
+    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
     <skip />
 </resources>
