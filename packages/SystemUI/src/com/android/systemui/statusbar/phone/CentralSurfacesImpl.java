@@ -3773,6 +3773,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             });
         } else if (mDozing && !unlocking) {
             mScrimController.transitionTo(ScrimState.AOD);
+            // This will cancel the keyguardFadingAway animation if it is running. We need to do
+            // this as otherwise it can remain pending and leave keyguard in a weird state.
+            mUnlockScrimCallback.onCancelled();
         } else if (mKeyguardStateController.isShowing() && !isOccluded() && !unlocking) {
             mScrimController.transitionTo(ScrimState.KEYGUARD);
         } else if (mKeyguardStateController.isShowing() && mKeyguardUpdateMonitor.isDreaming()
