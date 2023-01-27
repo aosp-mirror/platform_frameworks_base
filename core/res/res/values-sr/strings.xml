@@ -1841,6 +1841,10 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Приказује се цео екран"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Да бисте изашли, превуците надоле одозго."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Важи"</string>
+    <!-- no translation found for display_rotation_camera_compat_toast_after_rotation (7600891546249829854) -->
+    <skip />
+    <!-- no translation found for display_rotation_camera_compat_toast_in_split_screen (8393302456336805466) -->
+    <skip />
     <string name="done_label" msgid="7283767013231718521">"Готово"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Кружни клизач за сате"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Кружни клизач за минуте"</string>
