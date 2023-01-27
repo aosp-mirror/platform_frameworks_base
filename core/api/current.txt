@@ -13541,9 +13541,9 @@ package android.credentials {
 
   public final class UnregisterCredentialDescriptionRequest implements android.os.Parcelable {
     ctor public UnregisterCredentialDescriptionRequest(@NonNull android.credentials.CredentialDescription);
-    ctor public UnregisterCredentialDescriptionRequest(@NonNull java.util.List<android.credentials.CredentialDescription>);
+    ctor public UnregisterCredentialDescriptionRequest(@NonNull java.util.Set<android.credentials.CredentialDescription>);
     method public int describeContents();
-    method @NonNull public java.util.List<android.credentials.CredentialDescription> getCredentialDescriptions();
+    method @NonNull public java.util.Set<android.credentials.CredentialDescription> getCredentialDescriptions();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.credentials.UnregisterCredentialDescriptionRequest> CREATOR;
   }
