@@ -54,10 +54,12 @@ public class SyncValidatorSCVHTestCase implements ISurfaceValidatorTestCase {
             new Point(300, 800), new Point(200, 200)};
     private int mLastSizeIndex = 1;
 
-    private long mDelayMs;
+    private final long mDelayMs;
+    private final boolean mOverrideDefaultDuration;
 
-    public SyncValidatorSCVHTestCase(long delayMs) {
+    public SyncValidatorSCVHTestCase(long delayMs, boolean overrideDefaultDuration) {
         mDelayMs = delayMs;
+        mOverrideDefaultDuration = overrideDefaultDuration;
     }
 
     private final Runnable mRunnable = new Runnable() {
@@ -230,5 +232,10 @@ public class SyncValidatorSCVHTestCase implements ISurfaceValidatorTestCase {
     @Override
     public void end() {
         mHandler.removeCallbacks(mRunnable);
+    }
+
+    @Override
+    public boolean hasAnimation() {
+        return !mOverrideDefaultDuration;
     }
 }

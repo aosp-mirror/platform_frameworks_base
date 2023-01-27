@@ -250,6 +250,8 @@ void CanvasContext::setupPipelineSurface() {
         // Order is important when new and old surfaces are the same, because old surface has
         // its frame stats disabled automatically.
         native_window_enable_frame_timestamps(mNativeSurface->getNativeWindow(), true);
+        native_window_set_scaling_mode(mNativeSurface->getNativeWindow(),
+                                       NATIVE_WINDOW_SCALING_MODE_FREEZE);
     } else {
         mRenderThread.removeFrameCallback(this);
         mGenerationID++;

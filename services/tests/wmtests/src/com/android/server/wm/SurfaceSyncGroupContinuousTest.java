@@ -22,6 +22,7 @@ import static android.server.wm.WindowManagerState.getLogicalDisplaySize;
 
 import android.app.KeyguardManager;
 import android.os.PowerManager;
+import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
 import android.view.cts.surfacevalidator.CapturedActivity;
 import android.window.SurfaceSyncGroup;
@@ -68,11 +69,23 @@ public class SurfaceSyncGroupContinuousTest {
 
     @Test
     public void testSurfaceControlViewHostIPCSync_Fast() throws Throwable {
-        mCapturedActivity.verifyTest(new SyncValidatorSCVHTestCase(0 /* delayMs */), mName);
+        mCapturedActivity.verifyTest(
+                new SyncValidatorSCVHTestCase(0 /* delayMs */, false /* overrideDefaultDuration */),
+                mName);
     }
 
     @Test
     public void testSurfaceControlViewHostIPCSync_Slow() throws Throwable {
-        mCapturedActivity.verifyTest(new SyncValidatorSCVHTestCase(100 /* delayMs */), mName);
+        mCapturedActivity.verifyTest(new SyncValidatorSCVHTestCase(100 /* delayMs */,
+                false /* overrideDefaultDuration */), mName);
+    }
+
+    @Test
+    @Presubmit
+    public void testSurfaceControlViewHostIPCSync_Short() throws Throwable {
+        mCapturedActivity.setMinimumCaptureDurationMs(5000);
+        mCapturedActivity.verifyTest(
+                new SyncValidatorSCVHTestCase(0 /* delayMs */, true /* overrideDefaultDuration */),
+                mName);
     }
 }
