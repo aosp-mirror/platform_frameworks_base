@@ -5827,7 +5827,7 @@ public abstract class PackageManager {
     /**
      * Returns the app metadata for a package.
      *
-     * @param packageName
+     * @param packageName The package name for which to get the app metadata.
      * @return A PersistableBundle containing the app metadata that was provided by the installer.
      *         In the case where a package does not have any metadata, an empty PersistableBundle is
      *         returned.
