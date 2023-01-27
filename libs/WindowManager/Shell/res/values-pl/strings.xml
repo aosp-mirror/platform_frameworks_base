@@ -82,6 +82,16 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Kliknij dwukrotnie poza aplikacją, aby ją przenieść"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"OK"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Rozwiń, aby wyświetlić więcej informacji."</string>
+    <!-- no translation found for letterbox_restart_dialog_title (8543049527871033505) -->
+    <skip />
+    <!-- no translation found for letterbox_restart_dialog_description (6096946078246557848) -->
+    <skip />
+    <!-- no translation found for letterbox_restart_cancel (1342209132692537805) -->
+    <skip />
+    <!-- no translation found for letterbox_restart_restart (8529976234412442973) -->
+    <skip />
+    <!-- no translation found for letterbox_restart_dialog_checkbox_title (5252918008140768386) -->
+    <skip />
     <string name="maximize_button_text" msgid="1650859196290301963">"Maksymalizuj"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Minimalizuj"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Zamknij"</string>

@@ -82,6 +82,11 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Koppintson duplán az alkalmazáson kívül az áthelyezéséhez"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Értem"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Kibontással további információkhoz juthat."</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Újraindítja a jobb megjelenítés érdekében?"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Újraindíthatja az alkalmazást a képernyőn való jobb megjelenítés érdekében, de elveszítheti az előrehaladását és az esetleges nem mentett változásokat"</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Mégse"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"Újraindítás"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Ne jelenjen meg többé"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Teljes méret"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Kis méret"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Bezárás"</string>
