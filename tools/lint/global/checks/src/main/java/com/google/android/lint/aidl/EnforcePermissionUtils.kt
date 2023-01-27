@@ -17,6 +17,8 @@
 package com.google.android.lint.aidl
 
 import com.android.tools.lint.detector.api.JavaContext
+import com.android.tools.lint.detector.api.LintFix
+import com.android.tools.lint.detector.api.Location
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiReferenceList
 import org.jetbrains.uast.UMethod
@@ -69,3 +71,26 @@ private fun hasSingleAncestor(references: PsiReferenceList?, qualifiedName: Stri
         references != null &&
                 references.referenceElements.size == 1 &&
                 references.referenceElements[0].qualifiedName == qualifiedName
+
+fun getHelperMethodCallSourceString(node: UMethod) = "${node.name}$AIDL_PERMISSION_HELPER_SUFFIX()"
+
+fun getHelperMethodFix(
+    node: UMethod,
+    manualCheckLocation: Location,
+    prepend: Boolean = true
+): LintFix {
+    val helperMethodSource = getHelperMethodCallSourceString(node)
+    val indent = " ".repeat(manualCheckLocation.start?.column ?: 0)
+    val newText = "$helperMethodSource;${if (prepend) "\n\n$indent" else ""}"
+
+    val fix = LintFix.create()
+            .replace()
+            .range(manualCheckLocation)
+            .with(newText)
+            .reformat(true)
+            .autoFix()
+
+    if (prepend) fix.beginning()
+
+    return fix.build()
+}

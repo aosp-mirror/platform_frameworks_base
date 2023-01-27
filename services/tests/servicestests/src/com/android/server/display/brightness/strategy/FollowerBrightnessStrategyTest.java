@@ -54,6 +54,7 @@ public class FollowerBrightnessStrategyTest {
                         .setBrightness(brightnessToFollow)
                         .setBrightnessReason(brightnessReason)
                         .setSdrBrightness(brightnessToFollow)
+                        .setDisplayBrightnessStrategyName(mFollowerBrightnessStrategy.getName())
                         .build();
         DisplayBrightnessState updatedDisplayBrightnessState =
                 mFollowerBrightnessStrategy.updateBrightness(displayPowerRequest);

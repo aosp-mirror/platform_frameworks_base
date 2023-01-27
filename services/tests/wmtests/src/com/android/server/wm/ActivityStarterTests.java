@@ -99,6 +99,7 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.provider.DeviceConfig;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.Pair;
 import android.util.Size;
@@ -108,10 +109,12 @@ import android.window.TaskFragmentOrganizerToken;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.compatibility.common.util.DeviceConfigStateHelper;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.wm.LaunchParamsController.LaunchParamsModifier;
 import com.android.server.wm.utils.MockTracker;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -131,10 +134,9 @@ import java.util.Set;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class ActivityStarterTests extends WindowTestsBase {
-    private ActivityStartController mController;
-    private ActivityMetricsLogger mActivityMetricsLogger;
-    private PackageManagerInternal mMockPackageManager;
 
+    private static final String ENABLE_DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER =
+            "enable_default_rescind_bal_privileges_from_pending_intent_sender";
     private static final int PRECONDITION_NO_CALLER_APP = 1;
     private static final int PRECONDITION_NO_INTENT_COMPONENT = 1 << 1;
     private static final int PRECONDITION_NO_ACTIVITY_INFO = 1 << 2;
@@ -145,13 +147,19 @@ public class ActivityStarterTests extends WindowTestsBase {
     private static final int PRECONDITION_DIFFERENT_UID = 1 << 7;
     private static final int PRECONDITION_ACTIVITY_SUPPORTS_INTENT_EXCEPTION = 1 << 8;
     private static final int PRECONDITION_CANNOT_START_ANY_ACTIVITY = 1 << 9;
-
     private static final int FAKE_CALLING_UID = 666;
     private static final int FAKE_REAL_CALLING_UID = 667;
     private static final String FAKE_CALLING_PACKAGE = "com.whatever.dude";
     private static final int UNIMPORTANT_UID = 12345;
     private static final int UNIMPORTANT_UID2 = 12346;
     private static final int CURRENT_IME_UID = 12347;
+
+    protected final DeviceConfigStateHelper mDeviceConfig = new DeviceConfigStateHelper(
+            DeviceConfig.NAMESPACE_WINDOW_MANAGER);
+
+    private ActivityStartController mController;
+    private ActivityMetricsLogger mActivityMetricsLogger;
+    private PackageManagerInternal mMockPackageManager;
 
     @Before
     public void setUp() throws Exception {
@@ -161,6 +169,13 @@ public class ActivityStarterTests extends WindowTestsBase {
         doReturn(balController).when(mController).getBackgroundActivityLaunchController();
         mActivityMetricsLogger = mock(ActivityMetricsLogger.class);
         clearInvocations(mActivityMetricsLogger);
+        mDeviceConfig.set(ENABLE_DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER,
+                String.valueOf(true));
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mDeviceConfig.close();
     }
 
     @Test

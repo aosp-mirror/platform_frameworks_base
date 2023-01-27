@@ -12,16 +12,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package com.android.server.companion.datatransfer.contextsync;
+package com.android.systemui.keyguard.data.repository
 
-/** Callback for call metadata syncing. */
-public abstract class CallMetadataSyncCallback {
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
-    abstract void processCallControlAction(int crossDeviceCallId, int callControlAction);
+class FakeDeviceEntryFingerprintAuthRepository : DeviceEntryFingerprintAuthRepository {
+    private val _isLockedOut = MutableStateFlow<Boolean>(false)
+    override val isLockedOut: StateFlow<Boolean> = _isLockedOut.asStateFlow()
 
-    abstract void requestCrossDeviceSync(int userId);
-
-    abstract void updateStatus(int userId, boolean shouldSyncCallMetadata);
+    fun setLockedOut(lockedOut: Boolean) {
+        _isLockedOut.value = lockedOut
+    }
 }

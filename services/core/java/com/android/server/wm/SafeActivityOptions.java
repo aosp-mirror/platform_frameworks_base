@@ -143,7 +143,11 @@ public class SafeActivityOptions {
                 .setLaunchTaskDisplayArea(options.getLaunchTaskDisplayArea())
                 .setLaunchDisplayId(options.getLaunchDisplayId())
                 .setCallerDisplayId(options.getCallerDisplayId())
-                .setLaunchRootTask(options.getLaunchRootTask());
+                .setLaunchRootTask(options.getLaunchRootTask())
+                .setPendingIntentBackgroundActivityStartMode(
+                        options.getPendingIntentBackgroundActivityStartMode())
+                .setIgnorePendingIntentCreatorForegroundState(
+                        options.getIgnorePendingIntentCreatorForegroundState());
     }
 
     /**

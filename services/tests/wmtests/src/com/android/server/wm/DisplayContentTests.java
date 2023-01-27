@@ -1738,7 +1738,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
         // No need to apply rotation if the display ignores orientation request.
         doCallRealMethod().when(displayContent).rotationForActivityInDifferentOrientation(any());
-        pinnedActivity.mOrientation = SCREEN_ORIENTATION_LANDSCAPE;
+        pinnedActivity.setOverrideOrientation(SCREEN_ORIENTATION_LANDSCAPE);
         displayContent.setIgnoreOrientationRequest(true);
         assertEquals(WindowConfiguration.ROTATION_UNDEFINED,
                 displayContent.rotationForActivityInDifferentOrientation(pinnedActivity));

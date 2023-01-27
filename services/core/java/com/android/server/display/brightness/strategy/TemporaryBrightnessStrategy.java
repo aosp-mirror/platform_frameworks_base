@@ -48,7 +48,7 @@ public class TemporaryBrightnessStrategy implements DisplayBrightnessStrategy {
         DisplayBrightnessState displayBrightnessState =
                 BrightnessUtils.constructDisplayBrightnessState(BrightnessReason.REASON_TEMPORARY,
                         mTemporaryScreenBrightness,
-                        mTemporaryScreenBrightness);
+                        mTemporaryScreenBrightness, getName());
         return displayBrightnessState;
     }
 

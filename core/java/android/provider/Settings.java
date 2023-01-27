@@ -40,6 +40,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.SearchManager;
 import android.app.WallpaperManager;
+import android.app.tare.EconomyManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -14682,7 +14683,7 @@ public final class Settings {
          *
          * @hide
          */
-        public static final int DEFAULT_ENABLE_TARE = 1;
+        public static final int DEFAULT_ENABLE_TARE = EconomyManager.DEFAULT_ENABLE_TARE_MODE;
 
         /**
          * Whether to enable the TARE AlarmManager economic policy or not.
@@ -14697,7 +14698,8 @@ public final class Settings {
          *
          * @hide
          */
-        public static final int DEFAULT_ENABLE_TARE_ALARM_MANAGER = 0;
+        public static final int DEFAULT_ENABLE_TARE_ALARM_MANAGER =
+                        EconomyManager.DEFAULT_ENABLE_POLICY_ALARM ? 1 : 0;
 
         /**
          * Settings for AlarmManager's TARE EconomicPolicy (list of its economic factors).
@@ -14721,7 +14723,8 @@ public final class Settings {
          *
          * @hide
          */
-        public static final int DEFAULT_ENABLE_TARE_JOB_SCHEDULER = 0;
+        public static final int DEFAULT_ENABLE_TARE_JOB_SCHEDULER =
+                EconomyManager.DEFAULT_ENABLE_POLICY_JOB_SCHEDULER ? 1 : 0;
 
         /**
          * Settings for JobScheduler's TARE EconomicPolicy (list of its economic factors).

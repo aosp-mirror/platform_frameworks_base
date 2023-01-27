@@ -1573,7 +1573,7 @@ public class DisplayRotation {
         proto.end(token);
     }
 
-    boolean isDeviceInPosture(DeviceStateController.FoldState state, boolean isTabletop) {
+    boolean isDeviceInPosture(DeviceStateController.DeviceState state, boolean isTabletop) {
         if (mFoldController == null) return false;
         return mFoldController.isDeviceInPosture(state, isTabletop);
     }
@@ -1585,10 +1585,10 @@ public class DisplayRotation {
     /**
      * Called by the DeviceStateManager callback when the device state changes.
      */
-    void foldStateChanged(DeviceStateController.FoldState foldState) {
+    void foldStateChanged(DeviceStateController.DeviceState deviceState) {
         if (mFoldController != null) {
             synchronized (mLock) {
-                mFoldController.foldStateChanged(foldState);
+                mFoldController.foldStateChanged(deviceState);
             }
         }
     }
@@ -1596,8 +1596,8 @@ public class DisplayRotation {
     private class FoldController {
         @Surface.Rotation
         private int mHalfFoldSavedRotation = -1; // No saved rotation
-        private DeviceStateController.FoldState mFoldState =
-                DeviceStateController.FoldState.UNKNOWN;
+        private DeviceStateController.DeviceState mDeviceState =
+                DeviceStateController.DeviceState.UNKNOWN;
         private boolean mInHalfFoldTransition = false;
         private final boolean mIsDisplayAlwaysSeparatingHinge;
         private final Set<Integer> mTabletopRotations;
@@ -1637,32 +1637,33 @@ public class DisplayRotation {
                     R.bool.config_isDisplayHingeAlwaysSeparating);
         }
 
-        boolean isDeviceInPosture(DeviceStateController.FoldState state, boolean isTabletop) {
-            if (state != mFoldState) {
+        boolean isDeviceInPosture(DeviceStateController.DeviceState state, boolean isTabletop) {
+            if (state != mDeviceState) {
                 return false;
             }
-            if (mFoldState == DeviceStateController.FoldState.HALF_FOLDED) {
+            if (mDeviceState == DeviceStateController.DeviceState.HALF_FOLDED) {
                 return !(isTabletop ^ mTabletopRotations.contains(mRotation));
             }
             return true;
         }
 
-        DeviceStateController.FoldState getFoldState() {
-            return mFoldState;
+        DeviceStateController.DeviceState getFoldState() {
+            return mDeviceState;
         }
 
         boolean isSeparatingHinge() {
-            return mFoldState == DeviceStateController.FoldState.HALF_FOLDED
-                    || (mFoldState == DeviceStateController.FoldState.OPEN
+            return mDeviceState == DeviceStateController.DeviceState.HALF_FOLDED
+                    || (mDeviceState == DeviceStateController.DeviceState.OPEN
                         && mIsDisplayAlwaysSeparatingHinge);
         }
 
         boolean overrideFrozenRotation() {
-            return mFoldState == DeviceStateController.FoldState.HALF_FOLDED;
+            return mDeviceState == DeviceStateController.DeviceState.HALF_FOLDED;
         }
 
         boolean shouldRevertOverriddenRotation() {
-            return mFoldState == DeviceStateController.FoldState.OPEN // When transitioning to open.
+            // When transitioning to open.
+            return mDeviceState == DeviceStateController.DeviceState.OPEN
                     && mInHalfFoldTransition
                     && mHalfFoldSavedRotation != -1 // Ignore if we've already reverted.
                     && mUserRotationMode
@@ -1676,30 +1677,30 @@ public class DisplayRotation {
             return savedRotation;
         }
 
-        void foldStateChanged(DeviceStateController.FoldState newState) {
+        void foldStateChanged(DeviceStateController.DeviceState newState) {
             ProtoLog.v(WM_DEBUG_ORIENTATION,
                     "foldStateChanged: displayId %d, halfFoldStateChanged %s, "
                     + "saved rotation: %d, mUserRotation: %d, mLastSensorRotation: %d, "
                     + "mLastOrientation: %d, mRotation: %d",
                     mDisplayContent.getDisplayId(), newState.name(), mHalfFoldSavedRotation,
                     mUserRotation, mLastSensorRotation, mLastOrientation, mRotation);
-            if (mFoldState == DeviceStateController.FoldState.UNKNOWN) {
-                mFoldState = newState;
+            if (mDeviceState == DeviceStateController.DeviceState.UNKNOWN) {
+                mDeviceState = newState;
                 return;
             }
-            if (newState == DeviceStateController.FoldState.HALF_FOLDED
-                    && mFoldState != DeviceStateController.FoldState.HALF_FOLDED) {
+            if (newState == DeviceStateController.DeviceState.HALF_FOLDED
+                    && mDeviceState != DeviceStateController.DeviceState.HALF_FOLDED) {
                 // The device has transitioned to HALF_FOLDED state: save the current rotation and
                 // update the device rotation.
                 mHalfFoldSavedRotation = mRotation;
-                mFoldState = newState;
+                mDeviceState = newState;
                 // Now mFoldState is set to HALF_FOLDED, the overrideFrozenRotation function will
                 // return true, so rotation is unlocked.
                 mService.updateRotation(false /* alwaysSendConfiguration */,
                         false /* forceRelayout */);
             } else {
                 mInHalfFoldTransition = true;
-                mFoldState = newState;
+                mDeviceState = newState;
                 // Tell the device to update its orientation.
                 mService.updateRotation(false /* alwaysSendConfiguration */,
                         false /* forceRelayout */);
@@ -1822,7 +1823,7 @@ public class DisplayRotation {
             final long mTimestamp = System.currentTimeMillis();
             final int mHalfFoldSavedRotation;
             final boolean mInHalfFoldTransition;
-            final DeviceStateController.FoldState mFoldState;
+            final DeviceStateController.DeviceState mDeviceState;
             @Nullable final String mDisplayRotationCompatPolicySummary;
 
             Record(DisplayRotation dr, int fromRotation, int toRotation) {
@@ -1843,8 +1844,9 @@ public class DisplayRotation {
                 if (source != null) {
                     mLastOrientationSource = source.toString();
                     final WindowState w = source.asWindowState();
-                    mSourceOrientation =
-                            w != null ? w.mAttrs.screenOrientation : source.mOrientation;
+                    mSourceOrientation = w != null
+                            ? w.mAttrs.screenOrientation
+                            : source.getOverrideOrientation();
                 } else {
                     mLastOrientationSource = null;
                     mSourceOrientation = SCREEN_ORIENTATION_UNSET;
@@ -1852,11 +1854,11 @@ public class DisplayRotation {
                 if (dr.mFoldController != null) {
                     mHalfFoldSavedRotation = dr.mFoldController.mHalfFoldSavedRotation;
                     mInHalfFoldTransition = dr.mFoldController.mInHalfFoldTransition;
-                    mFoldState = dr.mFoldController.mFoldState;
+                    mDeviceState = dr.mFoldController.mDeviceState;
                 } else {
                     mHalfFoldSavedRotation = NO_FOLD_CONTROLLER;
                     mInHalfFoldTransition = false;
-                    mFoldState = DeviceStateController.FoldState.UNKNOWN;
+                    mDeviceState = DeviceStateController.DeviceState.UNKNOWN;
                 }
                 mDisplayRotationCompatPolicySummary = dc.mDisplayRotationCompatPolicy == null
                         ? null
@@ -1882,7 +1884,7 @@ public class DisplayRotation {
                     pw.println(prefix + " halfFoldSavedRotation="
                             + mHalfFoldSavedRotation
                             + " mInHalfFoldTransition=" + mInHalfFoldTransition
-                            + " mFoldState=" + mFoldState);
+                            + " mFoldState=" + mDeviceState);
                 }
                 if (mDisplayRotationCompatPolicySummary != null) {
                     pw.println(prefix + mDisplayRotationCompatPolicySummary);

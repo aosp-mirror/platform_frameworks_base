@@ -36,6 +36,7 @@ import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.UExpressionList
 import org.jetbrains.uast.UIfExpression
+import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UThrowExpression
 import org.jetbrains.uast.UastBinaryOperator
 import org.jetbrains.uast.evaluateString
@@ -46,29 +47,37 @@ import org.jetbrains.uast.visitor.AbstractUastVisitor
  * Helper class that facilitates the creation of lint auto fixes
  */
 data class EnforcePermissionFix(
-    val locations: List<Location>,
+    val manualCheckLocations: List<Location>,
     val permissionNames: List<String>,
     val errorLevel: Boolean,
     val anyOf: Boolean,
 ) {
-    fun toLintFix(annotationLocation: Location): LintFix {
-        val removeFixes = this.locations.map {
-            LintFix.create()
-                .replace()
-                .reformat(true)
-                .range(it)
-                .with("")
-                .autoFix()
-                .build()
+    fun toLintFix(context: JavaContext, node: UMethod): LintFix {
+        val methodLocation = context.getLocation(node)
+        val replaceOrRemoveFixes = manualCheckLocations.mapIndexed { index, manualCheckLocation ->
+            if (index == 0) {
+                // Replace the first manual check with a call to the helper method
+                getHelperMethodFix(node, manualCheckLocation, false)
+            } else {
+                // Remove all subsequent manual checks
+                LintFix.create()
+                    .replace()
+                    .reformat(true)
+                    .range(manualCheckLocation)
+                    .with("")
+                    .autoFix()
+                    .build()
+            }
         }
 
+        // Annotate the method with @EnforcePermission(...)
         val annotateFix = LintFix.create()
-            .annotate(this.annotation)
-            .range(annotationLocation)
+            .annotate(annotation)
+            .range(methodLocation)
             .autoFix()
             .build()
 
-        return LintFix.create().composite(annotateFix, *removeFixes.toTypedArray())
+        return LintFix.create().composite(annotateFix, *replaceOrRemoveFixes.toTypedArray())
     }
 
     private val annotation: String
@@ -89,7 +98,50 @@ data class EnforcePermissionFix(
 
     companion object {
         /**
+         * Walks the expressions in a block, looking for simple permission checks.
+         *
+         * As soon as something other than a permission check is encountered, stop looking,
+         * as some other business logic is happening that prevents an automated fix.
+         */
+        fun fromBlockExpression(
+            context: JavaContext,
+            blockExpression: UBlockExpression
+        ): EnforcePermissionFix? {
+            try {
+                val singleFixes = mutableListOf<EnforcePermissionFix>()
+                for (expression in blockExpression.expressions) {
+                    val fix = fromExpression(context, expression) ?: break
+                    singleFixes.add(fix)
+                }
+                return compose(singleFixes)
+            } catch (e: AnyOfAllOfException) {
+                return null
+            }
+        }
+
+        /**
+         * Conditionally constructs EnforcePermissionFix from any UExpression
+         *
+         * @return EnforcePermissionFix if the expression boils down to a permission check,
+         * else null
+         */
+        fun fromExpression(
+            context: JavaContext,
+            expression: UExpression
+        ): EnforcePermissionFix? {
+            val trimmedExpression = expression.skipParenthesizedExprDown()
+            if (trimmedExpression is UIfExpression) {
+                return fromIfExpression(context, trimmedExpression)
+            }
+            findCallExpression(trimmedExpression)?.let {
+                return fromCallExpression(context, it)
+            }
+            return null
+        }
+
+        /**
          * Conditionally constructs EnforcePermissionFix from a UCallExpression
+         *
          * @return EnforcePermissionFix if the called method is annotated with @PermissionMethod, else null
          */
         fun fromCallExpression(
@@ -111,6 +163,7 @@ data class EnforcePermissionFix(
 
         /**
          * Conditionally constructs EnforcePermissionFix from a UCallExpression
+         *
          * @return EnforcePermissionFix IF AND ONLY IF:
          * * The condition of the if statement compares the return value of a
          *   PermissionMethod to one of the PackageManager.PermissionResult values
@@ -172,7 +225,8 @@ data class EnforcePermissionFix(
         }
 
 
-        fun compose(individuals: List<EnforcePermissionFix>): EnforcePermissionFix {
+        fun compose(individuals: List<EnforcePermissionFix>): EnforcePermissionFix? {
+            if (individuals.isEmpty()) return null
             val anyOfs = individuals.filter(EnforcePermissionFix::anyOf)
             // anyOf/allOf should be consistent.  If we encounter some @PermissionMethods that are anyOf
             // and others that aren't, we don't know what to do.
@@ -180,7 +234,7 @@ data class EnforcePermissionFix(
                 throw AnyOfAllOfException()
             }
             return EnforcePermissionFix(
-                    individuals.flatMap(EnforcePermissionFix::locations),
+                    individuals.flatMap(EnforcePermissionFix::manualCheckLocations),
                     individuals.flatMap(EnforcePermissionFix::permissionNames),
                     errorLevel = individuals.all(EnforcePermissionFix::errorLevel),
                     anyOf = anyOfs.isNotEmpty()

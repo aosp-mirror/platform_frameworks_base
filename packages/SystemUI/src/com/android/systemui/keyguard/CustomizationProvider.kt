@@ -31,10 +31,12 @@ import android.os.Bundle
 import android.util.Log
 import com.android.systemui.SystemUIAppComponentFactoryBase
 import com.android.systemui.SystemUIAppComponentFactoryBase.ContextAvailableCallback
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
 import com.android.systemui.keyguard.ui.preview.KeyguardRemotePreviewManager
 import com.android.systemui.shared.customization.data.content.CustomizationProviderContract as Contract
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.runBlocking
 
 class CustomizationProvider :
@@ -42,6 +44,7 @@ class CustomizationProvider :
 
     @Inject lateinit var interactor: KeyguardQuickAffordanceInteractor
     @Inject lateinit var previewManager: KeyguardRemotePreviewManager
+    @Inject @Main lateinit var mainDispatcher: CoroutineDispatcher
 
     private lateinit var contextAvailableCallback: ContextAvailableCallback
 
@@ -138,12 +141,14 @@ class CustomizationProvider :
         selectionArgs: Array<out String>?,
         sortOrder: String?,
     ): Cursor? {
-        return when (uriMatcher.match(uri)) {
-            MATCH_CODE_ALL_AFFORDANCES -> runBlocking { queryAffordances() }
-            MATCH_CODE_ALL_SLOTS -> querySlots()
-            MATCH_CODE_ALL_SELECTIONS -> runBlocking { querySelections() }
-            MATCH_CODE_ALL_FLAGS -> queryFlags()
-            else -> null
+        return runBlocking(mainDispatcher) {
+            when (uriMatcher.match(uri)) {
+                MATCH_CODE_ALL_AFFORDANCES -> queryAffordances()
+                MATCH_CODE_ALL_SLOTS -> querySlots()
+                MATCH_CODE_ALL_SELECTIONS -> querySelections()
+                MATCH_CODE_ALL_FLAGS -> queryFlags()
+                else -> null
+            }
         }
     }
 

@@ -26,6 +26,7 @@ import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_FG_ONL
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_BAL_PERMISSION;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_FOREGROUND;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_GRACE_PERIOD;
+import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_VISIBLE_WINDOW;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_BLOCK;
 
 import static java.util.Objects.requireNonNull;
@@ -152,7 +153,7 @@ class BackgroundLaunchProcessController {
                 Slog.d(TAG, "[Process(" + pid
                         + ")] Activity start allowed: process bound by foreground uid");
             }
-            return BAL_ALLOW_FOREGROUND;
+            return BAL_ALLOW_VISIBLE_WINDOW;
         }
         // Allow if the flag was explicitly set.
         if (isBackgroundStartAllowedByToken(uid, packageName, isCheckingForFgsStart)) {

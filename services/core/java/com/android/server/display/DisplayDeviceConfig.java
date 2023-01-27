@@ -17,12 +17,14 @@
 package com.android.server.display;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.RefreshRateLimitation;
+import android.hardware.input.HostUsiVersion;
 import android.os.Environment;
 import android.os.PowerManager;
 import android.text.TextUtils;
@@ -57,6 +59,7 @@ import com.android.server.display.config.SensorDetails;
 import com.android.server.display.config.ThermalStatus;
 import com.android.server.display.config.ThermalThrottling;
 import com.android.server.display.config.ThresholdPoint;
+import com.android.server.display.config.UsiVersion;
 import com.android.server.display.config.XmlParser;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -390,6 +393,12 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *         <item>80</item>
  *         <item>1500</item>
  *     </screenOffBrightnessSensorValueToLux>
+ *     // The version of the Universal Stylus Initiative (USI) protocol supported by this display.
+ *     // This should be omitted if the display does not support USI styluses.
+ *     <usiVersion>
+ *         <majorVersion>2</majorVersion>
+ *         <minorVersion>0</minorVersion>
+ *     </usiVersion>
  *    </displayConfiguration>
  *  }
  *  </pre>
@@ -625,6 +634,9 @@ public class DisplayDeviceConfig {
     private BrightnessThrottlingData mOriginalBrightnessThrottlingData;
     // The concurrent displays mode might need a stricter throttling policy
     private BrightnessThrottlingData mConcurrentDisplaysBrightnessThrottlingData;
+
+    @Nullable
+    private HostUsiVersion mHostUsiVersion;
 
     @VisibleForTesting
     DisplayDeviceConfig(Context context) {
@@ -1370,6 +1382,15 @@ public class DisplayDeviceConfig {
         return mScreenOffBrightnessSensorValueToLux;
     }
 
+    /**
+     * @return The USI version supported by this display, or null if USI is not supported.
+     * @see HostUsiVersion
+     */
+    @Nullable
+    public HostUsiVersion getHostUsiVersion() {
+        return mHostUsiVersion;
+    }
+
     @Override
     public String toString() {
         return "DisplayDeviceConfig{"
@@ -1474,6 +1495,8 @@ public class DisplayDeviceConfig {
                 + "\n"
                 + ", mScreenOffBrightnessSensorValueToLux=" + Arrays.toString(
                 mScreenOffBrightnessSensorValueToLux)
+                + "\n"
+                + ", mUsiVersion= " + mHostUsiVersion
                 + "}";
     }
 
@@ -1535,6 +1558,7 @@ public class DisplayDeviceConfig {
                 loadAutoBrightnessConfigValues(config);
                 loadRefreshRateSetting(config);
                 loadScreenOffBrightnessSensorValueToLuxFromDdc(config);
+                loadUsiVersion(config);
             } else {
                 Slog.w(TAG, "DisplayDeviceConfig file is null");
             }
@@ -2687,6 +2711,15 @@ public class DisplayDeviceConfig {
         for (int i = 0; i < items.size(); i++) {
             mScreenOffBrightnessSensorValueToLux[i] = items.get(i).intValue();
         }
+    }
+
+    private void loadUsiVersion(DisplayConfiguration config) {
+        final UsiVersion usiVersion = config.getUsiVersion();
+        mHostUsiVersion = usiVersion != null
+                ? new HostUsiVersion(
+                        usiVersion.getMajorVersion().intValue(),
+                        usiVersion.getMinorVersion().intValue())
+                : null;
     }
 
     /**

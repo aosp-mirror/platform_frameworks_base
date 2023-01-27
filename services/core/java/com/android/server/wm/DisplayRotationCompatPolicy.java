@@ -296,8 +296,8 @@ final class DisplayRotationCompatPolicy {
                 && activity.getRequestedConfigurationOrientation() != ORIENTATION_UNDEFINED
                 // "locked" and "nosensor" values are often used by camera apps that can't
                 // handle dynamic changes so we shouldn't force rotate them.
-                && activity.getRequestedOrientation() != SCREEN_ORIENTATION_NOSENSOR
-                && activity.getRequestedOrientation() != SCREEN_ORIENTATION_LOCKED
+                && activity.getOverrideOrientation() != SCREEN_ORIENTATION_NOSENSOR
+                && activity.getOverrideOrientation() != SCREEN_ORIENTATION_LOCKED
                 && mCameraIdPackageBiMap.containsPackageName(activity.packageName)
                 && activity.mLetterboxUiController.shouldForceRotateForCameraCompat();
     }
