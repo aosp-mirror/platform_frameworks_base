@@ -60,6 +60,7 @@ import com.android.systemui.qs.dagger.QSFragmentComponent;
 import com.android.systemui.qs.external.TileServiceRequestController;
 import com.android.systemui.qs.footer.ui.binder.FooterActionsViewBinder;
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel;
+import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -494,7 +495,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     @Override
     protected Fragment instantiate(Context context, String className, Bundle arguments) {
         MockitoAnnotations.initMocks(this);
-        CommandQueue commandQueue = new CommandQueue(context);
+        CommandQueue commandQueue = new CommandQueue(context, new FakeDisplayTracker(context));
 
         setupQsComponent();
         setUpViews();

@@ -91,6 +91,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationShadeWindowControllerImpl;
 import com.android.systemui.shade.NotificationShadeWindowView;
@@ -287,6 +288,8 @@ public class BubblesTest extends SysuiTestCase {
 
     private TestableLooper mTestableLooper;
 
+    private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -333,7 +336,7 @@ public class BubblesTest extends SysuiTestCase {
         mZenModeConfig.suppressedVisualEffects = 0;
         when(mZenModeController.getConfig()).thenReturn(mZenModeConfig);
 
-        mSysUiState = new SysUiState();
+        mSysUiState = new SysUiState(mDisplayTracker);
         mSysUiState.addCallback(sysUiFlags -> {
             mSysUiStateBubblesManageMenuExpanded =
                     (sysUiFlags

@@ -36,10 +36,10 @@ import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.hardware.display.DisplayManager;
 import android.hardware.graphics.common.AlphaInterpretation;
 import android.hardware.graphics.common.DisplayDecorationSupport;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.provider.Settings.Secure;
@@ -76,6 +76,7 @@ import com.android.systemui.decor.PrivacyDotDecorProviderFactory;
 import com.android.systemui.decor.RoundedCornerDecorProviderFactory;
 import com.android.systemui.decor.RoundedCornerResDelegate;
 import com.android.systemui.qs.SettingObserver;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.events.PrivacyDotViewController;
 import com.android.systemui.tuner.TunerService;
@@ -120,7 +121,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
             R.id.display_cutout_bottom
     };
 
-    private DisplayManager mDisplayManager;
+    private DisplayTracker mDisplayTracker;
     @VisibleForTesting
     protected boolean mIsRegistered;
     private final Context mContext;
@@ -128,7 +129,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
     private final TunerService mTunerService;
     private final SecureSettings mSecureSettings;
     @VisibleForTesting
-    DisplayManager.DisplayListener mDisplayListener;
+    DisplayTracker.Callback mDisplayListener;
     private CameraAvailabilityListener mCameraListener;
     private final UserTracker mUserTracker;
     private final PrivacyDotViewController mDotViewController;
@@ -302,6 +303,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
             SecureSettings secureSettings,
             TunerService tunerService,
             UserTracker userTracker,
+            DisplayTracker displayTracker,
             PrivacyDotViewController dotViewController,
             ThreadFactory threadFactory,
             PrivacyDotDecorProviderFactory dotFactory,
@@ -311,6 +313,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
         mSecureSettings = secureSettings;
         mTunerService = tunerService;
         mUserTracker = userTracker;
+        mDisplayTracker = displayTracker;
         mDotViewController = dotViewController;
         mThreadFactory = threadFactory;
         mDotFactory = dotFactory;
@@ -376,7 +379,6 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
     private void startOnScreenDecorationsThread() {
         Trace.beginSection("ScreenDecorations#startOnScreenDecorationsThread");
         mWindowManager = mContext.getSystemService(WindowManager.class);
-        mDisplayManager = mContext.getSystemService(DisplayManager.class);
         mContext.getDisplay().getDisplayInfo(mDisplayInfo);
         mRotation = mDisplayInfo.rotation;
         mDisplayMode = mDisplayInfo.getMode();
@@ -393,17 +395,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
         setupDecorations();
         setupCameraListener();
 
-        mDisplayListener = new DisplayManager.DisplayListener() {
-            @Override
-            public void onDisplayAdded(int displayId) {
-                // do nothing
-            }
-
-            @Override
-            public void onDisplayRemoved(int displayId) {
-                // do nothing
-            }
-
+        mDisplayListener = new DisplayTracker.Callback() {
             @Override
             public void onDisplayChanged(int displayId) {
                 mContext.getDisplay().getDisplayInfo(mDisplayInfo);
@@ -474,8 +466,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
                 }
             }
         };
-
-        mDisplayManager.registerDisplayListener(mDisplayListener, mHandler);
+        mDisplayTracker.addDisplayChangeCallback(mDisplayListener, new HandlerExecutor(mHandler));
         updateConfiguration();
         Trace.endSection();
     }
