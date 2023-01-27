@@ -532,10 +532,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"தானியங்கு"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"ஒலி / அதிர்வு இல்லை"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ஒலி / அதிர்வு இல்லாமல் உரையாடல் பிரிவின் கீழ்ப் பகுதியில் தோன்றும்"</string>
-    <!-- no translation found for notification_channel_summary_default (777294388712200605) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_default_with_bubbles (3482483084451555344) -->
-    <skip />
+    <string name="notification_channel_summary_default" msgid="777294388712200605">"சாதன அமைப்புகளைப் பொறுத்து ஒலிக்கக்கூடும் அல்லது அதிர்வடையக்கூடும்"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"சாதன அமைப்புகளைப் பொறுத்து ஒலிக்கக்கூடும் அல்லது அதிர்வடையக்கூடும். இயல்பாக, <xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸில் பெறப்படும் உரையாடல் அறிவிப்புகள் குமிழ்களாகத் தோன்றும்."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"இந்த அறிவிப்பு ஒலி எழுப்ப வேண்டுமா அதிர வேண்டுமா என்பதை சிஸ்டம் தீர்மானிக்கும்"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;நிலை:&lt;/b&gt; இயல்புநிலைக்கு உயர்த்தி அமைக்கப்பட்டது"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;நிலை:&lt;/b&gt; சைலன்ட் நிலைக்குக் குறைத்து அமைக்கப்பட்டது"</string>
@@ -802,6 +800,10 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"கட்டுப்பாடுகளைச் சேர்க்க வேண்டிய ஆப்ஸைத் தேர்ந்தெடுங்கள்"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# கட்டுப்பாடு சேர்க்கப்பட்டது.}other{# கட்டுப்பாடுகள் சேர்க்கப்பட்டன.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"அகற்றப்பட்டது"</string>
+    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
+    <skip />
+    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
+    <skip />
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"பிடித்தவற்றில் சேர்க்கப்பட்டது"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"பிடித்தவற்றில் சேர்க்கப்பட்டது, நிலை <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"பிடித்தவற்றிலிருந்து நீக்கப்பட்டது"</string>
@@ -868,6 +870,8 @@
     <string name="controls_error_failed" msgid="960228639198558525">"பிழை, மீண்டும் முயலவும்"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"கட்டுப்பாடுகளைச் சேர்த்தல்"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"கட்டுப்பாடுகளை மாற்றுதல்"</string>
+    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
+    <skip />
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"அவுட்புட்களைச் சேர்த்தல்"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"குழு"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 சாதனம் தேர்ந்தெடுக்கப்பட்டுள்ளது"</string>
@@ -1023,14 +1027,11 @@
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> பேட்டரி மீதமுள்ளது"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"உங்கள் ஸ்டைலஸைச் சார்ஜருடன் இணையுங்கள்"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"ஸ்டைலஸின் பேட்டரி குறைவாக உள்ளது"</string>
-    <!-- no translation found for video_camera (7654002575156149298) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_title (6991157106804289643) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_text (3458704745640229638) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_action (2937701298133010724) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_close (7927067108901068098) -->
+    <string name="video_camera" msgid="7654002575156149298">"வீடியோ கேமரா"</string>
+    <string name="call_from_work_profile_title" msgid="6991157106804289643">"இந்தக் கணக்கிலிருந்து அழைக்க முடியாது"</string>
+    <string name="call_from_work_profile_text" msgid="3458704745640229638">"உங்கள் பணிக் கொள்கையின்படி நீங்கள் பணிக் கணக்கில் இருந்து மட்டுமே ஃபோன் அழைப்புகளைச் செய்ய முடியும்"</string>
+    <string name="call_from_work_profile_action" msgid="2937701298133010724">"பணிக் கணக்கிற்கு மாறு"</string>
+    <string name="call_from_work_profile_close" msgid="7927067108901068098">"மூடுக"</string>
+    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
     <skip />
 </resources>
