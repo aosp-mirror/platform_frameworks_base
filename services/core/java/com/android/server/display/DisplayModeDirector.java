@@ -3081,10 +3081,10 @@ public class DisplayModeDirector {
 
         @Override
         public boolean supportsFrameRateOverride() {
-            return SurfaceFlingerProperties.enable_frame_rate_override().orElse(false)
+            return SurfaceFlingerProperties.enable_frame_rate_override().orElse(true)
                             && !SurfaceFlingerProperties.frame_rate_override_for_native_rates()
-                                    .orElse(true)
-                            && SurfaceFlingerProperties.frame_rate_override_global().orElse(false);
+                                    .orElse(false)
+                            && SurfaceFlingerProperties.frame_rate_override_global().orElse(true);
         }
 
         private DisplayManager getDisplayManager() {
