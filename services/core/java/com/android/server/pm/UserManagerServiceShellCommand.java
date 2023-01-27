@@ -111,6 +111,11 @@ public class UserManagerServiceShellCommand extends ShellCommand {
         pw.println("    It returns the effective mode, even when using emulation");
         pw.println("    (to get the real mode as well, use -v or --verbose)");
         pw.println();
+        pw.println("  is-visible-background-users-supported [-v | --verbose]");
+        pw.println("    Checks whether the device allows users to be start visible on background.");
+        pw.println("    It returns the effective mode, even when using emulation");
+        pw.println("    (to get the real mode as well, use -v or --verbose)");
+        pw.println();
         pw.println("  is-user-visible [--display DISPLAY_ID] <USER_ID>");
         pw.println("    Checks if the given user is visible in the given display.");
         pw.println("    If the display option is not set, it uses the user's context to check");
@@ -134,6 +139,8 @@ public class UserManagerServiceShellCommand extends ShellCommand {
                     return runSetSystemUserModeEmulation();
                 case "is-headless-system-user-mode":
                     return runIsHeadlessSystemUserMode();
+                case "is-visible-background-users-supported":
+                    return runIsVisibleBackgroundUserSupported();
                 case "is-visible-background-users-on-default-display-supported":
                     return runIsVisibleBackgroundUserOnDefaultDisplaySupported();
                 case "is-user-visible":
@@ -418,6 +425,7 @@ public class UserManagerServiceShellCommand extends ShellCommand {
         } else {
             isVisible = getUserManagerForUser(userId).isUserVisible();
         }
+        // NOTE: do not change output below (or command name / args), as it's used by ITestDevice
         pw.println(isVisible);
         return 0;
     }
@@ -446,6 +454,35 @@ public class UserManagerServiceShellCommand extends ShellCommand {
         } else {
             pw.printf("effective=%b real=%b\n", effective,
                     RoSystemProperties.MULTIUSER_HEADLESS_SYSTEM_USER);
+        }
+        return 0;
+    }
+
+    private int runIsVisibleBackgroundUserSupported() {
+        PrintWriter pw = getOutPrintWriter();
+
+        boolean verbose = false;
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "-v":
+                case "--verbose":
+                    verbose = true;
+                    break;
+                default:
+                    pw.println("Invalid option: " + opt);
+                    return -1;
+            }
+        }
+
+        boolean effective = UserManager.isVisibleBackgroundUsersEnabled();
+        if (!verbose) {
+            // NOTE: do not change output below, as it's used by ITestDevice
+            // (it's ok to change the verbose option though)
+            pw.println(effective);
+        } else {
+            pw.printf("effective=%b real=%b\n", effective, Resources.getSystem()
+                    .getBoolean(R.bool.config_multiuserVisibleBackgroundUsers));
         }
         return 0;
     }

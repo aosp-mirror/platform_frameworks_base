@@ -244,7 +244,8 @@ public class UserControllerTest {
 
     @Test
     public void testStartUserVisibleOnDisplay() {
-        boolean started = mUserController.startUserVisibleOnDisplay(TEST_USER_ID, 42);
+        boolean started = mUserController.startUserVisibleOnDisplay(TEST_USER_ID, 42,
+                /* unlockProgressListener= */ null);
 
         assertWithMessage("startUserOnDisplay(%s, %s)", TEST_USER_ID, 42).that(started).isTrue();
         verifyUserAssignedToDisplay(TEST_USER_ID, 42);

@@ -69,6 +69,7 @@ import android.content.pm.PackageManagerInternal;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.IProgressListener;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
@@ -848,7 +849,8 @@ public class ActivityManagerServiceTest {
         mInjector.secondaryDisplayIdsForStartingBackgroundUsers = new int[]{4, 8, 15, 16, 23, 42};
 
         assertThrows(IllegalArgumentException.class,
-                () -> mAms.startUserInBackgroundVisibleOnDisplay(USER_ID, 666));
+                () -> mAms.startUserInBackgroundVisibleOnDisplay(USER_ID, 666,
+                        /* unlockProgressListener= */ null));
 
         assertWithMessage("UserController.startUserOnSecondaryDisplay() calls")
                 .that(mInjector.usersStartedOnSecondaryDisplays).isEmpty();
@@ -859,7 +861,8 @@ public class ActivityManagerServiceTest {
         mInjector.secondaryDisplayIdsForStartingBackgroundUsers = new int[]{ 4, 8, 15, 16, 23, 42 };
         mInjector.returnValueForstartUserOnSecondaryDisplay = false;
 
-        boolean started = mAms.startUserInBackgroundVisibleOnDisplay(USER_ID, 42);
+        boolean started = mAms.startUserInBackgroundVisibleOnDisplay(USER_ID, 42,
+                /* unlockProgressListener= */ null);
         Log.v(TAG, "Started: " + started);
 
         assertWithMessage("mAms.startUserInBackgroundOnDisplay(%s, 42)", USER_ID)
@@ -874,7 +877,8 @@ public class ActivityManagerServiceTest {
         mInjector.secondaryDisplayIdsForStartingBackgroundUsers = new int[]{ 4, 8, 15, 16, 23, 42 };
         mInjector.returnValueForstartUserOnSecondaryDisplay = true;
 
-        boolean started = mAms.startUserInBackgroundVisibleOnDisplay(USER_ID, 42);
+        boolean started = mAms.startUserInBackgroundVisibleOnDisplay(USER_ID, 42,
+                /* unlockProgressListener= */ null);
         Log.v(TAG, "Started: " + started);
 
         assertWithMessage("mAms.startUserInBackgroundOnDisplay(%s, 42)", USER_ID)
@@ -1009,7 +1013,8 @@ public class ActivityManagerServiceTest {
         }
 
         @Override
-        public boolean startUserInBackgroundVisibleOnDisplay(int userId, int displayId) {
+        public boolean startUserInBackgroundVisibleOnDisplay(int userId, int displayId,
+                IProgressListener unlockProgressListener) {
             usersStartedOnSecondaryDisplays.add(new Pair<>(userId, displayId));
             return returnValueForstartUserOnSecondaryDisplay;
         }

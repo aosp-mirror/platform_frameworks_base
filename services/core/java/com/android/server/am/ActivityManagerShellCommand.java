@@ -2243,9 +2243,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     pw.println("Not supported");
                     return -1;
                 }
-                Slogf.d(TAG, "calling startUserInBackgroundVisibleOnDisplay(%d,%d)", userId,
-                        displayId);
-                success = mInterface.startUserInBackgroundVisibleOnDisplay(userId, displayId);
+                Slogf.d(TAG, "calling startUserInBackgroundVisibleOnDisplay(%d, %d, %s)", userId,
+                        displayId, waiter);
+                success = mInterface.startUserInBackgroundVisibleOnDisplay(userId, displayId,
+                        waiter);
                 displaySuffix = " on display " + displayId;
             }
             if (wait && success) {
@@ -3849,6 +3850,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
     int runListDisplaysForStartingUsers(PrintWriter pw) throws RemoteException {
         int[] displayIds = mInterface.getDisplayIdsForStartingVisibleBackgroundUsers();
+        // NOTE: format below cannot be changed as it's used by ITestDevice
         pw.println(displayIds == null || displayIds.length == 0
                 ? "none"
                 : Arrays.toString(displayIds));

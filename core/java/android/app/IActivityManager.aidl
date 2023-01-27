@@ -803,7 +803,7 @@ interface IActivityManager {
      */
     @JavaPassthrough(annotation=
             "@android.annotation.RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}, conditional = true)")
-    boolean startUserInBackgroundVisibleOnDisplay(int userid, int displayId);
+    boolean startUserInBackgroundVisibleOnDisplay(int userid, int displayId, IProgressListener unlockProgressListener);
 
     /**
      * Similar to {@link #startProfile(int userId)}, but with a listener to report user unlock

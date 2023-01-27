@@ -1560,16 +1560,18 @@ class UserController implements Handler.Callback {
      *
      * @param userId user to be started
      * @param displayId display where the user will be visible
+     * @param unlockListener Listener to be informed when the user has started and unlocked.
      *
      * @return whether the user was started
      */
-    boolean startUserVisibleOnDisplay(@UserIdInt int userId, int displayId) {
+    boolean startUserVisibleOnDisplay(@UserIdInt int userId, int displayId,
+            @Nullable IProgressListener unlockListener) {
         checkCallingHasOneOfThosePermissions("startUserOnDisplay",
                 MANAGE_USERS, INTERACT_ACROSS_USERS);
 
         try {
             return startUserNoChecks(userId, displayId, USER_START_MODE_BACKGROUND_VISIBLE,
-                    /* unlockListener= */ null);
+                    unlockListener);
         } catch (RuntimeException e) {
             Slogf.e(TAG, "startUserOnSecondaryDisplay(%d, %d) failed: %s", userId, displayId, e);
             return false;
