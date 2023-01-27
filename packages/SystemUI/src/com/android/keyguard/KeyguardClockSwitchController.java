@@ -45,6 +45,7 @@ import com.android.systemui.plugins.log.LogBuffer;
 import com.android.systemui.plugins.log.LogLevel;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.clocks.ClockRegistry;
+import com.android.systemui.shared.regionsampling.RegionSampler;
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
@@ -423,6 +424,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         ClockController clock = getClock();
         if (clock != null) {
             clock.dump(pw);
+        }
+        final RegionSampler regionSampler = mClockEventController.getRegionSampler();
+        if (regionSampler != null) {
+            regionSampler.dump(pw);
         }
     }
 
