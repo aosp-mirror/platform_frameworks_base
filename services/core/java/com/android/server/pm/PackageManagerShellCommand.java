@@ -3184,6 +3184,10 @@ class PackageManagerShellCommand extends ShellCommand {
                 case "--skip-verification":
                     sessionParams.installFlags |= PackageManager.INSTALL_DISABLE_VERIFICATION;
                     break;
+                case "--bypass-low-target-sdk-block":
+                    sessionParams.installFlags |=
+                            PackageManager.INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK;
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown option " + opt);
             }
