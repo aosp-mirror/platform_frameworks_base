@@ -25,6 +25,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
@@ -53,9 +54,7 @@ import android.view.InputEventSender;
 import android.view.KeyEvent;
 import android.view.Surface;
 import android.view.View;
-
 import com.android.internal.util.Preconditions;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -1835,13 +1834,15 @@ public final class TvInputManager {
      * of the given TV input.
      *
      * @param inputId The ID of the TV input.
+     * @param tvAppAttributionSource The Attribution Source of the TV App.
      * @param callback A callback used to receive the created session.
      * @param handler A {@link Handler} that the session creation will be delivered to.
      * @hide
      */
-    public void createSession(@NonNull String inputId, @NonNull final SessionCallback callback,
-            @NonNull Handler handler) {
-        createSessionInternal(inputId, false, callback, handler);
+    public void createSession(@NonNull String inputId,
+            @NonNull AttributionSource tvAppAttributionSource,
+            @NonNull final SessionCallback callback, @NonNull Handler handler) {
+        createSessionInternal(inputId, tvAppAttributionSource, false, callback, handler);
     }
 
     /**
@@ -1866,7 +1867,7 @@ public final class TvInputManager {
      * @param useCase the use case type of the client.
      *        {@see TvInputService#PriorityHintUseCaseType}.
      * @param sessionId the unique id of the session owned by the client.
-     *        {@see TvInputService#onCreateSession(String, String)}.
+     *        {@see TvInputService#onCreateSession(String, String, AttributionSource)}.
      *
      * @return the use case priority value for the given use case type and the client's foreground
      *         or background status.
@@ -1917,11 +1918,11 @@ public final class TvInputManager {
      */
     public void createRecordingSession(@NonNull String inputId,
             @NonNull final SessionCallback callback, @NonNull Handler handler) {
-        createSessionInternal(inputId, true, callback, handler);
+        createSessionInternal(inputId, null, true, callback, handler);
     }
 
-    private void createSessionInternal(String inputId, boolean isRecordingSession,
-            SessionCallback callback, Handler handler) {
+    private void createSessionInternal(String inputId, AttributionSource tvAppAttributionSource,
+            boolean isRecordingSession, SessionCallback callback, Handler handler) {
         Preconditions.checkNotNull(inputId);
         Preconditions.checkNotNull(callback);
         Preconditions.checkNotNull(handler);
@@ -1930,7 +1931,8 @@ public final class TvInputManager {
             int seq = mNextSeq++;
             mSessionCallbackRecordMap.put(seq, record);
             try {
-                mService.createSession(mClient, inputId, isRecordingSession, seq, mUserId);
+                mService.createSession(
+                        mClient, inputId, tvAppAttributionSource, isRecordingSession, seq, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -2101,8 +2103,8 @@ public final class TvInputManager {
      * @param deviceId The device ID to acquire Hardware for.
      * @param info The TV input which will use the acquired Hardware.
      * @param tvInputSessionId a String returned to TIS when the session was created.
-     *        {@see TvInputService#onCreateSession(String, String)}. If null, the client will be
-     *        treated as a background app.
+     *        {@see TvInputService#onCreateSession(String, String, AttributionSource)}. If null, the
+     *        client will be treated as a background app.
      * @param priorityHint The use case of the client. {@see TvInputService#PriorityHintUseCaseType}
      * @param executor the executor on which the listener would be invoked.
      * @param callback A callback to receive updates on Hardware.
