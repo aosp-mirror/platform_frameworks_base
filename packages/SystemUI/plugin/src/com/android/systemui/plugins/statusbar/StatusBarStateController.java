@@ -105,6 +105,11 @@ public interface StatusBarStateController {
         default void onDozingChanged(boolean isDozing) {}
 
         /**
+         * Callback to be notified when Dreaming changes. Dreaming is stored separately from state.
+         */
+        default void onDreamingChanged(boolean isDreaming) {}
+
+        /**
          * Callback to be notified when the doze amount changes. Useful for animations.
          * Note: this will be called for each animation frame. Please be careful to avoid
          * performance regressions.

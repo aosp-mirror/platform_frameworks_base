@@ -20,6 +20,7 @@ import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.UserHandle
 import android.service.controls.ControlsProviderService
@@ -95,6 +96,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
     @Mock lateinit var dumpManager: DumpManager
     @Mock lateinit var authorizedPanelsRepository: AuthorizedPanelsRepository
     @Mock lateinit var featureFlags: FeatureFlags
+    @Mock lateinit var packageManager: PackageManager
     val sharedPreferences = FakeSharedPreferences()
     lateinit var controlsSettingsRepository: FakeControlsSettingsRepository
 
@@ -124,6 +126,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
             ControlsUiControllerImpl(
                 Lazy { controlsController },
                 context,
+                packageManager,
                 uiExecutor,
                 bgExecutor,
                 Lazy { controlsListingController },

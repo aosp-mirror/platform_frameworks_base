@@ -25,6 +25,7 @@ import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.service.controls.Control
@@ -38,6 +39,7 @@ import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.BaseAdapter
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -90,6 +92,7 @@ private data class ControlKey(val componentName: ComponentName, val controlId: S
 class ControlsUiControllerImpl @Inject constructor (
         val controlsController: Lazy<ControlsController>,
         val context: Context,
+        private val packageManager: PackageManager,
         @Main val uiExecutor: DelayableExecutor,
         @Background val bgExecutor: DelayableExecutor,
         val controlsListingController: Lazy<ControlsListingController>,
@@ -113,6 +116,11 @@ class ControlsUiControllerImpl @Inject constructor (
         private const val PREF_IS_PANEL = "controls_is_panel"
 
         private const val FADE_IN_MILLIS = 200L
+
+        private const val OPEN_APP_ID = 0L
+        private const val ADD_CONTROLS_ID = 1L
+        private const val ADD_APP_ID = 2L
+        private const val EDIT_CONTROLS_ID = 3L
     }
 
     private var selectedItem: SelectedItem = SelectedItem.EMPTY_SELECTION
@@ -139,6 +147,9 @@ class ControlsUiControllerImpl @Inject constructor (
     private val localeComparator = compareBy<SelectionItem, CharSequence>(collator) {
         it.getTitle()
     }
+
+    private var openAppIntent: Intent? = null
+    private var overflowMenuAdapter: BaseAdapter? = null
 
     private val onSeedingComplete = Consumer<Boolean> {
         accepted ->
@@ -216,6 +227,8 @@ class ControlsUiControllerImpl @Inject constructor (
         this.parent = parent
         this.onDismiss = onDismiss
         this.activityContext = activityContext
+        this.openAppIntent = null
+        this.overflowMenuAdapter = null
         hidden = false
         retainCache = false
 
@@ -306,6 +319,12 @@ class ControlsUiControllerImpl @Inject constructor (
         startTargetedActivity(si, ControlsEditingActivity::class.java)
     }
 
+    private fun startDefaultActivity() {
+        openAppIntent?.let {
+            startActivity(it, animateExtra = false)
+        }
+    }
+
     private fun startTargetedActivity(si: StructureInfo, klazz: Class<*>) {
         val i = Intent(activityContext, klazz)
         putIntentExtras(i, si)
@@ -329,9 +348,11 @@ class ControlsUiControllerImpl @Inject constructor (
         startActivity(i)
     }
 
-    private fun startActivity(intent: Intent) {
+    private fun startActivity(intent: Intent, animateExtra: Boolean = true) {
         // Force animations when transitioning from a dialog to an activity
-        intent.putExtra(ControlsUiController.EXTRA_ANIMATE, true)
+        if (animateExtra) {
+            intent.putExtra(ControlsUiController.EXTRA_ANIMATE, true)
+        }
 
         if (keyguardStateController.isShowing()) {
             activityStarter.postStartActivityDismissingKeyguard(intent, 0 /* delay */)
@@ -383,8 +404,31 @@ class ControlsUiControllerImpl @Inject constructor (
             Log.w(ControlsUiController.TAG, "Not TaskViewFactory to display panel $selectionItem")
         }
 
+        bgExecutor.execute {
+            val intent = Intent(Intent.ACTION_MAIN)
+                    .addCategory(Intent.CATEGORY_LAUNCHER)
+                    .setPackage(selectionItem.componentName.packageName)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or
+                            Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
+            val intents = packageManager
+                    .queryIntentActivities(intent, PackageManager.ResolveInfoFlags.of(0L))
+            intents.firstOrNull { it.activityInfo.exported }?.let { resolved ->
+                intent.setPackage(null)
+                intent.setComponent(resolved.activityInfo.componentName)
+                openAppIntent = intent
+                parent.post {
+                    // This will call show on the PopupWindow in the same thread, so make sure this
+                    // happens in the view thread.
+                    overflowMenuAdapter?.notifyDataSetChanged()
+                }
+            }
+        }
         createDropDown(panelsAndStructures, selectionItem)
-        createMenu()
+
+        val currentApps = panelsAndStructures.map { it.componentName }.toSet()
+        val allApps = controlsListingController.get()
+                .getCurrentServices().map { it.componentName }.toSet()
+        createMenu(extraApps = (allApps - currentApps).isNotEmpty())
     }
 
     private fun createPanelView(componentName: ComponentName) {
@@ -423,28 +467,41 @@ class ControlsUiControllerImpl @Inject constructor (
         }
     }
 
-    private fun createMenu() {
+    private fun createMenu(extraApps: Boolean) {
         val isPanel = selectedItem is SelectedItem.PanelItem
         val selectedStructure = (selectedItem as? SelectedItem.StructureItem)?.structure
                 ?: EMPTY_STRUCTURE
         val newFlows = featureFlags.isEnabled(Flags.CONTROLS_MANAGEMENT_NEW_FLOWS)
-        val addControlsId = if (newFlows || isPanel) {
-            R.string.controls_menu_add_another_app
-        } else {
-            R.string.controls_menu_add
+
+        val items = buildList {
+            add(OverflowMenuAdapter.MenuItem(
+                    context.getText(R.string.controls_open_app),
+                    OPEN_APP_ID
+            ))
+            if (newFlows || isPanel) {
+                if (extraApps) {
+                    add(OverflowMenuAdapter.MenuItem(
+                            context.getText(R.string.controls_menu_add_another_app),
+                            ADD_APP_ID
+                    ))
+                }
+            } else {
+                add(OverflowMenuAdapter.MenuItem(
+                        context.getText(R.string.controls_menu_add),
+                        ADD_CONTROLS_ID
+                ))
+            }
+            if (!isPanel) {
+                add(OverflowMenuAdapter.MenuItem(
+                        context.getText(R.string.controls_menu_edit),
+                        EDIT_CONTROLS_ID
+                ))
+            }
         }
 
-        val items = if (isPanel) {
-            arrayOf(
-                    context.resources.getString(addControlsId),
-            )
-        } else {
-            arrayOf(
-                    context.resources.getString(addControlsId),
-                    context.resources.getString(R.string.controls_menu_edit)
-            )
+        val adapter = OverflowMenuAdapter(context, R.layout.controls_more_item, items) { position ->
+                getItemId(position) != OPEN_APP_ID || openAppIntent != null
         }
-        var adapter = ArrayAdapter<String>(context, R.layout.controls_more_item, items)
 
         val anchor = parent.requireViewById<ImageView>(R.id.controls_more)
         anchor.setOnClickListener(object : View.OnClickListener {
@@ -462,25 +519,21 @@ class ControlsUiControllerImpl @Inject constructor (
                             pos: Int,
                             id: Long
                         ) {
-                            when (pos) {
-                                // 0: Add Control
-                                0 -> {
-                                    if (isPanel || newFlows) {
-                                        startProviderSelectorActivity()
-                                    } else {
-                                        startFavoritingActivity(selectedStructure)
-                                    }
-                                }
-                                // 1: Edit controls
-                                1 -> startEditingActivity(selectedStructure)
+                            when (id) {
+                                OPEN_APP_ID -> startDefaultActivity()
+                                ADD_APP_ID -> startProviderSelectorActivity()
+                                ADD_CONTROLS_ID -> startFavoritingActivity(selectedStructure)
+                                EDIT_CONTROLS_ID -> startEditingActivity(selectedStructure)
                             }
                             dismiss()
                         }
                     })
                     show()
+                    listView?.post { listView?.requestAccessibilityFocus() }
                 }
             }
         })
+        overflowMenuAdapter = adapter
     }
 
     private fun createDropDown(items: List<SelectionItem>, selected: SelectionItem) {
@@ -542,6 +595,7 @@ class ControlsUiControllerImpl @Inject constructor (
                         }
                     })
                     show()
+                    listView?.post { listView?.requestAccessibilityFocus() }
                 }
             }
         })
@@ -631,7 +685,7 @@ class ControlsUiControllerImpl @Inject constructor (
                 .putString(PREF_COMPONENT, selectedItem.componentName.flattenToString())
                 .putString(PREF_STRUCTURE_OR_APP_NAME, selectedItem.name.toString())
                 .putBoolean(PREF_IS_PANEL, selectedItem is SelectedItem.PanelItem)
-                .commit()
+                .apply()
     }
 
     private fun maybeUpdateSelectedItem(item: SelectionItem): Boolean {

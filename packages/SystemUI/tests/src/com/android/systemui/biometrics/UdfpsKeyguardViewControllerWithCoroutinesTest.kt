@@ -27,6 +27,7 @@ import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.BouncerView
 import com.android.systemui.keyguard.data.repository.BiometricRepository
+import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor
@@ -91,6 +92,7 @@ class UdfpsKeyguardViewControllerWithCoroutinesTest : UdfpsKeyguardViewControlle
             AlternateBouncerInteractor(
                 keyguardBouncerRepository,
                 mock(BiometricRepository::class.java),
+                mock(DeviceEntryFingerprintAuthRepository::class.java),
                 mock(SystemClock::class.java),
                 mock(KeyguardUpdateMonitor::class.java),
                 mock(FeatureFlags::class.java)

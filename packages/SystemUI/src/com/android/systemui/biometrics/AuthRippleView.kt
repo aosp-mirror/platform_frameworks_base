@@ -55,11 +55,11 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
     private val fadeDuration = 83L
     private val retractDuration = 400L
     private var alphaInDuration: Long = 0
-    private var unlockedRippleInProgress: Boolean = false
     private val dwellShader = DwellRippleShader()
     private val dwellPaint = Paint()
     private val rippleShader = RippleShader()
     private val ripplePaint = Paint()
+    private var unlockedRippleAnimator: AnimatorSet? = null
     private var fadeDwellAnimator: Animator? = null
     private var retractDwellAnimator: Animator? = null
     private var dwellPulseOutAnimator: Animator? = null
@@ -205,7 +205,7 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
      * Plays a ripple animation that grows to the dwellRadius with distortion.
      */
     fun startDwellRipple(isDozing: Boolean) {
-        if (unlockedRippleInProgress || dwellPulseOutAnimator?.isRunning == true) {
+        if (unlockedRippleAnimator?.isRunning == true || dwellPulseOutAnimator?.isRunning == true) {
             return
         }
 
@@ -262,9 +262,7 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
      * Ripple that bursts outwards from the position of the sensor to the edges of the screen
      */
     fun startUnlockedRipple(onAnimationEnd: Runnable?) {
-        if (unlockedRippleInProgress) {
-            return // Ignore if ripple effect is already playing
-        }
+        unlockedRippleAnimator?.cancel()
 
         val rippleAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
             interpolator = Interpolators.LINEAR_OUT_SLOW_IN
@@ -289,14 +287,13 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
             }
         }
 
-        val animatorSet = AnimatorSet().apply {
+        unlockedRippleAnimator = AnimatorSet().apply {
             playTogether(
                 rippleAnimator,
                 alphaInAnimator
             )
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator?) {
-                    unlockedRippleInProgress = true
                     rippleShader.rippleFill = false
                     drawRipple = true
                     visibility = VISIBLE
@@ -304,13 +301,13 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
 
                 override fun onAnimationEnd(animation: Animator?) {
                     onAnimationEnd?.run()
-                    unlockedRippleInProgress = false
                     drawRipple = false
                     visibility = GONE
+                    unlockedRippleAnimator = null
                 }
             })
         }
-        animatorSet.start()
+        unlockedRippleAnimator?.start()
     }
 
     fun resetRippleAlpha() {

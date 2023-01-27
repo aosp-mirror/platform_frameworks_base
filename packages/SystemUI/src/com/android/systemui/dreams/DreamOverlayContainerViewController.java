@@ -40,8 +40,6 @@ import com.android.systemui.dreams.dagger.DreamOverlayModule;
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor;
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
 import com.android.systemui.statusbar.BlurUtils;
-import com.android.systemui.statusbar.phone.KeyguardBouncer;
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
@@ -56,7 +54,6 @@ import javax.inject.Named;
 @DreamOverlayComponent.DreamOverlayScope
 public class DreamOverlayContainerViewController extends ViewController<DreamOverlayContainerView> {
     private final DreamOverlayStatusBarViewController mStatusBarViewController;
-    private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final BlurUtils mBlurUtils;
     private final DreamOverlayAnimationsController mDreamOverlayAnimationsController;
     private final DreamOverlayStateController mStateController;
@@ -127,13 +124,29 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
                 }
             };
 
+    /**
+     * If true, overlay entry animations should be skipped once.
+     *
+     * This is turned on when exiting low light and should be turned off once the entry animations
+     * are skipped once.
+     */
+    private boolean mSkipEntryAnimations;
+
+    private final DreamOverlayStateController.Callback
+            mDreamOverlayStateCallback =
+            new DreamOverlayStateController.Callback() {
+                @Override
+                public void onExitLowLight() {
+                    mSkipEntryAnimations = true;
+                }
+            };
+
     @Inject
     public DreamOverlayContainerViewController(
             DreamOverlayContainerView containerView,
             ComplicationHostViewController complicationHostViewController,
             @Named(DreamOverlayModule.DREAM_OVERLAY_CONTENT_VIEW) ViewGroup contentView,
             DreamOverlayStatusBarViewController statusBarViewController,
-            StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             BlurUtils blurUtils,
             @Main Handler handler,
             @Main Resources resources,
@@ -147,7 +160,6 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
         super(containerView);
         mDreamOverlayContentView = contentView;
         mStatusBarViewController = statusBarViewController;
-        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mBlurUtils = blurUtils;
         mDreamOverlayAnimationsController = animationsController;
         mStateController = stateController;
@@ -170,6 +182,7 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
 
     @Override
     protected void onInit() {
+        mStateController.addCallback(mDreamOverlayStateCallback);
         mStatusBarViewController.init();
         mComplicationHostViewController.init();
         mDreamOverlayAnimationsController.init(mView);
@@ -179,25 +192,24 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
     protected void onViewAttached() {
         mJitterStartTimeMillis = System.currentTimeMillis();
         mHandler.postDelayed(this::updateBurnInOffsets, mBurnInProtectionUpdateInterval);
-        final KeyguardBouncer bouncer = mStatusBarKeyguardViewManager.getPrimaryBouncer();
-        if (bouncer != null) {
-            bouncer.addBouncerExpansionCallback(mBouncerExpansionCallback);
-        }
         mPrimaryBouncerCallbackInteractor.addBouncerExpansionCallback(mBouncerExpansionCallback);
 
         // Start dream entry animations. Skip animations for low light clock.
         if (!mStateController.isLowLightActive()) {
             mDreamOverlayAnimationsController.startEntryAnimations();
+
+            if (mSkipEntryAnimations) {
+                // If we're transitioning from the low light dream back to the user dream, skip the
+                // overlay animations and show immediately.
+                mDreamOverlayAnimationsController.endAnimations();
+                mSkipEntryAnimations = false;
+            }
         }
     }
 
     @Override
     protected void onViewDetached() {
         mHandler.removeCallbacks(this::updateBurnInOffsets);
-        final KeyguardBouncer bouncer = mStatusBarKeyguardViewManager.getPrimaryBouncer();
-        if (bouncer != null) {
-            bouncer.removeBouncerExpansionCallback(mBouncerExpansionCallback);
-        }
         mPrimaryBouncerCallbackInteractor.removeBouncerExpansionCallback(mBouncerExpansionCallback);
 
         mDreamOverlayAnimationsController.cancelAnimations();

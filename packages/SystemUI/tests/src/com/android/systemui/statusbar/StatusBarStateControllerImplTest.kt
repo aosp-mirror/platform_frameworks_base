@@ -37,6 +37,7 @@ import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
@@ -151,5 +152,19 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
         // waiting an extra frame. Waiting an extra frame will cause a relayout (which is expensive)
         // and cause us to drop a frame during the LOCKSCREEN_TRANSITION_FROM_AOD CUJ.
         assertEquals(0.99f, controller.dozeAmount, 0.009f)
+    }
+
+    @Test
+    fun testSetDreamState_invokesCallback() {
+        val listener = mock(StatusBarStateController.StateListener::class.java)
+        controller.addCallback(listener)
+
+        controller.setIsDreaming(true)
+        verify(listener).onDreamingChanged(true)
+
+        Mockito.clearInvocations(listener)
+
+        controller.setIsDreaming(false)
+        verify(listener).onDreamingChanged(false)
     }
 }
