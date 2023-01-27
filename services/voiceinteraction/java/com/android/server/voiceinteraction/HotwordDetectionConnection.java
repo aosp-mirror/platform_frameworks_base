@@ -681,8 +681,7 @@ final class HotwordDetectionConnection {
                 }
                 boolean bindResult = mContext.bindIsolatedService(
                         mIntent,
-                        Context.BIND_SHARED_ISOLATED_PROCESS | Context.BIND_AUTO_CREATE
-                                | Context.BIND_FOREGROUND_SERVICE | mBindingFlags,
+                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE | mBindingFlags,
                         "hotword_detector_" + mInstanceNumber,
                         mExecutor,
                         serviceConnection);
