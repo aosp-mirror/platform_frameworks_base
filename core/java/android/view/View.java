@@ -25829,10 +25829,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param selected true if the view must be selected, false otherwise
      */
     public void setSelected(boolean selected) {
-        setSelected(selected, true);
-    }
-
-    void setSelected(boolean selected, boolean sendAccessibilityEvent) {
         //noinspection DoubleNegation
         if (((mPrivateFlags & PFLAG_SELECTED) != 0) != selected) {
             mPrivateFlags = (mPrivateFlags & ~PFLAG_SELECTED) | (selected ? PFLAG_SELECTED : 0);
@@ -25840,13 +25836,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             invalidate(true);
             refreshDrawableState();
             dispatchSetSelected(selected);
-            if (sendAccessibilityEvent) {
-                if (selected) {
-                    sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
-                } else {
-                    notifyViewAccessibilityStateChangedIfNeeded(
-                            AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
-                }
+            if (selected) {
+                sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
+            } else {
+                notifyViewAccessibilityStateChangedIfNeeded(
+                        AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
             }
         }
     }
