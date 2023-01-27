@@ -41,6 +41,7 @@ import android.content.pm.InstallSourceInfo;
 import android.content.pm.ModuleInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.Signature;
@@ -82,6 +83,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IBinaryTransparencyService;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.pm.ApexManager;
+import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 
 import libcore.util.HexEncoding;
 
@@ -121,7 +124,9 @@ public class BinaryTransparencyService extends SystemService {
     static final long RECORD_MEASUREMENTS_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 
     @VisibleForTesting
-    static final String BUNDLE_PACKAGE_INFO = "package-info";
+    static final String BUNDLE_PACKAGE_NAME = "package-name";
+    @VisibleForTesting
+    static final String BUNDLE_PACKAGE_IS_APEX = "package-is-apex";
     @VisibleForTesting
     static final String BUNDLE_CONTENT_DIGEST_ALGORITHM = "content-digest-algo";
     @VisibleForTesting
@@ -150,6 +155,7 @@ public class BinaryTransparencyService extends SystemService {
     private String mVbmetaDigest;
     // the system time (in ms) the last measurement was taken
     private long mMeasurementsLastRecordedMs;
+    private PackageManagerInternal mPackageManagerInternal;
     private BiometricLogger mBiometricLogger;
 
     /**
@@ -172,7 +178,18 @@ public class BinaryTransparencyService extends SystemService {
             List<Bundle> results = new ArrayList<>();
 
             for (PackageInfo packageInfo : getCurrentInstalledApexs()) {
-                Bundle apexMeasurement = measurePackage(packageInfo);
+                PackageState packageState = mPackageManagerInternal.getPackageStateInternal(
+                        packageInfo.packageName);
+                if (packageState == null) {
+                    Slog.w(TAG, "Package state is unavailable, ignoring the package "
+                            + packageInfo.packageName);
+                    continue;
+                }
+                Bundle apexMeasurement = measurePackage(packageState);
+                if (apexMeasurement == null) {
+                    Slog.w(TAG, "Skipping the missing APEX in " + packageState.getPath());
+                    continue;
+                }
                 results.add(apexMeasurement);
             }
 
@@ -205,26 +222,30 @@ public class BinaryTransparencyService extends SystemService {
 
         /**
          * Perform basic measurement (i.e. content digest) on a given package.
-         * @param packageInfo The package to be measured.
+         * @param packageState The package to be measured.
          * @return a {@link android.os.Bundle} that packs the measurement result with the following
-         *         keys: {@link #BUNDLE_PACKAGE_INFO},
+         *         keys: {@link #BUNDLE_PACKAGE_NAME},
+         *               {@link #BUNDLE_PACKAGE_IS_APEX}
          *               {@link #BUNDLE_CONTENT_DIGEST_ALGORITHM}
          *               {@link #BUNDLE_CONTENT_DIGEST}
          */
-        private @NonNull Bundle measurePackage(PackageInfo packageInfo) {
+        private @Nullable Bundle measurePackage(PackageState packageState) {
             Bundle result = new Bundle();
 
             // compute content digest
             if (DEBUG) {
-                Slog.d(TAG, "Computing content digest for " + packageInfo.packageName + " at "
-                        + packageInfo.applicationInfo.sourceDir);
+                Slog.d(TAG, "Computing content digest for " + packageState.getPackageName() + " at "
+                        + packageState.getPath());
             }
-            Map<Integer, byte[]> contentDigests = computeApkContentDigest(
-                    packageInfo.applicationInfo.sourceDir);
-            result.putParcelable(BUNDLE_PACKAGE_INFO, packageInfo);
+            AndroidPackage pkg = packageState.getAndroidPackage();
+            if (pkg == null) {
+                Slog.w(TAG, "Skipping the missing APK in " + packageState.getPath());
+                return null;
+            }
+            Map<Integer, byte[]> contentDigests = computeApkContentDigest(pkg.getBaseApkPath());
+            result.putString(BUNDLE_PACKAGE_NAME, pkg.getPackageName());
             if (contentDigests == null) {
-                Slog.d(TAG, "Failed to compute content digest for "
-                        + packageInfo.applicationInfo.sourceDir);
+                Slog.d(TAG, "Failed to compute content digest for " + pkg.getBaseApkPath());
                 result.putInt(BUNDLE_CONTENT_DIGEST_ALGORITHM, 0);
                 result.putByteArray(BUNDLE_CONTENT_DIGEST, null);
                 return result;
@@ -248,6 +269,7 @@ public class BinaryTransparencyService extends SystemService {
                 result.putInt(BUNDLE_CONTENT_DIGEST_ALGORITHM, 0);
                 result.putByteArray(BUNDLE_CONTENT_DIGEST, null);
             }
+            result.putBoolean(BUNDLE_PACKAGE_IS_APEX, packageState.isApex());
 
             return result;
         }
@@ -326,16 +348,28 @@ public class BinaryTransparencyService extends SystemService {
         private List<IBinaryTransparencyService.ApexInfo> collectAllApexInfo() {
             var results = new ArrayList<IBinaryTransparencyService.ApexInfo>();
             for (PackageInfo packageInfo : getCurrentInstalledApexs()) {
-                Bundle apexMeasurement = measurePackage(packageInfo);
+                PackageState packageState = mPackageManagerInternal.getPackageStateInternal(
+                        packageInfo.packageName);
+                if (packageState == null) {
+                    Slog.w(TAG, "Package state is unavailable, ignoring the APEX "
+                            + packageInfo.packageName);
+                    continue;
+                }
+
+                Bundle apexMeasurement = measurePackage(packageState);
+                if (apexMeasurement == null) {
+                    Slog.w(TAG, "Skipping the missing APEX in " + packageState.getPath());
+                    continue;
+                }
 
                 var apexInfo = new IBinaryTransparencyService.ApexInfo();
-                apexInfo.packageName = packageInfo.packageName;
-                apexInfo.longVersion = packageInfo.getLongVersionCode();
+                apexInfo.packageName = packageState.getPackageName();
+                apexInfo.longVersion = packageState.getVersionCode();
                 apexInfo.digest = apexMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST);
                 apexInfo.digestAlgorithm =
                         apexMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM);
                 apexInfo.signerDigests =
-                        computePackageSignerSha256Digests(packageInfo.signingInfo);
+                        computePackageSignerSha256Digests(packageState.getSigningInfo());
 
                 results.add(apexInfo);
             }
@@ -344,49 +378,38 @@ public class BinaryTransparencyService extends SystemService {
 
         private List<IBinaryTransparencyService.AppInfo> collectAllUpdatedPreloadInfo(
                 Set<String> packagesToSkip) {
-            var results = new ArrayList<IBinaryTransparencyService.AppInfo>();
+            final var results = new ArrayList<IBinaryTransparencyService.AppInfo>();
+
             PackageManager pm = mContext.getPackageManager();
-            for (PackageInfo packageInfo : pm.getInstalledPackages(
-                    PackageManager.PackageInfoFlags.of(PackageManager.MATCH_FACTORY_ONLY
-                            | PackageManager.GET_SIGNING_CERTIFICATES))) {
-                if (packagesToSkip.contains(packageInfo.packageName)) {
-                    continue;
+            mPackageManagerInternal.forEachPackageState((packageState) -> {
+                if (!packageState.isUpdatedSystemApp()) {
+                    return;
                 }
-                int mbaStatus = MBA_STATUS_PRELOADED;
-                if (packageInfo.signingInfo == null) {
-                    Slog.d(TAG, "Preload " + packageInfo.packageName  + " at "
-                            + packageInfo.applicationInfo.sourceDir + " has likely been updated.");
-                    mbaStatus = MBA_STATUS_UPDATED_PRELOAD;
-
-                    PackageInfo origPackageInfo = packageInfo;
-                    try {
-                        packageInfo = pm.getPackageInfo(packageInfo.packageName,
-                                PackageManager.PackageInfoFlags.of(PackageManager.MATCH_ALL
-                                        | PackageManager.GET_SIGNING_CERTIFICATES));
-                    } catch (PackageManager.NameNotFoundException e) {
-                        Slog.e(TAG, "Failed to obtain an updated PackageInfo of "
-                                + origPackageInfo.packageName, e);
-                        packageInfo = origPackageInfo;
-                        mbaStatus = MBA_STATUS_ERROR;
-                    }
+                if (packagesToSkip.contains(packageState.getPackageName())) {
+                    return;
                 }
 
-                if (mbaStatus == MBA_STATUS_UPDATED_PRELOAD) {
-                    Bundle packageMeasurement = measurePackage(packageInfo);
+                Slog.d(TAG, "Preload " + packageState.getPackageName() + " at "
+                        + packageState.getPath() + " has likely been updated.");
 
-                    var appInfo = new IBinaryTransparencyService.AppInfo();
-                    appInfo.packageName = packageInfo.packageName;
-                    appInfo.longVersion = packageInfo.getLongVersionCode();
-                    appInfo.digest = packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST);
-                    appInfo.digestAlgorithm =
-                            packageMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM);
-                    appInfo.signerDigests =
-                            computePackageSignerSha256Digests(packageInfo.signingInfo);
-                    appInfo.mbaStatus = mbaStatus;
-
-                    results.add(appInfo);
+                Bundle packageMeasurement = measurePackage(packageState);
+                if (packageMeasurement == null) {
+                    Slog.w(TAG, "Skipping the missing APK in " + packageState.getPath());
+                    return;
                 }
-            }
+
+                var appInfo = new IBinaryTransparencyService.AppInfo();
+                appInfo.packageName = packageState.getPackageName();
+                appInfo.longVersion = packageState.getVersionCode();
+                appInfo.digest = packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST);
+                appInfo.digestAlgorithm =
+                        packageMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM);
+                appInfo.signerDigests =
+                        computePackageSignerSha256Digests(packageState.getSigningInfo());
+                appInfo.mbaStatus = MBA_STATUS_UPDATED_PRELOAD;
+
+                results.add(appInfo);
+            });
             return results;
         }
 
@@ -397,32 +420,44 @@ public class BinaryTransparencyService extends SystemService {
                 if (packagesToSkip.contains(packageInfo.packageName)) {
                     continue;
                 }
+                PackageState packageState = mPackageManagerInternal.getPackageStateInternal(
+                        packageInfo.packageName);
+                if (packageState == null) {
+                    Slog.w(TAG, "Package state is unavailable, ignoring the package "
+                            + packageInfo.packageName);
+                    continue;
+                }
 
-                Bundle packageMeasurement = measurePackage(packageInfo);
+                Bundle packageMeasurement = measurePackage(packageState);
+                if (packageMeasurement == null) {
+                    Slog.w(TAG, "Skipping the missing APK in " + packageState.getPath());
+                    continue;
+                }
                 if (DEBUG) {
                     Slog.d(TAG,
-                            "Extracting InstallSourceInfo for " + packageInfo.packageName);
+                            "Extracting InstallSourceInfo for " + packageState.getPackageName());
                 }
                 var appInfo = new IBinaryTransparencyService.AppInfo();
-                appInfo.packageName = packageInfo.packageName;
-                appInfo.longVersion = packageInfo.getLongVersionCode();
+                appInfo.packageName = packageState.getPackageName();
+                appInfo.longVersion = packageState.getVersionCode();
                 appInfo.digest = packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST);
                 appInfo.digestAlgorithm =
                     packageMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM);
                 appInfo.signerDigests =
-                    computePackageSignerSha256Digests(packageInfo.signingInfo);
+                        computePackageSignerSha256Digests(packageState.getSigningInfo());
                 appInfo.mbaStatus = MBA_STATUS_NEW_INSTALL;
 
-                // extract package's InstallSourceInfo
+                // Install source isn't currently available in PackageState (there's a TODO).
+                // Extract manually with another call.
                 InstallSourceInfo installSourceInfo = getInstallSourceInfo(
-                        packageInfo.packageName);
+                        packageState.getPackageName());
                 if (installSourceInfo != null) {
                     appInfo.initiator = installSourceInfo.getInitiatingPackageName();
                     SigningInfo initiatorSignerInfo =
                             installSourceInfo.getInitiatingPackageSigningInfo();
                     if (initiatorSignerInfo != null) {
                         appInfo.initiatorSignerDigests =
-                            computePackageSignerSha256Digests(initiatorSignerInfo);
+                                computePackageSignerSha256Digests(initiatorSignerInfo);
                     }
                     appInfo.installer = installSourceInfo.getInstallingPackageName();
                     appInfo.originator = installSourceInfo.getOriginatingPackageName();
@@ -1130,6 +1165,7 @@ public class BinaryTransparencyService extends SystemService {
         mServiceImpl = new BinaryTransparencyServiceImpl();
         mVbmetaDigest = VBMETA_DIGEST_UNINITIALIZED;
         mMeasurementsLastRecordedMs = 0;
+        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mBiometricLogger = biometricLogger;
     }
 
