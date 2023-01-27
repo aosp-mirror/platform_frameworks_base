@@ -49,6 +49,7 @@ import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 
 import java.security.KeyStore;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -596,6 +597,42 @@ public class TvInteractiveAppView extends ViewGroup {
     }
 
     /**
+     * Sends current time shift mode to related TV interactive app.
+     *
+     * @param mode The current time shift mode. The value is one of the following:
+     * {@link TvInputManager#TIME_SHIFT_MODE_OFF}, {@link TvInputManager#TIME_SHIFT_MODE_LOCAL},
+     * {@link TvInputManager#TIME_SHIFT_MODE_NETWORK},
+     * {@link TvInputManager#TIME_SHIFT_MODE_AUTO}.
+     * @hide
+     */
+    public void sendTimeShiftMode(@android.media.tv.TvInputManager.TimeShiftMode int mode) {
+        if (DEBUG) {
+            Log.d(TAG, "sendTimeShiftMode");
+        }
+        if (mSession != null) {
+            mSession.sendTimeShiftMode(mode);
+        }
+    }
+
+    /**
+     * Sends available supported speeds to related TV interactive app.
+     *
+     * @param speeds An ordered array of playback speeds, expressed as values relative to the normal
+     *               playback speed 1.0.
+     * @see PlaybackParams#getSpeed()
+     * @hide
+     */
+    public void sendAvailableSpeeds(@NonNull float[] speeds) {
+        if (DEBUG) {
+            Log.d(TAG, "sendAvailableSpeeds");
+        }
+        if (mSession != null) {
+            Arrays.sort(speeds);
+            mSession.sendAvailableSpeeds(speeds);
+        }
+    }
+
+    /**
      * Sends the requested {@link android.media.tv.TvRecordingInfo}.
      *
      * @param recordingInfo The recording info requested {@code null} if no recording found.
@@ -1125,6 +1162,26 @@ public class TvInteractiveAppView extends ViewGroup {
         }
 
         /**
+         * This is called when {@link TvInteractiveAppService.Session#requestTimeShiftMode()} is
+         * called.
+         *
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         * @hide
+         */
+        public void onRequestTimeShiftMode(@NonNull String iAppServiceId) {
+        }
+
+        /**
+         * This is called when {@link TvInteractiveAppService.Session#requestAvailableSpeeds()} is
+         * called.
+         *
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         * @hide
+         */
+        public void onRequestAvailableSpeeds(@NonNull String iAppServiceId) {
+        }
+
+        /**
          * This is called when {@link TvInteractiveAppService.Session#requestStartRecording(Uri)}
          * is called.
          *
@@ -1606,6 +1663,34 @@ public class TvInteractiveAppView extends ViewGroup {
             }
             if (mCallback != null) {
                 mCallback.onRequestCurrentTvInputId(mIAppServiceId);
+            }
+        }
+
+        @Override
+        public void onRequestTimeShiftMode(Session session) {
+            if (DEBUG) {
+                Log.d(TAG, "onRequestTimeShiftMode");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onRequestTimeShiftMode - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onRequestTimeShiftMode(mIAppServiceId);
+            }
+        }
+
+        @Override
+        public void onRequestAvailableSpeeds(Session session) {
+            if (DEBUG) {
+                Log.d(TAG, "onRequestAvailableSpeeds");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onRequestAvailableSpeeds - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onRequestAvailableSpeeds(mIAppServiceId);
             }
         }
 

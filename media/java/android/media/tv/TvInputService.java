@@ -66,6 +66,7 @@ import com.android.internal.util.Preconditions;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -1084,6 +1085,59 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Informs the app that the time shift mode is set or updated.
+         *
+         * @param mode The current time shift mode. The value is one of the following:
+         * {@link TvInputManager#TIME_SHIFT_MODE_OFF}, {@link TvInputManager#TIME_SHIFT_MODE_LOCAL},
+         * {@link TvInputManager#TIME_SHIFT_MODE_NETWORK},
+         * {@link TvInputManager#TIME_SHIFT_MODE_AUTO}.
+         * @hide
+         */
+        public void notifyTimeShiftMode(@android.media.tv.TvInputManager.TimeShiftMode int mode) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifyTimeShiftMode");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onTimeShiftMode(mode);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyTimeShiftMode", e);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Informs the app available speeds for time-shifting.
+         * <p>This should be called when time-shifting is enabled.
+         *
+         * @param speeds An ordered array of playback speeds, expressed as values relative to the
+         *               normal playback speed 1.0.
+         * @see PlaybackParams#getSpeed()
+         * @hide
+         */
+        public void notifyAvailableSpeeds(@NonNull float[] speeds) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifyAvailableSpeeds");
+                        if (mSessionCallback != null) {
+                            Arrays.sort(speeds);
+                            mSessionCallback.onAvailableSpeeds(speeds);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyAvailableSpeeds", e);
+                    }
+                }
+            });
+        }
+
+        /**
          * Notifies signal strength.
          */
         public void notifySignalStrength(@TvInputManager.SignalStrength final int strength) {
@@ -1474,6 +1528,18 @@ public abstract class TvInputService extends Service {
          * @see #onTimeShiftGetCurrentPosition()
          */
         public void onTimeShiftSetPlaybackParams(PlaybackParams params) {
+        }
+
+        /**
+         * Called when the application sets time shift mode.
+         *
+         * @param mode The time shift mode. The value is one of the following:
+         * {@link TvInputManager#TIME_SHIFT_MODE_OFF}, {@link TvInputManager#TIME_SHIFT_MODE_LOCAL},
+         * {@link TvInputManager#TIME_SHIFT_MODE_NETWORK},
+         * {@link TvInputManager#TIME_SHIFT_MODE_AUTO}.
+         * @hide
+         */
+        public void onTimeShiftSetMode(@android.media.tv.TvInputManager.TimeShiftMode int mode) {
         }
 
         /**
@@ -1879,6 +1945,13 @@ public abstract class TvInputService extends Service {
          */
         void timeShiftSetPlaybackParams(PlaybackParams params) {
             onTimeShiftSetPlaybackParams(params);
+        }
+
+        /**
+         * Calls {@link #onTimeShiftSetMode}.
+         */
+        void timeShiftSetMode(int mode) {
+            onTimeShiftSetMode(mode);
         }
 
         /**

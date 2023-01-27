@@ -224,6 +224,7 @@ public abstract class TvInteractiveAppService extends Service {
             TIME_SHIFT_COMMAND_TYPE_RESUME,
             TIME_SHIFT_COMMAND_TYPE_SEEK_TO,
             TIME_SHIFT_COMMAND_TYPE_SET_PLAYBACK_PARAMS,
+            TIME_SHIFT_COMMAND_TYPE_SET_MODE,
     })
     public @interface TimeShiftCommandType {}
 
@@ -262,6 +263,12 @@ public abstract class TvInteractiveAppService extends Service {
      * @hide
      */
     public static final String TIME_SHIFT_COMMAND_TYPE_SET_PLAYBACK_PARAMS = "set_playback_params";
+    /**
+     * Time shift command type: set time shift mode.
+     *
+     * @hide
+     */
+    public static final String TIME_SHIFT_COMMAND_TYPE_SET_MODE = "set_mode";
 
     /**
      * Time shift command parameter: program URI.
@@ -287,6 +294,17 @@ public abstract class TvInteractiveAppService extends Service {
      * @hide
      */
     public static final String COMMAND_PARAMETER_KEY_PLAYBACK_PARAMS = "command_playback_params";
+    /**
+     * Time shift command parameter: playback params.
+     * <p>Type: Integer. One of {@link TvInputManager#TIME_SHIFT_MODE_OFF},
+     * {@link TvInputManager#TIME_SHIFT_MODE_LOCAL},
+     * {@link TvInputManager#TIME_SHIFT_MODE_NETWORK},
+     * {@link TvInputManager#TIME_SHIFT_MODE_AUTO}.
+     *
+     * @see #TIME_SHIFT_COMMAND_TYPE_SET_MODE
+     * @hide
+     */
+    public static final String COMMAND_PARAMETER_KEY_TIME_SHIFT_MODE = "command_time_shift_mode";
 
     private final Handler mServiceHandler = new ServiceHandler();
     private final RemoteCallbackList<ITvInteractiveAppServiceCallback> mCallbacks =
@@ -567,6 +585,24 @@ public abstract class TvInteractiveAppService extends Service {
          * Receives current TV input ID.
          */
         public void onCurrentTvInputId(@Nullable String inputId) {
+        }
+
+        /**
+         * Receives current time shift mode.
+         * @param mode The current time shift mode. The value is one of the following:
+         * {@link TvInputManager#TIME_SHIFT_MODE_OFF}, {@link TvInputManager#TIME_SHIFT_MODE_LOCAL},
+         * {@link TvInputManager#TIME_SHIFT_MODE_NETWORK},
+         * {@link TvInputManager#TIME_SHIFT_MODE_AUTO}.
+         * @hide
+         */
+        public void onTimeShiftMode(@android.media.tv.TvInputManager.TimeShiftMode int mode) {
+        }
+
+        /**
+         * Receives available speeds.
+         * @hide
+         */
+        public void onAvailableSpeeds(@NonNull float[] speeds) {
         }
 
         /**
@@ -1235,6 +1271,54 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
+         * Requests time shift mode.
+         * @hide
+         */
+        @CallSuper
+        public void requestTimeShiftMode() {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "requestTimeShiftMode");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onRequestTimeShiftMode();
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in requestTimeShiftMode", e);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Requests available speeds for time shift.
+         * @hide
+         */
+        @CallSuper
+        public void requestAvailableSpeeds() {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "requestAvailableSpeeds");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onRequestAvailableSpeeds();
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in requestAvailableSpeeds", e);
+                    }
+                }
+            });
+        }
+
+        /**
          * Requests starting of recording
          *
          * <p> This is used to request the active {@link android.media.tv.TvRecordingClient} to
@@ -1532,6 +1616,14 @@ public abstract class TvInteractiveAppService extends Service {
 
         void sendCurrentTvInputId(@Nullable String inputId) {
             onCurrentTvInputId(inputId);
+        }
+
+        void sendTimeShiftMode(int mode) {
+            onTimeShiftMode(mode);
+        }
+
+        void sendAvailableSpeeds(@NonNull float[] speeds) {
+            onAvailableSpeeds(speeds);
         }
 
         void sendTvRecordingInfo(@Nullable TvRecordingInfo recordingInfo) {

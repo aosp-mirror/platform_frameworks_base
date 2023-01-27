@@ -100,6 +100,8 @@ public class ITvInteractiveAppSessionWrapper
     private static final int DO_NOTIFY_RECORDING_TUNED = 43;
     private static final int DO_NOTIFY_RECORDING_ERROR = 44;
     private static final int DO_NOTIFY_RECORDING_SCHEDULED = 45;
+    private static final int DO_SEND_TIME_SHIFT_MODE = 46;
+    private static final int DO_SEND_AVAILABLE_SPEEDS = 47;
 
     private final HandlerCaller mCaller;
     private Session mSessionImpl;
@@ -185,6 +187,14 @@ public class ITvInteractiveAppSessionWrapper
             }
             case DO_SEND_CURRENT_TV_INPUT_ID: {
                 mSessionImpl.sendCurrentTvInputId((String) msg.obj);
+                break;
+            }
+            case DO_SEND_TIME_SHIFT_MODE: {
+                mSessionImpl.sendTimeShiftMode((Integer) msg.obj);
+                break;
+            }
+            case DO_SEND_AVAILABLE_SPEEDS: {
+                mSessionImpl.sendAvailableSpeeds((float[]) msg.obj);
                 break;
             }
             case DO_SEND_RECORDING_INFO: {
@@ -429,6 +439,18 @@ public class ITvInteractiveAppSessionWrapper
     public void sendCurrentTvInputId(@Nullable String inputId) {
         mCaller.executeOrSendMessage(
                 mCaller.obtainMessageO(DO_SEND_CURRENT_TV_INPUT_ID, inputId));
+    }
+
+    @Override
+    public void sendTimeShiftMode(int mode) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageI(DO_SEND_TIME_SHIFT_MODE, mode));
+    }
+
+    @Override
+    public void sendAvailableSpeeds(float[] speeds) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageO(DO_SEND_AVAILABLE_SPEEDS, speeds));
     }
 
     @Override

@@ -30,6 +30,7 @@ import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.Surface;
+
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 
@@ -75,6 +76,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_REQUEST_AD = 27;
     private static final int DO_NOTIFY_AD_BUFFER = 28;
     private static final int DO_SELECT_AUDIO_PRESENTATION = 29;
+    private static final int DO_TIME_SHIFT_SET_MODE = 30;
 
     private final boolean mIsRecordingSession;
     private final HandlerCaller mCaller;
@@ -217,6 +219,9 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
             case DO_TIME_SHIFT_SET_PLAYBACK_PARAMS: {
                 mTvInputSessionImpl.timeShiftSetPlaybackParams((PlaybackParams) msg.obj);
                 break;
+            }
+            case DO_TIME_SHIFT_SET_MODE: {
+                mTvInputSessionImpl.timeShiftSetMode((Integer) msg.obj);
             }
             case DO_TIME_SHIFT_ENABLE_POSITION_TRACKING: {
                 mTvInputSessionImpl.timeShiftEnablePositionTracking((Boolean) msg.obj);
@@ -398,6 +403,11 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     public void timeShiftSetPlaybackParams(PlaybackParams params) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_TIME_SHIFT_SET_PLAYBACK_PARAMS,
                 params));
+    }
+
+    @Override
+    public void timeShiftSetMode(int mode) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageI(DO_TIME_SHIFT_SET_MODE, mode));
     }
 
     @Override

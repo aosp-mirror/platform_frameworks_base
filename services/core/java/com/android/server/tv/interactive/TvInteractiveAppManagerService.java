@@ -1486,6 +1486,56 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
 
         @Override
+        public void sendTimeShiftMode(IBinder sessionToken, int mode, int userId) {
+            if (DEBUG) {
+                Slogf.d(TAG, "sendTimeShiftMode(mode=%d)", mode);
+            }
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "sendTimeShiftMode");
+            SessionState sessionState = null;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                resolvedUserId);
+                        getSessionLocked(sessionState).sendTimeShiftMode(mode);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slogf.e(TAG, "error in sendTimeShiftMode", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void sendAvailableSpeeds(IBinder sessionToken, float[] speeds, int userId) {
+            if (DEBUG) {
+                Slogf.d(TAG, "sendAvailableSpeeds(speeds=%s)", Arrays.toString(speeds));
+            }
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "sendAvailableSpeeds");
+            SessionState sessionState = null;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                resolvedUserId);
+                        getSessionLocked(sessionState).sendAvailableSpeeds(speeds);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slogf.e(TAG, "error in sendAvailableSpeeds", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void sendTvRecordingInfo(IBinder sessionToken, TvRecordingInfo recordingInfo,
                 int userId) {
             if (DEBUG) {
@@ -2742,6 +2792,40 @@ public class TvInteractiveAppManagerService extends SystemService {
                     mSessionState.mClient.onRequestCurrentTvInputId(mSessionState.mSeq);
                 } catch (RemoteException e) {
                     Slogf.e(TAG, "error in onRequestCurrentTvInputId", e);
+                }
+            }
+        }
+
+        @Override
+        public void onRequestTimeShiftMode() {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onRequestTimeShiftMode");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onRequestTimeShiftMode(mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onRequestTimeShiftMode", e);
+                }
+            }
+        }
+
+        @Override
+        public void onRequestAvailableSpeeds() {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onRequestAvailableSpeeds");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onRequestAvailableSpeeds(mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onRequestAvailableSpeeds", e);
                 }
             }
         }

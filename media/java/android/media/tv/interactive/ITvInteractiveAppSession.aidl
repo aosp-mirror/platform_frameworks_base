@@ -46,6 +46,8 @@ oneway interface ITvInteractiveAppSession {
     void sendStreamVolume(float volume);
     void sendTrackInfoList(in List<TvTrackInfo> tracks);
     void sendCurrentTvInputId(in String inputId);
+    void sendTimeShiftMode(int mode);
+    void sendAvailableSpeeds(in float[] speeds);
     void sendSigningResult(in String signingId, in byte[] result);
     void sendTvRecordingInfo(in TvRecordingInfo recordingInfo);
     void sendTvRecordingInfoList(in List<TvRecordingInfo> recordingInfoList);

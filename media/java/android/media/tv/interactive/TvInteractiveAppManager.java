@@ -33,6 +33,7 @@ import android.media.tv.TvContentRating;
 import android.media.tv.TvInputManager;
 import android.media.tv.TvRecordingInfo;
 import android.media.tv.TvTrackInfo;
+import android.media.tv.interactive.TvInteractiveAppService.Session;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -513,6 +514,30 @@ public final class TvInteractiveAppManager {
                         return;
                     }
                     record.postRequestCurrentTvInputId();
+                }
+            }
+
+            @Override
+            public void onRequestTimeShiftMode(int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestTimeShiftMode();
+                }
+            }
+
+            @Override
+            public void onRequestAvailableSpeeds(int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestAvailableSpeeds();
                 }
             }
 
@@ -1190,6 +1215,30 @@ public final class TvInteractiveAppManager {
             }
             try {
                 mService.sendCurrentTvInputId(mToken, inputId, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void sendTimeShiftMode(int mode) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.sendTimeShiftMode(mToken, mode, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void sendAvailableSpeeds(float[] speeds) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.sendAvailableSpeeds(mToken, speeds, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -2063,6 +2112,24 @@ public final class TvInteractiveAppManager {
             });
         }
 
+        void postRequestTimeShiftMode() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestTimeShiftMode(mSession);
+                }
+            });
+        }
+
+        void postRequestAvailableSpeeds() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestAvailableSpeeds(mSession);
+                }
+            });
+        }
+
         void postRequestStartRecording(Uri programUri) {
             mHandler.post(new Runnable() {
                 @Override
@@ -2253,7 +2320,7 @@ public final class TvInteractiveAppManager {
         }
 
         /**
-         * This is called when {@link TvInteractiveAppService.Session#SetVideoBounds} is called.
+         * This is called when {@link TvInteractiveAppService.Session#setVideoBounds} is called.
          *
          * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
          */
@@ -2261,7 +2328,7 @@ public final class TvInteractiveAppManager {
         }
 
         /**
-         * This is called when {@link TvInteractiveAppService.Session#RequestCurrentVideoBounds} is
+         * This is called when {@link TvInteractiveAppService.Session#requestCurrentVideoBounds} is
          * called.
          *
          * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
@@ -2270,7 +2337,7 @@ public final class TvInteractiveAppManager {
         }
 
         /**
-         * This is called when {@link TvInteractiveAppService.Session#RequestCurrentChannelUri} is
+         * This is called when {@link TvInteractiveAppService.Session#requestCurrentChannelUri} is
          * called.
          *
          * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
@@ -2279,7 +2346,7 @@ public final class TvInteractiveAppManager {
         }
 
         /**
-         * This is called when {@link TvInteractiveAppService.Session#RequestCurrentChannelLcn} is
+         * This is called when {@link TvInteractiveAppService.Session#requestCurrentChannelLcn} is
          * called.
          *
          * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
@@ -2288,7 +2355,7 @@ public final class TvInteractiveAppManager {
         }
 
         /**
-         * This is called when {@link TvInteractiveAppService.Session#RequestStreamVolume} is
+         * This is called when {@link TvInteractiveAppService.Session#requestStreamVolume} is
          * called.
          *
          * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
@@ -2297,7 +2364,7 @@ public final class TvInteractiveAppManager {
         }
 
         /**
-         * This is called when {@link TvInteractiveAppService.Session#RequestTrackInfoList} is
+         * This is called when {@link TvInteractiveAppService.Session#requestTrackInfoList} is
          * called.
          *
          * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
@@ -2306,7 +2373,7 @@ public final class TvInteractiveAppManager {
         }
 
         /**
-         * This is called when {@link TvInteractiveAppService.Session#RequestCurrentTvInputId} is
+         * This is called when {@link TvInteractiveAppService.Session#requestCurrentTvInputId} is
          * called.
          *
          * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
@@ -2315,7 +2382,25 @@ public final class TvInteractiveAppManager {
         }
 
         /**
-         * This is called when {@link TvInteractiveAppService.Session#RequestStartRecording} is
+         * This is called when {@link TvInteractiveAppService.Session#requestTimeShiftMode()} is
+         * called.
+         *
+         * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
+         */
+        public void onRequestTimeShiftMode(Session session) {
+        }
+
+        /**
+         * This is called when {@link TvInteractiveAppService.Session#requestAvailableSpeeds()} is
+         * called.
+         *
+         * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
+         */
+        public void onRequestAvailableSpeeds(Session session) {
+        }
+
+        /**
+         * This is called when {@link TvInteractiveAppService.Session#requestStartRecording} is
          * called.
          *
          * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
