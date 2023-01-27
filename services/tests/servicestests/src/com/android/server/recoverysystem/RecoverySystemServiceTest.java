@@ -46,7 +46,7 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
-import android.hardware.boot.V1_2.IBootControl;
+import android.hardware.boot.IBootControl;
 import android.os.Handler;
 import android.os.IPowerManager;
 import android.os.IRecoverySystemProgressListener;
