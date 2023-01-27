@@ -37,6 +37,8 @@ public class KeyguardPinViewController
             mView.onDevicePostureChanged(posture);
     private LockPatternUtils mLockPatternUtils;
     private final FeatureFlags mFeatureFlags;
+    private static final int DEFAULT_PIN_LENGTH = 6;
+    private NumPadButton mBackspaceKey;
     private View mOkButton = mView.findViewById(R.id.key_enter);
 
     private int mUserId;
@@ -59,6 +61,7 @@ public class KeyguardPinViewController
         mPostureController = postureController;
         mLockPatternUtils = lockPatternUtils;
         mFeatureFlags = featureFlags;
+        mBackspaceKey = view.findViewById(R.id.delete_button);
     }
 
     @Override
@@ -79,6 +82,7 @@ public class KeyguardPinViewController
     protected void onUserInput() {
         super.onUserInput();
         if (isAutoConfirmation()) {
+            updateBackSpaceVisibility();
             if (mPasswordEntry.getText().length() == mPinLength) {
                 verifyPasswordAndUnlock();
             }
@@ -96,12 +100,11 @@ public class KeyguardPinViewController
         if (mFeatureFlags.isEnabled(Flags.AUTO_PIN_CONFIRMATION)) {
             mUserId = KeyguardUpdateMonitor.getCurrentUser();
             mPinLength = mLockPatternUtils.getPinLength(mUserId);
-            if (isAutoConfirmation()) {
-                mOkButton.setVisibility(View.INVISIBLE);
-            } else {
-                mOkButton.setVisibility(View.VISIBLE);
-            }
-            mPasswordEntry.setIsPinHinting(true, isPinHinting());
+            mBackspaceKey.setTransparentMode(/* isTransparentMode= */ isAutoConfirmation());
+            mOkButton.setVisibility(isAutoConfirmation() ? View.INVISIBLE : View.VISIBLE);
+            updateBackSpaceVisibility();
+            mPasswordEntry.setUsePinShapes(true);
+            mPasswordEntry.setIsPinHinting(isAutoConfirmation() && isPinHinting());
         }
         super.startAppearAnimation();
     }
@@ -112,15 +115,33 @@ public class KeyguardPinViewController
                 mKeyguardUpdateMonitor.needsSlowUnlockTransition(), finishRunnable);
     }
 
-    /*
-        Responsible for identifying if PIN hinting is to be enabled or not
+    //
+
+    /**
+     *  Updates the visibility and the enabled state of the backspace.
+     * Visibility changes are only for auto confirmation configuration.
+     */
+    private void updateBackSpaceVisibility() {
+        if (!isAutoConfirmation()) {
+            return;
+        }
+
+        if (mPasswordEntry.getText().length() > 0) {
+            mBackspaceKey.setVisibility(View.VISIBLE);
+        } else {
+            mBackspaceKey.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    /**
+     *   Responsible for identifying if PIN hinting is to be enabled or not
      */
     private boolean isPinHinting() {
         return mLockPatternUtils.getPinLength(mUserId) == DEFAULT_PIN_LENGTH;
     }
 
-    /*
-        Responsible for identifying if auto confirm is enabled or not in Settings
+    /**
+     *   Responsible for identifying if auto confirm is enabled or not in Settings
      */
     private boolean isAutoConfirmation() {
         //Checks if user has enabled the auto confirm in Settings

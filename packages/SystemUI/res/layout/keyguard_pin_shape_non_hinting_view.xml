@@ -14,10 +14,10 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<com.android.keyguard.PINShapeSixDigitView
+<com.android.keyguard.PinShapeNonHintingView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:gravity="center"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-</com.android.keyguard.PINShapeSixDigitView>
+</com.android.keyguard.PinShapeNonHintingView>

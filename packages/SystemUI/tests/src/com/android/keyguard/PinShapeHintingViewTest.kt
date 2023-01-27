@@ -16,30 +16,49 @@
 
 package com.android.keyguard
 
+import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper
 import android.view.LayoutInflater
+import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.google.common.truth.Truth
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@SmallTest
+@RunWith(AndroidTestingRunner::class)
+@TestableLooper.RunWithLooper
 class PinShapeHintingViewTest : SysuiTestCase() {
-    lateinit var mPinShapeHintingView: PinShapeHintingView
+    lateinit var underTest: PinShapeHintingView
 
     @Before
     fun setup() {
-        mPinShapeHintingView =
-            LayoutInflater.from(context).inflate(R.layout.keyguard_pin_shape_six_digit_view, null)
+        underTest =
+            LayoutInflater.from(context).inflate(R.layout.keyguard_pin_shape_hinting_view, null)
                 as PinShapeHintingView
     }
 
     @Test
     fun testAppend() {
         // Add more when animation part is complete
-        mPinShapeHintingView.append()
+        underTest.append()
+        Truth.assertThat(underTest.childCount).isEqualTo(6)
     }
 
     @Test
     fun testDelete() {
-        mPinShapeHintingView.delete()
+        underTest.delete()
+        Truth.assertThat(underTest.childCount).isEqualTo(6)
+    }
+
+    @Test
+    fun testReset() {
+        for (i in 0 until 3) {
+            underTest.append()
+        }
+        underTest.reset()
+        Truth.assertThat(underTest.childCount).isEqualTo(6)
     }
 }

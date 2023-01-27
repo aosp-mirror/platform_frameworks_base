@@ -17,6 +17,7 @@
 package com.android.keyguard;
 
 import android.content.Context;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -41,13 +42,11 @@ public class PinShapeHintingView extends LinearLayout implements PinShapeInput {
             .getDefaultColor();
     private int mPosition = 0;
     private static final int DEFAULT_PIN_LENGTH = 6;
-
-    public PinShapeHintingView(Context context) {
-        super(context);
-    }
+    private PinShapeAdapter mPinShapeAdapter;
 
     public PinShapeHintingView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mPinShapeAdapter = new PinShapeAdapter(context);
         mPinLength = DEFAULT_PIN_LENGTH;
         mDotDiameter = context.getResources().getDimensionPixelSize(R.dimen.default_dot_diameter);
         mDotSpacing = context.getResources().getDimensionPixelSize(R.dimen.default_dot_spacing);
@@ -65,20 +64,12 @@ public class PinShapeHintingView extends LinearLayout implements PinShapeInput {
         }
     }
 
-    public PinShapeHintingView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-    }
-
-    public PinShapeHintingView(Context context, AttributeSet attrs, int defStyleAttr,
-            int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-    }
-
     @Override
     public void append() {
         if (mPosition == DEFAULT_PIN_LENGTH) {
             return;
         }
+        setAnimatedDrawable(mPosition, mPinShapeAdapter.getShape(mPosition));
         mPosition++;
     }
 
@@ -88,6 +79,7 @@ public class PinShapeHintingView extends LinearLayout implements PinShapeInput {
             return;
         }
         mPosition--;
+        setAnimatedDrawable(mPosition, R.drawable.pin_dot_delete_avd);
     }
 
     @Override
@@ -107,5 +99,17 @@ public class PinShapeHintingView extends LinearLayout implements PinShapeInput {
     @Override
     public View getView() {
         return this;
+    }
+
+    private void setAnimatedDrawable(int position, int drawableResId) {
+        ImageView pinDot = (ImageView) getChildAt(position);
+        pinDot.setImageResource(drawableResId);
+        if (pinDot.getDrawable() != null) {
+            Drawable drawable = DrawableCompat.wrap(pinDot.getDrawable());
+            DrawableCompat.setTint(drawable, mColor);
+        }
+        if (pinDot.getDrawable() instanceof AnimatedVectorDrawable) {
+            ((AnimatedVectorDrawable) pinDot.getDrawable()).start();
+        }
     }
 }

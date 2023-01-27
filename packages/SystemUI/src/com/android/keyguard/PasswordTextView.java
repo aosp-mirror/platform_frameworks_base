@@ -57,8 +57,8 @@ public class PasswordTextView extends FrameLayout {
 
     private static final float DOT_OVERSHOOT_FACTOR = 1.5f;
     private static final long DOT_APPEAR_DURATION_OVERSHOOT = 320;
-    private static final long APPEAR_DURATION = 160;
-    private static final long DISAPPEAR_DURATION = 160;
+    public static final long APPEAR_DURATION = 160;
+    public static final long DISAPPEAR_DURATION = 160;
     private static final long RESET_DELAY_PER_ELEMENT = 40;
     private static final long RESET_MAX_DELAY = 200;
 
@@ -284,8 +284,8 @@ public class PasswordTextView extends FrameLayout {
         sendAccessibilityEventTypeViewTextChanged(textbefore, textbefore.length(), 0, 1);
     }
 
-    public void setUserActivityListener(UserActivityListener userActivitiListener) {
-        mUserActivityListener = userActivitiListener;
+    public void setUserActivityListener(UserActivityListener userActivityListener) {
+        mUserActivityListener = userActivityListener;
     }
 
     private void userActivity() {
@@ -361,6 +361,8 @@ public class PasswordTextView extends FrameLayout {
         }
         if (!animated) {
             mTextChars.clear();
+        } else {
+            userActivity();
         }
         if (mPinShapeInput != null) {
             mPinShapeInput.reset();
@@ -411,14 +413,19 @@ public class PasswordTextView extends FrameLayout {
     }
 
     /**
+     * Sets whether to use pin shapes.
+     */
+    public void setUsePinShapes(boolean usePinShapes) {
+        mUsePinShapes = usePinShapes;
+    }
+
+    /**
      * Determines whether AutoConfirmation feature is on.
      *
      * @param usePinShapes
      * @param isPinHinting
      */
-    public void setIsPinHinting(boolean usePinShapes, boolean isPinHinting) {
-        mUsePinShapes = usePinShapes;
-
+    public void setIsPinHinting(boolean isPinHinting) {
         if (mPinShapeInput != null) {
             removeView(mPinShapeInput.getView());
             mPinShapeInput = null;
@@ -426,10 +433,10 @@ public class PasswordTextView extends FrameLayout {
 
         if (isPinHinting) {
             mPinShapeInput = (PinShapeInput) LayoutInflater.from(mContext).inflate(
-                    R.layout.keyguard_pin_shape_six_digit_view, null);
+                    R.layout.keyguard_pin_shape_hinting_view, null);
         } else {
             mPinShapeInput = (PinShapeInput) LayoutInflater.from(mContext).inflate(
-                    R.layout.keyguard_pin_shape_non_six_digit_view, null);
+                    R.layout.keyguard_pin_shape_non_hinting_view, null);
         }
         addView(mPinShapeInput.getView());
     }

@@ -16,31 +16,59 @@
 
 package com.android.keyguard
 
+import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper
 import android.view.LayoutInflater
+import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.google.common.truth.Truth
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@SmallTest
+@RunWith(AndroidTestingRunner::class)
+@TestableLooper.RunWithLooper
 class PinShapeNonHintingViewTest : SysuiTestCase() {
-    lateinit var mPinShapeNonHintingView: PinShapeNonHintingView
+    lateinit var underTest: PinShapeNonHintingView
 
     @Before
     fun setup() {
-        mPinShapeNonHintingView =
-            LayoutInflater.from(context)
-                .inflate(R.layout.keyguard_pin_shape_non_six_digit_view, null)
+        underTest =
+            LayoutInflater.from(context).inflate(R.layout.keyguard_pin_shape_non_hinting_view, null)
                 as PinShapeNonHintingView
     }
 
     @Test
     fun testAppend() {
         // Add more when animation part is complete
-        mPinShapeNonHintingView.append()
+        underTest.append()
+        Truth.assertThat(underTest.childCount).isEqualTo(1)
     }
 
     @Test
     fun testDelete() {
-        mPinShapeNonHintingView.delete()
+        for (i in 0 until 3) {
+            underTest.append()
+        }
+        underTest.delete()
+
+        underTest.postDelayed(
+            { Truth.assertThat(underTest.childCount).isEqualTo(2) },
+            PasswordTextView.DISAPPEAR_DURATION + 100L
+        )
+    }
+
+    @Test
+    fun testReset() {
+        for (i in 0 until 3) {
+            underTest.append()
+        }
+        underTest.reset()
+        underTest.postDelayed(
+            { Truth.assertThat(underTest.childCount).isEqualTo(0) },
+            PasswordTextView.DISAPPEAR_DURATION + 100L
+        )
     }
 }

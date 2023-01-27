@@ -76,6 +76,8 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
 
     @Mock lateinit var featureFlags: FeatureFlags
     @Mock lateinit var passwordTextView: PasswordTextView
+    @Mock lateinit var deleteButton: NumPadButton
+    @Mock lateinit var enterButton: View
 
     lateinit var pinViewController: KeyguardPinViewController
 
@@ -92,6 +94,9 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
         `when`(keyguardPinView.findViewById<PasswordTextView>(R.id.pinEntry))
             .thenReturn(passwordTextView)
         `when`(keyguardPinView.resources).thenReturn(context.resources)
+        `when`(keyguardPinView.findViewById<NumPadButton>(R.id.delete_button))
+            .thenReturn(deleteButton)
+        `when`(keyguardPinView.findViewById<View>(R.id.key_enter)).thenReturn(enterButton)
         pinViewController =
             KeyguardPinViewController(
                 keyguardPinView,
@@ -126,8 +131,14 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
     @Test
     fun startAppearAnimation_withAutoPinConfirmation() {
         `when`(featureFlags.isEnabled(Flags.AUTO_PIN_CONFIRMATION)).thenReturn(true)
+        `when`(lockPatternUtils.getPinLength(anyInt())).thenReturn(6)
         `when`(lockPatternUtils.isAutoPinConfirmEnabled(anyInt())).thenReturn(true)
+        `when`(passwordTextView.text).thenReturn("")
+
         pinViewController.startAppearAnimation()
-        verify(passwordTextView).setIsPinHinting(true, true)
+        verify(deleteButton).visibility = View.INVISIBLE
+        verify(enterButton).visibility = View.INVISIBLE
+        verify(passwordTextView).setUsePinShapes(true)
+        verify(passwordTextView).setIsPinHinting(true)
     }
 }
