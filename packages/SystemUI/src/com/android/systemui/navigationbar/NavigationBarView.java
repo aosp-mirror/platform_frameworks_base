@@ -16,13 +16,11 @@
 
 package com.android.systemui.navigationbar;
 
-import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
 import static android.inputmethodservice.InputMethodService.canImeRenderGesturalNavButtons;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_HOME_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_OVERVIEW_DISABLED;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SEARCH_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.isGesturalMode;
 
@@ -75,13 +73,12 @@ import com.android.systemui.navigationbar.buttons.NearestTouchFrame;
 import com.android.systemui.navigationbar.buttons.RotationContextButton;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shared.rotation.FloatingRotationButton;
 import com.android.systemui.shared.rotation.RotationButton.RotationButtonUpdatesCallback;
 import com.android.systemui.shared.rotation.RotationButtonController;
-import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
@@ -127,6 +124,7 @@ public class NavigationBarView extends FrameLayout {
     private int mDarkIconColor;
 
     private EdgeBackGestureHandler mEdgeBackGestureHandler;
+    private DisplayTracker mDisplayTracker;
     private final DeadZone mDeadZone;
     private NavigationBarTransitions mBarTransitions;
     @Nullable
@@ -361,6 +359,10 @@ public class NavigationBarView extends FrameLayout {
         mBgExecutor = bgExecutor;
     }
 
+    public void setDisplayTracker(DisplayTracker displayTracker) {
+        mDisplayTracker = displayTracker;
+    }
+
     public void setTouchHandler(Gefingerpoken touchHandler) {
         mTouchHandler = touchHandler;
     }
@@ -558,7 +560,8 @@ public class NavigationBarView extends FrameLayout {
     }
 
     public void setBehavior(@Behavior int behavior) {
-        mRotationButtonController.onBehaviorChanged(Display.DEFAULT_DISPLAY, behavior);
+        mRotationButtonController.onBehaviorChanged(mDisplayTracker.getDefaultDisplayId(),
+                behavior);
     }
 
     @Override
@@ -678,7 +681,7 @@ public class NavigationBarView extends FrameLayout {
     @VisibleForTesting
     boolean isRecentsButtonDisabled() {
         return mUseCarModeUi || !isOverviewEnabled()
-                || getContext().getDisplayId() != Display.DEFAULT_DISPLAY;
+                || getContext().getDisplayId() != mDisplayTracker.getDefaultDisplayId();
     }
 
     private Display getContextDisplay() {
