@@ -7828,8 +7828,8 @@ public abstract class BatteryStats {
                 }
                 pw.print("\"");
                 pw.println();
-                dumpHistory(pw, flags, histStart, true);
             }
+            dumpHistory(pw, flags, histStart, true);
         }
 
         if ((flags & DUMP_HISTORY_ONLY) != 0) {
