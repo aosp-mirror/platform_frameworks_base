@@ -94,7 +94,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     DisplayArea(WindowManagerService wms, Type type, String name, int featureId) {
         super(wms);
         // TODO(display-area): move this up to ConfigurationContainer
-        mOrientation = SCREEN_ORIENTATION_UNSET;
+        setOverrideOrientation(SCREEN_ORIENTATION_UNSET);
         mType = type;
         mName = name;
         mFeatureId = featureId;
@@ -166,7 +166,8 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         // If this is set to ignore the orientation request, we don't propagate descendant
         // orientation request.
         final int orientation = requestingContainer != null
-                ? requestingContainer.mOrientation : SCREEN_ORIENTATION_UNSET;
+                ? requestingContainer.getOverrideOrientation()
+                : SCREEN_ORIENTATION_UNSET;
         return !getIgnoreOrientationRequest(orientation)
                 && super.onDescendantOrientationChanged(requestingContainer);
     }

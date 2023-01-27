@@ -1576,7 +1576,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // If display rotation class tells us that it doesn't consider app requested orientation,
         // this display won't rotate just because of an app changes its requested orientation. Thus
         // it indicates that this display chooses not to handle this request.
-        final int orientation = requestingContainer != null ? requestingContainer.mOrientation
+        final int orientation = requestingContainer != null
+                ? requestingContainer.getOverrideOrientation()
                 : SCREEN_ORIENTATION_UNSET;
         final boolean handled = handlesOrientationChangeFromDescendant(orientation);
         if (config == null) {
@@ -1702,14 +1703,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (mTransitionController.useShellTransitionsRotation()) {
             return ROTATION_UNDEFINED;
         }
+        final int activityOrientation = r.getOverrideOrientation();
         if (!WindowManagerService.ENABLE_FIXED_ROTATION_TRANSFORM
-                || getIgnoreOrientationRequest(r.mOrientation)) {
+                || getIgnoreOrientationRequest(activityOrientation)) {
             return ROTATION_UNDEFINED;
         }
-        if (r.mOrientation == ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
+        if (activityOrientation == ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
+            // TODO(b/266280737): Use ActivityRecord#canDefineOrientationForActivitiesAbove
             final ActivityRecord nextCandidate = getActivity(
-                    a -> a.mOrientation != SCREEN_ORIENTATION_UNSET
-                            && a.mOrientation != ActivityInfo.SCREEN_ORIENTATION_BEHIND,
+                    a -> a.getOverrideOrientation() != SCREEN_ORIENTATION_UNSET
+                            && a.getOverrideOrientation()
+                                    != ActivityInfo.SCREEN_ORIENTATION_BEHIND,
                     r, false /* includeBoundary */, true /* traverseTopToBottom */);
             if (nextCandidate != null) {
                 r = nextCandidate;
