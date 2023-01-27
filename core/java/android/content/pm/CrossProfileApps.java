@@ -15,6 +15,7 @@
  */
 package android.content.pm;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.app.admin.DevicePolicyResources.Strings.Core.SWITCH_TO_PERSONAL_LABEL;
 import static android.app.admin.DevicePolicyResources.Strings.Core.SWITCH_TO_WORK_LABEL;
 
@@ -23,6 +24,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UserHandleAware;
 import android.app.Activity;
 import android.app.AppOpsManager.Mode;
 import android.app.admin.DevicePolicyManager;
@@ -32,6 +34,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -167,7 +170,7 @@ public class CrossProfileApps {
      */
     @RequiresPermission(anyOf = {
             android.Manifest.permission.INTERACT_ACROSS_PROFILES,
-            android.Manifest.permission.INTERACT_ACROSS_USERS})
+            INTERACT_ACROSS_USERS})
     public void startActivity(
             @NonNull Intent intent,
             @NonNull UserHandle targetUser,
@@ -196,7 +199,7 @@ public class CrossProfileApps {
      */
     @RequiresPermission(anyOf = {
             android.Manifest.permission.INTERACT_ACROSS_PROFILES,
-            android.Manifest.permission.INTERACT_ACROSS_USERS})
+            INTERACT_ACROSS_USERS})
     public void startActivity(
             @NonNull Intent intent,
             @NonNull UserHandle targetUser,
@@ -500,10 +503,13 @@ public class CrossProfileApps {
      */
     @RequiresPermission(
             allOf={android.Manifest.permission.CONFIGURE_INTERACT_ACROSS_PROFILES,
-                    android.Manifest.permission.INTERACT_ACROSS_USERS})
+                    INTERACT_ACROSS_USERS})
+    @UserHandleAware(
+            enabledSinceTargetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
+            requiresPermissionIfNotCaller = INTERACT_ACROSS_USERS)
     public void setInteractAcrossProfilesAppOp(@NonNull String packageName, @Mode int newMode) {
         try {
-            mService.setInteractAcrossProfilesAppOp(packageName, newMode);
+            mService.setInteractAcrossProfilesAppOp(mContext.getUserId(), packageName, newMode);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -519,9 +525,12 @@ public class CrossProfileApps {
      * @hide
      */
     @TestApi
+    @UserHandleAware(
+            enabledSinceTargetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
+            requiresPermissionIfNotCaller = INTERACT_ACROSS_USERS)
     public boolean canConfigureInteractAcrossProfiles(@NonNull String packageName) {
         try {
-            return mService.canConfigureInteractAcrossProfiles(packageName);
+            return mService.canConfigureInteractAcrossProfiles(mContext.getUserId(), packageName);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -540,9 +549,13 @@ public class CrossProfileApps {
      *
      * @hide
      */
+    @UserHandleAware(
+            enabledSinceTargetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
+            requiresPermissionIfNotCaller = INTERACT_ACROSS_USERS)
     public boolean canUserAttemptToConfigureInteractAcrossProfiles(String packageName) {
         try {
-            return mService.canUserAttemptToConfigureInteractAcrossProfiles(packageName);
+            return mService.canUserAttemptToConfigureInteractAcrossProfiles(
+                    mContext.getUserId(), packageName);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -569,7 +582,10 @@ public class CrossProfileApps {
      */
     @RequiresPermission(
             allOf={android.Manifest.permission.CONFIGURE_INTERACT_ACROSS_PROFILES,
-                    android.Manifest.permission.INTERACT_ACROSS_USERS})
+                    INTERACT_ACROSS_USERS})
+    @UserHandleAware(
+            enabledSinceTargetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
+            requiresPermissionIfNotCaller = INTERACT_ACROSS_USERS)
     public void resetInteractAcrossProfilesAppOps(
             @NonNull Collection<String> previousCrossProfilePackages,
             @NonNull Set<String> newCrossProfilePackages) {
@@ -584,7 +600,8 @@ public class CrossProfileApps {
             return;
         }
         try {
-            mService.resetInteractAcrossProfilesAppOps(unsetCrossProfilePackages);
+            mService.resetInteractAcrossProfilesAppOps(
+                    mContext.getUserId(), unsetCrossProfilePackages);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -609,10 +626,13 @@ public class CrossProfileApps {
      */
     @RequiresPermission(
             allOf={android.Manifest.permission.CONFIGURE_INTERACT_ACROSS_PROFILES,
-                    android.Manifest.permission.INTERACT_ACROSS_USERS})
+                    INTERACT_ACROSS_USERS})
+    @UserHandleAware(
+            enabledSinceTargetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
+            requiresPermissionIfNotCaller = INTERACT_ACROSS_USERS)
     public void clearInteractAcrossProfilesAppOps() {
         try {
-            mService.clearInteractAcrossProfilesAppOps();
+            mService.clearInteractAcrossProfilesAppOps(mContext.getUserId());
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

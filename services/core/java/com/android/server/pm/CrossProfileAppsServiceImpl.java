@@ -430,8 +430,9 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
      * checks.
      */
     @Override
-    public void setInteractAcrossProfilesAppOp(String packageName, @Mode int newMode) {
-        setInteractAcrossProfilesAppOp(packageName, newMode, mInjector.getCallingUserId());
+    public void setInteractAcrossProfilesAppOp(
+            @UserIdInt int userId, String packageName, @Mode int newMode) {
+        setInteractAcrossProfilesAppOp(packageName, newMode, userId);
     }
 
     private void setInteractAcrossProfilesAppOp(
@@ -594,8 +595,12 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     }
 
     @Override
-    public boolean canConfigureInteractAcrossProfiles(String packageName) {
-        return canConfigureInteractAcrossProfiles(packageName, mInjector.getCallingUserId());
+    public boolean canConfigureInteractAcrossProfiles(int userId, String packageName) {
+        if (mInjector.getCallingUserId() != userId) {
+            mContext.checkCallingOrSelfPermission(INTERACT_ACROSS_USERS);
+        }
+
+        return canConfigureInteractAcrossProfiles(packageName, userId);
     }
 
     private boolean canConfigureInteractAcrossProfiles(String packageName, @UserIdInt int userId) {
@@ -613,9 +618,13 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     }
 
     @Override
-    public boolean canUserAttemptToConfigureInteractAcrossProfiles(String packageName) {
+    public boolean canUserAttemptToConfigureInteractAcrossProfiles(int userId, String packageName) {
+        if (mInjector.getCallingUserId() != userId) {
+            mContext.checkCallingOrSelfPermission(INTERACT_ACROSS_USERS);
+        }
+
         return canUserAttemptToConfigureInteractAcrossProfiles(
-                packageName, mInjector.getCallingUserId());
+                packageName, userId);
     }
 
     private boolean canUserAttemptToConfigureInteractAcrossProfiles(
@@ -676,28 +685,31 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     }
 
     @Override
-    public void resetInteractAcrossProfilesAppOps(List<String> packageNames) {
-        packageNames.forEach(this::resetInteractAcrossProfilesAppOp);
+    public void resetInteractAcrossProfilesAppOps(@UserIdInt int userId, List<String> packageNames) {
+        for (String packageName : packageNames) {
+            resetInteractAcrossProfilesAppOp(userId, packageName);
+        }
     }
 
-    private void resetInteractAcrossProfilesAppOp(String packageName) {
-        if (canConfigureInteractAcrossProfiles(packageName)) {
+    private void resetInteractAcrossProfilesAppOp(@UserIdInt int userId, String packageName) {
+        if (canConfigureInteractAcrossProfiles(packageName, userId)) {
             Slog.w(TAG, "Not resetting app-op for package " + packageName
                     + " since it is still configurable by users.");
             return;
         }
         final String op =
                 AppOpsManager.permissionToOp(INTERACT_ACROSS_PROFILES);
-        setInteractAcrossProfilesAppOp(packageName, AppOpsManager.opToDefaultMode(op));
+        setInteractAcrossProfilesAppOp(userId, packageName, AppOpsManager.opToDefaultMode(op));
     }
 
     @Override
-    public void clearInteractAcrossProfilesAppOps() {
+    public void clearInteractAcrossProfilesAppOps(@UserIdInt int userId) {
         final int defaultMode =
                 AppOpsManager.opToDefaultMode(
                         AppOpsManager.permissionToOp(INTERACT_ACROSS_PROFILES));
         findAllPackageNames()
-                .forEach(packageName -> setInteractAcrossProfilesAppOp(packageName, defaultMode));
+                .forEach(packageName -> setInteractAcrossProfilesAppOp(
+                        userId, packageName, defaultMode));
     }
 
     private List<String> findAllPackageNames() {
