@@ -16,6 +16,8 @@
 
 package com.android.server.media;
 
+import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -248,12 +250,17 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public void showMediaOutputSwitcher(String packageName) {
+    public boolean showMediaOutputSwitcher(String packageName) {
         if (!validatePackageName(Binder.getCallingUid(), packageName)) {
             throw new SecurityException("packageName must match the calling identity");
         }
         final long token = Binder.clearCallingIdentity();
         try {
+            if (mContext.getSystemService(ActivityManager.class).getPackageImportance(packageName)
+                    > IMPORTANCE_FOREGROUND) {
+                Slog.w(TAG, "showMediaOutputSwitcher only works when called from foreground");
+                return false;
+            }
             synchronized (mLock) {
                 StatusBarManagerInternal statusBar =
                         LocalServices.getService(StatusBarManagerInternal.class);
@@ -262,6 +269,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         } finally {
             Binder.restoreCallingIdentity(token);
         }
+        return true;
     }
 
     // Binder call
