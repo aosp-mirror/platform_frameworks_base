@@ -114,6 +114,8 @@ import android.window.SplashScreen;
 import com.android.internal.compat.CompatibilityChangeConfig;
 import com.android.internal.util.MemInfoReader;
 import com.android.server.am.LowMemDetector.MemFactor;
+import com.android.server.am.nano.Capabilities;
+import com.android.server.am.nano.Capability;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.utils.Slogf;
 
@@ -196,6 +198,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private boolean mDismissKeyguard;
 
     final boolean mDumping;
+
+    private static final String[] CAPABILITIES = {"start.suspend"};
+
 
     ActivityManagerShellCommand(ActivityManagerService service, boolean dumping) {
         mInterface = service;
@@ -378,6 +383,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runListDisplaysForStartingUsers(pw);
                 case "set-foreground-service-delegate":
                     return runSetForegroundServiceDelegate(pw);
+                case "capabilities":
+                    return runCapabilities(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -385,6 +392,46 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("Remote exception: " + e);
         }
         return -1;
+    }
+
+    int runCapabilities(PrintWriter pw) throws RemoteException {
+        final PrintWriter err = getErrPrintWriter();
+        boolean outputAsProtobuf = false;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--protobuf")) {
+                outputAsProtobuf = true;
+            } else {
+                err.println("Error: Unknown option: " + opt);
+                return -1;
+            }
+        }
+
+        if (outputAsProtobuf) {
+            Capabilities capabilities = new Capabilities();
+            capabilities.values =  new Capability[CAPABILITIES.length];
+            for (int i = 0; i < CAPABILITIES.length; i++) {
+                Capability cap = new Capability();
+                cap.name = CAPABILITIES[i];
+                capabilities.values[i] = cap;
+            }
+
+            try {
+                getRawOutputStream().write(Capabilities.toByteArray(capabilities));
+            } catch (IOException e) {
+                pw.println("Error while serializing capabilities protobuffer");
+            }
+
+        } else {
+            // Unfortunately we don't have protobuf text format capabilities here.
+            // Fallback to line separated list instead for text parser.
+            pw.println("Format: 1");
+            for (String capability : CAPABILITIES) {
+                pw.println(capability);
+            }
+        }
+        return 0;
     }
 
     private Intent makeIntent(int defUser) throws URISyntaxException {
@@ -4135,6 +4182,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("         Start ignoring delivery group policy set for a broadcast action");
             pw.println("  clear-ignore-delivery-group-policy <ACTION>");
             pw.println("         Stop ignoring delivery group policy set for a broadcast action");
+            pw.println("  capabilities [--protobuf]");
+            pw.println("         Output am supported features (text format). Options are:");
+            pw.println("         --protobuf: format output using protobuffer");
             Intent.printIntentArgsHelp(pw, "");
         }
     }
