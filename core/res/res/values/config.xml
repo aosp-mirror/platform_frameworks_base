@@ -2074,6 +2074,10 @@
          STREAM_MUSIC as if it's on TV platform. -->
     <bool name="config_single_volume">false</bool>
 
+    <!-- Flag indicating whether notification and ringtone volumes
+         are controlled together (aliasing is true) or not. -->
+    <bool name="config_alias_ring_notif_stream_types">true</bool>
+
     <!-- The number of volume steps for the notification stream -->
     <integer name="config_audio_notif_vol_steps">7</integer>
 
