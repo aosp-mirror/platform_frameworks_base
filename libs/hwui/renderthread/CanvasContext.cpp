@@ -194,8 +194,6 @@ void CanvasContext::setSurface(ANativeWindow* window, bool enableTimeout) {
     ATRACE_CALL();
 
     if (window) {
-        // Ensure the hint session is running here, away from any critical paths
-        mHintSessionWrapper.init();
         mNativeSurface = std::make_unique<ReliableSurface>(window);
         mNativeSurface->init();
         if (enableTimeout) {
@@ -1031,6 +1029,10 @@ void CanvasContext::sendLoadIncreaseHint() {
 
 void CanvasContext::setSyncDelayDuration(nsecs_t duration) {
     mSyncDelayDuration = duration;
+}
+
+void CanvasContext::startHintSession() {
+    mHintSessionWrapper.init();
 }
 
 } /* namespace renderthread */

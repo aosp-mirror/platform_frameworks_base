@@ -45,8 +45,12 @@ RenderProxy::RenderProxy(bool translucent, RenderNode* rootRenderNode,
     pid_t uiThreadId = pthread_gettid_np(pthread_self());
     pid_t renderThreadId = getRenderThreadTid();
     mContext = mRenderThread.queue().runSync([=, this]() -> CanvasContext* {
-        return CanvasContext::create(mRenderThread, translucent, rootRenderNode, contextFactory,
-                                     uiThreadId, renderThreadId);
+        CanvasContext* context = CanvasContext::create(mRenderThread, translucent, rootRenderNode,
+                                                       contextFactory, uiThreadId, renderThreadId);
+        if (context != nullptr) {
+            mRenderThread.queue().post([=] { context->startHintSession(); });
+        }
+        return context;
     });
     mDrawFrameTask.setContext(&mRenderThread, mContext, rootRenderNode);
 }
