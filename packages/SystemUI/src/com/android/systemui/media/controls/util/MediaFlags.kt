@@ -55,4 +55,7 @@ class MediaFlags @Inject constructor(private val featureFlags: FeatureFlags) {
     /** Check whether we show the updated recommendation card. */
     fun isRecommendationCardUpdateEnabled() =
         featureFlags.isEnabled(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE)
+
+    /** Check whether to get progress information for resume players */
+    fun isResumeProgressEnabled() = featureFlags.isEnabled(Flags.MEDIA_RESUME_PROGRESS)
 }
