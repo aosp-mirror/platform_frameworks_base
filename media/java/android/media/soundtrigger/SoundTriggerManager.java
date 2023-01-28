@@ -184,11 +184,16 @@ public final class SoundTriggerManager {
         if (oldInstance != null) {
             // Shutdown old instance.
         }
-        SoundTriggerDetector newInstance = new SoundTriggerDetector(mSoundTriggerSession,
-                soundModelId, callback, handler);
-        mReceiverInstanceMap.put(soundModelId, newInstance);
-        return newInstance;
-    }
+        try {
+            SoundTriggerDetector newInstance = new SoundTriggerDetector(mSoundTriggerSession,
+                    mSoundTriggerSession.getSoundModel(new ParcelUuid(soundModelId)),
+                    callback, handler);
+            mReceiverInstanceMap.put(soundModelId, newInstance);
+            return newInstance;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+   }
 
     /**
      * Class captures the data and fields that represent a non-keyphrase sound model. Use the

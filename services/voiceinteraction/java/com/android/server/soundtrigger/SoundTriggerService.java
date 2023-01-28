@@ -298,35 +298,33 @@ public class SoundTriggerService extends SystemService {
         }
 
         @Override
-        public int startRecognition(ParcelUuid parcelUuid, IRecognitionStatusCallback callback,
+        public int startRecognition(GenericSoundModel soundModel,
+                IRecognitionStatusCallback callback,
                 RecognitionConfig config, boolean runInBatterySaverMode) {
             try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
                 enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
+
+                if (soundModel == null) {
+                    Slog.e(TAG, "Null model passed to startRecognition");
+                    return STATUS_ERROR;
+                }
+
                 if (runInBatterySaverMode) {
                     enforceCallingPermission(Manifest.permission.SOUND_TRIGGER_RUN_IN_BATTERY_SAVER);
                 }
 
                 if (DEBUG) {
-                    Slog.i(TAG, "startRecognition(): Uuid : " + parcelUuid);
+                    Slog.i(TAG, "startRecognition(): Uuid : " + soundModel.toString());
                 }
 
                 sEventLogger.enqueue(new EventLogger.StringEvent(
-                        "startRecognition(): Uuid : " + parcelUuid));
+                        "startRecognition(): Uuid : " + soundModel.getUuid().toString()));
 
-                GenericSoundModel model = getSoundModel(parcelUuid);
-                if (model == null) {
-                    Slog.w(TAG, "Null model in database for id: " + parcelUuid);
-
-                    sEventLogger.enqueue(new EventLogger.StringEvent(
-                            "startRecognition(): Null model in database for id: " + parcelUuid));
-
-                    return STATUS_ERROR;
-                }
-
-                int ret = mSoundTriggerHelper.startGenericRecognition(parcelUuid.getUuid(), model,
+                int ret = mSoundTriggerHelper.startGenericRecognition(soundModel.getUuid(),
+                        soundModel,
                         callback, config, runInBatterySaverMode);
                 if (ret == STATUS_OK) {
-                    mSoundModelStatTracker.onStart(parcelUuid.getUuid());
+                    mSoundModelStatTracker.onStart(soundModel.getUuid());
                 }
                 return ret;
             }
@@ -379,8 +377,7 @@ public class SoundTriggerService extends SystemService {
 
                 sEventLogger.enqueue(new EventLogger.StringEvent("updateSoundModel(): model = "
                         + soundModel));
-
-                mDbHelper.updateGenericSoundModel(soundModel);
+               mDbHelper.updateGenericSoundModel(soundModel);
             }
         }
 

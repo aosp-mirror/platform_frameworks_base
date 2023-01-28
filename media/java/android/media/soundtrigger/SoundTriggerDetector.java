@@ -25,6 +25,7 @@ import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.SoundTrigger;
+import android.hardware.soundtrigger.SoundTrigger.GenericSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.media.AudioFormat;
@@ -50,6 +51,7 @@ import java.util.UUID;
  * VoiceInteractionService} instead. Access to this class is protected by a permission
  * granted only to system or privileged apps.
  * @deprecated use {@link SoundTriggerManager} directly
+ *
  * @hide
  */
 @Deprecated
@@ -67,7 +69,7 @@ public final class SoundTriggerDetector {
     private final Object mLock = new Object();
 
     private final ISoundTriggerSession mSoundTriggerSession;
-    private final UUID mSoundModelId;
+    private final GenericSoundModel mSoundModel;
     private final Callback mCallback;
     private final Handler mHandler;
     private final RecognitionCallback mRecognitionCallback;
@@ -277,10 +279,11 @@ public final class SoundTriggerDetector {
      * This class should be constructed by the {@link SoundTriggerManager}.
      * @hide
      */
-    SoundTriggerDetector(ISoundTriggerSession soundTriggerSession, UUID soundModelId,
+    SoundTriggerDetector(ISoundTriggerSession soundTriggerSession,
+            @NonNull GenericSoundModel soundModel,
             @NonNull Callback callback, @Nullable Handler handler) {
         mSoundTriggerSession = soundTriggerSession;
-        mSoundModelId = soundModelId;
+        mSoundModel = soundModel;
         mCallback = callback;
         if (handler == null) {
             mHandler = new MyHandler();
@@ -320,7 +323,7 @@ public final class SoundTriggerDetector {
 
         int status;
         try {
-            status = mSoundTriggerSession.startRecognition(new ParcelUuid(mSoundModelId),
+            status = mSoundTriggerSession.startRecognition(mSoundModel,
                     mRecognitionCallback, new RecognitionConfig(captureTriggerAudio,
                             allowMultipleTriggers, null, null, audioCapabilities),
                     runInBatterySaver);
@@ -339,7 +342,7 @@ public final class SoundTriggerDetector {
     public boolean stopRecognition() {
         int status = STATUS_OK;
         try {
-            status = mSoundTriggerSession.stopRecognition(new ParcelUuid(mSoundModelId),
+            status = mSoundTriggerSession.stopRecognition(new ParcelUuid(mSoundModel.getUuid()),
                     mRecognitionCallback);
         } catch (RemoteException e) {
             return false;
