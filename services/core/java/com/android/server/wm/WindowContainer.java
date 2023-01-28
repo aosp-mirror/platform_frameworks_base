@@ -73,6 +73,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -178,8 +179,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     protected final WindowList<E> mChildren = new WindowList<E>();
 
     // The specified orientation for this window container.
-    @ActivityInfo.ScreenOrientation
-    protected int mOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
+    // Shouldn't be accessed directly since subclasses can override getOverrideOrientation.
+    @ScreenOrientation
+    private int mOverrideOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
 
     /**
      * The window container which decides its orientation since the last time
@@ -1427,19 +1429,20 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     /**
      * Gets the configuration orientation by the requested screen orientation
-     * ({@link ActivityInfo.ScreenOrientation}) of this activity.
+     * ({@link ScreenOrientation}) of this activity.
      *
      * @return orientation in ({@link Configuration#ORIENTATION_LANDSCAPE},
      *         {@link Configuration#ORIENTATION_PORTRAIT},
      *         {@link Configuration#ORIENTATION_UNDEFINED}).
      */
+    @ScreenOrientation
     int getRequestedConfigurationOrientation() {
         return getRequestedConfigurationOrientation(false /* forDisplay */);
     }
 
     /**
      * Gets the configuration orientation by the requested screen orientation
-     * ({@link ActivityInfo.ScreenOrientation}) of this activity.
+     * ({@link ScreenOrientation}) of this activity.
      *
      * @param forDisplay whether it is the requested config orientation for display.
      *                   If {@code true}, we may reverse the requested orientation if the root is
@@ -1450,8 +1453,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *         {@link Configuration#ORIENTATION_PORTRAIT},
      *         {@link Configuration#ORIENTATION_UNDEFINED}).
      */
+    @ScreenOrientation
     int getRequestedConfigurationOrientation(boolean forDisplay) {
-        int requestedOrientation = mOrientation;
+        int requestedOrientation = getOverrideOrientation();
         final RootDisplayArea root = getRootDisplayArea();
         if (forDisplay && root != null && root.isOrientationDifferentFromDisplay()) {
             // Reverse the requested orientation if the orientation of its root is different from
@@ -1461,7 +1465,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             // (portrait).
             // When an app below the DAG is requesting landscape, it should actually request the
             // display to be portrait, so that the DAG and the app will be in landscape.
-            requestedOrientation = reverseOrientation(mOrientation);
+            requestedOrientation = reverseOrientation(getOverrideOrientation());
         }
 
         if (requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_NOSENSOR) {
@@ -1486,7 +1490,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *
      * @param orientation the specified orientation.
      */
-    void setOrientation(int orientation) {
+    void setOrientation(@ScreenOrientation int orientation) {
         setOrientation(orientation, null /* requestingContainer */);
     }
 
@@ -1494,17 +1498,17 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * Sets the specified orientation of this container. It percolates this change upward along the
      * hierarchy to let each level of the hierarchy a chance to respond to it.
      *
-     * @param orientation the specified orientation. Needs to be one of {@link
-     *      android.content.pm.ActivityInfo.ScreenOrientation}.
+     * @param orientation the specified orientation. Needs to be one of {@link ScreenOrientation}.
      * @param requestingContainer the container which orientation request has changed. Mostly used
      *                            to ensure it gets correct configuration.
      */
-    void setOrientation(int orientation, @Nullable WindowContainer requestingContainer) {
-        if (mOrientation == orientation) {
+    void setOrientation(@ScreenOrientation int orientation,
+            @Nullable WindowContainer requestingContainer) {
+        if (getOverrideOrientation() == orientation) {
             return;
         }
 
-        mOrientation = orientation;
+        setOverrideOrientation(orientation);
         final WindowContainer parent = getParent();
         if (parent != null) {
             if (getConfiguration().orientation != getRequestedConfigurationOrientation()
@@ -1523,9 +1527,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
-    @ActivityInfo.ScreenOrientation
+    @ScreenOrientation
     int getOrientation() {
-        return getOrientation(mOrientation);
+        return getOrientation(getOverrideOrientation());
     }
 
     /**
@@ -1539,7 +1543,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *                  better match.
      * @return The orientation as specified by this branch or the window hierarchy.
      */
-    int getOrientation(int candidate) {
+    @ScreenOrientation
+    int getOrientation(@ScreenOrientation int candidate) {
         mLastOrientationSource = null;
         if (!providesOrientation()) {
             return SCREEN_ORIENTATION_UNSET;
@@ -1549,16 +1554,16 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // specified; otherwise we prefer to use the orientation of its topmost child that has one
         // specified and fall back on this container's unset or unspecified value as a candidate
         // if none of the children have a better candidate for the orientation.
-        if (mOrientation != SCREEN_ORIENTATION_UNSET
-                && mOrientation != SCREEN_ORIENTATION_UNSPECIFIED) {
+        if (getOverrideOrientation() != SCREEN_ORIENTATION_UNSET
+                && getOverrideOrientation() != SCREEN_ORIENTATION_UNSPECIFIED) {
             mLastOrientationSource = this;
-            return mOrientation;
+            return getOverrideOrientation();
         }
 
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
 
-            // TODO: Maybe mOrientation should default to SCREEN_ORIENTATION_UNSET vs.
+            // TODO: Maybe mOverrideOrientation should default to SCREEN_ORIENTATION_UNSET vs.
             // SCREEN_ORIENTATION_UNSPECIFIED?
             final int orientation = wc.getOrientation(candidate == SCREEN_ORIENTATION_BEHIND
                     ? SCREEN_ORIENTATION_BEHIND : SCREEN_ORIENTATION_UNSET);
@@ -1587,6 +1592,20 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
 
         return candidate;
+    }
+
+    /**
+     * Returns orientation specified on this level of hierarchy without taking children into
+     * account, like {@link #getOrientation} does, allowing subclasses to override. See {@link
+     * ActivityRecord#getOverrideOrientation} for an example.
+     */
+    @ScreenOrientation
+    protected int getOverrideOrientation() {
+        return mOverrideOrientation;
+    }
+
+    protected void setOverrideOrientation(@ScreenOrientation int orientation) {
+        mOverrideOrientation = orientation;
     }
 
     /**
@@ -2635,7 +2654,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
         final long token = proto.start(fieldId);
         super.dumpDebug(proto, CONFIGURATION_CONTAINER, logLevel);
-        proto.write(ORIENTATION, mOrientation);
+        proto.write(ORIENTATION, mOverrideOrientation);
         proto.write(VISIBLE, isVisible);
         writeIdentifierToProto(proto, IDENTIFIER);
         if (mSurfaceAnimator.isAnimating()) {

@@ -39,6 +39,7 @@ import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.carrier.QSCarrierGroupController;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.statusbar.ActionClickLogger;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.MediaArtworkProcessor;
@@ -184,11 +185,12 @@ public interface CentralSurfacesDependenciesModule {
     @SysUISingleton
     static CommandQueue provideCommandQueue(
             Context context,
+            DisplayTracker displayTracker,
             ProtoTracer protoTracer,
             CommandRegistry registry,
             DumpHandler dumpHandler
     ) {
-        return new CommandQueue(context, protoTracer, registry, dumpHandler);
+        return new CommandQueue(context, displayTracker, protoTracer, registry, dumpHandler);
     }
 
     /**

@@ -77,6 +77,12 @@ public class CrossFadeHelper {
      */
     public static void fadeOut(View view, float fadeOutAmount, boolean remap) {
         view.animate().cancel();
+
+        // Don't fade out if already not visible.
+        if (view.getAlpha() == 0.0f) {
+            return;
+        }
+
         if (fadeOutAmount == 1.0f && view.getVisibility() != View.GONE) {
             view.setVisibility(View.INVISIBLE);
         } else if (view.getVisibility() == View.INVISIBLE) {

@@ -19,28 +19,28 @@ package com.android.wm.shell.windowdecor;
 /**
  * Callback called when receiving drag-resize or drag-move related input events.
  */
-public interface DragResizeCallback {
+public interface DragPositioningCallback {
     /**
-     * Called when a drag resize starts.
+     * Called when a drag-resize or drag-move starts.
      *
      * @param ctrlType {@link TaskPositioner.CtrlType} indicating the direction of resizing, use
      *                 {@code 0} to indicate it's a move
-     * @param x x coordinate in window decoration coordinate system where the drag resize starts
-     * @param y y coordinate in window decoration coordinate system where the drag resize starts
+     * @param x x coordinate in window decoration coordinate system where the drag starts
+     * @param y y coordinate in window decoration coordinate system where the drag starts
      */
-    void onDragResizeStart(@TaskPositioner.CtrlType int ctrlType, float x, float y);
+    void onDragPositioningStart(@TaskPositioner.CtrlType int ctrlType, float x, float y);
 
     /**
-     * Called when the pointer moves during a drag resize.
+     * Called when the pointer moves during a drag-resize or drag-move.
      * @param x x coordinate in window decoration coordinate system of the new pointer location
      * @param y y coordinate in window decoration coordinate system of the new pointer location
      */
-    void onDragResizeMove(float x, float y);
+    void onDragPositioningMove(float x, float y);
 
     /**
-     * Called when a drag resize stops.
+     * Called when a drag-resize or drag-move stops.
      * @param x x coordinate in window decoration coordinate system where the drag resize stops
      * @param y y coordinate in window decoration coordinate system where the drag resize stops
      */
-    void onDragResizeEnd(float x, float y);
+    void onDragPositioningEnd(float x, float y);
 }

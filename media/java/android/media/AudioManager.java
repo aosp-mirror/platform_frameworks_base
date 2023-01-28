@@ -1337,12 +1337,8 @@ public class AudioManager {
     public void setVolumeIndexForAttributes(@NonNull AudioAttributes attr, int index, int flags) {
         Preconditions.checkNotNull(attr, "attr must not be null");
         final IAudioService service = getService();
-        try {
-            service.setVolumeIndexForAttributes(attr, index, flags,
-                    getContext().getOpPackageName(), getContext().getAttributionTag());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        int groupId = getVolumeGroupIdForAttributes(attr);
+        setVolumeGroupVolumeIndex(groupId, index, flags);
     }
 
     /**
@@ -1361,11 +1357,8 @@ public class AudioManager {
     public int getVolumeIndexForAttributes(@NonNull AudioAttributes attr) {
         Preconditions.checkNotNull(attr, "attr must not be null");
         final IAudioService service = getService();
-        try {
-            return service.getVolumeIndexForAttributes(attr);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        int groupId = getVolumeGroupIdForAttributes(attr);
+        return getVolumeGroupVolumeIndex(groupId);
     }
 
     /**
@@ -1382,11 +1375,8 @@ public class AudioManager {
     public int getMaxVolumeIndexForAttributes(@NonNull AudioAttributes attr) {
         Preconditions.checkNotNull(attr, "attr must not be null");
         final IAudioService service = getService();
-        try {
-            return service.getMaxVolumeIndexForAttributes(attr);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        int groupId = getVolumeGroupIdForAttributes(attr);
+        return getVolumeGroupMaxVolumeIndex(groupId);
     }
 
     /**
@@ -1403,8 +1393,168 @@ public class AudioManager {
     public int getMinVolumeIndexForAttributes(@NonNull AudioAttributes attr) {
         Preconditions.checkNotNull(attr, "attr must not be null");
         final IAudioService service = getService();
+        int groupId = getVolumeGroupIdForAttributes(attr);
+        return getVolumeGroupMinVolumeIndex(groupId);
+    }
+
+    /**
+     * Returns the volume group id associated to the given {@link AudioAttributes}.
+     *
+     * @param attributes The {@link AudioAttributes} to consider.
+     * @return {@link android.media.audiopolicy.AudioVolumeGroup} id supporting the given
+     * {@link AudioAttributes} if found,
+     * {@code android.media.audiopolicy.AudioVolumeGroup.DEFAULT_VOLUME_GROUP} otherwise.
+     * @hide
+     */
+    public int getVolumeGroupIdForAttributes(@NonNull AudioAttributes attributes) {
+        Preconditions.checkNotNull(attributes, "Audio Attributes must not be null");
+        return AudioProductStrategy.getVolumeGroupIdForAudioAttributes(attributes,
+                /* fallbackOnDefault= */ false);
+    }
+
+    /**
+     * Sets the volume index for a particular group associated to given id.
+     * <p> Call first in prior {@link getVolumeGroupIdForAttributes} to retrieve the volume group
+     * id supporting the given {@link AudioAttributes}.
+     *
+     * @param groupId of the {@link android.media.audiopolicy.AudioVolumeGroup} to consider.
+     * @param index The volume index to set. See
+     *          {@link #getVolumeGroupMaxVolumeIndex(id)} for the largest valid value
+     *          {@link #getVolumeGroupMinVolumeIndex(id)} for the lowest valid value.
+     * @param flags One or more flags.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void setVolumeGroupVolumeIndex(int groupId, int index, int flags) {
+        final IAudioService service = getService();
         try {
-            return service.getMinVolumeIndexForAttributes(attr);
+            service.setVolumeGroupVolumeIndex(groupId, index, flags,
+                    getContext().getOpPackageName(), getContext().getAttributionTag());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the current volume index for a particular group associated to given id.
+     * <p> Call first in prior {@link getVolumeGroupIdForAttributes} to retrieve the volume group
+     * id supporting the given {@link AudioAttributes}.
+     *
+     * @param groupId of the {@link android.media.audiopolicy.AudioVolumeGroup} to consider.
+     * @return The current volume index for the stream.
+     * @hide
+     */
+    @IntRange(from = 0)
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public int getVolumeGroupVolumeIndex(int groupId) {
+        final IAudioService service = getService();
+        try {
+            return service.getVolumeGroupVolumeIndex(groupId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the maximum volume index for a particular group associated to given id.
+     * <p> Call first in prior {@link getVolumeGroupIdForAttributes} to retrieve the volume group
+     * id supporting the given {@link AudioAttributes}.
+     *
+     * @param groupId of the {@link android.media.audiopolicy.AudioVolumeGroup} to consider.
+     * @return The maximum valid volume index for the {@link AudioAttributes}.
+     * @hide
+     */
+    @IntRange(from = 0)
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public int getVolumeGroupMaxVolumeIndex(int groupId) {
+        final IAudioService service = getService();
+        try {
+            return service.getVolumeGroupMaxVolumeIndex(groupId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the minimum volume index for a particular group associated to given id.
+     * <p> Call first in prior {@link getVolumeGroupIdForAttributes} to retrieve the volume group
+     * id supporting the given {@link AudioAttributes}.
+     *
+     * @param groupId of the {@link android.media.audiopolicy.AudioVolumeGroup} to consider.
+     * @return The minimum valid volume index for the {@link AudioAttributes}.
+     * @hide
+     */
+    @IntRange(from = 0)
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public int getVolumeGroupMinVolumeIndex(int groupId) {
+        final IAudioService service = getService();
+        try {
+            return service.getVolumeGroupMinVolumeIndex(groupId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Adjusts the volume of a particular group associated to given id by one step in a direction.
+     * <p> If the volume group is associated to a stream type, it fallbacks on
+     * {@link AudioManager#adjustStreamVolume()} for compatibility reason.
+     * <p> Call first in prior {@link getVolumeGroupIdForAttributes} to retrieve the volume group
+     * id supporting the given {@link AudioAttributes}.
+     *
+     * @param groupId of the {@link android.media.audiopolicy.AudioVolumeGroup} to consider.
+     * @param direction The direction to adjust the volume. One of
+     *            {@link #ADJUST_LOWER}, {@link #ADJUST_RAISE}, or
+     *            {@link #ADJUST_SAME}.
+     * @param flags One or more flags.
+     * @throws SecurityException if the adjustment triggers a Do Not Disturb change and the caller
+     * is not granted notification policy access.
+     * @hide
+     */
+    public void adjustVolumeGroupVolume(int groupId, int direction, int flags) {
+        IAudioService service = getService();
+        try {
+            service.adjustVolumeGroupVolume(groupId, direction, flags,
+                    getContext().getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get last audible volume of the group associated to given id before it was muted.
+     * <p> Call first in prior {@link getVolumeGroupIdForAttributes} to retrieve the volume group
+     * id supporting the given {@link AudioAttributes}.
+     *
+     * @param groupId of the {@link android.media.audiopolicy.AudioVolumeGroup} to consider.
+     * @return current volume if not muted, volume before muted otherwise.
+     * @hide
+     */
+    @RequiresPermission("android.permission.QUERY_AUDIO_STATE")
+    @IntRange(from = 0)
+    public int getLastAudibleVolumeGroupVolume(int groupId) {
+        IAudioService service = getService();
+        try {
+            return service.getLastAudibleVolumeGroupVolume(groupId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the current mute state for a particular volume group associated to the given id.
+     * <p> Call first in prior {@link getVolumeGroupIdForAttributes} to retrieve the volume group
+     * id supporting the given {@link AudioAttributes}.
+     *
+     * @param groupId of the {@link android.media.audiopolicy.AudioVolumeGroup} to consider.
+     * @return The mute state for the given {@link android.media.audiopolicy.AudioVolumeGroup} id.
+     * @see #adjustAttributesVolume(AudioAttributes, int, int)
+     * @hide
+     */
+    public boolean isVolumeGroupMuted(int groupId) {
+        IAudioService service = getService();
+        try {
+            return service.isVolumeGroupMuted(groupId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
