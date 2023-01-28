@@ -70,6 +70,8 @@
     <string name="uninstalling_app" msgid="8866082646836981397">"درحال حذف نصب <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"حذف نصب انجام شد."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> را حذف نصب کرد"</string>
+    <!-- no translation found for uninstall_done_clone_app (5578308154544195413) -->
+    <skip />
     <string name="uninstall_failed" msgid="1847750968168364332">"حذف نصب انجام نشد."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> باموفقیت حذف نصب شد."</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"درحال حذف همسانه <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>

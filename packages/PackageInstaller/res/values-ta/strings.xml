@@ -70,6 +70,8 @@
     <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ஐ நிறுவல் நீக்குகிறது…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"நிறுவல் நீக்கம் முடிந்தது."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> நிறுவல் நீக்கப்பட்டது"</string>
+    <!-- no translation found for uninstall_done_clone_app (5578308154544195413) -->
+    <skip />
     <string name="uninstall_failed" msgid="1847750968168364332">"நிறுவல் நீக்க இயலவில்லை."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ஐ நிறுவல் நீக்குவதில் தோல்வி."</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> குளோனை நீக்குகிறது…"</string>

@@ -70,6 +70,8 @@
     <string name="uninstalling_app" msgid="8866082646836981397">"កំពុងលុប <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"បាន​បញ្ចប់​ការ​លុប។"</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"បានលុប <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
+    <!-- no translation found for uninstall_done_clone_app (5578308154544195413) -->
+    <skip />
     <string name="uninstall_failed" msgid="1847750968168364332">"មិន​អាច​លុប​បានទេ។"</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"មិនអាចលុប <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> បានទេ។"</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"កំពុងលុបក្លូន <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
