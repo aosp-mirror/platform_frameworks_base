@@ -3130,7 +3130,7 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void notifyKeyguardTrustedChanged() {
         synchronized (mGlobalLock) {
-            if (mAtmService.mKeyguardController.isLocksScreenShowing(DEFAULT_DISPLAY)) {
+            if (mAtmService.mKeyguardController.isKeyguardShowing(DEFAULT_DISPLAY)) {
                 mRoot.ensureActivitiesVisible(null, 0, false /* preserveWindows */);
             }
         }
