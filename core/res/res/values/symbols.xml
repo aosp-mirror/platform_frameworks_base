@@ -4191,6 +4191,7 @@
 
   <java-symbol type="string" name="config_factoryResetPackage" />
   <java-symbol type="array" name="config_highRefreshRateBlacklist" />
+  <java-symbol type="array" name="config_forceSlowJpegModeList" />
 
   <java-symbol type="layout" name="chooser_dialog" />
   <java-symbol type="layout" name="chooser_dialog_item" />

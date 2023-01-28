@@ -5210,6 +5210,11 @@
          of known compatibility issues. -->
     <string-array name="config_highRefreshRateBlacklist"></string-array>
 
+    <!-- The list of packages to force slowJpegMode for Apps using Camera API1 -->
+    <string-array name="config_forceSlowJpegModeList" translatable="false">
+        <!-- Add packages here -->
+    </string-array>
+
     <!-- Whether or not to hide the navigation bar when the soft keyboard is visible in order to
          create additional screen real estate outside beyond the keyboard. Note that the user needs
          to have a confirmed way to dismiss the keyboard when desired. -->
