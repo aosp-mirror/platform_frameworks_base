@@ -293,6 +293,7 @@ public class ScreenshotController {
     };
 
     private ScreenshotView mScreenshotView;
+    private MessageContainerController mMessageContainerController;
     private Bitmap mScreenBitmap;
     private SaveImageInBackgroundTask mSaveInBgTask;
     private boolean mScreenshotTakenInPortrait;
@@ -631,6 +632,7 @@ public class ScreenshotController {
         // Inflate the screenshot layout
         mScreenshotView = (ScreenshotView)
                 LayoutInflater.from(mContext).inflate(R.layout.screenshot, null);
+        mMessageContainerController = new MessageContainerController(mScreenshotView);
         mScreenshotView.addOnAttachStateChangeListener(
                 new View.OnAttachStateChangeListener() {
                     @Override
@@ -1193,7 +1195,8 @@ public class ScreenshotController {
     private void doPostAnimation(ScreenshotController.SavedImageData imageData) {
         mScreenshotView.setChipIntents(imageData);
         if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)) {
-            mWorkProfileMessageController.onScreenshotTaken(imageData.owner, mScreenshotView);
+            mWorkProfileMessageController.onScreenshotTaken(imageData.owner,
+                    mMessageContainerController);
         }
     }
 
