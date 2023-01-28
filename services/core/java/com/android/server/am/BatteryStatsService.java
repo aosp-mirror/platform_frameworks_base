@@ -441,6 +441,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
 
         @Override
+        public void noteCpuWakingNetworkPacket(Network network, long elapsedMillis, int uid) {
+            Slog.d(TAG, "Wakeup due to incoming packet on network " + network + " to uid " + uid);
+        }
+
+        @Override
         public void noteBinderCallStats(int workSourceUid, long incrementatCallCount,
                 Collection<BinderCallsStats.CallStat> callStats) {
             synchronized (BatteryStatsService.this.mLock) {
