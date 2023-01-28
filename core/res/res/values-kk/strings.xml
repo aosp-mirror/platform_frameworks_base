@@ -332,7 +332,7 @@
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Түртілген элементтерді дыбыстау функциясын қосу"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Түртілген элементтер дауыстап айтылады және экранды қимылдар арқылы зерттеуге болады."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Терілген мәтінді тексеру"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Несиелік карта нөмірі және құпия сөздер сияқты жеке деректі қоса."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Несиелік карта нөмірлері және құпия сөздер сияқты жеке деректерді қамтиды."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Дисплей ұлғайтуды басқару"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Дисплейдің масштабтау деңгейін және орналастыруды басқару."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Қимылдарды орындау"</string>
