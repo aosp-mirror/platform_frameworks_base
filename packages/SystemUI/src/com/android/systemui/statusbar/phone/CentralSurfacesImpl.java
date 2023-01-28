@@ -1306,8 +1306,13 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         // Set up the quick settings tile panel
         final View container = mNotificationShadeWindowView.findViewById(R.id.qs_frame);
         if (container != null) {
-            FragmentHostManager fragmentHostManager = FragmentHostManager.get(container);
-            ExtensionFragmentListener.attachExtensonToFragment(container, QS.TAG, R.id.qs_frame,
+            FragmentHostManager fragmentHostManager =
+                    mFragmentService.getFragmentHostManager(container);
+            ExtensionFragmentListener.attachExtensonToFragment(
+                    mFragmentService,
+                    container,
+                    QS.TAG,
+                    R.id.qs_frame,
                     mExtensionController
                             .newExtension(QS.class)
                             .withPlugin(QS.class)
@@ -1478,7 +1483,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     protected QS createDefaultQSFragment() {
-        return FragmentHostManager.get(mNotificationShadeWindowView).create(QSFragment.class);
+        return mFragmentService
+                .getFragmentHostManager(mNotificationShadeWindowView)
+                .create(QSFragment.class);
     }
 
     private void setUpPresenter() {
