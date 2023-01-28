@@ -1010,6 +1010,18 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
+    public void testSetDozingNotUnlocking_transitionToAOD_cancelKeyguardFadingAway() {
+        setDozing(true);
+        when(mKeyguardStateController.isShowing()).thenReturn(false);
+        when(mKeyguardStateController.isKeyguardFadingAway()).thenReturn(true);
+
+        mCentralSurfaces.updateScrimController();
+
+        verify(mScrimController, times(2)).transitionTo(eq(ScrimState.AOD));
+        verify(mStatusBarKeyguardViewManager).onKeyguardFadedAway();
+    }
+
+    @Test
     public void testShowKeyguardImplementation_setsState() {
         when(mLockscreenUserManager.getCurrentProfiles()).thenReturn(new SparseArray<>());
 

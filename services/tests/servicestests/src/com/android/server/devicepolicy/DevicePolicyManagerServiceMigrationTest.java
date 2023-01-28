@@ -59,7 +59,6 @@ import java.util.Set;
 @RunWith(AndroidJUnit4.class)
 public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
-    private static final String USER_TYPE_EMPTY = "";
     private static final int COPE_ADMIN1_APP_ID = 123;
     private static final int COPE_ANOTHER_ADMIN_APP_ID = 125;
     private static final int COPE_PROFILE_USER_ID = 11;
@@ -81,6 +80,7 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
         when(getServices().packageManager.hasSystemFeature(eq(PackageManager.FEATURE_DEVICE_ADMIN)))
                 .thenReturn(true);
+        when(getServices().userManagerInternal.getUserIds()).thenReturn(new int[]{0});
     }
 
     // Test setting default restrictions for managed profile.

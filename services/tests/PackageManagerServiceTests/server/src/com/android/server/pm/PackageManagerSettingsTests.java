@@ -56,7 +56,6 @@ import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
-import android.util.Log;
 import android.util.LongSparseArray;
 
 import androidx.test.InstrumentationRegistry;
@@ -108,7 +107,6 @@ import java.util.concurrent.CountDownLatch;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class PackageManagerSettingsTests {
-    private static final String TAG = "PackageManagerSettingsTests";
     private static final String PACKAGE_NAME_1 = "com.android.app1";
     private static final String PACKAGE_NAME_2 = "com.android.app2";
     private static final String PACKAGE_NAME_3 = "com.android.app3";
@@ -140,6 +138,25 @@ public class PackageManagerSettingsTests {
     public void setup() {
         // Disable binder caches in this process.
         PropertyInvalidatedCache.disableForTestMode();
+    }
+
+    @Before
+    public void createUserManagerServiceRef() throws ReflectiveOperationException {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync((Runnable) () -> {
+            try {
+                // unregister the user manager from the local service
+                LocalServices.removeServiceForTest(UserManagerInternal.class);
+                new UserManagerService(InstrumentationRegistry.getContext());
+            } catch (Exception e) {
+                e.printStackTrace();
+                fail("Could not create user manager service; " + e);
+            }
+        });
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        deleteFolder(InstrumentationRegistry.getContext().getFilesDir());
     }
 
     /** make sure our initialized KeySetManagerService metadata matches packages.xml */
@@ -1612,13 +1629,13 @@ public class PackageManagerSettingsTests {
                 UUID.randomUUID());
     }
 
-    private @NonNull List<UserInfo> createFakeUsers() {
+    static @NonNull List<UserInfo> createFakeUsers() {
         ArrayList<UserInfo> users = new ArrayList<>();
         users.add(new UserInfo(UserHandle.USER_SYSTEM, "test user", UserInfo.FLAG_INITIALIZED));
         return users;
     }
 
-    private void writeFile(File file, byte[] data) {
+    private static void writeFile(File file, byte[] data) {
         file.mkdirs();
         try {
             AtomicFile aFile = new AtomicFile(file);
@@ -1626,7 +1643,7 @@ public class PackageManagerSettingsTests {
             fos.write(data);
             aFile.finishWrite(fos);
         } catch (IOException ioe) {
-            Log.e(TAG, "Cannot write file " + file.getPath());
+            throw new RuntimeException("Cannot write file " + file.getPath(), ioe);
         }
     }
 
@@ -1640,7 +1657,7 @@ public class PackageManagerSettingsTests {
                 ).getBytes());
     }
 
-    private void writePackagesXml(String fileName) {
+    static void writePackagesXml(String fileName) {
         writeFile(new File(InstrumentationRegistry.getContext().getFilesDir(), fileName),
                 ("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<packages>"
@@ -1748,7 +1765,7 @@ public class PackageManagerSettingsTests {
                         .getBytes());
     }
 
-    private void writeStoppedPackagesXml() {
+    private static void writeStoppedPackagesXml() {
         writeFile(new File(InstrumentationRegistry.getContext().getFilesDir(), "system/packages-stopped.xml"),
                 ( "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<stopped-packages>"
@@ -1758,7 +1775,7 @@ public class PackageManagerSettingsTests {
                 .getBytes());
     }
 
-    private void writePackagesList() {
+    private static void writePackagesList() {
         writeFile(new File(InstrumentationRegistry.getContext().getFilesDir(), "system/packages.list"),
                 ( "com.android.app1 11000 0 /data/data/com.android.app1 seinfo1"
                 + "com.android.app2 11001 0 /data/data/com.android.app2 seinfo2"
@@ -1766,7 +1783,7 @@ public class PackageManagerSettingsTests {
                 .getBytes());
     }
 
-    private void deleteSystemFolder() {
+    private static void deleteSystemFolder() {
         File systemFolder = new File(InstrumentationRegistry.getContext().getFilesDir(), "system");
         deleteFolder(systemFolder);
     }
@@ -1781,7 +1798,7 @@ public class PackageManagerSettingsTests {
         folder.delete();
     }
 
-    private void writeOldFiles() {
+    static void writeOldFiles() {
         deleteSystemFolder();
         writePackagesXml("system/packages.xml");
         writeStoppedPackagesXml();
@@ -1795,25 +1812,6 @@ public class PackageManagerSettingsTests {
         writePackagesList();
     }
 
-    @Before
-    public void createUserManagerServiceRef() throws ReflectiveOperationException {
-        InstrumentationRegistry.getInstrumentation().runOnMainSync((Runnable) () -> {
-            try {
-                // unregister the user manager from the local service
-                LocalServices.removeServiceForTest(UserManagerInternal.class);
-                new UserManagerService(InstrumentationRegistry.getContext());
-            } catch (Exception e) {
-                e.printStackTrace();
-                fail("Could not create user manager service; " + e);
-            }
-        });
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        deleteFolder(InstrumentationRegistry.getTargetContext().getFilesDir());
-    }
-
     private Settings makeSettings() {
         return new Settings(InstrumentationRegistry.getContext().getFilesDir(),
                 mRuntimePermissionsPersistence, mPermissionDataProvider,
@@ -1821,7 +1819,7 @@ public class PackageManagerSettingsTests {
                 new PackageManagerTracedLock());
     }
 
-    private void verifyKeySetMetaData(Settings settings)
+    static void verifyKeySetMetaData(Settings settings)
             throws ReflectiveOperationException, IllegalAccessException {
         WatchedArrayMap<String, PackageSetting> packages = settings.mPackages;
         KeySetManagerService ksms = settings.getKeySetManagerService();

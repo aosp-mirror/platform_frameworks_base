@@ -137,6 +137,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private PipBoundsAlgorithm mPipBoundsAlgorithm;
     private PipKeepClearAlgorithmInterface mPipKeepClearAlgorithm;
     private PipBoundsState mPipBoundsState;
+    private PipSizeSpecHandler mPipSizeSpecHandler;
     private PipMotionHelper mPipMotionHelper;
     private PipTouchHandler mTouchHandler;
     private PipTransitionController mPipTransitionController;
@@ -380,6 +381,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PipKeepClearAlgorithmInterface pipKeepClearAlgorithm,
             PipBoundsState pipBoundsState,
+            PipSizeSpecHandler pipSizeSpecHandler,
             PipMotionHelper pipMotionHelper,
             PipMediaController pipMediaController,
             PhonePipMenuController phonePipMenuController,
@@ -401,11 +403,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
         return new PipController(context, shellInit, shellCommandHandler, shellController,
                 displayController, pipAnimationController, pipAppOpsListener,
-                pipBoundsAlgorithm, pipKeepClearAlgorithm, pipBoundsState, pipMotionHelper,
-                pipMediaController, phonePipMenuController, pipTaskOrganizer, pipTransitionState,
-                pipTouchHandler, pipTransitionController, windowManagerShellWrapper,
-                taskStackListener, pipParamsChangedForwarder, displayInsetsController,
-                oneHandedController, mainExecutor)
+                pipBoundsAlgorithm, pipKeepClearAlgorithm, pipBoundsState, pipSizeSpecHandler,
+                pipMotionHelper, pipMediaController, phonePipMenuController, pipTaskOrganizer,
+                pipTransitionState, pipTouchHandler, pipTransitionController,
+                windowManagerShellWrapper, taskStackListener, pipParamsChangedForwarder,
+                displayInsetsController, oneHandedController, mainExecutor)
                 .mImpl;
     }
 
@@ -419,6 +421,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PipKeepClearAlgorithmInterface pipKeepClearAlgorithm,
             @NonNull PipBoundsState pipBoundsState,
+            PipSizeSpecHandler pipSizeSpecHandler,
             PipMotionHelper pipMotionHelper,
             PipMediaController pipMediaController,
             PhonePipMenuController phonePipMenuController,
@@ -444,6 +447,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
         mPipKeepClearAlgorithm = pipKeepClearAlgorithm;
         mPipBoundsState = pipBoundsState;
+        mPipSizeSpecHandler = pipSizeSpecHandler;
         mPipMotionHelper = pipMotionHelper;
         mPipTaskOrganizer = pipTaskOrganizer;
         mPipTransitionState = pipTransitionState;
@@ -512,7 +516,10 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         // Ensure that we have the display info in case we get calls to update the bounds before the
         // listener calls back
         mPipBoundsState.setDisplayId(mContext.getDisplayId());
-        mPipBoundsState.setDisplayLayout(new DisplayLayout(mContext, mContext.getDisplay()));
+
+        DisplayLayout layout = new DisplayLayout(mContext, mContext.getDisplay());
+        mPipSizeSpecHandler.setDisplayLayout(layout);
+        mPipBoundsState.setDisplayLayout(layout);
 
         try {
             mWindowManagerShellWrapper.addPinnedStackListener(mPinnedTaskListener);
@@ -686,6 +693,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mPipBoundsAlgorithm.onConfigurationChanged(mContext);
         mTouchHandler.onConfigurationChanged();
         mPipBoundsState.onConfigurationChanged();
+        mPipSizeSpecHandler.onConfigurationChanged();
     }
 
     @Override
@@ -711,7 +719,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         Runnable updateDisplayLayout = () -> {
             final boolean fromRotation = Transitions.ENABLE_SHELL_TRANSITIONS
                     && mPipBoundsState.getDisplayLayout().rotation() != layout.rotation();
+
+            // update the internal state of objects subscribed to display changes
+            mPipSizeSpecHandler.setDisplayLayout(layout);
             mPipBoundsState.setDisplayLayout(layout);
+
             final WindowContainerTransaction wct =
                     fromRotation ? new WindowContainerTransaction() : null;
             updateMovementBounds(null /* toBounds */,
@@ -1083,6 +1095,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mPipTaskOrganizer.dump(pw, innerPrefix);
         mPipBoundsState.dump(pw, innerPrefix);
         mPipInputConsumer.dump(pw, innerPrefix);
+        mPipSizeSpecHandler.dump(pw, innerPrefix);
     }
 
     /**

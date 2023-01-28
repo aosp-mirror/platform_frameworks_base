@@ -251,6 +251,30 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testNotifyLowLightExit() {
+        final DreamOverlayStateController stateController =
+                new DreamOverlayStateController(mExecutor, true);
+
+        stateController.addCallback(mCallback);
+        mExecutor.runAllReady();
+        assertThat(stateController.isLowLightActive()).isFalse();
+
+        // Turn low light on then off to trigger the exiting callback.
+        stateController.setLowLightActive(true);
+        stateController.setLowLightActive(false);
+
+        // Callback was only called once, when
+        mExecutor.runAllReady();
+        verify(mCallback, times(1)).onExitLowLight();
+        assertThat(stateController.isLowLightActive()).isFalse();
+
+        // Set with false again, which should not cause the callback to trigger again.
+        stateController.setLowLightActive(false);
+        mExecutor.runAllReady();
+        verify(mCallback, times(1)).onExitLowLight();
+    }
+
+    @Test
     public void testNotifyEntryAnimationsFinishedChanged() {
         final DreamOverlayStateController stateController =
                 new DreamOverlayStateController(mExecutor, true);

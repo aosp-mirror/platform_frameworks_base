@@ -1328,8 +1328,9 @@ public final class DisplayManagerService extends SystemService {
 
         if (projection != null) {
             try {
-                if (!getProjectionService().isValidMediaProjection(projection)) {
-                    throw new SecurityException("Invalid media projection");
+                if (!getProjectionService().isCurrentProjection(projection)) {
+                    throw new SecurityException("Cannot create VirtualDisplay with "
+                            + "non-current MediaProjection");
                 }
                 flags = projection.applyVirtualDisplayFlags(flags);
             } catch (RemoteException e) {
@@ -2395,7 +2396,9 @@ public final class DisplayManagerService extends SystemService {
                 }
                 // fallthrough
             default:
-                Slog.w(TAG, "Display " + info + " does not support input device matching.");
+                if (DEBUG) {
+                    Slog.w(TAG, "Display " + info + " does not support input device matching.");
+                }
         }
         return Optional.empty();
     }

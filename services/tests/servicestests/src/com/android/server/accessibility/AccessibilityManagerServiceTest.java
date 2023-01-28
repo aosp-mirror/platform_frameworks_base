@@ -189,6 +189,7 @@ public class AccessibilityManagerServiceTest {
 
         mA11yms = new AccessibilityManagerService(
                 mTestableContext,
+                mHandler,
                 mMockPackageManager,
                 mMockSecurityPolicy,
                 mMockSystemActionPerformer,
@@ -371,6 +372,7 @@ public class AccessibilityManagerServiceTest {
         );
 
         mA11yms.onMagnificationTransitionEndedLocked(Display.DEFAULT_DISPLAY, true);
+        mHandler.sendAllMessages();
 
         ArgumentCaptor<Display> displayCaptor = ArgumentCaptor.forClass(Display.class);
         verify(mInputFilter, timeout(100)).refreshMagnificationMode(displayCaptor.capture());

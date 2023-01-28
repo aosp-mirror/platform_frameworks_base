@@ -209,17 +209,17 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
         private final int mTaskId;
         private final WindowContainerToken mTaskToken;
-        private final DragResizeCallback mDragResizeCallback;
+        private final DragPositioningCallback mDragPositioningCallback;
         private final DragDetector mDragDetector;
 
         private int mDragPointerId = -1;
 
         private DesktopModeTouchEventListener(
                 RunningTaskInfo taskInfo,
-                DragResizeCallback dragResizeCallback) {
+                DragPositioningCallback dragPositioningCallback) {
             mTaskId = taskInfo.taskId;
             mTaskToken = taskInfo.token;
-            mDragResizeCallback = dragResizeCallback;
+            mDragPositioningCallback = dragPositioningCallback;
             mDragDetector = new DragDetector(this);
         }
 
@@ -283,13 +283,13 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             switch (e.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN: {
                     mDragPointerId = e.getPointerId(0);
-                    mDragResizeCallback.onDragResizeStart(
+                    mDragPositioningCallback.onDragPositioningStart(
                             0 /* ctrlType */, e.getRawX(0), e.getRawY(0));
                     break;
                 }
                 case MotionEvent.ACTION_MOVE: {
                     final int dragPointerIdx = e.findPointerIndex(mDragPointerId);
-                    mDragResizeCallback.onDragResizeMove(
+                    mDragPositioningCallback.onDragPositioningMove(
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
                     break;
                 }
@@ -298,7 +298,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     final int dragPointerIdx = e.findPointerIndex(mDragPointerId);
                     final int statusBarHeight = mDisplayController
                             .getDisplayLayout(taskInfo.displayId).stableInsets().top;
-                    mDragResizeCallback.onDragResizeEnd(
+                    mDragPositioningCallback.onDragPositioningEnd(
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
                     if (e.getRawY(dragPointerIdx) <= statusBarHeight) {
                         if (DesktopModeStatus.isProto2Enabled()) {
@@ -557,7 +557,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         final DesktopModeTouchEventListener touchEventListener =
                 new DesktopModeTouchEventListener(taskInfo, taskPositioner);
         windowDecoration.setCaptionListeners(touchEventListener, touchEventListener);
-        windowDecoration.setDragResizeCallback(taskPositioner);
+        windowDecoration.setDragPositioningCallback(taskPositioner);
         windowDecoration.setDragDetector(touchEventListener.mDragDetector);
         windowDecoration.relayout(taskInfo, startT, finishT);
         incrementEventReceiverTasks(taskInfo.displayId);

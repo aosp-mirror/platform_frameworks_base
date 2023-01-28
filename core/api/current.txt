@@ -13541,9 +13541,9 @@ package android.credentials {
 
   public final class UnregisterCredentialDescriptionRequest implements android.os.Parcelable {
     ctor public UnregisterCredentialDescriptionRequest(@NonNull android.credentials.CredentialDescription);
-    ctor public UnregisterCredentialDescriptionRequest(@NonNull java.util.List<android.credentials.CredentialDescription>);
+    ctor public UnregisterCredentialDescriptionRequest(@NonNull java.util.Set<android.credentials.CredentialDescription>);
     method public int describeContents();
-    method @NonNull public java.util.List<android.credentials.CredentialDescription> getCredentialDescriptions();
+    method @NonNull public java.util.Set<android.credentials.CredentialDescription> getCredentialDescriptions();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.credentials.UnregisterCredentialDescriptionRequest> CREATOR;
   }
@@ -20341,7 +20341,7 @@ package android.location {
     method @NonNull public android.location.GnssClock getClock();
     method @NonNull public java.util.Collection<android.location.GnssAutomaticGainControl> getGnssAutomaticGainControls();
     method @NonNull public java.util.Collection<android.location.GnssMeasurement> getMeasurements();
-    method public boolean hasFullTracking();
+    method public boolean hasIsFullTracking();
     method public boolean isFullTracking();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssMeasurementsEvent> CREATOR;
@@ -20351,10 +20351,10 @@ package android.location {
     ctor public GnssMeasurementsEvent.Builder();
     ctor public GnssMeasurementsEvent.Builder(@NonNull android.location.GnssMeasurementsEvent);
     method @NonNull public android.location.GnssMeasurementsEvent build();
-    method @NonNull public android.location.GnssMeasurementsEvent.Builder clearFullTracking();
+    method @NonNull public android.location.GnssMeasurementsEvent.Builder clearIsFullTracking();
     method @NonNull public android.location.GnssMeasurementsEvent.Builder setClock(@NonNull android.location.GnssClock);
-    method @NonNull public android.location.GnssMeasurementsEvent.Builder setFullTracking(boolean);
     method @NonNull public android.location.GnssMeasurementsEvent.Builder setGnssAutomaticGainControls(@NonNull java.util.Collection<android.location.GnssAutomaticGainControl>);
+    method @NonNull public android.location.GnssMeasurementsEvent.Builder setIsFullTracking(boolean);
     method @NonNull public android.location.GnssMeasurementsEvent.Builder setMeasurements(@NonNull java.util.Collection<android.location.GnssMeasurement>);
   }
 
@@ -21369,7 +21369,8 @@ package android.media {
     field @NonNull public static final android.os.Parcelable.Creator<android.media.AudioPlaybackConfiguration> CREATOR;
   }
 
-  public final class AudioPresentation {
+  public final class AudioPresentation implements android.os.Parcelable {
+    method public int describeContents();
     method public java.util.Map<java.util.Locale,java.lang.String> getLabels();
     method public java.util.Locale getLocale();
     method public int getMasteringIndication();
@@ -21378,6 +21379,7 @@ package android.media {
     method public boolean hasAudioDescription();
     method public boolean hasDialogueEnhancement();
     method public boolean hasSpokenSubtitles();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int CONTENT_COMMENTARY = 5; // 0x5
     field public static final int CONTENT_DIALOG = 4; // 0x4
     field public static final int CONTENT_EMERGENCY = 6; // 0x6
@@ -21387,11 +21389,14 @@ package android.media {
     field public static final int CONTENT_UNKNOWN = -1; // 0xffffffff
     field public static final int CONTENT_VISUALLY_IMPAIRED = 2; // 0x2
     field public static final int CONTENT_VOICEOVER = 7; // 0x7
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.AudioPresentation> CREATOR;
     field public static final int MASTERED_FOR_3D = 3; // 0x3
     field public static final int MASTERED_FOR_HEADPHONE = 4; // 0x4
     field public static final int MASTERED_FOR_STEREO = 1; // 0x1
     field public static final int MASTERED_FOR_SURROUND = 2; // 0x2
     field public static final int MASTERING_NOT_INDICATED = 0; // 0x0
+    field public static final int PRESENTATION_ID_UNKNOWN = -1; // 0xffffffff
+    field public static final int PROGRAM_ID_UNKNOWN = -1; // 0xffffffff
   }
 
   public static final class AudioPresentation.Builder {
@@ -27024,6 +27029,7 @@ package android.media.tv {
     method @Nullable public android.media.tv.TvInputService.RecordingSession onCreateRecordingSession(@NonNull String, @NonNull String);
     method @Nullable public abstract android.media.tv.TvInputService.Session onCreateSession(@NonNull String);
     method @Nullable public android.media.tv.TvInputService.Session onCreateSession(@NonNull String, @NonNull String);
+    method @Nullable public android.media.tv.TvInputService.Session onCreateSession(@NonNull String, @NonNull String, @NonNull android.content.AttributionSource);
     field public static final int PRIORITY_HINT_USE_CASE_TYPE_BACKGROUND = 100; // 0x64
     field public static final int PRIORITY_HINT_USE_CASE_TYPE_LIVE = 400; // 0x190
     field public static final int PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK = 300; // 0x12c
@@ -27062,6 +27068,8 @@ package android.media.tv {
     method public void layoutSurface(int, int, int, int);
     method public void notifyAdResponse(@NonNull android.media.tv.AdResponse);
     method public void notifyAitInfoUpdated(@NonNull android.media.tv.AitInfo);
+    method public void notifyAudioPresentationChanged(@NonNull java.util.List<android.media.AudioPresentation>);
+    method public void notifyAudioPresentationSelected(int, int);
     method public void notifyBroadcastInfoResponse(@NonNull android.media.tv.BroadcastInfoResponse);
     method public void notifyChannelRetuned(android.net.Uri);
     method public void notifyContentAllowed();
@@ -27085,6 +27093,7 @@ package android.media.tv {
     method public void onRemoveBroadcastInfo(int);
     method public void onRequestAd(@NonNull android.media.tv.AdRequest);
     method public void onRequestBroadcastInfo(@NonNull android.media.tv.BroadcastInfoRequest);
+    method public boolean onSelectAudioPresentation(int, int);
     method public boolean onSelectTrack(int, @Nullable String);
     method public abstract void onSetCaptionEnabled(boolean);
     method public void onSetInteractiveAppNotificationEnabled(boolean);
@@ -27128,6 +27137,39 @@ package android.media.tv {
     method public void onError(int);
     method public void onRecordingStopped(android.net.Uri);
     method public void onTuned(android.net.Uri);
+  }
+
+  public final class TvRecordingInfo implements android.os.Parcelable {
+    ctor public TvRecordingInfo(@NonNull String, long, long, int, @NonNull String, @NonNull String, long, long, @NonNull android.net.Uri, @Nullable android.net.Uri, @NonNull java.util.List<android.media.tv.TvContentRating>, @Nullable android.net.Uri, long, long);
+    method public int describeContents();
+    method @NonNull public android.net.Uri getChannelUri();
+    method @NonNull public java.util.List<android.media.tv.TvContentRating> getContentRatings();
+    method @NonNull public String getDescription();
+    method @NonNull public long getEndPaddingMillis();
+    method @NonNull public String getName();
+    method @Nullable public android.net.Uri getProgramUri();
+    method @IntRange(from=0xffffffff) @NonNull public long getRecordingDurationMillis();
+    method @NonNull public String getRecordingId();
+    method @IntRange(from=0xffffffff) @NonNull public long getRecordingStartTimeMillis();
+    method @Nullable public android.net.Uri getRecordingUri();
+    method @NonNull public int getRepeatDays();
+    method @IntRange(from=0) @NonNull public long getScheduledDurationMillis();
+    method @IntRange(from=0) @NonNull public long getScheduledStartTimeMillis();
+    method @NonNull public long getStartPaddingMillis();
+    method public void setDescription(@NonNull String);
+    method public void setName(@NonNull String);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.TvRecordingInfo> CREATOR;
+    field public static final int FRIDAY = 32; // 0x20
+    field public static final int MONDAY = 2; // 0x2
+    field public static final int RECORDING_ALL = 3; // 0x3
+    field public static final int RECORDING_IN_PROGRESS = 2; // 0x2
+    field public static final int RECORDING_SCHEDULED = 1; // 0x1
+    field public static final int SATURDAY = 64; // 0x40
+    field public static final int SUNDAY = 1; // 0x1
+    field public static final int THURSDAY = 16; // 0x10
+    field public static final int TUESDAY = 4; // 0x4
+    field public static final int WEDNESDAY = 8; // 0x8
   }
 
   public final class TvTrackInfo implements android.os.Parcelable {
@@ -27181,10 +27223,13 @@ package android.media.tv {
     ctor public TvView(android.content.Context, android.util.AttributeSet);
     ctor public TvView(android.content.Context, android.util.AttributeSet, int);
     method public boolean dispatchUnhandledInputEvent(android.view.InputEvent);
+    method @NonNull public java.util.List<android.media.AudioPresentation> getAudioPresentations();
     method public String getSelectedTrack(int);
     method public java.util.List<android.media.tv.TvTrackInfo> getTracks(int);
     method public boolean onUnhandledInputEvent(android.view.InputEvent);
+    method public void overrideTvAppAttributionSource(@NonNull android.content.AttributionSource);
     method public void reset();
+    method public void selectAudioPresentation(int, int);
     method public void selectTrack(int, String);
     method public void sendAppPrivateCommand(@NonNull String, android.os.Bundle);
     method public void setCallback(@Nullable android.media.tv.TvView.TvInputCallback);
@@ -27217,6 +27262,8 @@ package android.media.tv {
   public abstract static class TvView.TvInputCallback {
     ctor public TvView.TvInputCallback();
     method public void onAitInfoUpdated(@NonNull String, @NonNull android.media.tv.AitInfo);
+    method public void onAudioPresentationSelected(@NonNull String, int, int);
+    method public void onAudioPresentationsChanged(@NonNull String, @NonNull java.util.List<android.media.AudioPresentation>);
     method public void onChannelRetuned(String, android.net.Uri);
     method public void onConnectionFailed(String);
     method public void onContentAllowed(String);
@@ -27371,8 +27418,11 @@ package android.media.tv.interactive {
     method @CallSuper public void requestStopRecording(@NonNull String);
     method @CallSuper public void requestStreamVolume();
     method @CallSuper public void requestTrackInfoList();
+    method @CallSuper public void requestTvRecordingInfo(@NonNull String);
+    method @CallSuper public void requestTvRecordingInfoList(@NonNull int);
     method @CallSuper public void sendPlaybackCommandRequest(@NonNull String, @Nullable android.os.Bundle);
     method @CallSuper public void setMediaViewEnabled(boolean);
+    method @CallSuper public void setTvRecordingInfo(@NonNull String, @NonNull android.media.tv.TvRecordingInfo);
     method @CallSuper public void setVideoBounds(@NonNull android.graphics.Rect);
   }
 
@@ -27447,6 +27497,9 @@ package android.media.tv.interactive {
     method public void onRequestStopRecording(@NonNull String, @NonNull String);
     method public void onRequestStreamVolume(@NonNull String);
     method public void onRequestTrackInfoList(@NonNull String);
+    method public void onRequestTvRecordingInfo(@NonNull String, @NonNull String);
+    method public void onRequestTvRecordingInfoList(@NonNull String, @NonNull int);
+    method public void onSetTvRecordingInfo(@NonNull String, @NonNull String, @NonNull android.media.tv.TvRecordingInfo);
     method public void onSetVideoBounds(@NonNull String, @NonNull android.graphics.Rect);
     method public void onStateChanged(@NonNull String, int, int);
     method public void onTeletextAppStateChanged(@NonNull String, int);
@@ -41586,9 +41639,7 @@ package android.telecom {
   }
 
   public final class CallEndpointException extends java.lang.RuntimeException implements android.os.Parcelable {
-    ctor public CallEndpointException(@Nullable String);
     ctor public CallEndpointException(@Nullable String, int);
-    ctor public CallEndpointException(@Nullable String, int, @Nullable Throwable);
     method public int describeContents();
     method public int getCode();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -49334,6 +49385,8 @@ package android.util {
     method public static int complexToDimensionPixelSize(int, android.util.DisplayMetrics);
     method public static float complexToFloat(int);
     method public static float complexToFraction(int, float, float);
+    method public static float convertDimensionToPixels(int, float, @NonNull android.util.DisplayMetrics);
+    method public static float convertPixelsToDimension(int, float, @NonNull android.util.DisplayMetrics);
     method public static float deriveDimension(int, float, @NonNull android.util.DisplayMetrics);
     method public int getComplexUnit();
     method public float getDimension(android.util.DisplayMetrics);
@@ -52317,6 +52370,7 @@ package android.view {
 
   public static interface View.OnLongClickListener {
     method public boolean onLongClick(android.view.View);
+    method public default boolean onLongClickUseDefaultHapticFeedback(@NonNull android.view.View);
   }
 
   public static interface View.OnScrollChangeListener {

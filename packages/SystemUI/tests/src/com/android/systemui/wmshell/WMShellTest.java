@@ -29,6 +29,7 @@ import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.notetask.NoteTaskInitializer;
+import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -84,6 +85,7 @@ public class WMShellTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        FakeDisplayTracker displayTracker = new FakeDisplayTracker(mContext);
         mWMShell = new WMShell(
                 mContext,
                 mShellInterface,
@@ -100,6 +102,7 @@ public class WMShellTest extends SysuiTestCase {
                 mProtoTracer,
                 mWakefulnessLifecycle,
                 mUserTracker,
+                displayTracker,
                 mNoteTaskInitializer,
                 mSysUiMainExecutor
         );

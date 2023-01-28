@@ -1137,8 +1137,7 @@ final class HdmiCecController {
         @Override
         public void nativeSetHpdSignalType(int signal, int portId) {
             try {
-                // TODO(b/266178786) add portId to the HAL method
-                mHdmiConnection.setHpdSignal((byte) signal);
+                mHdmiConnection.setHpdSignal((byte) signal, portId);
             } catch (ServiceSpecificException sse) {
                 HdmiLogger.error(
                         "Could not set HPD signal type for portId " + portId + " to " + signal
@@ -1153,8 +1152,7 @@ final class HdmiCecController {
         @Override
         public int nativeGetHpdSignalType(int portId) {
             try {
-                // TODO(b/266178786) add portId to the HAL method
-                return mHdmiConnection.getHpdSignal();
+                return mHdmiConnection.getHpdSignal(portId);
             } catch (RemoteException e) {
                 HdmiLogger.error(
                         "Could not get HPD signal type for portId " + portId + ". Exception: ", e);

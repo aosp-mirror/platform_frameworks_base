@@ -29,6 +29,8 @@ import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPH
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
 import android.content.Context;
@@ -39,6 +41,7 @@ import android.media.AudioFormat;
 import android.media.AudioManagerInternal;
 import android.media.permission.Identity;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
@@ -48,6 +51,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SharedMemory;
 import android.provider.DeviceConfig;
+import android.service.voice.HotwordDetectedResult;
 import android.service.voice.HotwordDetectionService;
 import android.service.voice.HotwordDetector;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
@@ -82,6 +86,26 @@ import java.util.function.Function;
 final class HotwordDetectionConnection {
     private static final String TAG = "HotwordDetectionConnection";
     static final boolean DEBUG = false;
+
+    /**
+     * For apps targeting Android API {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above,
+     * implementors of the {@link HotwordDetectionService} must not augment the phrase IDs which are
+     * supplied via {@link HotwordDetectionService
+     * #onDetect(AlwaysOnHotwordDetector.EventPayload, long, HotwordDetectionService.Callback)}.
+     *
+     * <p>The {@link HotwordDetectedResult#getHotwordPhraseId()} must match one of the phrase IDs
+     * from the {@link android.service.voice.AlwaysOnHotwordDetector
+     * .EventPayload#getKeyphraseRecognitionExtras()} list.
+     * </p>
+     *
+     * <p>This behavior change is made to ensure the {@link HotwordDetectionService} honors what
+     * it receives from the {@link android.hardware.soundtrigger.SoundTriggerModule}, and it
+     * cannot signal to the client application a phrase which was not origially detected.
+     * </p>
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public static final long ENFORCE_HOTWORD_PHRASE_ID = 215066299L;
 
     private static final String KEY_RESTART_PERIOD_IN_SECONDS = "restart_period_in_seconds";
     private static final long RESET_DEBUG_HOTWORD_LOGGING_TIMEOUT_MILLIS = 60 * 60 * 1000; // 1 hour

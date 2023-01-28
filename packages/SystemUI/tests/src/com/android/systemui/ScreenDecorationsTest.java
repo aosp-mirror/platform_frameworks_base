@@ -89,6 +89,7 @@ import com.android.systemui.decor.PrivacyDotCornerDecorProviderImpl;
 import com.android.systemui.decor.PrivacyDotDecorProviderFactory;
 import com.android.systemui.decor.RoundedCornerResDelegate;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.events.PrivacyDotViewController;
 import com.android.systemui.tuner.TunerService;
@@ -117,6 +118,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     private DisplayManager mDisplayManager;
     private SecureSettings mSecureSettings;
     private final FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
+    private final FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
     private FakeThreadFactory mThreadFactory;
     private ArrayList<DecorProvider> mPrivacyDecorProviders;
     private ArrayList<DecorProvider> mFaceScanningProviders;
@@ -220,7 +222,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 mExecutor));
 
         mScreenDecorations = spy(new ScreenDecorations(mContext, mExecutor, mSecureSettings,
-                mTunerService, mUserTracker, mDotViewController, mThreadFactory,
+                mTunerService, mUserTracker, mDisplayTracker, mDotViewController, mThreadFactory,
                 mPrivacyDotDecorProviderFactory, mFaceScanningProviderFactory) {
             @Override
             public void start() {

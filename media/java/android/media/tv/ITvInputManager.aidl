@@ -16,9 +16,11 @@
 
 package android.media.tv;
 
+import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Rect;
+import android.media.AudioPresentation;
 import android.media.PlaybackParams;
 import android.media.tv.AdBuffer;
 import android.media.tv.AdRequest;
@@ -63,7 +65,7 @@ interface ITvInputManager {
     void addBlockedRating(in String rating, int userId);
     void removeBlockedRating(in String rating, int userId);
 
-    void createSession(in ITvInputClient client, in String inputId, boolean isRecordingSession,
+    void createSession(in ITvInputClient client, in String inputId, in AttributionSource tvAppAttributionSource, boolean isRecordingSession,
             int seq, int userId);
     void releaseSession(in IBinder sessionToken, int userId);
     int getClientPid(in String sessionId);
@@ -77,6 +79,8 @@ interface ITvInputManager {
     void tune(in IBinder sessionToken, in Uri channelUri, in Bundle params, int userId);
     void setCaptionEnabled(in IBinder sessionToken, boolean enabled, int userId);
     void selectTrack(in IBinder sessionToken, int type, in String trackId, int userId);
+    void selectAudioPresentation(in IBinder sessionToken, int presentationId, int programId,
+            int userId);
 
     void setInteractiveAppNotificationEnabled(in IBinder sessionToken, boolean enabled, int userId);
 

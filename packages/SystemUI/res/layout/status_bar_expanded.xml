@@ -141,7 +141,7 @@
             android:id="@+id/lock_icon_bg"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/fingerprint_bg"
+            android:src="@drawable/fingerprint_bg"
             android:visibility="invisible"/>
 
         <ImageView

@@ -303,6 +303,7 @@ package android {
     field public static final String REVIEW_ACCESSIBILITY_SERVICES = "android.permission.REVIEW_ACCESSIBILITY_SERVICES";
     field public static final String REVOKE_RUNTIME_PERMISSIONS = "android.permission.REVOKE_RUNTIME_PERMISSIONS";
     field public static final String ROTATE_SURFACE_FLINGER = "android.permission.ROTATE_SURFACE_FLINGER";
+    field public static final String SATELLITE_COMMUNICATION = "android.permission.SATELLITE_COMMUNICATION";
     field public static final String SCHEDULE_PRIORITIZED_ALARM = "android.permission.SCHEDULE_PRIORITIZED_ALARM";
     field @Deprecated public static final String SCORE_NETWORKS = "android.permission.SCORE_NETWORKS";
     field public static final String SECURE_ELEMENT_PRIVILEGED_OPERATION = "android.permission.SECURE_ELEMENT_PRIVILEGED_OPERATION";
@@ -5807,14 +5808,19 @@ package android.hardware.usb {
   public final class DisplayPortAltModeInfo implements android.os.Parcelable {
     method public int describeContents();
     method public int getCableStatus();
+    method public int getLinkTrainingStatus();
     method public int getNumberOfLanes();
     method public int getPartnerSinkStatus();
+    method public boolean isHotPlugDetectActive();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.usb.DisplayPortAltModeInfo> CREATOR;
     field public static final int DISPLAYPORT_ALT_MODE_STATUS_CAPABLE = 2; // 0x2
     field public static final int DISPLAYPORT_ALT_MODE_STATUS_ENABLED = 3; // 0x3
     field public static final int DISPLAYPORT_ALT_MODE_STATUS_NOT_CAPABLE = 1; // 0x1
     field public static final int DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN = 0; // 0x0
+    field public static final int LINK_TRAINING_STATUS_FAILURE = 2; // 0x2
+    field public static final int LINK_TRAINING_STATUS_SUCCESS = 1; // 0x1
+    field public static final int LINK_TRAINING_STATUS_UNKNOWN = 0; // 0x0
   }
 
   public class UsbDeviceConnection {

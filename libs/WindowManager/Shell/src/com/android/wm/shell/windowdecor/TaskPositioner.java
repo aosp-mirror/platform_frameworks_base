@@ -23,7 +23,7 @@ import android.window.WindowContainerTransaction;
 
 import com.android.wm.shell.ShellTaskOrganizer;
 
-class TaskPositioner implements DragResizeCallback {
+class TaskPositioner implements DragPositioningCallback {
 
     @IntDef({CTRL_TYPE_UNDEFINED, CTRL_TYPE_LEFT, CTRL_TYPE_RIGHT, CTRL_TYPE_TOP, CTRL_TYPE_BOTTOM})
     @interface CtrlType {}
@@ -38,8 +38,8 @@ class TaskPositioner implements DragResizeCallback {
     private final WindowDecoration mWindowDecoration;
 
     private final Rect mTaskBoundsAtDragStart = new Rect();
-    private final PointF mResizeStartPoint = new PointF();
-    private final Rect mResizeTaskBounds = new Rect();
+    private final PointF mRepositionStartPoint = new PointF();
+    private final Rect mRepositionTaskBounds = new Rect();
     private boolean mHasMoved = false;
 
     private int mCtrlType;
@@ -57,7 +57,7 @@ class TaskPositioner implements DragResizeCallback {
     }
 
     @Override
-    public void onDragResizeStart(int ctrlType, float x, float y) {
+    public void onDragPositioningStart(int ctrlType, float x, float y) {
         mHasMoved = false;
 
         mDragStartListener.onDragStart(mWindowDecoration.mTaskInfo.taskId);
@@ -65,11 +65,11 @@ class TaskPositioner implements DragResizeCallback {
 
         mTaskBoundsAtDragStart.set(
                 mWindowDecoration.mTaskInfo.configuration.windowConfiguration.getBounds());
-        mResizeStartPoint.set(x, y);
+        mRepositionStartPoint.set(x, y);
     }
 
     @Override
-    public void onDragResizeMove(float x, float y) {
+    public void onDragPositioningMove(float x, float y) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (changeBounds(wct, x, y)) {
             // The task is being resized, send the |dragResizing| hint to core with the first
@@ -84,7 +84,7 @@ class TaskPositioner implements DragResizeCallback {
     }
 
     @Override
-    public void onDragResizeEnd(float x, float y) {
+    public void onDragPositioningEnd(float x, float y) {
         // |mHasMoved| being false means there is no real change to the task bounds in WM core, so
         // we don't need a WCT to finish it.
         if (mHasMoved) {
@@ -96,42 +96,44 @@ class TaskPositioner implements DragResizeCallback {
 
         mCtrlType = CTRL_TYPE_UNDEFINED;
         mTaskBoundsAtDragStart.setEmpty();
-        mResizeStartPoint.set(0, 0);
+        mRepositionStartPoint.set(0, 0);
         mHasMoved = false;
     }
 
     private boolean changeBounds(WindowContainerTransaction wct, float x, float y) {
-        // |mResizeTaskBounds| is the bounds last reported if |mHasMoved| is true. If it's not true,
-        // we can compare it against |mTaskBoundsAtDragStart|.
-        final int oldLeft = mHasMoved ? mResizeTaskBounds.left : mTaskBoundsAtDragStart.left;
-        final int oldTop = mHasMoved ? mResizeTaskBounds.top : mTaskBoundsAtDragStart.top;
-        final int oldRight = mHasMoved ? mResizeTaskBounds.right : mTaskBoundsAtDragStart.right;
-        final int oldBottom = mHasMoved ? mResizeTaskBounds.bottom : mTaskBoundsAtDragStart.bottom;
+        // |mRepositionTaskBounds| is the bounds last reported if |mHasMoved| is true. If it's not
+        // true, we can compare it against |mTaskBoundsAtDragStart|.
+        final int oldLeft = mHasMoved ? mRepositionTaskBounds.left : mTaskBoundsAtDragStart.left;
+        final int oldTop = mHasMoved ? mRepositionTaskBounds.top : mTaskBoundsAtDragStart.top;
+        final int oldRight = mHasMoved ? mRepositionTaskBounds.right : mTaskBoundsAtDragStart.right;
+        final int oldBottom =
+                mHasMoved ? mRepositionTaskBounds.bottom : mTaskBoundsAtDragStart.bottom;
 
-        final float deltaX = x - mResizeStartPoint.x;
-        final float deltaY = y - mResizeStartPoint.y;
-        mResizeTaskBounds.set(mTaskBoundsAtDragStart);
+        final float deltaX = x - mRepositionStartPoint.x;
+        final float deltaY = y - mRepositionStartPoint.y;
+        mRepositionTaskBounds.set(mTaskBoundsAtDragStart);
         if ((mCtrlType & CTRL_TYPE_LEFT) != 0) {
-            mResizeTaskBounds.left += deltaX;
+            mRepositionTaskBounds.left += deltaX;
         }
         if ((mCtrlType & CTRL_TYPE_RIGHT) != 0) {
-            mResizeTaskBounds.right += deltaX;
+            mRepositionTaskBounds.right += deltaX;
         }
         if ((mCtrlType & CTRL_TYPE_TOP) != 0) {
-            mResizeTaskBounds.top += deltaY;
+            mRepositionTaskBounds.top += deltaY;
         }
         if ((mCtrlType & CTRL_TYPE_BOTTOM) != 0) {
-            mResizeTaskBounds.bottom += deltaY;
+            mRepositionTaskBounds.bottom += deltaY;
         }
         if (mCtrlType == CTRL_TYPE_UNDEFINED) {
-            mResizeTaskBounds.offset((int) deltaX, (int) deltaY);
+            mRepositionTaskBounds.offset((int) deltaX, (int) deltaY);
         }
 
-        if (oldLeft == mResizeTaskBounds.left && oldTop == mResizeTaskBounds.top
-                && oldRight == mResizeTaskBounds.right && oldBottom == mResizeTaskBounds.bottom) {
+        if (oldLeft == mRepositionTaskBounds.left && oldTop == mRepositionTaskBounds.top
+                && oldRight == mRepositionTaskBounds.right
+                && oldBottom == mRepositionTaskBounds.bottom) {
             return false;
         }
-        wct.setBounds(mWindowDecoration.mTaskInfo.token, mResizeTaskBounds);
+        wct.setBounds(mWindowDecoration.mTaskInfo.token, mRepositionTaskBounds);
         return true;
     }
 

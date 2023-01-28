@@ -16,8 +16,6 @@
 
 package com.android.wm.shell;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -30,27 +28,20 @@ import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.os.Binder;
-import android.util.CloseGuard;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.window.WindowContainerToken;
-import android.window.WindowContainerTransaction;
 
-import com.android.wm.shell.common.SyncTransactionQueue;
-
-import java.io.PrintWriter;
 import java.util.concurrent.Executor;
 
 /**
- * View that can display a task.
+ * A {@link SurfaceView} that can display a task. This is a concrete implementation for
+ * {@link TaskViewBase} which interacts {@link TaskViewTaskController}.
  */
 public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
-        ShellTaskOrganizer.TaskListener, ViewTreeObserver.OnComputeInternalInsetsListener {
-
+        ViewTreeObserver.OnComputeInternalInsetsListener, TaskViewBase {
     /** Callback for listening task state. */
     public interface Listener {
         /**
@@ -75,65 +66,33 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
         default void onBackPressedOnTaskRoot(int taskId) {}
     }
 
-    private final CloseGuard mGuard = new CloseGuard();
-
-    private final ShellTaskOrganizer mTaskOrganizer;
-    private final Executor mShellExecutor;
-    private final SyncTransactionQueue mSyncQueue;
-    private final TaskViewTransitions mTaskViewTransitions;
-
-    protected ActivityManager.RunningTaskInfo mTaskInfo;
-    private WindowContainerToken mTaskToken;
-    private SurfaceControl mTaskLeash;
-    private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
-    private boolean mSurfaceCreated;
-    private boolean mIsInitialized;
-    private boolean mNotifiedForInitialized;
-    private Listener mListener;
-    private Executor mListenerExecutor;
-    private Region mObscuredTouchRegion;
-
     private final Rect mTmpRect = new Rect();
     private final Rect mTmpRootRect = new Rect();
     private final int[] mTmpLocation = new int[2];
+    private final TaskViewTaskController mTaskViewTaskController;
+    private Region mObscuredTouchRegion;
 
-    public TaskView(Context context, ShellTaskOrganizer organizer,
-            TaskViewTransitions taskViewTransitions, SyncTransactionQueue syncQueue) {
+    public TaskView(Context context, TaskViewTaskController taskViewTaskController) {
         super(context, null, 0, 0, true /* disableBackgroundLayer */);
-
-        mTaskOrganizer = organizer;
-        mShellExecutor = organizer.getExecutor();
-        mSyncQueue = syncQueue;
-        mTaskViewTransitions = taskViewTransitions;
-        if (mTaskViewTransitions != null) {
-            mTaskViewTransitions.addTaskView(this);
-        }
+        mTaskViewTaskController = taskViewTaskController;
+        // TODO(b/266736992): Think about a better way to set the TaskViewBase on the
+        //  TaskViewTaskController and vice-versa
+        mTaskViewTaskController.setTaskViewBase(this);
         getHolder().addCallback(this);
-        mGuard.open("release");
     }
 
     /**
-     * @return {@code True} when the TaskView's surface has been created, {@code False} otherwise.
+     * Launch a new activity.
+     *
+     * @param pendingIntent Intent used to launch an activity.
+     * @param fillInIntent Additional Intent data, see {@link Intent#fillIn Intent.fillIn()}
+     * @param options options for the activity.
+     * @param launchBounds the bounds (window size and position) that the activity should be
+     *                     launched in, in pixels and in screen coordinates.
      */
-    public boolean isInitialized() {
-        return mIsInitialized;
-    }
-
-    /** Until all users are converted, we may have mixed-use (eg. Car). */
-    private boolean isUsingShellTransitions() {
-        return mTaskViewTransitions != null && mTaskViewTransitions.isEnabled();
-    }
-
-    /**
-     * Only one listener may be set on the view, throws an exception otherwise.
-     */
-    public void setListener(@NonNull Executor executor, Listener listener) {
-        if (mListener != null) {
-            throw new IllegalStateException(
-                    "Trying to set a listener when one has already been set");
-        }
-        mListener = listener;
-        mListenerExecutor = executor;
+    public void startActivity(@NonNull PendingIntent pendingIntent, @Nullable Intent fillInIntent,
+            @NonNull ActivityOptions options, @Nullable Rect launchBounds) {
+        mTaskViewTaskController.startActivity(pendingIntent, fillInIntent, options, launchBounds);
     }
 
     /**
@@ -148,61 +107,47 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
      */
     public void startShortcutActivity(@NonNull ShortcutInfo shortcut,
             @NonNull ActivityOptions options, @Nullable Rect launchBounds) {
-        prepareActivityOptions(options, launchBounds);
-        LauncherApps service = mContext.getSystemService(LauncherApps.class);
-        if (isUsingShellTransitions()) {
-            mShellExecutor.execute(() -> {
-                final WindowContainerTransaction wct = new WindowContainerTransaction();
-                wct.startShortcut(mContext.getPackageName(), shortcut, options.toBundle());
-                mTaskViewTransitions.startTaskView(wct, this);
-            });
-            return;
+        mTaskViewTaskController.startShortcutActivity(shortcut, options, launchBounds);
+    }
+
+    @Override
+    public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
+        onLocationChanged();
+        if (taskInfo.taskDescription != null) {
+            setResizeBackgroundColor(taskInfo.taskDescription.getBackgroundColor());
         }
-        try {
-            service.startShortcut(shortcut, null /* sourceBounds */, options.toBundle());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+    }
+
+    @Override
+    public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
+        if (taskInfo.taskDescription != null) {
+            setResizeBackgroundColor(taskInfo.taskDescription.getBackgroundColor());
         }
     }
 
     /**
-     * Launch a new activity.
-     *
-     * @param pendingIntent Intent used to launch an activity.
-     * @param fillInIntent Additional Intent data, see {@link Intent#fillIn Intent.fillIn()}
-     * @param options options for the activity.
-     * @param launchBounds the bounds (window size and position) that the activity should be
-     *                     launched in, in pixels and in screen coordinates.
+     * @return {@code True} when the TaskView's surface has been created, {@code False} otherwise.
      */
-    public void startActivity(@NonNull PendingIntent pendingIntent, @Nullable Intent fillInIntent,
-            @NonNull ActivityOptions options, @Nullable Rect launchBounds) {
-        prepareActivityOptions(options, launchBounds);
-        if (isUsingShellTransitions()) {
-            mShellExecutor.execute(() -> {
-                WindowContainerTransaction wct = new WindowContainerTransaction();
-                wct.sendPendingIntent(pendingIntent, fillInIntent, options.toBundle());
-                mTaskViewTransitions.startTaskView(wct, this);
-            });
-            return;
-        }
-        try {
-            pendingIntent.send(mContext, 0 /* code */, fillInIntent,
-                    null /* onFinished */, null /* handler */, null /* requiredPermission */,
-                    options.toBundle());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public boolean isInitialized() {
+        return mTaskViewTaskController.isInitialized();
     }
 
-    private void prepareActivityOptions(ActivityOptions options, Rect launchBounds) {
-        final Binder launchCookie = new Binder();
-        mShellExecutor.execute(() -> {
-            mTaskOrganizer.setPendingLaunchCookieListener(launchCookie, this);
-        });
-        options.setLaunchBounds(launchBounds);
-        options.setLaunchCookie(launchCookie);
-        options.setLaunchWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
-        options.setRemoveWithTaskOrganizer(true);
+    @Override
+    public Rect getCurrentBoundsOnScreen() {
+        getBoundsOnScreen(mTmpRect);
+        return mTmpRect;
+    }
+
+    @Override
+    public void setResizeBgColor(SurfaceControl.Transaction t, int bgColor) {
+        setResizeBackgroundColor(t, bgColor);
+    }
+
+    /**
+     * Only one listener may be set on the view, throws an exception otherwise.
+     */
+    public void setListener(@NonNull Executor executor, TaskView.Listener listener) {
+        mTaskViewTaskController.setListener(executor, listener);
     }
 
     /**
@@ -227,251 +172,38 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
      * Call when view position or size has changed. Do not call when animating.
      */
     public void onLocationChanged() {
-        if (mTaskToken == null) {
-            return;
-        }
-        // Sync Transactions can't operate simultaneously with shell transition collection.
-        // The transition animation (upon showing) will sync the location itself.
-        if (isUsingShellTransitions() && mTaskViewTransitions.hasPending()) return;
-
-        WindowContainerTransaction wct = new WindowContainerTransaction();
-        updateWindowBounds(wct);
-        mSyncQueue.queue(wct);
-    }
-
-    private void updateWindowBounds(WindowContainerTransaction wct) {
         getBoundsOnScreen(mTmpRect);
-        wct.setBounds(mTaskToken, mTmpRect);
+        mTaskViewTaskController.onLocationChanged(mTmpRect);
     }
 
     /**
      * Release this container if it is initialized.
      */
     public void release() {
-        performRelease();
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            if (mGuard != null) {
-                mGuard.warnIfOpen();
-                performRelease();
-            }
-        } finally {
-            super.finalize();
-        }
-    }
-
-    private void performRelease() {
         getHolder().removeCallback(this);
-        if (mTaskViewTransitions != null) {
-            mTaskViewTransitions.removeTaskView(this);
-        }
-        mShellExecutor.execute(() -> {
-            mTaskOrganizer.removeListener(this);
-            resetTaskInfo();
-        });
-        mGuard.close();
-        mIsInitialized = false;
-        notifyReleased();
-    }
-
-    /** Called when the {@link TaskView} has been released. */
-    protected void notifyReleased() {
-        if (mListener != null && mNotifiedForInitialized) {
-            mListenerExecutor.execute(() -> {
-                mListener.onReleased();
-            });
-            mNotifiedForInitialized = false;
-        }
-    }
-
-    private void resetTaskInfo() {
-        mTaskInfo = null;
-        mTaskToken = null;
-        mTaskLeash = null;
-    }
-
-    private void updateTaskVisibility() {
-        WindowContainerTransaction wct = new WindowContainerTransaction();
-        wct.setHidden(mTaskToken, !mSurfaceCreated /* hidden */);
-        mSyncQueue.queue(wct);
-        if (mListener == null) {
-            return;
-        }
-        int taskId = mTaskInfo.taskId;
-        mSyncQueue.runInSync((t) -> {
-            mListenerExecutor.execute(() -> {
-                mListener.onTaskVisibilityChanged(taskId, mSurfaceCreated);
-            });
-        });
-    }
-
-    @Override
-    public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo,
-            SurfaceControl leash) {
-        if (isUsingShellTransitions()) {
-            // Everything else handled by enter transition.
-            return;
-        }
-        mTaskInfo = taskInfo;
-        mTaskToken = taskInfo.token;
-        mTaskLeash = leash;
-
-        if (mSurfaceCreated) {
-            // Surface is ready, so just reparent the task to this surface control
-            mTransaction.reparent(mTaskLeash, getSurfaceControl())
-                    .show(mTaskLeash)
-                    .apply();
-        } else {
-            // The surface has already been destroyed before the task has appeared,
-            // so go ahead and hide the task entirely
-            updateTaskVisibility();
-        }
-        mTaskOrganizer.setInterceptBackPressedOnTaskRoot(mTaskToken, true);
-        onLocationChanged();
-        if (taskInfo.taskDescription != null) {
-            int backgroundColor = taskInfo.taskDescription.getBackgroundColor();
-            mSyncQueue.runInSync((t) -> {
-                setResizeBackgroundColor(t, backgroundColor);
-            });
-        }
-
-        if (mListener != null) {
-            final int taskId = taskInfo.taskId;
-            final ComponentName baseActivity = taskInfo.baseActivity;
-            mListenerExecutor.execute(() -> {
-                mListener.onTaskCreated(taskId, baseActivity);
-            });
-        }
-    }
-
-    @Override
-    public void onTaskVanished(ActivityManager.RunningTaskInfo taskInfo) {
-        // Unlike Appeared, we can't yet guarantee that vanish will happen within a transition that
-        // we know about -- so leave clean-up here even if shell transitions are enabled.
-        if (mTaskToken == null || !mTaskToken.equals(taskInfo.token)) return;
-
-        if (mListener != null) {
-            final int taskId = taskInfo.taskId;
-            mListenerExecutor.execute(() -> {
-                mListener.onTaskRemovalStarted(taskId);
-            });
-        }
-        mTaskOrganizer.setInterceptBackPressedOnTaskRoot(mTaskToken, false);
-
-        // Unparent the task when this surface is destroyed
-        mTransaction.reparent(mTaskLeash, null).apply();
-        resetTaskInfo();
-    }
-
-    @Override
-    public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
-        if (taskInfo.taskDescription != null) {
-            setResizeBackgroundColor(taskInfo.taskDescription.getBackgroundColor());
-        }
-    }
-
-    @Override
-    public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo) {
-        if (mTaskToken == null || !mTaskToken.equals(taskInfo.token)) return;
-        if (mListener != null) {
-            final int taskId = taskInfo.taskId;
-            mListenerExecutor.execute(() -> {
-                mListener.onBackPressedOnTaskRoot(taskId);
-            });
-        }
-    }
-
-    @Override
-    public void attachChildSurfaceToTask(int taskId, SurfaceControl.Builder b) {
-        b.setParent(findTaskSurface(taskId));
-    }
-
-    @Override
-    public void reparentChildSurfaceToTask(int taskId, SurfaceControl sc,
-            SurfaceControl.Transaction t) {
-        t.reparent(sc, findTaskSurface(taskId));
-    }
-
-    private SurfaceControl findTaskSurface(int taskId) {
-        if (mTaskInfo == null || mTaskLeash == null || mTaskInfo.taskId != taskId) {
-            throw new IllegalArgumentException("There is no surface for taskId=" + taskId);
-        }
-        return mTaskLeash;
-    }
-
-    @Override
-    public void dump(@androidx.annotation.NonNull PrintWriter pw, String prefix) {
-        final String innerPrefix = prefix + "  ";
-        final String childPrefix = innerPrefix + "  ";
-        pw.println(prefix + this);
+        mTaskViewTaskController.release();
     }
 
     @Override
     public String toString() {
-        return "TaskView" + ":" + (mTaskInfo != null ? mTaskInfo.taskId : "null");
+        return mTaskViewTaskController.toString();
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        mSurfaceCreated = true;
-        mIsInitialized = true;
-        notifyInitialized();
-        mShellExecutor.execute(() -> {
-            if (mTaskToken == null) {
-                // Nothing to update, task is not yet available
-                return;
-            }
-            if (isUsingShellTransitions()) {
-                mTaskViewTransitions.setTaskViewVisible(this, true /* visible */);
-                return;
-            }
-            // Reparent the task when this surface is created
-            mTransaction.reparent(mTaskLeash, getSurfaceControl())
-                    .show(mTaskLeash)
-                    .apply();
-            updateTaskVisibility();
-        });
-    }
-
-    /** Called when the {@link TaskView} is initialized. */
-    protected void notifyInitialized() {
-        if (mListener != null && !mNotifiedForInitialized) {
-            mNotifiedForInitialized = true;
-            mListenerExecutor.execute(() -> {
-                mListener.onInitialized();
-            });
-        }
+        mTaskViewTaskController.surfaceCreated(getSurfaceControl());
     }
 
     @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        if (mTaskToken == null) {
-            return;
-        }
-        onLocationChanged();
+    public void surfaceChanged(@androidx.annotation.NonNull SurfaceHolder holder, int format,
+            int width, int height) {
+        getBoundsOnScreen(mTmpRect);
+        mTaskViewTaskController.surfaceChanged(mTmpRect);
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        mSurfaceCreated = false;
-        mShellExecutor.execute(() -> {
-            if (mTaskToken == null) {
-                // Nothing to update, task is not yet available
-                return;
-            }
-
-            if (isUsingShellTransitions()) {
-                mTaskViewTransitions.setTaskViewVisible(this, false /* visible */);
-                return;
-            }
-
-            // Unparent the task when this surface is destroyed
-            mTransaction.reparent(mTaskLeash, null).apply();
-            updateTaskVisibility();
-        });
+        mTaskViewTaskController.surfaceDestroyed();
     }
 
     @Override
@@ -513,89 +245,6 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
     /** Returns the task info for the task in the TaskView. */
     @Nullable
     public ActivityManager.RunningTaskInfo getTaskInfo() {
-        return mTaskInfo;
-    }
-
-    void prepareHideAnimation(@NonNull SurfaceControl.Transaction finishTransaction) {
-        if (mTaskToken == null) {
-            // Nothing to update, task is not yet available
-            return;
-        }
-
-        finishTransaction.reparent(mTaskLeash, null).apply();
-
-        if (mListener != null) {
-            final int taskId = mTaskInfo.taskId;
-            mListener.onTaskVisibilityChanged(taskId, mSurfaceCreated /* visible */);
-        }
-    }
-
-    /**
-     * Called when the associated Task closes. If the TaskView is just being hidden, prepareHide
-     * is used instead.
-     */
-    void prepareCloseAnimation() {
-        if (mTaskToken != null) {
-            if (mListener != null) {
-                final int taskId = mTaskInfo.taskId;
-                mListenerExecutor.execute(() -> {
-                    mListener.onTaskRemovalStarted(taskId);
-                });
-            }
-            mTaskOrganizer.setInterceptBackPressedOnTaskRoot(mTaskToken, false);
-        }
-        resetTaskInfo();
-    }
-
-    void prepareOpenAnimation(final boolean newTask,
-            @NonNull SurfaceControl.Transaction startTransaction,
-            @NonNull SurfaceControl.Transaction finishTransaction,
-            ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash,
-            WindowContainerTransaction wct) {
-        mTaskInfo = taskInfo;
-        mTaskToken = mTaskInfo.token;
-        mTaskLeash = leash;
-        if (mSurfaceCreated) {
-            // Surface is ready, so just reparent the task to this surface control
-            startTransaction.reparent(mTaskLeash, getSurfaceControl())
-                    .show(mTaskLeash)
-                    .apply();
-            // Also reparent on finishTransaction since the finishTransaction will reparent back
-            // to its "original" parent by default.
-            finishTransaction.reparent(mTaskLeash, getSurfaceControl())
-                    .setPosition(mTaskLeash, 0, 0)
-                    .apply();
-
-            // TODO: determine if this is really necessary or not
-            updateWindowBounds(wct);
-        } else {
-            // The surface has already been destroyed before the task has appeared,
-            // so go ahead and hide the task entirely
-            wct.setHidden(mTaskToken, true /* hidden */);
-            // listener callback is below
-        }
-        if (newTask) {
-            mTaskOrganizer.setInterceptBackPressedOnTaskRoot(mTaskToken, true /* intercept */);
-        }
-
-        if (mTaskInfo.taskDescription != null) {
-            int backgroundColor = mTaskInfo.taskDescription.getBackgroundColor();
-            setResizeBackgroundColor(startTransaction, backgroundColor);
-        }
-
-        if (mListener != null) {
-            final int taskId = mTaskInfo.taskId;
-            final ComponentName baseActivity = mTaskInfo.baseActivity;
-
-            mListenerExecutor.execute(() -> {
-                if (newTask) {
-                    mListener.onTaskCreated(taskId, baseActivity);
-                }
-                // Even if newTask, send a visibilityChange if the surface was destroyed.
-                if (!newTask || !mSurfaceCreated) {
-                    mListener.onTaskVisibilityChanged(taskId, mSurfaceCreated /* visible */);
-                }
-            });
-        }
+        return mTaskViewTaskController.getTaskInfo();
     }
 }
