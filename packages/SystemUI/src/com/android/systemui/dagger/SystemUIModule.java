@@ -217,6 +217,10 @@ public abstract class SystemUIModule {
     abstract BcSmartspaceConfigPlugin optionalBcSmartspaceConfigPlugin();
 
     @BindsOptionalOf
+    @Named(SmartspaceModule.DATE_SMARTSPACE_DATA_PLUGIN)
+    abstract BcSmartspaceDataPlugin optionalDateSmartspaceConfigPlugin();
+
+    @BindsOptionalOf
     @Named(SmartspaceModule.WEATHER_SMARTSPACE_DATA_PLUGIN)
     abstract BcSmartspaceDataPlugin optionalWeatherSmartspaceConfigPlugin();
 
