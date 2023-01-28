@@ -84,6 +84,11 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Mag-double tap sa labas ng app para baguhin ang posisyon nito"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"OK"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"I-expand para sa higit pang impormasyon."</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"I-restart para sa mas magandang hitsura?"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Puwede mong i-restart ang app para maging mas maganda ang itsura nito sa iyong screen, pero posibleng mawala ang pag-usad mo o anumang hindi na-save na pagbabago"</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Kanselahin"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"I-restart"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Huwag nang ipakita ulit"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"I-maximize"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"I-minimize"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Isara"</string>
