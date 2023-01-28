@@ -477,7 +477,7 @@ public class UserLifecycleTests {
     /** Tests switching to an already-created already-running non-owner background user, with wait
      * times between iterations */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
-    public void switchUser_running_realistic() throws RemoteException {
+    public void switchUser_running_initializedUser() throws RemoteException {
         final int startUser = ActivityManager.getCurrentUser();
         final int testUser = initializeNewUserAndSwitchBack(/* stopNewUser */ false);
         while (mRunner.keepRunning()) {
