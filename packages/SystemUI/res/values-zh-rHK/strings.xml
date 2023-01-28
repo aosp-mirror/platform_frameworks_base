@@ -543,8 +543,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"自動"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"無音效或震動"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"無音效或震動，並在對話部分的較低位置顯示"</string>
-    <string name="notification_channel_summary_default" msgid="777294388712200605">"根據裝置的設定響鈴或震動"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"根據裝置的設定響鈴或震動。根據預設，來自「<xliff:g id="APP_NAME">%1$s</xliff:g>」的對話會以對話框形式顯示。"</string>
+    <string name="notification_channel_summary_default" msgid="777294388712200605">"可能會根據裝置設定發出鈴聲或震動"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"可能會根據裝置設定發出鈴聲或震動。根據預設，來自 <xliff:g id="APP_NAME">%1$s</xliff:g> 的對話會以對話氣泡顯示。"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"由系統判斷是否要讓此通知發出音效或震動"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;狀態：&lt;/b&gt;已提升為預設"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;狀態：&lt;/b&gt;已降低為靜音"</string>
@@ -832,6 +832,10 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"選擇要新增控制項的應用程式"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{已新增 # 個控制項。}other{已新增 # 個控制項。}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"已移除"</string>
+    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
+    <skip />
+    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
+    <skip />
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"已加入收藏"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"已加入至收藏位置 <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"已取消收藏"</string>
@@ -898,6 +902,8 @@
     <string name="controls_error_failed" msgid="960228639198558525">"發生錯誤，請重試"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"新增控制項"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"編輯控制項"</string>
+    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
+    <skip />
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"新增輸出裝置"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"群組"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"已選取 1 部裝置"</string>
@@ -913,7 +919,7 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"喇叭和螢幕"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"建議的裝置"</string>
-    <string name="media_output_status_require_premium" msgid="5691200962588753380">"必須有付費帳戶"</string>
+    <string name="media_output_status_require_premium" msgid="5691200962588753380">"需要付費帳戶"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"廣播運作方式"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"廣播"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"附近有兼容藍牙裝置的人可收聽您正在廣播的媒體內容"</string>
@@ -1059,8 +1065,10 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"將觸控筆連接充電器"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"觸控筆電量不足"</string>
     <string name="video_camera" msgid="7654002575156149298">"攝影機"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"無法透過這個資料夾撥打電話"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"貴公司政策僅允許透過工作資料夾撥打電話"</string>
-    <string name="call_from_work_profile_action" msgid="2937701298133010724">"切換至工作資料夾"</string>
+    <string name="call_from_work_profile_title" msgid="6991157106804289643">"無法透過此設定檔撥打電話"</string>
+    <string name="call_from_work_profile_text" msgid="3458704745640229638">"您的公司政策只允許透過工作設定檔撥打電話"</string>
+    <string name="call_from_work_profile_action" msgid="2937701298133010724">"切換至工作設定檔"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"關閉"</string>
+    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
+    <skip />
 </resources>
