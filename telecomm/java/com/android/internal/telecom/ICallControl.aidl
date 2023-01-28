@@ -28,7 +28,6 @@ oneway interface ICallControl {
     void setActive(String callId, in ResultReceiver callback);
     void setInactive(String callId, in ResultReceiver callback);
     void disconnect(String callId, in DisconnectCause disconnectCause, in ResultReceiver callback);
-    void rejectCall(String callId, in ResultReceiver callback);
     void startCallStreaming(String callId, in ResultReceiver callback);
     void requestCallEndpointChange(in CallEndpoint callEndpoint, in ResultReceiver callback);
 }
