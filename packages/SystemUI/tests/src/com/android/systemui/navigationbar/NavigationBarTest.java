@@ -87,6 +87,7 @@ import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationShadeWindowView;
@@ -495,7 +496,8 @@ public class NavigationBarTest extends SysuiTestCase {
                 Optional.of(mock(BackAnimation.class)),
                 mUserContextProvider,
                 mWakefulnessLifecycle,
-                mTaskStackChangeListeners));
+                mTaskStackChangeListeners,
+                new FakeDisplayTracker(mContext)));
     }
 
     private void processAllMessages() {

@@ -58,6 +58,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import android.app.AlarmManager;
 import android.app.Instrumentation;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyResourcesManager;
@@ -183,6 +184,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private ScreenLifecycle mScreenLifecycle;
     @Mock
     private AuthController mAuthController;
+    @Mock
+    private AlarmManager mAlarmManager;
     @Captor
     private ArgumentCaptor<DockManager.AlignmentStateListener> mAlignmentListener;
     @Captor
@@ -277,7 +280,9 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 mAuthController, mLockPatternUtils, mScreenLifecycle,
                 mKeyguardBypassController, mAccessibilityManager,
                 mFaceHelpMessageDeferral, mock(KeyguardLogger.class),
-                mAlternateBouncerInteractor);
+                mAlternateBouncerInteractor,
+                mAlarmManager
+        );
         mController.init();
         mController.setIndicationArea(mIndicationArea);
         verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());

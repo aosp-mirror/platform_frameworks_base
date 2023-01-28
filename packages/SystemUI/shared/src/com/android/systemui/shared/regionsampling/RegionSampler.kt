@@ -114,25 +114,7 @@ constructor(
 
     /** Dump region sampler */
     fun dump(pw: PrintWriter) {
-        pw.println("[RegionSampler]")
-        pw.println("regionSamplingEnabled: $regionSamplingEnabled")
-        pw.println("regionDarkness: $regionDarkness")
-        pw.println("lightForegroundColor: ${Integer.toHexString(lightForegroundColor)}")
-        pw.println("darkForegroundColor:${Integer.toHexString(darkForegroundColor)}")
-        pw.println("passed-in sampledView: $sampledView")
-        pw.println("calculated samplingBounds: $samplingBounds")
-        pw.println(
-            "sampledView width: ${sampledView?.width}, sampledView height: ${sampledView?.height}"
-        )
-        pw.println("screen width: ${displaySize.x}, screen height: ${displaySize.y}")
-        pw.println(
-            "sampledRegionWithOffset: ${convertBounds(calculateSampledRegion(sampledView!!))}"
-        )
-        pw.println(
-            "initialSampling for lockscreen: " +
-                "${wallpaperManager?.getWallpaperColors(WallpaperManager.FLAG_LOCK)}"
-        )
-        // TODO(b/265969235): add initialSampling dump for HS smartspace
+        regionSampler?.dump(pw)
     }
 
     fun calculateSampledRegion(sampledView: View): RectF {

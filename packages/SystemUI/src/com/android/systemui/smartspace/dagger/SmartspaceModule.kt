@@ -18,7 +18,6 @@ package com.android.systemui.smartspace.dagger
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.smartspace.SmartspacePrecondition
 import com.android.systemui.smartspace.SmartspaceTargetFilter
-import com.android.systemui.smartspace.filters.LockscreenAndDreamTargetFilter
 import com.android.systemui.smartspace.preconditions.LockscreenPrecondition
 import dagger.Binds
 import dagger.BindsOptionalOf
@@ -35,11 +34,6 @@ abstract class SmartspaceModule {
         const val DREAM_SMARTSPACE_DATA_PLUGIN = "dreams_smartspace_data_plugin"
 
         /**
-         * The lockscreen smartspace target filter.
-         */
-        const val LOCKSCREEN_SMARTSPACE_TARGET_FILTER = "lockscreen_smartspace_target_filter"
-
-        /**
          * The dream smartspace target filter.
          */
         const val DREAM_SMARTSPACE_TARGET_FILTER = "dream_smartspace_target_filter"
@@ -48,6 +42,11 @@ abstract class SmartspaceModule {
          * The precondition for dream smartspace
          */
         const val DREAM_SMARTSPACE_PRECONDITION = "dream_smartspace_precondition"
+
+        /**
+         * The BcSmartspaceDataPlugin for the standalone weather.
+         */
+        const val WEATHER_SMARTSPACE_DATA_PLUGIN = "weather_smartspace_data_plugin"
     }
 
     @BindsOptionalOf
@@ -57,12 +56,6 @@ abstract class SmartspaceModule {
     @BindsOptionalOf
     @Named(DREAM_SMARTSPACE_DATA_PLUGIN)
     abstract fun optionalDreamsBcSmartspaceDataPlugin(): BcSmartspaceDataPlugin?
-
-    @Binds
-    @Named(LOCKSCREEN_SMARTSPACE_TARGET_FILTER)
-    abstract fun provideLockscreenSmartspaceTargetFilter(
-        filter: LockscreenAndDreamTargetFilter?
-    ): SmartspaceTargetFilter?
 
     @Binds
     @Named(DREAM_SMARTSPACE_PRECONDITION)
