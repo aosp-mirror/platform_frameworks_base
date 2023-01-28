@@ -337,7 +337,7 @@
     <!-- Used for both start and bottom margin of the preview, relative to the action container -->
     <dimen name="overlay_preview_container_margin">8dp</dimen>
     <dimen name="overlay_action_container_margin_horizontal">8dp</dimen>
-    <dimen name="overlay_action_container_margin_bottom">4dp</dimen>
+    <dimen name="overlay_action_container_margin_bottom">6dp</dimen>
     <dimen name="overlay_bg_protection_height">242dp</dimen>
     <dimen name="overlay_action_container_corner_radius">18dp</dimen>
     <dimen name="overlay_action_container_padding_vertical">4dp</dimen>
