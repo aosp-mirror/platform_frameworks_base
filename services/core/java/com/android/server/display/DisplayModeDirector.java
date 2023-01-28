@@ -373,8 +373,12 @@ public class DisplayModeDirector {
         }
     }
 
-    private void disableRenderRateSwitching(VoteSummary summary) {
+    private void disableRenderRateSwitching(VoteSummary summary, float fps) {
         summary.minRenderFrameRate = summary.maxRenderFrameRate;
+
+        if (!isRenderRateAchievable(fps, summary)) {
+            summary.minRenderFrameRate = summary.maxRenderFrameRate = fps;
+        }
 
         if (mLoggingEnabled) {
             Slog.i(TAG, "Disabled render rate switching on summary: " + summary);
@@ -540,10 +544,10 @@ public class DisplayModeDirector {
                 disableModeSwitching(primarySummary, fps);
                 if (modeSwitchingDisabled) {
                     disableModeSwitching(appRequestSummary, fps);
-                    disableRenderRateSwitching(primarySummary);
+                    disableRenderRateSwitching(primarySummary, fps);
 
                     if (mModeSwitchingType == DisplayManager.SWITCHING_TYPE_NONE) {
-                        disableRenderRateSwitching(appRequestSummary);
+                        disableRenderRateSwitching(appRequestSummary, fps);
                     }
                 }
             }
@@ -568,6 +572,22 @@ public class DisplayModeDirector {
                                     appRequestSummary.minRenderFrameRate,
                                     appRequestSummary.maxRenderFrameRate)));
         }
+    }
+
+    private boolean isRenderRateAchievable(float physicalRefreshRate, VoteSummary summary) {
+        // Check whether the render frame rate range is achievable by the mode's physical
+        // refresh rate, meaning that if a divisor of the physical refresh rate is in range
+        // of the render frame rate.
+        // For example for the render frame rate [50, 70]:
+        //   - 120Hz is in range as we can render at 60hz by skipping every other frame,
+        //     which is within the render rate range
+        //   - 90hz is not in range as none of the even divisors (i.e. 90, 45, 30)
+        //     fall within the acceptable render range.
+        final int divisor =
+                (int) Math.ceil((physicalRefreshRate / summary.maxRenderFrameRate)
+                        - FLOAT_TOLERANCE);
+        float adjustedPhysicalRefreshRate = physicalRefreshRate / divisor;
+        return adjustedPhysicalRefreshRate >= (summary.minRenderFrameRate - FLOAT_TOLERANCE);
     }
 
     private ArrayList<Display.Mode> filterModes(Display.Mode[] supportedModes,
@@ -627,22 +647,9 @@ public class DisplayModeDirector {
                 }
             }
 
-            // Check whether the render frame rate range is achievable by the mode's physical
-            // refresh rate, meaning that if a divisor of the physical refresh rate is in range
-            // of the render frame rate.
-            // For example for the render frame rate [50, 70]:
-            //   - 120Hz is in range as we can render at 60hz by skipping every other frame,
-            //     which is within the render rate range
-            //   - 90hz is not in range as none of the even divisors (i.e. 90, 45, 30)
-            //     fall within the acceptable render range.
-            final int divisor =
-                    (int) Math.ceil((physicalRefreshRate / summary.maxRenderFrameRate)
-                            - FLOAT_TOLERANCE);
-            float adjustedPhysicalRefreshRate = physicalRefreshRate / divisor;
-            if (adjustedPhysicalRefreshRate < (summary.minRenderFrameRate - FLOAT_TOLERANCE)) {
+            if (!isRenderRateAchievable(physicalRefreshRate, summary)) {
                 if (mLoggingEnabled) {
                     Slog.w(TAG, "Discarding mode " + mode.getModeId()
-                            + " with adjusted refresh rate: " + adjustedPhysicalRefreshRate
                             + ", outside frame rate bounds"
                             + ": minRenderFrameRate=" + summary.minRenderFrameRate
                             + ", maxRenderFrameRate=" + summary.maxRenderFrameRate
