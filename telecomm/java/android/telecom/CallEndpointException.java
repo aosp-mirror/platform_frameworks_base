@@ -92,24 +92,11 @@ public final class CallEndpointException extends RuntimeException implements Par
     public @interface CallEndpointErrorCode {
     }
 
-    public CallEndpointException(@Nullable String message) {
-        super(getMessage(message, ERROR_UNSPECIFIED));
-        mMessage = message;
-    }
-
     public CallEndpointException(@Nullable String message, @CallEndpointErrorCode int code) {
         super(getMessage(message, code));
         mCode = code;
         mMessage = message;
     }
-
-    public CallEndpointException(@Nullable String message, @CallEndpointErrorCode int code,
-            @Nullable Throwable cause) {
-        super(getMessage(message, code), cause);
-        mCode = code;
-        mMessage = message;
-    }
-
 
     public @CallEndpointErrorCode int getCode() {
         return mCode;
