@@ -493,7 +493,11 @@ public class InputManagerService extends IInputManager.Stub
         // Add ourselves to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
 
-        registerPointerSpeedSettingObserver();
+        registerMousePointerSpeedSettingObserver();
+        registerTouchpadPointerSpeedSettingObserver();
+        registerTouchpadNaturalScrollingEnabledObserver();
+        registerTouchpadTapToClickEnabledObserver();
+        registerTouchpadRightClickZoneEnabledObserver();
         registerShowTouchesSettingObserver();
         registerAccessibilityLargePointerSettingObserver();
         registerLongPressTimeoutObserver();
@@ -502,14 +506,22 @@ public class InputManagerService extends IInputManager.Stub
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                updatePointerSpeedFromSettings();
+                updateMousePointerSpeedFromSettings();
+                updateTouchpadPointerSpeedFromSettings();
+                updateTouchpadNaturalScrollingEnabledFromSettings();
+                updateTouchpadTapToClickEnabledFromSettings();
+                updateTouchpadRightClickZoneEnabledFromSettings();
                 updateShowTouchesFromSettings();
                 updateAccessibilityLargePointerFromSettings();
                 updateDeepPressStatusFromSettings("user switched");
             }
         }, new IntentFilter(Intent.ACTION_USER_SWITCHED), null, mHandler);
 
-        updatePointerSpeedFromSettings();
+        updateMousePointerSpeedFromSettings();
+        updateTouchpadPointerSpeedFromSettings();
+        updateTouchpadNaturalScrollingEnabledFromSettings();
+        updateTouchpadTapToClickEnabledFromSettings();
+        updateTouchpadRightClickZoneEnabledFromSettings();
         updateShowTouchesFromSettings();
         updateAccessibilityLargePointerFromSettings();
         updateDeepPressStatusFromSettings("just booted");
@@ -1337,8 +1349,8 @@ public class InputManagerService extends IInputManager.Stub
         setPointerSpeedUnchecked(speed);
     }
 
-    private void updatePointerSpeedFromSettings() {
-        int speed = getPointerSpeedSetting();
+    private void updateMousePointerSpeedFromSettings() {
+        int speed = getMousePointerSpeedSetting();
         setPointerSpeedUnchecked(speed);
     }
 
@@ -1358,18 +1370,18 @@ public class InputManagerService extends IInputManager.Stub
                 properties -> properties.pointerIconVisible = visible);
     }
 
-    private void registerPointerSpeedSettingObserver() {
+    private void registerMousePointerSpeedSettingObserver() {
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.POINTER_SPEED), true,
                 new ContentObserver(mHandler) {
                     @Override
                     public void onChange(boolean selfChange) {
-                        updatePointerSpeedFromSettings();
+                        updateMousePointerSpeedFromSettings();
                     }
                 }, UserHandle.USER_ALL);
     }
 
-    private int getPointerSpeedSetting() {
+    private int getMousePointerSpeedSetting() {
         int speed = InputManager.DEFAULT_POINTER_SPEED;
         try {
             speed = Settings.System.getIntForUser(mContext.getContentResolver(),
@@ -1377,6 +1389,77 @@ public class InputManagerService extends IInputManager.Stub
         } catch (SettingNotFoundException ignored) {
         }
         return speed;
+    }
+
+    private void registerTouchpadPointerSpeedSettingObserver() {
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.TOUCHPAD_POINTER_SPEED), true,
+                new ContentObserver(mHandler) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        updateTouchpadPointerSpeedFromSettings();
+                    }
+                }, UserHandle.USER_ALL);
+    }
+
+    private void updateTouchpadPointerSpeedFromSettings() {
+        int speed = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.TOUCHPAD_POINTER_SPEED, InputManager.DEFAULT_POINTER_SPEED,
+                UserHandle.USER_CURRENT);
+        speed = Math.min(Math.max(speed, InputManager.MIN_POINTER_SPEED),
+                InputManager.MAX_POINTER_SPEED);
+        mNative.setTouchpadPointerSpeed(speed);
+    }
+
+    private void registerTouchpadNaturalScrollingEnabledObserver() {
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.TOUCHPAD_NATURAL_SCROLLING), true,
+                new ContentObserver(mHandler) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        updateTouchpadNaturalScrollingEnabledFromSettings();
+                    }
+                }, UserHandle.USER_ALL);
+    }
+
+    private void updateTouchpadNaturalScrollingEnabledFromSettings() {
+        int setting = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.TOUCHPAD_NATURAL_SCROLLING, 0, UserHandle.USER_CURRENT);
+        mNative.setTouchpadNaturalScrollingEnabled(setting != 0);
+    }
+
+    private void registerTouchpadTapToClickEnabledObserver() {
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.TOUCHPAD_TAP_TO_CLICK), true,
+                new ContentObserver(mHandler) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        updateTouchpadTapToClickEnabledFromSettings();
+                    }
+                }, UserHandle.USER_ALL);
+    }
+
+    private void updateTouchpadTapToClickEnabledFromSettings() {
+        int setting = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.TOUCHPAD_TAP_TO_CLICK, 0, UserHandle.USER_CURRENT);
+        mNative.setTouchpadTapToClickEnabled(setting != 0);
+    }
+
+    private void registerTouchpadRightClickZoneEnabledObserver() {
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE), true,
+                new ContentObserver(mHandler) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        updateTouchpadRightClickZoneEnabledFromSettings();
+                    }
+                }, UserHandle.USER_ALL);
+    }
+
+    private void updateTouchpadRightClickZoneEnabledFromSettings() {
+        int setting = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE, 0, UserHandle.USER_CURRENT);
+        mNative.setTouchpadRightClickZoneEnabled(setting != 0);
     }
 
     private void updateShowTouchesFromSettings() {
