@@ -122,7 +122,8 @@ public final class BackgroundWindowManager extends WindowlessWindowManager {
             return false;
         }
 
-        mViewHost = new SurfaceControlViewHost(mContext, mContext.getDisplay(), this);
+        mViewHost = new SurfaceControlViewHost(mContext, mContext.getDisplay(), this,
+                "BackgroundWindowManager");
         mBackgroundView = (View) LayoutInflater.from(mContext)
                 .inflate(R.layout.background_panel, null /* root */);
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(

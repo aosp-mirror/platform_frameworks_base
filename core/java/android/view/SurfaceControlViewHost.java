@@ -32,6 +32,8 @@ import android.view.accessibility.IAccessibilityEmbeddedConnection;
 import android.window.ISurfaceSyncGroup;
 import android.window.WindowTokenClient;
 
+import dalvik.system.CloseGuard;
+
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -51,6 +53,7 @@ import java.util.concurrent.TimeoutException;
 public class SurfaceControlViewHost {
     private final static String TAG = "SurfaceControlViewHost";
     private final ViewRootImpl mViewRoot;
+    private final CloseGuard mCloseGuard = CloseGuard.get();
     private WindowlessWindowManager mWm;
 
     private SurfaceControl mSurfaceControl;
@@ -292,9 +295,10 @@ public class SurfaceControlViewHost {
 
     /** @hide */
     public SurfaceControlViewHost(@NonNull Context c, @NonNull Display d,
-            @NonNull WindowlessWindowManager wwm) {
+            @NonNull WindowlessWindowManager wwm, @NonNull String callsite) {
         mWm = wwm;
         mViewRoot = new ViewRootImpl(c, d, mWm, new WindowlessWindowLayout());
+        mCloseGuard.openWithCallSite("release", callsite);
         addConfigCallback(c, d);
 
         WindowManagerGlobal.getInstance().addWindowlessRoot(mViewRoot);
@@ -316,15 +320,35 @@ public class SurfaceControlViewHost {
      */
     public SurfaceControlViewHost(@NonNull Context context, @NonNull Display display,
             @Nullable IBinder hostToken) {
+        this(context, display, hostToken, "untracked");
+    }
+
+    /**
+     * Construct a new SurfaceControlViewHost. The root Surface will be
+     * allocated internally and is accessible via getSurfacePackage().
+     *
+     * The {@param hostToken} parameter, primarily used for ANR reporting,
+     * must be obtained from whomever will be hosting the embedded hierarchy.
+     * It's accessible from {@link SurfaceView#getHostToken}.
+     *
+     * @param context The Context object for your activity or application.
+     * @param display The Display the hierarchy will be placed on.
+     * @param hostToken The host token, as discussed above.
+     * @param callsite The call site, used for tracking leakage of the host
+     * @hide
+     */
+    public SurfaceControlViewHost(@NonNull Context context, @NonNull Display display,
+            @Nullable IBinder hostToken, @NonNull String callsite) {
         mSurfaceControl = new SurfaceControl.Builder()
                 .setContainerLayer()
                 .setName("SurfaceControlViewHost")
-                .setCallsite("SurfaceControlViewHost")
+                .setCallsite("SurfaceControlViewHost[" + callsite + "]")
                 .build();
         mWm = new WindowlessWindowManager(context.getResources().getConfiguration(),
                 mSurfaceControl, hostToken);
 
         mViewRoot = new ViewRootImpl(context, display, mWm, new WindowlessWindowLayout());
+        mCloseGuard.openWithCallSite("release", callsite);
         addConfigCallback(context, display);
 
         WindowManagerGlobal.getInstance().addWindowlessRoot(mViewRoot);
@@ -350,7 +374,9 @@ public class SurfaceControlViewHost {
         if (mReleased) {
             return;
         }
-        Log.e(TAG, "SurfaceControlViewHost finalized without being released: " + this);
+        if (mCloseGuard != null) {
+            mCloseGuard.warnIfOpen();
+        }
         // We aren't on the UI thread here so we need to pass false to doDie
         mViewRoot.die(false /* immediate */);
         WindowManagerGlobal.getInstance().removeWindowlessRoot(mViewRoot);
@@ -466,6 +492,7 @@ public class SurfaceControlViewHost {
         mViewRoot.die(true /* immediate */);
         WindowManagerGlobal.getInstance().removeWindowlessRoot(mViewRoot);
         mReleased = true;
+        mCloseGuard.close();
     }
 
     /**

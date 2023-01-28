@@ -363,7 +363,8 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
     /** Creates a {@link SurfaceControlViewHost} for this window manager. */
     @VisibleForTesting(visibility = PRIVATE)
     public SurfaceControlViewHost createSurfaceViewHost() {
-        return new SurfaceControlViewHost(mContext, mContext.getDisplay(), this);
+        return new SurfaceControlViewHost(mContext, mContext.getDisplay(), this,
+                getClass().getSimpleName());
     }
 
     /** Gets the layout params. */

@@ -275,7 +275,7 @@ final class RemoteSelectionToolbar {
                     mHostInputToken, mTransferTouchListener);
             contentHolder.addView(mContentContainer);
             mSurfaceControlViewHost = new SurfaceControlViewHost(mContext, mContext.getDisplay(),
-                    mHostInputToken);
+                    mHostInputToken, "RemoteSelectionToolbar");
             mSurfaceControlViewHost.setView(contentHolder, mPopupWidth, mPopupHeight);
         }
         if (mSurfacePackage == null) {
