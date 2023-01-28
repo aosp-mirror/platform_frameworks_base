@@ -4781,12 +4781,14 @@ public class Editor {
                 }
 
                 if (includeVisibleLineBounds) {
-                    Rect visibleRect = new Rect();
-                    if (mTextView.getLocalVisibleRect(visibleRect)) {
+                    final Rect visibleRect = new Rect();
+                    if (mTextView.getContentVisibleRect(visibleRect)) {
+                        // Subtract the viewportToContentVerticalOffset to convert the view
+                        // coordinates to layout coordinates.
                         final float visibleTop =
-                                visibleRect.top + viewportToContentVerticalOffset;
+                                visibleRect.top - viewportToContentVerticalOffset;
                         final float visibleBottom =
-                                visibleRect.bottom + viewportToContentVerticalOffset;
+                                visibleRect.bottom - viewportToContentVerticalOffset;
                         final int firstLine =
                                 layout.getLineForVertical((int) Math.floor(visibleTop));
                         final int lastLine =
@@ -4799,7 +4801,7 @@ public class Editor {
                                     + viewportToContentVerticalOffset;
                             final float right = layout.getLineRight(line)
                                     + viewportToContentHorizontalOffset;
-                            final float bottom = layout.getLineBottom(line)
+                            final float bottom = layout.getLineBottom(line, false)
                                     + viewportToContentVerticalOffset;
                             builder.addVisibleLineBounds(left, top, right, bottom);
                         }
