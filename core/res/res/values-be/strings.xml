@@ -460,6 +460,14 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Праграма ў час яе выкарыстання будзе мець доступ да даных датчыкаў цела, такіх як пульс, тэмпература і працэнт утрымання ў крыві кіслароду."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Доступ да даных датчыкаў цела, такіх як пульс, у фонавым рэжыме"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Праграма ў час яе працы ў фонавым рэжыме будзе мець доступ да даных датчыкаў цела, такіх як пульс, тэмпература і працэнт утрымання ў крыві кіслароду."</string>
+    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
+    <skip />
+    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Чытаць падзеі календара і падрабязныя звесткі"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Гэта праграма можа чытаць усе падзеі календара, захаваныя на вашым планшэце, і абагульваць ці захоўваць даныя календара."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Гэта праграма можа счытваць усе падзеі календара, захаваныя на прыладзе Android TV, і абагульваць ці захоўваць яго даныя."</string>

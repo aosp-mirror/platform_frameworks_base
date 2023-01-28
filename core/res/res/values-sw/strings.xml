@@ -458,6 +458,14 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Hurushusu programu ifikie data ya vitambuzi shughuli za mwili, kama vile mapigo ya moyo, halijoto na asilimia ya oksijeni kwenye damu wakati programu inatumika."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Fikia data ya vitambuzi shughuli za mwili, kama vile mapigo ya moyo, wakati programu inatumika chinichini"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Hurushusu programu ifikie data ya vitambuzi shughuli za mwili, kama vile mapigo ya moyo, halijoto na asilimia ya oksijeni kwenye damu wakati programu inatumika chinichini."</string>
+    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
+    <skip />
+    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Soma matukio na maelezo ya kalenda"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Programu hii inaweza kusoma matukio yote ya kalenda yaliyohifadhiwa kwenye kompyuta yako kibao na kushiriki au kuhifadhi data yako ya kalenda."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Programu hii inaweza kusoma matukio yote ya kalenda yaliyohifadhiwa kwenye kifaa chako cha Android TV na kushiriki au kuhifadhi data ya kalenda yako."</string>

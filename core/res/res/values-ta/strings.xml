@@ -458,6 +458,14 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ஆப்ஸ் பயன்பாட்டில் இருக்கும்போது இதயத் துடிப்பு, வெப்பநிலை, ரத்த ஆக்ஸிஜன் சதவீதம் போன்ற உடல் சென்சார் தரவை அணுக ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"பின்னணியில் இயங்கும்போது இதயத் துடிப்பு போன்ற உடல் சென்சார் தரவை அணுகுதல்"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ஆப்ஸ் பின்னணியில் இயங்கும்போது இதயத் துடிப்பு, வெப்பநிலை, ரத்த ஆக்ஸிஜன் சதவீதம் போன்ற உடல் சென்சார் தரவை அணுக ஆப்ஸை அனுமதிக்கிறது."</string>
+    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
+    <skip />
+    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6408654259475396200">"கேலெண்டர் நிகழ்வுகளையும் விவரங்களையும் படிக்கலாம்"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"இந்த ஆப்ஸ் உங்கள் டேப்லெட்டில் சேமிக்கப்பட்டுள்ள கேலெண்டர் நிகழ்வுகள் அனைத்தையும் படிக்கலாம், உங்கள் கேலெண்டர் தரவைப் பகிரலாம் அல்லது சேமிக்கலாம்."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"உங்கள் Android TVயில் சேமித்துள்ள அனைத்துக் கேலெண்டர் நிகழ்வுகளையும் இந்த ஆப்ஸால் தெரிந்துகொள்ள முடியும். அத்துடன் உங்களின் கேலெண்டர் தரவைப் பகிரவும் சேமிக்கவும் முடியும்."</string>

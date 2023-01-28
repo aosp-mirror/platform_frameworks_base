@@ -458,6 +458,14 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"အက်ပ်သုံးစဉ် နှလုံးခုန်နှုန်း၊ အပူချိန်၊ သွေးတွင်း အောက်ဆီဂျင်ရာခိုင်နှုန်းကဲ့သို့ ခန္ဓာကိုယ်အာရုံခံစနစ် ဒေတာများသုံးရန် အက်ပ်ကိုခွင့်ပြုသည်။"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"နောက်ခံတွင်ဖွင့်စဉ် နှလုံးခုန်နှုန်းကဲ့သို့ ခန္ဓာကိုယ်အာရုံခံစနစ် ဒေတာ သုံးခြင်း"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"နောက်ခံတွင်အက်ပ်ဖွင့်စဉ် နှလုံးခုန်နှုန်း၊ အပူချိန်၊ သွေးတွင်း အောက်ဆီဂျင်ရာခိုင်နှုန်းကဲ့သို့ ခန္ဓာကိုယ်အာရုံခံစနစ် ဒေတာများသုံးရန် အက်ပ်ကိုခွင့်ပြုသည်။"</string>
+    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
+    <skip />
+    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6408654259475396200">"ပြက္ခဒိန်ဖြစ်ရပ်များနှင့် အသေးစိတ်အချက်အလက်များကို ဖတ်ခြင်း"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ဤအက်ပ်သည် သင့်တက်ဘလက်တွင် သိမ်းဆည်းထားသည့် ပြက္ခဒိန်ဖြစ်ရပ်များကို ကြည့်ရှုနိုင်ပြီး သင့်ပြက္ခဒိန်ဒေတာများကို မျှဝေခြင်းနှင့် သိမ်းဆည်းခြင်းတို့ ပြုလုပ်နိုင်ပါသည်။"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ဤအက်ပ်သည် သင့် Android TV စက်ပစ္စည်းတွင် သိမ်းဆည်းထားသည့် ပြက္ခဒိန်ဖြစ်ရပ်များအားလုံးကို ဖတ်နိုင်ပြီး သင်၏ ပြက္ခဒိန်ဒေတာများကို မျှဝေခြင်း သို့မဟုတ် သိမ်းဆည်းခြင်းတို့ ပြုလုပ်နိုင်သည်။"</string>

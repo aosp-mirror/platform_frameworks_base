@@ -458,6 +458,14 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"এপ্‌টো ব্যৱহাৰ কৰি থকাৰ সময়ত এপ্‌টোক হৃদস্পন্দনৰ হাৰ, উষ্ণতা আৰু তেজত অক্সিজেনৰ শতকৰা হাৰৰ দৰে শৰীৰৰ ছেন্সৰৰ ডেটা এক্সেছ কৰিবলৈ অনুমতি দিয়ে।"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"নেপথ্যত থকাৰ সময়ত হৃদস্পন্দনৰ হাৰৰ দৰে শৰীৰৰ ছেন্সৰৰ ডেটা এক্সেছ কৰক"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"এপ্‌টো নেপথ্যত থকাৰ সময়ত এপ্‌টোক হৃদস্পন্দনৰ হাৰ, উষ্ণতা আৰু তেজত অক্সিজেনৰ শতকৰা হাৰৰ দৰে শৰীৰৰ ছেন্সৰৰ ডেটা এক্সেছ কৰিবলৈ অনুমতি দিয়ে।"</string>
+    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
+    <skip />
+    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6408654259475396200">"কেলেণ্ডাৰৰ কাৰ্যক্ৰম আৰু সবিশেষ পঢ়িব পাৰে"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"এই এপ্‌টোৱে আপোনাৰ টেবলেটটোত সংৰক্ষিত আটাইবোৰ কেলেণ্ডাৰ কাৰ্যক্ৰম পঢ়িব পাৰে আৰু আপোনাৰ কেলেণ্ডাৰৰ ডেটা শ্বেয়াৰ বা ছেভ কৰিব পাৰে।"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"এই এপ্‌টোৱে আপোনাৰ Android TV ডিভাইচটোত ষ্ট’ৰ কৰি ৰখা আটাইবোৰ কেলেণ্ডাৰৰ অনুষ্ঠান পঢ়িব পাৰে আৰু আপোনাৰ কেলেণ্ডাৰৰ ডেটা শ্বেয়াৰ অথবা ছেভ কৰিব পাৰে।"</string>

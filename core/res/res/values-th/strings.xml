@@ -458,6 +458,14 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"อนุญาตให้แอปเข้าถึงข้อมูลเซ็นเซอร์ร่างกาย เช่น อัตราการเต้นของหัวใจ อุณหภูมิ และเปอร์เซ็นต์ออกซิเจนในเลือด ขณะใช้งานแอป"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"เข้าถึงข้อมูลเซ็นเซอร์ร่างกาย เช่น อัตราการเต้นของหัวใจ ขณะแอปทำงานในเบื้องหลัง"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"อนุญาตให้แอปเข้าถึงข้อมูลเซ็นเซอร์ร่างกาย เช่น อัตราการเต้นของหัวใจ อุณหภูมิ และเปอร์เซ็นต์ออกซิเจนในเลือด ขณะที่แอปทำงานในเบื้องหลัง"</string>
+    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
+    <skip />
+    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6408654259475396200">"อ่านกิจกรรมในปฏิทินและรายละเอียด"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"แอปนี้สามารถอ่านกิจกรรมทั้งหมดในปฏิทินที่เก็บไว้ในแท็บเล็ต รวมถึงแชร์หรือบันทึกข้อมูลในปฏิทินของคุณ"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"แอปนี้อ่านกิจกรรมทั้งหมดในปฏิทินที่จัดเก็บไว้ในอุปกรณ์ Android TV ได้ รวมถึงแชร์หรือบันทึกข้อมูลในปฏิทินของคุณได้ด้วย"</string>

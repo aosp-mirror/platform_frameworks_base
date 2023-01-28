@@ -458,6 +458,14 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"به برنامه اجازه می‌دهد تا زمانی که درحال استفاده است، به داده‌های حسگر بدن، مثل ضربان قلب، دما، و درصد اکسیژن خون دسترسی داشته باشد."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"دسترسی به داده‌های حسگر بدن، مثل ضربان قلب، درحین اجرا در پس‌زمینه"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"به برنامه اجازه می‌دهد تا زمانی که در پس‌زمینه درحال اجرا است، به داده‌های حسگر بدن، مثل ضربان قلب، دما، و درصد اکسیژن خون دسترسی داشته باشد."</string>
+    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
+    <skip />
+    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6408654259475396200">"خواندن رویدادها و جزئیات تقویم"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"این برنامه می‌تواند همه رویدادهای تقویم ذخیره‌شده در رایانه لوحی شما را بخواند و داده‌های تقویم شما را به اشتراک بگذارد یا ذخیره کند."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"‏این برنامه می‌تواند همه رویدادهای تقویم را که در Android TV شما ذخیره‌شده بخواند، و داده‌های تقویم شما را هم‌رسانی یا ذخیره کند."</string>
@@ -607,7 +615,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"به برنامه اجازه می‌دهد مکان‌ها را از مجموعه رسانه‌تان بخواند."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"استفاده از زیست‌سنجشی"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"استفاده از زیست‌سنجشی یا قفل صفحه"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"تأیید کنید این شما هستید"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"تأیید کنید این شمایید"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"برای ادامه، از زیست‌سنجشی استفاده کنید"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"برای ادامه، از زیست‌سنجشی یا قفل صفحه استفاده کنید"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"سخت‌افزار زیست‌سنجی دردسترس نیست"</string>
