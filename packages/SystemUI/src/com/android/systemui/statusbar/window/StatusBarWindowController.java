@@ -48,6 +48,7 @@ import com.android.systemui.animation.DelegateLaunchAnimatorController;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.fragments.FragmentHostManager;
+import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider;
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
 import com.android.systemui.unfold.util.JankMonitorTransitionProgressListener;
@@ -73,6 +74,7 @@ public class StatusBarWindowController {
     private boolean mIsAttached;
 
     private final ViewGroup mStatusBarWindowView;
+    private final FragmentService mFragmentService;
     // The container in which we should run launch animations started from the status bar and
     //   expanding into the opening window.
     private final ViewGroup mLaunchAnimationContainer;
@@ -86,6 +88,7 @@ public class StatusBarWindowController {
             WindowManager windowManager,
             IWindowManager iWindowManager,
             StatusBarContentInsetsProvider contentInsetsProvider,
+            FragmentService fragmentService,
             @Main Resources resources,
             Optional<UnfoldTransitionProgressProvider> unfoldTransitionProgressProvider) {
         mContext = context;
@@ -93,6 +96,7 @@ public class StatusBarWindowController {
         mIWindowManager = iWindowManager;
         mContentInsetsProvider = contentInsetsProvider;
         mStatusBarWindowView = statusBarWindowView;
+        mFragmentService = fragmentService;
         mLaunchAnimationContainer = mStatusBarWindowView.findViewById(
                 R.id.status_bar_launch_animation_container);
         mLpChanged = new WindowManager.LayoutParams();
@@ -157,7 +161,7 @@ public class StatusBarWindowController {
 
     /** Returns a fragment host manager for the status bar window view. */
     public FragmentHostManager getFragmentHostManager() {
-        return FragmentHostManager.get(mStatusBarWindowView);
+        return mFragmentService.getFragmentHostManager(mStatusBarWindowView);
     }
 
     /**
