@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Ghairi"</string>
     <string name="string_continue" msgid="1346732695941131882">"Endelea"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Chaguo zaidi"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"Pata maelezo zaidi"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Ni salama ukitumia funguo za siri"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Kwa kutumia funguo za siri, huhitaji kuunda au kukumbuka manenosiri changamano"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Funguo za siri ni funguo dijitali zilizosimbwa kwa njia fiche unazounda kwa kutumia alama yako ya kidole, uso au mbinu ya kufunga skrini"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Vyote huhifadhiwa kwenye kidhibiti cha manenosiri, ili uweze kuingia katika akaunti kwenye vifaa vingine"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Maelezo zaidi kuhusu funguo za siri"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Teknolojia isiyotumia manenosiri"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Funguo za siri zinakuruhusu uingie katika akaunti bila kutegemea manenosiri. Unapaswa tu kutumia alama yako ya kidole, kipengele cha utambuzi wa uso, PIN au mchoro wa kutelezesha ili uthibitishe utambulisho wako na uunde ufunguo wa siri."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Kriptographia ya ufunguo wa umma"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Kulingana na Ushirikiano wa FIDO (unaojumuisha Google, Apple, Microsoft na zaidi) na viwango vya W3C, funguo za siri hutumia jozi ya funguo za kriptografia. Tofauti na jina la mtumiaji na mfuatano wa herufi tunazotumia kwa ajili ya manenosiri, jozi ya funguo binafsi na za umma imeundwa kwa ajili ya programu au tovuti. Ufunguo binafsi unatunzwa kwa usalama kwenye kifaa chako au kidhibiti cha manenosiri na huthibitisha utambulisho wako. Ufunguo wa umma unashirikiwa na seva ya programu au tovuti. Kwa funguo zinazolingana, unaweza kujisajili na kuingia katika akaunti papo hapo."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Ulinzi wa akaunti ulioboreshwa"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Kila ufunguo umeunganishwa kwa upekee na programu au tovuti husika, kwa hivyo kamwe huwezi kuingia katika akaunti ya programu au tovuti ya kilaghai kwa bahati mbaya. Pia, kwa kuwa seva huhifadhi tu funguo za umma, udukuzi si rahisi."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Mabadiliko rahisi"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Tunavyoelekea katika enzi isiyo ya manenosiri, manenosiri yataendelea kupatikana pamoja na funguo za siri."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Chagua ambako unahifadhi <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Chagua kidhibiti cha manenosiri ili uhifadhi taarifa zako na uingie kwenye akaunti kwa urahisi wakati mwingine"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Ungependa kuunda ufunguo wa siri kwa ajili ya <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>

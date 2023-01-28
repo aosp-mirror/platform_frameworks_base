@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Annuler"</string>
     <string name="string_continue" msgid="1346732695941131882">"Continuer"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Autres options"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"En savoir plus"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Une sécurité accrue grâce aux clés d\'accès"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Avec les clés d\'accès, nul besoin de créer ou de mémoriser des mots de passe complexes"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Les clés d\'accès sont des clés numériques chiffrées que vous créez en utilisant votre empreinte digitale, votre visage ou le verrouillage de votre écran"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Ils sont enregistrés dans un gestionnaire de mots de passe pour vous permettre de vous connecter sur d\'autres appareils"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"En savoir plus sur les clés d\'accès"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Technologie sans mot de passe"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Les clés d\'accès vous permettent de vous connecter sans utiliser de mots de passe. Il vous suffit d\'utiliser votre empreinte digitale, la reconnaissance faciale, un NIP ou un schéma de balayage pour vérifier votre identité et créer un mot de passe."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Cryptographie des clés publiques"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Selon les normes de l\'Alliance FIDO (y compris Google, Apple, Microsoft et plus) et du W3C, les clés d\'accès utilisent des biclés cryptographiques. Contrairement au nom d\'utilisateur et à la chaîne de caractères que nous utilisons pour les mots de passe, une biclé privée-publique est créée pour une appli ou un site Web. La clé privée est stockée en toute sécurité sur votre appareil ou votre gestionnaire de mots de passe et confirme votre identité. La clé publique est partagée avec le serveur de l\'appli ou du site Web. Avec les clés correspondantes, vous pouvez vous inscrire et vous connecter instantanément."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Sécurité accrue du compte"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Chaque clé est exclusivement liée à l\'application ou au site Web pour lequel elle a été créée, de sorte que vous ne pourrez jamais vous connecter par erreur à une application ou un site Web frauduleux. En outre, comme les serveurs ne conservent que les clés publiques, le piratage informatique est beaucoup plus difficile."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Transition fluide"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"À mesure que nous nous dirigeons vers un avenir sans mot de passe, les mots de passe seront toujours utilisés parallèlement aux clés d\'accès."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Choisir où sauvegarder vos <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Sélectionnez un gestionnaire de mots de passe pour enregistrer vos renseignements et vous connecter plus rapidement la prochaine fois"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Créer une clé d\'accès pour <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>

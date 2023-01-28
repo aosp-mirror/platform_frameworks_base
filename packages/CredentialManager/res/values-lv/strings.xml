@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Atcelt"</string>
     <string name="string_continue" msgid="1346732695941131882">"Turpināt"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Citas opcijas"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"Uzzināt vairāk"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Lielāka drošība ar piekļuves atslēgām"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Izmantojot piekļuves atslēgas, nav jāveido vai jāatceras sarežģītas paroles."</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Piekļuves atslēgas ir šifrētas digitālas atslēgas, ko varat izveidot, izmantojot pirksta nospiedumu, seju vai ekrāna bloķēšanas informāciju."</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Tās tiek saglabātas paroļu pārvaldniekā, lai jūs varētu pierakstīties citās ierīcēs."</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Vairāk par piekļuves atslēgām"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Bezparoles tehnoloģija"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Piekļuves atslēgas sniedz iespēju pierakstīties, nepaļaujoties uz parolēm. Jums tikai jāizmanto pirksta nospiedums, autorizācija pēc sejas, PIN vai atbloķēšanas kombinācija, lai apliecinātu savu identitāti un izveidotu piekļuves atslēgu."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Publisko atslēgu kriptogrāfija"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Saskaņā ar FIDO Alliance (Google, Apple, Microsoft u.c. organizācijas) un W3C standartiem piekļuves atslēgās tiek izmantoti kriptogrāfisko atslēgu pāri. Nav vajadzīgs lietotājvārds un parole, jo lietotnei vai vietnei tiek izveidots privātas un publiskas atslēgas pāris. Privātā atslēga tiek glabāta jūsu ierīcē vai paroļu pārvaldniekā un apliecina jūsu identitāti. Publiskā atslēga tiek kopīgota ar lietotni vai vietnes serveri. Ja atslēgas atbilst, varat nekavējoties reģistrēties un pierakstīties."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Uzlabota kontu drošība"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Katra atslēga ir saistīta tikai ar to lietotni vai vietni, kurai tā tika izveidota, tādēļ jūs nevarēsiet nejauši pierakstīties krāpnieciskā lietotnē vai vietnē. Turklāt uzlaušanu ievērojami sarežģī tas, ka serveros tiek glabātas tikai publiskās atslēgas."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Ērta pāreja"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Lai arī pamazām notiek pāreja uz darbu bez parolēm, tās joprojām būs pieejamas līdzās piekļuves atslēgām."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Izvēlieties, kur saglabāt savas <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Lai saglabātu informāciju un nākamreiz varētu pierakstīties ātrāk, atlasiet paroļu pārvaldnieku."</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Vai izveidot piekļuves atslēgu lietotnei <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>

@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Отказ"</string>
     <string name="string_continue" msgid="1346732695941131882">"Напред"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Още опции"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"Научете повече"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"По-сигурно с помощта на кодове за достъп"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Когато използвате кодове за достъп, не е необходимо да създавате, нито да помните сложни пароли"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Кодовете за достъп са шифровани дигитални ключове, които създавате посредством отпечатъка, лицето си или опцията си за заключване на екрана"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Данните се запазват в мениджър на пароли, за да можете да влизате в профила си на други устройства"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Още за кодовете за достъп"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Заменяща паролите технология"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Кодовете за достъп ви дават възможност да влизате в профила си без парола. Трябва само да използвате отпечатъка, лицето, ПИН кода или фигурата си, за да потвърдите самоличността си и да създадете код за достъп."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Криптография с публичен ключ"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Според съюза FIDO (Google, Apple, Microsoft и др.) и стандартите на W3C кодовете за достъп ползват двойки криптографски ключове. Вместо потребителско име и парола за дадено приложение или уебсайт се създава двойка ключове – частен и публичен. Първият се съхранява надеждно на устройството ви или в мениджъра на пароли и служи за потвърждаване на самоличността ви. Вторият се споделя със съответния сървър. С двойката ключове можете да се регистрирате и да влезете в профила си незабавно."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Подобрена сигурност на профила"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Всеки ключ е свързан само с приложението или уебсайта, за които е създаден. Затова не е възможно да влезете в измамно приложение или уебсайт по погрешка. Освен това сървърите съхраняват само публичните ключове, което значително затруднява опитите за хакерство."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Безпроблемен преход"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Паролите ще продължат да са налице заедно с кодовете за достъп по пътя ни към бъдеще без пароли."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Изберете къде да запазите своите <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Изберете мениджър на пароли, в който да се запазят данните ви, така че следващия път да влезете по-бързо в профила си"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Да се създаде ли код за достъп за <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>

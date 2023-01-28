@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Anulează"</string>
     <string name="string_continue" msgid="1346732695941131882">"Continuă"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Mai multe opțiuni"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"Află mai multe"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Mai în siguranță cu chei de acces"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Dacă folosești chei de acces, nu este nevoie să creezi sau să reții parole complexe"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Cheile de acces sunt chei digitale criptate pe care le creezi folosindu-ți amprenta, fața sau blocarea ecranului"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Acestea sunt salvate într-un manager de parole, ca să te poți conecta pe alte dispozitive"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Mai multe despre cheile de acces"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Tehnologie fără parole"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Cu ajutorul cheilor de acces, poți să te conectezi fără să te bazezi pe parole. Pentru a-ți verifica identitatea și a crea o cheie de acces, nu trebuie decât să folosești amprenta, recunoașterea facială, PIN-ul sau modelul."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Criptografia cheilor publice"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Conform standardelor FIDO Alliance (din care fac parte Google, Apple, Microsoft etc.) și W3C, cheile de acces folosesc perechi de chei criptografice. Spre deosebire de numele de utilizator și șirul de caractere pe care le folosim pentru parole, perechea de chei publică/privată este creată pentru o aplicație sau un site. Cheia privată este stocată în siguranță pe dispozitivul sau în managerul tău de parole și îți confirmă identitatea. Cheia publică este trimisă aplicației sau serverului site-ului. Cu ajutorul cheilor corespunzătoare, poți să te înregistrezi și să te conectezi instantaneu."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Securitate îmbunătățită a contului"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Fiecare cheie este conectată în mod exclusiv cu aplicația sau site-ul pentru care a fost creată, prin urmare nu te poți conecta niciodată din greșeală la o aplicație sau un site fraudulos. În plus, întrucât pe servere sunt stocate doar chei publice, hackingul este mult mai dificil."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Tranziție fluidă"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Ne îndreptăm spre un viitor fără parole, în care parolele vor fi disponibile pe lângă cheile de acces."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Alege unde dorești să salvezi <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selectează un manager de parole pentru a salva informațiile și a te conecta mai rapid data viitoare"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Creezi o cheie de acces pentru <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>

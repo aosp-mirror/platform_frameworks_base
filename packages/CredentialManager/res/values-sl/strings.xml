@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Prekliči"</string>
     <string name="string_continue" msgid="1346732695941131882">"Naprej"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Več možnosti"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"Več o tem"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Večja varnost s ključi za dostop"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Po zaslugi ključev za dostop vam ni treba ustvarjati ali si zapomniti zapletenih gesel."</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Ključi za dostop so šifrirani digitalni ključi, ki jih ustvarite s prstnim odtisom, obrazom ali načinom zaklepanja zaslona."</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Shranjeni so v upravitelju gesel, kar pomeni, da se z njimi lahko prijavite tudi v drugih napravah."</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Več o ključih za dostop"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Tehnologija brez uporabe gesel"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Ključi za dostop vam omogočajo prijavo brez uporabe gesel. Za potrditev identitete in ustvarjanje ključa za dostop morate uporabiti le prstni odtis, prepoznavo obraza, kodo PIN ali vzorec za vlečenje s prstom."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Kriptografija javnih ključev"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"V skladu s pravili združenja FIDO Alliance (ki vključuje Google, Apple, Microsoft in druge družbe) in standardi W3C so ključi za dostop sestavljeni iz parov kriptografskih ključev. Za razliko od uporabniškega imena in niza znakov, ki ga uporabljamo za geslo, je par zasebnega in javnega ključa ustvarjen za aplikacijo ali spletno mesto. Zasebni ključ je varno shranjen v vaši napravi ali upravitelju gesel in se uporablja za potrditev vaše identitete. Javni ključ se deli s strežnikom aplikacije ali spletnega mesta. Z ustreznima ključema se lahko hitro registrirate in prijavite."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Večja varnost računov"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Vsak ključ je neločljivo povezan z aplikacijo ali spletnim mestom, za katero je bil ustvarjen, zato se nikoli ne morete pomotoma prijaviti v goljufivo aplikacijo ali spletno mesto. Poleg tega so v strežnikih shranjeni le javni ključi, zato je vdiranje v račune precej oteženo."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Prehod brez zapletov"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Na poti v prihodnost brez gesel bodo poleg ključev za dostop še vedno v uporabi tudi gesla."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Izbira mesta za shranjevanje <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Izberite upravitelja gesel za shranjevanje podatkov za prijavo, da se boste naslednjič lahko hitreje prijavili."</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Želite ustvariti ključ za dostop do aplikacije <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>

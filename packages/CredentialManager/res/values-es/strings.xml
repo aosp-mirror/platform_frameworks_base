@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Cancelar"</string>
     <string name="string_continue" msgid="1346732695941131882">"Continuar"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Más opciones"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"Más información"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Más seguridad con las llaves de acceso"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Con las llaves de acceso, no tienes que crear ni recordar contraseñas complicadas"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Las llaves de acceso son claves digitales cifradas que puedes crear con tu huella digital, cara o bloqueo de pantalla"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Se guardan en un gestor de contraseñas para que puedas iniciar sesión en otros dispositivos"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Más información sobre llaves de acceso"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Tecnología sin contraseñas"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Las llaves de acceso te permiten iniciar sesión sin necesidad de contraseñas. Solo necesitas usar la huella digital, el reconocimiento facial, el PIN o patrón para verificar tu identidad y crear una llave de acceso."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Criptografía de claves públicas"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Las llaves de acceso usan pares de claves criptográficas basándose en normativas de W3C y FIDO Alliance (que incluye Google, Apple, Microsoft y más). A diferencia del nombre de usuario y la cadena de caracteres que utilizamos en las contraseñas, un par de claves pública y privada se crea para una aplicación o sitio web. La clave privada se almacena con seguridad en tu dispositivo o gestor de contraseñas y confirma tu identidad. La clave pública se comparte con el servidor de la aplicación o el sitio web. Con las correspondientes llaves, puedes registrarte e iniciar sesión de forma instantánea."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Seguridad de las cuentas mejorada"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Cada llave está vinculada exclusivamente con la aplicación o sitio web para los que se crearon, por lo que nunca puedes iniciar sesión en una aplicación o sitio web fraudulentos por error. Además, dado que los servidores solo mantienen claves públicas, es muy difícil que las pirateen."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Transición fluida"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Aunque nos dirigimos hacia un mundo sin contraseñas, estas seguirán estando disponibles junto con las llaves de acceso."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Elige dónde guardar tus <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selecciona un gestor de contraseñas para guardar tu información e iniciar sesión más rápido la próxima vez"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"¿Crear llave de acceso para <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>

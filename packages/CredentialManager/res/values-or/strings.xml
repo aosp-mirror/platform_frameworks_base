@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"ବାତିଲ କରନ୍ତୁ"</string>
     <string name="string_continue" msgid="1346732695941131882">"ଜାରି ରଖନ୍ତୁ"</string>
     <string name="string_more_options" msgid="7990658711962795124">"ଅଧିକ ବିକଳ୍ପ"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"ଅଧିକ ଜାଣନ୍ତୁ"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"ପାସକୀ ସହ ଅଧିକ ସୁରକ୍ଷିତ"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"ପାସକୀଗୁଡ଼ିକ ସହ ଆପଣଙ୍କୁ ଜଟିଳ ପାସୱାର୍ଡଗୁଡ଼ିକ ତିଆରି କରିବା କିମ୍ବା ମନେରଖିବାର ଆବଶ୍ୟକତା ନାହିଁ"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"ପାସକୀଗୁଡ଼ିକ ହେଉଛି ଆପଣ ଆପଣଙ୍କ ଟିପଚିହ୍ନ, ଫେସ କିମ୍ବା ସ୍କ୍ରିନ ଲକ ବ୍ୟବହାର କରି ତିଆରି କରୁଥିବା ଏକକ୍ରିପ୍ଟ କରାଯାଇଥିବା ଡିଜିଟାଲ କୀ"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"ସେଗୁଡ଼ିକୁ ଏକ Password Managerରେ ସେଭ କରାଯାଏ, ଯାହା ଫଳରେ ଆପଣ ଅନ୍ୟ ଡିଭାଇସଗୁଡ଼ିକରେ ସାଇନ ଇନ କରିପାରିବେ"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"ପାସକୀଗୁଡ଼ିକ ବିଷୟରେ ଅଧିକ"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"ପାସୱାର୍ଡ ବିହୀନ ଟେକ୍ନୋଲୋଜି"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"ପାସକୀଗୁଡ଼ିକ, ପାସୱାର୍ଡ ଉପରେ ନିର୍ଭର ନକରି ସାଇନ ଇନ କରିବାକୁ ଆପଣଙ୍କୁ ଅନୁମତି ଦେଇଥାଏ। ଆପଣଙ୍କ ପରିଚୟ ଯାଞ୍ଚ କରି ଏକ ପାସକୀ ତିଆରି କରିବାକୁ ଆପଣଙ୍କୁ କେବଳ ଆପଣଙ୍କ ଟିପଚିହ୍ନ, ଫେସ ଚିହ୍ନଟକରଣ, PIN କିମ୍ବା ସ୍ୱାଇପ ପାଟର୍ନ ବ୍ୟବହାର କରିବାକୁ ହେବ।"</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"ସାର୍ବଜନୀନ କୀ କ୍ରିପ୍ଟୋଗ୍ରାଫି"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"FIDO Alliance (Google, Apple, Microsoft ଓ ଆହୁରି ଅନେକ କିଛି ଅନ୍ତର୍ଭୁକ୍ତ) ଓ W3C ଷ୍ଟାଣ୍ଡାର୍ଡ ଆଧାରରେ ପାସକୀଗୁଡ଼ିକ କ୍ରିପ୍ଟୋଗ୍ରାଫିକ କୀ ପେୟାର ବ୍ୟବହାର କରେ। ପାସୱାର୍ଡ ପାଇଁ ଆମେ ବ୍ୟବହାର କରୁଥିବା ୟୁଜରନେମ ଓ କେରେକ୍ଟରର ଷ୍ଟ୍ରିଂ ପରି ଏକ ଆପ ବା ୱେବସାଇଟ ପାଇଁ ଏକ ବ୍ୟକ୍ତିଗତ-ସାର୍ବଜନୀନ କୀ ପେୟାର ତିଆରି କରାଯାଇଛି। ପ୍ରାଇଭେଟ କୀ ଆପଣଙ୍କ ଡିଭାଇସ ବା ପାସୱାର୍ଡ ମେନେଜରରେ ସୁରକ୍ଷିତ ଭାବରେ ଷ୍ଟୋର କରାଯାଏ ଓ ଏହା ଆପଣଙ୍କ ପରିଚୟ ସୁନିଶ୍ଚିତ କରେ। ସାର୍ବଜନୀନ କୀ ଆପ ବା ୱେବସାଇଟ ସର୍ଭର ସହ ସେୟାର କରାଯାଏ। ସମ୍ବନ୍ଧିତ କୀ ସହ ଆପଣ ତୁରନ୍ତ ପଞ୍ଜିକରଣ କରି ସାଇନ ଇନ କରିପାରିବେ।"</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"ଉନ୍ନତ ଆକାଉଣ୍ଟ ସୁରକ୍ଷା"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"ପ୍ରତ୍ୟେକ କୀ\'କୁ ସେହି ଆପ କିମ୍ବା ୱେବସାଇଟ ସହ ଏକ୍ସକ୍ଲୁସିଭ ଭାବେ ଲିଙ୍କ କରାଯାଏ ଯେଉଁଥିପାଇଁ ଏହାକୁ ତିଆରି କରାଯାଇଛି, ଫଳରେ ଆପଣ ଭୁଲବଶତଃ କୌଣସି ପ୍ରତାରଣାମୂଳକ ଆପ କିମ୍ବା ୱେବସାଇଟରେ କେବେ ବି ସାଇନ ଇନ କରିପାରିବେ ନାହିଁ। ଏହା ସହ, କେବଳ ସର୍ଭରଗୁଡ଼ିକ ସାର୍ବଜନୀନ କୀ ରଖୁଥିବା ଯୋଗୁଁ ଏହାକୁ ହେକ କରିବା ବହୁତ କଷ୍ଟକର।"</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"ବାଧାରହିତ ଟ୍ରାଞ୍ଜିସନ"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"ଆମେ ଏକ ପାସୱାର୍ଡ ବିହୀନ ଭବିଷ୍ୟତ ଆଡ଼କୁ ମୁଭ କରୁଥିବା ଯୋଗୁଁ ଏବେ ବି ପାସକୀଗୁଡ଼ିକ ସହିତ ପାସୱାର୍ଡ ଉପଲବ୍ଧ ହେବ।"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"ଆପଣଙ୍କ <xliff:g id="CREATETYPES">%1$s</xliff:g>କୁ କେଉଁଠାରେ ସେଭ କରିବେ ତାହା ବାଛନ୍ତୁ"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"ଆପଣଙ୍କ ସୂଚନା ସେଭ କରି ପରବର୍ତ୍ତୀ ସମୟରେ ଶୀଘ୍ର ସାଇନ ଇନ କରିବା ପାଇଁ ଏକ Password Manager ଚୟନ କରନ୍ତୁ"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> ପାଇଁ ପାସକୀ ତିଆରି କରିବେ?"</string>

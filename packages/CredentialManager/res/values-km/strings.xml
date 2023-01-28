@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"បោះបង់"</string>
     <string name="string_continue" msgid="1346732695941131882">"បន្ត"</string>
     <string name="string_more_options" msgid="7990658711962795124">"ជម្រើសច្រើនទៀត"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"ស្វែងយល់បន្ថែម"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"កាន់តែមានសុវត្ថិភាពដោយប្រើកូដសម្ងាត់"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"តាមរយៈ​កូដសម្ងាត់ អ្នកមិនចាំបាច់​បង្កើត ឬចងចាំពាក្យសម្ងាត់ស្មុគស្មាញ​នោះទេ"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"កូដសម្ងាត់​ត្រូវបានអ៊ីនគ្រីប​ឃីឌីជីថលដែលអ្នកបង្កើតដោយប្រើ​ស្នាមម្រាមដៃ មុខ ឬចាក់សោអេក្រង់​របស់អ្នក"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"កូដសម្ងាត់ត្រូវបានរក្សាទុក​ទៅក្នុង​កម្មវិធីគ្រប់គ្រងពាក្យសម្ងាត់ ដូច្នេះអ្នកអាច​ចូលនៅលើឧបករណ៍ផ្សេងទៀត"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"ច្រើនទៀតអំពីកូដសម្ងាត់"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"បច្ចេកវិទ្យាគ្មានពាក្យសម្ងាត់"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"កូដសម្ងាត់អនុញ្ញាតឱ្យអ្នកចូលគណនីដោយមិនចាំបាច់ពឹងផ្អែកលើពាក្យ​សម្ងាត់។ អ្នកគ្រាន់តែត្រូវប្រើស្នាមម្រាមដៃ ការសម្គាល់មុខ កូដ PIN របស់អ្នក ឬអូសលំនាំដើម្បីផ្ទៀងផ្ទាត់អត្តសញ្ញាណរបស់អ្នក និងបង្កើតកូដសម្ងាត់។"</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"គ្រីបតូសាស្ត្រកូដសាធារណៈ"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"ផ្អែកលើ FIDO Alliance (ដែលរួមបញ្ចូល Google, Apple, Microsoft និងច្រើនទៀត) និងស្តង់ដារ W3C កូដសម្ងាត់ប្រើគូសោគ្រីបតូសាស្ត្រ។ ខុសពីឈ្មោះអ្នកប្រើប្រាស់ និងតួអក្សរដែលយើងប្រើសម្រាប់ពាក្យសម្ងាត់ កូដសាធារណៈឯកជនមួយត្រូវបានបង្កើតឡើងសម្រាប់កម្មវិធី ឬគេហទំព័រមួយ។ កូដឯកជនត្រូវបានរក្សាទុកដោយសុវត្ថិភាពនៅលើឧបករណ៍របស់អ្នក ឬកម្មវិធីគ្រប់គ្រងពាក្យសម្ងាត់ ហើយវាបញ្ជាក់ពីអត្តសញ្ញាណរបស់អ្នក។ កូដសាធារណៈត្រូវបានចែករំលែកជាមួយម៉ាស៊ីនមេកម្មវិធី ឬគេហទំព័រ។ ជាមួយកូដដែលត្រូវគ្នា អ្នកអាចចុះឈ្មោះ និងចូលគណនីបានភ្លាមៗ។"</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"សុវត្ថិភាពគណនីដែលប្រសើរឡើង"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"កូដនីមួយៗត្រូវបានភ្ជាប់ផ្តាច់មុខជាមួយកម្មវិធី ឬគេហទំព័រដែលវាត្រូវបានបង្កើតឡើង ដូច្នេះអ្នកមិនអាចចូលទៅក្នុងកម្មវិធី ឬគេហទំព័រក្លែងបន្លំដោយច្រឡំបានឡើយ។ លើសពីនេះ ជាមួយនឹងម៉ាស៊ីនមេដែលរក្សាតែកូដសាធារណៈប៉ុណ្ណោះ ការលួចចូលគឺពិបាកខ្លាំង។"</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"ដំណើរផ្លាស់ប្ដូរយ៉ាងរលូន"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"នៅពេលដែលយើងឈានទៅរកអនាគតដែលគ្មានពាក្យសម្ងាត់ ពាក្យសម្ងាត់នៅតែអាចប្រើបានរួមជាមួយកូដសម្ងាត់។"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"ជ្រើសរើសកន្លែង​ដែលត្រូវរក្សាទុក<xliff:g id="CREATETYPES">%1$s</xliff:g>របស់អ្នក"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"ជ្រើសរើស​កម្មវិធីគ្រប់គ្រងពាក្យសម្ងាត់ ដើម្បីរក្សាទុក​ព័ត៌មានរបស់អ្នក និងចូលគណនី​បានកាន់តែរហ័ស​នៅពេលលើកក្រោយ"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"បង្កើត​កូដសម្ងាត់​សម្រាប់ <xliff:g id="APPNAME">%1$s</xliff:g> ឬ?"</string>

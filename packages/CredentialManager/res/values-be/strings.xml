@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Скасаваць"</string>
     <string name="string_continue" msgid="1346732695941131882">"Далей"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Дадатковыя параметры"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"Даведацца больш"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"З ключамі доступу вам будзе бяспечней."</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Дзякуючы ключам доступу вам не трэба ствараць і запамінаць складаныя паролі."</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Ключы доступу – гэта зашыфраваныя лючбавыя ключы, створаныя вамі з дапамогай адбітка пальца, твару ці блакіроўкі экрана."</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Яны захаваны ў менеджары пароляў. Дзякуючы гэтаму вы можаце ўваходзіць на іншых прыладах"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Падрабязней пра ключы доступу"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Тэхналогія ідэнтыфікацыі без выкарыстання пароляў"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Ключы доступу дазваляюць уваходзіць ва ўліковы запіс без выкарыстання пароляў. Каб спраўдзіць асобу і стварыць ключ доступу, дастаткова скарыстаць адбітак пальца, распазнаванне твару, PIN-код або ўзор разблакіроўкі."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Крыптаграфія адкрытых ключоў"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"З улікам стандартаў FIDO Alliance (Google, Apple, Microsoft і іншыя кампаніі) і W3C ключы доступу выкарыстоўваюць крыптаграфічныя пары ключоў. Для праграмы ці вэб-сайта замест імя карыстальніка і набору сімвалаў у якасці пароля ствараецца пара з закрытага і адкрытага ключоў. Закрыты ключ бяспечна захоўваецца на прыладзе ці ў менеджары пароляў і пацвярджае асобу. Адкрыты ключ абагульваецца з серверам праграмы ці сайта. Адпаведныя ключы дазваляюць імгненна рэгістравацца і ўваходзіць у сістэму."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Павышаная бяспека ўліковага запісу"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Кожны ключ звязаны толькі з праграмай або вэб-сайтам, для якіх ён быў створаны, таму вы не зможаце памылкова ўвайсці ў праграму ці на вэб-сайт, створаныя ў мэтах махлярства. Акрамя таго, на серверах захоўваюцца толькі адкрытыя ключы, таму правесці ўзлом намнога складаней."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Плаўны пераход"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Хоць мы ўжо рухаемся ў бок будучыні без выкарыстання пароляў, яны па-ранейшаму застануцца даступнымі нароўні з ключамі доступу."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Выберыце, куды захаваць <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Выберыце менеджар пароляў, каб захаваць свае даныя і забяспечыць хуткі ўваход у наступныя разы"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Стварыце ключ доступу да праграмы \"<xliff:g id="APPNAME">%1$s</xliff:g>\""</string>
