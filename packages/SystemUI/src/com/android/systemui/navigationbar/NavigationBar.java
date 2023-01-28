@@ -25,7 +25,6 @@ import static android.app.StatusBarManager.WindowType;
 import static android.app.StatusBarManager.WindowVisibleState;
 import static android.app.StatusBarManager.windowStateToString;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.containsType;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
@@ -130,6 +129,7 @@ import com.android.systemui.navigationbar.gestural.QuickswitchOrientedNavHandle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
@@ -218,6 +218,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private final OnComputeInternalInsetsListener mOnComputeInternalInsetsListener;
     private final UserContextProvider mUserContextProvider;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
+    private final DisplayTracker mDisplayTracker;
     private final RegionSamplingHelper mRegionSamplingHelper;
     private final int mNavColorSampleMargin;
     private NavigationBarFrame mFrame;
@@ -461,7 +462,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                 @Override
                 public void onStartedWakingUp() {
                     notifyScreenStateChanged(true);
-                    if (isGesturalModeOnDefaultDisplay(getContext(), mNavBarMode)) {
+                    if (isGesturalModeOnDefaultDisplay(getContext(), mDisplayTracker,
+                            mNavBarMode)) {
                         mRegionSamplingHelper.start(mSamplingBounds);
                     }
                 }
@@ -545,7 +547,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             Optional<BackAnimation> backAnimation,
             UserContextProvider userContextProvider,
             WakefulnessLifecycle wakefulnessLifecycle,
-            TaskStackChangeListeners taskStackChangeListeners) {
+            TaskStackChangeListeners taskStackChangeListeners,
+            DisplayTracker displayTracker) {
         super(navigationBarView);
         mFrame = navigationBarFrame;
         mContext = context;
@@ -585,6 +588,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mUserContextProvider = userContextProvider;
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mTaskStackChangeListeners = taskStackChangeListeners;
+        mDisplayTracker = displayTracker;
 
         mNavColorSampleMargin = getResources()
                 .getDimensionPixelSize(R.dimen.navigation_handle_sample_horizontal_margin);
@@ -632,12 +636,14 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
                     @Override
                     public boolean isSamplingEnabled() {
-                        return isGesturalModeOnDefaultDisplay(getContext(), mNavBarMode);
+                        return isGesturalModeOnDefaultDisplay(getContext(), mDisplayTracker,
+                                mNavBarMode);
                     }
                 }, mainExecutor, bgExecutor);
 
         mView.setBackgroundExecutor(bgExecutor);
         mView.setEdgeBackGestureHandler(mEdgeBackGestureHandler);
+        mView.setDisplayTracker(mDisplayTracker);
         mNavBarMode = mNavigationModeController.addListener(mModeChangedListener);
     }
 
@@ -665,7 +671,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                 getBarLayoutParams(mContext.getResources().getConfiguration().windowConfiguration
                         .getRotation()));
         mDisplayId = mContext.getDisplayId();
-        mIsOnDefaultDisplay = mDisplayId == DEFAULT_DISPLAY;
+        mIsOnDefaultDisplay = mDisplayId == mDisplayTracker.getDefaultDisplayId();
 
         // Ensure we try to get currentSysuiState from navBarHelper before command queue callbacks
         // start firing, since the latter is source of truth
@@ -1468,7 +1474,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private void onAccessibilityClick(View v) {
         final Display display = v.getDisplay();
         mAccessibilityManager.notifyAccessibilityButtonClicked(
-                display != null ? display.getDisplayId() : DEFAULT_DISPLAY);
+                display != null ? display.getDisplayId() : mDisplayTracker.getDefaultDisplayId());
     }
 
     private boolean onAccessibilityLongClick(View v) {

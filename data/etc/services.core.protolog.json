@@ -3331,6 +3331,12 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/TaskFragment.java"
     },
+    "1015746067": {
+      "message": "Display id=%d is ignoring orientation request for %d, return %d following a per-app override for %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
     "1022095595": {
       "message": "TaskFragment info changed name=%s",
       "level": "VERBOSE",

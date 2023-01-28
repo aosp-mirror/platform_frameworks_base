@@ -63,6 +63,7 @@ import com.android.systemui.qs.footer.dagger.FooterActionsModule;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.screenshot.dagger.ScreenshotModule;
 import com.android.systemui.security.data.repository.SecurityRepositoryModule;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.dagger.MultiUserUtilsModule;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.smartspace.dagger.SmartspaceModule;
@@ -106,6 +107,8 @@ import com.android.wm.shell.bubbles.Bubbles;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
+
+import javax.inject.Named;
 
 import dagger.Binds;
 import dagger.BindsOptionalOf;
@@ -196,8 +199,8 @@ public abstract class SystemUIModule {
 
     @SysUISingleton
     @Provides
-    static SysUiState provideSysUiState(DumpManager dumpManager) {
-        final SysUiState state = new SysUiState();
+    static SysUiState provideSysUiState(DisplayTracker displayTracker, DumpManager dumpManager) {
+        final SysUiState state = new SysUiState(displayTracker);
         dumpManager.registerDumpable(state);
         return state;
     }
@@ -213,6 +216,10 @@ public abstract class SystemUIModule {
 
     @BindsOptionalOf
     abstract BcSmartspaceConfigPlugin optionalBcSmartspaceConfigPlugin();
+
+    @BindsOptionalOf
+    @Named(SmartspaceModule.WEATHER_SMARTSPACE_DATA_PLUGIN)
+    abstract BcSmartspaceDataPlugin optionalWeatherSmartspaceConfigPlugin();
 
     @BindsOptionalOf
     abstract Recents optionalRecents();

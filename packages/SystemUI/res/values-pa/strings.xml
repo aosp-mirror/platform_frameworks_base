@@ -532,10 +532,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"ਸਵੈਚਲਿਤ"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"ਕੋਈ ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਹੀਂ"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ਕੋਈ ਧੁਨੀ ਜਾਂ ਥਰਥਰਾਹਟ ਨਹੀਂ ਅਤੇ ਸੂਚਨਾਵਾਂ ਗੱਲਬਾਤ ਸੈਕਸ਼ਨ ਵਿੱਚ ਹੇਠਲੇ ਪਾਸੇ ਦਿਸਦੀਆਂ ਹਨ"</string>
-    <!-- no translation found for notification_channel_summary_default (777294388712200605) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_default_with_bubbles (3482483084451555344) -->
-    <skip />
+    <string name="notification_channel_summary_default" msgid="777294388712200605">"ਡੀਵਾਈਸ ਸੈਟਿੰਗਾਂ ਦੇ ਆਧਾਰ \'ਤੇ ਘੰਟੀ ਵੱਜ ਸਕਦੀ ਹੈ ਜਾਂ ਥਰਥਰਾਹਟ ਹੋ ਸਕਦੀ ਹੈ"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"ਡੀਵਾਈਸ ਸੈਟਿੰਗਾਂ ਦੇ ਆਧਾਰ \'ਤੇ ਘੰਟੀ ਵੱਜ ਸਕਦੀ ਹੈ ਜਾਂ ਥਰਥਰਾਹਟ ਹੋ ਸਕਦੀ ਹੈ। ਪੂਰਵ-ਨਿਰਧਾਰਿਤ ਤੌਰ \'ਤੇ <xliff:g id="APP_NAME">%1$s</xliff:g> ਬਬਲ ਤੋਂ ਗੱਲਾਂਬਾਤਾਂ।"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ਸਿਸਟਮ ਨੂੰ ਨਿਰਧਾਰਤ ਕਰਨ ਦਿਓ ਕਿ ਇਸ ਸੂਚਨਾ ਲਈ ਕੋਈ ਧੁਨੀ ਵਜਾਉਣੀ ਚਾਹੀਦੀ ਹੈ ਜਾਂ ਥਰਥਰਾਹਟ ਕਰਨੀ ਚਾਹੀਦੀ ਹੈ"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;ਸਥਿਤੀ:&lt;/b&gt; ਦਰਜਾ ਵਧਾ ਕੇ ਪੂਰਵ-ਨਿਰਧਾਰਤ \'ਤੇ ਸੈੱਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;ਸਥਿਤੀ:&lt;/b&gt; ਦਰਜਾ ਘਟਾ ਕੇ ਸ਼ਾਂਤ \'ਤੇ ਸੈੱਟ ਕੀਤਾ ਗਿਆ"</string>
@@ -802,6 +800,10 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਐਪ ਚੁਣੋ"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ।}one{# ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ।}other{# ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕੀਤੇ ਗਏ।}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"ਹਟਾਇਆ ਗਿਆ"</string>
+    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
+    <skip />
+    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
+    <skip />
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"ਮਨਪਸੰਦ ਵਿੱਚ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"ਮਨਪਸੰਦ ਵਿੱਚ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ, ਸਥਾਨ <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"ਮਨਪਸੰਦ ਵਿੱਚੋਂ ਹਟਾਇਆ ਗਿਆ"</string>
@@ -868,6 +870,8 @@
     <string name="controls_error_failed" msgid="960228639198558525">"ਗੜਬੜ, ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"ਕੰਟਰੋਲਾਂ ਦਾ ਸੰਪਾਦਨ ਕਰੋ"</string>
+    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
+    <skip />
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"ਆਊਟਪੁੱਟ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"ਗਰੁੱਪ"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 ਡੀਵਾਈਸ ਨੂੰ ਚੁਣਿਆ ਗਿਆ"</string>
@@ -1023,14 +1027,11 @@
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> ਬੈਟਰੀ ਬਾਕੀ"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"ਆਪਣੇ ਸਟਾਈਲਸ ਨੂੰ ਚਾਰਜਰ ਨਾਲ ਕਨੈਕਟ ਕਰੋ"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"ਸਟਾਈਲਸ ਦੀ ਬੈਟਰੀ ਘੱਟ ਹੈ"</string>
-    <!-- no translation found for video_camera (7654002575156149298) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_title (6991157106804289643) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_text (3458704745640229638) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_action (2937701298133010724) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_close (7927067108901068098) -->
+    <string name="video_camera" msgid="7654002575156149298">"ਵੀਡੀਓ ਕੈਮਰਾ"</string>
+    <string name="call_from_work_profile_title" msgid="6991157106804289643">"ਇਸ ਪ੍ਰੋਫਾਈਲ ਤੋਂ ਕਾਲ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ"</string>
+    <string name="call_from_work_profile_text" msgid="3458704745640229638">"ਤੁਹਾਡੀ ਕਾਰਜ ਨੀਤੀ ਤੁਹਾਨੂੰ ਸਿਰਫ਼ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਤੋਂ ਹੀ ਫ਼ੋਨ ਕਾਲਾਂ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ"</string>
+    <string name="call_from_work_profile_action" msgid="2937701298133010724">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ \'ਤੇ ਜਾਓ"</string>
+    <string name="call_from_work_profile_close" msgid="7927067108901068098">"ਬੰਦ ਕਰੋ"</string>
+    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
     <skip />
 </resources>

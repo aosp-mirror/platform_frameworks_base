@@ -24,6 +24,7 @@ import android.view.MotionEvent.ACTION_DOWN
 import android.view.MotionEvent.ACTION_MOVE
 import android.view.MotionEvent.ACTION_UP
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.settings.DisplayTracker
 
 /**
  * A class to detect a generic "swipe up" gesture. To be notified when the swipe up gesture is
@@ -32,9 +33,10 @@ import com.android.systemui.dagger.SysUISingleton
 @SysUISingleton
 abstract class SwipeUpGestureHandler(
     context: Context,
+    displayTracker: DisplayTracker,
     private val logger: SwipeUpGestureLogger,
-    private val loggerTag: String,
-) : GenericGestureDetector(SwipeUpGestureHandler::class.simpleName!!) {
+    private val loggerTag: String
+) : GenericGestureDetector(SwipeUpGestureHandler::class.simpleName!!, displayTracker) {
 
     private var startY: Float = 0f
     private var startTime: Long = 0L

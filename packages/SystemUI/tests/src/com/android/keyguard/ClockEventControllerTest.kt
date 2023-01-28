@@ -23,7 +23,6 @@ import android.widget.TextView
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
-import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
@@ -87,7 +86,6 @@ class ClockEventControllerTest : SysuiTestCase() {
     @Mock private lateinit var smallLogBuffer: LogBuffer
     @Mock private lateinit var largeLogBuffer: LogBuffer
     private lateinit var underTest: ClockEventController
-    @Mock private lateinit var dumpManager: DumpManager
 
     @Before
     fun setUp() {
@@ -115,8 +113,7 @@ class ClockEventControllerTest : SysuiTestCase() {
             bgExecutor,
             smallLogBuffer,
             largeLogBuffer,
-            featureFlags,
-            dumpManager
+            featureFlags
         )
         underTest.clock = clock
 

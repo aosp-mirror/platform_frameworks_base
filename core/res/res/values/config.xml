@@ -984,6 +984,12 @@
     <!-- Boolean indicating whether light mode is allowed when DWB is turned on. -->
     <bool name="config_displayWhiteBalanceLightModeAllowed">true</bool>
 
+    <!-- Device states where the sensor based rotation values should be reversed around the Z axis
+         for the default display.
+         TODO(b/265312193): Remove this workaround when this bug is fixed.-->
+    <integer-array name="config_deviceStatesToReverseDefaultDisplayRotationAroundZAxis">
+    </integer-array>
+
     <!-- Indicate available ColorDisplayManager.COLOR_MODE_xxx. -->
     <integer-array name="config_availableColorModes">
         <!-- Example:
