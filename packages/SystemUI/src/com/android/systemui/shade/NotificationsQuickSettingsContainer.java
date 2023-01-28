@@ -29,7 +29,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.android.systemui.R;
-import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.statusbar.notification.AboveShelfObserver;
@@ -130,18 +129,6 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
 
     public void removeQSFragmentAttachedListener() {
         mQSFragmentAttachedListener = qs -> {};
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        FragmentHostManager.get(this).addTagListener(QS.TAG, this);
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        FragmentHostManager.get(this).removeTagListener(QS.TAG, this);
     }
 
     @Override
