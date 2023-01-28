@@ -303,6 +303,7 @@ package android {
     field public static final String REVIEW_ACCESSIBILITY_SERVICES = "android.permission.REVIEW_ACCESSIBILITY_SERVICES";
     field public static final String REVOKE_RUNTIME_PERMISSIONS = "android.permission.REVOKE_RUNTIME_PERMISSIONS";
     field public static final String ROTATE_SURFACE_FLINGER = "android.permission.ROTATE_SURFACE_FLINGER";
+    field public static final String SATELLITE_COMMUNICATION = "android.permission.SATELLITE_COMMUNICATION";
     field public static final String SCHEDULE_PRIORITIZED_ALARM = "android.permission.SCHEDULE_PRIORITIZED_ALARM";
     field @Deprecated public static final String SCORE_NETWORKS = "android.permission.SCORE_NETWORKS";
     field public static final String SECURE_ELEMENT_PRIVILEGED_OPERATION = "android.permission.SECURE_ELEMENT_PRIVILEGED_OPERATION";
