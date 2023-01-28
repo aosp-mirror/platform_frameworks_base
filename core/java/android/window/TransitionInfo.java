@@ -198,6 +198,7 @@ public final class TransitionInfo implements Parcelable {
         in.readTypedList(mChanges, Change.CREATOR);
         mRootLeash = new SurfaceControl();
         mRootLeash.readFromParcel(in);
+        mRootLeash.setUnreleasedWarningCallSite("TransitionInfo");
         mRootOffset.readFromParcel(in);
         mOptions = in.readTypedObject(AnimationOptions.CREATOR);
     }

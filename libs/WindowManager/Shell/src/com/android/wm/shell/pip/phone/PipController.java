@@ -1203,6 +1203,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         @Override
         public void stopSwipePipToHome(int taskId, ComponentName componentName,
                 Rect destinationBounds, SurfaceControl overlay) {
+            if (overlay != null) {
+                overlay.setUnreleasedWarningCallSite("PipController.stopSwipePipToHome");
+            }
             executeRemoteCallWithTaskPermission(mController, "stopSwipePipToHome",
                     (controller) -> {
                         controller.stopSwipePipToHome(taskId, componentName, destinationBounds,

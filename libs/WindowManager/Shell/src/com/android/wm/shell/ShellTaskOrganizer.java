@@ -464,6 +464,9 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
 
     @Override
     public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) {
+        if (leash != null) {
+            leash.setUnreleasedWarningCallSite("ShellTaskOrganizer.onTaskAppeared");
+        }
         synchronized (mLock) {
             onTaskAppeared(new TaskAppearedInfo(taskInfo, leash));
         }

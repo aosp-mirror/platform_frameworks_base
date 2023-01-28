@@ -122,6 +122,8 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
                             + " mDisplayAreasInfo.get():" + mDisplayAreasInfo.get(displayId));
         }
 
+        leash.setUnreleasedWarningCallSite(
+                "RootTaskDisplayAreaOrganizer.onDisplayAreaAppeared");
         mDisplayAreasInfo.put(displayId, displayAreaInfo);
         mLeashes.put(displayId, leash);
 
