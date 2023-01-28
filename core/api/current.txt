@@ -21651,6 +21651,7 @@ package android.media {
     field public static final int DUAL_MONO_MODE_RR = 3; // 0x3
     field public static final int ENCAPSULATION_METADATA_TYPE_DVB_AD_DESCRIPTOR = 2; // 0x2
     field public static final int ENCAPSULATION_METADATA_TYPE_FRAMEWORK_TUNER = 1; // 0x1
+    field public static final int ENCAPSULATION_METADATA_TYPE_SUPPLEMENTARY_AUDIO_PLACEMENT = 3; // 0x3
     field public static final int ENCAPSULATION_MODE_ELEMENTARY_STREAM = 1; // 0x1
     field public static final int ENCAPSULATION_MODE_NONE = 0; // 0x0
     field public static final int ERROR = -1; // 0xffffffff
@@ -21669,6 +21670,9 @@ package android.media {
     field public static final int STATE_NO_STATIC_DATA = 2; // 0x2
     field public static final int STATE_UNINITIALIZED = 0; // 0x0
     field public static final int SUCCESS = 0; // 0x0
+    field public static final int SUPPLEMENTARY_AUDIO_PLACEMENT_LEFT = 1; // 0x1
+    field public static final int SUPPLEMENTARY_AUDIO_PLACEMENT_NORMAL = 0; // 0x0
+    field public static final int SUPPLEMENTARY_AUDIO_PLACEMENT_RIGHT = 2; // 0x2
     field public static final int WRITE_BLOCKING = 0; // 0x0
     field public static final int WRITE_NON_BLOCKING = 1; // 0x1
   }
