@@ -32,6 +32,7 @@ import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.hdmi.HdmiDeviceInfo;
+import android.media.AudioPresentation;
 import android.media.PlaybackParams;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -757,6 +758,74 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Sends an updated list of all audio presentations available from a Next Generation Audio
+         * service. This is used by the framework to maintain the audio presentation information for
+         * a given track of {@link TvTrackInfo#TYPE_AUDIO}, which in turn is used by
+         * {@link TvView#getAudioPresentations} for the application to retrieve metadata for the
+         * current audio track. The TV input service must call this method as soon as the audio
+         * track presentation information becomes available or is updated. Note that in a case
+         * where a part of the information for the current track is updated, it is not necessary
+         * to create a new {@link TvTrackInfo} object with a different track ID.
+         *
+         * @param audioPresentations A list of audio presentation information pertaining to the
+         * selected track.
+         */
+        public void notifyAudioPresentationChanged(@NonNull final List<AudioPresentation>
+                audioPresentations) {
+            final List<AudioPresentation> ap = new ArrayList<>(audioPresentations);
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "notifyAudioPresentationsChanged");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onAudioPresentationsChanged(ap);
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "error in notifyAudioPresentationsChanged", e);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Sends the presentation and program IDs of the selected audio presentation. This is used
+         * to inform the application that a specific audio presentation is selected. The TV input
+         * service must call this method as soon as an audio presentation is selected either by
+         * default or in response to a call to {@link #onSelectTrack}. The selected audio
+         * presentation ID for a currently selected audio track is maintained in the framework until
+         * the next call to this method even after the entire audio presentation list for the track
+         * is updated (but is reset when the session is tuned to a new channel), so care must be
+         * taken not to result in an obsolete track audio presentation ID.
+         *
+         * @param presentationId The ID of the selected audio presentation for the current track.
+         * @param programId The ID of the program providing the selected audio presentation.
+         * @see #onSelectAudioPresentation
+         */
+        public void notifyAudioPresentationSelected(final int presentationId, final int programId) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "notifyAudioPresentationSelected");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onAudioPresentationSelected(presentationId, programId);
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "error in notifyAudioPresentationSelected", e);
+                    }
+                }
+            });
+        }
+
+
+        /**
          * Informs the application that the user is allowed to watch the current program content.
          *
          * <p>Each TV input service is required to query the system whether the user is allowed to
@@ -1264,6 +1333,23 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Selects an audio presentation.
+         *
+         * <p>On successfully selecting the audio presentation,
+         * {@link #notifyAudioPresentationSelected} is invoked to provide updated information about
+         * the selected audio presentation to applications.
+         *
+         * @param presentationId The ID of the audio presentation to select.
+         * @param programId The ID of the program providing the selected audio presentation.
+         * @return {@code true} if the audio presentation selection was successful,
+         *         {@code false} otherwise.
+         * @see #notifyAudioPresentationSelected
+         */
+        public boolean onSelectAudioPresentation(int presentationId, int programId) {
+            return false;
+        }
+
+        /**
          * Processes a private command sent from the application to the TV input. This can be used
          * to provide domain-specific features that are only known between certain TV inputs and
          * their clients.
@@ -1594,6 +1680,13 @@ public abstract class TvInputService extends Service {
          */
         void setCaptionEnabled(boolean enabled) {
             onSetCaptionEnabled(enabled);
+        }
+
+        /**
+         * Calls {@link #onSelectAudioPresentation}.
+         */
+        void selectAudioPresentation(int presentationId, int programId) {
+            onSelectAudioPresentation(presentationId, programId);
         }
 
         /**

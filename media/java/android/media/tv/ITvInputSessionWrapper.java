@@ -74,6 +74,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_SET_IAPP_NOTIFICATION_ENABLED = 26;
     private static final int DO_REQUEST_AD = 27;
     private static final int DO_NOTIFY_AD_BUFFER = 28;
+    private static final int DO_SELECT_AUDIO_PRESENTATION = 29;
 
     private final boolean mIsRecordingSession;
     private final HandlerCaller mCaller;
@@ -239,6 +240,12 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 mTvInputRecordingSessionImpl.resumeRecording((Bundle) msg.obj);
                 break;
             }
+            case DO_SELECT_AUDIO_PRESENTATION: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                mTvInputSessionImpl.selectAudioPresentation(args.argi1, args.argi2);
+                args.recycle();
+                break;
+            }
             case DO_REQUEST_BROADCAST_INFO: {
                 mTvInputSessionImpl.requestBroadcastInfo((BroadcastInfoRequest) msg.obj);
                 break;
@@ -274,8 +281,8 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                         + "Consider handling the tune request in a separate thread.");
             }
             if (durationMs > EXECUTE_MESSAGE_TIMEOUT_LONG_MILLIS) {
-                throw new RuntimeException("Too much time to handle a request. (type=" + msg.what +
-                        ", " + durationMs + "ms > " + EXECUTE_MESSAGE_TIMEOUT_LONG_MILLIS + "ms).");
+                throw new RuntimeException("Too much time to handle a request. (type=" + msg.what
+                    + ", " + durationMs + "ms > " + EXECUTE_MESSAGE_TIMEOUT_LONG_MILLIS + "ms).");
             }
         }
     }
@@ -319,6 +326,12 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     @Override
     public void setCaptionEnabled(boolean enabled) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_SET_CAPTION_ENABLED, enabled));
+    }
+
+    @Override
+    public void selectAudioPresentation(int presentationId, int programId) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageII(DO_SELECT_AUDIO_PRESENTATION,
+                                                             presentationId, programId));
     }
 
     @Override
@@ -435,7 +448,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     }
 
     private final class TvInputEventReceiver extends InputEventReceiver {
-        public TvInputEventReceiver(InputChannel inputChannel, Looper looper) {
+        TvInputEventReceiver(InputChannel inputChannel, Looper looper) {
             super(inputChannel, looper);
         }
 

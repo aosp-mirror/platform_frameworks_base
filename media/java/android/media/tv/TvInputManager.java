@@ -32,6 +32,7 @@ import android.content.Intent;
 import android.graphics.Rect;
 import android.media.AudioDeviceInfo;
 import android.media.AudioFormat.Encoding;
+import android.media.AudioPresentation;
 import android.media.PlaybackParams;
 import android.media.tv.interactive.TvInteractiveAppManager;
 import android.net.Uri;
@@ -549,6 +550,27 @@ public final class TvInputManager {
         }
 
         /**
+         * This is called when the audio presentation information of the session has been changed.
+         *
+         * @param session A {@link TvInputManager.Session} associated with this callback.
+         * @param audioPresentations An updated list of selectable audio presentations.
+         */
+        public void onAudioPresentationsChanged(Session session,
+                List<AudioPresentation> audioPresentations) {
+        }
+
+        /**
+         * This is called when an audio presentation is selected.
+         *
+         * @param session A {@link TvInputManager.Session} associated with this callback.
+         * @param presentationId The ID of the selected audio presentation.
+         * @param programId The ID of the program providing the selected audio presentation.
+         */
+        public void onAudioPresentationSelected(Session session, int presentationId,
+                int programId) {
+        }
+
+        /**
          * This is called when the track information of the session has been changed.
          *
          * @param session A {@link TvInputManager.Session} associated with this callback.
@@ -772,6 +794,25 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mSessionCallback.onChannelRetuned(mSession, channelUri);
+                }
+            });
+        }
+
+        void postAudioPresentationsChanged(final List<AudioPresentation> audioPresentations) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onAudioPresentationsChanged(mSession, audioPresentations);
+                }
+            });
+        }
+
+        void postAudioPresentationSelected(final int presentationId, final int programId) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onAudioPresentationSelected(mSession, presentationId,
+                            programId);
                 }
             });
         }
@@ -1233,6 +1274,36 @@ public final class TvInputManager {
                     record.postChannelRetuned(channelUri);
                 }
             }
+            @Override
+            public void onAudioPresentationsChanged(List<AudioPresentation> audioPresentations,
+                    int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    if (record.mSession.updateAudioPresentations(audioPresentations)) {
+                        record.postAudioPresentationsChanged(audioPresentations);
+                    }
+                }
+            }
+
+            @Override
+            public void onAudioPresentationSelected(int presentationId, int programId, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    if (record.mSession.updateAudioPresentationSelection(presentationId,
+                            programId)) {
+                        record.postAudioPresentationSelected(presentationId, programId);
+                    }
+                }
+            }
+
 
             @Override
             public void onTracksChanged(List<TvTrackInfo> tracks, int seq) {
@@ -2401,11 +2472,17 @@ public final class TvInputManager {
 
         private final Object mMetadataLock = new Object();
         // @GuardedBy("mMetadataLock")
+        private final List<AudioPresentation> mAudioPresentations = new ArrayList<>();
+        // @GuardedBy("mMetadataLock")
         private final List<TvTrackInfo> mAudioTracks = new ArrayList<>();
         // @GuardedBy("mMetadataLock")
         private final List<TvTrackInfo> mVideoTracks = new ArrayList<>();
         // @GuardedBy("mMetadataLock")
         private final List<TvTrackInfo> mSubtitleTracks = new ArrayList<>();
+        // @GuardedBy("mMetadataLock")
+        private int mSelectedAudioProgramId = AudioPresentation.PROGRAM_ID_UNKNOWN;
+        // @GuardedBy("mMetadataLock")
+        private int mSelectedAudioPresentationId = AudioPresentation.PRESENTATION_ID_UNKNOWN;
         // @GuardedBy("mMetadataLock")
         private String mSelectedAudioTrackId;
         // @GuardedBy("mMetadataLock")
@@ -2554,9 +2631,12 @@ public final class TvInputManager {
                 return;
             }
             synchronized (mMetadataLock) {
+                mAudioPresentations.clear();
                 mAudioTracks.clear();
                 mVideoTracks.clear();
                 mSubtitleTracks.clear();
+                mSelectedAudioProgramId = AudioPresentation.PROGRAM_ID_UNKNOWN;
+                mSelectedAudioPresentationId = AudioPresentation.PRESENTATION_ID_UNKNOWN;
                 mSelectedAudioTrackId = null;
                 mSelectedVideoTrackId = null;
                 mSelectedSubtitleTrackId = null;
@@ -2585,6 +2665,119 @@ public final class TvInputManager {
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
+        }
+
+        /**
+         * Selects an audio presentation
+         *
+         * @param presentationId The ID of the audio presentation to select.
+         * @param programId The ID of the program offering the selected audio presentation.
+         * @see #getAudioPresentations
+         */
+        public void selectAudioPresentation(int presentationId, int programId) {
+            synchronized (mMetadataLock) {
+                if (presentationId != AudioPresentation.PRESENTATION_ID_UNKNOWN
+                        && !containsAudioPresentation(mAudioPresentations, presentationId)) {
+                    Log.w(TAG, "Invalid audio presentation id: " + presentationId);
+                    return;
+                }
+            }
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.selectAudioPresentation(mToken, presentationId, programId, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        private boolean containsAudioPresentation(List<AudioPresentation> audioPresentations,
+                    int presentationId) {
+            synchronized (mMetadataLock) {
+                for (AudioPresentation audioPresentation : audioPresentations) {
+                    if (audioPresentation.getPresentationId() == presentationId) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+
+        /**
+         * Returns a list of audio presentations.
+         *
+         * @return the list of audio presentations.
+         * Returns empty AudioPresentation list if no presentations are available.
+         */
+        public List<AudioPresentation> getAudioPresentations() {
+            synchronized (mMetadataLock) {
+                if (mAudioPresentations == null) {
+                    return new ArrayList<AudioPresentation>();
+                }
+                return new ArrayList<AudioPresentation>(mAudioPresentations);
+            }
+        }
+
+        /**
+         * Returns the program ID of the selected audio presentation.
+         *
+         * @return The ID of the program providing the selected audio presentation.
+         * Returns {@value AudioPresentation.PROGRAM_ID_UNKNOWN} if no audio presentation has
+         * been selected from a program.
+         * @see #selectAudioPresentation
+         */
+        public int getSelectedProgramId() {
+            synchronized (mMetadataLock) {
+                return mSelectedAudioProgramId;
+            }
+        }
+
+        /**
+         * Returns the presentation ID of the selected audio presentation.
+         *
+         * @return The ID of the selected audio presentation.
+         * Returns {@value AudioPresentation.PRESENTATION_ID_UNKNOWN} if no audio presentation
+         * has been selected.
+         * @see #selectAudioPresentation
+         */
+        public int getSelectedAudioPresentationId() {
+            synchronized (mMetadataLock) {
+                return mSelectedAudioPresentationId;
+            }
+        }
+
+        /**
+         * Responds to onAudioPresentationsChanged() and updates the internal audio presentation
+         * information.
+         * @return true if there is an update.
+         */
+        boolean updateAudioPresentations(List<AudioPresentation> audioPresentations) {
+            synchronized (mMetadataLock) {
+                mAudioPresentations.clear();
+                for (AudioPresentation presentation : audioPresentations) {
+                    mAudioPresentations.add(presentation);
+                }
+                return !mAudioPresentations.isEmpty();
+            }
+        }
+
+        /**
+         * Responds to onAudioPresentationSelected() and updates the internal audio presentation
+         * selection information.
+         * @return true if there is an update.
+         */
+        boolean updateAudioPresentationSelection(int presentationId, int programId) {
+            synchronized (mMetadataLock) {
+                if ((programId != mSelectedAudioProgramId)
+                        || (presentationId != mSelectedAudioPresentationId)) {
+                    mSelectedAudioPresentationId = presentationId;
+                    mSelectedAudioProgramId = programId;
+                    return true;
+                }
+            }
+            return false;
         }
 
         /**

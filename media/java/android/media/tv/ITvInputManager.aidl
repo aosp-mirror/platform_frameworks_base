@@ -20,6 +20,7 @@ import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Rect;
+import android.media.AudioPresentation;
 import android.media.PlaybackParams;
 import android.media.tv.AdBuffer;
 import android.media.tv.AdRequest;
@@ -78,6 +79,8 @@ interface ITvInputManager {
     void tune(in IBinder sessionToken, in Uri channelUri, in Bundle params, int userId);
     void setCaptionEnabled(in IBinder sessionToken, boolean enabled, int userId);
     void selectTrack(in IBinder sessionToken, int type, in String trackId, int userId);
+    void selectAudioPresentation(in IBinder sessionToken, int presentationId, int programId,
+            int userId);
 
     void setInteractiveAppNotificationEnabled(in IBinder sessionToken, boolean enabled, int userId);
 
