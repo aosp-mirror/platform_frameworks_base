@@ -20341,7 +20341,7 @@ package android.location {
     method @NonNull public android.location.GnssClock getClock();
     method @NonNull public java.util.Collection<android.location.GnssAutomaticGainControl> getGnssAutomaticGainControls();
     method @NonNull public java.util.Collection<android.location.GnssMeasurement> getMeasurements();
-    method public boolean hasFullTracking();
+    method public boolean hasIsFullTracking();
     method public boolean isFullTracking();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssMeasurementsEvent> CREATOR;
@@ -20351,10 +20351,10 @@ package android.location {
     ctor public GnssMeasurementsEvent.Builder();
     ctor public GnssMeasurementsEvent.Builder(@NonNull android.location.GnssMeasurementsEvent);
     method @NonNull public android.location.GnssMeasurementsEvent build();
-    method @NonNull public android.location.GnssMeasurementsEvent.Builder clearFullTracking();
+    method @NonNull public android.location.GnssMeasurementsEvent.Builder clearIsFullTracking();
     method @NonNull public android.location.GnssMeasurementsEvent.Builder setClock(@NonNull android.location.GnssClock);
-    method @NonNull public android.location.GnssMeasurementsEvent.Builder setFullTracking(boolean);
     method @NonNull public android.location.GnssMeasurementsEvent.Builder setGnssAutomaticGainControls(@NonNull java.util.Collection<android.location.GnssAutomaticGainControl>);
+    method @NonNull public android.location.GnssMeasurementsEvent.Builder setIsFullTracking(boolean);
     method @NonNull public android.location.GnssMeasurementsEvent.Builder setMeasurements(@NonNull java.util.Collection<android.location.GnssMeasurement>);
   }
 
