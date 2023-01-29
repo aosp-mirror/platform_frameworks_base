@@ -1965,7 +1965,7 @@ class ActivityStarter {
                 /* action */
                 action,
                 /* version */
-                1,
+                2,
                 /* multi_window - we have our source not in the target task, but both are visible */
                 targetTask != null && mSourceRecord != null
                         && !targetTask.equals(mSourceRecord.getTask()) && targetTask.isVisible()

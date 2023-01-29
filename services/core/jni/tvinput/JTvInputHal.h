@@ -52,6 +52,7 @@ using AidlITvInput = ::aidl::android::hardware::tv::input::ITvInput;
 using AidlNativeHandle = ::aidl::android::hardware::common::NativeHandle;
 using AidlTvInputDeviceInfo = ::aidl::android::hardware::tv::input::TvInputDeviceInfo;
 using AidlTvInputEvent = ::aidl::android::hardware::tv::input::TvInputEvent;
+using AidlTvMessageEvent = ::aidl::android::hardware::tv::input::TvMessageEvent;
 using AidlTvStreamConfig = ::aidl::android::hardware::tv::input::TvStreamConfig;
 
 extern gTvInputHalClassInfoType gTvInputHalClassInfo;
@@ -131,6 +132,7 @@ private:
     public:
         explicit TvInputCallback(JTvInputHal* hal);
         ::ndk::ScopedAStatus notify(const AidlTvInputEvent& event) override;
+        ::ndk::ScopedAStatus notifyTvMessageEvent(const AidlTvMessageEvent& event) override;
         Return<void> notify(const HidlTvInputEvent& event) override;
 
     private:

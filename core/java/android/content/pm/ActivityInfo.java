@@ -1285,6 +1285,29 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public static final long OVERRIDE_ANY_ORIENTATION = 265464455L;
 
     /**
+     * This override fixes display orientation to landscape natural orientation when a task is
+     * fullscreen. While display rotation is fixed to landscape, the orientation requested by the
+     * activity will be still respected by bounds resolution logic. For instance, if an activity
+     * requests portrait orientation and this override is set, then activity will appear in the
+     * letterbox mode for fixed orientation with the display rotated to the lanscape natural
+     * orientation.
+     *
+     * <p>This override is applicable only when natural orientation of the device is
+     * landscape and display ignores orientation requestes.
+     *
+     * <p>Main use case for this override are camera-using activities that are portrait-only and
+     * assume alignment with natural device orientation. Such activities can automatically be
+     * rotated with com.android.server.wm.DisplayRotationCompatPolicy but not all of them can
+     * handle dynamic rotation and thus can benefit from this override.
+     *
+     * @hide
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION = 255940284L;
+
+    /**
      * Compares activity window layout min width/height with require space for multi window to
      * determine if it can be put into multi window mode.
      */

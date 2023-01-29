@@ -58,7 +58,7 @@ jmethodID method_gnssAgcBuilderSetCarrierFrequencyHz;
 jmethodID method_gnssAgcBuilderBuild;
 jmethodID method_gnssMeasurementsEventBuilderCtor;
 jmethodID method_gnssMeasurementsEventBuilderSetClock;
-jmethodID method_gnssMeasurementsEventBuilderSetFullTracking;
+jmethodID method_gnssMeasurementsEventBuilderSetIsFullTracking;
 jmethodID method_gnssMeasurementsEventBuilderSetMeasurements;
 jmethodID method_gnssMeasurementsEventBuilderSetGnssAutomaticGainControls;
 jmethodID method_gnssMeasurementsEventBuilderBuild;
@@ -110,8 +110,8 @@ void GnssMeasurement_class_init_once(JNIEnv* env, jclass& clazz) {
             env->GetMethodID(class_gnssMeasurementsEventBuilder, "setGnssAutomaticGainControls",
                              "([Landroid/location/GnssAutomaticGainControl;)"
                              "Landroid/location/GnssMeasurementsEvent$Builder;");
-    method_gnssMeasurementsEventBuilderSetFullTracking =
-            env->GetMethodID(class_gnssMeasurementsEventBuilder, "setFullTracking",
+    method_gnssMeasurementsEventBuilderSetIsFullTracking =
+            env->GetMethodID(class_gnssMeasurementsEventBuilder, "setIsFullTracking",
                              "(Z)"
                              "Landroid/location/GnssMeasurementsEvent$Builder;");
     method_gnssMeasurementsEventBuilderBuild =
@@ -234,7 +234,7 @@ void GnssMeasurement_class_init_once(JNIEnv* env, jclass& clazz) {
 
 void setMeasurementData(JNIEnv* env, jobject& callbacksObj, jobject clock,
                         jobjectArray measurementArray, jobjectArray gnssAgcArray,
-                        bool hasFullTracking, jboolean isFullTracking) {
+                        bool hasIsFullTracking, jboolean isFullTracking) {
     jobject gnssMeasurementsEventBuilderObject =
             env->NewObject(class_gnssMeasurementsEventBuilder,
                            method_gnssMeasurementsEventBuilderCtor);
@@ -246,9 +246,9 @@ void setMeasurementData(JNIEnv* env, jobject& callbacksObj, jobject clock,
     callObjectMethodIgnoringResult(env, gnssMeasurementsEventBuilderObject,
                                    method_gnssMeasurementsEventBuilderSetGnssAutomaticGainControls,
                                    gnssAgcArray);
-    if (hasFullTracking) {
+    if (hasIsFullTracking) {
         callObjectMethodIgnoringResult(env, gnssMeasurementsEventBuilderObject,
-                                       method_gnssMeasurementsEventBuilderSetFullTracking,
+                                       method_gnssMeasurementsEventBuilderSetIsFullTracking,
                                        isFullTracking);
     }
     jobject gnssMeasurementsEventObject =
@@ -394,10 +394,10 @@ void GnssMeasurementCallbackAidl::translateAndSetGnssData(const GnssData& data) 
     gnssAgcArray = translateAllGnssAgcs(env, data.gnssAgcs);
     if (this->getInterfaceVersion() >= 3) {
         setMeasurementData(env, mCallbacksObj, clock, measurementArray, gnssAgcArray,
-                           /*hasFullTracking=*/true, data.isFullTracking);
+                           /*hasIsFullTracking=*/true, data.isFullTracking);
     } else {
         setMeasurementData(env, mCallbacksObj, clock, measurementArray, gnssAgcArray,
-                           /*hasFullTracking=*/false,
+                           /*hasIsFullTracking=*/false,
                            /*isFullTracking=*/JNI_FALSE);
     }
 

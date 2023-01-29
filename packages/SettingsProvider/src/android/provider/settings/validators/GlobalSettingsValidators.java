@@ -281,6 +281,14 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.Wearable.AMBIENT_PLUGGED_TIMEOUT_MIN, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.Wearable.AMBIENT_TILT_TO_BRIGHT, BOOLEAN_VALIDATOR);
         VALIDATORS.put(
+                Global.Wearable.LOCK_SCREEN_STATE,
+                new DiscreteValueValidator(
+                        new String[] {
+                                String.valueOf(Global.Wearable.LOCK_SCREEN_STATE_NONE),
+                                String.valueOf(Global.Wearable.LOCK_SCREEN_STATE_PIN),
+                                String.valueOf(Global.Wearable.LOCK_SCREEN_STATE_PATTERN)
+                        }));
+        VALIDATORS.put(
                 Global.Wearable.PAIRED_DEVICE_OS_TYPE,
                 new DiscreteValueValidator(
                         new String[] {

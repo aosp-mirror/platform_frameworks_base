@@ -57,7 +57,8 @@ public class TaskViewFactoryController {
 
     /** Creates an {@link TaskView} */
     public void create(@UiContext Context context, Executor executor, Consumer<TaskView> onCreate) {
-        TaskView taskView = new TaskView(context, mTaskOrganizer, mTaskViewTransitions, mSyncQueue);
+        TaskView taskView = new TaskView(context, new TaskViewTaskController(context,
+                mTaskOrganizer, mTaskViewTransitions, mSyncQueue));
         executor.execute(() -> {
             onCreate.accept(taskView);
         });

@@ -163,6 +163,9 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
     @Override
     @Nullable
     public ChooserListAdapter getWorkListAdapter() {
+        if (getCount() == 1) {
+            return null;
+        }
         return getAdapterForIndex(PROFILE_WORK).getListAdapter();
     }
 

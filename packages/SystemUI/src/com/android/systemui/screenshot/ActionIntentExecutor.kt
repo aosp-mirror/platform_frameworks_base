@@ -22,7 +22,6 @@ import android.os.Bundle
 import android.os.RemoteException
 import android.os.UserHandle
 import android.util.Log
-import android.view.Display
 import android.view.IRemoteAnimationFinishedCallback
 import android.view.IRemoteAnimationRunner
 import android.view.RemoteAnimationAdapter
@@ -33,6 +32,7 @@ import com.android.internal.infra.ServiceConnector
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.settings.DisplayTracker
 import javax.inject.Inject
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
@@ -47,6 +47,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
     private val context: Context,
+    private val displayTracker: DisplayTracker
 ) {
     /**
      * Execute the given intent with startActivity while performing operations for screenshot action
@@ -82,7 +83,7 @@ constructor(
             val runner = RemoteAnimationAdapter(SCREENSHOT_REMOTE_RUNNER, 0, 0)
             try {
                 WindowManagerGlobal.getWindowManagerService()
-                    .overridePendingAppTransitionRemote(runner, Display.DEFAULT_DISPLAY)
+                    .overridePendingAppTransitionRemote(runner, displayTracker.defaultDisplayId)
             } catch (e: Exception) {
                 Log.e(TAG, "Error overriding screenshot app transition", e)
             }

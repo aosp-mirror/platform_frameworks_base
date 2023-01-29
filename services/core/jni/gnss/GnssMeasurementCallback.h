@@ -49,7 +49,7 @@ void GnssMeasurement_class_init_once(JNIEnv* env, jclass& clazz);
 
 void setMeasurementData(JNIEnv* env, jobject& callbacksObj, jobject clock,
                         jobjectArray measurementArray, jobjectArray gnssAgcArray,
-                        bool hasFullTracking, jboolean isFullTracking);
+                        bool hasIsFullTracking, jboolean isFullTracking);
 
 class GnssMeasurementCallbackAidl : public hardware::gnss::BnGnssMeasurementCallback {
 public:
@@ -142,7 +142,7 @@ void GnssMeasurementCallbackHidl::translateAndSetGnssData(const T& data) {
     jobjectArray measurementArray =
             translateAllGnssMeasurements(env, data.measurements.data(), count);
     setMeasurementData(env, mCallbacksObj, clock, measurementArray, /*gnssAgcArray=*/nullptr,
-                       /*hasFullTracking=*/false,
+                       /*hasIsFullTracking=*/false,
                        /*isFullTracking=*/JNI_FALSE);
 
     env->DeleteLocalRef(clock);

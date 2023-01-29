@@ -561,6 +561,7 @@ public final class InputDevice implements Parcelable {
         private String mKeyboardLayoutType = null;
         private int mUsiVersionMajor = -1;
         private int mUsiVersionMinor = -1;
+        private int mAssociatedDisplayId = Display.INVALID_DISPLAY;
         private List<MotionRange> mMotionRanges = new ArrayList<>();
 
         /** @see InputDevice#getId() */
@@ -678,6 +679,12 @@ public final class InputDevice implements Parcelable {
             return this;
         }
 
+        /** @see InputDevice#getAssociatedDisplayId() */
+        public Builder setAssociatedDisplayId(int displayId) {
+            mAssociatedDisplayId = displayId;
+            return this;
+        }
+
         /** @see InputDevice#getMotionRanges() */
         public Builder addMotionRange(int axis, int source,
                 float min, float max, float flat, float fuzz, float resolution) {
@@ -708,7 +715,7 @@ public final class InputDevice implements Parcelable {
                     mHasBattery,
                     mUsiVersionMajor,
                     mUsiVersionMinor,
-                    Display.INVALID_DISPLAY);
+                    mAssociatedDisplayId);
 
             final int numRanges = mMotionRanges.size();
             for (int i = 0; i < numRanges; i++) {

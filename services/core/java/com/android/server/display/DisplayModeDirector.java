@@ -635,7 +635,9 @@ public class DisplayModeDirector {
             //     which is within the render rate range
             //   - 90hz is not in range as none of the even divisors (i.e. 90, 45, 30)
             //     fall within the acceptable render range.
-            final int divisor = (int) Math.ceil(physicalRefreshRate / summary.maxRenderFrameRate);
+            final int divisor =
+                    (int) Math.ceil((physicalRefreshRate / summary.maxRenderFrameRate)
+                            - FLOAT_TOLERANCE);
             float adjustedPhysicalRefreshRate = physicalRefreshRate / divisor;
             if (adjustedPhysicalRefreshRate < (summary.minRenderFrameRate - FLOAT_TOLERANCE)) {
                 if (mLoggingEnabled) {
@@ -3081,10 +3083,10 @@ public class DisplayModeDirector {
 
         @Override
         public boolean supportsFrameRateOverride() {
-            return SurfaceFlingerProperties.enable_frame_rate_override().orElse(false)
+            return SurfaceFlingerProperties.enable_frame_rate_override().orElse(true)
                             && !SurfaceFlingerProperties.frame_rate_override_for_native_rates()
-                                    .orElse(true)
-                            && SurfaceFlingerProperties.frame_rate_override_global().orElse(false);
+                                    .orElse(false)
+                            && SurfaceFlingerProperties.frame_rate_override_global().orElse(true);
         }
 
         private DisplayManager getDisplayManager() {

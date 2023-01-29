@@ -7698,8 +7698,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         boolean handled = false;
         final ListenerInfo li = mListenerInfo;
+        boolean shouldPerformHapticFeedback = true;
         if (li != null && li.mOnLongClickListener != null) {
             handled = li.mOnLongClickListener.onLongClick(View.this);
+            if (handled) {
+                shouldPerformHapticFeedback =
+                        li.mOnLongClickListener.onLongClickUseDefaultHapticFeedback(View.this);
+            }
         }
         if (!handled) {
             final boolean isAnchored = !Float.isNaN(x) && !Float.isNaN(y);
@@ -7710,7 +7715,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 handled = showLongClickTooltip((int) x, (int) y);
             }
         }
-        if (handled) {
+        if (handled && shouldPerformHapticFeedback) {
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
         }
         return handled;
@@ -25824,10 +25829,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param selected true if the view must be selected, false otherwise
      */
     public void setSelected(boolean selected) {
-        setSelected(selected, true);
-    }
-
-    void setSelected(boolean selected, boolean sendAccessibilityEvent) {
         //noinspection DoubleNegation
         if (((mPrivateFlags & PFLAG_SELECTED) != 0) != selected) {
             mPrivateFlags = (mPrivateFlags & ~PFLAG_SELECTED) | (selected ? PFLAG_SELECTED : 0);
@@ -25835,13 +25836,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             invalidate(true);
             refreshDrawableState();
             dispatchSetSelected(selected);
-            if (sendAccessibilityEvent) {
-                if (selected) {
-                    sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
-                } else {
-                    notifyViewAccessibilityStateChangedIfNeeded(
-                            AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
-                }
+            if (selected) {
+                sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
+            } else {
+                notifyViewAccessibilityStateChangedIfNeeded(
+                        AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
             }
         }
     }
@@ -29922,6 +29921,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * @return true if the callback consumed the long click, false otherwise.
          */
         boolean onLongClick(View v);
+
+        /**
+         * Returns whether the default {@link HapticFeedbackConstants#LONG_PRESS} haptic feedback
+         * is performed when this listener has consumed the long click. This method is called
+         * immediately after {@link #onLongClick} has returned true.
+         *
+         * @param v The view that was clicked and held.
+         * @return true to perform the default {@link HapticFeedbackConstants#LONG_PRESS} haptic
+         * feedback, or false if the handler manages all haptics itself.
+         */
+        default boolean onLongClickUseDefaultHapticFeedback(@NonNull View v) {
+            return true;
+        }
     }
 
     /**

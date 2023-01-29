@@ -21,7 +21,10 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED
 import android.net.NetworkCapabilities.TRANSPORT_CELLULAR
+import android.net.NetworkCapabilities.TRANSPORT_VPN
 import android.net.NetworkCapabilities.TRANSPORT_WIFI
+import android.net.TransportInfo
+import android.net.VpnTransportInfo
 import android.net.vcn.VcnTransportInfo
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
@@ -243,6 +246,54 @@ class WifiRepositoryImplTest : SysuiTestCase() {
         job.cancel()
     }
 
+    /** Regression test for b/266628069. */
+    @Test
+    fun isWifiDefault_transportInfoIsNotWifi_andNoWifiTransport_false() =
+        runBlocking(IMMEDIATE) {
+            val job = underTest.isWifiDefault.launchIn(this)
+
+            val transportInfo = VpnTransportInfo(
+                /* type= */ 0,
+                /* sessionId= */ "sessionId",
+            )
+            val networkCapabilities = mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_VPN)).thenReturn(true)
+                whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(false)
+                whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(false)
+                whenever(it.transportInfo).thenReturn(transportInfo)
+            }
+
+            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, networkCapabilities)
+
+            assertThat(underTest.isWifiDefault.value).isFalse()
+
+            job.cancel()
+        }
+
+    /** Regression test for b/266628069. */
+    @Test
+    fun isWifiDefault_transportInfoIsNotWifi_butHasWifiTransport_true() =
+        runBlocking(IMMEDIATE) {
+            val job = underTest.isWifiDefault.launchIn(this)
+
+            val transportInfo = VpnTransportInfo(
+                /* type= */ 0,
+                /* sessionId= */ "sessionId",
+            )
+            val networkCapabilities = mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_VPN)).thenReturn(true)
+                whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
+                whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(false)
+                whenever(it.transportInfo).thenReturn(transportInfo)
+            }
+
+            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, networkCapabilities)
+
+            assertThat(underTest.isWifiDefault.value).isTrue()
+
+            job.cancel()
+        }
+
     @Test
     fun isWifiDefault_cellularVcnNetwork_isTrue() = runBlocking(IMMEDIATE) {
         val job = underTest.isWifiDefault.launchIn(this)
@@ -258,6 +309,24 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
         job.cancel()
     }
+
+    @Test
+    fun wifiNetwork_cellularAndWifiTransports_usesCellular_isTrue() =
+        runBlocking(IMMEDIATE) {
+            val job = underTest.isWifiDefault.launchIn(this)
+
+            val capabilities = mock<NetworkCapabilities>().apply {
+                whenever(this.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
+                whenever(this.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
+                whenever(this.transportInfo).thenReturn(VcnTransportInfo(PRIMARY_WIFI_INFO))
+            }
+
+            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, capabilities)
+
+            assertThat(underTest.isWifiDefault.value).isTrue()
+
+            job.cancel()
+        }
 
     @Test
     fun isWifiDefault_cellularNotVcnNetwork_isFalse() = runBlocking(IMMEDIATE) {
@@ -467,6 +536,28 @@ class WifiRepositoryImplTest : SysuiTestCase() {
         job.cancel()
     }
 
+    /** Regression test for b/266628069. */
+    @Test
+    fun wifiNetwork_transportInfoIsNotWifi_flowHasNoNetwork() =
+        runBlocking(IMMEDIATE) {
+            var latest: WifiNetworkModel? = null
+            val job = underTest
+                .wifiNetwork
+                .onEach { latest = it }
+                .launchIn(this)
+
+            val transportInfo = VpnTransportInfo(
+                /* type= */ 0,
+                /* sessionId= */ "sessionId",
+            )
+            getNetworkCallback()
+                .onCapabilitiesChanged(NETWORK, createWifiNetworkCapabilities(transportInfo))
+
+            assertThat(latest is WifiNetworkModel.Inactive).isTrue()
+
+            job.cancel()
+        }
+
     @Test
     fun wifiNetwork_cellularVcnNetworkAdded_flowHasNetwork() = runBlocking(IMMEDIATE) {
         var latest: WifiNetworkModel? = null
@@ -533,6 +624,31 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
         job.cancel()
     }
+
+    @Test
+    fun wifiNetwork_cellularAndWifiTransports_usesCellular() =
+        runBlocking(IMMEDIATE) {
+            var latest: WifiNetworkModel? = null
+            val job = underTest
+                .wifiNetwork
+                .onEach { latest = it }
+                .launchIn(this)
+
+            val capabilities = mock<NetworkCapabilities>().apply {
+                whenever(this.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
+                whenever(this.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
+                whenever(this.transportInfo).thenReturn(VcnTransportInfo(PRIMARY_WIFI_INFO))
+            }
+
+            getNetworkCallback().onCapabilitiesChanged(NETWORK, capabilities)
+
+            assertThat(latest is WifiNetworkModel.Active).isTrue()
+            val latestActive = latest as WifiNetworkModel.Active
+            assertThat(latestActive.networkId).isEqualTo(NETWORK_ID)
+            assertThat(latestActive.ssid).isEqualTo(SSID)
+
+            job.cancel()
+        }
 
     @Test
     fun wifiNetwork_newPrimaryWifiNetwork_flowHasNewNetwork() = runBlocking(IMMEDIATE) {
@@ -870,12 +986,12 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     }
 
     private fun createWifiNetworkCapabilities(
-        wifiInfo: WifiInfo,
+        transportInfo: TransportInfo,
         isValidated: Boolean = true,
     ): NetworkCapabilities {
         return mock<NetworkCapabilities>().also {
             whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
-            whenever(it.transportInfo).thenReturn(wifiInfo)
+            whenever(it.transportInfo).thenReturn(transportInfo)
             whenever(it.hasCapability(NET_CAPABILITY_VALIDATED)).thenReturn(isValidated)
         }
     }

@@ -26,11 +26,13 @@ import android.annotation.SystemApi;
 import android.app.ActivityManager;
 import android.app.Service;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.hdmi.HdmiDeviceInfo;
+import android.media.AudioPresentation;
 import android.media.PlaybackParams;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -57,10 +59,8 @@ import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
-
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.Preconditions;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -171,7 +171,7 @@ public abstract class TvInputService extends Service {
 
             @Override
             public void createSession(InputChannel channel, ITvInputSessionCallback cb,
-                    String inputId, String sessionId) {
+                    String inputId, String sessionId, AttributionSource tvAppAttributionSource) {
                 if (channel == null) {
                     Log.w(TAG, "Creating session without input channel");
                 }
@@ -183,6 +183,7 @@ public abstract class TvInputService extends Service {
                 args.arg2 = cb;
                 args.arg3 = inputId;
                 args.arg4 = sessionId;
+                args.arg5 = tvAppAttributionSource;
                 mServiceHandler.obtainMessage(ServiceHandler.DO_CREATE_SESSION,
                         args).sendToTarget();
             }
@@ -367,6 +368,24 @@ public abstract class TvInputService extends Service {
     @Nullable
     public Session onCreateSession(@NonNull String inputId, @NonNull String sessionId) {
         return onCreateSession(inputId);
+    }
+
+    /**
+     * Returns a concrete implementation of {@link Session}.
+     *
+     * <p>For any apps that needs sessionId to request tuner resources from TunerResourceManager and
+     * needs to specify custom AttributionSource to AudioTrack, it needs to override this method to
+     * get the sessionId and AttrubutionSource passed. When no overriding, this method calls {@link
+     * #onCreateSession(String, String)} defaultly.
+     *
+     * @param inputId The ID of the TV input associated with the session.
+     * @param sessionId the unique sessionId created by TIF when session is created.
+     * @param tvAppAttributionSource The Attribution Source of the TV App.
+     */
+    @Nullable
+    public Session onCreateSession(@NonNull String inputId, @NonNull String sessionId,
+            @NonNull AttributionSource tvAppAttributionSource) {
+        return onCreateSession(inputId, sessionId);
     }
 
     /**
@@ -737,6 +756,74 @@ public abstract class TvInputService extends Service {
                 }
             });
         }
+
+        /**
+         * Sends an updated list of all audio presentations available from a Next Generation Audio
+         * service. This is used by the framework to maintain the audio presentation information for
+         * a given track of {@link TvTrackInfo#TYPE_AUDIO}, which in turn is used by
+         * {@link TvView#getAudioPresentations} for the application to retrieve metadata for the
+         * current audio track. The TV input service must call this method as soon as the audio
+         * track presentation information becomes available or is updated. Note that in a case
+         * where a part of the information for the current track is updated, it is not necessary
+         * to create a new {@link TvTrackInfo} object with a different track ID.
+         *
+         * @param audioPresentations A list of audio presentation information pertaining to the
+         * selected track.
+         */
+        public void notifyAudioPresentationChanged(@NonNull final List<AudioPresentation>
+                audioPresentations) {
+            final List<AudioPresentation> ap = new ArrayList<>(audioPresentations);
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "notifyAudioPresentationsChanged");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onAudioPresentationsChanged(ap);
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "error in notifyAudioPresentationsChanged", e);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Sends the presentation and program IDs of the selected audio presentation. This is used
+         * to inform the application that a specific audio presentation is selected. The TV input
+         * service must call this method as soon as an audio presentation is selected either by
+         * default or in response to a call to {@link #onSelectTrack}. The selected audio
+         * presentation ID for a currently selected audio track is maintained in the framework until
+         * the next call to this method even after the entire audio presentation list for the track
+         * is updated (but is reset when the session is tuned to a new channel), so care must be
+         * taken not to result in an obsolete track audio presentation ID.
+         *
+         * @param presentationId The ID of the selected audio presentation for the current track.
+         * @param programId The ID of the program providing the selected audio presentation.
+         * @see #onSelectAudioPresentation
+         */
+        public void notifyAudioPresentationSelected(final int presentationId, final int programId) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "notifyAudioPresentationSelected");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onAudioPresentationSelected(presentationId, programId);
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "error in notifyAudioPresentationSelected", e);
+                    }
+                }
+            });
+        }
+
 
         /**
          * Informs the application that the user is allowed to watch the current program content.
@@ -1128,7 +1215,7 @@ public abstract class TvInputService extends Service {
         public abstract void onSetStreamVolume(@FloatRange(from = 0.0, to = 1.0) float volume);
 
         /**
-         * called when broadcast info is requested.
+         * Called when broadcast info is requested.
          *
          * @param request broadcast info request
          */
@@ -1136,7 +1223,7 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * called when broadcast info is removed.
+         * Called when broadcast info is removed.
          */
         public void onRemoveBroadcastInfo(int requestId) {
         }
@@ -1243,6 +1330,23 @@ public abstract class TvInputService extends Service {
          * @see Session#notifyAitInfoUpdated(android.media.tv.AitInfo)
          */
         public void onSetInteractiveAppNotificationEnabled(boolean enabled) {
+        }
+
+        /**
+         * Selects an audio presentation.
+         *
+         * <p>On successfully selecting the audio presentation,
+         * {@link #notifyAudioPresentationSelected} is invoked to provide updated information about
+         * the selected audio presentation to applications.
+         *
+         * @param presentationId The ID of the audio presentation to select.
+         * @param programId The ID of the program providing the selected audio presentation.
+         * @return {@code true} if the audio presentation selection was successful,
+         *         {@code false} otherwise.
+         * @see #notifyAudioPresentationSelected
+         */
+        public boolean onSelectAudioPresentation(int presentationId, int programId) {
+            return false;
         }
 
         /**
@@ -1576,6 +1680,13 @@ public abstract class TvInputService extends Service {
          */
         void setCaptionEnabled(boolean enabled) {
             onSetCaptionEnabled(enabled);
+        }
+
+        /**
+         * Calls {@link #onSelectAudioPresentation}.
+         */
+        void selectAudioPresentation(int presentationId, int programId) {
+            onSelectAudioPresentation(presentationId, programId);
         }
 
         /**
@@ -2497,8 +2608,10 @@ public abstract class TvInputService extends Service {
                     ITvInputSessionCallback cb = (ITvInputSessionCallback) args.arg2;
                     String inputId = (String) args.arg3;
                     String sessionId = (String) args.arg4;
+                    AttributionSource tvAppAttributionSource = (AttributionSource) args.arg5;
                     args.recycle();
-                    Session sessionImpl = onCreateSession(inputId, sessionId);
+                    Session sessionImpl =
+                            onCreateSession(inputId, sessionId, tvAppAttributionSource);
                     if (sessionImpl == null) {
                         try {
                             // Failed to create a session.
@@ -2534,7 +2647,7 @@ public abstract class TvInputService extends Service {
                         proxySession.mServiceHandler = mServiceHandler;
                         TvInputManager manager = (TvInputManager) getSystemService(
                                 Context.TV_INPUT_SERVICE);
-                        manager.createSession(hardwareInputId,
+                        manager.createSession(hardwareInputId, tvAppAttributionSource,
                                 proxySession.mHardwareSessionCallback, mServiceHandler);
                     } else {
                         SomeArgs someArgs = SomeArgs.obtain();

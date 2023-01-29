@@ -41,6 +41,7 @@ interface IBinaryTransparencyService {
     parcelable AppInfo {
         String packageName;
         long longVersion;
+        String splitName;
         byte[] digest;
         int digestAlgorithm;
         String[] signerDigests;

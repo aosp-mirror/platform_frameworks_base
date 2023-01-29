@@ -142,6 +142,9 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
     @Override
     @Nullable
     public ResolverListAdapter getWorkListAdapter() {
+        if (getCount() == 1) {
+            return null;
+        }
         return getAdapterForIndex(PROFILE_WORK);
     }
 

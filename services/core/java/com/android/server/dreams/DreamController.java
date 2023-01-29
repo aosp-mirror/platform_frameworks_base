@@ -46,6 +46,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -118,6 +119,8 @@ final class DreamController {
         //   are yet to be delivered.
         options.setDeliveryGroupMatchingKey(
                 DREAMING_DELIVERY_GROUP_NAMESPACE, DREAMING_DELIVERY_GROUP_KEY);
+        // This allows the broadcast delivery to be delayed to apps in the Cached state.
+        options.setDeferUntilActive(true);
         return options.toBundle();
     }
 
@@ -152,10 +155,20 @@ final class DreamController {
                     + ", isPreviewMode=" + isPreviewMode + ", canDoze=" + canDoze
                     + ", userId=" + userId + ", reason='" + reason + "'");
 
-            if (mCurrentDream != null) {
-                mPreviousDreams.add(mCurrentDream);
-            }
+            final DreamRecord oldDream = mCurrentDream;
             mCurrentDream = new DreamRecord(token, name, isPreviewMode, canDoze, userId, wakeLock);
+            if (oldDream != null) {
+                if (!oldDream.mWakingGently) {
+                    // We will stop these previous dreams once the new dream is started.
+                    mPreviousDreams.add(oldDream);
+                } else if (Objects.equals(oldDream.mName, mCurrentDream.mName)) {
+                    // We are attempting to start a dream that is currently waking up gently.
+                    // Let's silently stop the old instance here to clear the dream state.
+                    // This should happen after the new mCurrentDream is set to avoid announcing
+                    // a "dream stopped" state.
+                    stopDreamInstance(/* immediately */ true, "restarting same dream", oldDream);
+                }
+            }
 
             mCurrentDream.mDreamStartTime = SystemClock.elapsedRealtime();
             MetricsLogger.visible(mContext,
@@ -281,7 +294,10 @@ final class DreamController {
                         new int[] {ACTIVITY_TYPE_DREAM});
 
                 mListener.onDreamStopped(dream.mToken);
+            } else if (dream.mCanDoze && !mCurrentDream.mCanDoze) {
+                mListener.stopDozing(dream.mToken);
             }
+
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_POWER);
         }
@@ -327,6 +343,7 @@ final class DreamController {
      */
     public interface Listener {
         void onDreamStopped(Binder token);
+        void stopDozing(Binder token);
     }
 
     private final class DreamRecord implements DeathRecipient, ServiceConnection {

@@ -3385,6 +3385,11 @@
   <java-symbol type="array" name="config_displayWhiteBalanceDisplayNominalWhite" />
   <java-symbol type="bool" name="config_displayWhiteBalanceLightModeAllowed" />
 
+  <!-- Device states where the sensor based rotation values should be reversed around the Z axis
+       for the default display.
+       TODO(b/265312193): Remove this workaround when this bug is fixed.-->
+  <java-symbol type="array" name="config_deviceStatesToReverseDefaultDisplayRotationAroundZAxis" />
+
   <!-- Default user restrictions for the SYSTEM user -->
   <java-symbol type="array" name="config_defaultFirstUserRestrictions" />
 

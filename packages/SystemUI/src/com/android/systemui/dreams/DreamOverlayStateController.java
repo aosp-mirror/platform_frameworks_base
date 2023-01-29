@@ -83,6 +83,12 @@ public class DreamOverlayStateController implements
          */
         default void onAvailableComplicationTypesChanged() {
         }
+
+        /**
+         * Called when the low light dream is exiting and transitioning back to the user dream.
+         */
+        default void onExitLowLight() {
+        }
     }
 
     private final Executor mExecutor;
@@ -278,6 +284,10 @@ public class DreamOverlayStateController implements
      * @param active {@code true} if low light mode is active, {@code false} otherwise.
      */
     public void setLowLightActive(boolean active) {
+        if (isLowLightActive() && !active) {
+            // Notify that we're exiting low light only on the transition from active to not active.
+            mCallbacks.forEach(Callback::onExitLowLight);
+        }
         modifyState(active ? OP_SET_STATE : OP_CLEAR_STATE, STATE_LOW_LIGHT_ACTIVE);
     }
 

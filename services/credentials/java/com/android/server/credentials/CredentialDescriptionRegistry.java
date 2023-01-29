@@ -30,6 +30,7 @@ import java.util.Set;
 public class CredentialDescriptionRegistry {
 
     private static final int MAX_ALLOWED_CREDENTIAL_DESCRIPTIONS = 128;
+    private static final int MAX_ALLOWED_ENTRIES_PER_PROVIDER = 16;
     private static SparseArray<CredentialDescriptionRegistry> sCredentialDescriptionSessionPerUser;
 
     static {
@@ -50,9 +51,11 @@ public class CredentialDescriptionRegistry {
     }
 
     private Map<String, Set<CredentialDescription>> mCredentialDescriptions;
+    private int mTotalDescriptionCount;
 
     private CredentialDescriptionRegistry() {
         this.mCredentialDescriptions = new HashMap<>();
+        this.mTotalDescriptionCount = 0;
     }
 
     /** Handle the given {@link RegisterCredentialDescriptionRequest} by creating
@@ -60,13 +63,20 @@ public class CredentialDescriptionRegistry {
     public void executeRegisterRequest(RegisterCredentialDescriptionRequest request,
             String callingPackageName) {
 
-        if (!mCredentialDescriptions.containsKey(callingPackageName)
-                && mCredentialDescriptions.size() <= MAX_ALLOWED_CREDENTIAL_DESCRIPTIONS) {
+        if (!mCredentialDescriptions.containsKey(callingPackageName)) {
             mCredentialDescriptions.put(callingPackageName, new HashSet<>());
         }
 
-        mCredentialDescriptions.get(callingPackageName)
-                .addAll(request.getCredentialDescriptions());
+        if (mTotalDescriptionCount <= MAX_ALLOWED_CREDENTIAL_DESCRIPTIONS
+                && mCredentialDescriptions.get(callingPackageName).size()
+                <= MAX_ALLOWED_ENTRIES_PER_PROVIDER) {
+            Set<CredentialDescription> descriptions = request.getCredentialDescriptions();
+            int size = mCredentialDescriptions.get(callingPackageName).size();
+            mCredentialDescriptions.get(callingPackageName)
+                    .addAll(descriptions);
+            mTotalDescriptionCount += size - mCredentialDescriptions.get(callingPackageName).size();
+        }
+
     }
 
     /** Handle the given {@link UnregisterCredentialDescriptionRequest} by creating
@@ -76,8 +86,10 @@ public class CredentialDescriptionRegistry {
             String callingPackageName) {
 
         if (mCredentialDescriptions.containsKey(callingPackageName)) {
+            int size = mCredentialDescriptions.get(callingPackageName).size();
             mCredentialDescriptions.get(callingPackageName)
                     .removeAll(request.getCredentialDescriptions());
+            mTotalDescriptionCount -= size - mCredentialDescriptions.get(callingPackageName).size();
         }
     }
 

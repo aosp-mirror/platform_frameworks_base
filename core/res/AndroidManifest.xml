@@ -1026,6 +1026,11 @@
         android:permissionFlags="hardRestricted"
         android:protectionLevel="dangerous" />
 
+    <!-- @SystemApi @hide Allows an application to communicate over satellite.
+         Only granted if the application is a system app. -->
+    <permission android:name="android.permission.SATELLITE_COMMUNICATION"
+                android:protectionLevel="internal|role" />
+
     <!-- ====================================================================== -->
     <!-- Permissions for accessing external storage                             -->
     <!-- ====================================================================== -->
@@ -4153,7 +4158,7 @@
          <p>Should only be requested by the System, should be required by
          TileService declarations.-->
     <permission android:name="android.permission.BIND_QUICK_SETTINGS_TILE"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|recents" />
 
     <!-- Allows SystemUI to request third party controls.
          <p>Should only be requested by the System and required by

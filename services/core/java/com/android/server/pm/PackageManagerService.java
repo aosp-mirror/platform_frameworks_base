@@ -187,6 +187,7 @@ import com.android.modules.utils.TypedXmlSerializer;
 import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.server.EventLogTags;
 import com.android.server.FgThread;
+import com.android.server.IntentResolver;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
@@ -4742,6 +4743,44 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                             .clearCrossProfileIntentFilters(sourceUserId, ownerPackage,
                                     null);
             scheduleWritePackageRestrictions(sourceUserId);
+        }
+
+        @Override
+        public boolean removeCrossProfileIntentFilter(IntentFilter intentFilter,
+                String ownerPackage,
+                int sourceUserId,
+                int targetUserId, int flags) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+            final int callingUid = Binder.getCallingUid();
+            enforceOwnerRights(snapshotComputer(), ownerPackage, callingUid);
+            mUserManager.enforceCrossProfileIntentFilterAccess(sourceUserId, targetUserId,
+                    callingUid, /* addCrossProfileIntentFilter */ false);
+            PackageManagerServiceUtils.enforceShellRestriction(mInjector.getUserManagerInternal(),
+                    UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, sourceUserId);
+
+            boolean removedMatchingFilter = false;
+            synchronized (mLock) {
+                CrossProfileIntentResolver resolver =
+                        mSettings.editCrossProfileIntentResolverLPw(sourceUserId);
+
+                ArraySet<CrossProfileIntentFilter> set =
+                        new ArraySet<>(resolver.filterSet());
+                for (CrossProfileIntentFilter filter : set) {
+                    if (IntentResolver.filterEquals(filter.mFilter, intentFilter)
+                            && filter.getOwnerPackage().equals(ownerPackage)
+                            && filter.getTargetUserId() == targetUserId
+                            && filter.getFlags() == flags) {
+                        resolver.removeFilter(filter);
+                        removedMatchingFilter = true;
+                        break;
+                    }
+                }
+            }
+            if (removedMatchingFilter) {
+                scheduleWritePackageRestrictions(sourceUserId);
+            }
+            return removedMatchingFilter;
         }
 
         @Override

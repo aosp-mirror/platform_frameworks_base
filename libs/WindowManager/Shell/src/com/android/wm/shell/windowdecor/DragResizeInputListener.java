@@ -62,7 +62,7 @@ class DragResizeInputListener implements AutoCloseable {
     private final SurfaceControl mDecorationSurface;
     private final InputChannel mInputChannel;
     private final TaskResizeInputEventReceiver mInputEventReceiver;
-    private final com.android.wm.shell.windowdecor.DragResizeCallback mCallback;
+    private final DragPositioningCallback mCallback;
 
     private int mWidth;
     private int mHeight;
@@ -83,7 +83,7 @@ class DragResizeInputListener implements AutoCloseable {
             Choreographer choreographer,
             int displayId,
             SurfaceControl decorationSurface,
-            DragResizeCallback callback) {
+            DragPositioningCallback callback) {
         mInputManager = context.getSystemService(InputManager.class);
         mHandler = handler;
         mChoreographer = choreographer;
@@ -294,7 +294,7 @@ class DragResizeInputListener implements AutoCloseable {
                         float rawX = e.getRawX(0);
                         float rawY = e.getRawY(0);
                         int ctrlType = calculateCtrlType(isTouch, x, y);
-                        mCallback.onDragResizeStart(ctrlType, rawX, rawY);
+                        mCallback.onDragPositioningStart(ctrlType, rawX, rawY);
                         result = true;
                     }
                     break;
@@ -306,7 +306,7 @@ class DragResizeInputListener implements AutoCloseable {
                     int dragPointerIndex = e.findPointerIndex(mDragPointerId);
                     float rawX = e.getRawX(dragPointerIndex);
                     float rawY = e.getRawY(dragPointerIndex);
-                    mCallback.onDragResizeMove(rawX, rawY);
+                    mCallback.onDragPositioningMove(rawX, rawY);
                     result = true;
                     break;
                 }
@@ -314,7 +314,7 @@ class DragResizeInputListener implements AutoCloseable {
                 case MotionEvent.ACTION_CANCEL: {
                     if (mShouldHandleEvents) {
                         int dragPointerIndex = e.findPointerIndex(mDragPointerId);
-                        mCallback.onDragResizeEnd(
+                        mCallback.onDragPositioningEnd(
                                 e.getRawX(dragPointerIndex), e.getRawY(dragPointerIndex));
                     }
                     mShouldHandleEvents = false;

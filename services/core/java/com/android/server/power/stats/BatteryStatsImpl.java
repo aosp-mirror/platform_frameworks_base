@@ -3925,6 +3925,7 @@ public class BatteryStatsImpl extends BatteryStats {
         private final HistoryStepDetails mDetails = new HistoryStepDetails();
 
         private boolean mHasHistoryStepDetails;
+        private boolean mUpdateRequested;
 
         /**
          * Total time (in milliseconds) spent executing in user code.
@@ -3954,15 +3955,20 @@ public class BatteryStatsImpl extends BatteryStats {
 
         @Override
         public HistoryStepDetails getHistoryStepDetails() {
-            // Perform a CPU update right after we do this collection, so we have started
-            // collecting good data for the next step.
-            requestImmediateCpuUpdate();
+            if (!mUpdateRequested) {
+                mUpdateRequested = true;
+                // Perform a CPU update right after we do this collection, so we have started
+                // collecting good data for the next step.
+                requestImmediateCpuUpdate();
 
-            if (mPlatformIdleStateCallback != null) {
-                mDetails.statSubsystemPowerState =
-                        mPlatformIdleStateCallback.getSubsystemLowPowerStats();
-                if (DEBUG) Slog.i(TAG, "WRITE SubsystemPowerState:" +
-                        mDetails.statSubsystemPowerState);
+                if (mPlatformIdleStateCallback != null) {
+                    mDetails.statSubsystemPowerState =
+                            mPlatformIdleStateCallback.getSubsystemLowPowerStats();
+                    if (DEBUG) {
+                        Slog.i(TAG,
+                                "WRITE SubsystemPowerState:" + mDetails.statSubsystemPowerState);
+                    }
+                }
             }
 
             if (!mHasHistoryStepDetails) {
@@ -4072,7 +4078,11 @@ public class BatteryStatsImpl extends BatteryStats {
             mCurStepStatIrqTimeMs += statIrqTimeMs;
             mCurStepStatSoftIrqTimeMs += statSoftIrqTimeMs;
             mCurStepStatIdleTimeMs += statIdleTimeMs;
+        }
+
+        public void finishAddingCpuLocked() {
             mHasHistoryStepDetails = true;
+            mUpdateRequested = false;
         }
 
         @Override
@@ -4953,18 +4963,26 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @GuardedBy("this")
-    public boolean startAddingCpuLocked() {
+    public boolean startAddingCpuStatsLocked() {
         mExternalSync.cancelCpuSyncDueToWakelockChange();
         return mOnBatteryInternal;
     }
 
     @GuardedBy("this")
-    public void finishAddingCpuLocked(int totalUTimeMs, int totalSTimeMs, int statUserTimeMs,
+    public void addCpuStatsLocked(int totalUTimeMs, int totalSTimeMs, int statUserTimeMs,
             int statSystemTimeMs, int statIOWaitTimeMs, int statIrqTimeMs,
             int statSoftIrqTimeMs, int statIdleTimeMs) {
         mStepDetailsCalculator.addCpuStats(totalUTimeMs, totalSTimeMs, statUserTimeMs,
                 statSystemTimeMs, statIOWaitTimeMs, statIrqTimeMs,
                 statSoftIrqTimeMs, statIdleTimeMs);
+    }
+
+    /**
+     * Called after {@link #addCpuStatsLocked} has been invoked for all active apps.
+     */
+    @GuardedBy("this")
+    public void finishAddingCpuStatsLocked() {
+        mStepDetailsCalculator.finishAddingCpuLocked();
     }
 
     public void noteProcessDiedLocked(int uid, int pid) {
@@ -11299,7 +11317,7 @@ public class BatteryStatsImpl extends BatteryStats {
      */
     @Override
     public BatteryStatsHistoryIterator iterateBatteryStatsHistory() {
-        return mHistory.iterate();
+        return mHistory.copy().iterate();
     }
 
     @Override
@@ -14054,7 +14072,8 @@ public class BatteryStatsImpl extends BatteryStats {
                     && (oldStatus == BatteryManager.BATTERY_STATUS_FULL
                     || level >= 90
                     || (mDischargeCurrentLevel < 20 && level >= 80)
-                    || getHighDischargeAmountSinceCharge() >= 200)) {
+                    || getHighDischargeAmountSinceCharge() >= 200)
+                    && mHistory.isResetEnabled()) {
                 Slog.i(TAG, "Resetting battery stats: level=" + level + " status=" + oldStatus
                         + " dischargeLevel=" + mDischargeCurrentLevel
                         + " lowAmount=" + getLowDischargeAmountSinceCharge()
@@ -16604,7 +16623,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @GuardedBy("this")
-    public void dumpLocked(Context context, PrintWriter pw, int flags, int reqUid, long histStart) {
+    public void dump(Context context, PrintWriter pw, int flags, int reqUid, long histStart) {
         if (DEBUG) {
             pw.println("mOnBatteryTimeBase:");
             mOnBatteryTimeBase.dump(pw, "  ");
@@ -16676,36 +16695,39 @@ public class BatteryStatsImpl extends BatteryStats {
             pr.println("*** Camera timer:");
             mCameraOnTimer.logState(pr, "  ");
         }
-        super.dumpLocked(context, pw, flags, reqUid, histStart);
+        super.dump(context, pw, flags, reqUid, histStart);
 
-        pw.print("Per process state tracking available: ");
-        pw.println(trackPerProcStateCpuTimes());
-        pw.print("Total cpu time reads: ");
-        pw.println(mNumSingleUidCpuTimeReads);
-        pw.print("Batching Duration (min): ");
-        pw.println((mClock.uptimeMillis() - mCpuTimeReadsTrackingStartTimeMs) / (60 * 1000));
-        pw.print("All UID cpu time reads since the later of device start or stats reset: ");
-        pw.println(mNumAllUidCpuTimeReads);
-        pw.print("UIDs removed since the later of device start or stats reset: ");
-        pw.println(mNumUidsRemoved);
+        synchronized (this) {
+            pw.print("Per process state tracking available: ");
+            pw.println(trackPerProcStateCpuTimes());
+            pw.print("Total cpu time reads: ");
+            pw.println(mNumSingleUidCpuTimeReads);
+            pw.print("Batching Duration (min): ");
+            pw.println((mClock.uptimeMillis() - mCpuTimeReadsTrackingStartTimeMs) / (60 * 1000));
+            pw.print("All UID cpu time reads since the later of device start or stats reset: ");
+            pw.println(mNumAllUidCpuTimeReads);
+            pw.print("UIDs removed since the later of device start or stats reset: ");
+            pw.println(mNumUidsRemoved);
 
-        pw.println("Currently mapped isolated uids:");
-        final int numIsolatedUids = mIsolatedUids.size();
-        for (int i = 0; i < numIsolatedUids; i++) {
-            final int isolatedUid = mIsolatedUids.keyAt(i);
-            final int ownerUid = mIsolatedUids.valueAt(i);
-            final int refCount = mIsolatedUidRefCounts.get(isolatedUid);
-            pw.println("  " + isolatedUid + "->" + ownerUid + " (ref count = " + refCount + ")");
+            pw.println("Currently mapped isolated uids:");
+            final int numIsolatedUids = mIsolatedUids.size();
+            for (int i = 0; i < numIsolatedUids; i++) {
+                final int isolatedUid = mIsolatedUids.keyAt(i);
+                final int ownerUid = mIsolatedUids.valueAt(i);
+                final int refCount = mIsolatedUidRefCounts.get(isolatedUid);
+                pw.println(
+                        "  " + isolatedUid + "->" + ownerUid + " (ref count = " + refCount + ")");
+            }
+
+            pw.println();
+            dumpConstantsLocked(pw);
+
+            pw.println();
+            dumpCpuPowerBracketsLocked(pw);
+
+            pw.println();
+            dumpEnergyConsumerStatsLocked(pw);
         }
-
-        pw.println();
-        dumpConstantsLocked(pw);
-
-        pw.println();
-        dumpCpuPowerBracketsLocked(pw);
-
-        pw.println();
-        dumpEnergyConsumerStatsLocked(pw);
     }
 
     @Override

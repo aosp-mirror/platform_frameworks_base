@@ -695,7 +695,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         setKeyguardBouncerVisibility(true);
 
         verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt(), anyBoolean());
-        verify(mFaceManager).isHardwareDetected();
         verify(mFaceManager, never()).hasEnrolledTemplates(anyInt());
     }
 

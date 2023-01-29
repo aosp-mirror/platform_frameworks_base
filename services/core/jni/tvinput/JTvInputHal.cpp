@@ -338,6 +338,12 @@ JTvInputHal::TvInputCallback::TvInputCallback(JTvInputHal* hal) {
     return ::ndk::ScopedAStatus::ok();
 }
 
+::ndk::ScopedAStatus JTvInputHal::TvInputCallback::notifyTvMessageEvent(
+        const AidlTvMessageEvent& event) {
+    // TODO: Implement this
+    return ::ndk::ScopedAStatus::ok();
+}
+
 JTvInputHal::ITvInputWrapper::ITvInputWrapper(std::shared_ptr<AidlITvInput>& aidlTvInput)
       : mIsHidl(false), mAidlTvInput(aidlTvInput) {}
 

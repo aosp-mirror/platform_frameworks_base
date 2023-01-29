@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.android.credentialmanager.common.Constants
 import com.android.credentialmanager.CreateFlowUtils
 import com.android.credentialmanager.CredentialManagerRepo
 import com.android.credentialmanager.UserConfigRepo
@@ -32,35 +33,16 @@ import com.android.credentialmanager.common.DialogState
 import com.android.credentialmanager.common.ProviderActivityResult
 import com.android.credentialmanager.common.ProviderActivityState
 
-data class CreateCredentialUiState(
-    val enabledProviders: List<EnabledProviderInfo>,
-    val disabledProviders: List<DisabledProviderInfo>? = null,
-    val currentScreenState: CreateScreenState,
-    val requestDisplayInfo: RequestDisplayInfo,
-    val sortedCreateOptionsPairs: List<Pair<CreateOptionInfo, EnabledProviderInfo>>,
-    // Should not change with the real time update of default provider, only determine whether
-    // we're showing provider selection page at the beginning
-    val hasDefaultProvider: Boolean,
-    val activeEntry: ActiveEntry? = null,
-    val selectedEntry: EntryInfo? = null,
-    val providerActivityState: ProviderActivityState =
-        ProviderActivityState.NOT_APPLICABLE,
-    val isFromProviderSelection: Boolean? = null,
-    val dialogState: DialogState = DialogState.ACTIVE,
-)
 
 class CreateCredentialViewModel(
     private val credManRepo: CredentialManagerRepo,
+    private val providerEnableListUiState: List<EnabledProviderInfo>,
+    private val providerDisableListUiState: List<DisabledProviderInfo>,
+    private val requestDisplayInfoUiState: RequestDisplayInfo,
     userConfigRepo: UserConfigRepo = UserConfigRepo.getInstance(),
 ) : ViewModel() {
-    val providerEnableListUiState = credManRepo.getCreateProviderEnableListInitialUiState()
-
-    val providerDisableListUiState = credManRepo.getCreateProviderDisableListInitialUiState()
-
-    val requestDisplayInfoUiState = credManRepo.getCreateRequestDisplayInfoInitialUiState()
 
     val defaultProviderId = userConfigRepo.getDefaultProviderId()
-
     val isPasskeyFirstUse = userConfigRepo.getIsPasskeyFirstUse()
 
     var uiState by mutableStateOf(
@@ -70,13 +52,18 @@ class CreateCredentialViewModel(
             defaultProviderId,
             requestDisplayInfoUiState,
             false,
-            isPasskeyFirstUse))
+            isPasskeyFirstUse)!!)
         private set
 
     fun onConfirmIntro() {
-        uiState = CreateFlowUtils.toCreateCredentialUiState(
+        val newUiState = CreateFlowUtils.toCreateCredentialUiState(
             providerEnableListUiState, providerDisableListUiState, defaultProviderId,
             requestDisplayInfoUiState, true, isPasskeyFirstUse)
+        if (newUiState == null) {
+            onInternalError()
+            return
+        }
+        uiState = newUiState
         UserConfigRepo.getInstance().setIsPasskeyFirstUse(false)
     }
 
@@ -143,6 +130,14 @@ class CreateCredentialViewModel(
         uiState = uiState.copy(dialogState = DialogState.CANCELED_FOR_SETTINGS)
     }
 
+    // When the view model runs into unexpected illegal state, reports the error back and close
+    // the activity gracefully.
+    private fun onInternalError() {
+        Log.w(Constants.LOG_TAG, "UI closed due to illegal internal state")
+        credManRepo.onParsingFailureCancel()
+        uiState = uiState.copy(dialogState = DialogState.COMPLETE)
+    }
+
     fun onCancel() {
         credManRepo.onUserCancel()
         uiState = uiState.copy(dialogState = DialogState.COMPLETE)
@@ -171,11 +166,11 @@ class CreateCredentialViewModel(
     fun onDefaultChanged(providerId: String?) {
         if (providerId != null) {
             Log.d(
-                "Account Selector", "Default provider changed to: " +
+                Constants.LOG_TAG, "Default provider changed to: " +
                 " {provider=$providerId")
             UserConfigRepo.getInstance().setDefaultProvider(providerId)
         } else {
-            Log.w("Account Selector", "Null provider is being changed")
+            Log.w(Constants.LOG_TAG, "Null provider is being changed")
         }
     }
 
@@ -184,7 +179,7 @@ class CreateCredentialViewModel(
         val entryKey = selectedEntry.entryKey
         val entrySubkey = selectedEntry.entrySubkey
         Log.d(
-            "Account Selector", "Option selected for entry: " +
+            Constants.LOG_TAG, "Option selected for entry: " +
             " {provider=$providerId, key=$entryKey, subkey=$entrySubkey")
         if (selectedEntry.pendingIntent != null) {
             uiState = uiState.copy(
@@ -211,7 +206,8 @@ class CreateCredentialViewModel(
                 .setFillInIntent(entry.fillInIntent).build()
             launcher.launch(intentSenderRequest)
         } else {
-            Log.w("Account Selector", "No provider UI to launch")
+            Log.d(Constants.LOG_TAG, "Unexpected: no provider UI to launch")
+            onInternalError()
         }
     }
 
@@ -220,9 +216,9 @@ class CreateCredentialViewModel(
         if (selectedEntry != null) {
             onEntrySelected(selectedEntry)
         } else {
-            Log.w("Account Selector",
-                "Illegal state: confirm is pressed but activeEntry isn't set.")
-            uiState = uiState.copy(dialogState = DialogState.COMPLETE)
+            Log.d(Constants.LOG_TAG,
+                "Unexpected: confirm is pressed but no active entry exists.")
+            onInternalError()
         }
     }
 
@@ -232,7 +228,7 @@ class CreateCredentialViewModel(
         val resultData = providerActivityResult.data
         if (resultCode == Activity.RESULT_CANCELED) {
             // Re-display the CredMan UI if the user canceled from the provider UI.
-            Log.d("Account Selector", "The provider activity was cancelled," +
+            Log.d(Constants.LOG_TAG, "The provider activity was cancelled," +
                 " re-displaying our UI.")
             uiState = uiState.copy(
                 selectedEntry = null,
@@ -241,18 +237,44 @@ class CreateCredentialViewModel(
         } else {
             if (entry != null) {
                 val providerId = entry.providerId
-                Log.d("Account Selector", "Got provider activity result: {provider=" +
+                Log.d(Constants.LOG_TAG, "Got provider activity result: {provider=" +
                     "$providerId, key=${entry.entryKey}, subkey=${entry.entrySubkey}, " +
                     "resultCode=$resultCode, resultData=$resultData}"
                 )
                 credManRepo.onOptionSelected(
                     providerId, entry.entryKey, entry.entrySubkey, resultCode, resultData,
                 )
+                uiState = uiState.copy(dialogState = DialogState.COMPLETE)
             } else {
-                Log.w("Account Selector",
+                Log.d(Constants.LOG_TAG,
                     "Illegal state: received a provider result but found no matching entry.")
+                onInternalError()
             }
-            uiState = uiState.copy(dialogState = DialogState.COMPLETE)
+        }
+    }
+
+    companion object Factory {
+        // Validates the input and returns null if the input is invalid.
+        fun newInstance(
+            credManRepo: CredentialManagerRepo,
+            providerEnableListUiState: List<EnabledProviderInfo>,
+            providerDisableListUiState: List<DisabledProviderInfo>,
+            requestDisplayInfoUiState: RequestDisplayInfo?,
+        ): CreateCredentialViewModel? {
+            if (providerEnableListUiState.isEmpty() || requestDisplayInfoUiState == null) {
+                return null
+            }
+            return try {
+                val result = CreateCredentialViewModel(
+                    credManRepo = credManRepo,
+                    providerEnableListUiState = providerEnableListUiState,
+                    providerDisableListUiState = providerDisableListUiState,
+                    requestDisplayInfoUiState = requestDisplayInfoUiState
+                )
+                result
+            } catch (e: Exception) {
+                null
+            }
         }
     }
 }

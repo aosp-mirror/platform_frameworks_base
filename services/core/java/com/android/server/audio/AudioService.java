@@ -8049,6 +8049,7 @@ public class AudioService extends IAudioService.Stub
             volumeChangedOptions.setDeliveryGroupPolicy(DELIVERY_GROUP_POLICY_MOST_RECENT);
             volumeChangedOptions.setDeliveryGroupMatchingKey(
                     AudioManager.VOLUME_CHANGED_ACTION, String.valueOf(mStreamType));
+            volumeChangedOptions.setDeferUntilActive(true);
             mVolumeChangedOptions = volumeChangedOptions.toBundle();
 
             mStreamDevicesChanged = new Intent(AudioManager.STREAM_DEVICES_CHANGED_ACTION);
@@ -8057,6 +8058,7 @@ public class AudioService extends IAudioService.Stub
             streamDevicesChangedOptions.setDeliveryGroupPolicy(DELIVERY_GROUP_POLICY_MOST_RECENT);
             streamDevicesChangedOptions.setDeliveryGroupMatchingKey(
                     AudioManager.STREAM_DEVICES_CHANGED_ACTION, String.valueOf(mStreamType));
+            streamDevicesChangedOptions.setDeferUntilActive(true);
             mStreamDevicesChangedOptions = streamDevicesChangedOptions.toBundle();
         }
 
@@ -11375,12 +11377,12 @@ public class AudioService extends IAudioService.Stub
         }
 
         try {
-            if (!projectionService.isValidMediaProjection(projection)) {
+            if (!projectionService.isCurrentProjection(projection)) {
                 Log.w(TAG, "App passed invalid MediaProjection token");
                 return false;
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "Can't call .isValidMediaProjection() on IMediaProjectionManager"
+            Log.e(TAG, "Can't call .isCurrentProjection() on IMediaProjectionManager"
                     + projectionService.asBinder(), e);
             return false;
         }

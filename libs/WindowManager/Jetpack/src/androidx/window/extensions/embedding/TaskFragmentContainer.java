@@ -570,20 +570,22 @@ class TaskFragmentContainer {
 
     /**
      * Checks if last requested bounds are equal to the provided value.
+     * The requested bounds are relative bounds in parent coordinate.
      */
-    boolean areLastRequestedBoundsEqual(@Nullable Rect bounds) {
-        return (bounds == null && mLastRequestedBounds.isEmpty())
-                || mLastRequestedBounds.equals(bounds);
+    boolean areLastRequestedBoundsEqual(@Nullable Rect relBounds) {
+        return (relBounds == null && mLastRequestedBounds.isEmpty())
+                || mLastRequestedBounds.equals(relBounds);
     }
 
     /**
      * Updates the last requested bounds.
+     * The requested bounds are relative bounds in parent coordinate.
      */
-    void setLastRequestedBounds(@Nullable Rect bounds) {
-        if (bounds == null) {
+    void setLastRequestedBounds(@Nullable Rect relBounds) {
+        if (relBounds == null) {
             mLastRequestedBounds.setEmpty();
         } else {
-            mLastRequestedBounds.set(bounds);
+            mLastRequestedBounds.set(relBounds);
         }
     }
 

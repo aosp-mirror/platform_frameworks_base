@@ -17,6 +17,8 @@
 package com.android.server.voiceinteraction;
 
 import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
+import static android.Manifest.permission.LOG_COMPAT_CHANGE;
+import static android.Manifest.permission.READ_COMPAT_CHANGE_CONFIG;
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.service.attention.AttentionService.PROXIMITY_UNKNOWN;
 import static android.service.voice.HotwordDetectionService.AUDIO_SOURCE_EXTERNAL;
@@ -43,11 +45,14 @@ import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENT
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_SECURITY_EXCEPTION;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_UNEXPECTED_CALLBACK;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECT_UNEXPECTED_CALLBACK;
+import static com.android.server.voiceinteraction.HotwordDetectionConnection.ENFORCE_HOTWORD_PHRASE_ID;
 import static com.android.server.voiceinteraction.SoundTriggerSessionPermissionsDecorator.enforcePermissionForPreflight;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.AppOpsManager;
+import android.app.compat.CompatChanges;
 import android.attention.AttentionManagerInternal;
 import android.content.Context;
 import android.content.PermissionChecker;
@@ -692,8 +697,13 @@ abstract class DetectorSession {
         }
     }
 
-    static void enforceExtraKeyphraseIdNotLeaked(HotwordDetectedResult result,
+    @RequiresPermission(allOf = {READ_COMPAT_CHANGE_CONFIG, LOG_COMPAT_CHANGE})
+    void enforceExtraKeyphraseIdNotLeaked(HotwordDetectedResult result,
             SoundTrigger.KeyphraseRecognitionEvent recognitionEvent) {
+        if (!CompatChanges.isChangeEnabled(ENFORCE_HOTWORD_PHRASE_ID,
+                mVoiceInteractionServiceUid)) {
+            return;
+        }
         // verify the phrase ID in HotwordDetectedResult is not exposing extra phrases
         // the DSP did not detect
         for (SoundTrigger.KeyphraseRecognitionExtra keyphrase : recognitionEvent.keyphraseExtras) {

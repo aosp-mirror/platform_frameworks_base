@@ -88,7 +88,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final ClockRegistry.ClockChangeListener mClockChangedListener;
 
     private ViewGroup mStatusArea;
-    // If set will replace keyguard_slice_view
+
+    // If the SMARTSPACE flag is set, keyguard_slice_view is replaced by the following views.
+    private View mWeatherView;
     private View mSmartspaceView;
 
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
@@ -192,10 +194,17 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
         if (mSmartspaceController.isEnabled()) {
             View ksv = mView.findViewById(R.id.keyguard_slice_view);
-            int ksvIndex = mStatusArea.indexOfChild(ksv);
+            int viewIndex = mStatusArea.indexOfChild(ksv);
             ksv.setVisibility(View.GONE);
 
-            addSmartspaceView(ksvIndex);
+            // TODO(b/261757708): add content observer for the Settings toggle and add/remove
+            //  weather according to the Settings.
+            if (mSmartspaceController.isDateWeatherDecoupled()) {
+                addWeatherView(viewIndex);
+                viewIndex += 1;
+            }
+
+            addSmartspaceView(viewIndex);
         }
 
         mSecureSettings.registerContentObserverForUser(
@@ -235,6 +244,18 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                 addSmartspaceView(index);
             }
         }
+    }
+
+    private void addWeatherView(int index) {
+        mWeatherView = mSmartspaceController.buildAndConnectWeatherView(mView);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                MATCH_PARENT, WRAP_CONTENT);
+        mStatusArea.addView(mWeatherView, index, lp);
+        int startPadding = getContext().getResources().getDimensionPixelSize(
+                R.dimen.below_clock_padding_start);
+        int endPadding = getContext().getResources().getDimensionPixelSize(
+                R.dimen.below_clock_padding_end);
+        mWeatherView.setPaddingRelative(startPadding, 0, endPadding, 0);
     }
 
     private void addSmartspaceView(int index) {

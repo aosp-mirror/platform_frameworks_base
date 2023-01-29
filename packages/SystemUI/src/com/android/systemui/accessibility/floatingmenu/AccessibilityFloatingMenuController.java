@@ -17,7 +17,6 @@
 package com.android.systemui.accessibility.floatingmenu;
 
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 
 import static com.android.systemui.flags.Flags.A11Y_FLOATING_MENU_FLING_SPRING_ANIMATIONS;
@@ -40,6 +39,7 @@ import com.android.systemui.accessibility.AccessibilityButtonModeObserver.Access
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.util.settings.SecureSettings;
 
 import javax.inject.Inject;
@@ -61,6 +61,7 @@ public class AccessibilityFloatingMenuController implements
     private final AccessibilityManager mAccessibilityManager;
     private final FeatureFlags mFeatureFlags;
     private final SecureSettings mSecureSettings;
+    private final DisplayTracker mDisplayTracker;
     @VisibleForTesting
     IAccessibilityFloatingMenu mFloatingMenu;
     private int mBtnMode;
@@ -105,7 +106,8 @@ public class AccessibilityFloatingMenuController implements
             AccessibilityButtonModeObserver accessibilityButtonModeObserver,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             FeatureFlags featureFlags,
-            SecureSettings secureSettings) {
+            SecureSettings secureSettings,
+            DisplayTracker displayTracker) {
         mContext = context;
         mWindowManager = windowManager;
         mDisplayManager = displayManager;
@@ -115,6 +117,7 @@ public class AccessibilityFloatingMenuController implements
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mFeatureFlags = featureFlags;
         mSecureSettings = secureSettings;
+        mDisplayTracker = displayTracker;
 
         mIsKeyguardVisible = false;
     }
@@ -185,7 +188,8 @@ public class AccessibilityFloatingMenuController implements
     private void showFloatingMenu() {
         if (mFloatingMenu == null) {
             if (mFeatureFlags.isEnabled(A11Y_FLOATING_MENU_FLING_SPRING_ANIMATIONS)) {
-                final Display defaultDisplay = mDisplayManager.getDisplay(DEFAULT_DISPLAY);
+                final Display defaultDisplay = mDisplayManager.getDisplay(
+                        mDisplayTracker.getDefaultDisplayId());
                 final Context windowContext = mContext.createWindowContext(defaultDisplay,
                         TYPE_NAVIGATION_BAR_PANEL, /* options= */ null);
                 mFloatingMenu = new MenuViewLayerController(windowContext, mWindowManager,

@@ -33,6 +33,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.util.function.TriConsumer;
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -57,7 +58,7 @@ public class PipBoundsStateTest extends ShellTestCase {
 
     @Before
     public void setUp() {
-        mPipBoundsState = new PipBoundsState(mContext);
+        mPipBoundsState = new PipBoundsState(mContext, new PipSizeSpecHandler(mContext));
         mTestComponentName1 = new ComponentName(mContext, "component1");
         mTestComponentName2 = new ComponentName(mContext, "component2");
     }

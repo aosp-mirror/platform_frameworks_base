@@ -27,6 +27,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
@@ -1148,7 +1149,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mDeviceStateController = new DeviceStateController(mWmService.mContext, mWmService.mH);
 
         mDisplayPolicy = new DisplayPolicy(mWmService, this);
-        mDisplayRotation = new DisplayRotation(mWmService, this, mDisplayInfo.address);
+        mDisplayRotation = new DisplayRotation(mWmService, this, mDisplayInfo.address,
+                mDeviceStateController);
 
         final Consumer<DeviceStateController.DeviceState> deviceStateConsumer =
                 (@NonNull DeviceStateController.DeviceState newFoldState) -> {
@@ -2781,6 +2783,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final int orientation = super.getOrientation();
 
         if (!handlesOrientationChangeFromDescendant(orientation)) {
+            ActivityRecord topActivity = topRunningActivity(/* considerKeyguardState= */ true);
+            if (topActivity != null && topActivity.mLetterboxUiController
+                    .shouldUseDisplayLandscapeNaturalOrientation()) {
+                ProtoLog.v(WM_DEBUG_ORIENTATION,
+                        "Display id=%d is ignoring orientation request for %d, return %d"
+                        + " following a per-app override for %s",
+                        mDisplayId, orientation, SCREEN_ORIENTATION_LANDSCAPE, topActivity);
+                return SCREEN_ORIENTATION_LANDSCAPE;
+            }
             mLastOrientationSource = null;
             // Return SCREEN_ORIENTATION_UNSPECIFIED so that Display respect sensor rotation
             ProtoLog.v(WM_DEBUG_ORIENTATION,
