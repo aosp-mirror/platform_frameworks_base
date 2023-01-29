@@ -249,11 +249,13 @@ public class DisplayRotation {
         mDeskDockRotation = readRotation(R.integer.config_deskDockRotation);
         mUndockedHdmiRotation = readRotation(R.integer.config_undockedHdmiRotation);
 
-        mRotation = readDefaultDisplayRotation(displayAddress);
+        int defaultRotation = readDefaultDisplayRotation(displayAddress);
+        mRotation = defaultRotation;
 
         if (isDefaultDisplay) {
             final Handler uiHandler = UiThread.getHandler();
-            mOrientationListener = new OrientationListener(mContext, uiHandler);
+            mOrientationListener =
+                    new OrientationListener(mContext, uiHandler, defaultRotation);
             mOrientationListener.setCurrentRotation(mRotation);
             mSettingsObserver = new SettingsObserver(uiHandler);
             mSettingsObserver.observe();
@@ -1735,8 +1737,9 @@ public class DisplayRotation {
     private class OrientationListener extends WindowOrientationListener implements Runnable {
         transient boolean mEnabled;
 
-        OrientationListener(Context context, Handler handler) {
-            super(context, handler);
+        OrientationListener(Context context, Handler handler,
+                @Surface.Rotation int defaultRotation) {
+            super(context, handler, defaultRotation);
         }
 
         @Override

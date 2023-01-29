@@ -54,7 +54,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
-import java.io.PrintWriter
 import java.util.Locale
 import java.util.TimeZone
 import java.util.concurrent.Executor
@@ -307,15 +306,6 @@ open class ClockEventController @Inject constructor(
             resources.getDimensionPixelSize(R.dimen.small_clock_text_size).toFloat())
         clock?.largeClock?.events?.onFontSettingChanged(
             resources.getDimensionPixelSize(R.dimen.large_clock_text_size).toFloat())
-    }
-
-    /**
-     * Dump information for debugging
-     */
-    fun dump(pw: PrintWriter) {
-        pw.println(this)
-        clock?.dump(pw)
-        regionSampler?.dump(pw)
     }
 
     @VisibleForTesting
