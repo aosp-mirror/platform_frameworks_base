@@ -458,6 +458,14 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"앱이 사용 중에 심박수, 체온, 혈중 산소 농도와 같은 생체 신호 센서 데이터에 액세스하도록 허용합니다."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"백그라운드에서 심박수와 같은 생체 신호 센서 데이터에 액세스"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"앱이 백그라운드에서 심박수, 체온, 혈중 산소 농도와 같은 생체 신호 센서 데이터에 액세스하도록 허용합니다."</string>
+    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
+    <skip />
+    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6408654259475396200">"캘린더 일정 및 세부정보 읽기"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"이 앱은 태블릿에 저장된 모든 캘린더 일정을 읽고 캘린더 데이터를 공유하거나 저장할 수 있습니다."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"앱이 Android TV 기기에 저장된 모든 캘린더 일정을 읽고 캘린더 데이터를 공유하거나 저장할 수 있습니다."</string>

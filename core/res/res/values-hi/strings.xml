@@ -458,6 +458,14 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"इससे ऐप्लिकेशन को इस्तेमाल करने के दौरान, उसे बॉडी सेंसर के डेटा को ऐक्सेस करने की अनुमति मिलती है. इसमें धड़कन की दर, शरीर का तापमान, और खून में ऑक्सीजन का प्रतिशत जैसी जानकारी शामिल होती है."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"बैकग्राउंड में चलने के दौरान, धड़कन की दर जैसे बॉडी सेंसर डेटा का ऐक्सेस दें"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"इससे ऐप्लिकेशन के बैकग्राउंड में चलने के दौरान, उसे बॉडी सेंसर के डेटा को ऐक्सेस करने की अनुमति मिलती है. इसमें धड़कन की दर, शरीर का तापमान, और खून में ऑक्सीजन का प्रतिशत जैसी जानकारी शामिल होती है."</string>
+    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
+    <skip />
+    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6408654259475396200">"कैलेंडर इवेंट और विवरण पढ़ें"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"यह ऐप्लिकेशन आपके टैबलेट पर संग्रहित सभी कैलेंडर इवेंट पढ़ सकता है और आपका कैलेंडर डेटा शेयर कर सकता है या सहेज सकता है."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"यह ऐप्लिकेशन आपके टीवी पर सेव किए गए सभी कैलेंडर इवेंट को पढ़ सकता है. इसके अलावा यह आपके कैलेंडर का डेटा शेयर कर सकता है या सेव कर सकता है."</string>

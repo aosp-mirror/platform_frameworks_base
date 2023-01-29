@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"ரத்துசெய்"</string>
     <string name="string_continue" msgid="1346732695941131882">"தொடர்க"</string>
     <string name="string_more_options" msgid="7990658711962795124">"கூடுதல் விருப்பங்கள்"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"மேலும் அறிக"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"கடவுச்சாவிகள் மூலம் பாதுகாப்பாக வைத்திருங்கள்"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"கடவுச்சாவிகளைப் பயன்படுத்துவதன் மூலம் கடினமான கடவுச்சொற்களை உருவாக்கவோ நினைவில்கொள்ளவோ தேவையில்லை"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"கடவுச்சாவிகள் என்பவை உங்கள் கைரேகை, முகம் அல்லது திரைப் பூட்டு மூலம் உருவாக்கப்படும் என்க்ரிப்ஷன் செய்யப்பட்ட டிஜிட்டல் சாவிகள் ஆகும்"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"அவை Password Managerரில் சேமிக்கப்பட்டுள்ளதால் நீங்கள் பிற சாதனங்களிலிருந்து உள்நுழையலாம்"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"கடவுச்சாவிகள் குறித்த கூடுதல் விவரங்கள்"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"கடவுச்சொல்லற்ற தொழில்நுட்பம்"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"கடவுச்சாவிகள் மூலம், கடவுச்சொற்களை உள்ளிடாமலேயே நீங்கள் உள்நுழைய முடியும். உங்கள் அடையாளத்தை உறுதிப்படுத்தி கடவுச்சாவியை உருவாக்க உங்கள் கைரேகை, முகம் அறிதல், பின் அல்லது ஸ்வைப் பேட்டர்னைப் பயன்படுத்தினாலே போதும்."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"பொதுக் குறியீட்டுக் கிரிப்டோகிராஃபி"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"FIDO Alliance (Google, Apple, Microsoft மற்றும் பல நிறுவனங்கள்) &amp; W3C தரநிலைகளின் அடிப்படையில் கடவுச்சாவிகள் கிரிப்டோகிராஃபிக் இரட்டைக் குறியீடுகளைப் பயன்படுத்துகின்றன. பயனர்பெயர் &amp; கடவுச்சொல் போல் இல்லாமல், ஓர் ஆப்ஸ்/தளத்திற்கென இரட்டைக் குறியீடு உருவாக்கப்படும். சாதனம்/கடவுச்சொல் நிர்வாகியில் பாதுகாப்பாகச் சேமிக்கப்படும் தனிப்பட்ட குறியீடு உங்கள் அடையாளத்தை உறுதிசெய்யும். பொதுக் குறியீடு ஆப்ஸ்/இணையதள சர்வருடன் பகிரப்படும். தொடர்புடைய குறியீடுகள் மூலம் உடனடியாகப் பதிவுசெய்யலாம் உள்நுழையலாம்."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"மேம்படுத்தப்பட்ட கணக்குப் பாதுகாப்பு"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"ஒவ்வொரு குறியீடும் எந்த ஆப்ஸ்/இணையதளத்திற்காக உருவாக்கப்பட்டதோ அதனுடன் மட்டுமே இணைக்கப்பட்டிருக்கும். இது மோசடியான ஆப்ஸ்/இணையதளத்தில் நீங்கள் தவறுதலாக உள்நுழைவதைத் தடுக்கும். அத்துடன், சேவையகங்களில் பொதுக் குறியீடுகள் மட்டுமே சேமிக்கப்படுவதால் கணக்கை ஹேக் செய்வது மிகக் கடினமாகும்."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"தடையற்ற டிரான்ஸிஷன்"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"கடவுச்சொல்லற்ற எதிர்காலத்தை நோக்கி நாம் பயணிக்கிறோம். கடவுச்சாவிகளைப் பயன்படுத்தும் இதே வேளையில் கடவுச்சொற்களையும் பயன்படுத்த முடியும்."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"உங்கள் <xliff:g id="CREATETYPES">%1$s</xliff:g> எங்கே சேமிக்கப்பட வேண்டும் என்பதைத் தேர்வுசெய்யுங்கள்"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"உங்கள் தகவல்களைச் சேமித்து அடுத்த முறை விரைவாக உள்நுழைய ஒரு கடவுச்சொல் நிர்வாகியைத் தேர்வுசெய்யுங்கள்"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> ஆப்ஸுக்கான கடவுச்சாவியை உருவாக்கவா?"</string>

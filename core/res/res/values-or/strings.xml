@@ -458,6 +458,14 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ଏହି ଆପଟି ବ୍ୟବହାରରେ ଥିବା ସମୟରେ, ହାର୍ଟ ରେଟ ଏବଂ ତାପମାତ୍ରା, ରକ୍ତରେ ଅମ୍ଳଜାନ ଶତକଡ଼ା ପରି ବଡି ସେନ୍ସର ଡାଟାକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦିଏ।"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"ପୃଷ୍ଠପଟରେ ଥିବା ସମୟରେ, ହାର୍ଟ ରେଟ ପରି ବଡି ସେନ୍ସର ଡାଟାକୁ ଆକ୍ସେସ କରନ୍ତୁ"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ଏହି ଆପଟି ପୃଷ୍ଠପଟରେ ଥିବା ସମୟରେ, ହାର୍ଟ ରେଟ, ତାପମାତ୍ରା ଏବଂ ରକ୍ତରେ ଅମ୍ଳଜାନ ଶତକଡ଼ା ପରି ବଡି ସେନ୍ସର ଡାଟାକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦିଏ।"</string>
+    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
+    <skip />
+    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6408654259475396200">"କ୍ୟାଲେଣ୍ଡର୍‍ ଇଭେଣ୍ଟ ଏବଂ ବିବରଣୀ ପଢ଼େ"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ଆପଣଙ୍କ ଟାବଲେଟ୍‌ରେ ଷ୍ଟୋର୍‍ କରାଯାଇଥିବା ସମସ୍ତ କ୍ୟାଲେଣ୍ଡର ଇଭେଣ୍ଟ ଏହି ଆପ୍‍ ପଢ଼ିପାରେ ଏବଂ ଆପଣଙ୍କ କ୍ୟାଲେଣ୍ଡର ଡାଟା ସେୟାର୍‍ କରିପାରେ କିମ୍ବା ସେଭ୍‍ କରିପାରେ।"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ଏହି ଆପ୍ ଆପଣଙ୍କ Android TV ଡିଭାଇସ୍‌ରେ ଷ୍ଟୋର୍ କରାଯାଇଥିବା ସମସ୍ତ କ୍ୟାଲେଣ୍ଡର ଇଭେଣ୍ଟ ପଢ଼ିପାରେ ଏବଂ ଆପଣଙ୍କ କ୍ୟାଲେଣ୍ଡର ଡାଟା ସେୟାର୍ କରିପାରେ କିମ୍ବା ସେଭ୍ କରିପାରେ।"</string>

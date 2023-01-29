@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"रद्द करा"</string>
     <string name="string_continue" msgid="1346732695941131882">"पुढे सुरू ठेवा"</string>
     <string name="string_more_options" msgid="7990658711962795124">"आणखी पर्याय"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"अधिक जाणून घ्या"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"पासकीसह आणखी सुरक्षित"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"पासकीसोबत, तुम्हाला क्लिष्ट पासवर्ड तयार करण्याची किंवा लक्षात ठेवण्याची आवश्यकता नाही"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"पासकी या तुम्ही तुमचे फिंगरप्रिंट, फेस किंवा स्क्रीन लॉक वापरून तयार करता अशा एंक्रिप्ट केलेल्या डिजिटल की आहेत"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"त्या Password Manager मध्ये सेव्ह केलेल्या असतात, जेणेकरून तुम्ही इतर डिव्हाइसवर साइन इन करू शकाल"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"पासकीबद्दल आणखी उपयुक्त माहिती"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"पासवर्ड न वापरणारे तंत्रज्ञान"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"पासवर्डवर अवलंबून न राहता, पासकी तुम्हाला साइन इन करण्याची अनुमती देतात. तुम्हाला तुमची ओळख पडताळणी करण्यासाठी आणि पासकी तयार करण्याकरिता, तुमचे फिंगरप्रिंट, फेस रेकग्निशन, पिन किंवा स्‍वाइप पॅटर्न वापरणे आवश्यक आहे."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"सार्वजनिक की क्रिप्टोग्राफी"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"FIDO अलायन्स (ज्यामध्ये Google, Apple, Microsoft, आणि आणखी बरेच समाविष्ट आहेत) आणि W3C स्टँडर्डवर आधारित, पासकी या क्रिप्टोग्राफिक की पेअर वापरतात. आपण पासवर्डसाठी वापरणारे वापरकर्ता नाव व वर्णांची स्ट्रिंगच्या उलट, खाजगी-सार्वजनिक की पेअर अ‍ॅप किंवा वेबसाइटसाठी तयार केली जाते. प्रायव्हेट की सुरक्षितरीत्या तुमच्या डिव्हाइस किंवा Password Manager वर स्टोअर केली जाते व तुमची ओळख पडताळणी करते. सार्वजनिक की ही अ‍ॅप किंवा वेबसाइट सर्व्हरसोबत शेअर केली जाते. संबंधित की सह, तुम्ही त्वरित नोंदणी व साइन इन करू शकता."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"सुधारित खाते सुरक्षा"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"प्रत्येक की ज्यांच्यासाठी बनवली आहे फक्त त्या अ‍ॅप किंवा वेबसाइटसोबत लिंक केलेली असते, ज्यमुळे तुम्ही कधीच कपटपूर्ण अ‍ॅप किंवा वेबसाइटवर चुकूनही साइन इन करणार नाही. तसेच, सर्व्हर फक्त सार्वजनिक की स्टोअर करत असल्यामुळे, हॅक करणे खूप अवघड आहे."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"अखंड संक्रमण"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"पासवर्ड न वापरणाऱ्या भविष्यात पुढे जाताना, पासवर्ड तरीही पासकीच्या बरोबरीने उपलब्ध असतील."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"तुमची <xliff:g id="CREATETYPES">%1$s</xliff:g> कुठे सेव्ह करायची ते निवडा"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"तुमची माहिती सेव्ह करण्यासाठी आणि पुढच्या वेळी जलद साइन इन करण्याकरिता Password Manager निवडा"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> साठी पासकी तयार करायची का?"</string>

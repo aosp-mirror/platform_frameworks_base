@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Mégse"</string>
     <string name="string_continue" msgid="1346732695941131882">"Folytatás"</string>
     <string name="string_more_options" msgid="7990658711962795124">"További lehetőségek"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"További információ"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Fokozott biztonság – azonosítókulccsal"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Azonosítókulcs birtokában nincs szükség összetett jelszavak létrehozására vagy megjegyzésére"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Az azonosítókulcsok olyan digitális kulcsok, amelyeket ujjlenyomata, arca vagy képernyőzár használatával hoz létre"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Az azonosítókulcsokat a rendszer jelszókezelőbe menti, így más eszközökbe is be tud jelentkezni"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Bővebben az azonosítókulcsokról"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Jelszó nélküli technológia"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Az azonosítókulcsok lehetővé teszik a jelszó nélküli bejelentkezést. Csak ujjlenyomatát, arcfelismerést, PIN-kódot vagy csúsztatási mintát kell használnia személyazonosságának igazolásához és azonosítókulcs létrehozásához."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"A nyilvános kulcs kriptográfiája"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Az azonosítókulcsok a FIDO Alliance (amely tagja a Google, az Apple és a Microsoft is) és a W3C szabványai alapján titkosítási kulcspárokat használnak. A felhasználónevekkel és a jelszavaknál megszokott karaktersorozattal ellentétben az adott apphoz vagy webhelyhez egy titkos és egy nyilvános kulcsból álló kulcspárt hoz létre a rendszer. A titkos kulcs tárolása biztonságosan történik az eszközén vagy a Jelszókezelőben, és ez a kulcs igazolja az Ön személyazonosságát. A nyilvános kulcsot osztja meg a rendszer az appal vagy a webhely szerverével. A kapcsolódó kulcsok révén Ön azonnal regisztrálhat és bejelentkezhet."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Nagyobb fiókbiztonság"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Minden kulcs kizárólag ahhoz az alkalmazáshoz vagy weboldalhoz kapcsolódik, amelyhez létrehozták, így soha nem fordulhat elő, hogy Ön tévedésből csalárd alkalmazásba vagy webhelyre jelentkezik be. Ráadásul – mivel a szerverek csak nyilvános kulcsokat tárolnak – a hackelés jóval nehezebb."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Zökkenőmentes átmenet"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Miközben a jelszó nélküli jövő felé haladunk, a jelszavak továbbra is rendelkezésre állnak majd az azonosítókulcsok mellett."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Válassza ki, hogy hova szeretné menteni <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Válasszon jelszókezelőt, hogy menthesse az adatait, és gyorsabban jelentkezhessen be a következő alkalommal."</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Létrehoz azonosítókulcsot a következőhöz: <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>

@@ -458,6 +458,14 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Разрешава на приложението да осъществява достъп до данните от сензорите за тяло, като например тези за сърдечен ритъм, температура и процент на кислорода в кръвта, докато то се използва."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Достъп до данните от сензорите за тяло (напр. за сърдечен ритъм) на заден план"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Разрешава на приложението да осъществява достъп до данните от сензорите за тяло, като например тези за сърдечен ритъм, температура и процент на кислорода в кръвта, докато то се изпълнява на заден план."</string>
+    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
+    <skip />
+    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Четене на събития и подробности от календара"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Това приложение може да чете всички съхранявани на таблета ви събития в календара и да споделя или запазва данни в календара ви."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Това приложение може да чете всички съхранявани на устройството ви с Android TV събития в календара и да споделя или запазва данни в календара ви."</string>

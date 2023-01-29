@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Жок"</string>
     <string name="string_continue" msgid="1346732695941131882">"Улантуу"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Башка варианттар"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"Кеңири маалымат"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Мүмкүндүк алуу ачкычтары менен коопсузураак болот"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Мүмкүндүк алуу ачкычтары менен татаал сырсөздөрдү түзүп же эстеп калуунун кереги жок"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Мүмкүндүк алуу ачкычтары – манжаңыздын изи, жүзүңүз же экранды кулпулоо функциясы аркылуу түзгөн шифрленген санариптик ачкычтар"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Алар сырсөздөрдү башкаргычка сакталып, аккаунтуңузга башка түзмөктөрдөн кире аласыз"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Мүмкүндүк алуу ачкычтары тууралуу кеңири маалымат"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Сырсөзсүз технология"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Мүмкүндүк алуу ачкычтары аркылуу сырсөздөрсүз эле аккаунтуңузга кире аласыз. Ким экениңизди ырастоо жана мүмкүндүк алуу ачкычын түзүү үчүн жөн гана манжаңыздын изин, жүзүнөн таануу функциясын, PIN кодду же графикалык ачкычты колдонушуңуз керек болот."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Жалпыга ачык ачкыч менен криптография"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"FIDO Alliance (Google, Apple, Microsoft ж.б.) жана W3C стандартына ылайык, мүмкүндүк алуу ачкычтары криптографиялык жуп ачкычтарды колдонот. Колдонмо же вебсайтта колдонуучунун аты жана сырсөз үчүн колдонулган символ сабы эмес, купуя жана жалпыга ачык жуп ачкыч түзүлөт. Купуя ачкыч түзмөктө же сырсөздөрдү башкаргычта коопсуз сакталып, өздүгүңүздү ырастоо үчүн колдонулат. Жалпыга ачык ачкыч колдонмо же вебсайттын серверине жөнөтүлөт. Туура келген ачкычтар аркылуу тез катталып жана кире аласыз."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Аккаунттун коопсуздугу жакшыртылды"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Ар бир ачкыч өзү арналган колдонмо же вебсайт менен гана байланыштырылгандыктан, эч качан шылуундардын колдонмолоруна же вебсайттарына жаңылыштык менен кирип албайсыз. Мындан тышкары, серверлерде жалпыга ачык ачкычтар гана сакталгандыктан, хакерлик кылуу кыйла кыйын."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Тез которулуу"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Сырсөзсүз келечекти көздөй баратсак да, аларды мүмкүндүк алуу ачкычтары менен бирге колдоно берүүгө болот."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"<xliff:g id="CREATETYPES">%1$s</xliff:g> кайда сакталарын тандаңыз"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Маалыматыңызды сактоо жана кийинки жолу тезирээк кирүү үчүн сырсөздөрдү башкаргычты тандаңыз"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> үчүн мүмкүндүк алуу ачкычын түзөсүзбү?"</string>

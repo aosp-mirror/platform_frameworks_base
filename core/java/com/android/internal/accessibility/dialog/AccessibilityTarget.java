@@ -52,6 +52,7 @@ public abstract class AccessibilityTarget implements TargetOperations, OnTargetS
     private CharSequence mLabel;
     private Drawable mIcon;
     private String mKey;
+    private CharSequence mStateDescription;
 
     @VisibleForTesting
     public AccessibilityTarget(Context context, @ShortcutType int shortcutType,
@@ -106,6 +107,10 @@ public abstract class AccessibilityTarget implements TargetOperations, OnTargetS
         }
     }
 
+    public void setStateDescription(CharSequence stateDescription) {
+        mStateDescription = stateDescription;
+    }
+
     /**
      * Gets the state description of this feature target.
      *
@@ -113,7 +118,7 @@ public abstract class AccessibilityTarget implements TargetOperations, OnTargetS
      */
     @Nullable
     public CharSequence getStateDescription() {
-        return null;
+        return mStateDescription;
     }
 
     public void setShortcutEnabled(boolean enabled) {

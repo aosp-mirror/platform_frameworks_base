@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Kanselleer"</string>
     <string name="string_continue" msgid="1346732695941131882">"Gaan voort"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Meer opsies"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"Kom meer te wete"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Veiliger met wagwoordsleutels"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Met wagwoordsleutels hoef jy nie komplekse wagwoorde te skep of te onthou nie"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Wagwoordsleutels is geënkripteerde digitale sleutels wat jy met jou vingerafdruk, gesig of skermslot skep"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Hulle word in ’n wagwoordbestuurder gestoor sodat jy op ander toestelle kan aanmeld"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Meer oor wagwoordsleutels"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Wagwoordlose tegnologie"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Met wagwoordsleutels kan jy aanmeld sonder om op wagwoorde staat te maak. Jy moet net jou vingerafdruk, gesigherkenning, PIN of swieppatroon gebruik om jou identiteit te verifieer en ’n wagwoordsleutel te skep."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Publiekesleutelkriptografie"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Gegrond op FIDO Alliance (wat Google, Apple, Microsoft en meer insluit) en W3C-standaarde, gebruik wagwoordsleutels kriptografiese sleutelpare. Anders as die gebruikernaam en string karakters wat ons vir wagwoorde gebruik, word ’n private-publieke-sleutelpaar vir ’n app of webwerf geskep. Die private sleutel word veilig op jou toestel of wagwoordbestuurder geberg en bevestig jou identiteit. Die publieke sleutel word met die app of webwerfbediener gedeel. Met passende sleutels kan jy dadelik registreer en aanmeld."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Verbeterde rekeningsekuriteit"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Elke sleutel is uitsluitlik gekoppel aan die app of webwerf waarvoor dit geskep is, en daarom kan jy nooit per ongeluk by ’n bedrieglike app of webwerf aanmeld nie. En omdat bedieners net publieke sleutels hou, is kuberkrakery baie moeiliker."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Moeitevrye oorgang"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Wagwoorde sal steeds saam met wagwoordsleutels beskikbaar wees terwyl ons na ’n wagwoordlose toekoms beweeg."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Kies waar om jou <xliff:g id="CREATETYPES">%1$s</xliff:g> te stoor"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Kies ’n wagwoordbestuurder om jou inligting te stoor en volgende keer vinniger aan te meld"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Skep wagwoordsleutel vir <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>

@@ -458,6 +458,14 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"యాప్ ఉపయోగంలో ఉన్నప్పుడు గుండె స్పందన రేటు, ఉష్ణోగ్రత, ఇంకా రక్తంలోని ఆక్సిజన్ శాతం వంటి శరీర సెన్సార్ డేటాను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"బ్యాక్‌గ్రౌండ్‌లో గుండె స్పందన రేటు వంటి శరీర సెన్సార్ డేటాను యాక్సెస్ చేయండి"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"యాప్ బ్యాక్‌గ్రౌండ్‌లో ఉన్నప్పుడు గుండె స్పందన రేటు, ఉష్ణోగ్రత, ఇంకా రక్తంలోని ఆక్సిజన్ శాతం వంటి శరీర సెన్సార్ డేటాను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
+    <skip />
+    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6408654259475396200">"క్యాలెండర్ ఈవెంట్‌లు మరియు వివరాలను చదవడం"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ఈ యాప్ మీ టాబ్లెట్‌లో నిల్వ చేసిన క్యాలెండర్ ఈవెంట్‌లన్నీ చదవగలదు మరియు మీ క్యాలెండర్ డేటాను షేర్ చేయగలదు లేదా సేవ్ చేయగలదు."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ఈ యాప్‌ మీ Android TV పరికరంలో నిల్వ చేసిన క్యాలెండర్ ఈవెంట్‌లన్నీ చదవగలదు, మీ క్యాలెండర్ డేటాను షేర్ చేయగలదు లేదా సేవ్ చేయగలదు."</string>

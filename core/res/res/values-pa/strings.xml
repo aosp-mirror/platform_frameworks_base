@@ -458,6 +458,14 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ਜਦੋਂ ਐਪ ਵਰਤੋਂ ਵਿੱਚ ਹੋਵੇ, ਤਾਂ ਇਸ ਨਾਲ ਐਪ ਨੂੰ ਦਿਲ ਦੀ ਧੜਕਣ, ਤਾਪਮਾਨ, ਖੂਨ ਵਿੱਚ ਮੌਜੂਦ ਆਕਸੀਜਨ ਦੀ ਫ਼ੀਸਦ ਵਰਗੇ ਸਰੀਰ ਸੰਬੰਧੀ ਸੈਂਸਰ ਦੇ ਡਾਟੇ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੀ ਆਗਿਆ ਮਿਲਦੀ ਹੈ।"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚੱਲਣ \'ਤੇ ਦਿਲ ਦੀ ਧੜਕਣ ਵਰਗੇ ਸਰੀਰ ਸੰਬੰਧੀ ਸੈਂਸਰ ਦੇ ਡਾਟਾ ਤੱਕ ਪਹੁੰਚ ਕਰੋ"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ਜਦੋਂ ਐਪ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚੱਲ ਰਹੀ ਹੋਵੇ, ਤਾਂ ਇਸ ਨਾਲ ਐਪ ਨੂੰ ਦਿਲ ਦੀ ਧੜਕਣ, ਤਾਪਮਾਨ, ਖੂਨ ਵਿੱਚ ਮੌਜੂਦ ਆਕਸੀਜਨ ਦੀ ਫ਼ੀਸਦ ਵਰਗੇ ਸਰੀਰ ਸੰਬੰਧੀ ਸੈਂਸਰ ਦੇ ਡਾਟੇ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੀ ਆਗਿਆ ਮਿਲਦੀ ਹੈ।"</string>
+    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
+    <skip />
+    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6408654259475396200">"ਕੈਲੰਡਰ ਵਰਤਾਰਿਆਂ ਅਤੇ ਵੇਰਵਿਆਂ ਨੂੰ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ਇਹ ਐਪ ਤੁਹਾਡੇ ਟੈਬਲੈੱਟ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਸਾਰੇ ਕੈਲੰਡਰ ਇਵੈਂਟਾਂ ਨੂੰ ਪੜ੍ਹ ਸਕਦੀ ਹੈ ਅਤੇ ਤੁਹਾਡੇ ਕੈਲੰਡਰ ਡਾਟੇ ਨੂੰ ਸਾਂਝਾ ਜਾਂ ਰੱਖਿਅਤ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ਇਹ ਐਪ ਤੁਹਾਡੇ Android TV ਡੀਵਾਈਸ \'ਤੇ ਸਟੋਰ ਕੀਤੇ ਸਾਰੇ ਕੈਲੰਡਰ ਇਵੈਂਟਾਂ ਨੂੰ ਪੜ੍ਹ ਸਕਦੀ ਹੈ ਅਤੇ ਤੁਹਾਡੇ ਕੈਲੰਡਰ ਡਾਟੇ ਨੂੰ ਸਾਂਝਾ ਜਾਂ ਰੱਖਿਅਤ ਕਰ ਸਕਦੀ ਹੈ।"</string>

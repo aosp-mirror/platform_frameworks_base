@@ -543,10 +543,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"ស្វ័យប្រវត្តិ"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"គ្មាន​សំឡេង ឬការញ័រទេ"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"គ្មានសំឡេង​ឬការញ័រ និងបង្ហាញ​ទាបជាង​នៅក្នុង​ផ្នែកសន្ទនា"</string>
-    <!-- no translation found for notification_channel_summary_default (777294388712200605) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_default_with_bubbles (3482483084451555344) -->
-    <skip />
+    <string name="notification_channel_summary_default" msgid="777294388712200605">"អាចរោទ៍ ឬញ័រ ដោយផ្អែកលើ​ការកំណត់ឧបករណ៍"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"អាចរោទ៍ ឬញ័រ ដោយផ្អែកលើ​ការកំណត់ឧបករណ៍។ ការសន្ទនា​ពីផ្ទាំងអណ្ដែត <xliff:g id="APP_NAME">%1$s</xliff:g> តាម​លំនាំដើម​។"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ឱ្យប្រព័ន្ធកំណត់ថាតើ​ការជូនដំណឹងនេះ​គួរតែបន្លឺសំឡេង ឬញ័រ"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;ស្ថានភាព៖&lt;/b&gt; បានដំឡើងទៅ​លំនាំដើម"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;ស្ថានភាព៖&lt;/b&gt; បានបញ្ចុះទៅស្ងាត់"</string>
@@ -814,8 +812,7 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"មធ្យម"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"តូច"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"ធំ"</string>
-    <!-- no translation found for accessibility_magnification_done (263349129937348512) -->
-    <skip />
+    <string name="accessibility_magnification_done" msgid="263349129937348512">"រួចរាល់"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"កែ"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"ការកំណត់វិនដូ​កម្មវិធីពង្រីក"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"ចុចដើម្បីបើក​មុខងារ​ភាពងាយស្រួល។ ប្ដូរ ឬប្ដូរ​ប៊ូតុងនេះ​តាមបំណង​នៅក្នុង​ការកំណត់។\n\n"<annotation id="link">"មើល​ការកំណត់"</annotation></string>
@@ -835,6 +832,10 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"ជ្រើសរើស​កម្មវិធីដែលត្រូវបញ្ចូល​ផ្ទាំងគ្រប់គ្រង"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{បានបញ្ចូល​ការគ្រប់គ្រង #។}other{បានបញ្ចូល​ការគ្រប់គ្រង #។}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"បានដកចេញ"</string>
+    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
+    <skip />
+    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
+    <skip />
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"បានដាក់ជា​សំណព្វ"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"បានដាក់ជា​សំណព្វ ទីតាំង​ទី <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"បានដកចេញ​ពី​សំណព្វ"</string>
@@ -901,6 +902,8 @@
     <string name="controls_error_failed" msgid="960228639198558525">"មានបញ្ហា សូម​ព្យាយាម​ម្តងទៀត"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"បញ្ចូល​ផ្ទាំងគ្រប់គ្រង"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"កែ​ផ្ទាំងគ្រប់គ្រង"</string>
+    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
+    <skip />
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"បញ្ចូល​ឧបករណ៍​មេឌៀ"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"ក្រុម"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"បានជ្រើសរើស​ឧបករណ៍ 1"</string>
@@ -916,8 +919,7 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ឧបករណ៍បំពងសំឡេង និងផ្ទាំងអេក្រង់"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"ឧបករណ៍​ដែលបានណែនាំ"</string>
-    <!-- no translation found for media_output_status_require_premium (5691200962588753380) -->
-    <skip />
+    <string name="media_output_status_require_premium" msgid="5691200962588753380">"ត្រូវការគណនីលំដាប់ខ្ពស់"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"របៀបដែលការផ្សាយដំណើរការ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ការ​ផ្សាយ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"មនុស្សនៅជិត​អ្នកដែលមាន​ឧបករណ៍ប៊្លូធូស​ត្រូវគ្នា​អាចស្តាប់​មេឌៀ​ដែលអ្នកកំពុងផ្សាយបាន"</string>
@@ -1062,14 +1064,11 @@
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"ថ្មនៅសល់ <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"ភ្ជាប់ប៊ិករបស់អ្នកជាមួយឆ្នាំងសាក"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"ថ្មប៊ិកនៅសល់តិច"</string>
-    <!-- no translation found for video_camera (7654002575156149298) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_title (6991157106804289643) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_text (3458704745640229638) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_action (2937701298133010724) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_close (7927067108901068098) -->
+    <string name="video_camera" msgid="7654002575156149298">"កាមេរ៉ា​វីដេអូ"</string>
+    <string name="call_from_work_profile_title" msgid="6991157106804289643">"មិនអាចហៅទូរសព្ទពីកម្រងព័ត៌មាននេះបានទេ"</string>
+    <string name="call_from_work_profile_text" msgid="3458704745640229638">"គោលការណ៍ការងាររបស់អ្នកអនុញ្ញាតឱ្យអ្នកធ្វើការហៅទូរសព្ទបានតែពីកម្រងព័ត៌មានការងារប៉ុណ្ណោះ"</string>
+    <string name="call_from_work_profile_action" msgid="2937701298133010724">"ប្ដូរ​ទៅ​កម្រង​ព័ត៌មាន​ការងារ"</string>
+    <string name="call_from_work_profile_close" msgid="7927067108901068098">"បិទ"</string>
+    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
     <skip />
 </resources>

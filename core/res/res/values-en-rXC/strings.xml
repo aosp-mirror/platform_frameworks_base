@@ -458,6 +458,14 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‎‎‎‏‏‎‎‏‏‏‎‏‎‏‏‎‏‎‎‎‎‎‎‎‎‏‎‏‎‏‏‏‏‏‏‏‎‏‎‎‏‎‏‎‎‏‏‎‎‎‏‎‎‏‏‎‎‎Allows the app to access body sensor data, such as heart rate, temperature, and blood oxygen percentage, while the app is in use.‎‏‎‎‏‎"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‎‎‎‎‏‎‏‏‎‎‏‏‏‎‏‏‎‎‎‎‎‎‎‎‎‎‎‏‏‎‎‎‏‎‏‏‏‎‎‏‎‏‏‏‏‏‎‎‎‏‏‎‏‏‏‏‏‎‎Access body sensor data, like heart rate, while in the background‎‏‎‎‏‎"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‏‎‎‎‏‏‎‏‏‎‎‏‎‎‏‏‎‎‏‎‏‎‎‏‎‏‎‏‎‏‏‎‎‎‏‏‎‎‏‎‎‎‏‎‎‎‎‏‎‏‎‏‎‏‎‎‏‎Allows the app to access body sensor data, such as heart rate, temperature, and blood oxygen percentage, while the app is in the background.‎‏‎‎‏‎"</string>
+    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
+    <skip />
+    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6408654259475396200">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‎‏‏‏‏‎‎‎‎‎‎‎‏‏‏‎‏‎‎‎‏‏‎‎‎‎‎‏‏‎‎‎‎‎‏‎‏‎‎‏‏‎‎‏‏‎‏‏‎‎‏‏‎‏‎‎‎‎Read calendar events and details‎‏‎‎‏‎"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‏‏‎‎‏‎‎‏‏‏‎‏‎‎‎‎‎‏‎‎‏‏‎‏‏‎‎‏‎‏‏‎‏‎‏‎‎‎‎‎‏‏‎‏‎‎‎‏‏‎‏‎‏‏‏‏‏‎‎This app can read all calendar events stored on your tablet and share or save your calendar data.‎‏‎‎‏‎"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‎‎‏‎‏‎‎‏‏‏‎‏‏‎‎‏‏‎‏‎‏‎‎‏‏‏‎‏‎‏‎‎‏‎‏‏‏‎‏‎‏‏‎‏‏‏‎‎‎‏‎‎‎‎‏‏‎‎‎This app can read all calendar events stored on your Android TV device and share or save your calendar data.‎‏‎‎‏‎"</string>

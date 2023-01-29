@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"မလုပ်တော့"</string>
     <string name="string_continue" msgid="1346732695941131882">"ရှေ့ဆက်ရန်"</string>
     <string name="string_more_options" msgid="7990658711962795124">"နောက်ထပ်ရွေးစရာများ"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"ပိုမိုလေ့လာရန်"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"လျှို့ဝှက်ကီးများဖြင့် ပိုလုံခြုံသည်"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"လျှို့ဝှက်ကီးများဖြင့် ရှုပ်ထွေးသောစကားဝှက်များကို ပြုလုပ်ရန် (သို့) မှတ်မိရန် မလိုပါ"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"လျှို့ဝှက်ကီးများမှာ သင်၏လက်ဗွေ၊ မျက်နှာ (သို့) ဖန်သားပြင်လော့ခ်သုံး၍ ပြုလုပ်ထားသော အသွင်ဝှက်ထားသည့် ဒစ်ဂျစ်တယ်ကီးများ ဖြစ်သည်"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"၎င်းတို့ကို စကားဝှက်မန်နေဂျာတွင် သိမ်းသဖြင့် အခြားစက်များတွင် လက်မှတ်ထိုးဝင်နိုင်ပါသည်"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"လျှို့ဝှက်ကီးများအကြောင်း ပိုပြရန်"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"စကားဝှက်မသုံးခြင်း နည်းပညာ"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"လျှို့ဝှက်ကီးများဖြင့် သင်သည် စကားဝှက်အပေါ် အမှီမပြုဘဲ လက်မှတ်ထိုးဝင်နိုင်သည်။ သင့်အထောက်အထားကို အတည်ပြုပြီး လျှို့ဝှက်ကီးလုပ်ရန် သင်၏ လက်ဗွေ၊ မျက်နှာသိရှိမှု၊ ပင်နံပါတ် (သို့) ပွတ်ဆွဲပုံဖော်ခြင်းကို အသုံးပြုရန်သာ လိုသည်။"</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"အများသုံးကီး ကုဒ်ထည့်သွင်းခြင်း"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"လျှို့ဝှက်ကီးများသည် FIDO Alliance (Google၊ Apple၊ Microsoft စသည်) နှင့် W3C စံညွှန်းများပေါ် အခြေခံ၍ ကုဒ်ထည့်သွင်းသည့် ကီးအတွဲများသုံးသည်။ အသုံးပြုသူအမည်၊ စကားဝှက်အတွက် အက္ခရာတွဲများနှင့်မတူသည်မှာ အက်ပ် (သို့) ဝဘ်ဆိုက်တစ်ခုအတွက် သီးသန့်-အများသုံး ကီးအတွဲ ပြုလုပ်ခြင်းဖြစ်သည်။ သီးသန့်ကီးကို သင့်စက် (သို့) စကားဝှက်မန်နေဂျာတွင် လုံခြုံစွာသိမ်းပြီး ၎င်းက သင့်အထောက်အထားကို အတည်ပြုသည်။ အများသုံးကီးကို အက်ပ် (သို့) ဝဘ်ဆိုက်ဆာဗာနှင့် မျှဝေသည်။ သက်ဆိုင်ရာကီးများသုံး၍ ချက်ချင်းမှတ်ပုံတင်ပြီး ဝင်နိုင်သည်။"</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"ပိုကောင်းသော အကောင့်လုံခြုံရေး"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"ကီးတစ်ခုစီကို ၎င်းအတွက် ပြုလုပ်ထားသော အက်ပ် (သို့) ဝဘ်ဆိုက်နှင့် သီးသန့်လင့်ခ်ချိတ်ထားသဖြင့် လိမ်လည်သော အက်ပ် (သို့) ဝဘ်ဆိုက်သို့ မည်သည့်အခါတွင်မှ မှားယွင်း၍ လက်မှတ်ထိုးဝင်နိုင်မည်မဟုတ်ပါ။ ထို့အပြင် ဆာဗာသီးသန့် သိမ်းထားသော အများသုံးကီးများကို ဟက်လုပ်ရန် ပိုခက်ခဲသည်။"</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"အလိုအလျောက် ကူးပြောင်းခြင်း"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"စကားဝှက်မသုံးခြင်း အနာဂတ်ဆီသို့ ရှေ့ဆက်ရာတွင် လျှို့ဝှက်ကီးများနှင့်အတူ စကားဝှက်များကို ဆက်လက်အသုံးပြုနိုင်ပါမည်။"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"သင်၏ <xliff:g id="CREATETYPES">%1$s</xliff:g> သိမ်းရန်နေရာ ရွေးခြင်း"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"သင့်အချက်အလက်သိမ်းပြီး နောက်တစ်ကြိမ်၌ ပိုမိုမြန်ဆန်စွာ လက်မှတ်ထိုးဝင်ရန် စကားဝှက်မန်နေဂျာကို ရွေးပါ"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> အတွက် လျှို့ဝှက်ကီးပြုလုပ်မလား။"</string>

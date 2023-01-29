@@ -458,6 +458,14 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ایپ کے استعمال میں ہونے کے دوران ایپ کو حرکت قلب کی شرح، درجہ حرارت اور خون میں آکسیجن کا فیصد جیسے باڈی سینسر ڈیٹا تک رسائی کی اجازت دیتا ہے۔"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"پس منظر میں ہونے کے دوران حرکت قلب کی شرح جیسے باڈی سینسر ڈیٹا تک رسائی پائیں"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ایپ کے پس منظر میں ہونے کے دوران ایپ کو حرکت قلب کی شرح، درجہ حرارت اور خون میں آکسیجن کا فیصد جیسے باڈی سینسر ڈیٹا تک رسائی کی اجازت دیتا ہے۔"</string>
+    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
+    <skip />
+    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6408654259475396200">"کیلنڈر ایونٹس اور تفاصیل پڑھیں"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"یہ ایپ آپ کے ٹیبلیٹ پر اسٹور کردہ سبھی کیلنڈر ایونٹس کو پڑھ سکتی ہے اور آپ کے  کیلنڈر ڈیٹا کا اشتراک یا اسے محفوظ کر سکتی ہے۔"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"‏یہ ایپ آپ کے Android TV آلہ پر اسٹور کردہ سبھی کیلنڈر ایونٹس کو پڑھ سکتی ہے اور آپ کے کیلنڈر ڈیٹا کا اشتراک یا اسے محفوظ کر سکتی ہے۔"</string>

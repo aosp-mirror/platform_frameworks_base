@@ -543,10 +543,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"Автоматтык"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Үнү чыкпайт жана дирилдебейт"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Үнү чыкпайт же дирилдебейт жана сүйлөшүүлөр тизмесинин ылдый жагында көрүнөт"</string>
-    <!-- no translation found for notification_channel_summary_default (777294388712200605) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_default_with_bubbles (3482483084451555344) -->
-    <skip />
+    <string name="notification_channel_summary_default" msgid="777294388712200605">"Түзмөктүн параметрлерине жараша шыңгырап же дирилдеши мүмкүн"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Түзмөктүн параметрлерине жараша шыңгырап же дирилдеши мүмкүн. <xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосундагы сүйлөшүүлөр демейки шартта калкып чыкма билдирмелер болуп көрүнөт."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Билдирменин үнүн чыгартууну же басууну тутумга тапшырыңыз"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Абалы:&lt;/b&gt; Демейкиге өзгөрдү"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Абалы:&lt;/b&gt; Үнсүз абалга төмөндөдү"</string>
@@ -834,6 +832,10 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"Башкаруу элементтери кошула турган колдонмону тандоо"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# көзөмөл кошулду.}other{# көзөмөл кошулду.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Өчүрүлдү"</string>
+    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
+    <skip />
+    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
+    <skip />
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Сүйүктүүлөргө кошулду"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Сүйүктүүлөргө <xliff:g id="NUMBER">%d</xliff:g>-позицияга кошулду"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Сүйүктүүлөрдөн чыгарылды"</string>
@@ -900,6 +902,8 @@
     <string name="controls_error_failed" msgid="960228639198558525">"Ката, кайталап көрүңүз"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Башкаруу элементтерин кошуу"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Башкаруу элементтерин түзөтүү"</string>
+    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
+    <skip />
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Медиа түзмөктөрдү кошуу"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Топ"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 түзмөк тандалды"</string>
@@ -915,8 +919,7 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Динамиктер жана дисплейлер"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Сунушталган түзмөктөр"</string>
-    <!-- no translation found for media_output_status_require_premium (5691200962588753380) -->
-    <skip />
+    <string name="media_output_status_require_premium" msgid="5691200962588753380">"Премиум аккаунт талап кылынат"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Кабарлоо кантип иштейт"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Кабарлоо"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Шайкеш Bluetooth түзмөктөрү болгон жакын жердеги кишилер кабарлап жаткан медиаңызды уга алышат"</string>
@@ -1061,14 +1064,11 @@
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Батареянын кубаты: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Стилусту кубаттаңыз"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Стилустун батареясы отурайын деп калды"</string>
-    <!-- no translation found for video_camera (7654002575156149298) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_title (6991157106804289643) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_text (3458704745640229638) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_action (2937701298133010724) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_close (7927067108901068098) -->
+    <string name="video_camera" msgid="7654002575156149298">"Видео камера"</string>
+    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Бул профилден чала албайсыз"</string>
+    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Жумуш саясатыңызга ылайык, жумуш профилинен гана чалууларды аткара аласыз"</string>
+    <string name="call_from_work_profile_action" msgid="2937701298133010724">"Жумуш профилине которулуу"</string>
+    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Жабуу"</string>
+    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
     <skip />
 </resources>

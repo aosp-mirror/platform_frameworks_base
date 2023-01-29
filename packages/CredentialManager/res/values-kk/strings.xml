@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Бас тарту"</string>
     <string name="string_continue" msgid="1346732695941131882">"Жалғастыру"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Басқа опциялар"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"Толық ақпарат"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Кіру кілттерімен қауіпсіздеу"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Кіру кілттері бар кезде күрделі құпия сөздер жасаудың немесе оларды есте сақтаудың қажеті жоқ."</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Кіру кілттері — саусақ ізі, бет не экран құлпы арқылы жасалатын шифрланған цифрлық кілттер."</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Олар құпия сөз менеджеріне сақталады. Соның арқасында басқа құрылғылардан кіре аласыз."</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Кіру кілттері туралы қосымша ақпарат"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Құпия сөзсіз технология"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Кіру кілттері сізге құпия сөзге сүйенбей-ақ кіруге мүмкіндік береді. Жеке басыңызды растап, кіру кілтін жасау үшін тек саусақ ізі, бет тану функциясы, PIN коды немесе сырғыту өрнегі қажет."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Ашық кілт криптографиясы"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"FIDO Alliance (оған Google, Apple, Microsoft, т.б. кіреді) және W3C стандарттары бойынша кіру кілттерінде криптографиялық кілт жұптары қолданылады. Құпия сөз үшін пайдаланушы аты мен таңбалар қолданылады, ал қолданба немесе веб-сайт үшін жеке-ашық кілт жұбы жасалады. Жеке кілт құрылғыңызда немесе құпия сөз менеджерінде қорғалып, сақталады. Ол жеке басыңызды растау үшін қажет. Ашық кілт қолданба немесе веб-сайт серверіне жіберіледі. Кілттер сәйкес келсе, бірден тіркеліп, аккаунтқа кіре аласыз."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Аккаунттың қосымша қауіпсіздігі"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Әрбір кілт өзі арнайы жасалған қолданбамен немесе веб-сайтпен ғана байланысты болады, сондықтан алаяқтар қолданбасына немесе веб-сайтына байқаусызда кіру мүмкін емес. Онымен қоса тек ашық кілттер сақталатын серверлер арқасында хакерлердің бұзып кіруі айтарлықтай қиындады."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Оңай ауысу"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Құпия сөзсіз болашақ жақын болғанына қарамастан, келешекте құпия сөздерді кіру кілттерімен қатар қолдана беруге болады."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"<xliff:g id="CREATETYPES">%1$s</xliff:g> қайда сақталатынын таңдаңыз"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Мәліметіңізді сақтап, келесіде жылдам кіру үшін құпия сөз менеджерін таңдаңыз."</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> үшін кіру кілтін жасау керек пе?"</string>

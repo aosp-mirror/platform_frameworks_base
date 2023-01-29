@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Anulo"</string>
     <string name="string_continue" msgid="1346732695941131882">"Vazhdo"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Opsione të tjera"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"Mëso më shumë"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Më e sigurt me çelësat e kalimit"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Me çelësat e kalimit, nuk ka nevojë të krijosh ose të mbash mend fjalëkalime të ndërlikuara"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Çelësat e kalimit kanë çelësa dixhitalë të enkriptuar që ti i krijon duke përdorur gjurmën e gishtit, fytyrën ose kyçjen e ekranit"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Ata ruhen te një menaxher fjalëkalimesh, në mënyrë që mund të identifikohesh në pajisje të tjera"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Më shumë rreth çelësave të kalimit"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Teknologji pa fjalëkalime"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Çelësat e kalimit të lejojnë të identifikohesh pa u mbështetur te fjalëkalimet. Të duhet vetëm të përdorësh gjurmën e gishtit, njohjen e fytyrës, PIN-in ose të rrëshqasësh motivin për të verifikuar identitetin dhe për të krijuar një çelës kalimi."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Kriptografia e çelësit publik"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Bazuar në aleancën FIDO (e cila përfshin Google, Apple, Microsoft e të tjera) dhe standardet W3C, çelësat e kalimit përdorin çifte çelësash kriptografikë. Ndryshe nga emri i përdoruesit dhe vargu i karaktereve që përdorim për fjalëkalime, një çift çelësash privat-publik krijohet për aplikacion ose sajtin e uebit. Çelësi privat ruhet i sigurt në pajisjen tënde ose në menaxherin e fjalëkalimeve dhe konfirmon identitetin tënd. Çelësi publik ndahet me aplikacionin ose serverin e sajtit të uebit. Me çelësat përkatës, mund të regjistrohesh dhe të identifikohesh në çast."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Siguri e përmirësuar e llogarisë"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Secili çelës është i lidhur ekskluzivisht me aplikacionin ose sajtin e uebit për të cilin është krijuar, kështu që nuk do të identifikohesh asnjëherë gabimisht në një aplikacion ose sajt uebi mashtrues. Gjithashtu, me serverët që mbajnë vetëm çelësa publikë, pirateria informatike është shumë më e vështirë."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Kalim i thjeshtuar"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Teksa shkojmë drejt një të ardhmeje pa fjalëkalime, këto të fundit do të ofrohen ende së bashku me çelësat e kalimit."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Zgjidh se ku të ruash <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Zgjidh një menaxher fjalëkalimesh për të ruajtur informacionet e tua dhe për t\'u identifikuar më shpejt herën tjetër"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Të krijohet çelësi i kalimit për <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>

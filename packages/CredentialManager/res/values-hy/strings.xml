@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Չեղարկել"</string>
     <string name="string_continue" msgid="1346732695941131882">"Շարունակել"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Այլ տարբերակներ"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"Իմանալ ավելին"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Անցաբառերի հետ ավելի ապահով է"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Անցաբառերի շնորհիվ դուք բարդ գաղտնաբառեր ստեղծելու կամ հիշելու անհրաժեշտություն չեք ունենա"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Անցաբառերը գաղտնագրված թվային բանալիներ են, որոնք ստեղծվում են մատնահետքի, դեմքով ապակողպման կամ էկրանի կողպման օգտագործմամբ"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Դուք կարող եք մուտք գործել այլ սարքերում, քանի որ անցաբառերը պահվում են գաղտնաբառերի կառավարիչում"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Մանրամասն անցաբառերի մասին"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Գաղտնաբառեր չպահանջող տեխնոլոգիա"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Անցաբառերը ձեզ թույլ են տալիս մուտք գործել առանց գաղտնաբառերի։ Ձեզ պարզապես հարկավոր է օգտագործել ձեր մատնահետքը, դիմաճանաչումը, PIN կոդը կամ նախշը՝ ձեր ինքնությունը հաստատելու և անցաբառ ստեղծելու համար։"</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Բաց բանալու կրիպտոգրաֆիա"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Ըստ FIDO դաշինքի (որը ներառում է Google-ը, Apple-ը, Microsoft-ը և այլ ընկերություններ) և W3C ստանդարտների՝ անցաբառերն օգտագործում են կրիպտոգրաֆիկ բանալիների զույգ։ Օգտանվան և գաղտնաբառի փոխարեն հավելվածի կամ կայքի համար մենք ստեղծում ենք բաց-փակ բանալիների զույգ։ Փակ բանալին ապահով պահվում է ձեր սարքում կամ գաղտնաբառերի կառավարիչում և հաստատում է ձեր ինքնությունը։ Բաց բանալին փոխանցվում է հավելվածի կամ կայքի սերվերին։ Համապատասխան բանալիների միջոցով կարող եք ակնթարթորեն գրանցվել և մուտք գործել։"</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Հաշվի բարելավված անվտանգություն"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Յուրաքանչյուր բանալի բացառապես կապված է հավելվածի կամ կայքի հետ, որի համար այն ստեղծվել է, ուստի դուք երբեք չեք կարող սխալմամբ մուտք գործել կեղծ հավելված կամ կայք։ Բացի այդ՝ սերվերներում պահվում են միայն բաց բանալիներ, ինչը զգալիորեն դժվարացնում է կոտրումը։"</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Սահուն անցում"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Թեև մենք առանց գաղտնաբառերի ապագայի ճանապարհին ենք, դրանք դեռ հասանելի կլինեն անցաբառերի հետ մեկտեղ։"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Նշեք, թե որտեղ եք ուզում պահել ձեր <xliff:g id="CREATETYPES">%1$s</xliff:g>ը"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Ընտրեք գաղտնաբառերի կառավարիչ՝ ձեր տեղեկությունները պահելու և հաջորդ անգամ ավելի արագ մուտք գործելու համար"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Ստեղծե՞լ անցաբառ «<xliff:g id="APPNAME">%1$s</xliff:g>» հավելվածի համար"</string>

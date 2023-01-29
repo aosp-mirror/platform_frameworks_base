@@ -458,6 +458,14 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Gir appen tilgang til data fra kroppssensorer, for eksempel puls, temperatur og oksygenmetning i blodet, når den er i bruk."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Tilgang til data fra kroppssensorer, for eksempel puls, når den er i bakgrunnen"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Gir appen tilgang til data fra kroppssensorer, for eksempel puls, temperatur og oksygenmetning i blodet, når den er i bakgrunnen."</string>
+    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
+    <skip />
+    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Les kalenderaktivitet og detaljer"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Denne appen kan lese all kalenderaktivitet som er lagret på nettbrettet ditt, og dele eller lagre kalenderdataene."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Denne appen kan lese all kalenderaktivitet som er lagret på Android TV-enheten din, og dele eller lagre kalenderdataene."</string>

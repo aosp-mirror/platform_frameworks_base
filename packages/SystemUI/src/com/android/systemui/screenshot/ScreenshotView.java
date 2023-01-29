@@ -33,7 +33,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.BroadcastOptions;
 import android.app.Notification;
@@ -84,7 +83,6 @@ import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -104,8 +102,7 @@ import java.util.ArrayList;
  * Handles the visual elements and animations for the screenshot flow.
  */
 public class ScreenshotView extends FrameLayout implements
-        ViewTreeObserver.OnComputeInternalInsetsListener,
-        WorkProfileMessageController.WorkProfileMessageDisplay {
+        ViewTreeObserver.OnComputeInternalInsetsListener {
 
     interface ScreenshotViewCallback {
         void onUserInteraction();
@@ -125,7 +122,7 @@ public class ScreenshotView extends FrameLayout implements
     private static final long SCREENSHOT_TO_CORNER_X_DURATION_MS = 234;
     private static final long SCREENSHOT_TO_CORNER_Y_DURATION_MS = 500;
     private static final long SCREENSHOT_TO_CORNER_SCALE_DURATION_MS = 234;
-    private static final long SCREENSHOT_ACTIONS_EXPANSION_DURATION_MS = 400;
+    public static final long SCREENSHOT_ACTIONS_EXPANSION_DURATION_MS = 400;
     private static final long SCREENSHOT_ACTIONS_ALPHA_DURATION_MS = 100;
     private static final float SCREENSHOT_ACTIONS_START_SCALE_X = .7f;
     private static final int SWIPE_PADDING_DP = 12; // extra padding around views to allow swipe
@@ -144,8 +141,6 @@ public class ScreenshotView extends FrameLayout implements
 
     private ImageView mScrollingScrim;
     private DraggableConstraintLayout mScreenshotStatic;
-    private ViewGroup mMessageContainer;
-    private TextView mMessageContent;
     private ImageView mScreenshotPreview;
     private ImageView mScreenshotBadge;
     private View mScreenshotPreviewBorder;
@@ -302,8 +297,11 @@ public class ScreenshotView extends FrameLayout implements
         mDismissButton.getBoundsOnScreen(tmpRect);
         swipeRegion.op(tmpRect, Region.Op.UNION);
 
-        mMessageContainer.findViewById(R.id.message_dismiss_button).getBoundsOnScreen(tmpRect);
-        swipeRegion.op(tmpRect, Region.Op.UNION);
+        View messageDismiss = findViewById(R.id.message_dismiss_button);
+        if (messageDismiss != null) {
+            messageDismiss.getBoundsOnScreen(tmpRect);
+            swipeRegion.op(tmpRect, Region.Op.UNION);
+        }
 
         return swipeRegion;
     }
@@ -359,39 +357,11 @@ public class ScreenshotView extends FrameLayout implements
         }
     }
 
-    /**
-     * Show a notification under the screenshot view indicating that a work profile screenshot has
-     * been taken and which app can be used to view it.
-     *
-     * @param appName The name of the app to use to view screenshots
-     * @param appIcon Optional icon for the relevant files app
-     * @param onDismiss Runnable to be run when the user dismisses this message
-     */
-    @Override
-    public void showWorkProfileMessage(CharSequence appName, @Nullable Drawable appIcon,
-            Runnable onDismiss) {
-        if (appIcon != null) {
-            // Replace the default icon if one is provided.
-            ImageView imageView = mMessageContainer.findViewById(R.id.screenshot_message_icon);
-            imageView.setImageDrawable(appIcon);
-        }
-        mMessageContent.setText(
-                mContext.getString(R.string.screenshot_work_profile_notification, appName));
-        mMessageContainer.setVisibility(VISIBLE);
-        mMessageContainer.findViewById(R.id.message_dismiss_button).setOnClickListener((v) -> {
-            mMessageContainer.setVisibility(View.GONE);
-            onDismiss.run();
-        });
-    }
-
     @Override // View
     protected void onFinishInflate() {
+        super.onFinishInflate();
         mScrollingScrim = requireNonNull(findViewById(R.id.screenshot_scrolling_scrim));
         mScreenshotStatic = requireNonNull(findViewById(R.id.screenshot_static));
-        mMessageContainer =
-                requireNonNull(mScreenshotStatic.findViewById(R.id.screenshot_message_container));
-        mMessageContent =
-                requireNonNull(mMessageContainer.findViewById(R.id.screenshot_message_content));
         mScreenshotPreview = requireNonNull(findViewById(R.id.screenshot_preview));
 
         mScreenshotPreviewBorder = requireNonNull(

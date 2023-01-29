@@ -70,6 +70,8 @@
     <string name="uninstalling_app" msgid="8866082646836981397">"جارٍ إلغاء تثبيت <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"تمّ إلغاء تثبيت التطبيق."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"تم إلغاء تثبيت <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
+    <!-- no translation found for uninstall_done_clone_app (5578308154544195413) -->
+    <skip />
     <string name="uninstall_failed" msgid="1847750968168364332">"تعذّر إلغاء تثبيت التطبيق."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"لم يتم إلغاء تثبيت <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> بنجاح."</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"جارٍ حذف النسخة الطبق الأصل عن \"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>\"…"</string>

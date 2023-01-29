@@ -458,6 +458,14 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"De app heeft toegang tot gegevens van lichaamssensoren, zoals hartslag, temperatuur en zuurstofpercentage in het bloed, terwijl de app wordt gebruikt."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Toegang tot gegevens van lichaamssensoren, zoals hartslag, op de achtergrond"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"De app heeft toegang tot gegevens van lichaamssensoren, zoals hartslag, temperatuur en zuurstofpercentage in het bloed, terwijl de app op de achtergrond wordt uitgevoerd."</string>
+    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
+    <skip />
+    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Agenda-afspraken en -gegevens lezen"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Deze app kan alle agenda-afspraken lezen die zijn opgeslagen op je tablet en je agendagegevens delen of opslaan."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Deze app kan alle agenda-afspraken lezen die zijn opgeslagen op je Android TV-apparaat en je agendagegevens delen of opslaan."</string>

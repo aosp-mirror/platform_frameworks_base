@@ -832,6 +832,10 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"Vyberte aplikaci, pro kterou chcete přidat ovládací prvky"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Byl přidán # ovládací prvek.}few{Byly přidány # ovládací prvky.}many{Bylo přidáno # ovládacího prvku.}other{Bylo přidáno # ovládacích prvků.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Odstraněno"</string>
+    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
+    <skip />
+    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
+    <skip />
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Přidáno do oblíbených"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Přidáno do oblíbených na pozici <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Odebráno z oblíbených"</string>
@@ -898,6 +902,8 @@
     <string name="controls_error_failed" msgid="960228639198558525">"Chyba, zkuste to znovu"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Přidat ovládací prvky"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Upravit ovládací prvky"</string>
+    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
+    <skip />
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Přidání výstupů"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Skupina"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Je vybráno 1 zařízení"</string>
@@ -1063,4 +1069,6 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Vaše pracovní zásady vám umožňují telefonovat pouze z pracovního profilu"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Přepnout na pracovní profil"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Zavřít"</string>
+    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
+    <skip />
 </resources>

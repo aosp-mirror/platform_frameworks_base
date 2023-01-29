@@ -92,6 +92,10 @@ public class SystemSettings {
         Settings.System.CLOCKWORK_BLUETOOTH_SETTINGS_PREF,
         Settings.System.UNREAD_NOTIFICATION_DOT_INDICATOR,
         Settings.System.AUTO_LAUNCH_MEDIA_CONTROLS,
-        Settings.System.LOCALE_PREFERENCES
+        Settings.System.LOCALE_PREFERENCES,
+        Settings.System.TOUCHPAD_POINTER_SPEED,
+        Settings.System.TOUCHPAD_NATURAL_SCROLLING,
+        Settings.System.TOUCHPAD_TAP_TO_CLICK,
+        Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE,
     };
 }

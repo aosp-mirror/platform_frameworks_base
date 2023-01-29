@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Abbrechen"</string>
     <string name="string_continue" msgid="1346732695941131882">"Weiter"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Weitere Optionen"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"Weitere Informationen"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Mehr Sicherheit mit Passkeys"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Mit Passkeys musst du keine komplizierten Passwörter erstellen oder dir merken"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Passkeys sind verschlüsselte digitale Schlüssel, die du mithilfe deines Fingerabdrucks, Gesichts oder deiner Displaysperre erstellst"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Sie werden in einem Passwortmanager gespeichert, damit du dich auf anderen Geräten anmelden kannst"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Weitere Informationen zu Passkeys"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Passwortlose Technologie"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Passkeys ermöglichen die Anmeldung, ohne dass Passwörter erforderlich sind. Du verwendest einfach die Fingerabdruck- oder Gesichtserkennung, eine PIN oder ein Muster, um deine Identität zu bestätigen und einen Passkey zu erstellen."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Asymmetrisches Kryptosystem"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Passkeys beruhen auf FIDO Alliance- (zu der auch Google und Apple gehören) und W3C-Standards. Anstelle von Nutzername und Passwort wird ein kryptografisches Paar aus privatem und öffentlichem Schlüssel für eine App oder Website erstellt. Der private Schlüssel wird sicher auf deinem Gerät oder im Passwortmanager gespeichert und bestätigt deine Identität. Der öffentliche Schlüssel wird mit dem App- oder Websiteserver geteilt. Stimmen beide überein, kannst du dich sofort registrieren und anmelden."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Verbesserte Kontosicherheit"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Jeder Schlüssel ist ausschließlich mit der App oder Website verknüpft, für die er erstellt wurde. Du kannst dich also nicht aus Versehen bei einer betrügerischen App oder Website anmelden. Da auf Servern nur öffentliche Schlüssel verwaltet werden, wird das Hacking außerdem erheblich erschwert."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Nahtlose Umstellung"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Auch wenn wir uns auf eine passwortlose Zukunft zubewegen, werden neben Passkeys weiter Passwörter verfügbar sein."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Wähle aus, wo deine <xliff:g id="CREATETYPES">%1$s</xliff:g> gespeichert werden sollen"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Du kannst einen Passwortmanager auswählen, um deine Anmeldedaten zu speichern, damit du dich nächstes Mal schneller anmelden kannst"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Passkey für <xliff:g id="APPNAME">%1$s</xliff:g> erstellen?"</string>

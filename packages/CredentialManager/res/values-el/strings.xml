@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Ακύρωση"</string>
     <string name="string_continue" msgid="1346732695941131882">"Συνέχεια"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Περισσότερες επιλογές"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"Μάθετε περισσότερα"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Μεγαλύτερη ασφάλεια με κλειδιά πρόσβασης"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Με τα κλειδιά πρόσβασης, δεν χρειάζεται να δημιουργείτε ή να θυμάστε σύνθετους κωδικούς πρόσβασης."</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Τα κλειδιά πρόσβασης είναι κρυπτογραφημένα ψηφιακά κλειδιά που δημιουργείτε χρησιμοποιώντας το δακτυλικό σας αποτύπωμα, το πρόσωπο ή το κλείδωμα οθόνης."</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Αποθηκεύονται σε ένα πρόγραμμα διαχείρισης κωδικών πρόσβασης, για να μπορείτε να συνδέεστε από άλλες συσκευές."</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Περισσότερες πληροφορίες για τα κλειδιά πρόσβασης"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Τεχνολογία χωρίς χρήση κωδικού πρόσβασης"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Τα κλειδιά πρόσβασης σάς επιτρέπουν να συνδέεστε χωρίς να εξαρτάστε από κωδικούς πρόσβασης. Χρειάζεται μόνο να χρησιμοποιήσετε το δακτυλικό αποτύπωμά σας, την αναγνώριση προσώπου, ένα PIN ή ένα μοτίβο σάρωσης για να επαληθεύσετε την ταυτότητά σας και να δημιουργήσετε ένα κλειδί πρόσβασης."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Κρυπτογραφία δημόσιου κλειδιού"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Βάσει του FIDO Alliance (συμμετ. οι Google, Apple, Microsoft κ.ά.) και προτύπων W3C, τα κλειδιά πρόσβ. χρησιμ. συζεύξεις κλειδιών κρυπτογρ. Σε αντίθεση με το όνομα χρήστη και τη συμβολοσειρά χαρακτ. για κωδ. πρόσβ., δημιουργείται μια σύζευξη ιδιωτικού-δημόσιου κλειδ. για εφαρμ./ιστοτόπους. Το ιδιωτ. κλειδί αποθηκεύεται με ασφάλεια στη συσκευή ή στον διαχειρ. κωδ. πρόσβ. και επιβεβαιώνει την ταυτότητά σας. Το δημόσιο κλειδί κοινοπ. στον διακομιστή εφαρμ./ιστοτόπου. Τα αντίστοιχα κλειδιά επιτρέπουν άμεση εγγραφή και σύνδεση."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Βελτιωμένη ασφάλεια λογαριασμού"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Κάθε κλειδί συνδέεται αποκλειστικά με την εφαρμογή ή τον ιστότοπο για τον οποίο δημιουργήθηκε ώστε να μην συνδέεστε ποτέ κατά λάθος σε μη νόμιμες εφαρμογές ή ιστοτόπους. Επιπλέον, οι παραβιάσεις είναι πολύ πιο δύσκολες, επειδή οι διακομιστές διατηρούν μόνο δημόσια κλειδιά."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Απρόσκοπτη μετάβαση"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Καθώς κινούμαστε προς ένα μέλλον χωρίς κωδικούς πρόσβασης, οι κωδικοί πρόσβασης θα εξακολουθούν να είναι διαθέσιμοι μαζί με τα κλειδιά πρόσβασης."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Επιλέξτε πού θα αποθηκεύονται τα <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Επιλέξτε ένα πρόγραμμα διαχείρισης κωδικών πρόσβασης για να αποθηκεύσετε τα στοιχεία σας και να συνδεθείτε πιο γρήγορα την επόμενη φορά."</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Δημιουργία κλειδιού πρόσβασης για <xliff:g id="APPNAME">%1$s</xliff:g>;"</string>
