@@ -34,6 +34,7 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import android.os.Binder;
 import android.os.RemoteException;
 import android.view.inputmethod.InputMethodManager;
 
@@ -66,8 +67,8 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
     @Test
     public void testPerformShowIme() throws Exception {
         synchronized (ImfLock.class) {
-            mVisibilityApplier.performShowIme(mWindowToken, null /* statsToken */,
-                    InputMethodManager.SHOW_IMPLICIT, null, SHOW_SOFT_INPUT);
+            mVisibilityApplier.performShowIme(new Binder() /* showInputToken */,
+                    null /* statsToken */, InputMethodManager.SHOW_IMPLICIT, null, SHOW_SOFT_INPUT);
         }
         verifyShowSoftInput(false, true, InputMethodManager.SHOW_IMPLICIT);
     }
@@ -75,8 +76,8 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
     @Test
     public void testPerformHideIme() throws Exception {
         synchronized (ImfLock.class) {
-            mVisibilityApplier.performHideIme(mWindowToken, null /* statsToken */, null,
-                    HIDE_SOFT_INPUT);
+            mVisibilityApplier.performHideIme(new Binder() /* hideInputToken */,
+                    null /* statsToken */, null, HIDE_SOFT_INPUT);
         }
         verifyHideSoftInput(false, true);
     }
