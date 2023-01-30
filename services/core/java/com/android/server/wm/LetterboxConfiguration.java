@@ -22,6 +22,7 @@ import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ALLOW
 import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ENABLE_CAMERA_COMPAT_TREATMENT;
 import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ENABLE_COMPAT_FAKE_FOCUS;
 import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY;
+import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -296,7 +297,6 @@ final class LetterboxConfiguration {
                 R.bool.config_isCompatFakeFocusEnabled);
         mIsPolicyForIgnoringRequestedOrientationEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsPolicyForIgnoringRequestedOrientationEnabled);
-
         mIsDisplayRotationImmersiveAppCompatPolicyEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsDisplayRotationImmersiveAppCompatPolicyEnabled);
         mDeviceConfig.updateFlagActiveStatus(
@@ -311,7 +311,9 @@ final class LetterboxConfiguration {
         mDeviceConfig.updateFlagActiveStatus(
                 /* isActive */ mIsCompatFakeFocusEnabled,
                 /* key */ KEY_ENABLE_COMPAT_FAKE_FOCUS);
-
+        mDeviceConfig.updateFlagActiveStatus(
+                /* isActive */ mTranslucentLetterboxingEnabled,
+                /* key */ KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY);
         mLetterboxConfigurationPersister = letterboxConfigurationPersister;
         mLetterboxConfigurationPersister.start();
     }
@@ -1003,7 +1005,7 @@ final class LetterboxConfiguration {
 
     boolean isTranslucentLetterboxingEnabled() {
         return mTranslucentLetterboxingOverrideEnabled || (mTranslucentLetterboxingEnabled
-                && isTranslucentLetterboxingAllowed());
+                && mDeviceConfig.getFlag(KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY));
     }
 
     void setTranslucentLetterboxingEnabled(boolean translucentLetterboxingEnabled) {
@@ -1049,13 +1051,6 @@ final class LetterboxConfiguration {
                 letterboxPositionForVerticalReachability);
         mLetterboxConfigurationPersister.setLetterboxPositionForVerticalReachability(
                 isDeviceInTabletopMode, nextVerticalPosition);
-    }
-
-    // TODO(b/262378106): Cache a runtime flag and implement
-    // DeviceConfig.OnPropertiesChangedListener
-    static boolean isTranslucentLetterboxingAllowed() {
-        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-                "enable_translucent_activity_letterbox", false);
     }
 
     /** Whether fake sending focus is enabled for unfocused apps in splitscreen */

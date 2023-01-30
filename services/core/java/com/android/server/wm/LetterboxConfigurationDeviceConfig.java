@@ -48,6 +48,11 @@ final class LetterboxConfigurationDeviceConfig
     static final String KEY_ENABLE_COMPAT_FAKE_FOCUS = "enable_compat_fake_focus";
     private static final boolean DEFAULT_VALUE_ENABLE_COMPAT_FAKE_FOCUS = true;
 
+    static final String KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY =
+            "enable_letterbox_translucent_activity";
+
+    private static final boolean DEFAULT_VALUE_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY = true;
+
     @VisibleForTesting
     static final Map<String, Boolean> sKeyToDefaultValueMap = Map.of(
             KEY_ENABLE_CAMERA_COMPAT_TREATMENT,
@@ -57,7 +62,9 @@ final class LetterboxConfigurationDeviceConfig
             KEY_ALLOW_IGNORE_ORIENTATION_REQUEST,
             DEFAULT_VALUE_ALLOW_IGNORE_ORIENTATION_REQUEST,
             KEY_ENABLE_COMPAT_FAKE_FOCUS,
-            DEFAULT_VALUE_ENABLE_COMPAT_FAKE_FOCUS
+            DEFAULT_VALUE_ENABLE_COMPAT_FAKE_FOCUS,
+            KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY,
+            DEFAULT_VALUE_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY
     );
 
     // Whether camera compatibility treatment is enabled.
@@ -81,6 +88,10 @@ final class LetterboxConfigurationDeviceConfig
     // needed because some game engines wait to get focus before drawing the content of the app
     // which isn't guaranteed by default in multi-window modes.
     private boolean mIsCompatFakeFocusAllowed = DEFAULT_VALUE_ENABLE_COMPAT_FAKE_FOCUS;
+
+    // Whether the letterbox strategy for transparent activities is allowed
+    private boolean mIsTranslucentLetterboxingAllowed =
+            DEFAULT_VALUE_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY;
 
     // Set of active device configs that need to be updated in
     // DeviceConfig.OnPropertiesChangedListener#onPropertiesChanged.
@@ -129,6 +140,8 @@ final class LetterboxConfigurationDeviceConfig
                 return mIsAllowIgnoreOrientationRequest;
             case KEY_ENABLE_COMPAT_FAKE_FOCUS:
                 return mIsCompatFakeFocusAllowed;
+            case KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY:
+                return mIsTranslucentLetterboxingAllowed;
             default:
                 throw new AssertionError("Unexpected flag name: " + key);
         }
@@ -141,20 +154,20 @@ final class LetterboxConfigurationDeviceConfig
         }
         switch (key) {
             case KEY_ENABLE_CAMERA_COMPAT_TREATMENT:
-                mIsCameraCompatTreatmentEnabled =
-                        getDeviceConfig(key, defaultValue);
+                mIsCameraCompatTreatmentEnabled = getDeviceConfig(key, defaultValue);
                 break;
             case KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY:
                 mIsDisplayRotationImmersiveAppCompatPolicyEnabled =
                         getDeviceConfig(key, defaultValue);
                 break;
             case KEY_ALLOW_IGNORE_ORIENTATION_REQUEST:
-                mIsAllowIgnoreOrientationRequest =
-                        getDeviceConfig(key, defaultValue);
+                mIsAllowIgnoreOrientationRequest = getDeviceConfig(key, defaultValue);
                 break;
             case KEY_ENABLE_COMPAT_FAKE_FOCUS:
-                mIsCompatFakeFocusAllowed =
-                        getDeviceConfig(key, defaultValue);
+                mIsCompatFakeFocusAllowed = getDeviceConfig(key, defaultValue);
+                break;
+            case KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY:
+                mIsTranslucentLetterboxingAllowed = getDeviceConfig(key, defaultValue);
                 break;
             default:
                 throw new AssertionError("Unexpected flag name: " + key);
