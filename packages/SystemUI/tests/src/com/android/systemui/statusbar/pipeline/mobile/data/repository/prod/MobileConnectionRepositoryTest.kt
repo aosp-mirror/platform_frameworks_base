@@ -71,7 +71,6 @@ import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
 import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -86,7 +85,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
@@ -670,16 +668,8 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             job.cancel()
         }
 
-    private fun getTelephonyCallbacks(): List<TelephonyCallback> {
-        val callbackCaptor = argumentCaptor<TelephonyCallback>()
-        Mockito.verify(telephonyManager).registerTelephonyCallback(any(), callbackCaptor.capture())
-        return callbackCaptor.allValues
-    }
-
     private inline fun <reified T> getTelephonyCallbackForType(): T {
-        val cbs = getTelephonyCallbacks().filterIsInstance<T>()
-        assertThat(cbs.size).isEqualTo(1)
-        return cbs[0]
+        return MobileTelephonyHelpers.getTelephonyCallbackForType(telephonyManager)
     }
 
     /** Convenience constructor for SignalStrength */
