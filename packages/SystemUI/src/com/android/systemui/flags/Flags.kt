@@ -108,7 +108,7 @@ object Flags {
     // TODO(b/263414400): Tracking Bug
     @JvmField
     val NOTIFICATION_ANIMATE_BIG_PICTURE =
-        unreleasedFlag(120, "notification_animate_big_picture", teamfood = true)
+        releasedFlag(120, "notification_animate_big_picture", teamfood = true)
 
     // 200 - keyguard/lockscreen
     // ** Flag retired **
