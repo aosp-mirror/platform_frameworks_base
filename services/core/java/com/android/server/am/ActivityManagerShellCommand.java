@@ -39,6 +39,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NA
 import static com.android.server.am.AppBatteryTracker.BatteryUsage.BATTERY_USAGE_COUNT;
 import static com.android.server.am.LowMemDetector.ADJ_MEM_FACTOR_NOTHING;
 
+import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
@@ -113,10 +114,12 @@ import android.window.SplashScreen;
 
 import com.android.internal.compat.CompatibilityChangeConfig;
 import com.android.internal.util.MemInfoReader;
+import com.android.server.LocalServices;
 import com.android.server.am.LowMemDetector.MemFactor;
 import com.android.server.am.nano.Capabilities;
 import com.android.server.am.nano.Capability;
 import com.android.server.compat.PlatformCompat;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.utils.Slogf;
 
 import dalvik.annotation.optimization.NeverCompile;
@@ -536,16 +539,30 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
     private class ProgressWaiter extends IProgressListener.Stub {
         private final CountDownLatch mFinishedLatch = new CountDownLatch(1);
+        private final @UserIdInt int mUserId;
+
+        private ProgressWaiter(@UserIdInt int userId) {
+            mUserId = userId;
+        }
 
         @Override
         public void onStarted(int id, Bundle extras) {}
 
         @Override
-        public void onProgress(int id, int progress, Bundle extras) {}
+        public void onProgress(int id, int progress, Bundle extras) {
+            Slogf.d(TAG, "ProgressWaiter[user=%d]: onProgress(%d, %d)", mUserId, id, progress);
+        }
 
         @Override
         public void onFinished(int id, Bundle extras) {
+            Slogf.d(TAG, "ProgressWaiter[user=%d]: onFinished(%d)", mUserId, id);
             mFinishedLatch.countDown();
+        }
+
+        @Override
+        public String toString() {
+            return "ProgressWaiter[userId=" + mUserId + ", finished="
+                    + (mFinishedLatch.getCount() == 0) + "]";
         }
 
         public boolean waitForFinish(long timeoutMillis) {
@@ -2183,6 +2200,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         boolean wait = false;
         String opt;
         int displayId = Display.INVALID_DISPLAY;
+        boolean forceInvisible = false;
         while ((opt = getNextOption()) != null) {
             switch(opt) {
                 case "-w":
@@ -2191,32 +2209,47 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 case "--display":
                     displayId = getDisplayIdFromNextArg();
                     break;
+                case "--force-invisible":
+                    forceInvisible = true;
+                    break;
                 default:
                     getErrPrintWriter().println("Error: unknown option: " + opt);
                     return -1;
             }
         }
-        int userId = Integer.parseInt(getNextArgRequired());
-
-        final ProgressWaiter waiter = wait ? new ProgressWaiter() : null;
+        final int userId = Integer.parseInt(getNextArgRequired());
+        final boolean callStartProfile = !forceInvisible && isProfile(userId);
+        final ProgressWaiter waiter = wait ? new ProgressWaiter(userId) : null;
+        Slogf.d(TAG, "runStartUser(): userId=%d, display=%d, waiter=%s, callStartProfile=%b, "
+                + "forceInvisible=%b", userId,  displayId, waiter, callStartProfile,
+                forceInvisible);
 
         boolean success;
-        String displaySuffix;
+        String displaySuffix = "";
 
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "shell_runStartUser" + userId);
         try {
-            if (displayId == Display.INVALID_DISPLAY) {
+            if (callStartProfile) {
+                Slogf.d(TAG, "calling startProfileWithListener(%d, %s)", userId, waiter);
+                // startProfileWithListener() will start the profile visible (as long its parent is
+                // the current user), while startUserInBackgroundWithListener() will always start
+                // the user (or profile) invisible
+                success = mInterface.startProfileWithListener(userId, waiter);
+            } else if (displayId == Display.INVALID_DISPLAY) {
+                Slogf.d(TAG, "calling startUserInBackgroundWithListener(%d)", userId);
                 success = mInterface.startUserInBackgroundWithListener(userId, waiter);
-                displaySuffix = "";
             } else {
                 if (!UserManager.isVisibleBackgroundUsersEnabled()) {
                     pw.println("Not supported");
                     return -1;
                 }
+                Slogf.d(TAG, "calling startUserInBackgroundVisibleOnDisplay(%d,%d)", userId,
+                        displayId);
                 success = mInterface.startUserInBackgroundVisibleOnDisplay(userId, displayId);
                 displaySuffix = " on display " + displayId;
             }
             if (wait && success) {
+                Slogf.d(TAG, "waiting %d ms", USER_OPERATION_TIMEOUT_MS);
                 success = waiter.waitForFinish(USER_OPERATION_TIMEOUT_MS);
             }
         } finally {
@@ -2273,7 +2306,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     static final class StopUserCallback extends IStopUserCallback.Stub {
+        private final @UserIdInt int mUserId;
         private boolean mFinished = false;
+
+        private StopUserCallback(@UserIdInt int userId) {
+            mUserId = userId;
+        }
 
         public synchronized void waitForFinish() {
             try {
@@ -2281,18 +2319,26 @@ final class ActivityManagerShellCommand extends ShellCommand {
             } catch (InterruptedException e) {
                 throw new IllegalStateException(e);
             }
+            Slogf.d(TAG, "user %d finished stopping", mUserId);
         }
 
         @Override
         public synchronized void userStopped(int userId) {
+            Slogf.d(TAG, "StopUserCallback: userStopped(%d)", userId);
             mFinished = true;
             notifyAll();
         }
 
         @Override
         public synchronized void userStopAborted(int userId) {
+            Slogf.d(TAG, "StopUserCallback: userStopAborted(%d)", userId);
             mFinished = true;
             notifyAll();
+        }
+
+        @Override
+        public String toString() {
+            return "ProgressWaiter[userId=" + mUserId + ", finished=" + mFinished + "]";
         }
     }
 
@@ -2310,10 +2356,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 return -1;
             }
         }
-        int user = Integer.parseInt(getNextArgRequired());
-        StopUserCallback callback = wait ? new StopUserCallback() : null;
+        int userId = Integer.parseInt(getNextArgRequired());
+        StopUserCallback callback = wait ? new StopUserCallback(userId) : null;
 
-        int res = mInterface.stopUser(user, force, callback);
+        Slogf.d(TAG, "Calling stopUser(%d, %b, %s)", userId, force, callback);
+        int res = mInterface.stopUser(userId, force, callback);
         if (res != ActivityManager.USER_OP_SUCCESS) {
             String txt = "";
             switch (res) {
@@ -2321,13 +2368,13 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     txt = " (Can't stop current user)";
                     break;
                 case ActivityManager.USER_OP_UNKNOWN_USER:
-                    txt = " (Unknown user " + user + ")";
+                    txt = " (Unknown user " + userId + ")";
                     break;
                 case ActivityManager.USER_OP_ERROR_IS_SYSTEM:
                     txt = " (System user cannot be stopped)";
                     break;
                 case ActivityManager.USER_OP_ERROR_RELATED_USERS_CANNOT_STOP:
-                    txt = " (Can't stop user " + user
+                    txt = " (Can't stop user " + userId
                             + " - one of its related users can't be stopped)";
                     break;
             }
@@ -3822,6 +3869,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return new Resources(AssetManager.getSystem(), metrics, config);
     }
 
+    private boolean isProfile(@UserIdInt int userId) {
+        final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
+        return umi.getProfileParentId(userId) != userId;
+    }
+
     @Override
     public void onHelp() {
         PrintWriter pw = getOutPrintWriter();
@@ -4052,13 +4104,18 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      execution of that user if it is currently stopped.");
             pw.println("  get-current-user");
             pw.println("      Returns id of the current foreground user.");
-            pw.println("  start-user [-w] [--display DISPLAY_ID] <USER_ID>");
+            pw.println("  start-user [-w] [--display DISPLAY_ID] [--force-invisible] <USER_ID>");
             pw.println("      Start USER_ID in background if it is currently stopped;");
             pw.println("      use switch-user if you want to start the user in foreground.");
             pw.println("      -w: wait for start-user to complete and the user to be unlocked.");
-            pw.println("      --display <DISPLAY_ID>: allows the user to launch activities in the");
-            pw.println("        given display, when supported (typically on automotive builds");
-            pw.println("        wherethe vehicle has multiple displays)");
+            pw.println("      --display <DISPLAY_ID>: starts the user visible in that display, "
+                    + "which allows the user to launch activities on it.");
+            pw.println("        (not supported on all devices; typically only on automotive builds "
+                    + "where the vehicle has passenger displays)");
+            pw.println("      --force-invisible: always start the user invisible, even if it's a "
+                    + "profile.");
+            pw.println("        (by default, a profile is visible in the default display when its "
+                    + "parent is the current foreground user)");
             pw.println("  unlock-user <USER_ID>");
             pw.println("      Unlock the given user.  This will only work if the user doesn't");
             pw.println("      have an LSKF (PIN/pattern/password).");
