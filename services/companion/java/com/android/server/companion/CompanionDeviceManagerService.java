@@ -1094,7 +1094,7 @@ public class CompanionDeviceManagerService extends SystemService {
     }
 
     /**
-     * Remove the revoked association form the cache and also remove the uid form the map if
+     * Remove the revoked association from the cache and also remove the uid from the map if
      * there are other associations with the same package still pending for role holder removal.
      *
      * @see #mRevokedAssociationsPendingRoleHolderRemoval
@@ -1113,7 +1113,7 @@ public class CompanionDeviceManagerService extends SystemService {
             final boolean shouldKeepUidForRemoval = any(
                     getPendingRoleHolderRemovalAssociationsForUser(userId),
                     ai -> packageName.equals(ai.getPackageName()));
-            // Do not remove the uid form the map since other associations with
+            // Do not remove the uid from the map since other associations with
             // the same packageName still pending for role holder removal.
             if (!shouldKeepUidForRemoval) {
                 mUidsPendingRoleHolderRemoval.remove(uid);
