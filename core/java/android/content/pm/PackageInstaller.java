@@ -1955,8 +1955,8 @@ public class PackageInstaller {
 
         /**
          * Optionally set the app metadata. The size of this data cannot exceed the maximum allowed.
-         * If no data is provided, then any existing app metadata from the previous install will be
-         * removed for the package.
+         * Any existing data from the previous install will not be retained even if no data is set
+         * for the current install session.
          *
          * @param data a PersistableBundle containing the app metadata. If this is set to null then
          *     any existing app metadata will be removed.
