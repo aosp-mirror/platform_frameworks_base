@@ -23,13 +23,16 @@ import android.graphics.drawable.Drawable
 import android.os.UserHandle
 import android.os.UserManager
 import android.util.Log
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
 import com.android.systemui.R
 import javax.inject.Inject
 
 /**
- * Handles all the non-UI portions of the work profile first run:
- * - Track whether the user has already dismissed it.
- * - Load the proper icon and app name.
+ * Handles work profile first run, determining whether a first run UI should be shown and populating
+ * that UI if needed.
  */
 class WorkProfileMessageController
 @Inject
@@ -40,10 +43,12 @@ constructor(
 ) {
 
     /**
-     * Determine if a message should be shown to the user, send message details to
-     * MessageContainerController if appropriate.
+     * @return a populated WorkProfileFirstRunData object if a work profile first run message should
+     * be shown
      */
-    fun onScreenshotTaken(userHandle: UserHandle, messageContainer: MessageContainerController) {
+    fun onScreenshotTaken(userHandle: UserHandle?): WorkProfileFirstRunData? {
+        if (userHandle == null) return null
+
         if (userManager.isManagedProfile(userHandle.identifier) && !messageAlreadyDismissed()) {
             var badgedIcon: Drawable? = null
             var label: CharSequence? = null
@@ -65,9 +70,27 @@ constructor(
             val badgedLabel =
                 packageManager.getUserBadgedLabel(label ?: defaultFileAppName(), userHandle)
 
-            messageContainer.showWorkProfileMessage(badgedLabel, badgedIcon) {
-                onMessageDismissed()
-            }
+            return WorkProfileFirstRunData(badgedLabel, badgedIcon)
+        }
+        return null
+    }
+
+    /**
+     * Use the provided WorkProfileFirstRunData to populate the work profile first run UI in the
+     * given view.
+     */
+    fun populateView(view: ViewGroup, data: WorkProfileFirstRunData, animateOut: () -> Unit) {
+        if (data.icon != null) {
+            // Replace the default icon if one is provided.
+            val imageView: ImageView = view.requireViewById<ImageView>(R.id.screenshot_message_icon)
+            imageView.setImageDrawable(data.icon)
+        }
+        val messageContent = view.requireViewById<TextView>(R.id.screenshot_message_content)
+        messageContent.text =
+            view.context.getString(R.string.screenshot_work_profile_notification, data.appName)
+        view.requireViewById<View>(R.id.message_dismiss_button).setOnClickListener {
+            animateOut()
+            onMessageDismissed()
         }
     }
 
@@ -90,6 +113,8 @@ constructor(
         )
 
     private fun defaultFileAppName() = context.getString(R.string.screenshot_default_files_app_name)
+
+    data class WorkProfileFirstRunData constructor(val appName: CharSequence, val icon: Drawable?)
 
     companion object {
         const val TAG = "WorkProfileMessageCtrl"

@@ -1,36 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:id="@+id/work_profile_first_run"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:visibility="gone">
     <ImageView
         android:id="@+id/screenshot_message_icon"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:paddingEnd="4dp"
-        android:src="@drawable/ic_work_app_badge"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/screenshot_message_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        android:src="@drawable/ic_work_app_badge"/>
 
     <TextView
         android:id="@+id/screenshot_message_content"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="start"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/screenshot_message_icon"
-        app:layout_constraintEnd_toStartOf="@id/message_dismiss_button"/>
+        android:layout_weight="1"
+        android:layout_gravity="start"/>
 
     <FrameLayout
         android:id="@+id/message_dismiss_button"
         android:layout_width="@dimen/overlay_dismiss_button_tappable_size"
         android:layout_height="@dimen/overlay_dismiss_button_tappable_size"
-        app:layout_constraintStart_toEndOf="@id/screenshot_message_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
         android:contentDescription="@string/screenshot_dismiss_work_profile">
         <ImageView
             android:layout_width="match_parent"
@@ -38,4 +30,4 @@
             android:layout_margin="@dimen/overlay_dismiss_button_margin"
             android:src="@drawable/overlay_cancel"/>
     </FrameLayout>
-</merge>
+</LinearLayout>
