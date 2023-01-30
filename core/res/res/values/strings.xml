@@ -556,6 +556,16 @@
     <!-- Title for the button that turns work profile on. To be used in a notification
         [CHAR LIMIT=NONE] -->
     <string name="personal_apps_suspended_turn_profile_on">Turn on</string>
+    <!-- Notification title. This notification lets the user know that they will be unable to
+     receive phone calls or texts until the work profile is turned on. [CHAR LIMIT=40] -->
+    <string name="work_profile_telephony_paused_title">Calls and messages are off</string>
+    <!-- Notification text. This notification lets the user know that they will be unable to
+     receive phone calls or texts until the work profile is turned on. [CHAR LIMIT=NONE] -->
+    <string name="work_profile_telephony_paused_text">You have paused work apps.
+        You won\'t receive phone calls or text messages.</string>
+    <!-- Label for notification button. This button lets the user turn the work profile on.
+         [CHAR LIMIT=15]  -->
+    <string name="work_profile_telephony_paused_turn_on_button">Unpause work apps</string>
 
     <!-- Display name for any time a piece of data refers to the owner of the phone. For example, this could be used in place of the phone's phone number. -->
     <string name="me">Me</string>
