@@ -974,6 +974,9 @@
     <!-- Boolean indicating whether light mode is allowed when DWB is turned on. -->
     <bool name="config_displayWhiteBalanceLightModeAllowed">true</bool>
 
+    <!-- Duration, in milliseconds, of the display white balance animated transitions. -->
+    <integer name="config_displayWhiteBalanceTransitionTime">3000</integer>
+
     <!-- Device states where the sensor based rotation values should be reversed around the Z axis
          for the default display.
          TODO(b/265312193): Remove this workaround when this bug is fixed.-->
