@@ -9974,8 +9974,9 @@ public class NotificationManagerService extends SystemService {
      * instance per user, we want to filter out interactions that are not for the user that the
      * given NAS is bound in.
      */
-    private boolean isInteractionVisibleToListener(ManagedServiceInfo info, int userId) {
-        boolean isAssistantService = isServiceTokenValid(info.service);
+    @VisibleForTesting
+    boolean isInteractionVisibleToListener(ManagedServiceInfo info, int userId) {
+        boolean isAssistantService = isServiceTokenValid(info.getService());
         return !isAssistantService || info.isSameUser(userId);
     }
 
@@ -11273,7 +11274,7 @@ public class NotificationManagerService extends SystemService {
                 }
 
                 BackgroundThread.getHandler().post(() -> {
-                    if (info.isSystem || hasCompanionDevice(info)) {
+                    if (info.isSystem() || hasCompanionDevice(info)) {
                         notifyNotificationChannelGroupChanged(
                                 info, pkg, user, group, modificationType);
                     }
@@ -11356,7 +11357,7 @@ public class NotificationManagerService extends SystemService {
         private void notifyNotificationChannelGroupChanged(ManagedServiceInfo info,
                 final String pkg, final UserHandle user, final NotificationChannelGroup group,
                 final int modificationType) {
-            final INotificationListener listener = (INotificationListener) info.service;
+            final INotificationListener listener = (INotificationListener) info.getService();
             try {
                 listener.onNotificationChannelGroupModification(pkg, user, group, modificationType);
             } catch (RemoteException ex) {
