@@ -1064,6 +1064,24 @@ public class DreamService extends Service implements Window.Callback {
      * </p>
      */
     public final void finish() {
+        // If there is an active overlay connection, signal that the dream is ending before
+        // continuing. Note that the overlay cannot rely on the unbound state, since another dream
+        // might have bound to it in the meantime.
+        if (mOverlayConnection != null) {
+            mOverlayConnection.addConsumer(overlay -> {
+                try {
+                    overlay.endDream();
+                    mOverlayConnection.unbind();
+                    mOverlayConnection = null;
+                    finish();
+                } catch (RemoteException e) {
+                    Log.e(mTag, "could not inform overlay of dream end:" + e);
+                }
+            });
+            mOverlayConnection.clearConsumers();
+            return;
+        }
+
         if (mDebug) Slog.v(mTag, "finish(): mFinished=" + mFinished);
 
         Activity activity = mActivity;
@@ -1079,10 +1097,6 @@ public class DreamService extends Service implements Window.Callback {
             return;
         }
         mFinished = true;
-
-        if (mOverlayConnection != null) {
-            mOverlayConnection.unbind();
-        }
 
         if (mDreamToken == null) {
             if (mDebug) Slog.v(mTag, "finish() called when not attached.");
@@ -1403,17 +1417,6 @@ public class DreamService extends Service implements Window.Callback {
 
                     @Override
                     public void onViewDetachedFromWindow(View v) {
-                        if (mOverlayConnection != null) {
-                            mOverlayConnection.addConsumer(overlay -> {
-                                try {
-                                    overlay.endDream();
-                                } catch (RemoteException e) {
-                                    Log.e(mTag, "could not inform overlay of dream end:" + e);
-                                }
-                            });
-                            mOverlayConnection.clearConsumers();
-                        }
-
                         if (mActivity == null || !mActivity.isChangingConfigurations()) {
                             // Only stop the dream if the view is not detached by relaunching
                             // activity for configuration changes. It is important to also clear
@@ -1421,6 +1424,10 @@ public class DreamService extends Service implements Window.Callback {
                             mWindow = null;
                             mActivity = null;
                             finish();
+                        }
+
+                        if (mOverlayConnection != null && mDreamStartOverlayConsumer != null) {
+                            mOverlayConnection.removeConsumer(mDreamStartOverlayConsumer);
                         }
                     }
                 });
