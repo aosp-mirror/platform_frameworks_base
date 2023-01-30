@@ -62,7 +62,7 @@ public class IptvFrontendSettingsFec {
     private final int mFecRowNum;
     private final int mFecColNum;
 
-    public IptvFrontendSettingsFec(@FecType int fecType, int fecRowNum, int fecColNum) {
+    private IptvFrontendSettingsFec(@FecType int fecType, int fecRowNum, int fecColNum) {
         mFecType = fecType;
         mFecRowNum = fecRowNum;
         mFecColNum = fecColNum;
