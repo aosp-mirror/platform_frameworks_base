@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021, The Android Open Source Project
+ * Copyright (c) 2023, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,15 @@
 
 package android.service.dreams;
 
-import android.service.dreams.IDreamOverlayClientCallback;
+import android.service.dreams.IDreamOverlayClient;
 
 /**
-* {@link IDreamOverlay} provides a way for a component to annotate a dream with additional view
-* elements. Registered through the DreamManager, a IDreamOverlay is bound to by the dream and
-* passed the necessary window details to participate in the user interface.
-
+* {@link IDreamOverlayClientCallback} allows receiving a requested {@link IDreamOverlayClient}.
 * @hide
 */
-interface IDreamOverlay {
+interface IDreamOverlayClientCallback {
     /**
-    * Retrieves a client the caller can use to interact with the dream overlay.
+    * Called with a unique {@link IDreamOverlayClient}.
     */
-    void getClient(in IDreamOverlayClientCallback callback);
+    void onDreamOverlayClient(in IDreamOverlayClient client);
 }
