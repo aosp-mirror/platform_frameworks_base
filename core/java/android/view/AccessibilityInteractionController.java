@@ -1502,7 +1502,7 @@ public final class AccessibilityInteractionController {
                     parent = provider.createAccessibilityNodeInfo(virtualDescendantId);
                     if (parent == null) {
                         // Going up the parent relation we found a null predecessor,
-                        // so remove these disconnected nodes form the result.
+                        // so remove these disconnected nodes from the result.
                         final int currentResultSize = outInfos.size();
                         for (int i = currentResultSize - 1; i >= initialResultSize; i--) {
                             outInfos.remove(i);
