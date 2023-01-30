@@ -83,7 +83,7 @@ final class TextToSpeechManagerPerUserService extends
             ServiceConnector.Impl<ITextToSpeechService> {
 
         private final String mEngine;
-        private final ITextToSpeechSessionCallback mCallback;
+        private ITextToSpeechSessionCallback mCallback;
         private final DeathRecipient mUnbindOnDeathHandler;
 
         static void start(Context context, @UserIdInt int userId, String engine,
@@ -156,6 +156,7 @@ final class TextToSpeechManagerPerUserService extends
                 } catch (NoSuchElementException ex) {
                     Slog.d(TAG, "The death recipient was not linked.");
                 }
+                mCallback = null;
             }
         }
 
