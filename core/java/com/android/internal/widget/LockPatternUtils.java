@@ -151,6 +151,8 @@ public class LockPatternUtils {
     @Deprecated
     public final static String LOCKSCREEN_WIDGETS_ENABLED = "lockscreen.widgets_enabled";
 
+    public static final String PIN_LENGTH = "lockscreen.pin_length";
+
     public final static String PASSWORD_HISTORY_KEY = "lockscreen.passwordhistory";
 
     private static final String LOCK_SCREEN_OWNER_INFO = Settings.Secure.LOCK_SCREEN_OWNER_INFO;
@@ -563,6 +565,24 @@ public class LockPatternUtils {
      */
     public boolean isPatternEverChosen(int userId) {
         return getBoolean(PATTERN_EVER_CHOSEN_KEY, false, userId);
+    }
+
+    /**
+     * Used for setting the length of the PIN set by a particular user.
+     * @param userId user id of the user whose pin length we save
+     * @param val value of length of pin
+     */
+    public void setPinLength(int userId, long val) {
+        setLong(PIN_LENGTH, val, userId);
+    }
+
+    /**
+     * Returns the length of the PIN set by a particular user.
+     * @param userId user id of the user whose pin length we have to return
+     * @return the length of the pin set by user and -1 if nothing
+     */
+    public long getPinLength(int userId) {
+        return getLong(PIN_LENGTH, -1, userId);
     }
 
     /**
