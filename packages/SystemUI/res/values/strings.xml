@@ -2538,8 +2538,7 @@
     <string name="media_output_group_title_speakers_and_displays">Speakers &amp; Displays</string>
     <!-- Title for Suggested Devices group. [CHAR LIMIT=NONE] -->
     <string name="media_output_group_title_suggested_device">Suggested Devices</string>
-    <!-- Sub status indicates device need premium account. [CHAR LIMIT=NONE] -->
-    <string name="media_output_status_require_premium">Requires premium account</string>
+
 
     <!-- Media Output Broadcast Dialog -->
     <!-- Title for Broadcast First Notify Dialog [CHAR LIMIT=60] -->
