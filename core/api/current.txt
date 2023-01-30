@@ -20181,6 +20181,7 @@ package android.location {
     method public boolean hasSatellitePvt();
     method public boolean hasScheduling();
     method public boolean hasSingleShotFix();
+    method public boolean isAccumulatedDeltaRangeCapabilityKnown();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssCapabilities> CREATOR;
   }
@@ -20189,6 +20190,7 @@ package android.location {
     ctor public GnssCapabilities.Builder();
     ctor public GnssCapabilities.Builder(@NonNull android.location.GnssCapabilities);
     method @NonNull public android.location.GnssCapabilities build();
+    method @NonNull public android.location.GnssCapabilities.Builder clearIsAccumulatedDeltaRangeCapabilityKnown();
     method @NonNull public android.location.GnssCapabilities.Builder setGnssSignalTypes(@NonNull java.util.List<android.location.GnssSignalType>);
     method @NonNull public android.location.GnssCapabilities.Builder setHasAccumulatedDeltaRange(boolean);
     method @NonNull public android.location.GnssCapabilities.Builder setHasAntennaInfo(boolean);

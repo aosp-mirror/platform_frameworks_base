@@ -95,7 +95,7 @@ void Gnss_class_init_once(JNIEnv* env, jclass& clazz) {
     method_reportSvStatus = env->GetMethodID(clazz, "reportSvStatus", "(I[I[F[F[F[F[F)V");
     method_reportNmea = env->GetMethodID(clazz, "reportNmea", "(J)V");
 
-    method_setTopHalCapabilities = env->GetMethodID(clazz, "setTopHalCapabilities", "(I)V");
+    method_setTopHalCapabilities = env->GetMethodID(clazz, "setTopHalCapabilities", "(IZ)V");
     method_setSignalTypeCapabilities =
             env->GetMethodID(clazz, "setSignalTypeCapabilities", "(Ljava/util/List;)V");
     method_setGnssYearOfHardware = env->GetMethodID(clazz, "setGnssYearOfHardware", "(I)V");
@@ -120,8 +120,10 @@ void Gnss_class_init_once(JNIEnv* env, jclass& clazz) {
 
 Status GnssCallbackAidl::gnssSetCapabilitiesCb(const int capabilities) {
     ALOGD("%s: %du\n", __func__, capabilities);
+    bool isAdrCapabilityKnown = (getInterfaceVersion() >= 3) ? true : false;
     JNIEnv* env = getJniEnv();
-    env->CallVoidMethod(mCallbacksObj, method_setTopHalCapabilities, capabilities);
+    env->CallVoidMethod(mCallbacksObj, method_setTopHalCapabilities, capabilities,
+                        isAdrCapabilityKnown);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return Status::ok();
 }
@@ -409,7 +411,8 @@ Return<void> GnssCallbackHidl::gnssSetCapabilitesCb(uint32_t capabilities) {
     ALOGD("%s: %du\n", __func__, capabilities);
 
     JNIEnv* env = getJniEnv();
-    env->CallVoidMethod(mCallbacksObj, method_setTopHalCapabilities, capabilities);
+    env->CallVoidMethod(mCallbacksObj, method_setTopHalCapabilities, capabilities,
+                        /* isAdrCapabilityKnown= */ false);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return Void();
 }
