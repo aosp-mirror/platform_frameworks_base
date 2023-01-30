@@ -831,4 +831,8 @@
     <string name="config_wallpaperPickerPackage" translatable="false">
         com.android.wallpaper
     </string>
+    
+    <!-- Whether the floating rotation button should be on the left/right in the device's natural
+         orientation -->
+    <bool name="floating_rotation_button_position_left">true</bool>
 </resources>
