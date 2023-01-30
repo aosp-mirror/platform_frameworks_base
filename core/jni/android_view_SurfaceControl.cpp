@@ -246,6 +246,17 @@ static struct {
     jmethodID invokeReleaseCallback;
 } gSurfaceControlClassInfo;
 
+static struct {
+    jclass clazz;
+    jfieldID mMinAlpha;
+    jfieldID mMinFractionRendered;
+    jfieldID mStabilityRequirementMs;
+} gTrustedPresentationThresholdsClassInfo;
+
+static struct {
+    jmethodID onTrustedPresentationChanged;
+} gTrustedPresentationCallbackClassInfo;
+
 constexpr ui::Dataspace pickDataspaceFromColorMode(const ui::ColorMode colorMode) {
     switch (colorMode) {
         case ui::ColorMode::DISPLAY_P3:
@@ -320,6 +331,47 @@ public:
 private:
     jobject mListener;
     JavaVM* mVm;
+
+    JNIEnv* getenv() {
+        JNIEnv* env;
+        mVm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
+        return env;
+    }
+};
+
+class TrustedPresentationCallbackWrapper {
+public:
+    explicit TrustedPresentationCallbackWrapper(JNIEnv* env, jobject trustedPresentationListener) {
+        env->GetJavaVM(&mVm);
+        mTrustedPresentationCallback = env->NewGlobalRef(trustedPresentationListener);
+        LOG_ALWAYS_FATAL_IF(!mTrustedPresentationCallback, "Failed to make global ref");
+    }
+
+    ~TrustedPresentationCallbackWrapper() {
+        getenv()->DeleteGlobalRef(mTrustedPresentationCallback);
+    }
+
+    void onTrustedPresentationChanged(bool inTrustedPresentationState) {
+        JNIEnv* env = getenv();
+        env->CallVoidMethod(mTrustedPresentationCallback,
+                            gTrustedPresentationCallbackClassInfo.onTrustedPresentationChanged,
+                            inTrustedPresentationState);
+    }
+
+    void addCallbackRef(const sp<SurfaceComposerClient::PresentationCallbackRAII>& callbackRef) {
+        mCallbackRef = callbackRef;
+    }
+
+    static void onTrustedPresentationChangedThunk(void* context, bool inTrustedPresentationState) {
+        TrustedPresentationCallbackWrapper* listener =
+                reinterpret_cast<TrustedPresentationCallbackWrapper*>(context);
+        listener->onTrustedPresentationChanged(inTrustedPresentationState);
+    }
+
+private:
+    jobject mTrustedPresentationCallback;
+    JavaVM* mVm;
+    sp<SurfaceComposerClient::PresentationCallbackRAII> mCallbackRef;
 
     JNIEnv* getenv() {
         JNIEnv* env;
@@ -1806,6 +1858,42 @@ static void nativeAddTransactionCommittedListener(JNIEnv* env, jclass clazz, jlo
                                                  context);
 }
 
+static void nativeSetTrustedPresentationCallback(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                                 jlong nativeObject,
+                                                 jlong trustedPresentationCallbackObject,
+                                                 jobject trustedPresentationThresholds) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    auto ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+
+    TrustedPresentationThresholds thresholds;
+    thresholds.minAlpha = env->GetFloatField(trustedPresentationThresholds,
+                                             gTrustedPresentationThresholdsClassInfo.mMinAlpha);
+    thresholds.minFractionRendered =
+            env->GetFloatField(trustedPresentationThresholds,
+                               gTrustedPresentationThresholdsClassInfo.mMinFractionRendered);
+    thresholds.stabilityRequirementMs =
+            env->GetIntField(trustedPresentationThresholds,
+                             gTrustedPresentationThresholdsClassInfo.mStabilityRequirementMs);
+
+    sp<SurfaceComposerClient::PresentationCallbackRAII> callbackRef;
+    TrustedPresentationCallbackWrapper* wrapper =
+            reinterpret_cast<TrustedPresentationCallbackWrapper*>(
+                    trustedPresentationCallbackObject);
+    transaction->setTrustedPresentationCallback(ctrl,
+                                                TrustedPresentationCallbackWrapper::
+                                                        onTrustedPresentationChangedThunk,
+                                                thresholds, wrapper, callbackRef);
+    wrapper->addCallbackRef(callbackRef);
+}
+
+static void nativeClearTrustedPresentationCallback(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                                   jlong nativeObject) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    auto ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+
+    transaction->clearTrustedPresentationCallback(ctrl);
+}
+
 class JankDataListenerWrapper : public JankDataListener {
 public:
     JankDataListenerWrapper(JNIEnv* env, jobject onJankDataListenerObject) {
@@ -1917,6 +2005,21 @@ static jobject nativeGetDefaultApplyToken(JNIEnv* env, jclass clazz) {
 static jboolean nativeBootFinished(JNIEnv* env, jclass clazz) {
     status_t error = SurfaceComposerClient::bootFinished();
     return error == OK ? JNI_TRUE : JNI_FALSE;
+}
+
+jlong nativeCreateTpc(JNIEnv* env, jclass clazz, jobject trustedPresentationCallback) {
+    return reinterpret_cast<jlong>(
+            new TrustedPresentationCallbackWrapper(env, trustedPresentationCallback));
+}
+
+void destroyNativeTpc(void* ptr) {
+    TrustedPresentationCallbackWrapper* callback =
+            reinterpret_cast<TrustedPresentationCallbackWrapper*>(ptr);
+    delete callback;
+}
+
+static jlong getNativeTrustedPresentationCallbackFinalizer(JNIEnv* env, jclass clazz) {
+    return static_cast<jlong>(reinterpret_cast<uintptr_t>(&destroyNativeTpc));
 }
 
 // ----------------------------------------------------------------------------
@@ -2145,6 +2248,10 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
              (void*)nativeSetDropInputMode },
     {"nativeAddTransactionCommittedListener", "(JLandroid/view/SurfaceControl$TransactionCommittedListener;)V",
             (void*) nativeAddTransactionCommittedListener },
+    {"nativeSetTrustedPresentationCallback", "(JJJLandroid/view/SurfaceControl$TrustedPresentationThresholds;)V",
+            (void*) nativeSetTrustedPresentationCallback },
+    {"nativeClearTrustedPresentationCallback", "(JJ)V",
+            (void*) nativeClearTrustedPresentationCallback },
     {"nativeSanitize", "(J)V",
             (void*) nativeSanitize },
     {"nativeSetDestinationFrame", "(JJIIII)V",
@@ -2155,6 +2262,9 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
                 (void*)nativeGetDefaultApplyToken },
     {"nativeBootFinished", "()Z",
             (void*)nativeBootFinished },
+    {"nativeCreateTpc", "(Landroid/view/SurfaceControl$TrustedPresentationCallback;)J",
+            (void*)nativeCreateTpc},
+    {"getNativeTrustedPresentationCallbackFinalizer", "()J", (void*)getNativeTrustedPresentationCallbackFinalizer },
         // clang-format on
 };
 
@@ -2381,6 +2491,23 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gTransactionClassInfo.mNativeObject =
             GetFieldIDOrDie(env, gTransactionClassInfo.clazz, "mNativeObject", "J");
 
+    jclass trustedPresentationThresholdsClazz =
+            FindClassOrDie(env, "android/view/SurfaceControl$TrustedPresentationThresholds");
+    gTrustedPresentationThresholdsClassInfo.clazz =
+            MakeGlobalRefOrDie(env, trustedPresentationThresholdsClazz);
+    gTrustedPresentationThresholdsClassInfo.mMinAlpha =
+            GetFieldIDOrDie(env, trustedPresentationThresholdsClazz, "mMinAlpha", "F");
+    gTrustedPresentationThresholdsClassInfo.mMinFractionRendered =
+            GetFieldIDOrDie(env, trustedPresentationThresholdsClazz, "mMinFractionRendered", "F");
+    gTrustedPresentationThresholdsClassInfo.mStabilityRequirementMs =
+            GetFieldIDOrDie(env, trustedPresentationThresholdsClazz, "mStabilityRequirementMs",
+                            "I");
+
+    jclass trustedPresentationCallbackClazz =
+            FindClassOrDie(env, "android/view/SurfaceControl$TrustedPresentationCallback");
+    gTrustedPresentationCallbackClassInfo.onTrustedPresentationChanged =
+            GetMethodIDOrDie(env, trustedPresentationCallbackClazz, "onTrustedPresentationChanged",
+                             "(Z)V");
     return err;
 }
 

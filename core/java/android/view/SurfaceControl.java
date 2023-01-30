@@ -280,7 +280,12 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeSetDefaultApplyToken(IBinder token);
     private static native IBinder nativeGetDefaultApplyToken();
     private static native boolean nativeBootFinished();
-
+    private static native long nativeCreateTpc(TrustedPresentationCallback callback);
+    private static native long getNativeTrustedPresentationCallbackFinalizer();
+    private static native void nativeSetTrustedPresentationCallback(long transactionObj,
+            long nativeObject, long nativeTpc, TrustedPresentationThresholds thresholds);
+    private static native void nativeClearTrustedPresentationCallback(long transactionObj,
+            long nativeObject);
 
     /**
      * Transforms that can be applied to buffers as they are displayed to a window.
@@ -464,6 +469,8 @@ public final class SurfaceControl implements Parcelable {
     private int mWidth;
     @GuardedBy("mLock")
     private int mHeight;
+
+    private TrustedPresentationCallback mTrustedPresentationCallback;
 
     private WeakReference<View> mLocalOwnerView;
 
@@ -2400,6 +2407,79 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
+     * Threshold values that are sent with
+     * {@link Transaction#setTrustedPresentationCallback(SurfaceControl,
+     * TrustedPresentationThresholds, Executor, Consumer)}
+     */
+    public static class TrustedPresentationThresholds {
+        private float mMinAlpha;
+        private float mMinFractionRendered;
+        private int mStabilityRequirementMs;
+
+        /**
+         * Creates a TrustedPresentationThresholds that's used when calling
+         * {@link Transaction#setTrustedPresentationCallback(SurfaceControl,
+         * TrustedPresentationThresholds, Executor, Consumer)}
+         *
+         * @param minAlpha               The min alpha the {@link SurfaceControl} is required to
+         *                               have to be considered inside the threshold.
+         * @param minFractionRendered    The min fraction of the SurfaceControl that was resented
+         *                               to the user to be considered inside the threshold.
+         * @param stabilityRequirementMs The time in milliseconds required for the
+         *                               {@link SurfaceControl} to be in the threshold.
+         * @throws IllegalArgumentException If threshold values are invalid.
+         */
+        public TrustedPresentationThresholds(
+                @FloatRange(from = 0f, fromInclusive = false, to = 1f) float minAlpha,
+                @FloatRange(from = 0f, fromInclusive = false, to = 1f) float minFractionRendered,
+                @IntRange(from = 1) int stabilityRequirementMs) {
+            mMinAlpha = minAlpha;
+            mMinFractionRendered = minFractionRendered;
+            mStabilityRequirementMs = stabilityRequirementMs;
+
+            checkValid();
+        }
+
+        private void checkValid() {
+            if (mMinAlpha <= 0 || mMinFractionRendered <= 0 || mStabilityRequirementMs < 1) {
+                throw new IllegalArgumentException(
+                        "TrustedPresentationThresholds values are invalid");
+            }
+        }
+    }
+
+    /**
+     * Register a TrustedPresentationCallback for a particular SurfaceControl so it can be notified
+     * when the specified Threshold has been crossed.
+     *
+     * @hide
+     */
+    public abstract static class TrustedPresentationCallback {
+        private final long mNativeObject;
+
+        private static final NativeAllocationRegistry sRegistry =
+                NativeAllocationRegistry.createMalloced(
+                        TrustedPresentationCallback.class.getClassLoader(),
+                        getNativeTrustedPresentationCallbackFinalizer());
+
+        private final Runnable mFreeNativeResources;
+
+        private TrustedPresentationCallback() {
+            mNativeObject = nativeCreateTpc(this);
+            mFreeNativeResources = sRegistry.registerNativeAllocation(this, mNativeObject);
+        }
+
+        /**
+         * Invoked when the SurfaceControl that this TrustedPresentationCallback was registered for
+         * enters or exits the threshold bounds.
+         *
+         * @param inTrustedPresentationState true when the SurfaceControl entered the
+         *                                   presentation state, false when it has left.
+         */
+        public abstract void onTrustedPresentationChanged(boolean inTrustedPresentationState);
+    }
+
+    /**
      * An atomic set of changes to a set of SurfaceControl.
      */
     public static class Transaction implements Closeable, Parcelable {
@@ -3773,6 +3853,106 @@ public final class SurfaceControl implements Parcelable {
             TransactionCommittedListener listenerInner =
                     () -> executor.execute(listener::onTransactionCommitted);
             nativeAddTransactionCommittedListener(mNativeObject, listenerInner);
+            return this;
+        }
+
+        /**
+         * Sets a callback to receive feedback about the presentation of a {@link SurfaceControl}.
+         * When the {@link SurfaceControl} is presented according to the passed in
+         * {@link TrustedPresentationThresholds}, it is said to "enter the state", and receives the
+         * callback with {@code true}. When the conditions fall out of thresholds, it is then
+         * said to leave the state.
+         * <p>
+         * There are a few simple thresholds:
+         * <ul>
+         *    <li>minAlpha: Lower bound on computed alpha</li>
+         *    <li>minFractionRendered: Lower bounds on fraction of pixels that were rendered</li>
+         *    <li>stabilityThresholdMs: A time that alpha and fraction rendered must remain within
+         *    bounds before we can "enter the state" </li>
+         * </ul>
+         * <p>
+         * The fraction of pixels rendered is a computation based on scale, crop
+         * and occlusion. The calculation may be somewhat counterintuitive, so we
+         * can work through an example. Imagine we have a SurfaceControl with a 100x100 buffer
+         * which is occluded by (10x100) pixels on the left, and cropped by (100x10) pixels
+         * on the top. Furthermore imagine this SurfaceControl is scaled by 0.9 in both dimensions.
+         * (c=crop,o=occluded,b=both,x=none)
+         *
+         * <blockquote>
+         * <table>
+         *   <caption></caption>
+         *   <tr><td>b</td><td>c</td><td>c</td><td>c</td></tr>
+         *   <tr><td>o</td><td>x</td><td>x</td><td>x</td></tr>
+         *   <tr><td>o</td><td>x</td><td>x</td><td>x</td></tr>
+         *   <tr><td>o</td><td>x</td><td>x</td><td>x</td></tr>
+         * </table>
+         * </blockquote>
+         *
+         *<p>
+         * We first start by computing fr=xscale*yscale=0.9*0.9=0.81, indicating
+         * that "81%" of the pixels were rendered. This corresponds to what was 100
+         * pixels being displayed in 81 pixels. This is somewhat of an abuse of
+         * language, as the information of merged pixels isn't totally lost, but
+         * we err on the conservative side.
+         * <p>
+         * We then repeat a similar process for the crop and covered regions and
+         * accumulate the results: fr = fr * (fractionNotCropped) * (fractionNotCovered)
+         * So for this example we would get 0.9*0.9*0.9*0.9=0.65...
+         * <p>
+         * Notice that this is not completely accurate, as we have double counted
+         * the region marked as b. However we only wanted a "lower bound" and so it
+         * is ok to err in this direction. Selection of the threshold will ultimately
+         * be somewhat arbitrary, and so there are some somewhat arbitrary decisions in
+         * this API as well.
+         * <p>
+         * @param sc         The {@link SurfaceControl} to set the
+         *                   {@link TrustedPresentationCallback} on
+         * @param thresholds The {@link TrustedPresentationThresholds} that will specify when the to
+         *                   invoke the callback.
+         * @param executor   The {@link Executor} where the callback will be invoked on.
+         * @param listener   The {@link Consumer} that will receive the callbacks when entered or
+         *                   exited the threshold.
+         * @return This transaction
+         * @see TrustedPresentationThresholds
+         */
+        @NonNull
+        public Transaction setTrustedPresentationCallback(@NonNull SurfaceControl sc,
+                @NonNull TrustedPresentationThresholds thresholds, @NonNull Executor executor,
+                @NonNull Consumer<Boolean> listener) {
+            checkPreconditions(sc);
+            TrustedPresentationCallback tpc = new TrustedPresentationCallback() {
+                @Override
+                public void onTrustedPresentationChanged(boolean inTrustedPresentationState) {
+                    executor.execute(
+                            () -> listener.accept(inTrustedPresentationState));
+                }
+            };
+
+            if (sc.mTrustedPresentationCallback != null) {
+                sc.mTrustedPresentationCallback.mFreeNativeResources.run();
+            }
+
+            nativeSetTrustedPresentationCallback(mNativeObject, sc.mNativeObject,
+                    tpc.mNativeObject, thresholds);
+            sc.mTrustedPresentationCallback = tpc;
+            return this;
+        }
+
+        /**
+         * Clears the {@link TrustedPresentationCallback} for a specific {@link SurfaceControl}
+         *
+         * @param sc The SurfaceControl that the {@link TrustedPresentationCallback} should be
+         *           cleared from
+         * @return This transaction
+         */
+        @NonNull
+        public Transaction clearTrustedPresentationCallback(@NonNull SurfaceControl sc) {
+            checkPreconditions(sc);
+            nativeClearTrustedPresentationCallback(mNativeObject, sc.mNativeObject);
+            if (sc.mTrustedPresentationCallback != null) {
+                sc.mTrustedPresentationCallback.mFreeNativeResources.run();
+                sc.mTrustedPresentationCallback = null;
+            }
             return this;
         }
 

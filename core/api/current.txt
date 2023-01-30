@@ -51245,6 +51245,7 @@ package android.view {
     method @NonNull public android.view.SurfaceControl.Transaction addTransactionCommittedListener(@NonNull java.util.concurrent.Executor, @NonNull android.view.SurfaceControl.TransactionCommittedListener);
     method public void apply();
     method @NonNull public android.view.SurfaceControl.Transaction clearFrameRate(@NonNull android.view.SurfaceControl);
+    method @NonNull public android.view.SurfaceControl.Transaction clearTrustedPresentationCallback(@NonNull android.view.SurfaceControl);
     method public void close();
     method public int describeContents();
     method @NonNull public android.view.SurfaceControl.Transaction merge(@NonNull android.view.SurfaceControl.Transaction);
@@ -51265,6 +51266,7 @@ package android.view {
     method @NonNull public android.view.SurfaceControl.Transaction setOpaque(@NonNull android.view.SurfaceControl, boolean);
     method @NonNull public android.view.SurfaceControl.Transaction setPosition(@NonNull android.view.SurfaceControl, float, float);
     method @NonNull public android.view.SurfaceControl.Transaction setScale(@NonNull android.view.SurfaceControl, float, float);
+    method @NonNull public android.view.SurfaceControl.Transaction setTrustedPresentationCallback(@NonNull android.view.SurfaceControl, @NonNull android.view.SurfaceControl.TrustedPresentationThresholds, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @NonNull public android.view.SurfaceControl.Transaction setVisibility(@NonNull android.view.SurfaceControl, boolean);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.SurfaceControl.Transaction> CREATOR;
@@ -51272,6 +51274,10 @@ package android.view {
 
   public static interface SurfaceControl.TransactionCommittedListener {
     method public void onTransactionCommitted();
+  }
+
+  public static class SurfaceControl.TrustedPresentationThresholds {
+    ctor public SurfaceControl.TrustedPresentationThresholds(@FloatRange(from=0.0f, fromInclusive=false, to=1.0f) float, @FloatRange(from=0.0f, fromInclusive=false, to=1.0f) float, @IntRange(from=1) int);
   }
 
   public class SurfaceControlViewHost {
