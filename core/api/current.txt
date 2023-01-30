@@ -39547,6 +39547,7 @@ package android.service.autofill {
     method @Deprecated @NonNull public android.service.autofill.FillResponse.Builder setAuthentication(@NonNull android.view.autofill.AutofillId[], @Nullable android.content.IntentSender, @Nullable android.widget.RemoteViews, @Nullable android.service.autofill.InlinePresentation, @Nullable android.service.autofill.InlinePresentation);
     method @NonNull public android.service.autofill.FillResponse.Builder setAuthentication(@NonNull android.view.autofill.AutofillId[], @Nullable android.content.IntentSender, @Nullable android.service.autofill.Presentations);
     method @NonNull public android.service.autofill.FillResponse.Builder setClientState(@Nullable android.os.Bundle);
+    method @NonNull public android.service.autofill.FillResponse.Builder setDetectedFieldClassifications(@NonNull java.util.Set<android.service.assist.classification.FieldClassification>);
     method @NonNull public android.service.autofill.FillResponse.Builder setDialogHeader(@NonNull android.widget.RemoteViews);
     method @NonNull public android.service.autofill.FillResponse.Builder setFieldClassificationIds(@NonNull android.view.autofill.AutofillId...);
     method @NonNull public android.service.autofill.FillResponse.Builder setFillDialogTriggerIds(@NonNull android.view.autofill.AutofillId...);
