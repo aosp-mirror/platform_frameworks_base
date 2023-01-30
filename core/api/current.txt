@@ -54302,6 +54302,7 @@ package android.view.contentcapture {
     method public final void notifyViewDisappeared(@NonNull android.view.autofill.AutofillId);
     method public final void notifyViewInsetsChanged(@NonNull android.graphics.Insets);
     method public final void notifyViewTextChanged(@NonNull android.view.autofill.AutofillId, @Nullable CharSequence);
+    method public final void notifyViewsAppeared(@NonNull java.util.List<android.view.ViewStructure>);
     method public final void notifyViewsDisappeared(@NonNull android.view.autofill.AutofillId, @NonNull long[]);
     method public final void setContentCaptureContext(@Nullable android.view.contentcapture.ContentCaptureContext);
   }
