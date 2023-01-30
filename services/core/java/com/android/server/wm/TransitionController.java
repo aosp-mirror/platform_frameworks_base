@@ -496,7 +496,7 @@ class TransitionController {
             }
             final TransitionRequestInfo request = new TransitionRequestInfo(
                     transition.mType, info, remoteTransition, displayChange);
-            transition.mLogger.mRequestTimeNs = SystemClock.uptimeNanos();
+            transition.mLogger.mRequestTimeNs = SystemClock.elapsedRealtimeNanos();
             transition.mLogger.mRequest = request;
             mTransitionPlayer.requestStartTransition(transition.getToken(), request);
             transition.setRemoteTransition(remoteTransition);

@@ -6003,7 +6003,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public boolean isTransitionTraceEnabled() {
-        return mTransitionTracer.isEnabled();
+        return mTransitionTracer.isActiveTracingEnabled();
     }
 
     @Override

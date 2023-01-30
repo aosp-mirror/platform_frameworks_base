@@ -225,7 +225,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mToken = new Token(this);
 
         mLogger.mCreateWallTimeMs = System.currentTimeMillis();
-        mLogger.mCreateTimeNs = SystemClock.uptimeNanos();
+        mLogger.mCreateTimeNs = SystemClock.elapsedRealtimeNanos();
         controller.mTransitionTracer.logState(this);
     }
 
@@ -385,6 +385,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         return mState == STATE_STARTED;
     }
 
+    boolean isPlaying() {
+        return mState == STATE_PLAYING;
+    }
+
+    boolean isFinished() {
+        return mState == STATE_FINISHED;
+    }
+
     @VisibleForTesting
     void startCollecting(long timeoutMs) {
         startCollecting(timeoutMs, TransitionController.SYNC_METHOD);
@@ -399,7 +407,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mSyncId = mSyncEngine.startSyncSet(this, timeoutMs, TAG, method);
 
         mLogger.mSyncId = mSyncId;
-        mLogger.mCollectTimeNs = SystemClock.uptimeNanos();
+        mLogger.mCollectTimeNs = SystemClock.elapsedRealtimeNanos();
         mController.mTransitionTracer.logState(this);
     }
 
@@ -419,7 +427,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 mSyncId);
         applyReady();
 
-        mLogger.mStartTimeNs = SystemClock.uptimeNanos();
+        mLogger.mStartTimeNs = SystemClock.elapsedRealtimeNanos();
         mController.mTransitionTracer.logState(this);
 
         mController.updateAnimatingState(mTmpTransaction);
@@ -629,7 +637,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                 "Set transition ready=%b %d", ready, mSyncId);
         mSyncEngine.setReady(mSyncId, ready);
-        if (ready) mLogger.mReadyTimeNs = SystemClock.uptimeNanos();
+        if (ready) mLogger.mReadyTimeNs = SystemClock.elapsedRealtimeNanos();
     }
 
     /**
@@ -781,7 +789,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             Trace.asyncTraceEnd(TRACE_TAG_WINDOW_MANAGER, TRACE_NAME_PLAY_TRANSITION,
                     System.identityHashCode(this));
         }
-        mLogger.mFinishTimeNs = SystemClock.uptimeNanos();
+        mLogger.mFinishTimeNs = SystemClock.elapsedRealtimeNanos();
         mController.mLoggerHandler.post(mLogger::logOnFinish);
         // Close the transactions now. They were originally copied to Shell in case we needed to
         // apply them due to a remote failure. Since we don't need to apply them anymore, free them
@@ -1117,8 +1125,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             try {
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                         "Calling onTransitionReady: %s", info);
-                mLogger.mSendTimeNs = SystemClock.uptimeNanos();
+                mLogger.mSendTimeNs = SystemClock.elapsedRealtimeNanos();
                 mLogger.mInfo = info;
+                mController.mTransitionTracer.logSentTransition(
+                        this, mTargets, mLogger.mCreateTimeNs, mLogger.mSendTimeNs, info);
                 mController.getTransitionPlayer().onTransitionReady(
                         mToken, info, transaction, mFinishTransaction);
                 if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
