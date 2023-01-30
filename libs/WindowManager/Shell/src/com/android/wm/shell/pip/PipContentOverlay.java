@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.pip;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
@@ -39,6 +40,11 @@ public abstract class PipContentOverlay {
             tx.remove(mLeash);
             tx.apply();
         }
+    }
+
+    @Nullable
+    public SurfaceControl getLeash() {
+        return mLeash;
     }
 
     /**
