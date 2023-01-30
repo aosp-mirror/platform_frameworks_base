@@ -28,8 +28,8 @@ interface FlagsCommonModule {
         @JvmStatic
         @Provides
         @Named(ALL_FLAGS)
-        fun providesAllFlags(): Map<Int, Flag<*>> {
-            return FlagsFactory.knownFlags.map { it.value.id to it.value }.toMap()
+        fun providesAllFlags(): Map<String, Flag<*>> {
+            return FlagsFactory.knownFlags
         }
     }
 }

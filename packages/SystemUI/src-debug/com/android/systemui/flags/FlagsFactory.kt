@@ -35,7 +35,7 @@ object FlagsFactory {
         teamfood: Boolean = false
     ): UnreleasedFlag {
         val flag = UnreleasedFlag(id = id, name = name, namespace = namespace, teamfood = teamfood)
-        FlagsFactory.checkForDupesAndAdd(flag)
+        checkForDupesAndAdd(flag)
         return flag
     }
 
@@ -46,7 +46,7 @@ object FlagsFactory {
         teamfood: Boolean = false
     ): ReleasedFlag {
         val flag = ReleasedFlag(id = id, name = name, namespace = namespace, teamfood = teamfood)
-        FlagsFactory.checkForDupesAndAdd(flag)
+        checkForDupesAndAdd(flag)
         return flag
     }
 
@@ -65,7 +65,7 @@ object FlagsFactory {
                 resourceId = resourceId,
                 teamfood = teamfood
             )
-        FlagsFactory.checkForDupesAndAdd(flag)
+        checkForDupesAndAdd(flag)
         return flag
     }
 
@@ -77,18 +77,13 @@ object FlagsFactory {
     ): SysPropBooleanFlag {
         val flag =
             SysPropBooleanFlag(id = id, name = name, namespace = "systemui", default = default)
-        FlagsFactory.checkForDupesAndAdd(flag)
+        checkForDupesAndAdd(flag)
         return flag
     }
 
     private fun checkForDupesAndAdd(flag: Flag<*>) {
         if (flagMap.containsKey(flag.name)) {
-            throw IllegalArgumentException("Name {flag.name} is already registered")
-        }
-        flagMap.forEach {
-            if (it.value.id == flag.id) {
-                throw IllegalArgumentException("Name {flag.id} is already registered")
-            }
+            throw IllegalArgumentException("Name {$flag.name} is already registered")
         }
         flagMap[flag.name] = flag
     }
