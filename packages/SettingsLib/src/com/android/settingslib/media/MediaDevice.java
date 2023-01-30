@@ -30,8 +30,8 @@ import static android.media.MediaRoute2Info.TYPE_USB_DEVICE;
 import static android.media.MediaRoute2Info.TYPE_USB_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
-import static android.media.RouteListingPreference.Item.DISABLE_REASON_NONE;
 import static android.media.RouteListingPreference.Item.FLAG_SUGGESTED_ROUTE;
+import static android.media.RouteListingPreference.Item.SUBTEXT_NONE;
 
 import static com.android.settingslib.media.LocalMediaManager.MediaDeviceState.STATE_SELECTED;
 
@@ -198,10 +198,11 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      *
      * @return disabled reason of device
      */
-    @RouteListingPreference.Item.DisableReason
+    @RouteListingPreference.Item.SubText
     public int getDisableReason() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && mItem != null
-                ? mItem.getDisableReason() : -1;
+                ? mItem.getSubText()
+                : -1;
     }
 
     /**
@@ -210,8 +211,9 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      * @return true if device has disabled reason
      */
     public boolean hasDisabledReason() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && mItem != null
-                && mItem.getDisableReason() != DISABLE_REASON_NONE;
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+                && mItem != null
+                && mItem.getSubText() != SUBTEXT_NONE;
     }
 
     /**
