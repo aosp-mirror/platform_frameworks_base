@@ -6205,8 +6205,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mHandler.post(() -> {
                 final int id = verificationId >= 0 ? verificationId : -verificationId;
                 final PackageVerificationState state = mPendingVerification.get(id);
-                if (state == null || !state.checkRequiredVerifierUid(callingUid)) {
-                    // Only allow calls from required verifiers.
+                if (state == null) {
+                    return;
+                }
+                if (!state.checkRequiredVerifierUid(callingUid)
+                        && !state.checkSufficientVerifierUid(callingUid)) {
+                    // Only allow calls from verifiers.
                     return;
                 }
 
