@@ -338,8 +338,9 @@ public class GnssNative {
      * {@link #create(Injector, GnssConfiguration)} may be invoked.
      */
     public static synchronized boolean isSupported() {
-        initializeHal();
-        return sGnssHal.isSupported();
+        // initializeHal();
+        // return sGnssHal.isSupported();
+        return false;
     }
 
     /**
