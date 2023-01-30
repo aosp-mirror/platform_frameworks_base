@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Hætta við"</string>
     <string name="string_continue" msgid="1346732695941131882">"Áfram"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Fleiri valkostir"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"Nánar"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Aukið öryggi með aðgangslyklum"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Með aðgangslyklum þarftu hvorki að búa til né muna flókin aðgangsorð"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Aðgangslyklar eru dulkóðaðir stafrænir lyklar sem þú býrð til með fingrafarinu þínu, andliti eða skjálás."</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Þeir eru vistaðir í aðgangsorðastjórnun svo þú getir skráð þig inn í öðrum tækjum"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Nánar um aðgangslykla"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Aðgangsorðalaus tækni"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Aðgangslyklar gera þér kleift að skrá þig inn án þess að þurfa aðgangsorð. Þú þarft aðeins og nota fingrafarið, andlitsgreiningu, PIN-númer eða strokmynstur til að staðfesta hver þú ert og búa til aðgangslykil."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Dulritun opinberra lykla"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Aðgangslyklar nota dulkóðuð lyklasett byggð á stöðlum FIDO Alliance (sem nær til Google, Apple, Microsoft og fleiri) og W3C. Ólíkt notandanafni og stafarunu aðgangsorðs er lyklasett opinbers lykils og einkalykils búið til fyrir forrit eða vefsvæði. Einkalykillinn er vistaður á öruggan hátt í tækinu eða í aðgangsorðastjórnun og hann staðfestir auðkenni þitt. Opinbera lyklinum er deilt með þjóni forritsins eða vefsvæðisins. Samsvarandi lyklar tryggja tafarlausa skráningu og innskráningu."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Bætt reikningsöryggi"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Hver lykill er eingöngu tengdur forritinu eða vefsvæðinu sem hann var búinn til fyrir. Því er engin hætta á að þú skráir þig óvart inn á sviksamlegt forrit eða vefsvæði. Einnig er erfiðara að hakka þegar þjónar geyma aðeins opinbera lykla."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Snurðulaus skipti"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Við stefnum að framtíð án aðgangsorða en aðgangsorð verða áfram í boði samhliða aðgangslyklum."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Veldu hvar þú vilt vista <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Veldu aðgangsorðastjórnun til að vista upplýsingarnar og vera fljótari að skrá þig inn næst"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Viltu búa til aðgangslykil fyrir <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>

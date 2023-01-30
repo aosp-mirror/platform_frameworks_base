@@ -458,6 +458,14 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"යෙදුම භාවිතයේ පවතින අතරතුර හෘද ස්පන්දන වේගය, උෂ්ණත්වය සහ රුධිර ඔක්සිජන් ප්‍රතිශතය වැනි ශරීර සංවේදක දත්ත වෙත ප්‍රවේශ වීමට යෙදුමට අවසර දෙයි."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"පසුබිමේ ඇති අතරතුර හෘද ස්පන්දන වේගය වැනි ශරීර සංවේදක දත්ත වෙත ප්‍රවේශ වන්න"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"යෙදුම පසුබිමේ ඇති අතර හෘද ස්පන්දන වේගය, උෂ්ණත්වය සහ රුධිර ඔක්සිජන් ප්‍රතිශතය වැනි ශරීර සංවේදක දත්ත වෙත ප්‍රවේශ වීමට යෙදුමට අවසර දෙයි."</string>
+    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
+    <skip />
+    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6408654259475396200">"දින දර්ශන සිදුවීම් හා විස්තර කියවන්න"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"මෙම යෙදුමට ඔබගේ ටැබ්ලට් පරිගණකය මත ගබඩා වී ඇති සියලු දින දර්ශන කියවීමට සහ සහ ඔබගේ දින දර්ශන දත්ත බෙදා ගැනීමට සහ සුරැකීමට හැකිය."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"මෙම යෙදුමට ඔබගේ Android TV මත ගබඩා කර ඇති සියලු දින දර්ශන සිදුවීම් කියවීමට සහ ඔබගේ දින දර්ශන දත්ත බෙදා ගැනීමට හෝ සුරැකීමට හැකිය."</string>

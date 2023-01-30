@@ -460,6 +460,14 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Zezwala aplikacji na dostęp do danych z czujników na ciele, takich jak tętno, temperatura i poziom saturacji, gdy aplikacja ta jest używana."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Zezwól na dostęp do danych z czujników na ciele, np. tętna, podczas używania aplikacji w tle"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Zezwala aplikacji na dostęp do danych z czujników na ciele, takich jak tętno, temperatura i poziom saturacji, gdy aplikacja ta jest używana w tle."</string>
+    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
+    <skip />
+    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Odczytywanie wydarzeń i informacji z kalendarza"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Ta aplikacja może odczytywać wszystkie zapisane na tablecie wydarzenia z kalendarza i udostępniać oraz zapisywać dane kalendarza."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Ta aplikacja może odczytywać wszystkie wydarzenia z kalendarza zapisane na urządzeniu z Androidem TV oraz udostępniać i zapisywać dane z kalendarza."</string>

@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Cancelar"</string>
     <string name="string_continue" msgid="1346732695941131882">"Continuar"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Más opciones"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"Más información"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Más seguridad con llaves de acceso"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Con las llaves de acceso, no es necesario crear ni recordar contraseñas complejas"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Las llaves de acceso son claves digitales encriptadas que puedes crear usando tu huella dactilar, rostro o bloqueo de pantalla"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Se guardan en un administrador de contraseñas para que puedas acceder en otros dispositivos"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Más información sobre las llaves de acceso"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Tecnología sin contraseñas"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Las llaves de acceso permiten acceder sin depender de contraseñas. Solo tienes que usar tu huella dactilar, reconocimiento facial, PIN o patrón de deslizamiento para verificar tu identidad y crear una clave de acceso."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Criptografía de claves públicas"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Basadas en la Alianza FIDO (Google, Apple, Microsoft, etc.) y en estándares del W3C, las llaves de acceso usan pares de claves criptográficas. A diferencia de la cadena de caracteres de las contraseñas, para una app o sitio web se crean claves privadas y públicas. La clave privada se guarda en tu dispositivo/administrador de contraseñas, y confirma tu identidad. La clave pública se comparte con el servidor de la app o sitio web. Las claves adecuadas te permiten registrarte y acceder al instante."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Mayor seguridad para las cuentas"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Cada llave está vinculada exclusivamente con el sitio web o la app para la que fue creada, por lo que nunca podrás acceder por error a una app o sitio web fraudulentos. Además, como los servidores solo guardan claves públicas, hackearlas es mucho más difícil."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Transición fluida"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"A medida que avanzamos hacia un futuro sin contraseñas, estas seguirán estando disponibles junto a las llaves de acceso."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Elige dónde guardar tus <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selecciona un administrador de contraseñas para guardar tu información y acceder más rápido la próxima vez"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"¿Quieres crear una llave de acceso para <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>

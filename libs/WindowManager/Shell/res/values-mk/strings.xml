@@ -84,6 +84,11 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Допрете двапати надвор од некоја апликација за да ја преместите"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Сфатив"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Проширете за повеќе информации."</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Да се рестартира за подобар приказ?"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Може да ја рестартирате апликацијата за да изгледа подобро на екранот, но може да го изгубите напредокот или незачуваните промени"</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Откажи"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"Рестартирај"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Не прикажувај повторно"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Зголеми"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Минимизирај"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Затвори"</string>

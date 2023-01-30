@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Peru"</string>
     <string name="string_continue" msgid="1346732695941131882">"Jatka"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Lisäasetukset"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"Lue lisää"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Turvallisuutta avainkoodeilla"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Kun käytät avainkoodeja, sinun ei tarvitse luoda tai muistaa monimutkaisia salasanoja"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Avainkoodit ovat salattuja digitaalisia avaimia, joita voit luoda sormenjäljen, kasvojen tai näytön lukituksen avulla"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Ne tallennetaan salasanojen ylläpito-ohjelmaan, jotta voit kirjautua sisään muilla laitteilla"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Lisätietoa avainkoodeista"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Salasanaton teknologia"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Avainkoodien avulla voit kirjautua sisään ilman salasanaa. Voit vahvistaa henkilöllisyytesi ja luoda avainkoodin sormenjäljen, kasvojentunnistuksen, PIN-koodin tai pyyhkäisykuvion avulla."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Julkisen avaimen salaus"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"FIDO Alliancen (johon kuuluvat Google, Apple, Microsoft ja muita) ja W3C:n standardien mukaan avainkoodit käyttävät salausavainpareja. Käyttäjätunnuksen ja salasanan sijaan sovellusta tai sivustoa varten luodaan pari, jossa on yksityinen ja julkinen avain. Yksityinen avain tallennetaan suojatusti laitteelle tai Salasanoihin, ja se vahvistaa henkilöllisyytesi. Julkinen avain jaetaan sovelluksen tai sivuston palvelimelle. Yhteensopivalla avainparilla voit rekisteröityä ja kirjautua sisään heti."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Parempi tilin tietoturva"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Kukin avain yhdistetään vain sovellukseen tai sivustoon, jota varten se on luotu, joten et voi koskaan kirjautua vilpilliseen sovellukseen tai sivustolle vahingossa. Lisäksi palvelimet säilyttävät vain julkisia avaimia, mikä tekee hakkeroinnista paljon vaikeampaa."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Saumaton siirtymä"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Kehitys kulkee kohti salasanatonta tulevaisuutta, mutta salasanat ovat edelleen käytettävissä avainkoodien ohella."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Valitse, minne <xliff:g id="CREATETYPES">%1$s</xliff:g> tallennetaan"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Valitse salasanojen ylläpitotyökalu, niin voit tallentaa tietosi ja kirjautua ensi kerralla nopeammin sisään"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Luodaanko avainkoodi (<xliff:g id="APPNAME">%1$s</xliff:g>)?"</string>

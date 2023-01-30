@@ -459,6 +459,14 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Dozvoljava aplikaciji da pristupa podacima senzora za telo, kao što su puls, temperatura i procenat kiseonika u krvi dok se aplikacija koristi."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Pristup podacima senzora za telo, kao što je puls, u pozadini"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Dozvoljava aplikaciji da pristupa podacima senzora za telo, kao što su puls, temperatura i procenat kiseonika u krvi dok je aplikacija u pozadini."</string>
+    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
+    <skip />
+    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Čitanje događaja i podataka iz kalendara"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Ova aplikacija može da čita sve događaje iz kalendara koje čuvate na tabletu, kao i da deli ili čuva podatke iz kalendara."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Ova aplikacija može da čita sve događaje iz kalendara koje čuvate na Android TV uređaju, kao i da deli ili čuva podatke iz kalendara."</string>

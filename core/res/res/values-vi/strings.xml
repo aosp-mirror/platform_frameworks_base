@@ -458,6 +458,14 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Cho phép ứng dụng truy cập vào dữ liệu cảm biến cơ thể khi đang dùng, chẳng hạn như nhịp tim, thân nhiệt và tỷ lệ phần trăm oxy trong máu."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Truy cập vào dữ liệu cảm biến cơ thể khi ở chế độ nền, chẳng hạn như nhịp tim"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Cho phép ứng dụng truy cập vào dữ liệu cảm biến cơ thể khi ở chế độ nền, chẳng hạn như nhịp tim, thân nhiệt và tỷ lệ phần trăm oxy trong máu."</string>
+    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
+    <skip />
+    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
+    <skip />
+    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Đọc chi tiết và sự kiện lịch"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Ứng dụng này có thể đọc tất cả các sự kiện lịch được lưu trữ trên máy tính bảng của bạn và chia sẻ hoặc lưu dữ liệu lịch của bạn."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Ứng dụng này có thể đọc tất cả sự kiện trên lịch mà bạn lưu vào thiết bị Android TV cũng như chia sẻ hoặc lưu dữ liệu lịch của bạn."</string>

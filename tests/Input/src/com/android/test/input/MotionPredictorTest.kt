@@ -102,9 +102,9 @@ class MotionPredictorTest {
      * a prediction. Here, we send 2 events to the predictor and check the returned event.
      * Input:
      * t = 0 x = 0 y = 0
-     * t = 1 x = 1 y = 2
+     * t = 4 x = 10 y = 20
      * Output (expected):
-     * t = 3 x = 3 y = 6
+     * t = 12 x = 30 y = 60 ± error
      *
      * Historical data is ignored for simplicity.
      */
@@ -118,19 +118,20 @@ class MotionPredictorTest {
         // ACTION_DOWN t=0 x=0 y=0
         predictor.record(downEvent)
 
-        eventTime += Duration.ofMillis(1)
-        val moveEvent = getStylusMotionEvent(eventTime, ACTION_MOVE, /*x=*/1f, /*y=*/2f)
+        eventTime += Duration.ofMillis(4)
+        val moveEvent = getStylusMotionEvent(eventTime, ACTION_MOVE, /*x=*/10f, /*y=*/20f)
         // ACTION_MOVE t=1 x=1 y=2
         predictor.record(moveEvent)
 
-        val predicted = predictor.predict(Duration.ofMillis(2).toNanos())
+        val predicted = predictor.predict(Duration.ofMillis(8).toNanos())
         assertEquals(1, predicted.size)
         val event = predicted[0]
         assertNotNull(event)
 
-        // Prediction will happen for t=3 (2 + 1, since offset is 1 and present time is 2)
-        assertEquals(3, event.eventTime)
-        assertEquals(3f, event.x, /*delta=*/0.001f)
-        assertEquals(6f, event.y, /*delta=*/0.001f)
+        // Prediction will happen for t=12 (since it is the next input interval after the requested
+        // time, 8, plus the model offset, 1).
+        assertEquals(12, event.eventTime)
+        assertEquals(30f, event.x, /*delta=*/5f)
+        assertEquals(60f, event.y, /*delta=*/15f)
     }
 }

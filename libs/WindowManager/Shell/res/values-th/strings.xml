@@ -84,6 +84,11 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"แตะสองครั้งด้านนอกแอปเพื่อเปลี่ยนตำแหน่ง"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"รับทราบ"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"ขยายเพื่อดูข้อมูลเพิ่มเติม"</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"รีสตาร์ทเพื่อรับมุมมองที่ดียิ่งขึ้นใช่ไหม"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"คุณรีสตาร์ทแอปเพื่อรับมุมมองที่ดียิ่งขึ้นบนหน้าจอได้ แต่ความคืบหน้าและการเปลี่ยนแปลงใดๆ ที่ไม่ได้บันทึกอาจหายไป"</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"ยกเลิก"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"รีสตาร์ท"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"ไม่ต้องแสดงข้อความนี้อีก"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"ขยายใหญ่สุด"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"ย่อ"</string>
     <string name="close_button_text" msgid="2913281996024033299">"ปิด"</string>

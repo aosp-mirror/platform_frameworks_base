@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"取消"</string>
     <string name="string_continue" msgid="1346732695941131882">"继续"</string>
     <string name="string_more_options" msgid="7990658711962795124">"更多选项"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"了解详情"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"通行密钥可提高安全性"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"借助通行密钥，您无需创建或记住复杂的密码"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"通行密钥是指您使用您的指纹、面孔或屏锁方式创建的加密数字钥匙"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"系统会将通行密钥保存到密码管理工具中，以便您在其他设备上登录"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"详细了解通行密钥"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"无密码技术"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"借助通行密钥，您不必依赖密码就能登录。您只需使用指纹、人脸识别功能、PIN 码或滑动图案便可验证您的身份并创建通行密钥。"</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"公钥加密"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"根据 FIDO 联盟（成员包括 Google、Apple、Microsoft 等）和 W3C 的标准，通行密钥使用加密密钥对。不同于用户名及可在密码中使用的一系列字符，系统会为应用或网站创建一个私钥-公钥对。私钥会安全地存储在您的设备上或密码管理工具中，用于证实您的身份。公钥会被共享给应用或网站服务器。您只要使用相应密钥，就能瞬间注册并登录。"</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"提升了帐号安全性"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"每个密钥都是专为特定应用或网站创建的，且仅与各自对应的网站或应用关联，因此您绝不会错误地登录任何欺诈性应用或网站。另外，由于服务器只保留公钥，黑客入侵的难度会大大增加。"</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"无缝转换"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"在我们向无密码未来迈进的过程中，密码仍会与通行密钥并存供用。"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"选择保存<xliff:g id="CREATETYPES">%1$s</xliff:g>的位置"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"请选择一款密码管理工具来保存您的信息，以便下次更快地登录"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"要为“<xliff:g id="APPNAME">%1$s</xliff:g>”创建通行密钥吗？"</string>

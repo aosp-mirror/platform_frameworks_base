@@ -5,30 +5,20 @@
     <string name="string_cancel" msgid="6369133483981306063">"Kanselahin"</string>
     <string name="string_continue" msgid="1346732695941131882">"Magpatuloy"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Higit pang opsyon"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
-    <skip />
+    <string name="string_learn_more" msgid="4541600451688392447">"Matuto pa"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Mas ligtas gamit ang mga passkey"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Gamit ang mga passkey, hindi mo na kailangang gumawa o tumanda ng mga komplikadong password"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Ang mga passkey ay mga naka-encrypt na digital na susi na ginagawa mo gamit ang iyong fingerprint, mukha, o lock ng screen"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Sine-save ang mga ito sa isang password manager para makapag-sign in ka sa iba pang device"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Higit pa tungkol sa mga passkey"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Teknolohiyang hindi gumagamit ng password"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Sa pamamagitan ng mga passkey, makakapag-sign in ka nang hindi umaasa sa mga password. Kailangan mo lang gamitin ang iyong fingerprint, pagkilala ng mukha, PIN, o swipe pattern para i-verify ang pagkakakilanlan mo at gumawa ng passkey."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Cryptography ng pampublikong key"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Batay sa FIDO Alliance (na kinabibilangan ng Google, Apple, Microsoft, atbp) at W3C standards, gumagamit ang passkeys ng cryptographic key pairs. Hindi tulad ng username at string ng characters na ginagamit sa password, para sa app o website ginagawa ang private-public key pair. Ligtas na naka-store sa device o password manager ang private key at kinukumpirma nito ang identity. Naka-share sa app o website server ang public key. Gamit ang key, instant kang makakapag-register at makakapag-sign in."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Pinahusay na seguridad sa account"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Eksklusibong naka-link sa app o website kung para saan ginawa ang bawat key, kaya hindi ka makakapag-sign in sa isang mapanlokong app o website nang hindi sinasadya. Bukod pa rito, dahil mga pampublikong key lang ang itinatabi ng mga server, lubos na mas mahirap ang pag-hack."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Madaling transition"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Habang lumalayo tayo sa mga password, magiging available pa rin ang mga password kasama ng mga passkey."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Piliin kung saan mo ise-save ang iyong <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Pumili ng password manger para ma-save ang iyong impormasyon at makapag-sign in nang mas mabilis sa susunod na pagkakataon"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Gumawa ng passkey para sa <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>

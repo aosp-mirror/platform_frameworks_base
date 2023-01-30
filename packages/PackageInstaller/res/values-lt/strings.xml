@@ -70,6 +70,7 @@
     <string name="uninstalling_app" msgid="8866082646836981397">"Pašalinamas paketas „<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>“…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Pašalinimas baigtas."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"Paketas „<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>“ pašalintas"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Ištrinta „<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>“ kopija"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Nepavyko pašalinti."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Paketo „<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>“ pašalinimo veiksmas nesėkmingas."</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Ištrinama „<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>“ kopija…"</string>

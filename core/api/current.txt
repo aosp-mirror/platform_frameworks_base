@@ -21651,6 +21651,7 @@ package android.media {
     field public static final int DUAL_MONO_MODE_RR = 3; // 0x3
     field public static final int ENCAPSULATION_METADATA_TYPE_DVB_AD_DESCRIPTOR = 2; // 0x2
     field public static final int ENCAPSULATION_METADATA_TYPE_FRAMEWORK_TUNER = 1; // 0x1
+    field public static final int ENCAPSULATION_METADATA_TYPE_SUPPLEMENTARY_AUDIO_PLACEMENT = 3; // 0x3
     field public static final int ENCAPSULATION_MODE_ELEMENTARY_STREAM = 1; // 0x1
     field public static final int ENCAPSULATION_MODE_NONE = 0; // 0x0
     field public static final int ERROR = -1; // 0xffffffff
@@ -21669,6 +21670,9 @@ package android.media {
     field public static final int STATE_NO_STATIC_DATA = 2; // 0x2
     field public static final int STATE_UNINITIALIZED = 0; // 0x0
     field public static final int SUCCESS = 0; // 0x0
+    field public static final int SUPPLEMENTARY_AUDIO_PLACEMENT_LEFT = 1; // 0x1
+    field public static final int SUPPLEMENTARY_AUDIO_PLACEMENT_NORMAL = 0; // 0x0
+    field public static final int SUPPLEMENTARY_AUDIO_PLACEMENT_RIGHT = 2; // 0x2
     field public static final int WRITE_BLOCKING = 0; // 0x0
     field public static final int WRITE_NON_BLOCKING = 1; // 0x1
   }
@@ -24591,6 +24595,7 @@ package android.media {
 
   public static final class RouteListingPreference.Item implements android.os.Parcelable {
     method public int describeContents();
+    method @Nullable public CharSequence getCustomDisableReasonMessage();
     method public int getDisableReason();
     method public int getFlags();
     method @NonNull public String getRouteId();
@@ -24598,6 +24603,7 @@ package android.media {
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.RouteListingPreference.Item> CREATOR;
     field public static final int DISABLE_REASON_AD = 3; // 0x3
+    field public static final int DISABLE_REASON_CUSTOM = 5; // 0x5
     field public static final int DISABLE_REASON_DOWNLOADED_CONTENT = 2; // 0x2
     field public static final int DISABLE_REASON_IN_APP_ONLY = 4; // 0x4
     field public static final int DISABLE_REASON_NONE = 0; // 0x0
@@ -24609,6 +24615,7 @@ package android.media {
   public static final class RouteListingPreference.Item.Builder {
     ctor public RouteListingPreference.Item.Builder(@NonNull String);
     method @NonNull public android.media.RouteListingPreference.Item build();
+    method @NonNull public android.media.RouteListingPreference.Item.Builder setCustomDisableReasonMessage(@Nullable CharSequence);
     method @NonNull public android.media.RouteListingPreference.Item.Builder setDisableReason(int);
     method @NonNull public android.media.RouteListingPreference.Item.Builder setFlags(int);
     method @NonNull public android.media.RouteListingPreference.Item.Builder setSessionParticipantCount(@IntRange(from=0) int);
