@@ -2,18 +2,19 @@
 #define _ANDROID_GRAPHICS_GRAPHICS_JNI_H_
 
 #include <cutils/compiler.h>
-#include <hwui/Bitmap.h>
-#include <hwui/Canvas.h>
 
-#include "BRDAllocator.h"
 #include "Bitmap.h"
+#include "BRDAllocator.h"
 #include "SkBitmap.h"
 #include "SkCodec.h"
-#include "SkColorSpace.h"
-#include "SkMallocPixelRef.h"
 #include "SkPixelRef.h"
+#include "SkMallocPixelRef.h"
 #include "SkPoint.h"
 #include "SkRect.h"
+#include "SkColorSpace.h"
+#include <hwui/Canvas.h>
+#include <hwui/Bitmap.h>
+
 #include "graphics_jni_helpers.h"
 
 class SkCanvas;
@@ -330,26 +331,6 @@ private:
     jbyteArray fArray;
     jbyte*      fPtr;
     int         fLen;
-};
-
-class JGlobalRefHolder {
-public:
-    JGlobalRefHolder(JavaVM* vm, jobject object) : mVm(vm), mObject(object) {}
-
-    virtual ~JGlobalRefHolder() {
-        GraphicsJNI::getJNIEnv()->DeleteGlobalRef(mObject);
-        mObject = nullptr;
-    }
-
-    jobject object() { return mObject; }
-    JavaVM* vm() { return mVm; }
-
-private:
-    JGlobalRefHolder(const JGlobalRefHolder&) = delete;
-    void operator=(const JGlobalRefHolder&) = delete;
-
-    JavaVM* mVm;
-    jobject mObject;
 };
 
 void doThrowNPE(JNIEnv* env);
