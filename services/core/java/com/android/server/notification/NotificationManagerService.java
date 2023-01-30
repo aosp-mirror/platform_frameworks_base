@@ -521,6 +521,8 @@ public class NotificationManagerService extends SystemService {
     private PackageManager mPackageManagerClient;
     PackageManagerInternal mPackageManagerInternal;
     private PermissionPolicyInternal mPermissionPolicyInternal;
+
+    private PermissionManagerServiceInternal mPermissionInternal;
     AudioManager mAudioManager;
     AudioManagerInternal mAudioManagerInternal;
     // Can be null for wear
@@ -2210,7 +2212,8 @@ public class NotificationManagerService extends SystemService {
             TelephonyManager telephonyManager, ActivityManagerInternal ami,
             MultiRateLimiter toastRateLimiter, PermissionHelper permissionHelper,
             UsageStatsManagerInternal usageStatsManagerInternal,
-            TelecomManager telecomManager, NotificationChannelLogger channelLogger) {
+            TelecomManager telecomManager, NotificationChannelLogger channelLogger,
+            PermissionManagerServiceInternal permInternal) {
         mHandler = handler;
         Resources resources = getContext().getResources();
         mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
@@ -2228,6 +2231,7 @@ public class NotificationManagerService extends SystemService {
         mPackageManagerClient = packageManagerClient;
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mPermissionPolicyInternal = LocalServices.getService(PermissionPolicyInternal.class);
+        mPermissionInternal = permInternal;
         mUmInternal = LocalServices.getService(UserManagerInternal.class);
         mUsageStatsManagerInternal = usageStatsManagerInternal;
         mAppOps = appOps;
@@ -2539,7 +2543,8 @@ public class NotificationManagerService extends SystemService {
                         AppGlobals.getPermissionManager()),
                 LocalServices.getService(UsageStatsManagerInternal.class),
                 getContext().getSystemService(TelecomManager.class),
-                new NotificationChannelLoggerImpl());
+                new NotificationChannelLoggerImpl(),
+                LocalServices.getService(PermissionManagerServiceInternal.class));
 
         publishBinderService(Context.NOTIFICATION_SERVICE, mService, /* allowIsolated= */ false,
                 DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_NORMAL);
@@ -6689,17 +6694,30 @@ public class NotificationManagerService extends SystemService {
                 (userId == UserHandle.USER_ALL) ? USER_SYSTEM : userId);
         Notification.addFieldsFromContext(ai, notification);
 
-        int canColorize = mPackageManagerClient.checkPermission(
-                android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, pkg);
+        int canColorize = mPermissionInternal.checkPermission(
+                android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, pkg, userId);
         if (canColorize == PERMISSION_GRANTED) {
             notification.flags |= Notification.FLAG_CAN_COLORIZE;
         } else {
             notification.flags &= ~Notification.FLAG_CAN_COLORIZE;
         }
 
+        if (notification.extras.getBoolean(Notification.EXTRA_ALLOW_DURING_SETUP, false)) {
+            int hasShowDuringSetupPerm = mPermissionInternal.checkPermission(
+                    android.Manifest.permission.NOTIFICATION_DURING_SETUP, pkg, userId);
+            if (hasShowDuringSetupPerm != PERMISSION_GRANTED) {
+                notification.extras.remove(Notification.EXTRA_ALLOW_DURING_SETUP);
+                if (DBG) {
+                    Slog.w(TAG, "warning: pkg " + pkg + " attempting to show during setup"
+                            + " without holding perm "
+                            + Manifest.permission.NOTIFICATION_DURING_SETUP);
+                }
+            }
+        }
+
         if (notification.fullScreenIntent != null && ai.targetSdkVersion >= Build.VERSION_CODES.Q) {
-            int fullscreenIntentPermission = mPackageManagerClient.checkPermission(
-                    android.Manifest.permission.USE_FULL_SCREEN_INTENT, pkg);
+            int fullscreenIntentPermission = mPermissionInternal.checkPermission(
+                    android.Manifest.permission.USE_FULL_SCREEN_INTENT, pkg, userId);
             if (fullscreenIntentPermission != PERMISSION_GRANTED) {
                 notification.fullScreenIntent = null;
                 Slog.w(TAG, "Package " + pkg +
@@ -6719,7 +6737,7 @@ public class NotificationManagerService extends SystemService {
 
         // Ensure MediaStyle has correct permissions for remote device extras
         if (notification.isStyle(Notification.MediaStyle.class)) {
-            int hasMediaContentControlPermission = mPackageManager.checkPermission(
+            int hasMediaContentControlPermission = mPermissionInternal.checkPermission(
                     android.Manifest.permission.MEDIA_CONTENT_CONTROL, pkg, userId);
             if (hasMediaContentControlPermission != PERMISSION_GRANTED) {
                 notification.extras.remove(Notification.EXTRA_MEDIA_REMOTE_DEVICE);
@@ -6734,7 +6752,7 @@ public class NotificationManagerService extends SystemService {
 
         // Ensure only allowed packages have a substitute app name
         if (notification.extras.containsKey(Notification.EXTRA_SUBSTITUTE_APP_NAME)) {
-            int hasSubstituteAppNamePermission = mPackageManager.checkPermission(
+            int hasSubstituteAppNamePermission = mPermissionInternal.checkPermission(
                     permission.SUBSTITUTE_NOTIFICATION_APP_NAME, pkg, userId);
             if (hasSubstituteAppNamePermission != PERMISSION_GRANTED) {
                 notification.extras.remove(Notification.EXTRA_SUBSTITUTE_APP_NAME);
@@ -8338,15 +8356,9 @@ public class NotificationManagerService extends SystemService {
     }
 
     private boolean isExemptFromRateLimiting(String pkg, int userId) {
-        boolean isExemptFromRateLimiting = false;
-        try {
-            isExemptFromRateLimiting = mPackageManager.checkPermission(
-                    android.Manifest.permission.UNLIMITED_TOASTS, pkg, userId)
-                    == PackageManager.PERMISSION_GRANTED;
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to connect with package manager");
-        }
-        return isExemptFromRateLimiting;
+        return mPermissionInternal.checkPermission(
+                android.Manifest.permission.UNLIMITED_TOASTS, pkg, userId)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     /** Reports rate limiting toasts compat change (used when the toast was blocked). */
@@ -9992,13 +10004,9 @@ public class NotificationManagerService extends SystemService {
     boolean canUseManagedServices(String pkg, Integer userId, String requiredPermission) {
         boolean canUseManagedServices = true;
         if (requiredPermission != null) {
-            try {
-                if (mPackageManager.checkPermission(requiredPermission, pkg, userId)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    canUseManagedServices = false;
-                }
-            } catch (RemoteException e) {
-                Slog.e(TAG, "can't talk to pm", e);
+            if (mPermissionInternal.checkPermission(requiredPermission, pkg, userId)
+                    != PackageManager.PERMISSION_GRANTED) {
+                canUseManagedServices = false;
             }
         }
 
