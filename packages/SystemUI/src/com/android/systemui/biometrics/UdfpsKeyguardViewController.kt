@@ -33,7 +33,6 @@ import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
-import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeExpansionListener
@@ -83,7 +82,6 @@ constructor(
     ) {
     private val useExpandedOverlay: Boolean =
         featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)
-    private val isModernBouncerEnabled: Boolean = featureFlags.isEnabled(Flags.MODERN_BOUNCER)
     private val isModernAlternateBouncerEnabled: Boolean =
         featureFlags.isEnabled(Flags.MODERN_ALTERNATE_BOUNCER)
     private var showingUdfpsBouncer = false
@@ -109,12 +107,6 @@ constructor(
                 )
             }
         }
-    /**
-     * Hidden amount of input (pin/pattern/password) bouncer. This is used
-     * [KeyguardBouncerConstants.EXPANSION_VISIBLE] (0f) to
-     * [KeyguardBouncerConstants.EXPANSION_HIDDEN] (1f). Only used for the non-modernBouncer.
-     */
-    private var inputBouncerHiddenAmount = KeyguardBouncerConstants.EXPANSION_HIDDEN
     private var inputBouncerExpansion = 0f // only used for modernBouncer
 
     private val stateListener: StatusBarStateController.StateListener =
@@ -253,15 +245,13 @@ constructor(
     }
 
     init {
-        if (isModernBouncerEnabled || isModernAlternateBouncerEnabled) {
-            view.repeatWhenAttached {
-                // repeatOnLifecycle CREATED (as opposed to STARTED) because the Bouncer expansion
-                // can make the view not visible; and we still want to listen for events
-                // that may make the view visible again.
-                repeatOnLifecycle(Lifecycle.State.CREATED) {
-                    if (isModernBouncerEnabled) listenForBouncerExpansion(this)
-                    if (isModernAlternateBouncerEnabled) listenForAlternateBouncerVisibility(this)
-                }
+        view.repeatWhenAttached {
+            // repeatOnLifecycle CREATED (as opposed to STARTED) because the Bouncer expansion
+            // can make the view not visible; and we still want to listen for events
+            // that may make the view visible again.
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                listenForBouncerExpansion(this)
+                if (isModernAlternateBouncerEnabled) listenForAlternateBouncerVisibility(this)
             }
         }
     }
@@ -333,7 +323,6 @@ constructor(
 
     override fun dump(pw: PrintWriter, args: Array<String>) {
         super.dump(pw, args)
-        pw.println("isModernBouncerEnabled=$isModernBouncerEnabled")
         pw.println("isModernAlternateBouncerEnabled=$isModernAlternateBouncerEnabled")
         pw.println("showingUdfpsAltBouncer=$showingUdfpsBouncer")
         pw.println(
@@ -353,11 +342,7 @@ constructor(
         pw.println("udfpsRequestedByApp=$udfpsRequested")
         pw.println("launchTransitionFadingAway=$launchTransitionFadingAway")
         pw.println("lastDozeAmount=$lastDozeAmount")
-        if (isModernBouncerEnabled) {
-            pw.println("inputBouncerExpansion=$inputBouncerExpansion")
-        } else {
-            pw.println("inputBouncerHiddenAmount=$inputBouncerHiddenAmount")
-        }
+        pw.println("inputBouncerExpansion=$inputBouncerExpansion")
         view.dump(pw)
     }
 
@@ -384,7 +369,6 @@ constructor(
         } else {
             keyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false)
         }
-        updateBouncerHiddenAmount()
         updateAlpha()
         updatePauseAuth()
         return true
@@ -425,19 +409,11 @@ constructor(
     }
 
     fun isBouncerExpansionGreaterThan(bouncerExpansionThreshold: Float): Boolean {
-        return if (isModernBouncerEnabled) {
-            inputBouncerExpansion >= bouncerExpansionThreshold
-        } else {
-            inputBouncerHiddenAmount < bouncerExpansionThreshold
-        }
+        return inputBouncerExpansion >= bouncerExpansionThreshold
     }
 
     fun isInputBouncerFullyVisible(): Boolean {
-        return if (isModernBouncerEnabled) {
-            inputBouncerExpansion == 1f
-        } else {
-            keyguardViewManager.isBouncerShowing && !alternateBouncerInteractor.isVisibleState()
-        }
+        return inputBouncerExpansion == 1f
     }
 
     override fun listenForTouchesOutsideView(): Boolean {
@@ -489,29 +465,12 @@ constructor(
     }
 
     private fun getInputBouncerHiddenAmt(): Float {
-        return if (isModernBouncerEnabled) {
-            1f - inputBouncerExpansion
-        } else {
-            inputBouncerHiddenAmount
-        }
+        return 1f - inputBouncerExpansion
     }
 
     /** Update the scale factor based on the device's resolution. */
     private fun updateScaleFactor() {
         udfpsController.mOverlayParams?.scaleFactor?.let { view.setScaleFactor(it) }
-    }
-
-    private fun updateBouncerHiddenAmount() {
-        if (isModernBouncerEnabled) {
-            return
-        }
-        val altBouncerShowing = alternateBouncerInteractor.isVisibleState()
-        if (altBouncerShowing || !keyguardViewManager.primaryBouncerIsOrWillBeShowing()) {
-            inputBouncerHiddenAmount = 1f
-        } else if (keyguardViewManager.isBouncerShowing) {
-            // input bouncer is fully showing
-            inputBouncerHiddenAmount = 0f
-        }
     }
 
     private val legacyAlternateBouncer: LegacyAlternateBouncer =
