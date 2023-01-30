@@ -147,7 +147,6 @@ public class UdfpsKeyguardViewControllerBaseTest extends SysuiTestCase {
 
     protected UdfpsKeyguardViewController createUdfpsKeyguardViewController(
             boolean useModernBouncer, boolean useExpandedOverlay) {
-        mFeatureFlags.set(Flags.MODERN_BOUNCER, useModernBouncer);
         mFeatureFlags.set(Flags.MODERN_ALTERNATE_BOUNCER, useModernBouncer);
         mFeatureFlags.set(Flags.UDFPS_NEW_TOUCH_DETECTION, useExpandedOverlay);
         UdfpsKeyguardViewController controller = new UdfpsKeyguardViewController(

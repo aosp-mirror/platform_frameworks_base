@@ -45,13 +45,16 @@ import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
+import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.Mockito.anyFloat
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
@@ -102,7 +105,6 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
     @Mock lateinit var keyguardBouncerComponentFactory: KeyguardBouncerComponent.Factory
-    @Mock lateinit var keyguardBouncerContainer: ViewGroup
     @Mock lateinit var keyguardBouncerComponent: KeyguardBouncerComponent
     @Mock lateinit var keyguardHostViewController: KeyguardHostViewController
     @Mock lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
@@ -116,6 +118,12 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         whenever(view.bottom).thenReturn(VIEW_BOTTOM)
+        whenever(view.findViewById<ViewGroup>(R.id.keyguard_bouncer_container))
+                .thenReturn(mock(ViewGroup::class.java))
+        whenever(keyguardBouncerComponentFactory.create(any(ViewGroup::class.java)))
+                .thenReturn(keyguardBouncerComponent)
+        whenever(keyguardBouncerComponent.keyguardHostViewController)
+                .thenReturn(keyguardHostViewController)
         underTest = NotificationShadeWindowViewController(
             lockscreenShadeTransitionController,
             FalsingCollectorFake(),
@@ -275,6 +283,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
 
     @Test
     fun testGetBouncerContainer() {
+        Mockito.clearInvocations(view)
         underTest.bouncerContainer
         verify(view).findViewById<ViewGroup>(R.id.keyguard_bouncer_container)
     }
