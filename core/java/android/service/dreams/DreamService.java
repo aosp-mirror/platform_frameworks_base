@@ -248,25 +248,39 @@ public class DreamService extends Service implements Window.Callback {
     private OverlayConnection mOverlayConnection;
 
     private static class OverlayConnection extends PersistentServiceConnection<IDreamOverlay> {
-        // Overlay set during onBind.
-        private IDreamOverlay mOverlay;
+        // Retrieved Client
+        private IDreamOverlayClient mClient;
+
         // A list of pending requests to execute on the overlay.
-        private final ArrayList<Consumer<IDreamOverlay>> mConsumers = new ArrayList<>();
+        private final ArrayList<Consumer<IDreamOverlayClient>> mConsumers = new ArrayList<>();
+
+        private final IDreamOverlayClientCallback mClientCallback =
+                new IDreamOverlayClientCallback.Stub() {
+            @Override
+            public void onDreamOverlayClient(IDreamOverlayClient client) {
+                mClient = client;
+
+                for (Consumer<IDreamOverlayClient> consumer : mConsumers) {
+                    consumer.accept(mClient);
+                }
+            }
+        };
 
         private final Callback<IDreamOverlay> mCallback = new Callback<IDreamOverlay>() {
             @Override
             public void onConnected(ObservableServiceConnection<IDreamOverlay> connection,
                     IDreamOverlay service) {
-                mOverlay = service;
-                for (Consumer<IDreamOverlay> consumer : mConsumers) {
-                    consumer.accept(mOverlay);
+                try {
+                    service.getClient(mClientCallback);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "could not get DreamOverlayClient", e);
                 }
             }
 
             @Override
             public void onDisconnected(ObservableServiceConnection<IDreamOverlay> connection,
                     int reason) {
-                mOverlay = null;
+                mClient = null;
             }
         };
 
@@ -296,16 +310,16 @@ public class DreamService extends Service implements Window.Callback {
             super.unbind();
         }
 
-        public void addConsumer(Consumer<IDreamOverlay> consumer) {
+        public void addConsumer(Consumer<IDreamOverlayClient> consumer) {
             execute(() -> {
                 mConsumers.add(consumer);
-                if (mOverlay != null) {
-                    consumer.accept(mOverlay);
+                if (mClient != null) {
+                    consumer.accept(mClient);
                 }
             });
         }
 
-        public void removeConsumer(Consumer<IDreamOverlay> consumer) {
+        public void removeConsumer(Consumer<IDreamOverlayClient> consumer) {
             execute(() -> mConsumers.remove(consumer));
         }
 
@@ -1365,7 +1379,7 @@ public class DreamService extends Service implements Window.Callback {
 
         mWindow.getDecorView().addOnAttachStateChangeListener(
                 new View.OnAttachStateChangeListener() {
-                    private Consumer<IDreamOverlay> mDreamStartOverlayConsumer;
+                    private Consumer<IDreamOverlayClient> mDreamStartOverlayConsumer;
 
                     @Override
                     public void onViewAttachedToWindow(View v) {
