@@ -3640,8 +3640,19 @@ public class AudioService extends IAudioService.Stub
         return false;
     }
 
+    /**
+     * Update stream volume, ringer mode and mute status after a volume index change
+     * @param streamType
+     * @param index
+     * @param flags
+     * @param device the device for which the volume is changed
+     * @param caller
+     * @param hasModifyAudioSettings
+     * @param canChangeMute true if the origin of this event is one where the mute state should be
+     *                      updated following the change in volume index
+     */
     private void onSetStreamVolume(int streamType, int index, int flags, int device,
-            String caller, boolean hasModifyAudioSettings) {
+            String caller, boolean hasModifyAudioSettings, boolean canChangeMute) {
         final int stream = mStreamVolumeAlias[streamType];
         setStreamVolumeInt(stream, index, device, false, caller, hasModifyAudioSettings);
         // setting volume on ui sounds stream type also controls silent mode
@@ -3651,10 +3662,8 @@ public class AudioService extends IAudioService.Stub
                     TAG + ".onSetStreamVolume", false /*external*/);
         }
         // setting non-zero volume for a muted stream unmutes the stream and vice versa
-        // (only when changing volume for the current device),
         // except for BT SCO stream where only explicit mute is allowed to comply to BT requirements
-        if ((streamType != AudioSystem.STREAM_BLUETOOTH_SCO)
-                && (getDeviceForStream(stream) == device)) {
+        if ((streamType != AudioSystem.STREAM_BLUETOOTH_SCO) && canChangeMute) {
             // As adjustStreamVolume with muteAdjust flags mute/unmutes stream and aliased streams.
             muteAliasStreams(stream, index == 0);
         }
@@ -4369,7 +4378,10 @@ public class AudioService extends IAudioService.Stub
                 mPendingVolumeCommand = new StreamVolumeCommand(
                                                     streamType, index, flags, device);
             } else {
-                onSetStreamVolume(streamType, index, flags, device, caller, hasModifyAudioSettings);
+                onSetStreamVolume(streamType, index, flags, device, caller, hasModifyAudioSettings,
+                        // ada is non-null when called from setDeviceVolume,
+                        // which shouldn't update the mute state
+                        ada == null /*canChangeMute*/);
                 index = mStreamStates[streamType].getIndex(device);
             }
         }
@@ -10282,7 +10294,8 @@ public class AudioService extends IAudioService.Stub
                                   mPendingVolumeCommand.mIndex,
                                   mPendingVolumeCommand.mFlags,
                                   mPendingVolumeCommand.mDevice,
-                                  callingPackage, true /*hasModifyAudioSettings*/);
+                                  callingPackage, true /*hasModifyAudioSettings*/,
+                                  true /*canChangeMute*/);
                 mPendingVolumeCommand = null;
             }
         }
