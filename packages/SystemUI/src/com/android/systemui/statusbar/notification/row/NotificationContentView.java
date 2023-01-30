@@ -1051,7 +1051,7 @@ public class NotificationContentView extends FrameLayout implements Notification
     }
 
     /**
-     * @return one of the static enum types in this view, calculated form the current state
+     * @return one of the static enum types in this view, calculated from the current state
      */
     public int calculateVisibleType() {
         if (mUserExpanding) {
