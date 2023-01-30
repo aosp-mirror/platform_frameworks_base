@@ -3055,6 +3055,20 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    public void testApplyAspectRatio_containingRatioAlmostEqualToMaxRatio_boundsUnchanged() {
+        setUpDisplaySizeWithApp(1981, 2576);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mWm.mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(0.5f);
+
+        final Rect originalBounds = new Rect(mActivity.getBounds());
+        prepareUnresizable(mActivity, 1.3f, SCREEN_ORIENTATION_UNSPECIFIED);
+
+        // The containing aspect ratio is now 1.3003534, while the desired aspect ratio is 1.3. The
+        // bounds of the activity should not be changed as the difference is too small
+        assertEquals(mActivity.getBounds(), originalBounds);
+    }
+
+    @Test
     public void testUpdateResolvedBoundsHorizontalPosition_activityFillParentWidth() {
         // When activity width equals parent width, multiplier shouldn't have any effect.
         assertHorizontalPositionForDifferentDisplayConfigsForLandscapeActivity(
