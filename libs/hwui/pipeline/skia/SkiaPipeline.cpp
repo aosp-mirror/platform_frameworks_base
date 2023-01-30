@@ -642,17 +642,24 @@ void SkiaPipeline::setSurfaceColorProperties(ColorMode colorMode) {
             mSurfaceColorSpace = DeviceInfo::get()->getWideColorSpace();
             break;
         case ColorMode::Hdr:
-            mSurfaceColorType = SkColorType::kRGBA_F16_SkColorType;
-            mSurfaceColorSpace = SkColorSpace::MakeRGB(GetPQSkTransferFunction(), SkNamedGamut::kRec2020);
-            break;
-        case ColorMode::Hdr10:
-            mSurfaceColorType = SkColorType::kRGBA_1010102_SkColorType;
-            mSurfaceColorSpace = SkColorSpace::MakeRGB(GetPQSkTransferFunction(), SkNamedGamut::kRec2020);
+            mSurfaceColorType = SkColorType::kN32_SkColorType;
+            mSurfaceColorSpace = SkColorSpace::MakeRGB(
+                    GetExtendedTransferFunction(mTargetSdrHdrRatio), SkNamedGamut::kDisplayP3);
             break;
         case ColorMode::A8:
             mSurfaceColorType = SkColorType::kAlpha_8_SkColorType;
             mSurfaceColorSpace = nullptr;
             break;
+    }
+}
+
+void SkiaPipeline::setTargetSdrHdrRatio(float ratio) {
+    if (mColorMode == ColorMode::Hdr) {
+        mTargetSdrHdrRatio = ratio;
+        mSurfaceColorSpace = SkColorSpace::MakeRGB(GetExtendedTransferFunction(mTargetSdrHdrRatio),
+                                                   SkNamedGamut::kDisplayP3);
+    } else {
+        mTargetSdrHdrRatio = 1.f;
     }
 }
 

@@ -450,6 +450,11 @@ Result<EGLSurface, EGLint> EglManager::createSurface(EGLNativeWindowType window,
                 case ColorMode::Default:
                     attribs[1] = EGL_GL_COLORSPACE_LINEAR_KHR;
                     break;
+                // Extended Range HDR requires being able to manipulate the dataspace in ways
+                // we cannot easily do while going through EGLSurface. Given this requires
+                // composer3 support, just treat HDR as equivalent to wide color gamut if
+                // the GLES path is still being hit
+                case ColorMode::Hdr:
                 case ColorMode::WideColorGamut: {
                     skcms_Matrix3x3 colorGamut;
                     LOG_ALWAYS_FATAL_IF(!colorSpace->toXYZD50(&colorGamut),
@@ -466,14 +471,6 @@ Result<EGLSurface, EGLint> EglManager::createSurface(EGLNativeWindowType window,
                     }
                     break;
                 }
-                case ColorMode::Hdr:
-                    config = mEglConfigF16;
-                    attribs[1] = EGL_GL_COLORSPACE_BT2020_PQ_EXT;
-                    break;
-                case ColorMode::Hdr10:
-                    config = mEglConfig1010102;
-                    attribs[1] = EGL_GL_COLORSPACE_BT2020_PQ_EXT;
-                    break;
                 case ColorMode::A8:
                     LOG_ALWAYS_FATAL("Unreachable: A8 doesn't use a color space");
                     break;

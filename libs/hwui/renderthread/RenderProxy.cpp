@@ -143,8 +143,20 @@ void RenderProxy::setOpaque(bool opaque) {
     mRenderThread.queue().post([=]() { mContext->setOpaque(opaque); });
 }
 
-void RenderProxy::setColorMode(ColorMode mode) {
-    mRenderThread.queue().post([=]() { mContext->setColorMode(mode); });
+float RenderProxy::setColorMode(ColorMode mode) {
+    // We only need to figure out what the renderer supports for HDR, otherwise this can stay
+    // an async call since we already know the return value
+    if (mode == ColorMode::Hdr) {
+        return mRenderThread.queue().runSync(
+                [=]() -> float { return mContext->setColorMode(mode); });
+    } else {
+        mRenderThread.queue().post([=]() { mContext->setColorMode(mode); });
+        return 1.f;
+    }
+}
+
+void RenderProxy::setRenderSdrHdrRatio(float ratio) {
+    mDrawFrameTask.setRenderSdrHdrRatio(ratio);
 }
 
 int64_t* RenderProxy::frameInfo() {

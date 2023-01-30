@@ -100,6 +100,7 @@ SkImageInfo BufferDescriptionToImageInfo(const AHardwareBuffer_Desc& bufferDesc,
                                          sk_sp<SkColorSpace> colorSpace);
 
 uint32_t ColorTypeToBufferFormat(SkColorType colorType);
+SkColorType BufferFormatToColorType(uint32_t bufferFormat);
 #endif
 
 ANDROID_API sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace);
@@ -129,6 +130,7 @@ struct Lab {
 Lab sRGBToLab(SkColor color);
 SkColor LabToSRGB(const Lab& lab, SkAlpha alpha);
 skcms_TransferFunction GetPQSkTransferFunction(float sdr_white_level = 0.f);
+skcms_TransferFunction GetExtendedTransferFunction(float sdrHdrRatio);
 std::optional<skcms_TransferFunction> GetHLGScaleTransferFunction();
 
 } /* namespace uirenderer */

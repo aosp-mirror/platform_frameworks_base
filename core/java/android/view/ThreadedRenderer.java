@@ -572,17 +572,10 @@ public final class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    public void setSurfaceControl(@Nullable SurfaceControl surfaceControl) {
-        super.setSurfaceControl(surfaceControl);
+    public void setSurfaceControl(@Nullable SurfaceControl surfaceControl,
+            @Nullable BLASTBufferQueue blastBufferQueue) {
+        super.setSurfaceControl(surfaceControl, blastBufferQueue);
         mWebViewOverlayProvider.setSurfaceControl(surfaceControl);
-        updateWebViewOverlayCallbacks();
-    }
-
-    /**
-     * Sets the BLASTBufferQueue being used for rendering. This is required to be specified
-     * for WebView overlay support
-     */
-    public void setBlastBufferQueue(@Nullable BLASTBufferQueue blastBufferQueue) {
         mWebViewOverlayProvider.setBLASTBufferQueue(blastBufferQueue);
         updateWebViewOverlayCallbacks();
     }

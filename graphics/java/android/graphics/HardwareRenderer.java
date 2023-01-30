@@ -158,6 +158,7 @@ public class HardwareRenderer {
     private boolean mOpaque = true;
     private boolean mForceDark = false;
     private @ActivityInfo.ColorMode int mColorMode = ActivityInfo.COLOR_MODE_DEFAULT;
+    private float mDesiredSdrHdrRatio = 1f;
 
     /**
      * Creates a new instance of a HardwareRenderer. The HardwareRenderer will default
@@ -319,7 +320,8 @@ public class HardwareRenderer {
      * @param surfaceControl The surface control to pass to render thread in hwui.
      *        If null, any previous references held in render thread will be discarded.
     */
-    public void setSurfaceControl(@Nullable SurfaceControl surfaceControl) {
+    public void setSurfaceControl(@Nullable SurfaceControl surfaceControl,
+            @Nullable BLASTBufferQueue blastBufferQueue) {
         nSetSurfaceControl(mNativeProxy, surfaceControl != null ? surfaceControl.mNativeObject : 0);
     }
 
@@ -643,11 +645,12 @@ public class HardwareRenderer {
      * @param colorMode The @{@link ActivityInfo.ColorMode} to request
      * @hide
      */
-    public void setColorMode(@ActivityInfo.ColorMode int colorMode) {
+    public float setColorMode(@ActivityInfo.ColorMode int colorMode) {
         if (mColorMode != colorMode) {
             mColorMode = colorMode;
-            nSetColorMode(mNativeProxy, colorMode);
+            mDesiredSdrHdrRatio = nSetColorMode(mNativeProxy, colorMode);
         }
+        return mDesiredSdrHdrRatio;
     }
 
     /**
@@ -661,6 +664,12 @@ public class HardwareRenderer {
         nSetSdrWhitePoint(mNativeProxy, whitePoint);
         mColorMode = colorMode;
         nSetColorMode(mNativeProxy, colorMode);
+    }
+
+    /** @hide */
+    public void setTargetSdrHdrRatio(float ratio) {
+        if (ratio < 1.f || Float.isNaN(ratio) || Float.isInfinite(ratio)) ratio = 1.f;
+        nSetTargetSdrHdrRatio(mNativeProxy, ratio);
     }
 
     /**
@@ -1451,7 +1460,9 @@ public class HardwareRenderer {
 
     private static native void nSetOpaque(long nativeProxy, boolean opaque);
 
-    private static native void nSetColorMode(long nativeProxy, int colorMode);
+    private static native float nSetColorMode(long nativeProxy, int colorMode);
+
+    private static native void nSetTargetSdrHdrRatio(long nativeProxy, float ratio);
 
     private static native void nSetSdrWhitePoint(long nativeProxy, float whitePoint);
 

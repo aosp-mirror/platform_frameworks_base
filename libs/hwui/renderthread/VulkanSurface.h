@@ -46,6 +46,8 @@ public:
     }
     const SkMatrix& getCurrentPreTransform() { return mWindowInfo.preTransform; }
 
+    void setColorSpace(sk_sp<SkColorSpace> colorSpace);
+
 private:
     /*
      * All structs/methods in this private section are specifically for use by the VulkanManager
@@ -94,6 +96,7 @@ private:
         uint32_t bufferFormat;
         android_dataspace dataspace;
         sk_sp<SkColorSpace> colorspace;
+        ColorMode colorMode;
         int transform;
         size_t bufferCount;
         uint64_t windowUsageFlags;

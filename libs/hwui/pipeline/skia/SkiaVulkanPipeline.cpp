@@ -185,6 +185,13 @@ bool SkiaVulkanPipeline::setSurface(ANativeWindow* surface, SwapBehavior /*swapB
     return mVkSurface != nullptr;
 }
 
+void SkiaVulkanPipeline::setTargetSdrHdrRatio(float ratio) {
+    SkiaPipeline::setTargetSdrHdrRatio(ratio);
+    if (mVkSurface) {
+        mVkSurface->setColorSpace(mSurfaceColorSpace);
+    }
+}
+
 bool SkiaVulkanPipeline::isSurfaceReady() {
     return CC_UNLIKELY(mVkSurface != nullptr);
 }
