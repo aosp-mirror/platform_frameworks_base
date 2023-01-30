@@ -83,6 +83,11 @@ class PackageVerificationState {
         mSufficientVerifierUids.put(uid, true);
     }
 
+    /** Returns true if the uid a sufficient verifier. */
+    boolean checkSufficientVerifierUid(int uid) {
+        return mSufficientVerifierUids.get(uid, false);
+    }
+
     /**
      * Should be called when a verification is received from an agent so the state of the package
      * verification can be tracked.
