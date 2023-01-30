@@ -347,7 +347,7 @@ object Flags {
         unreleasedFlag(910, "media_ttt_receiver_success_ripple", teamfood = true)
 
     // TODO(b/263512203): Tracking Bug
-    val MEDIA_EXPLICIT_INDICATOR = unreleasedFlag(911, "media_explicit_indicator", teamfood = true)
+    val MEDIA_EXPLICIT_INDICATOR = releasedFlag(911, "media_explicit_indicator")
 
     // TODO(b/265813373): Tracking Bug
     val MEDIA_TAP_TO_TRANSFER_DISMISS_GESTURE =
