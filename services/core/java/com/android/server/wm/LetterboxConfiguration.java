@@ -25,8 +25,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.provider.DeviceConfig;
 import android.util.Slog;
@@ -1062,38 +1060,8 @@ final class LetterboxConfiguration {
                 "enable_translucent_activity_letterbox", false);
     }
 
-    @VisibleForTesting
-    boolean getPackageManagerProperty(PackageManager pm, String property) {
-        boolean enabled = false;
-        try {
-            final PackageManager.Property p = pm.getProperty(property, mContext.getPackageName());
-            enabled = p.getBoolean();
-        } catch (PackageManager.NameNotFoundException e) {
-            // Property not found
-        }
-        return enabled;
-    }
-
-    @VisibleForTesting
-    boolean isCompatFakeFocusEnabled(ActivityInfo info) {
-        if (!isCompatFakeFocusEnabledOnDevice()) {
-            return false;
-        }
-        // See if the developer has chosen to opt in / out of treatment
-        PackageManager pm = mContext.getPackageManager();
-        if (getPackageManagerProperty(pm, PROPERTY_COMPAT_FAKE_FOCUS_OPT_OUT)) {
-            return false;
-        } else if (getPackageManagerProperty(pm, PROPERTY_COMPAT_FAKE_FOCUS_OPT_IN)) {
-            return true;
-        }
-        if (info.isChangeEnabled(ActivityInfo.OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS)) {
-            return true;
-        }
-        return false;
-    }
-
     /** Whether fake sending focus is enabled for unfocused apps in splitscreen */
-    boolean isCompatFakeFocusEnabledOnDevice() {
+    boolean isCompatFakeFocusEnabled() {
         return mIsCompatFakeFocusEnabled
                 && DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
                         DEVICE_CONFIG_KEY_ENABLE_COMPAT_FAKE_FOCUS, true);
