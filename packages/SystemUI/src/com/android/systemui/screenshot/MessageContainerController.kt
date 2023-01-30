@@ -3,101 +3,133 @@ package com.android.systemui.screenshot
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
-import android.graphics.drawable.Drawable
+import android.os.UserHandle
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import android.view.ViewTreeObserver
 import android.view.animation.AccelerateDecelerateInterpolator
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.constraintlayout.widget.Guideline
 import com.android.systemui.R
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
+import javax.inject.Inject
 
 /**
  * MessageContainerController controls the display of content in the screenshot message container.
  */
 class MessageContainerController
+@Inject
 constructor(
-    parent: ViewGroup,
+    private val workProfileMessageController: WorkProfileMessageController,
+    private val screenshotDetectionController: ScreenshotDetectionController,
+    private val featureFlags: FeatureFlags,
 ) {
-    private val guideline: Guideline = parent.requireViewById(R.id.guideline)
-    private val messageContainer: ViewGroup =
-        parent.requireViewById(R.id.screenshot_message_container)
+    private lateinit var container: ViewGroup
+    private lateinit var guideline: Guideline
+    private lateinit var workProfileFirstRunView: ViewGroup
+    private lateinit var detectionNoticeView: ViewGroup
+    private var animateOut: Animator? = null
 
-    /**
-     * Show a notification under the screenshot view indicating that a work profile screenshot has
-     * been taken and which app can be used to view it.
-     *
-     * @param appName The name of the app to use to view screenshots
-     * @param appIcon Optional icon for the relevant files app
-     * @param onDismiss Runnable to be run when the user dismisses this message
-     */
-    fun showWorkProfileMessage(appName: CharSequence, appIcon: Drawable?, onDismiss: Runnable) {
-        // Eventually this container will support multiple notification types, but for now just make
-        // sure we don't double inflate.
-        if (messageContainer.childCount == 0) {
-            View.inflate(
-                messageContainer.context,
-                R.layout.screenshot_work_profile_first_run,
-                messageContainer
-            )
+    fun setView(screenshotView: ViewGroup) {
+        container = screenshotView.requireViewById(R.id.screenshot_message_container)
+        guideline = screenshotView.requireViewById(R.id.guideline)
+
+        workProfileFirstRunView = container.requireViewById(R.id.work_profile_first_run)
+        detectionNoticeView = container.requireViewById(R.id.screenshot_detection_notice)
+
+        // Restore to starting state.
+        container.visibility = View.GONE
+        guideline.setGuidelineEnd(0)
+        workProfileFirstRunView.visibility = View.GONE
+        detectionNoticeView.visibility = View.GONE
+    }
+
+    // Minimal implementation for use when Flags.SCREENSHOT_METADATA isn't turned on.
+    fun onScreenshotTaken(userHandle: UserHandle) {
+        if (featureFlags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY)) {
+            val workProfileData = workProfileMessageController.onScreenshotTaken(userHandle)
+            if (workProfileData != null) {
+                workProfileFirstRunView.visibility = View.VISIBLE
+                detectionNoticeView.visibility = View.GONE
+
+                workProfileMessageController.populateView(
+                    workProfileFirstRunView,
+                    workProfileData,
+                    this::animateOutMessageContainer
+                )
+                animateInMessageContainer()
+            }
         }
-        if (appIcon != null) {
-            // Replace the default icon if one is provided.
-            val imageView: ImageView =
-                messageContainer.requireViewById<ImageView>(R.id.screenshot_message_icon)
-            imageView.setImageDrawable(appIcon)
+    }
+
+    fun onScreenshotTaken(screenshot: ScreenshotData) {
+        if (featureFlags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY)) {
+            val workProfileData =
+                workProfileMessageController.onScreenshotTaken(screenshot.userHandle)
+            var notifiedApps: List<CharSequence> = listOf()
+            if (featureFlags.isEnabled(Flags.SCREENSHOT_DETECTION)) {
+                notifiedApps = screenshotDetectionController.maybeNotifyOfScreenshot(screenshot)
+            }
+
+            // If work profile first run needs to show, bias towards that, otherwise show screenshot
+            // detection notification if needed.
+            if (workProfileData != null) {
+                workProfileFirstRunView.visibility = View.VISIBLE
+                detectionNoticeView.visibility = View.GONE
+                workProfileMessageController.populateView(
+                    workProfileFirstRunView,
+                    workProfileData,
+                    this::animateOutMessageContainer
+                )
+                animateInMessageContainer()
+            } else if (notifiedApps.isNotEmpty()) {
+                detectionNoticeView.visibility = View.VISIBLE
+                workProfileFirstRunView.visibility = View.GONE
+                screenshotDetectionController.populateView(detectionNoticeView, notifiedApps)
+                animateInMessageContainer()
+            }
         }
-        val messageContent =
-            messageContainer.requireViewById<TextView>(R.id.screenshot_message_content)
-        messageContent.text =
-            messageContainer.context.getString(
-                R.string.screenshot_work_profile_notification,
-                appName
-            )
-        messageContainer.requireViewById<View>(R.id.message_dismiss_button).setOnClickListener {
-            animateOutMessageContainer()
-            onDismiss.run()
-        }
+    }
+
+    private fun animateInMessageContainer() {
+        if (container.visibility == View.VISIBLE) return
 
         // Need the container to be fully measured before animating in (to know animation offset
         // destination)
-        messageContainer.viewTreeObserver.addOnPreDrawListener(
+        container.visibility = View.VISIBLE
+        container.viewTreeObserver.addOnPreDrawListener(
             object : ViewTreeObserver.OnPreDrawListener {
                 override fun onPreDraw(): Boolean {
-                    messageContainer.viewTreeObserver.removeOnPreDrawListener(this)
-                    animateInMessageContainer()
+                    container.viewTreeObserver.removeOnPreDrawListener(this)
+                    getAnimator(true).start()
                     return false
                 }
             }
         )
     }
 
-    private fun animateInMessageContainer() {
-        if (messageContainer.visibility == View.VISIBLE) return
-
-        messageContainer.visibility = View.VISIBLE
-        getAnimator(true).start()
-    }
-
     private fun animateOutMessageContainer() {
-        getAnimator(false).apply {
-            addListener(
-                object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator) {
-                        super.onAnimationEnd(animation)
-                        messageContainer.visibility = View.INVISIBLE
+        if (animateOut != null) return
+
+        animateOut =
+            getAnimator(false).apply {
+                addListener(
+                    object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator) {
+                            super.onAnimationEnd(animation)
+                            container.visibility = View.GONE
+                            animateOut = null
+                        }
                     }
-                }
-            )
-            start()
-        }
+                )
+                start()
+            }
     }
 
     private fun getAnimator(animateIn: Boolean): Animator {
-        val params = messageContainer.layoutParams as MarginLayoutParams
-        val offset = messageContainer.height + params.topMargin + params.bottomMargin
+        val params = container.layoutParams as MarginLayoutParams
+        val offset = container.height + params.topMargin + params.bottomMargin
         val anim = if (animateIn) ValueAnimator.ofFloat(0f, 1f) else ValueAnimator.ofFloat(1f, 0f)
         with(anim) {
             duration = ScreenshotView.SCREENSHOT_ACTIONS_EXPANSION_DURATION_MS
@@ -105,7 +137,7 @@ constructor(
             addUpdateListener { valueAnimator: ValueAnimator ->
                 val interpolation = valueAnimator.animatedValue as Float
                 guideline.setGuidelineEnd((interpolation * offset).toInt())
-                messageContainer.alpha = interpolation
+                container.alpha = interpolation
             }
         }
         return anim
