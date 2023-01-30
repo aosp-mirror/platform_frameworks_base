@@ -19,6 +19,7 @@ package android.speech;
 import android.os.Bundle;
 import android.content.AttributionSource;
 import android.content.Intent;
+import android.speech.IModelDownloadListener;
 import android.speech.IRecognitionListener;
 import android.speech.IRecognitionSupportCallback;
 
@@ -76,6 +77,24 @@ oneway interface IRecognitionService {
      * Requests RecognitionService to download the support for the given recognizerIntent. For more
      * information see {@link #checkRecognitionSupport},  {@link #startListening} and
      * {@link RecognizerIntent}.
+     *
+     * Progress can be monitord by calling {@link #setModelDownloadListener} before a trigger.
      */
     void triggerModelDownload(in Intent recognizerIntent, in AttributionSource attributionSource);
+
+    /**
+     * Sets listener to received download progress updates. Clients still have to call
+     * {@link #triggerModelDownload} to trigger a model download.
+     */
+    void setModelDownloadListener(
+        in Intent recognizerIntent,
+        in AttributionSource attributionSource,
+        in IModelDownloadListener listener);
+
+    /**
+     * Clears the listener for model download events attached to a recognitionIntent if any.
+     */
+    void clearModelDownloadListener(
+        in Intent recognizerIntent,
+        in AttributionSource attributionSource);
 }

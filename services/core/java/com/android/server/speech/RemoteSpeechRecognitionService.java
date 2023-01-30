@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.speech.IModelDownloadListener;
 import android.speech.IRecognitionListener;
 import android.speech.IRecognitionService;
 import android.speech.IRecognitionSupportCallback;
@@ -255,6 +256,35 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
             return;
         }
         run(service -> service.triggerModelDownload(recognizerIntent, attributionSource));
+    }
+
+    void setModelDownloadListener(
+            Intent recognizerIntent,
+            AttributionSource attributionSource,
+            IModelDownloadListener listener) {
+        if (!mConnected) {
+            try {
+                listener.onError(SpeechRecognizer.ERROR_SERVER_DISCONNECTED);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to report the connection broke to the caller.", e);
+                e.printStackTrace();
+            }
+            return;
+        }
+
+        run(service ->
+                service.setModelDownloadListener(recognizerIntent, attributionSource, listener));
+    }
+
+    void clearModelDownloadListener(
+            Intent recognizerIntent,
+            AttributionSource attributionSource) {
+        if (!mConnected) {
+            return;
+        }
+
+        run(service ->
+                service.clearModelDownloadListener(recognizerIntent, attributionSource));
     }
 
     void shutdown(IBinder clientToken) {

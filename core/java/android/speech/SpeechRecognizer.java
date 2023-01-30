@@ -145,6 +145,7 @@ public class SpeechRecognizer {
             ERROR_LANGUAGE_NOT_SUPPORTED,
             ERROR_LANGUAGE_UNAVAILABLE,
             ERROR_CANNOT_CHECK_SUPPORT,
+            ERROR_CANNOT_LISTEN_TO_DOWNLOAD_EVENTS,
     })
     public @interface RecognitionError {}
 
@@ -190,6 +191,9 @@ public class SpeechRecognizer {
     /** The service does not allow to check for support. */
     public static final int ERROR_CANNOT_CHECK_SUPPORT = 14;
 
+    /** The service does not support listening to model downloads events. */
+    public static final int ERROR_CANNOT_LISTEN_TO_DOWNLOAD_EVENTS = 15;
+
     /** action codes */
     private static final int MSG_START = 1;
     private static final int MSG_STOP = 2;
@@ -198,6 +202,8 @@ public class SpeechRecognizer {
     private static final int MSG_SET_TEMPORARY_ON_DEVICE_COMPONENT = 5;
     private static final int MSG_CHECK_RECOGNITION_SUPPORT = 6;
     private static final int MSG_TRIGGER_MODEL_DOWNLOAD = 7;
+    private static final int MSG_SET_MODEL_DOWNLOAD_LISTENER = 8;
+    private static final int MSG_CLEAR_MODEL_DOWNLOAD_LISTENER = 9;
 
     /** The actual RecognitionService endpoint */
     private IRecognitionService mService;
@@ -241,6 +247,17 @@ public class SpeechRecognizer {
                     break;
                 case MSG_TRIGGER_MODEL_DOWNLOAD:
                     handleTriggerModelDownload((Intent) msg.obj);
+                    break;
+                case MSG_SET_MODEL_DOWNLOAD_LISTENER:
+                    ModelDownloadListenerArgs modelDownloadListenerArgs =
+                            (ModelDownloadListenerArgs) msg.obj;
+                    handleSetModelDownloadListener(
+                            modelDownloadListenerArgs.mIntent,
+                            modelDownloadListenerArgs.mExecutor,
+                            modelDownloadListenerArgs.mModelDownloadListener);
+                    break;
+                case MSG_CLEAR_MODEL_DOWNLOAD_LISTENER:
+                    handleClearModelDownloadListener((Intent) msg.obj);
                     break;
             }
         }
@@ -545,6 +562,10 @@ public class SpeechRecognizer {
      * user interaction to approve the download. Callers can verify the status of the request via
      * {@link #checkRecognitionSupport(Intent, Executor, RecognitionSupportCallback)}.
      *
+     * <p>Listeners set via
+     * {@link #setModelDownloadListener(Intent, Executor, ModelDownloadListener)} will receive
+     * updates about this download request.</p>
+     *
      * @param recognizerIntent contains parameters for the recognition to be performed. The intent
      *        may also contain optional extras, see {@link RecognizerIntent}.
      */
@@ -561,6 +582,54 @@ public class SpeechRecognizer {
             connectToSystemService();
         }
         putMessage(Message.obtain(mHandler, MSG_TRIGGER_MODEL_DOWNLOAD, recognizerIntent));
+    }
+
+    /**
+     * Sets a listener to model download updates. Clients will have to call this method before
+     * {@link #triggerModelDownload(Intent)}.
+     *
+     * @param recognizerIntent the request to monitor support for.
+     * @param listener on which to receive updates about the model download request.
+     */
+    public void setModelDownloadListener(
+            @NonNull Intent recognizerIntent,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull ModelDownloadListener listener) {
+        Objects.requireNonNull(recognizerIntent, "intent must not be null");
+        if (DBG) {
+            Slog.i(TAG, "#setModelDownloadListener called");
+            if (mService == null) {
+                Slog.i(TAG, "Connection is not established yet");
+            }
+        }
+        if (mService == null) {
+            // First time connection: first establish a connection, then dispatch.
+            connectToSystemService();
+        }
+        putMessage(Message.obtain(
+                mHandler, MSG_SET_MODEL_DOWNLOAD_LISTENER,
+                new ModelDownloadListenerArgs(recognizerIntent, executor, listener)));
+    }
+
+    /**
+     * Clears the listener for model download updates if any.
+     *
+     * @param recognizerIntent the request to monitor support for.
+     */
+    public void clearModelDownloadListener(@NonNull Intent recognizerIntent) {
+        Objects.requireNonNull(recognizerIntent, "intent must not be null");
+        if (DBG) {
+            Slog.i(TAG, "#clearModelDownloadListener called");
+            if (mService == null) {
+                Slog.i(TAG, "Connection is not established yet");
+            }
+        }
+        if (mService == null) {
+            // First time connection: first establish a connection, then dispatch.
+            connectToSystemService();
+        }
+        putMessage(Message.obtain(
+                mHandler, MSG_CLEAR_MODEL_DOWNLOAD_LISTENER, recognizerIntent));
     }
 
     /**
@@ -681,6 +750,42 @@ public class SpeechRecognizer {
         } catch (final RemoteException e) {
             Log.e(TAG, "downloadModel() failed", e);
             mListener.onError(ERROR_CLIENT);
+        }
+    }
+
+    private void handleSetModelDownloadListener(
+            Intent recognizerIntent,
+            Executor callbackExecutor,
+            @Nullable ModelDownloadListener modelDownloadListener) {
+        if (!maybeInitializeManagerService()) {
+            return;
+        }
+        try {
+            InternalModelDownloadListener listener =
+                    modelDownloadListener == null
+                            ? null
+                            : new InternalModelDownloadListener(
+                                    callbackExecutor,
+                                    modelDownloadListener);
+            mService.setModelDownloadListener(
+                    recognizerIntent, mContext.getAttributionSource(), listener);
+            if (DBG) Log.d(TAG, "setModelDownloadListener()");
+        } catch (final RemoteException e) {
+            Log.e(TAG, "setModelDownloadListener() failed", e);
+            callbackExecutor.execute(() -> modelDownloadListener.onError(ERROR_CLIENT));
+        }
+    }
+
+    private void handleClearModelDownloadListener(Intent recognizerIntent) {
+        if (!maybeInitializeManagerService()) {
+            return;
+        }
+        try {
+            mService.clearModelDownloadListener(
+                    recognizerIntent, mContext.getAttributionSource());
+            if (DBG) Log.d(TAG, "clearModelDownloadListener()");
+        } catch (final RemoteException e) {
+            Log.e(TAG, "clearModelDownloadListener() failed", e);
         }
     }
 
@@ -827,6 +932,19 @@ public class SpeechRecognizer {
         }
     }
 
+    private static class ModelDownloadListenerArgs {
+        final Intent mIntent;
+        final Executor mExecutor;
+        final ModelDownloadListener mModelDownloadListener;
+
+        private ModelDownloadListenerArgs(Intent intent, Executor executor,
+                ModelDownloadListener modelDownloadListener) {
+            mIntent = intent;
+            mExecutor = executor;
+            mModelDownloadListener = modelDownloadListener;
+        }
+    }
+
     /**
      * Internal wrapper of IRecognitionListener which will propagate the results to
      * RecognitionListener
@@ -953,6 +1071,38 @@ public class SpeechRecognizer {
         @Override
         public void onError(int errorCode) throws RemoteException {
             mExecutor.execute(() -> mCallback.onError(errorCode));
+        }
+    }
+
+    private static class InternalModelDownloadListener extends IModelDownloadListener.Stub {
+        private final Executor mExecutor;
+        private final ModelDownloadListener mModelDownloadListener;
+
+        private InternalModelDownloadListener(
+                Executor executor,
+                @NonNull ModelDownloadListener modelDownloadListener) {
+            mExecutor = executor;
+            mModelDownloadListener = modelDownloadListener;
+        }
+
+        @Override
+        public void onProgress(int completedPercent) throws RemoteException {
+            mExecutor.execute(() -> mModelDownloadListener.onProgress(completedPercent));
+        }
+
+        @Override
+        public void onSuccess() throws RemoteException {
+            mExecutor.execute(() -> mModelDownloadListener.onSuccess());
+        }
+
+        @Override
+        public void onScheduled() throws RemoteException {
+            mExecutor.execute(() -> mModelDownloadListener.onScheduled());
+        }
+
+        @Override
+        public void onError(int error) throws RemoteException {
+            mExecutor.execute(() -> mModelDownloadListener.onError(error));
         }
     }
 }
