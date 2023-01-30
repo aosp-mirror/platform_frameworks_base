@@ -129,6 +129,9 @@ public class ThermalManagerService extends SystemService {
     ThermalManagerService(Context context, @Nullable ThermalHalWrapper halWrapper) {
         super(context);
         mHalWrapper = halWrapper;
+        if (halWrapper != null) {
+            halWrapper.setCallback(this::onTemperatureChangedCallback);
+        }
         mStatus = Temperature.THROTTLING_NONE;
     }
 
@@ -149,22 +152,21 @@ public class ThermalManagerService extends SystemService {
             // Connect to HAL and post to listeners.
             boolean halConnected = (mHalWrapper != null);
             if (!halConnected) {
-                mHalWrapper = new ThermalHalAidlWrapper();
+                mHalWrapper = new ThermalHalAidlWrapper(this::onTemperatureChangedCallback);
                 halConnected = mHalWrapper.connectToHal();
             }
             if (!halConnected) {
-                mHalWrapper = new ThermalHal20Wrapper();
+                mHalWrapper = new ThermalHal20Wrapper(this::onTemperatureChangedCallback);
                 halConnected = mHalWrapper.connectToHal();
             }
             if (!halConnected) {
-                mHalWrapper = new ThermalHal11Wrapper();
+                mHalWrapper = new ThermalHal11Wrapper(this::onTemperatureChangedCallback);
                 halConnected = mHalWrapper.connectToHal();
             }
             if (!halConnected) {
-                mHalWrapper = new ThermalHal10Wrapper();
+                mHalWrapper = new ThermalHal10Wrapper(this::onTemperatureChangedCallback);
                 halConnected = mHalWrapper.connectToHal();
             }
-            mHalWrapper.setCallback(this::onTemperatureChangedCallback);
             if (!halConnected) {
                 Slog.w(TAG, "No Thermal HAL service on this device");
                 return;
@@ -723,6 +725,10 @@ public class ThermalManagerService extends SystemService {
             }
         };
 
+        ThermalHalAidlWrapper(TemperatureChangedCallback callback) {
+            mCallback = callback;
+        }
+
         @Override
         protected List<Temperature> getCurrentTemperatures(boolean shouldFilter,
                 int type) {
@@ -832,9 +838,10 @@ public class ThermalManagerService extends SystemService {
                         binder.linkToDeath(this, 0);
                     } catch (RemoteException e) {
                         Slog.e(TAG, "Unable to connect IThermal AIDL instance", e);
-                        mInstance = null;
+                        connectToHal();
                     }
                     if (mInstance != null) {
+                        Slog.i(TAG, "Thermal HAL AIDL service connected.");
                         registerThermalChangedCallback();
                     }
                 }
@@ -850,7 +857,7 @@ public class ThermalManagerService extends SystemService {
                         e);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Unable to connect IThermal AIDL instance", e);
-                mInstance = null;
+                connectToHal();
             }
         }
 
@@ -866,8 +873,8 @@ public class ThermalManagerService extends SystemService {
 
         @Override
         public synchronized void binderDied() {
-            Slog.w(TAG, "IThermal HAL instance died");
-            mInstance = null;
+            Slog.w(TAG, "Thermal AIDL HAL died, reconnecting...");
+            connectToHal();
         }
     }
 
@@ -875,6 +882,10 @@ public class ThermalManagerService extends SystemService {
         /** Proxy object for the Thermal HAL 1.0 service. */
         @GuardedBy("mHalLock")
         private android.hardware.thermal.V1_0.IThermal mThermalHal10 = null;
+
+        ThermalHal10Wrapper(TemperatureChangedCallback callback) {
+            mCallback = callback;
+        }
 
         @Override
         protected List<Temperature> getCurrentTemperatures(boolean shouldFilter,
@@ -1011,6 +1022,10 @@ public class ThermalManagerService extends SystemService {
                     }
                 };
 
+        ThermalHal11Wrapper(TemperatureChangedCallback callback) {
+            mCallback = callback;
+        }
+
         @Override
         protected List<Temperature> getCurrentTemperatures(boolean shouldFilter,
                 int type) {
@@ -1144,6 +1159,10 @@ public class ThermalManagerService extends SystemService {
                         }
                     }
                 };
+
+        ThermalHal20Wrapper(TemperatureChangedCallback callback) {
+            mCallback = callback;
+        }
 
         @Override
         protected List<Temperature> getCurrentTemperatures(boolean shouldFilter,
