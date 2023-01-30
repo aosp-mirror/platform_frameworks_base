@@ -98,6 +98,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.HandlerThread;
+import android.os.SystemClock;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -556,7 +557,8 @@ public class InteractionJankMonitor {
     public boolean begin(@NonNull Configuration.Builder builder) {
         try {
             final Configuration config = builder.build();
-            EventLogTags.writeJankCujEventsBeginRequest(config.mCujType);
+            EventLogTags.writeJankCujEventsBeginRequest(
+                    config.mCujType, SystemClock.elapsedRealtimeNanos(), SystemClock.uptimeNanos());
             final TrackerResult result = new TrackerResult();
             final boolean success = config.getHandler().runWithScissors(
                     () -> result.mResult = beginInternal(config), EXECUTOR_TASK_TIMEOUT);
@@ -630,7 +632,8 @@ public class InteractionJankMonitor {
      * @return boolean true if the tracker is ended successfully, false otherwise.
      */
     public boolean end(@CujType int cujType) {
-        EventLogTags.writeJankCujEventsEndRequest(cujType);
+        EventLogTags.writeJankCujEventsEndRequest(cujType, SystemClock.elapsedRealtimeNanos(),
+                SystemClock.uptimeNanos());
         FrameTracker tracker = getTracker(cujType);
         // Skip this call since we haven't started a trace yet.
         if (tracker == null) return false;
@@ -668,7 +671,8 @@ public class InteractionJankMonitor {
      * @return boolean true if the tracker is cancelled successfully, false otherwise.
      */
     public boolean cancel(@CujType int cujType) {
-        EventLogTags.writeJankCujEventsCancelRequest(cujType);
+        EventLogTags.writeJankCujEventsCancelRequest(cujType, SystemClock.elapsedRealtimeNanos(),
+                SystemClock.uptimeNanos());
         return cancel(cujType, REASON_CANCEL_NORMAL);
     }
 
