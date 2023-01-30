@@ -2525,8 +2525,7 @@ public class ChooserActivity extends ResolverActivity implements
             List<Intent> payloadIntents, Intent[] initialIntents, List<ResolveInfo> rList,
             boolean filterLastUsed, UserHandle userHandle) {
         ChooserListAdapter chooserListAdapter = createChooserListAdapter(context, payloadIntents,
-                initialIntents, rList, filterLastUsed,
-                createListController(userHandle));
+                initialIntents, rList, filterLastUsed, userHandle);
         AppPredictor.Callback appPredictorCallback = createAppPredictorCallback(chooserListAdapter);
         AppPredictor appPredictor = setupAppPredictorForUser(userHandle, appPredictorCallback);
         chooserListAdapter.setAppPredictor(appPredictor);
@@ -2536,12 +2535,18 @@ public class ChooserActivity extends ResolverActivity implements
 
     @VisibleForTesting
     public ChooserListAdapter createChooserListAdapter(Context context,
-            List<Intent> payloadIntents, Intent[] initialIntents, List<ResolveInfo> rList,
-            boolean filterLastUsed, ResolverListController resolverListController) {
+            List<Intent> payloadIntents,
+            Intent[] initialIntents,
+            List<ResolveInfo> rList,
+            boolean filterLastUsed,
+            UserHandle userHandle) {
+        UserHandle initialIntentsUserSpace = isLaunchedAsCloneProfile()
+                && userHandle.equals(getPersonalProfileUserHandle())
+                ? getCloneProfileUserHandle() : userHandle;
         return new ChooserListAdapter(context, payloadIntents, initialIntents, rList,
-                filterLastUsed, resolverListController, this,
+                filterLastUsed, createListController(userHandle), this,
                 this, context.getPackageManager(),
-                getChooserActivityLogger());
+                getChooserActivityLogger(), initialIntentsUserSpace);
     }
 
     @VisibleForTesting

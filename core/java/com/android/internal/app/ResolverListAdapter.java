@@ -91,13 +91,16 @@ public class ResolverListAdapter extends BaseAdapter {
     private boolean mIsTabLoaded;
     private final Map<DisplayResolveInfo, LoadIconTask> mIconLoaders = new HashMap<>();
     private final Map<DisplayResolveInfo, LoadLabelTask> mLabelLoaders = new HashMap<>();
+    // Represents the UserSpace in which the Initial Intents should be resolved.
+    private final UserHandle mInitialIntentsUserSpace;
 
     public ResolverListAdapter(Context context, List<Intent> payloadIntents,
             Intent[] initialIntents, List<ResolveInfo> rList,
             boolean filterLastUsed,
             ResolverListController resolverListController,
             ResolverListCommunicator resolverListCommunicator,
-            boolean isAudioCaptureDevice) {
+            boolean isAudioCaptureDevice,
+            UserHandle initialIntentsUserSpace) {
         mContext = context;
         mIntents = payloadIntents;
         mInitialIntents = initialIntents;
@@ -111,6 +114,11 @@ public class ResolverListAdapter extends BaseAdapter {
         mIsAudioCaptureDevice = isAudioCaptureDevice;
         final ActivityManager am = (ActivityManager) mContext.getSystemService(ACTIVITY_SERVICE);
         mIconDpi = am.getLauncherLargeIconDensity();
+        mInitialIntentsUserSpace = initialIntentsUserSpace;
+    }
+
+    public ResolverListController getResolverListController() {
+        return mResolverListController;
     }
 
     public void handlePackagesChanged() {
@@ -439,7 +447,7 @@ public class ResolverListAdapter extends BaseAdapter {
                         ri.nonLocalizedLabel = li.getNonLocalizedLabel();
                         ri.icon = li.getIconResource();
                         ri.iconResourceId = ri.icon;
-                        ri.userHandle = getUserHandle();
+                        ri.userHandle = mInitialIntentsUserSpace;
                     }
                     if (userManager.isManagedProfile()) {
                         ri.noResourceId = true;
