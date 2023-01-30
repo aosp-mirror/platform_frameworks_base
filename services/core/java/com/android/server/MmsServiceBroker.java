@@ -46,6 +46,7 @@ import android.util.Slog;
 
 import com.android.internal.telephony.IMms;
 import com.android.internal.telephony.TelephonyPermissions;
+import com.android.internal.telephony.util.TelephonyUtils;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriGrantsManagerInternal;
 
@@ -342,8 +343,11 @@ public class MmsServiceBroker extends SystemService {
             // Check if user is associated with the subscription
             if (!TelephonyPermissions.checkSubscriptionAssociatedWithUser(mContext, subId,
                     Binder.getCallingUserHandle())) {
-                // TODO(b/258629881): Display error dialog.
-		return;
+                if (TelephonyUtils.isUidForeground(mContext, Binder.getCallingUid())) {
+                    TelephonyUtils.showErrorIfSubscriptionAssociatedWithManagedProfile(mContext,
+                            subId);
+                }
+                return;
             }
 
             if (getAppOpsManager().noteOp(AppOpsManager.OP_SEND_SMS, Binder.getCallingUid(),

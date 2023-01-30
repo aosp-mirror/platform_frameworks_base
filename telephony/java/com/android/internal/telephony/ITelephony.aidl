@@ -2209,6 +2209,11 @@ interface ITelephony {
         IIntegerConsumer subIdResult);
 
     /**
+     * Show error dialog to switch to managed profile.
+     */
+    oneway void showSwitchToManagedProfileDialog();
+
+    /**
      * Returns the MMS user agent.
      */
     String getMmsUserAgent(int subId);
