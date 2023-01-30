@@ -60,7 +60,7 @@ message NfcServiceDumpProto {
     optional bool secure_nfc_capable = 13;
     optional bool vr_mode_enabled = 14;
     optional DiscoveryParamsProto discovery_params = 15;
-    optional P2pLinkManagerProto p2p_link_manager = 16;
+    reserved 16;
     optional com.android.nfc.cardemulation.CardEmulationManagerProto card_emulation_manager = 17;
     optional NfcDispatcherProto nfc_dispatcher = 18;
     optional string native_crash_logs = 19 [(.android.privacy).dest = DEST_EXPLICIT];
@@ -75,38 +75,6 @@ message DiscoveryParamsProto {
     optional bool enable_reader = 3;
     optional bool enable_host_routing = 4;
     optional bool enable_p2p = 5;
-}
-
-// Debugging information for com.android.nfc.P2pLinkManager
-message P2pLinkManagerProto {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    enum LinkState {
-        LINK_STATE_UNKNOWN = 0;
-        LINK_STATE_DOWN = 1;
-        LINK_STATE_DEBOUNCE = 2;
-        LINK_STATE_UP = 3;
-    }
-
-    enum SendState {
-        SEND_STATE_UNKNOWN = 0;
-        SEND_STATE_NOTHING_TO_SEND = 1;
-        SEND_STATE_NEED_CONFIRMATION = 2;
-        SEND_STATE_SENDING = 3;
-        SEND_STATE_COMPLETE = 4;
-        SEND_STATE_CANCELED = 5;
-    }
-
-    optional int32 default_miu = 1;
-    optional int32 default_rw_size = 2;
-    optional LinkState link_state = 3;
-    optional SendState send_state = 4;
-    optional int32 send_flags = 5;
-    optional bool send_enabled = 6;
-    optional bool receive_enabled = 7;
-    optional string callback_ndef = 8 [(.android.privacy).dest = DEST_EXPLICIT];
-    optional .android.nfc.NdefMessageProto message_to_send = 9;
-    repeated string uris_to_send = 10 [(.android.privacy).dest = DEST_EXPLICIT];
 }
 
 // Debugging information for com.android.nfc.NfcDispatcher
