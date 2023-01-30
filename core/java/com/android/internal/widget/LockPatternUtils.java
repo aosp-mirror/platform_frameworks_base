@@ -48,6 +48,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -165,8 +166,16 @@ public class LockPatternUtils {
     private static final String KNOWN_TRUST_AGENTS = "lockscreen.knowntrustagents";
     private static final String IS_TRUST_USUALLY_MANAGED = "lockscreen.istrustusuallymanaged";
 
+    private static final String AUTO_PIN_CONFIRM = "lockscreen.auto_pin_confirm";
+
     public static final String CURRENT_LSKF_BASED_PROTECTOR_ID_KEY = "sp-handle";
     public static final String PASSWORD_HISTORY_DELIMITER = ",";
+
+    /**
+     * drives the pin auto confirmation feature availability in code logic.
+     */
+    public static final String FLAG_ENABLE_AUTO_PIN_CONFIRMATION =
+            "AutoPinConfirmation__enable_auto_pin_confirmation";
 
     @UnsupportedAppUsage
     private final Context mContext;
@@ -645,6 +654,38 @@ public class LockPatternUtils {
         return getBoolean(DISABLE_LOCKSCREEN_KEY, false, userId)
                 || disabledByDefault
                 || isDemoUser;
+    }
+
+    /**
+     * Sets the pin auto confirm capability to enabled or disabled
+     * @param enabled enables pin auto confirm capability when true
+     * @param userId user ID of the user this has effect on
+     */
+    public void setAutoPinConfirm(boolean enabled, int userId) {
+        setBoolean(AUTO_PIN_CONFIRM, enabled, userId);
+    }
+
+    /**
+     * Determines if the auto pin confirmation feature is enabled or not for current user
+     * If setting is not available, the default behaviour is disabled
+     * @param userId user ID of the user this has effect on
+     *
+     * @return true, if the entered pin should be auto confirmed
+     */
+    public boolean isAutoPinConfirmEnabled(int userId) {
+        return getBoolean(AUTO_PIN_CONFIRM, /* defaultValue= */ false, userId);
+    }
+
+    /**
+     * Whether the auto pin feature logic is available or not.
+     * @return true, if deviceConfig flag is set to true or the flag is not propagated and
+     * defaultValue is true.
+     */
+    public boolean isAutoPinConfirmFeatureAvailable() {
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_AUTO_PIN_CONFIRMATION,
+                FLAG_ENABLE_AUTO_PIN_CONFIRMATION,
+                /* defaultValue= */ false);
     }
 
     /** Returns if the given quality maps to an alphabetic password */
