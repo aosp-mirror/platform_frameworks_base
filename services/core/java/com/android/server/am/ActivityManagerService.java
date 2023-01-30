@@ -32,6 +32,7 @@ import static android.app.ActivityManager.INSTR_FLAG_DISABLE_TEST_API_CHECKS;
 import static android.app.ActivityManager.INSTR_FLAG_NO_RESTART;
 import static android.app.ActivityManager.INTENT_SENDER_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_ALL;
+import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
@@ -3341,6 +3342,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         mBatteryStatsService.noteProcessDied(app.info.uid, pid);
+        mOomAdjuster.updateShortFgsOwner(app.info.uid, pid, false);
 
         if (!app.isKilled()) {
             if (!fromBinderDied) {
@@ -18304,6 +18306,23 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void unregisterStrictModeCallback(int callingPid) {
             mStrictModeCallbacks.remove(callingPid);
+        }
+
+        @Override
+        public boolean canHoldWakeLocksInDeepDoze(int uid, int procstate) {
+            // This method is called with the PowerManager lock held. Do not hold AM here.
+
+            // If the procstate is high enough, it's always allowed.
+            if (procstate <= PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
+                return true;
+            }
+            // IF it's too low, it's not allowed.
+            if (procstate > PROCESS_STATE_IMPORTANT_FOREGROUND) {
+                return false;
+            }
+            // If it's PROCESS_STATE_IMPORTANT_FOREGROUND, then we allow it only wheen the UID
+            // has a SHORT_FGS.
+            return mOomAdjuster.hasUidShortForegroundService(uid);
         }
     }
 
