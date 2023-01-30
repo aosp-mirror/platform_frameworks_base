@@ -275,10 +275,10 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
         expected: Map<String, List<KeyguardQuickAffordanceConfig>>,
     ) {
         assertThat(observed).isEqualTo(expected)
-        assertThat(underTest.getSelections())
+        assertThat(underTest.getCurrentSelections())
             .isEqualTo(expected.mapValues { (_, configs) -> configs.map { it.key } })
         expected.forEach { (slotId, configs) ->
-            assertThat(underTest.getSelections(slotId)).isEqualTo(configs)
+            assertThat(underTest.getCurrentSelections(slotId)).isEqualTo(configs)
         }
     }
 
