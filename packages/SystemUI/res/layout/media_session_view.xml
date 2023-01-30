@@ -106,7 +106,7 @@
         app:layout_constrainedWidth="true"
         app:layout_constraintWidth_min="@dimen/min_clickable_item_size"
         app:layout_constraintHeight_min="@dimen/min_clickable_item_size">
-        <LinearLayout
+        <com.android.systemui.common.ui.view.LaunchableLinearLayout
             android:id="@+id/media_seamless_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -135,7 +135,7 @@
                 android:textDirection="locale"
                 android:textSize="12sp"
                 android:lineHeight="16sp" />
-        </LinearLayout>
+        </com.android.systemui.common.ui.view.LaunchableLinearLayout>
     </LinearLayout>
 
     <!-- Song name -->

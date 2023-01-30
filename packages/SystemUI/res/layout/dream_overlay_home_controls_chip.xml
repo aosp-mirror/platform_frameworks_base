@@ -20,7 +20,7 @@
     android:layout_width="wrap_content"
     android:paddingVertical="@dimen/dream_overlay_complication_home_controls_padding">
 
-    <ImageView
+    <com.android.systemui.common.ui.view.LaunchableImageView
         android:id="@+id/home_controls_chip"
         android:layout_height="@dimen/keyguard_affordance_fixed_height"
         android:layout_width="@dimen/keyguard_affordance_fixed_width"
