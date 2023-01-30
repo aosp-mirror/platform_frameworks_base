@@ -1238,6 +1238,18 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public static final long OVERRIDE_ANY_ORIENTATION = 265464455L;
 
     /**
+     * When enabled, activates OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE,
+     * OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR and OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT
+     * only when an app is connected to the camera. See
+     * com.android.server.wm.DisplayRotationCompatPolicy for more context.
+     * @hide
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA = 265456536L;
+
+    /**
      * This override fixes display orientation to landscape natural orientation when a task is
      * fullscreen. While display rotation is fixed to landscape, the orientation requested by the
      * activity will be still respected by bounds resolution logic. For instance, if an activity

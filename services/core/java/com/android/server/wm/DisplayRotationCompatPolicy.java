@@ -308,6 +308,10 @@ final class DisplayRotationCompatPolicy {
                 && mDisplayContent.getDisplay().getType() == TYPE_INTERNAL;
     }
 
+    boolean isActivityEligibleForOrientationOverride(@NonNull ActivityRecord activity) {
+        return isTreatmentEnabledForDisplay() && isCameraActiveInFullscreen(activity);
+    }
+
     /**
      * Whether camera compat treatment is applicable for the given activity.
      *
@@ -319,12 +323,16 @@ final class DisplayRotationCompatPolicy {
      * </ul>
      */
     boolean isTreatmentEnabledForActivity(@Nullable ActivityRecord activity) {
-        return activity != null && !activity.inMultiWindowMode()
+        return activity != null && isCameraActiveInFullscreen(activity)
                 && activity.getRequestedConfigurationOrientation() != ORIENTATION_UNDEFINED
                 // "locked" and "nosensor" values are often used by camera apps that can't
                 // handle dynamic changes so we shouldn't force rotate them.
                 && activity.getOverrideOrientation() != SCREEN_ORIENTATION_NOSENSOR
-                && activity.getOverrideOrientation() != SCREEN_ORIENTATION_LOCKED
+                && activity.getOverrideOrientation() != SCREEN_ORIENTATION_LOCKED;
+    }
+
+    private boolean isCameraActiveInFullscreen(@NonNull ActivityRecord activity) {
+        return !activity.inMultiWindowMode()
                 && mCameraIdPackageBiMap.containsPackageName(activity.packageName)
                 && activity.mLetterboxUiController.shouldForceRotateForCameraCompat();
     }
@@ -369,6 +377,9 @@ final class DisplayRotationCompatPolicy {
         // Checking whether an activity in fullscreen rather than the task as this camera compat
         // treatment doesn't cover activity embedding.
         if (topActivity.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
+            if (topActivity.mLetterboxUiController.isOverrideOrientationOnlyForCameraEnabled()) {
+                topActivity.recomputeConfiguration();
+            }
             updateOrientationWithWmLock();
             return;
         }
@@ -423,6 +434,17 @@ final class DisplayRotationCompatPolicy {
         ProtoLog.v(WM_DEBUG_ORIENTATION,
                 "Display id=%d is notified that Camera %s is closed, updating rotation.",
                 mDisplayContent.mDisplayId, cameraId);
+        ActivityRecord topActivity = mDisplayContent.topRunningActivity(
+                /* considerKeyguardState= */ true);
+        if (topActivity == null
+                // Checking whether an activity in fullscreen rather than the task as this camera
+                // compat treatment doesn't cover activity embedding.
+                || topActivity.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
+            return;
+        }
+        if (topActivity.mLetterboxUiController.isOverrideOrientationOnlyForCameraEnabled()) {
+            topActivity.recomputeConfiguration();
+        }
         updateOrientationWithWmLock();
     }
 
