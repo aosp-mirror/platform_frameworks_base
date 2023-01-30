@@ -49979,16 +49979,24 @@ package android.view {
     field public static final int CLOCK_TICK = 4; // 0x4
     field public static final int CONFIRM = 16; // 0x10
     field public static final int CONTEXT_CLICK = 6; // 0x6
+    field public static final int DRAG_START = 25; // 0x19
     field @Deprecated public static final int FLAG_IGNORE_GLOBAL_SETTING = 2; // 0x2
     field public static final int FLAG_IGNORE_VIEW_SETTING = 1; // 0x1
     field public static final int GESTURE_END = 13; // 0xd
     field public static final int GESTURE_START = 12; // 0xc
+    field public static final int GESTURE_THRESHOLD_ACTIVATE = 23; // 0x17
+    field public static final int GESTURE_THRESHOLD_DEACTIVATE = 24; // 0x18
     field public static final int KEYBOARD_PRESS = 3; // 0x3
     field public static final int KEYBOARD_RELEASE = 7; // 0x7
     field public static final int KEYBOARD_TAP = 3; // 0x3
     field public static final int LONG_PRESS = 0; // 0x0
+    field public static final int NO_HAPTICS = -1; // 0xffffffff
     field public static final int REJECT = 17; // 0x11
+    field public static final int SEGMENT_FREQUENT_TICK = 27; // 0x1b
+    field public static final int SEGMENT_TICK = 26; // 0x1a
     field public static final int TEXT_HANDLE_MOVE = 9; // 0x9
+    field public static final int TOGGLE_OFF = 22; // 0x16
+    field public static final int TOGGLE_ON = 21; // 0x15
     field public static final int VIRTUAL_KEY = 1; // 0x1
     field public static final int VIRTUAL_KEY_RELEASE = 8; // 0x8
   }
