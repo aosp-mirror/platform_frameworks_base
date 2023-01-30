@@ -18,6 +18,7 @@ package com.android.wm.shell.pip;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 
 import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
@@ -26,8 +27,10 @@ import android.app.RemoteAction;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.RemoteException;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
+import android.util.TypedValue;
 import android.window.TaskSnapshot;
 
 import com.android.internal.protolog.common.ProtoLog;
@@ -67,6 +70,13 @@ public class PipUtils {
                     "%s: Unable to get pinned stack.", TAG);
         }
         return new Pair<>(null, 0);
+    }
+
+    /**
+     * @return the pixels for a given dp value.
+     */
+    public static int dpToPx(float dpValue, DisplayMetrics dm) {
+        return (int) TypedValue.applyDimension(COMPLEX_UNIT_DIP, dpValue, dm);
     }
 
     /**

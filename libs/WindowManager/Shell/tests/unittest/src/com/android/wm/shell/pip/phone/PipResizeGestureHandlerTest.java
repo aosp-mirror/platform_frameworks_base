@@ -85,15 +85,18 @@ public class PipResizeGestureHandlerTest extends ShellTestCase {
 
     private PipBoundsState mPipBoundsState;
 
+    private PipSizeSpecHandler mPipSizeSpecHandler;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mPipBoundsState = new PipBoundsState(mContext);
+        mPipSizeSpecHandler = new PipSizeSpecHandler(mContext);
+        mPipBoundsState = new PipBoundsState(mContext, mPipSizeSpecHandler);
         final PipSnapAlgorithm pipSnapAlgorithm = new PipSnapAlgorithm();
         final PipKeepClearAlgorithmInterface pipKeepClearAlgorithm =
                 new PipKeepClearAlgorithmInterface() {};
         final PipBoundsAlgorithm pipBoundsAlgorithm = new PipBoundsAlgorithm(mContext,
-                mPipBoundsState, pipSnapAlgorithm, pipKeepClearAlgorithm);
+                mPipBoundsState, pipSnapAlgorithm, pipKeepClearAlgorithm, mPipSizeSpecHandler);
         final PipMotionHelper motionHelper = new PipMotionHelper(mContext, mPipBoundsState,
                 mPipTaskOrganizer, mPhonePipMenuController, pipSnapAlgorithm,
                 mMockPipTransitionController, mFloatingContentCoordinator);
