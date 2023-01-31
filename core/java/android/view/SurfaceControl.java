@@ -2411,10 +2411,10 @@ public final class SurfaceControl implements Parcelable {
      * {@link Transaction#setTrustedPresentationCallback(SurfaceControl,
      * TrustedPresentationThresholds, Executor, Consumer)}
      */
-    public static class TrustedPresentationThresholds {
-        private float mMinAlpha;
-        private float mMinFractionRendered;
-        private int mStabilityRequirementMs;
+    public static final class TrustedPresentationThresholds {
+        private final float mMinAlpha;
+        private final float mMinFractionRendered;
+        private final int mStabilityRequirementMs;
 
         /**
          * Creates a TrustedPresentationThresholds that's used when calling

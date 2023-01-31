@@ -51266,7 +51266,7 @@ package android.view {
     method public void onTransactionCommitted();
   }
 
-  public static class SurfaceControl.TrustedPresentationThresholds {
+  public static final class SurfaceControl.TrustedPresentationThresholds {
     ctor public SurfaceControl.TrustedPresentationThresholds(@FloatRange(from=0.0f, fromInclusive=false, to=1.0f) float, @FloatRange(from=0.0f, fromInclusive=false, to=1.0f) float, @IntRange(from=1) int);
   }
 
