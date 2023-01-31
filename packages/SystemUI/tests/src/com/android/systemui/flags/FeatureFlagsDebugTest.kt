@@ -171,9 +171,10 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
 
     @Test
     fun teamFoodFlag_True() {
+        // No teamfood on this branch! No change in behavior expected.
         whenever(flagManager.readFlagValue<Boolean>(
             eq(Flags.TEAMFOOD.name), any())).thenReturn(true)
-        assertThat(mFeatureFlagsDebug.isEnabled(teamfoodableFlagA)).isTrue()
+        assertThat(mFeatureFlagsDebug.isEnabled(teamfoodableFlagA)).isFalse()
         assertThat(mFeatureFlagsDebug.isEnabled(teamfoodableFlagB)).isTrue()
 
         // Regular boolean flags should still test the same.
