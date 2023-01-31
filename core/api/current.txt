@@ -26318,8 +26318,23 @@ package android.media.session {
 
 package android.media.tv {
 
+  public final class AdBuffer implements android.os.Parcelable {
+    ctor public AdBuffer(int, @NonNull String, @NonNull android.os.SharedMemory, int, int, long, int);
+    method public int describeContents();
+    method public int getFlags();
+    method public int getId();
+    method public int getLength();
+    method @NonNull public String getMimeType();
+    method public int getOffset();
+    method public long getPresentationTimeUs();
+    method @NonNull public android.os.SharedMemory getSharedMemory();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.AdBuffer> CREATOR;
+  }
+
   public final class AdRequest implements android.os.Parcelable {
     ctor public AdRequest(int, int, @Nullable android.os.ParcelFileDescriptor, long, long, long, @Nullable String, @NonNull android.os.Bundle);
+    ctor public AdRequest(int, int, @Nullable android.net.Uri, long, long, long, @NonNull android.os.Bundle);
     method public int describeContents();
     method public long getEchoIntervalMillis();
     method @Nullable public android.os.ParcelFileDescriptor getFileDescriptor();
@@ -26329,6 +26344,7 @@ package android.media.tv {
     method public int getRequestType();
     method public long getStartTimeMillis();
     method public long getStopTimeMillis();
+    method @Nullable public android.net.Uri getUri();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.AdRequest> CREATOR;
     field public static final int REQUEST_TYPE_START = 1; // 0x1
@@ -26343,6 +26359,7 @@ package android.media.tv {
     method public int getResponseType();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.AdResponse> CREATOR;
+    field public static final int RESPONSE_TYPE_BUFFERING = 5; // 0x5
     field public static final int RESPONSE_TYPE_ERROR = 4; // 0x4
     field public static final int RESPONSE_TYPE_FINISHED = 2; // 0x2
     field public static final int RESPONSE_TYPE_PLAYING = 1; // 0x1
@@ -27096,6 +27113,7 @@ package android.media.tv {
   public abstract static class TvInputService.Session implements android.view.KeyEvent.Callback {
     ctor public TvInputService.Session(android.content.Context);
     method public void layoutSurface(int, int, int, int);
+    method public void notifyAdBufferConsumed(@NonNull android.media.tv.AdBuffer);
     method public void notifyAdResponse(@NonNull android.media.tv.AdResponse);
     method public void notifyAitInfoUpdated(@NonNull android.media.tv.AitInfo);
     method public void notifyAudioPresentationChanged(@NonNull java.util.List<android.media.AudioPresentation>);
@@ -27111,6 +27129,7 @@ package android.media.tv {
     method public void notifyTuned(@NonNull android.net.Uri);
     method public void notifyVideoAvailable();
     method public void notifyVideoUnavailable(int);
+    method public void onAdBuffer(@NonNull android.media.tv.AdBuffer);
     method public void onAppPrivateCommand(@NonNull String, android.os.Bundle);
     method public android.view.View onCreateOverlayView();
     method public boolean onGenericMotionEvent(android.view.MotionEvent);
@@ -27397,9 +27416,11 @@ package android.media.tv.interactive {
     ctor public TvInteractiveAppService.Session(@NonNull android.content.Context);
     method public boolean isMediaViewEnabled();
     method @CallSuper public void layoutSurface(int, int, int, int);
+    method @CallSuper public void notifyAdBuffer(@NonNull android.media.tv.AdBuffer);
     method @CallSuper public final void notifyBiInteractiveAppCreated(@NonNull android.net.Uri, @Nullable String);
     method @CallSuper public void notifySessionStateChanged(int, int);
     method @CallSuper public final void notifyTeletextAppStateChanged(int);
+    method public void onAdBufferConsumed(@NonNull android.media.tv.AdBuffer);
     method public void onAdResponse(@NonNull android.media.tv.AdResponse);
     method public void onBroadcastInfoResponse(@NonNull android.media.tv.BroadcastInfoResponse);
     method public void onContentAllowed();

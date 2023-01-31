@@ -24,9 +24,8 @@ import android.os.SharedMemory;
 
 /**
  * Buffer for advertisement data.
- * @hide
  */
-public class AdBuffer implements Parcelable {
+public final class AdBuffer implements Parcelable {
     private final int mId;
     @NonNull
     private final String mMimeType;
@@ -60,6 +59,8 @@ public class AdBuffer implements Parcelable {
 
     /**
      * Gets corresponding AD request ID.
+     *
+     * @return The ID of the ad request
      */
     public int getId() {
         return mId;
@@ -67,6 +68,8 @@ public class AdBuffer implements Parcelable {
 
     /**
      * Gets the mime type of the data.
+     *
+     * @return The mime type of the data.
      */
     @NonNull
     public String getMimeType() {
@@ -74,7 +77,17 @@ public class AdBuffer implements Parcelable {
     }
 
     /**
-     * Gets the shared memory which stores the data.
+     * Gets the {@link SharedMemory} which stores the data.
+     *
+     * <p> Information on how the data in this buffer is formatted can be found using
+     * {@link AdRequest#getMetadata()}
+     * <p> This data lives in a {@link SharedMemory} instance because of the
+     * potentially large amount of data needed to store the ad. This optimizes the
+     * data communication between the ad data source and the service responsible for
+     * its display.
+     *
+     * @see SharedMemory#create(String, int)
+     * @return The {@link SharedMemory} that stores the data for this ad buffer.
      */
     @NonNull
     public SharedMemory getSharedMemory() {
@@ -82,28 +95,38 @@ public class AdBuffer implements Parcelable {
     }
 
     /**
-     * Gets the offset of the buffer.
+     * Gets the offset into the shared memory to begin mapping.
+     *
+     * @see SharedMemory#map(int, int, int)
+     * @return The offset of this ad buffer in the shared memory in bytes.
      */
     public int getOffset() {
         return mOffset;
     }
 
     /**
-     * Gets the data length.
+     * Gets the data length of this ad buffer.
+     *
+     * @return The data length of this ad buffer in bytes.
      */
     public int getLength() {
         return mLength;
     }
 
     /**
-     * Gets the presentation time in microseconds.
+     * Gets the presentation time.
+     *
+     * @return The presentation time in microseconds.
      */
     public long getPresentationTimeUs() {
         return mPresentationTimeUs;
     }
 
     /**
-     * Gets the flags.
+     * Gets the buffer flags for this ad buffer.
+     *
+     * @see android.media.MediaCodec
+     * @return The buffer flags for this ad buffer.
      */
     @BufferFlag
     public int getFlags() {
