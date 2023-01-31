@@ -1756,12 +1756,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return ROTATION_UNDEFINED;
         }
         if (activityOrientation == ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
-            // TODO(b/266280737): Use ActivityRecord#canDefineOrientationForActivitiesAbove
             final ActivityRecord nextCandidate = getActivity(
-                    a -> a.getOverrideOrientation() != SCREEN_ORIENTATION_UNSET
-                            && a.getOverrideOrientation()
-                                    != ActivityInfo.SCREEN_ORIENTATION_BEHIND,
-                    r, false /* includeBoundary */, true /* traverseTopToBottom */);
+                    a -> a.canDefineOrientationForActivitiesAbove() /* callback */,
+                    r /* boundary */, false /* includeBoundary */, true /* traverseTopToBottom */);
             if (nextCandidate != null) {
                 r = nextCandidate;
             }
