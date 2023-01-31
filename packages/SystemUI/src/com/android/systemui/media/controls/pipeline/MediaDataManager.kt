@@ -68,6 +68,7 @@ import com.android.systemui.media.controls.models.recommendation.SmartspaceMedia
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaDataProvider
 import com.android.systemui.media.controls.resume.MediaResumeListener
 import com.android.systemui.media.controls.util.MediaControllerFactory
+import com.android.systemui.media.controls.util.MediaDataUtils
 import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.plugins.ActivityStarter
@@ -668,6 +669,11 @@ class MediaDataManager(
                 MediaConstants.METADATA_VALUE_ATTRIBUTE_PRESENT &&
                 mediaFlags.isExplicitIndicatorEnabled()
 
+        val progress =
+            if (mediaFlags.isResumeProgressEnabled()) {
+                MediaDataUtils.getDescriptionProgress(desc.extras)
+            } else null
+
         val mediaAction = getResumeMediaAction(resumeAction)
         val lastActive = systemClock.elapsedRealtime()
         foregroundExecutor.execute {
@@ -698,6 +704,7 @@ class MediaDataManager(
                     instanceId = instanceId,
                     appUid = appUid,
                     isExplicit = isExplicit,
+                    resumeProgress = progress,
                 )
             )
         }

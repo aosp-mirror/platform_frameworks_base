@@ -360,6 +360,9 @@ object Flags {
     @JvmField
     val MEDIA_RECOMMENDATION_CARD_UPDATE = unreleasedFlag(914, "media_recommendation_card_update")
 
+    // TODO(b/267007629): Tracking Bug
+    val MEDIA_RESUME_PROGRESS = unreleasedFlag(915, "media_resume_progress")
+
     // 1000 - dock
     val SIMULATE_DOCK_THROUGH_CHARGING = releasedFlag(1000, "simulate_dock_through_charging")
 
