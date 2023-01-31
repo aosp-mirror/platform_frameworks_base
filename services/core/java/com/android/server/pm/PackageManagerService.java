@@ -387,6 +387,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     static final int SCAN_DROP_CACHE = 1 << 24;
     static final int SCAN_AS_FACTORY = 1 << 25;
     static final int SCAN_AS_APEX = 1 << 26;
+    static final int SCAN_AS_STOPPED_SYSTEM_APP = 1 << 27;
 
     @IntDef(flag = true, prefix = { "SCAN_" }, value = {
             SCAN_NO_DEX,
@@ -403,6 +404,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             SCAN_AS_INSTANT_APP,
             SCAN_AS_FULL_APP,
             SCAN_AS_VIRTUAL_PRELOAD,
+            SCAN_AS_STOPPED_SYSTEM_APP,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ScanFlags {}
@@ -964,6 +966,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     final @Nullable String mRecentsPackage;
     final @Nullable String mAmbientContextDetectionPackage;
     final @Nullable String mWearableSensingPackage;
+    final @NonNull Set<String> mInitialNonStoppedSystemPackages;
+    final boolean mShouldStopSystemPackagesByDefault;
     private final @NonNull String mRequiredSdkSandboxPackage;
 
     @GuardedBy("mLock")
@@ -1771,6 +1775,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mOverlayConfigSignaturePackage = testParams.overlayConfigSignaturePackage;
         mResolveComponentName = testParams.resolveComponentName;
         mRequiredSdkSandboxPackage = testParams.requiredSdkSandboxPackage;
+        mInitialNonStoppedSystemPackages = testParams.initialNonStoppedSystemPackages;
+        mShouldStopSystemPackagesByDefault = testParams.shouldStopSystemPackagesByDefault;
 
         mLiveComputer = createLiveComputer();
         mSnapshotStatistics = null;
@@ -2096,6 +2102,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
             mCacheDir = PackageManagerServiceUtils.preparePackageParserCache(
                     mIsEngBuild, mIsUserDebugBuild, mIncrementalVersion);
+
+            mInitialNonStoppedSystemPackages = mInjector.getSystemConfig()
+                    .getInitialNonStoppedSystemPackages();
+            mShouldStopSystemPackagesByDefault = mContext.getResources()
+                    .getBoolean(R.bool.config_stopSystemPackagesByDefault);
 
             final int[] userIds = mUserManager.getUserIds();
             PackageParser2 packageParser = mInjector.getScanningCachingPackageParser();
