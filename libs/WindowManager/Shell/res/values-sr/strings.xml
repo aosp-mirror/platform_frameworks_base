@@ -82,16 +82,11 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Двапут додирните изван апликације да бисте променили њену позицију"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Важи"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Проширите за још информација."</string>
-    <!-- no translation found for letterbox_restart_dialog_title (8543049527871033505) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_dialog_description (6096946078246557848) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_cancel (1342209132692537805) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_restart (8529976234412442973) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_dialog_checkbox_title (5252918008140768386) -->
-    <skip />
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Желите ли да рестартујете ради бољег приказа?"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Можете да рестартујете апликацију да би изгледала боље на екрану, с тим што можете да изгубите оно што сте урадили или несачуване промене, ако их има"</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Откажи"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"Рестартуј"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Не приказуј поново"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Увећајте"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Умањите"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Затворите"</string>

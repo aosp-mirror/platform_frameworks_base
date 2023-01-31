@@ -800,10 +800,8 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"Odaberite aplikaciju za dodavanje kontrola"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# kontrola je dodata.}one{# kontrola je dodata.}few{# kontrole su dodate.}other{# kontrola je dodato.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Uklonjeno"</string>
-    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
-    <skip />
-    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
-    <skip />
+    <string name="controls_panel_authorization_title" msgid="267429338785864842">"Želite li da dodate <xliff:g id="APPNAME">%s</xliff:g>?"</string>
+    <string name="controls_panel_authorization" msgid="4540047176861801815">"Kada dodate aplikaciju <xliff:g id="APPNAME">%s</xliff:g>, ona može da dodaje kontrole i sadržaj u ovo okno. U nekim aplikacijama možete da izaberete koje će se kontrole ovde prikazivati."</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Označeno je kao omiljeno"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Označeno je kao omiljeno, <xliff:g id="NUMBER">%d</xliff:g>. pozicija"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Uklonjeno je iz omiljenih"</string>
@@ -870,8 +868,7 @@
     <string name="controls_error_failed" msgid="960228639198558525">"Greška. Probajte ponovo"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Dodaj kontrole"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Izmeni kontrole"</string>
-    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
-    <skip />
+    <string name="controls_menu_add_another_app" msgid="8661172304650786705">"Dodaj aplikaciju"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Dodajte izlaze"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Grupa"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Izabran je 1 uređaj"</string>
@@ -1017,7 +1014,7 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• da je dostupan barem jedan uređaj"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Dodirnite i zadržite prečicu"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Otkaži"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Obrnite"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Obrni"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Otvorite telefon za bolji selfi"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Želite da obrnete na prednji ekran za bolji selfi?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Koristite zadnju kameru da biste snimili širu sliku sa višom rezolucijom."</string>

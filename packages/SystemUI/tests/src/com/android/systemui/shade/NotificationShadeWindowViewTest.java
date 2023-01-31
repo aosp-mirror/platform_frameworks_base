@@ -29,9 +29,11 @@ import android.os.SystemClock;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
+import android.view.ViewGroup;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.keyguard.KeyguardHostViewController;
 import com.android.keyguard.LockIconViewController;
 import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.R;
@@ -94,6 +96,8 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private KeyguardBouncerViewModel mKeyguardBouncerViewModel;
     @Mock private KeyguardBouncerComponent.Factory mKeyguardBouncerComponentFactory;
+    @Mock private KeyguardBouncerComponent mKeyguardBouncerComponent;
+    @Mock private KeyguardHostViewController mKeyguardHostViewController;
     @Mock private NotificationInsetsController mNotificationInsetsController;
     @Mock private AlternateBouncerInteractor mAlternateBouncerInteractor;
     @Mock private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
@@ -109,6 +113,12 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
         mView = spy(new NotificationShadeWindowView(getContext(), null));
         when(mView.findViewById(R.id.notification_stack_scroller))
                 .thenReturn(mNotificationStackScrollLayout);
+
+        when(mView.findViewById(R.id.keyguard_bouncer_container)).thenReturn(mock(ViewGroup.class));
+        when(mKeyguardBouncerComponentFactory.create(any(ViewGroup.class))).thenReturn(
+                mKeyguardBouncerComponent);
+        when(mKeyguardBouncerComponent.getKeyguardHostViewController()).thenReturn(
+                mKeyguardHostViewController);
 
         when(mStatusBarStateController.isDozing()).thenReturn(false);
         mDependency.injectTestDependency(ShadeController.class, mShadeController);

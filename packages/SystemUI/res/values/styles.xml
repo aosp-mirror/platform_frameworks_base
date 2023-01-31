@@ -678,12 +678,29 @@
 
     <style name="MediaPlayer.Recommendation"/>
 
+    <style name="MediaPlayer.Recommendation.Header">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">@dimen/qs_media_padding</item>
+        <item name="android:layout_marginStart">@dimen/qs_media_padding</item>
+        <item name="android:fontFamily">=@*android:string/config_headlineFontFamilyMedium</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
     <style name="MediaPlayer.Recommendation.AlbumContainer">
         <item name="android:layout_width">@dimen/qs_media_rec_album_size</item>
         <item name="android:layout_height">@dimen/qs_media_rec_album_size</item>
         <item name="android:background">@drawable/qs_media_light_source</item>
         <item name="android:layout_marginTop">@dimen/qs_media_padding</item>
         <item name="android:layout_marginBottom">@dimen/qs_media_rec_album_bottom_margin</item>
+    </style>
+
+    <style name="MediaPlayer.Recommendation.AlbumContainer.Updated">
+        <item name="android:layout_width">@dimen/qs_media_rec_album_width</item>
+        <item name="android:background">@drawable/qs_media_light_source</item>
+        <item name="android:layout_marginTop">@dimen/qs_media_info_spacing</item>
     </style>
 
     <style name="MediaPlayer.Recommendation.Album">

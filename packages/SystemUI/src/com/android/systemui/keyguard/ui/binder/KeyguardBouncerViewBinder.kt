@@ -106,13 +106,6 @@ object KeyguardBouncerViewBinder {
                             hostViewController.appear(
                                 SystemBarUtils.getStatusBarHeight(view.context)
                             )
-                        }
-                    }
-
-                    launch {
-                        viewModel.showWithFullExpansion.collect { model ->
-                            hostViewController.resetSecurityContainer()
-                            hostViewController.showPromptReason(model.promptReason)
                             hostViewController.onResume()
                         }
                     }

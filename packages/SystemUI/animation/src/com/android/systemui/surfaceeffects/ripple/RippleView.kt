@@ -77,7 +77,7 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
         rippleShader = RippleShader(rippleShape)
 
         rippleShader.color = RippleAnimationConfig.RIPPLE_DEFAULT_COLOR
-        rippleShader.progress = 0f
+        rippleShader.rawProgress = 0f
         rippleShader.sparkleStrength = RippleAnimationConfig.RIPPLE_SPARKLE_STRENGTH
         rippleShader.pixelDensity = resources.displayMetrics.density
 
@@ -93,7 +93,7 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
         animator.addUpdateListener { updateListener ->
             val now = updateListener.currentPlayTime
             val progress = updateListener.animatedValue as Float
-            rippleShader.progress = progress
+            rippleShader.rawProgress = progress
             rippleShader.distortionStrength = 1 - progress
             rippleShader.time = now.toFloat()
             invalidate()
@@ -142,25 +142,13 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
         }
         // To reduce overdraw, we mask the effect to a circle or a rectangle that's bigger than the
         // active effect area. Values here should be kept in sync with the animation implementation
-        // in the ripple shader.
+        // in the ripple shader. (Twice bigger)
         if (rippleShape == RippleShape.CIRCLE) {
-            val maskRadius =
-                (1 -
-                    (1 - rippleShader.progress) *
-                        (1 - rippleShader.progress) *
-                        (1 - rippleShader.progress)) * maxWidth
+            val maskRadius = rippleShader.currentWidth
             canvas.drawCircle(centerX, centerY, maskRadius, ripplePaint)
         } else {
-            val maskWidth =
-                (1 -
-                    (1 - rippleShader.progress) *
-                        (1 - rippleShader.progress) *
-                        (1 - rippleShader.progress)) * maxWidth * 2
-            val maskHeight =
-                (1 -
-                    (1 - rippleShader.progress) *
-                        (1 - rippleShader.progress) *
-                        (1 - rippleShader.progress)) * maxHeight * 2
+            val maskWidth = rippleShader.currentWidth * 2
+            val maskHeight = rippleShader.currentHeight * 2
             canvas.drawRect(
                 /* left= */ centerX - maskWidth,
                 /* top= */ centerY - maskHeight,

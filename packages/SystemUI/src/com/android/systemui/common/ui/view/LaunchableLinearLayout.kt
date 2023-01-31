@@ -23,7 +23,7 @@ import com.android.systemui.animation.LaunchableView
 import com.android.systemui.animation.LaunchableViewDelegate
 
 /** A [LinearLayout] that also implements [LaunchableView]. */
-class LaunchableLinearLayout : LinearLayout, LaunchableView {
+open class LaunchableLinearLayout : LinearLayout, LaunchableView {
     private val delegate =
         LaunchableViewDelegate(
             this,

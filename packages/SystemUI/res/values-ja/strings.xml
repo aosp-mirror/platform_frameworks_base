@@ -447,7 +447,7 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"字幕のオーバーレイ"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"有効にする"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"無効にする"</string>
-    <string name="sound_settings" msgid="8874581353127418308">"サウンドとバイブレーション"</string>
+    <string name="sound_settings" msgid="8874581353127418308">"音とバイブレーション"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"設定"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"アプリは固定されています"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"固定を解除するまで画面が常に表示されるようになります。[戻る] と [最近] を同時に押し続けると固定が解除されます。"</string>
@@ -1014,7 +1014,7 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• 利用できるデバイスが 1 台以上ある"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ショートカットの長押しが必要です"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"キャンセル"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"切り替えましょう"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"切り替える"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"高画質で撮るにはスマートフォンを開いてください"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"前面ディスプレイに切り替えて綺麗に撮りましょう"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"高解像度で広い範囲を撮影するには、背面カメラを使用してください。"</string>

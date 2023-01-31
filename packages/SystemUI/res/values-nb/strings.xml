@@ -1019,7 +1019,7 @@
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Avbryt"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Vend nå"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Brett ut telefonen for å ta bedre selfier"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Vil du bytte til frontskjermen for bedre selfier?"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Vil du bruke frontkameraet for bedre selfier?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Bruk det bakovervendte kameraet for å ta bredere bilder med høyere oppløsning."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Denne skjermen slås av"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"En sammenleggbar enhet blir brettet ut"</string>

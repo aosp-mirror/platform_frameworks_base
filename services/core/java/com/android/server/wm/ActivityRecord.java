@@ -439,6 +439,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // finished destroying itself.
     private static final int DESTROY_TIMEOUT = 10 * 1000;
 
+    // Rounding tolerance to be used in aspect ratio computations
+    private static final float ASPECT_RATIO_ROUNDING_TOLERANCE = 0.005f;
+
     final ActivityTaskManagerService mAtmService;
     @NonNull
     final ActivityInfo info; // activity info provided by developer in AndroidManifest
@@ -8239,8 +8242,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (screenResolvedBounds.width() <= parentAppBounds.width()) {
                 float positionMultiplier = mLetterboxUiController.getHorizontalPositionMultiplier(
                         newParentConfiguration);
-                offsetX = (int) Math.ceil((parentAppBounds.width() - screenResolvedBounds.width())
-                        * positionMultiplier);
+                offsetX = Math.max(0, (int) Math.ceil((parentAppBounds.width()
+                        - screenResolvedBounds.width()) * positionMultiplier)
+                        // This is added to make sure that insets added inside
+                        // CompatDisplayInsets#getContainerBounds() do not break the alignment
+                        // provided by the positionMultiplier
+                        - screenResolvedBounds.left + parentAppBounds.left);
             }
         }
 
@@ -8250,8 +8257,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (screenResolvedBounds.height() <= parentAppBounds.height()) {
                 float positionMultiplier = mLetterboxUiController.getVerticalPositionMultiplier(
                         newParentConfiguration);
-                offsetY = (int) Math.ceil((parentAppBounds.height() - screenResolvedBounds.height())
-                        * positionMultiplier);
+                offsetY = Math.max(0, (int) Math.ceil((parentAppBounds.height()
+                        - screenResolvedBounds.height()) * positionMultiplier)
+                        // This is added to make sure that insets added inside
+                        // CompatDisplayInsets#getContainerBounds() do not break the alignment
+                        // provided by the positionMultiplier
+                        - screenResolvedBounds.top + parentAppBounds.top);
             }
         }
 
@@ -8950,7 +8961,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         int activityWidth = containingAppWidth;
         int activityHeight = containingAppHeight;
 
-        if (containingRatio > desiredAspectRatio) {
+        if (containingRatio - desiredAspectRatio > ASPECT_RATIO_ROUNDING_TOLERANCE) {
             if (containingAppWidth < containingAppHeight) {
                 // Width is the shorter side, so we use that to figure-out what the max. height
                 // should be given the aspect ratio.
@@ -8960,7 +8971,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // should be given the aspect ratio.
                 activityWidth = (int) ((activityHeight * desiredAspectRatio) + 0.5f);
             }
-        } else if (containingRatio < desiredAspectRatio) {
+        } else if (desiredAspectRatio - containingRatio > ASPECT_RATIO_ROUNDING_TOLERANCE) {
             boolean adjustWidth;
             switch (getRequestedConfigurationOrientation()) {
                 case ORIENTATION_LANDSCAPE:
@@ -10034,6 +10045,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     isLandscape ? shortSide : longSide);
         }
 
+        // TODO(b/267151420): Explore removing getContainerBounds() from CompatDisplayInsets.
         /** Gets the horizontal centered container bounds for size compatibility mode. */
         void getContainerBounds(Rect outAppBounds, Rect outBounds, int rotation, int orientation,
                 boolean orientationRequested, boolean isFixedToUserRotation) {

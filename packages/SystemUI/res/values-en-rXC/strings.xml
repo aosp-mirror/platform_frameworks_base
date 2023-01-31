@@ -1029,6 +1029,5 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‏‏‏‏‏‏‏‏‏‏‏‏‎‎‏‎‎‏‏‎‏‎‎‏‎‎‎‎‏‎‎‎‏‎‏‏‎‏‎‏‏‏‏‏‏‏‏‎‏‏‎‎‎‎‎‏‏‎‎Your work policy allows you to make phone calls only from the work profile‎‏‎‎‏‎"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‎‎‏‏‎‎‎‏‎‎‏‏‎‎‏‏‏‏‏‏‎‎‎‏‎‎‎‎‎‏‏‎‏‏‎‏‏‎‏‏‎‎‎‎‎‎‏‎‎‏‎‎‏‎‎‏‎‎‎Switch to work profile‎‏‎‎‏‎"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‎‎‎‎‎‎‎‏‎‏‎‎‏‏‎‎‏‏‎‎‎‏‎‎‏‎‏‎‎‎‎‎‎‏‎‏‏‏‎‏‏‎‎‎‏‏‏‎‏‎‏‎‎‎‎‏‎‎Close‎‏‎‎‏‎"</string>
-    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
-    <skip />
+    <string name="lock_screen_settings" msgid="9197175446592718435">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‎‏‎‎‎‏‎‏‏‏‎‏‏‏‎‎‏‎‏‎‏‏‏‎‎‎‎‎‏‏‏‎‎‎‏‏‎‏‎‏‎‎‎‎‏‏‎‎‏‏‎‎‎‏‏‎Lock screen settings‎‏‎‎‏‎"</string>
 </resources>

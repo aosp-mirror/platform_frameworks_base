@@ -1021,7 +1021,7 @@
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Daha iyi selfie çekmek için telefonu açın"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Daha iyi bir selfie için ön ekrana geçilsin mi?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Daha yüksek çözünürlüğe sahip daha büyük bir fotoğraf için arka yüz kamerasını kullanın."</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ * Bu ekran kapatılacak"</b></string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Bu ekran kapatılacak"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Katlanabilir cihaz açılıyor"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Katlanabilir cihaz döndürülüyor"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> pil kaldı"</string>

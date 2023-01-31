@@ -185,6 +185,24 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     public abstract String getId();
 
     /**
+     * Get disabled reason of device
+     *
+     * @return disabled reason of device
+     */
+    public int getDisableReason() {
+        return -1;
+    }
+
+    /**
+     * Checks if device is has disabled reason
+     *
+     * @return true if device has disabled reason
+     */
+    public boolean hasDisabledReason() {
+        return false;
+    }
+
+    /**
      * Checks if device is suggested device from application
      *
      * @return true if device is suggested device

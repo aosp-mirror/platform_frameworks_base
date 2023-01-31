@@ -800,10 +800,8 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"कन्ट्रोल थप्नु पर्ने एप छान्नुहोस्"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# कन्ट्रोल हालियो।}other{# वटा कन्ट्रोल हालियो।}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"हटाइएको"</string>
-    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
-    <skip />
-    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
-    <skip />
+    <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> हाल्ने हो?"</string>
+    <string name="controls_panel_authorization" msgid="4540047176861801815">"तपाईंले <xliff:g id="APPNAME">%s</xliff:g> हाल्नुभयो भने यसले यो प्यानलमा सेटिङ र सामग्री हाल्न सक्छ। तपाईं केही एपहरूमा यहाँ कुन कुन सेटिङ देखाउने भन्ने कुरा छनौट गर्न सक्नुहुन्छ।"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"मनपराइएको"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"मन पराइएका कुराहरूको <xliff:g id="NUMBER">%d</xliff:g> औँ स्थानमा"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"मन पर्ने कुराहरूको सूचीमा नराखिएको"</string>
@@ -870,8 +868,7 @@
     <string name="controls_error_failed" msgid="960228639198558525">"त्रुटि भयो, फेरि प्रयास गर्नु…"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"कन्ट्रोल थप्नुहोस्"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"कन्ट्रोल सम्पादन गर्नुहोस्"</string>
-    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
-    <skip />
+    <string name="controls_menu_add_another_app" msgid="8661172304650786705">"एप हाल्नुहोस्"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"आउटपुट यन्त्रहरू थप्नुहोस्"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"समूह"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"१ यन्त्र चयन गरियो"</string>
