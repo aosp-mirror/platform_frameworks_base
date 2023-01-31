@@ -34,6 +34,22 @@ import org.junit.runners.JUnit4;
 public final class SchemeRainbowTest extends SysuiTestCase {
 
     @Test
+    public void testKeyColors() {
+        SchemeRainbow scheme = new SchemeRainbow(Hct.fromInt(0xff0000ff), false, 0.0);
+
+        assertThat(MaterialDynamicColors.primaryPaletteKeyColor.getArgb(scheme))
+                .isSameColorAs(0xff696FC4);
+        assertThat(MaterialDynamicColors.secondaryPaletteKeyColor.getArgb(scheme))
+                .isSameColorAs(0xff75758B);
+        assertThat(MaterialDynamicColors.tertiaryPaletteKeyColor.getArgb(scheme))
+                .isSameColorAs(0xff936B84);
+        assertThat(MaterialDynamicColors.neutralPaletteKeyColor.getArgb(scheme))
+                .isSameColorAs(0xff070707);
+        assertThat(MaterialDynamicColors.neutralVariantPaletteKeyColor.getArgb(scheme))
+                .isSameColorAs(0xff070707);
+    }
+
+    @Test
     public void lightTheme_minContrast_primary() {
         SchemeRainbow scheme = new SchemeRainbow(Hct.fromInt(0xff0000ff), false, -1.0);
         assertThat(MaterialDynamicColors.primary.getArgb(scheme)).isSameColorAs(0xff676DC1);
@@ -230,5 +246,4 @@ public final class SchemeRainbowTest extends SysuiTestCase {
         SchemeRainbow scheme = new SchemeRainbow(Hct.fromInt(0xff0000ff), true, 1.0);
         assertThat(MaterialDynamicColors.surface.getArgb(scheme)).isSameColorAs(0xff131313);
     }
-
 }
