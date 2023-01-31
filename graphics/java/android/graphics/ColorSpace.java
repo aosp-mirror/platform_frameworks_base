@@ -212,9 +212,9 @@ public abstract class ColorSpace {
             new Rgb.TransferParameters(1 / 1.055, 0.055 / 1.055, 1 / 12.92, 0.04045, 2.4);
     private static final Rgb.TransferParameters BT2020_HLG_TRANSFER_PARAMETERS =
             new Rgb.TransferParameters(2.0f, 2.0f, 1 / 0.17883277f,
-                0.28466892f, 0.5599107f, -11 / 12.0f, -3.0f, true);
+                0.28466892f, 0.5599107f, 0.0f, -3.0f, true);
     private static final Rgb.TransferParameters BT2020_PQ_TRANSFER_PARAMETERS =
-            new Rgb.TransferParameters(-107 / 128.0f, 1.0f, 32 / 2523.0f,
+            new Rgb.TransferParameters(107 / 128.0f, 1.0f, 32 / 2523.0f,
                 2413 / 128.0f, -2392 / 128.0f, 8192 / 1305.0f, -2.0f, true);
 
     // See static initialization block next to #get(Named)

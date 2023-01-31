@@ -43,7 +43,6 @@
 #include "SkRegion.h"
 #include "SkTextBlob.h"
 #include "SkVertices.h"
-#include "Tonemapper.h"
 #include "VectorDrawable.h"
 #include "include/gpu/GpuTypes.h" // from Skia
 #include "include/gpu/GrDirectContext.h"
@@ -345,9 +344,7 @@ struct DrawImage final : Op {
     SkPaint paint;
     BitmapPalette palette;
     void draw(SkCanvas* c, const SkMatrix&) const {
-        SkPaint newPaint = paint;
-        tonemapPaint(image->imageInfo(), c->imageInfo(), -1, newPaint);
-        c->drawImage(image.get(), x, y, sampling, &newPaint);
+        c->drawImage(image.get(), x, y, sampling, &paint);
     }
 };
 struct DrawImageRect final : Op {
@@ -369,9 +366,7 @@ struct DrawImageRect final : Op {
     SkCanvas::SrcRectConstraint constraint;
     BitmapPalette palette;
     void draw(SkCanvas* c, const SkMatrix&) const {
-        SkPaint newPaint = paint;
-        tonemapPaint(image->imageInfo(), c->imageInfo(), -1, newPaint);
-        c->drawImageRect(image.get(), src, dst, sampling, &newPaint, constraint);
+        c->drawImageRect(image.get(), src, dst, sampling, &paint, constraint);
     }
 };
 struct DrawImageLattice final : Op {
@@ -404,10 +399,8 @@ struct DrawImageLattice final : Op {
         auto flags =
                 (0 == fs) ? nullptr : pod<SkCanvas::Lattice::RectType>(
                                               this, (xs + ys) * sizeof(int) + fs * sizeof(SkColor));
-        SkPaint newPaint = paint;
-        tonemapPaint(image->imageInfo(), c->imageInfo(), -1, newPaint);
-        c->drawImageLattice(image.get(), {xdivs, ydivs, flags, xs, ys, &src, colors}, dst, filter,
-                            &newPaint);
+        c->drawImageLattice(image.get(), {xdivs, ydivs, flags, xs, ys, &src, colors}, dst,
+                            filter, &paint);
     }
 };
 

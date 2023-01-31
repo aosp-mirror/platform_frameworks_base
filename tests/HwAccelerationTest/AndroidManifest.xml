@@ -120,15 +120,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="ColorBitmapActivity"
-                  android:label="Bitmaps/BitmapColors"
-                  android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="com.android.test.hwui.TEST"/>
-            </intent-filter>
-        </activity>
-
         <activity android:name="PathOffsetActivity"
              android:label="Path/Offset"
              android:exported="true">
