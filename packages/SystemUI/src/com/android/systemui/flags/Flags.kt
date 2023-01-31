@@ -540,6 +540,10 @@ object Flags {
     // TODO(b/266983474) Tracking Bug
     val SHARESHEET_IMAGE_AND_TEXT_PREVIEW = unreleasedFlag(1503, "sharesheet_image_text_preview")
 
+    // TODO(b/267355521) Tracking Bug
+    val SHARESHEET_SCROLLABLE_IMAGE_PREVIEW =
+        unreleasedFlag(1504, "sharesheet_scrollable_image_preview")
+
     // 1700 - clipboard
     @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = releasedFlag(1701, "clipboard_remote_behavior")
     // TODO(b/267162944): Tracking bug
