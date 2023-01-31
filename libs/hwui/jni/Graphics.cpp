@@ -516,8 +516,7 @@ int GraphicsJNI::set_metrics_int(JNIEnv* env, jobject metrics, const SkFontMetri
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-jobject GraphicsJNI::createBitmapRegionDecoder(JNIEnv* env, skia::BitmapRegionDecoder* bitmap)
-{
+jobject GraphicsJNI::createBitmapRegionDecoder(JNIEnv* env, BitmapRegionDecoderWrapper* bitmap) {
     ALOG_ASSERT(bitmap != NULL);
 
     jobject obj = env->NewObject(gBitmapRegionDecoder_class,

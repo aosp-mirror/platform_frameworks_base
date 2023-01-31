@@ -20,9 +20,7 @@ class SkCanvas;
 struct SkFontMetrics;
 
 namespace android {
-namespace skia {
-    class BitmapRegionDecoder;
-}
+class BitmapRegionDecoderWrapper;
 class Canvas;
 class Paint;
 struct Typeface;
@@ -119,7 +117,7 @@ public:
     static jobject createRegion(JNIEnv* env, SkRegion* region);
 
     static jobject createBitmapRegionDecoder(JNIEnv* env,
-                                             android::skia::BitmapRegionDecoder* bitmap);
+                                             android::BitmapRegionDecoderWrapper* bitmap);
 
     /**
      * Given a bitmap we natively allocate a memory block to store the contents
