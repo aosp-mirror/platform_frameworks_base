@@ -66,7 +66,8 @@ interface ClockController {
         events.onColorPaletteChanged(resources)
         animations.doze(dozeFraction)
         animations.fold(foldFraction)
-        events.onTimeTick()
+        smallClock.events.onTimeTick()
+        largeClock.events.onTimeTick()
     }
 
     /** Optional method for dumping debug information */
@@ -87,9 +88,6 @@ interface ClockFaceController {
 
 /** Events that should call when various rendering parameters change */
 interface ClockEvents {
-    /** Call every time tick */
-    fun onTimeTick() {}
-
     /** Call whenever timezone changes */
     fun onTimeZoneChanged(timeZone: TimeZone) {}
 
@@ -131,6 +129,13 @@ interface ClockAnimations {
 
 /** Events that have specific data about the related face */
 interface ClockFaceEvents {
+    /** Call every time tick */
+    fun onTimeTick() {}
+
+    /** Expected interval between calls to onTimeTick. Can always reduce to PER_MINUTE in AOD. */
+    val tickRate: ClockTickRate
+        get() = ClockTickRate.PER_MINUTE
+
     /** Region Darkness specific to the clock face */
     fun onRegionDarknessChanged(isDark: Boolean) {}
 
@@ -148,6 +153,13 @@ interface ClockFaceEvents {
      * targetRegion is relative to the parent view.
      */
     fun onTargetRegionChanged(targetRegion: Rect?) {}
+}
+
+/** Tick rates for clocks */
+enum class ClockTickRate(val value: Int) {
+    PER_MINUTE(2), // Update the clock once per minute.
+    PER_SECOND(1), // Update the clock once per second.
+    PER_FRAME(0), // Update the clock every second.
 }
 
 /** Some data about a clock design */
