@@ -532,10 +532,8 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automática"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Sen son nin vibración"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Sen son nin vibración, e aparecen máis abaixo na sección de conversas"</string>
-    <!-- no translation found for notification_channel_summary_default (777294388712200605) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_default_with_bubbles (3482483084451555344) -->
-    <skip />
+    <string name="notification_channel_summary_default" msgid="777294388712200605">"Poderían facer que o dispositivo soe ou vibre en función da súa configuración"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Poderían facer que o dispositivo soe ou vibre en función da súa configuración. As conversas de <xliff:g id="APP_NAME">%1$s</xliff:g> móstranse en burbullas de forma predeterminada."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Fai que o sistema determine se a notificación debe emitir un son ou unha vibración"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Estado:&lt;/b&gt; ascendeuse a Predeterminada"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Estado:&lt;/b&gt; o nivel diminuíuse a Silencioso"</string>
@@ -1029,16 +1027,11 @@
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Batería restante: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Conecta o lapis óptico a un cargador"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"O lapis óptico ten pouca batería"</string>
-    <!-- no translation found for video_camera (7654002575156149298) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_title (6991157106804289643) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_text (3458704745640229638) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_action (2937701298133010724) -->
-    <skip />
-    <!-- no translation found for call_from_work_profile_close (7927067108901068098) -->
-    <skip />
+    <string name="video_camera" msgid="7654002575156149298">"Videocámara"</string>
+    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Non se pode chamar desde este perfil"</string>
+    <string name="call_from_work_profile_text" msgid="3458704745640229638">"A política do teu traballo só che permite facer chamadas de teléfono desde o perfil de traballo"</string>
+    <string name="call_from_work_profile_action" msgid="2937701298133010724">"Cambiar ao perfil de traballo"</string>
+    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Pechar"</string>
     <!-- no translation found for lock_screen_settings (9197175446592718435) -->
     <skip />
 </resources>

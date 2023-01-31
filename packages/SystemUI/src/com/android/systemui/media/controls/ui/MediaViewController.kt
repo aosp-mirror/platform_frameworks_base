@@ -25,6 +25,7 @@ import com.android.systemui.media.controls.models.GutsViewHolder
 import com.android.systemui.media.controls.models.player.MediaViewHolder
 import com.android.systemui.media.controls.models.recommendation.RecommendationViewHolder
 import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.calculateAlpha
+import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.animation.MeasurementOutput
 import com.android.systemui.util.animation.TransitionLayout
@@ -45,7 +46,8 @@ constructor(
     private val context: Context,
     private val configurationController: ConfigurationController,
     private val mediaHostStatesManager: MediaHostStatesManager,
-    private val logger: MediaViewLogger
+    private val logger: MediaViewLogger,
+    private val mediaFlags: MediaFlags,
 ) {
 
     /**
@@ -646,8 +648,13 @@ constructor(
                 expandedLayout.load(context, R.xml.media_session_expanded)
             }
             TYPE.RECOMMENDATION -> {
-                collapsedLayout.load(context, R.xml.media_recommendation_collapsed)
-                expandedLayout.load(context, R.xml.media_recommendation_expanded)
+                if (mediaFlags.isRecommendationCardUpdateEnabled()) {
+                    collapsedLayout.load(context, R.xml.media_recommendations_view_collapsed)
+                    expandedLayout.load(context, R.xml.media_recommendations_view_expanded)
+                } else {
+                    collapsedLayout.load(context, R.xml.media_recommendation_collapsed)
+                    expandedLayout.load(context, R.xml.media_recommendation_expanded)
+                }
             }
         }
         refreshState()

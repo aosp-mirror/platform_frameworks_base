@@ -17,11 +17,11 @@ package com.android.systemui.privacy
 import android.content.Context
 import android.util.AttributeSet
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import com.android.settingslib.Utils
 import com.android.systemui.R
+import com.android.systemui.animation.LaunchableFrameLayout
 import com.android.systemui.statusbar.events.BackgroundAnimatableView
 
 class OngoingPrivacyChip @JvmOverloads constructor(
@@ -29,7 +29,7 @@ class OngoingPrivacyChip @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttrs: Int = 0,
     defStyleRes: Int = 0
-) : FrameLayout(context, attrs, defStyleAttrs, defStyleRes), BackgroundAnimatableView {
+) : LaunchableFrameLayout(context, attrs, defStyleAttrs, defStyleRes), BackgroundAnimatableView {
 
     private var iconMargin = 0
     private var iconSize = 0

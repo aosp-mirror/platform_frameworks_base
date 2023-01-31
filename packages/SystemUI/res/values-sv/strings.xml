@@ -1019,7 +1019,7 @@
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Avbryt"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Vänd nu"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Vik upp telefonen för att ta en bättre selfie"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Vill du ta en bättre selfie med främre skärmen?"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Vill du ta en bättre selfie med främre kameran?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Använd den bakre kameran för att ta ett mer vidsträckt foto med högre upplösning."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Den här skärmen inaktiveras"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"En vikbar enhet viks upp"</string>

@@ -34,6 +34,7 @@ import android.view.ViewGroup
 import android.view.ViewGroupOverlay
 import android.widget.FrameLayout
 import com.android.internal.jank.InteractionJankMonitor
+import java.lang.IllegalArgumentException
 import java.util.LinkedList
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -46,7 +47,8 @@ private const val TAG = "GhostedViewLaunchAnimatorController"
  * of the ghosted view.
  *
  * Important: [ghostedView] must be attached to a [ViewGroup] when calling this function and during
- * the animation.
+ * the animation. It must also implement [LaunchableView], otherwise an exception will be thrown
+ * during this controller instantiation.
  *
  * Note: Avoid instantiating this directly and call [ActivityLaunchAnimator.Controller.fromView]
  * whenever possible instead.
@@ -101,6 +103,15 @@ constructor(
     private val background: Drawable?
 
     init {
+        // Make sure the View we launch from implements LaunchableView to avoid visibility issues.
+        if (ghostedView !is LaunchableView) {
+            throw IllegalArgumentException(
+                "A GhostedViewLaunchAnimatorController was created from a View that does not " +
+                    "implement LaunchableView. This can lead to subtle bugs where the visibility " +
+                    "of the View we are launching from is not what we expected."
+            )
+        }
+
         /** Find the first view with a background in [view] and its children. */
         fun findBackground(view: View): Drawable? {
             if (view.background != null) {

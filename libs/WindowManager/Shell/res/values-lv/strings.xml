@@ -82,16 +82,11 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Lai pārvietotu lietotni, veiciet dubultskārienu ārpus lietotnes"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Labi"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Izvērsiet, lai iegūtu plašāku informāciju."</string>
-    <!-- no translation found for letterbox_restart_dialog_title (8543049527871033505) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_dialog_description (6096946078246557848) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_cancel (1342209132692537805) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_restart (8529976234412442973) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_dialog_checkbox_title (5252918008140768386) -->
-    <skip />
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Vai restartēt, lai uzlabotu skatu?"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Varat restartēt lietotni, lai tā labāk izskatītos ekrānā, taču, iespējams, zaudēsiet paveikto vai nesaglabātas izmaiņas (ja tādas ir)."</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Atcelt"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"Restartēt"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Vairs nerādīt"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Maksimizēt"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Minimizēt"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Aizvērt"</string>

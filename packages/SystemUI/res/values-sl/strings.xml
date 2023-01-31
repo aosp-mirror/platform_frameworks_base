@@ -1017,7 +1017,7 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Na voljo mora biti vsaj ena naprava."</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Pridržite bližnjico"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Prekliči"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Obrnite"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Obrni"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Razprite telefon za boljši selfi"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Obrnite telefon na sprednji zaslon za boljši selfi"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Uporabite hrbtni fotoaparat, da posnamete širšo sliko višje ločljivosti."</string>

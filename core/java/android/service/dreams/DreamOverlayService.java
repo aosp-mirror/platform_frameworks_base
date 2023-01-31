@@ -36,38 +36,100 @@ import android.view.WindowManager;
 public abstract class DreamOverlayService extends Service {
     private static final String TAG = "DreamOverlayService";
     private static final boolean DEBUG = false;
-    private boolean mShowComplications;
-    private ComponentName mDreamComponent;
 
-    private IDreamOverlay mDreamOverlay = new IDreamOverlay.Stub() {
+    // The last client that started dreaming and hasn't ended
+    private OverlayClient mCurrentClient;
+
+    // An {@link IDreamOverlayClient} implementation that identifies itself when forwarding
+    // requests to the {@link DreamOverlayService}
+    private static class OverlayClient extends IDreamOverlayClient.Stub {
+        private final DreamOverlayService mService;
+        private boolean mShowComplications;
+        private ComponentName mDreamComponent;
+        IDreamOverlayCallback mDreamOverlayCallback;
+
+        OverlayClient(DreamOverlayService service) {
+            mService = service;
+        }
+
         @Override
-        public void startDream(WindowManager.LayoutParams layoutParams,
-                IDreamOverlayCallback callback, String dreamComponent,
-                boolean shouldShowComplications) {
-            mDreamOverlayCallback = callback;
+        public void startDream(WindowManager.LayoutParams params, IDreamOverlayCallback callback,
+                String dreamComponent, boolean shouldShowComplications) throws RemoteException {
             mDreamComponent = ComponentName.unflattenFromString(dreamComponent);
             mShowComplications = shouldShowComplications;
-            onStartDream(layoutParams);
+            mDreamOverlayCallback = callback;
+            mService.startDream(this, params);
+        }
+
+
+
+        @Override
+        public void wakeUp() {
+            mService.wakeUp(this, () -> {
+                try {
+                    mDreamOverlayCallback.onWakeUpComplete();
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Could not notify dream of wakeUp", e);
+                }
+            });
         }
 
         @Override
         public void endDream() {
-            onEndDream();
+            mService.endDream(this);
         }
 
+        private void onExitRequested() {
+            try {
+                mDreamOverlayCallback.onExitRequested();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Could not request exit:" + e);
+            }
+        }
+
+        private boolean shouldShowComplications() {
+            return mShowComplications;
+        }
+
+        private ComponentName getComponent() {
+            return mDreamComponent;
+        }
+    }
+
+    private void startDream(OverlayClient client, WindowManager.LayoutParams params) {
+        endDream(mCurrentClient);
+        mCurrentClient = client;
+        onStartDream(params);
+    }
+
+    private void endDream(OverlayClient client) {
+        if (client == null || client != mCurrentClient) {
+            return;
+        }
+
+        onEndDream();
+        mCurrentClient = null;
+    }
+
+    private void wakeUp(OverlayClient client, Runnable callback) {
+        if (mCurrentClient != client) {
+            return;
+        }
+
+        onWakeUp(callback);
+    }
+
+    private IDreamOverlay mDreamOverlay = new IDreamOverlay.Stub() {
         @Override
-        public void wakeUp() {
-            onWakeUp(() -> {
-                try {
-                    mDreamOverlayCallback.onWakeUpComplete();
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Could not notify dream of wakeUp:" + e);
-                }
-            });
+        public void getClient(IDreamOverlayClientCallback callback) {
+            try {
+                callback.onDreamOverlayClient(
+                        new OverlayClient(DreamOverlayService.this));
+            } catch (RemoteException e) {
+                Log.e(TAG, "could not send client to callback", e);
+            }
         }
     };
-
-    IDreamOverlayCallback mDreamOverlayCallback;
 
     public DreamOverlayService() {
     }
@@ -110,18 +172,23 @@ public abstract class DreamOverlayService extends Service {
      * This method is invoked to request the dream exit.
      */
     public final void requestExit() {
-        try {
-            mDreamOverlayCallback.onExitRequested();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Could not request exit:" + e);
+        if (mCurrentClient == null) {
+            throw new IllegalStateException("requested exit with no dream present");
         }
+
+        mCurrentClient.onExitRequested();
     }
 
     /**
      * Returns whether to show complications on the dream overlay.
      */
     public final boolean shouldShowComplications() {
-        return mShowComplications;
+        if (mCurrentClient == null) {
+            throw new IllegalStateException(
+                    "requested if should show complication when no dream active");
+        }
+
+        return mCurrentClient.shouldShowComplications();
     }
 
     /**
@@ -129,6 +196,10 @@ public abstract class DreamOverlayService extends Service {
      * @hide
      */
     public final ComponentName getDreamComponent() {
-        return mDreamComponent;
+        if (mCurrentClient == null) {
+            throw new IllegalStateException("requested dream component when no dream active");
+        }
+
+        return mCurrentClient.getComponent();
     }
 }

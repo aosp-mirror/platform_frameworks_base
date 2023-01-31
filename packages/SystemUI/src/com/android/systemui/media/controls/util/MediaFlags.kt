@@ -51,4 +51,8 @@ class MediaFlags @Inject constructor(private val featureFlags: FeatureFlags) {
      * whether the underlying notification was dismissed
      */
     fun isRetainingPlayersEnabled() = featureFlags.isEnabled(Flags.MEDIA_RETAIN_SESSIONS)
+
+    /** Check whether we show the updated recommendation card. */
+    fun isRecommendationCardUpdateEnabled() =
+        featureFlags.isEnabled(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE)
 }

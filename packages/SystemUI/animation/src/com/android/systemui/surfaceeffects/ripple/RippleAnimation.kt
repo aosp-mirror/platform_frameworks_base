@@ -48,7 +48,7 @@ class RippleAnimation(private val config: RippleAnimationConfig) {
         animator.addUpdateListener { updateListener ->
             val now = updateListener.currentPlayTime
             val progress = updateListener.animatedValue as Float
-            rippleShader.progress = progress
+            rippleShader.rawProgress = progress
             rippleShader.distortionStrength = if (config.shouldDistort) 1 - progress else 0f
             rippleShader.time = now.toFloat()
         }

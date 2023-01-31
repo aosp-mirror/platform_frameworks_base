@@ -1021,7 +1021,7 @@
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Fold telefonen ud for at tage en bedre selfie"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Vil du bruge frontkameraet for at få bedre selfie?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Brug bagsidekameraet for at få et bredere billede med højere opløsning."</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ *Denne skærm slukkes"</b></string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Denne skærm slukkes"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Foldbar enhed foldes ud"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Foldbar enhed vendes om"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> batteri tilbage"</string>

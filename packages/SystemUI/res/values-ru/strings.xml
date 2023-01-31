@@ -800,10 +800,8 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"Чтобы добавить виджеты управления, выберите приложение"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Добавлен # элемент управления.}one{Добавлен # элемент управления.}few{Добавлено # элемента управления.}many{Добавлено # элементов управления.}other{Добавлено # элемента управления.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Удалено"</string>
-    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
-    <skip />
-    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
-    <skip />
+    <string name="controls_panel_authorization_title" msgid="267429338785864842">"Добавить приложение \"<xliff:g id="APPNAME">%s</xliff:g>\"?"</string>
+    <string name="controls_panel_authorization" msgid="4540047176861801815">"Приложение \"<xliff:g id="APPNAME">%s</xliff:g>\" может добавить на эту панель элементы управления и контент. Некоторые приложения позволяют выбирать, какие элементы будут здесь показаны."</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Добавлено в избранное"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Добавлено в избранное на позицию <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Не добавлено в избранное"</string>
@@ -870,8 +868,7 @@
     <string name="controls_error_failed" msgid="960228639198558525">"Ошибка. Повторите попытку."</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Добавить виджеты"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Изменить виджеты"</string>
-    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
-    <skip />
+    <string name="controls_menu_add_another_app" msgid="8661172304650786705">"Добавить приложение"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Добавление устройств вывода"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Группа"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Выбрано 1 устройство"</string>
@@ -1019,7 +1016,7 @@
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Отмена"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Перевернуть сейчас"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Разложите телефон, чтобы селфи получилось лучше"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Перевернули телефон передним экраном к себе?"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Перейти на передний экран?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Используйте основную камеру с широкоугольным объективом и высоким разрешением."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Этот экран отключится"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Складное устройство в разложенном виде"</string>
