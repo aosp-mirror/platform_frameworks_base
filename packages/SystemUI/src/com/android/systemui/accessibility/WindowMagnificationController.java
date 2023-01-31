@@ -49,6 +49,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.util.Range;
 import android.util.Size;
+import android.util.TypedValue;
 import android.view.Choreographer;
 import android.view.Display;
 import android.view.Gravity;
@@ -1273,9 +1274,19 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     }
 
     private void applyResourcesValues() {
-        mMirrorBorderView.setBackgroundColor(mResources.getColor(mEditSizeEnable
-                ? R.color.magnification_border_color_change : R.color.magnification_border_color));
+        // Sets the border appearance for the magnifier window
+        mMirrorBorderView.setBackground(mResources.getDrawable(mEditSizeEnable
+                ? R.drawable.accessibility_window_magnification_background_change
+                : R.drawable.accessibility_window_magnification_background));
 
+        // Changes the corner radius of the mMirrorSurfaceView
+        mMirrorSurfaceView.setCornerRadius(
+                        TypedValue.applyDimension(
+                                TypedValue.COMPLEX_UNIT_DIP,
+                                mEditSizeEnable ? 16f : 28f,
+                                mContext.getResources().getDisplayMetrics()));
+
+        // Sets visibility of components for the magnifier window
         if (mEditSizeEnable) {
             mDragView.setVisibility(View.GONE);
             mCloseView.setVisibility(View.VISIBLE);

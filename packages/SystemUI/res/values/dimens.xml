@@ -1099,6 +1099,7 @@
     <dimen name="magnification_outer_border_margin">15dp</dimen>
     <dimen name="magnification_inner_border_margin">17dp</dimen>
     <dimen name="magnification_mirror_surface_margin">20dp</dimen>
+    <dimen name="magnification_drag_corner_margin">8dp</dimen>
     <dimen name="magnification_frame_move_short">5dp</dimen>
     <dimen name="magnification_frame_move_long">25dp</dimen>
     <dimen name="magnification_drag_view_size">36dp</dimen>
@@ -1111,6 +1112,15 @@
     <dimen name="magnifier_left_right_controls_height">45dp</dimen>
     <dimen name="magnifier_up_down_controls_width">45dp</dimen>
     <dimen name="magnifier_up_down_controls_height">40dp</dimen>
+    <dimen name="magnifier_outer_corner_radius">30dp</dimen>
+    <dimen name="magnifier_corner_radius">28dp</dimen>
+    <dimen name="magnifier_edit_corner_radius">16dp</dimen>
+    <dimen name="magnifier_edit_outer_corner_radius">18dp</dimen>
+    <dimen name="magnifier_border_width">8dp</dimen>
+    <dimen name="magnifier_stroke_width">2dp</dimen>
+    <dimen name="magnifier_edit_dash_gap">20dp</dimen>
+    <dimen name="magnification_window_drag_corner_size">26dp</dimen>
+    <dimen name="magnification_window_drag_corner_stroke">3dp</dimen>
     <!-- The extra padding to show the whole outer border -->
     <dimen name="magnifier_drag_handle_padding">3dp</dimen>
     <dimen name="magnification_max_frame_size">300dp</dimen>
@@ -1134,6 +1144,8 @@
     <dimen name="magnification_setting_image_button_padding_horizontal">24dp</dimen>
     <dimen name="magnification_setting_image_button_open_in_full_padding_vertical">16dp</dimen>
     <dimen name="magnification_setting_image_button_open_in_full_padding_horizontal">28dp</dimen>
+    <dimen name="magnification_setting_seekbar_icon_size">24dp</dimen>
+
 
     <!-- How far from the right edge of the screen you need to drag the window before the button
          repositions to the other side. -->
