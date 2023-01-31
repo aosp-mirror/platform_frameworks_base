@@ -43,6 +43,7 @@ import com.android.systemui.media.controls.models.recommendation.RecommendationV
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaData
 import com.android.systemui.media.controls.pipeline.MediaDataManager
 import com.android.systemui.media.controls.ui.MediaControlPanel.SMARTSPACE_CARD_DISMISS_EVENT
+import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.media.controls.util.SmallHash
 import com.android.systemui.plugins.ActivityStarter
@@ -88,7 +89,8 @@ constructor(
     falsingManager: FalsingManager,
     dumpManager: DumpManager,
     private val logger: MediaUiEventLogger,
-    private val debugLogger: MediaCarouselControllerLogger
+    private val debugLogger: MediaCarouselControllerLogger,
+    private val mediaFlags: MediaFlags,
 ) : Dumpable {
     /** The current width of the carousel */
     private var currentCarouselWidth: Int = 0
@@ -647,7 +649,11 @@ constructor(
 
             val newRecs = mediaControlPanelFactory.get()
             newRecs.attachRecommendation(
-                RecommendationViewHolder.create(LayoutInflater.from(context), mediaContent)
+                RecommendationViewHolder.create(
+                    LayoutInflater.from(context),
+                    mediaContent,
+                    mediaFlags.isRecommendationCardUpdateEnabled()
+                )
             )
             newRecs.mediaViewController.sizeChangedListener = this::updateCarouselDimensions
             val lp =

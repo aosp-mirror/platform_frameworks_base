@@ -1740,6 +1740,14 @@ abstract public class ManagedServices {
             return ManagedServices.this;
         }
 
+        public IInterface getService() {
+            return service;
+        }
+
+        public boolean isSystem() {
+            return isSystem;
+        }
+
         @Override
         public String toString() {
             return new StringBuilder("ManagedServiceInfo[")

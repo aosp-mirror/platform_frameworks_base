@@ -40,6 +40,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.SynchronousUserSwitchObserver;
 import android.content.BroadcastReceiver;
@@ -311,6 +312,7 @@ public final class PowerManagerService extends SystemService
     private SettingsObserver mSettingsObserver;
     private DreamManagerInternal mDreamManager;
     private LogicalLight mAttentionLight;
+    private ActivityManagerInternal mAmInternal;
 
     private final InattentiveSleepWarningController mInattentiveSleepWarningOverlayController;
     private final AmbientDisplaySuppressionController mAmbientDisplaySuppressionController;
@@ -1237,6 +1239,7 @@ public final class PowerManagerService extends SystemService
             mDisplayManagerInternal = getLocalService(DisplayManagerInternal.class);
             mPolicy = getLocalService(WindowManagerPolicy.class);
             mBatteryManagerInternal = getLocalService(BatteryManagerInternal.class);
+            mAmInternal = getLocalService(ActivityManagerInternal.class);
             mAttentionDetector.systemReady(mContext);
 
             SensorManager sensorManager = new SystemSensorManager(mContext, mHandler.getLooper());
@@ -4077,9 +4080,8 @@ public final class PowerManagerService extends SystemService
                     final UidState state = wakeLock.mUidState;
                     if (Arrays.binarySearch(mDeviceIdleWhitelist, appid) < 0 &&
                             Arrays.binarySearch(mDeviceIdleTempWhitelist, appid) < 0 &&
-                            state.mProcState != ActivityManager.PROCESS_STATE_NONEXISTENT &&
-                            state.mProcState >
-                                    ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
+                            (mAmInternal != null && !mAmInternal.canHoldWakeLocksInDeepDoze(
+                                    state.mUid, state.mProcState))) {
                         disabled = true;
                     }
                 }

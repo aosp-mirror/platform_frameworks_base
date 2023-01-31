@@ -79,9 +79,9 @@ class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleVi
         animator.addUpdateListener { updateListener ->
             val now = updateListener.currentPlayTime
             val progress = updateListener.animatedValue as Float
-            rippleShader.progress = startingPercentage + (progress * (1 - startingPercentage))
-            rippleShader.distortionStrength = 1 - rippleShader.progress
-            rippleShader.pixelDensity = 1 - rippleShader.progress
+            rippleShader.rawProgress = startingPercentage + (progress * (1 - startingPercentage))
+            rippleShader.distortionStrength = 1 - rippleShader.rawProgress
+            rippleShader.pixelDensity = 1 - rippleShader.rawProgress
             rippleShader.time = now.toFloat()
             invalidate()
         }

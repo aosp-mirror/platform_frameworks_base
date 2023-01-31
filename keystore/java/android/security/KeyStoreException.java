@@ -265,7 +265,7 @@ public class KeyStoreException extends Exception {
     private static int initializeRkpStatusForRegularErrors(int errorCode) {
         // Check if the system code mistakenly called a constructor of KeyStoreException with
         // the OUT_OF_KEYS error code but without RKP status.
-        if (isRkpRelatedError(errorCode)) {
+        if (errorCode == ResponseCode.OUT_OF_KEYS) {
             Log.e(TAG, "RKP error code without RKP status");
             // Set RKP status to RKP_SERVER_REFUSED_ISSUANCE so that the caller never retries.
             return RKP_SERVER_REFUSED_ISSUANCE;
@@ -301,7 +301,7 @@ public class KeyStoreException extends Exception {
         super(message);
         mErrorCode = errorCode;
         mRkpStatus = rkpStatus;
-        if (!isRkpRelatedError(mErrorCode)) {
+        if (mErrorCode != ResponseCode.OUT_OF_KEYS) {
             Log.e(TAG, "Providing RKP status for error code " + errorCode + " has no effect.");
         }
     }
@@ -338,7 +338,7 @@ public class KeyStoreException extends Exception {
     public boolean isTransientFailure() {
         PublicErrorInformation failureInfo = getErrorInformation(mErrorCode);
         // Special-case handling for RKP failures:
-        if (mRkpStatus != RKP_SUCCESS && isRkpRelatedError(mErrorCode)) {
+        if (mRkpStatus != RKP_SUCCESS && mErrorCode == ResponseCode.OUT_OF_KEYS) {
             switch (mRkpStatus) {
                 case RKP_TEMPORARILY_UNAVAILABLE:
                 case RKP_FETCHING_PENDING_CONNECTIVITY:
@@ -376,11 +376,6 @@ public class KeyStoreException extends Exception {
         return (failureInfo.indicators & IS_SYSTEM_ERROR) != 0;
     }
 
-    private static boolean isRkpRelatedError(int errorCode) {
-        return errorCode == ResponseCode.OUT_OF_KEYS
-                  || errorCode == ResponseCode.OUT_OF_KEYS_REQUIRES_UPGRADE;
-    }
-
     /**
      * Returns the re-try policy for transient failures. Valid only if
      * {@link #isTransientFailure()} returns {@code True}.
@@ -388,7 +383,7 @@ public class KeyStoreException extends Exception {
     @RetryPolicy
     public int getRetryPolicy() {
         PublicErrorInformation failureInfo = getErrorInformation(mErrorCode);
-        // Special-case handling for RKP failures:
+        // Special-case handling for RKP failures (To be removed in API 34)
         if (mRkpStatus != RKP_SUCCESS) {
             switch (mRkpStatus) {
                 case RKP_TEMPORARILY_UNAVAILABLE:
@@ -404,10 +399,14 @@ public class KeyStoreException extends Exception {
                             ? RETRY_WITH_EXPONENTIAL_BACKOFF : RETRY_NEVER;
             }
         }
-        if ((failureInfo.indicators & IS_TRANSIENT_ERROR) != 0) {
-            return RETRY_WITH_EXPONENTIAL_BACKOFF;
-        } else {
-            return RETRY_NEVER;
+        switch (mErrorCode) {
+            case ResponseCode.OUT_OF_KEYS_REQUIRES_SYSTEM_UPGRADE:
+                return RETRY_AFTER_NEXT_REBOOT;
+            case ResponseCode.OUT_OF_KEYS_PENDING_INTERNET_CONNECTIVITY:
+                return RETRY_WHEN_CONNECTIVITY_AVAILABLE;
+            default:
+                return (failureInfo.indicators & IS_TRANSIENT_ERROR) != 0
+                        ? RETRY_WITH_EXPONENTIAL_BACKOFF : RETRY_NEVER;
         }
     }
 
@@ -657,8 +656,16 @@ public class KeyStoreException extends Exception {
                 new PublicErrorInformation(0, ERROR_KEY_DOES_NOT_EXIST));
         sErrorCodeToFailureInfo.put(ResponseCode.OUT_OF_KEYS,
                 new PublicErrorInformation(IS_SYSTEM_ERROR, ERROR_ATTESTATION_KEYS_UNAVAILABLE));
-        sErrorCodeToFailureInfo.put(ResponseCode.OUT_OF_KEYS_REQUIRES_UPGRADE,
+        sErrorCodeToFailureInfo.put(ResponseCode.OUT_OF_KEYS_REQUIRES_SYSTEM_UPGRADE,
                 new PublicErrorInformation(IS_SYSTEM_ERROR | IS_TRANSIENT_ERROR,
                         ERROR_DEVICE_REQUIRES_UPGRADE_FOR_ATTESTATION));
+        sErrorCodeToFailureInfo.put(ResponseCode.OUT_OF_KEYS_PENDING_INTERNET_CONNECTIVITY,
+                new PublicErrorInformation(IS_SYSTEM_ERROR | IS_TRANSIENT_ERROR,
+                        ERROR_ATTESTATION_KEYS_UNAVAILABLE));
+        sErrorCodeToFailureInfo.put(ResponseCode.OUT_OF_KEYS_TRANSIENT_ERROR,
+                new PublicErrorInformation(IS_SYSTEM_ERROR | IS_TRANSIENT_ERROR,
+                        ERROR_ATTESTATION_KEYS_UNAVAILABLE));
+        sErrorCodeToFailureInfo.put(ResponseCode.OUT_OF_KEYS_PERMANENT_ERROR,
+                new PublicErrorInformation(IS_SYSTEM_ERROR, ERROR_ATTESTATION_KEYS_UNAVAILABLE));
     }
 }

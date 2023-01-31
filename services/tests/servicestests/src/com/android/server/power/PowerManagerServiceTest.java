@@ -16,6 +16,7 @@
 
 package com.android.server.power;
 
+import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
@@ -29,6 +30,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.AdditionalMatchers.gt;
+import static org.mockito.AdditionalMatchers.leq;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -150,6 +153,9 @@ public class PowerManagerServiceTest {
     @Mock
     private InattentiveSleepWarningController mInattentiveSleepWarningControllerMock;
 
+    @Mock
+    private ActivityManagerInternal mActivityManagerInternal;
+
     private PowerManagerService mService;
     private ContextWrapper mContextSpy;
     private BatteryReceiver mBatteryReceiver;
@@ -205,6 +211,7 @@ public class PowerManagerServiceTest {
         addLocalServiceMock(ActivityManagerInternal.class, mActivityManagerInternalMock);
         addLocalServiceMock(AttentionManagerInternal.class, mAttentionManagerInternalMock);
         addLocalServiceMock(DreamManagerInternal.class, mDreamManagerInternalMock);
+        addLocalServiceMock(ActivityManagerInternal.class, mActivityManagerInternal);
 
         mContextSpy = spy(new ContextWrapper(ApplicationProvider.getApplicationContext()));
         mResourcesSpy = spy(mContextSpy.getResources());
@@ -221,6 +228,14 @@ public class PowerManagerServiceTest {
 
         mClock = new OffsettableClock.Stopped();
         mTestLooper = new TestLooper(mClock::now);
+
+        // Set up canHoldWakeLocksInDeepDoze.
+        // - procstate <= PROCESS_STATE_BOUND_FOREGROUND_SERVICE -> true
+        // - procstate >  PROCESS_STATE_BOUND_FOREGROUND_SERVICE -> false
+        when(mActivityManagerInternal.canHoldWakeLocksInDeepDoze(
+                anyInt(), leq(PROCESS_STATE_BOUND_FOREGROUND_SERVICE))).thenReturn(true);
+        when(mActivityManagerInternal.canHoldWakeLocksInDeepDoze(
+                anyInt(), gt(PROCESS_STATE_BOUND_FOREGROUND_SERVICE))).thenReturn(false);
     }
 
     private PowerManagerService createService() {

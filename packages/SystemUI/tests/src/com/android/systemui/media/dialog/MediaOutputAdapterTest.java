@@ -31,6 +31,7 @@ import android.graphics.drawable.Icon;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 
 import androidx.core.graphics.drawable.IconCompat;
 import androidx.test.filters.SmallTest;
@@ -45,6 +46,8 @@ import com.google.common.collect.ImmutableList;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,6 +75,8 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     private IconCompat mIconCompat = mock(IconCompat.class);
     private View mDialogLaunchView = mock(View.class);
 
+    @Captor
+    private ArgumentCaptor<SeekBar.OnSeekBarChangeListener> mOnSeekBarChangeListenerCaptor;
     private MediaOutputAdapter mMediaOutputAdapter;
     private MediaOutputAdapter.MediaDeviceViewHolder mViewHolder;
     private List<MediaDevice> mMediaDevices = new ArrayList<>();
@@ -349,6 +354,24 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
 
         assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mSeekBar.getVolume()).isEqualTo(TEST_CURRENT_VOLUME);
+    }
+
+    @Test
+    public void onBindViewHolder_dragSeekbar_setsVolume() {
+        mOnSeekBarChangeListenerCaptor = ArgumentCaptor.forClass(
+                SeekBar.OnSeekBarChangeListener.class);
+        MediaOutputSeekbar mSpySeekbar = spy(mViewHolder.mSeekBar);
+        mViewHolder.mSeekBar = mSpySeekbar;
+        when(mMediaDevice1.getMaxVolume()).thenReturn(TEST_MAX_VOLUME);
+        when(mMediaDevice1.getCurrentVolume()).thenReturn(TEST_MAX_VOLUME);
+        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
+
+        verify(mViewHolder.mSeekBar).setOnSeekBarChangeListener(
+                mOnSeekBarChangeListenerCaptor.capture());
+
+        mOnSeekBarChangeListenerCaptor.getValue().onStopTrackingTouch(mViewHolder.mSeekBar);
+        assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
+        verify(mMediaOutputController).logInteractionAdjustVolume(mMediaDevice1);
     }
 
     @Test

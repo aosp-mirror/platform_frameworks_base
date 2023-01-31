@@ -1,7 +1,10 @@
 package com.android.internal.widget;
 
+import static android.provider.DeviceConfig.NAMESPACE_AUTO_PIN_CONFIRMATION;
+
 import android.annotation.NonNull;
 import android.os.AsyncTask;
+import android.provider.DeviceConfig;
 
 import com.android.internal.widget.LockPatternUtils.RequestThrottledException;
 
@@ -117,6 +120,10 @@ public final class LockPatternChecker {
             @Override
             protected void onPostExecute(Boolean result) {
                 callback.onChecked(result, mThrottleTimeout);
+                if (DeviceConfig.getBoolean(NAMESPACE_AUTO_PIN_CONFIRMATION,
+                        "enable_auto_pin_confirmation", false)) {
+                    utils.setPinLength(userId, credentialCopy.size());
+                }
                 credentialCopy.zeroize();
             }
 

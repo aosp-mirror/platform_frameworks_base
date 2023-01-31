@@ -201,7 +201,7 @@ public class WallpaperManagerServiceTests {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        ExtendedMockito.doAnswer(invocation ->  {
+        ExtendedMockito.doAnswer(invocation -> {
             int userId = (invocation.getArgument(0));
             return getWallpaperTestDir(userId);
         }).when(() -> WallpaperUtils.getWallpaperDir(anyInt()));
@@ -315,7 +315,8 @@ public class WallpaperManagerServiceTests {
 
         spyOn(mService.mWallpaperDisplayHelper);
         doReturn(true).when(mService.mWallpaperDisplayHelper)
-                .isUsableDisplay(any(Display.class), mService.mLastWallpaper.connection.mClientUid);
+                .isUsableDisplay(any(Display.class),
+                        eq(mService.mLastWallpaper.connection.mClientUid));
         mService.mLastWallpaper.connection.attachEngine(mock(IWallpaperEngine.class),
                 DEFAULT_DISPLAY);
 

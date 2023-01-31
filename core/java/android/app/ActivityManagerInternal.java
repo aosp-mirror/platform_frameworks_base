@@ -955,4 +955,12 @@ public abstract class ActivityManagerInternal {
      * @hide
      */
     public abstract void stopForegroundServiceDelegate(@NonNull ServiceConnection connection);
+
+    /**
+     * Called by PowerManager. Return whether a given procstate is allowed to hold
+     * wake locks in deep doze. Because it's called with the power manager lock held, we can't
+     * hold AM locks in it.
+     * @hide
+     */
+    public abstract boolean canHoldWakeLocksInDeepDoze(int uid, int procstate);
 }

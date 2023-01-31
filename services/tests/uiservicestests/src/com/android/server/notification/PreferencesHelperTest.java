@@ -93,6 +93,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -2446,6 +2447,35 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 NotificationChannelLogger.NotificationChannelEvent
                         .NOTIFICATION_CHANNEL_DELETED,
                 mLogger.get(6).event);  // Final log is the deletion of the channel.
+    }
+
+    @Test
+    public void testGetNotificationChannelGroup() throws Exception {
+        NotificationChannelGroup notDeleted = new NotificationChannelGroup("not", "deleted");
+        NotificationChannel base =
+                new NotificationChannel("not deleted", "belongs to notDeleted", IMPORTANCE_DEFAULT);
+        base.setGroup("not");
+        NotificationChannel convo =
+                new NotificationChannel("convo", "belongs to notDeleted", IMPORTANCE_DEFAULT);
+        convo.setGroup("not");
+        convo.setConversationId("not deleted", "banana");
+
+        mHelper.createNotificationChannelGroup(PKG_N_MR1, UID_N_MR1, notDeleted, true);
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, base, true, false);
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, convo, true, false);
+        mHelper.createNotificationChannelGroup(PKG_N_MR1, UID_N_MR1, notDeleted, true);
+
+        NotificationChannelGroup g
+                = mHelper.getNotificationChannelGroup(notDeleted.getId(), PKG_N_MR1, UID_N_MR1);
+        Parcel parcel = Parcel.obtain();
+        g.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+
+        NotificationChannelGroup g2
+                = mHelper.getNotificationChannelGroup(notDeleted.getId(), PKG_N_MR1, UID_N_MR1);
+        Parcel parcel2 = Parcel.obtain();
+        g2.writeToParcel(parcel2, 0);
+        parcel2.setDataPosition(0);
     }
 
     @Test

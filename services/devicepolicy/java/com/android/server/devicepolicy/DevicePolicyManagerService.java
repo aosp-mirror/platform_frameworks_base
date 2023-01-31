@@ -16363,7 +16363,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private boolean hasAccountFeatures(AccountManager am, Account account, String[] features) {
         try {
-            return am.hasFeatures(account, features, null, null).getResult();
+            // TODO(267156507): Restore without blocking binder thread
+            return false;
+//            return am.hasFeatures(account, features, null, null).getResult();
         } catch (Exception e) {
             Slogf.w(LOG_TAG, "Failed to get account feature", e);
             return false;

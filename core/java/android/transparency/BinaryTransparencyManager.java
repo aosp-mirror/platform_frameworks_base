@@ -19,6 +19,7 @@ package android.transparency;
 import android.annotation.NonNull;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Slog;
 
@@ -83,4 +84,36 @@ public class BinaryTransparencyManager {
         }
     }
 
+    /**
+     * Collects the APEX information on the device.
+     *
+     * @param includeTestOnly Whether to include test only data in the returned ApexInfo.
+     * @return A List containing the APEX info.
+     * @hide
+     */
+    @NonNull
+    public List<IBinaryTransparencyService.ApexInfo> collectAllApexInfo(boolean includeTestOnly) {
+        try {
+            return mService.collectAllApexInfo(includeTestOnly);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Collects the updated preload information on the device.
+     *
+     * @return A List containing the preload info.
+     * @hide
+     */
+    @NonNull
+    public List<IBinaryTransparencyService.AppInfo> collectAllUpdatedPreloadInfo(
+            Bundle packagesToSkip) {
+        try {
+            Slog.d(TAG, "Calling backend's collectAllUpdatedPreloadInfo()");
+            return mService.collectAllUpdatedPreloadInfo(packagesToSkip);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

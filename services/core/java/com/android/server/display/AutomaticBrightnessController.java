@@ -402,7 +402,6 @@ class AutomaticBrightnessController {
             boolean userChangedAutoBrightnessAdjustment, int displayPolicy,
             boolean shouldResetShortTermModel) {
         mState = state;
-        mHbmController.setAutoBrightnessEnabled(mState);
         // While dozing, the application processor may be suspended which will prevent us from
         // receiving new information from the light sensor. On some devices, we may be able to
         // switch to a wake-up light sensor instead but for now we will simply disable the sensor
@@ -466,7 +465,6 @@ class AutomaticBrightnessController {
         mHandler.sendEmptyMessage(MSG_RUN_UPDATE);
     }
 
-    @VisibleForTesting
     float getAmbientLux() {
         return mAmbientLux;
     }

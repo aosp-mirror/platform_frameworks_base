@@ -1127,13 +1127,14 @@ public class GnssNative {
     }
 
     @NativeEntryPoint
-    void setTopHalCapabilities(@GnssCapabilities.TopHalCapabilityFlags int capabilities) {
+    void setTopHalCapabilities(@GnssCapabilities.TopHalCapabilityFlags int capabilities,
+            boolean isAdrCapabilityKnown) {
         // Here the bits specified by 'capabilities' are turned on. It is handled differently from
         // sub hal because top hal capabilities could be set by HIDL HAL and/or AIDL HAL. Each of
         // them possesses a different set of capabilities.
         mTopFlags |= capabilities;
         GnssCapabilities oldCapabilities = mCapabilities;
-        mCapabilities = oldCapabilities.withTopHalFlags(mTopFlags);
+        mCapabilities = oldCapabilities.withTopHalFlags(mTopFlags, isAdrCapabilityKnown);
         onCapabilitiesChanged(oldCapabilities, mCapabilities);
     }
 

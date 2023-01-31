@@ -22,6 +22,7 @@ import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.util.animation.MeasurementInput
 import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.animation.TransitionViewState
@@ -55,6 +56,7 @@ class MediaViewControllerTest : SysuiTestCase() {
     @Mock private lateinit var mediaTitleWidgetState: WidgetState
     @Mock private lateinit var mediaSubTitleWidgetState: WidgetState
     @Mock private lateinit var mediaContainerWidgetState: WidgetState
+    @Mock private lateinit var mediaFlags: MediaFlags
 
     val delta = 0.1F
 
@@ -64,7 +66,13 @@ class MediaViewControllerTest : SysuiTestCase() {
     fun setup() {
         MockitoAnnotations.initMocks(this)
         mediaViewController =
-            MediaViewController(context, configurationController, mediaHostStatesManager, logger)
+            MediaViewController(
+                context,
+                configurationController,
+                mediaHostStatesManager,
+                logger,
+                mediaFlags,
+            )
     }
 
     @Test

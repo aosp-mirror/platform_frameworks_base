@@ -1584,6 +1584,12 @@ public class JobSchedulerService extends com.android.server.SystemService
         return reason;
     }
 
+    @VisibleForTesting
+    @JobScheduler.PendingJobReason
+    int getPendingJobReason(JobStatus job) {
+        return getPendingJobReason(job.getUid(), job.getNamespace(), job.getJobId());
+    }
+
     @JobScheduler.PendingJobReason
     @GuardedBy("mLock")
     private int getPendingJobReasonLocked(int uid, String namespace, int jobId) {
@@ -1694,7 +1700,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
-    private void stopUserVisibleJobsInternal(@NonNull String packageName, int userId) {
+    @VisibleForTesting
+    void stopUserVisibleJobsInternal(@NonNull String packageName, int userId) {
         final int packageUid = mLocalPM.getPackageUid(packageName, 0, userId);
         if (packageUid < 0) {
             Slog.wtf(TAG, "Asked to stop jobs of an unknown package");
@@ -1716,6 +1723,21 @@ public class JobSchedulerService extends com.android.server.SystemService
                 // to stop only that work, B's jobs would be demoted as well.
                 // TODO(255768978): make it possible to demote only the relevant subset of jobs
                 job.addInternalFlags(JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER);
+
+                // The app process will be killed soon. There's no point keeping its jobs in
+                // the pending queue to try and start them.
+                if (mPendingJobQueue.remove(job)) {
+                    synchronized (mPendingJobReasonCache) {
+                        SparseIntArray jobIdToReason = mPendingJobReasonCache.get(
+                                job.getUid(), job.getNamespace());
+                        if (jobIdToReason == null) {
+                            jobIdToReason = new SparseIntArray();
+                            mPendingJobReasonCache.add(job.getUid(), job.getNamespace(),
+                                    jobIdToReason);
+                        }
+                        jobIdToReason.put(job.getJobId(), JobScheduler.PENDING_JOB_REASON_USER);
+                    }
+                }
             }
         }
     }

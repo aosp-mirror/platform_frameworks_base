@@ -97,7 +97,8 @@ public class SurfaceControlViewHost {
         public ISurfaceSyncGroup getSurfaceSyncGroup() {
             CompletableFuture<ISurfaceSyncGroup> surfaceSyncGroup = new CompletableFuture<>();
             mViewRoot.mHandler.post(
-                    () -> surfaceSyncGroup.complete(mViewRoot.getOrCreateSurfaceSyncGroup()));
+                    () -> surfaceSyncGroup.complete(
+                            mViewRoot.getOrCreateSurfaceSyncGroup().mISurfaceSyncGroup));
             try {
                 return surfaceSyncGroup.get(1, TimeUnit.SECONDS);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {

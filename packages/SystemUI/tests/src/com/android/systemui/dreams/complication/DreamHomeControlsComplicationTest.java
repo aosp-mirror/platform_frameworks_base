@@ -31,13 +31,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
-import android.widget.ImageView;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.common.ui.view.LaunchableImageView;
 import com.android.systemui.controls.ControlsServiceInfo;
 import com.android.systemui.controls.controller.ControlsController;
 import com.android.systemui.controls.controller.StructureInfo;
@@ -90,7 +90,7 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     private View mView;
 
     @Mock
-    private ImageView mHomeControlsView;
+    private LaunchableImageView mHomeControlsView;
 
     @Mock
     private ActivityStarter mActivityStarter;

@@ -64,7 +64,6 @@ import static com.android.wm.shell.transition.TransitionAnimationHelper.addBackg
 import static com.android.wm.shell.transition.TransitionAnimationHelper.edgeExtendWindow;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.getTransitionBackgroundColorIfSet;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.loadAttributeAnimation;
-import static com.android.wm.shell.transition.TransitionAnimationHelper.sDisableCustomTaskAnimationProperty;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -568,7 +567,6 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         final boolean isTask = change.getTaskInfo() != null;
         final TransitionInfo.AnimationOptions options = info.getAnimationOptions();
         final int overrideType = options != null ? options.getType() : ANIM_NONE;
-        final boolean canCustomContainer = !isTask || !sDisableCustomTaskAnimationProperty;
         final Rect endBounds = Transitions.isClosingType(changeMode)
                 ? mRotator.getEndBoundsInStartRotation(change)
                 : change.getEndAbsBounds();
@@ -591,7 +589,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         } else if (type == TRANSIT_RELAUNCH) {
             a = mTransitionAnimation.createRelaunchAnimation(endBounds, mInsets, endBounds);
         } else if (overrideType == ANIM_CUSTOM
-                && (canCustomContainer || options.getOverrideTaskTransition())) {
+                && (!isTask || options.getOverrideTaskTransition())) {
             a = mTransitionAnimation.loadAnimationRes(options.getPackageName(), enter
                     ? options.getEnterResId() : options.getExitResId());
         } else if (overrideType == ANIM_OPEN_CROSS_PROFILE_APPS && enter) {

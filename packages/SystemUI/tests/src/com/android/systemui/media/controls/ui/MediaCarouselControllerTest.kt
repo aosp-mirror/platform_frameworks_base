@@ -33,6 +33,7 @@ import com.android.systemui.media.controls.models.recommendation.SmartspaceMedia
 import com.android.systemui.media.controls.pipeline.EMPTY_SMARTSPACE_MEDIA_DATA
 import com.android.systemui.media.controls.pipeline.MediaDataManager
 import com.android.systemui.media.controls.ui.MediaHierarchyManager.Companion.LOCATION_QS
+import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
@@ -87,6 +88,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Mock lateinit var smartspaceMediaData: SmartspaceMediaData
     @Mock lateinit var mediaCarousel: MediaScrollView
     @Mock lateinit var pageIndicator: PageIndicator
+    @Mock lateinit var mediaFlags: MediaFlags
     @Captor lateinit var listener: ArgumentCaptor<MediaDataManager.Listener>
     @Captor
     lateinit var configListener: ArgumentCaptor<ConfigurationController.ConfigurationListener>
@@ -114,7 +116,8 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                 falsingManager,
                 dumpManager,
                 logger,
-                debugLogger
+                debugLogger,
+                mediaFlags,
             )
         verify(configurationController).addCallback(capture(configListener))
         verify(mediaDataManager).addListener(capture(listener))
