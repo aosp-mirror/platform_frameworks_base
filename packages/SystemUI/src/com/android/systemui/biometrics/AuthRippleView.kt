@@ -86,7 +86,7 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
 
     init {
         rippleShader.color = 0xffffffff.toInt() // default color
-        rippleShader.progress = 0f
+        rippleShader.rawProgress = 0f
         rippleShader.sparkleStrength = RIPPLE_SPARKLE_STRENGTH
         ripplePaint.shader = rippleShader
 
@@ -269,7 +269,7 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
             duration = AuthRippleController.RIPPLE_ANIMATION_DURATION
             addUpdateListener { animator ->
                 val now = animator.currentPlayTime
-                rippleShader.progress = animator.animatedValue as Float
+                rippleShader.rawProgress = animator.animatedValue as Float
                 rippleShader.time = now.toFloat()
 
                 invalidate()
@@ -342,7 +342,7 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
     override fun onDraw(canvas: Canvas?) {
         // To reduce overdraw, we mask the effect to a circle whose radius is big enough to cover
         // the active effect area. Values here should be kept in sync with the
-        // animation implementation in the ripple shader.
+        // animation implementation in the ripple shader. (Twice bigger)
         if (drawDwell) {
             val maskRadius = (1 - (1 - dwellShader.progress) * (1 - dwellShader.progress) *
                     (1 - dwellShader.progress)) * dwellRadius * 2f
@@ -351,10 +351,8 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         }
 
         if (drawRipple) {
-            val mask = (1 - (1 - rippleShader.progress) * (1 - rippleShader.progress) *
-                    (1 - rippleShader.progress)) * radius * 2f
             canvas?.drawCircle(origin.x.toFloat(), origin.y.toFloat(),
-                    mask, ripplePaint)
+                    rippleShader.currentWidth, ripplePaint)
         }
     }
 }

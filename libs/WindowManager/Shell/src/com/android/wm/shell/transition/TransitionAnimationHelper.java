@@ -43,7 +43,6 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Shader;
-import android.os.SystemProperties;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.animation.Animation;
@@ -59,21 +58,6 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup;
 /** The helper class that provides methods for adding styles to transition animations. */
 public class TransitionAnimationHelper {
 
-    /**
-     * Restrict ability of activities overriding transition animation in a way such that
-     * an activity can do it only when the transition happens within a same task.
-     *
-     * @see android.app.Activity#overridePendingTransition(int, int)
-     */
-    private static final String DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY =
-            "persist.wm.disable_custom_task_animation";
-
-    /**
-     * @see #DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY
-     */
-    static final boolean sDisableCustomTaskAnimationProperty =
-            SystemProperties.getBoolean(DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY, true);
-
     /** Loads the animation that is defined through attribute id for the given transition. */
     @Nullable
     public static Animation loadAttributeAnimation(@NonNull TransitionInfo info,
@@ -86,7 +70,6 @@ public class TransitionAnimationHelper {
         final boolean isTask = change.getTaskInfo() != null;
         final TransitionInfo.AnimationOptions options = info.getAnimationOptions();
         final int overrideType = options != null ? options.getType() : ANIM_NONE;
-        final boolean canCustomContainer = !isTask || !sDisableCustomTaskAnimationProperty;
         final boolean isDream =
                 isTask && change.getTaskInfo().topActivityType == ACTIVITY_TYPE_DREAM;
         int animAttr = 0;
@@ -158,7 +141,7 @@ public class TransitionAnimationHelper {
 
         Animation a = null;
         if (animAttr != 0) {
-            if (overrideType == ANIM_FROM_STYLE && canCustomContainer) {
+            if (overrideType == ANIM_FROM_STYLE && !isTask) {
                 a = transitionAnimation
                         .loadAnimationAttr(options.getPackageName(), options.getAnimations(),
                                 animAttr, translucent);

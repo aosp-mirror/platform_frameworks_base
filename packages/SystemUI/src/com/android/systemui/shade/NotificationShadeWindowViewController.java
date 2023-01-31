@@ -160,12 +160,10 @@ public class NotificationShadeWindowViewController {
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
-        if (featureFlags.isEnabled(Flags.MODERN_BOUNCER)) {
-            KeyguardBouncerViewBinder.bind(
-                    mView.findViewById(R.id.keyguard_bouncer_container),
-                    keyguardBouncerViewModel,
-                    keyguardBouncerComponentFactory);
-        }
+        KeyguardBouncerViewBinder.bind(
+                mView.findViewById(R.id.keyguard_bouncer_container),
+                keyguardBouncerViewModel,
+                keyguardBouncerComponentFactory);
 
         if (featureFlags.isEnabled(Flags.UNOCCLUSION_TRANSITION)) {
             collectFlow(mView, keyguardTransitionInteractor.getLockscreenToDreamingTransition(),

@@ -23,11 +23,16 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.os.SystemClock;
+import android.util.IndentingPrintWriter;
+import android.util.LocalLog;
 import android.util.Log;
 import android.util.NtpTrustedTime;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.io.PrintWriter;
 
 /**
  * Handles injecting network time to GNSS by explicitly making NTP requests when needed.
@@ -60,6 +65,9 @@ class NtpNetworkTimeHelper extends NetworkTimeHelper {
     private static final long WAKELOCK_TIMEOUT_MILLIS = 60 * 1000;
     private static final String WAKELOCK_KEY = "NtpTimeHelper";
 
+    private final LocalLog mDumpLog = new LocalLog(10, /*useLocalTimestamps=*/false);
+
+    @GuardedBy("this")
     private final ExponentialBackOff mNtpBackOff = new ExponentialBackOff(RETRY_INTERVAL,
             MAX_RETRY_INTERVAL);
 
@@ -103,14 +111,37 @@ class NtpNetworkTimeHelper extends NetworkTimeHelper {
 
     @Override
     void demandUtcTimeInjection() {
-        retrieveAndInjectNtpTime();
+        retrieveAndInjectNtpTime("demandUtcTimeInjection");
     }
 
     @Override
     synchronized void onNetworkAvailable() {
         if (mInjectNtpTimeState == STATE_PENDING_NETWORK) {
-            retrieveAndInjectNtpTime();
+            retrieveAndInjectNtpTime("onNetworkAvailable");
         }
+    }
+
+    @Override
+    void dump(PrintWriter pw) {
+        pw.println("NtpNetworkTimeHelper:");
+
+        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+        ipw.increaseIndent();
+        synchronized (this) {
+            ipw.println("mInjectNtpTimeState=" + mInjectNtpTimeState);
+            ipw.println("mPeriodicTimeInjection=" + mPeriodicTimeInjection);
+            ipw.println("mNtpBackOff=" + mNtpBackOff);
+        }
+
+        ipw.println("Debug log:");
+        ipw.increaseIndent();
+        mDumpLog.dump(ipw);
+        ipw.decreaseIndent();
+
+        ipw.println("NtpTrustedTime:");
+        ipw.increaseIndent();
+        mNtpTime.dump(ipw);
+        ipw.decreaseIndent();
     }
 
     /**
@@ -122,14 +153,14 @@ class NtpNetworkTimeHelper extends NetworkTimeHelper {
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
-    private synchronized void retrieveAndInjectNtpTime() {
+    private synchronized void retrieveAndInjectNtpTime(String reason) {
         if (mInjectNtpTimeState == STATE_RETRIEVING_AND_INJECTING) {
             // already downloading data
             return;
         }
         if (!isNetworkConnected()) {
             // try to inject the cached NTP time
-            injectCachedNtpTime();
+            maybeInjectCachedNtpTime(reason + "[Network not connected]");
             // try again when network is up
             mInjectNtpTimeState = STATE_PENDING_NETWORK;
             return;
@@ -143,7 +174,8 @@ class NtpNetworkTimeHelper extends NetworkTimeHelper {
 
     /** {@link NtpTrustedTime#forceRefresh} is a blocking network operation. */
     private void blockingGetNtpTimeAndInject() {
-        long delay;
+        long debugId = SystemClock.elapsedRealtime();
+        long delayMillis;
 
         // force refresh NTP cache when outdated
         boolean refreshSuccess = true;
@@ -158,26 +190,30 @@ class NtpNetworkTimeHelper extends NetworkTimeHelper {
 
             // only update when NTP time is fresh
             // If refreshSuccess is false, cacheAge does not drop down.
-            if (injectCachedNtpTime()) {
-                delay = NTP_INTERVAL;
+            String injectReason = "blockingGetNtpTimeAndInject:"
+                    + ", debugId=" + debugId
+                    + ", refreshSuccess=" + refreshSuccess;
+            if (maybeInjectCachedNtpTime(injectReason)) {
+                delayMillis = NTP_INTERVAL;
                 mNtpBackOff.reset();
             } else {
-                Log.e(TAG, "requestTime failed");
-                delay = mNtpBackOff.nextBackoffMillis();
+                logWarn("maybeInjectCachedNtpTime() returned false");
+                delayMillis = mNtpBackOff.nextBackoffMillis();
             }
 
-            if (DEBUG) {
-                Log.d(TAG, String.format(
-                        "mPeriodicTimeInjection=%s, refreshSuccess=%s, delay=%s",
-                        mPeriodicTimeInjection,
-                        refreshSuccess,
-                        delay));
-            }
             if (mPeriodicTimeInjection || !refreshSuccess) {
+                String debugMsg = "blockingGetNtpTimeAndInject: Scheduling later NTP retrieval"
+                                + ", debugId=" + debugId
+                                + ", mPeriodicTimeInjection=" + mPeriodicTimeInjection
+                                + ", refreshSuccess=" + refreshSuccess
+                                + ", delayMillis=" + delayMillis;
+                logDebug(debugMsg);
+
                 // Schedule next NTP injection.
                 // Since this is delayed, the wake lock is released right away, and will be held
                 // again when the delayed task runs.
-                mHandler.postDelayed(this::retrieveAndInjectNtpTime, delay);
+                String reason = "scheduled: debugId=" + debugId;
+                mHandler.postDelayed(() -> retrieveAndInjectNtpTime(reason), delayMillis);
             }
         }
         // release wake lock held by task
@@ -185,24 +221,41 @@ class NtpNetworkTimeHelper extends NetworkTimeHelper {
     }
 
     /** Returns true if successfully inject cached NTP time. */
-    private synchronized boolean injectCachedNtpTime() {
+    private synchronized boolean maybeInjectCachedNtpTime(String reason) {
         NtpTrustedTime.TimeResult ntpResult = mNtpTime.getCachedTimeResult();
         if (ntpResult == null || ntpResult.getAgeMillis() >= NTP_INTERVAL) {
+            String debugMsg = "maybeInjectCachedNtpTime: Not injecting latest NTP time"
+                    + ", reason=" + reason
+                    + ", ntpResult=" + ntpResult;
+            logDebug(debugMsg);
+
             return false;
         }
 
         long unixEpochTimeMillis = ntpResult.getTimeMillis();
+        long currentTimeMillis = System.currentTimeMillis();
+        String debugMsg = "maybeInjectCachedNtpTime: Injecting latest NTP time"
+                + ", reason=" + reason
+                + ", ntpResult=" + ntpResult
+                + ", System time offset millis=" + (unixEpochTimeMillis - currentTimeMillis);
+        logDebug(debugMsg);
+
         long timeReferenceMillis = ntpResult.getElapsedRealtimeMillis();
         int uncertaintyMillis = ntpResult.getUncertaintyMillis();
-        if (DEBUG) {
-            long currentTimeMillis = System.currentTimeMillis();
-            Log.d(TAG, "NTP server returned: " + unixEpochTimeMillis
-                    + " ntpResult: " + ntpResult
-                    + " system time offset: " + (unixEpochTimeMillis - currentTimeMillis));
-        }
-
         mHandler.post(() -> mCallback.injectTime(unixEpochTimeMillis, timeReferenceMillis,
                 uncertaintyMillis));
         return true;
+    }
+
+    private void logWarn(String logMsg) {
+        mDumpLog.log(logMsg);
+        Log.e(TAG, logMsg);
+    }
+
+    private void logDebug(String debugMsg) {
+        mDumpLog.log(debugMsg);
+        if (DEBUG) {
+            Log.d(TAG, debugMsg);
+        }
     }
 }

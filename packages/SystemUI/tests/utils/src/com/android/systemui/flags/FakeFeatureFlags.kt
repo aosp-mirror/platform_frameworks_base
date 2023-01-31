@@ -38,12 +38,6 @@ class FakeFeatureFlags : FeatureFlags {
         }
     }
 
-    fun set(flag: DeviceConfigBooleanFlag, value: Boolean) {
-        if (booleanFlags.put(flag.id, value)?.let { value != it } != false) {
-            notifyFlagChanged(flag)
-        }
-    }
-
     fun set(flag: ResourceBooleanFlag, value: Boolean) {
         if (booleanFlags.put(flag.id, value)?.let { value != it } != false) {
             notifyFlagChanged(flag)
@@ -73,7 +67,7 @@ class FakeFeatureFlags : FeatureFlags {
             listeners.forEach { listener ->
                 listener.onFlagChanged(
                     object : FlagListenable.FlagEvent {
-                        override val flagId = flag.id
+                        override val flagName = flag.name
                         override fun requestNoRestart() {}
                     }
                 )

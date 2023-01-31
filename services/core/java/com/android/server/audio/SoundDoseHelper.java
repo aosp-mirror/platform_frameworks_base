@@ -404,7 +404,8 @@ public class SoundDoseHelper {
                         mPendingVolumeCommand.mIndex,
                         mPendingVolumeCommand.mFlags,
                         mPendingVolumeCommand.mDevice,
-                        callingPackage, true /*hasModifyAudioSettings*/);
+                        callingPackage, true /*hasModifyAudioSettings*/,
+                        true /*canChangeMute*/);
                 mPendingVolumeCommand = null;
             }
         }

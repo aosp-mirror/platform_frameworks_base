@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2023 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+
+<!-- Layout for media recommendations inside QSPanel carousel -->
+<com.android.systemui.util.animation.TransitionLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/media_recommendations_updated"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:forceHasOverlappingRendering="false"
+    android:background="@drawable/qs_media_background"
+    android:theme="@style/MediaPlayer">
+
+    <!-- This view just ensures the full media player is a certain height. -->
+    <View
+        android:id="@+id/sizing_view"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/qs_media_session_height_expanded" />
+
+    <TextView
+        android:id="@+id/media_rec_title"
+        style="@style/MediaPlayer.Recommendation.Header"
+        android:text="@string/controls_media_smartspace_rec_header"/>
+
+    <FrameLayout
+        android:id="@+id/media_cover1_container"
+        style="@style/MediaPlayer.Recommendation.AlbumContainer.Updated"
+        >
+
+        <include
+            layout="@layout/media_recommendation_view"/>
+
+    </FrameLayout>
+
+
+    <FrameLayout
+        android:id="@+id/media_cover2_container"
+        style="@style/MediaPlayer.Recommendation.AlbumContainer.Updated"
+        >
+
+        <include
+            layout="@layout/media_recommendation_view"/>
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/media_cover3_container"
+        style="@style/MediaPlayer.Recommendation.AlbumContainer.Updated"
+        >
+
+        <include
+            layout="@layout/media_recommendation_view"/>
+
+    </FrameLayout>
+
+    <include
+        layout="@layout/media_long_press_menu" />
+
+</com.android.systemui.util.animation.TransitionLayout>

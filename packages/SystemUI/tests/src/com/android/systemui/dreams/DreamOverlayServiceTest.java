@@ -31,6 +31,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.service.dreams.IDreamOverlay;
 import android.service.dreams.IDreamOverlayCallback;
+import android.service.dreams.IDreamOverlayClient;
+import android.service.dreams.IDreamOverlayClientCallback;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,6 +63,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
@@ -189,13 +192,25 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 mDreamOverlayCallbackController);
     }
 
-    @Test
-    public void testOnStartMetricsLogged() throws Exception {
+    public IDreamOverlayClient getClient() throws RemoteException {
         final IBinder proxy = mService.onBind(new Intent());
         final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+        final IDreamOverlayClientCallback callback =
+                Mockito.mock(IDreamOverlayClientCallback.class);
+        overlay.getClient(callback);
+        final ArgumentCaptor<IDreamOverlayClient> clientCaptor =
+                ArgumentCaptor.forClass(IDreamOverlayClient.class);
+        verify(callback).onDreamOverlayClient(clientCaptor.capture());
+
+        return clientCaptor.getValue();
+    }
+
+    @Test
+    public void testOnStartMetricsLogged() throws Exception {
+        final IDreamOverlayClient client = getClient();
 
         // Inform the overlay service of dream starting.
-        overlay.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
+        client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
                 false /*shouldShowComplication*/);
         mMainExecutor.runAllReady();
 
@@ -206,11 +221,10 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
 
     @Test
     public void testOverlayContainerViewAddedToWindow() throws Exception {
-        final IBinder proxy = mService.onBind(new Intent());
-        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+        final IDreamOverlayClient client = getClient();
 
         // Inform the overlay service of dream starting.
-        overlay.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
+        client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
                 false /*shouldShowComplication*/);
         mMainExecutor.runAllReady();
 
@@ -219,11 +233,10 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
 
     @Test
     public void testDreamOverlayContainerViewControllerInitialized() throws Exception {
-        final IBinder proxy = mService.onBind(new Intent());
-        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+        final IDreamOverlayClient client = getClient();
 
         // Inform the overlay service of dream starting.
-        overlay.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
+        client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
                 false /*shouldShowComplication*/);
         mMainExecutor.runAllReady();
 
@@ -237,11 +250,10 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 .thenReturn(mDreamOverlayContainerViewParent)
                 .thenReturn(null);
 
-        final IBinder proxy = mService.onBind(new Intent());
-        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+        final IDreamOverlayClient client = getClient();
 
         // Inform the overlay service of dream starting.
-        overlay.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
+        client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
                 false /*shouldShowComplication*/);
         mMainExecutor.runAllReady();
 
@@ -250,11 +262,10 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
 
     @Test
     public void testShouldShowComplicationsSetByStartDream() throws RemoteException {
-        final IBinder proxy = mService.onBind(new Intent());
-        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+        final IDreamOverlayClient client = getClient();
 
         // Inform the overlay service of dream starting.
-        overlay.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
+        client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
                 true /*shouldShowComplication*/);
 
         assertThat(mService.shouldShowComplications()).isTrue();
@@ -262,11 +273,10 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
 
     @Test
     public void testLowLightSetByStartDream() throws RemoteException {
-        final IBinder proxy = mService.onBind(new Intent());
-        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+        final IDreamOverlayClient client = getClient();
 
         // Inform the overlay service of dream starting.
-        overlay.startDream(mWindowParams, mDreamOverlayCallback,
+        client.startDream(mWindowParams, mDreamOverlayCallback,
                 LOW_LIGHT_COMPONENT.flattenToString(), false /*shouldShowComplication*/);
         mMainExecutor.runAllReady();
 
@@ -276,11 +286,10 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
 
     @Test
     public void testOnEndDream() throws RemoteException {
-        final IBinder proxy = mService.onBind(new Intent());
-        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+        final IDreamOverlayClient client = getClient();
 
         // Inform the overlay service of dream starting.
-        overlay.startDream(mWindowParams, mDreamOverlayCallback,
+        client.startDream(mWindowParams, mDreamOverlayCallback,
                 LOW_LIGHT_COMPONENT.flattenToString(), false /*shouldShowComplication*/);
         mMainExecutor.runAllReady();
 
@@ -302,11 +311,10 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
 
     @Test
     public void testDestroy() throws RemoteException {
-        final IBinder proxy = mService.onBind(new Intent());
-        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+        final IDreamOverlayClient client = getClient();
 
         // Inform the overlay service of dream starting.
-        overlay.startDream(mWindowParams, mDreamOverlayCallback,
+        client.startDream(mWindowParams, mDreamOverlayCallback,
                 LOW_LIGHT_COMPONENT.flattenToString(), false /*shouldShowComplication*/);
         mMainExecutor.runAllReady();
 
@@ -346,15 +354,14 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
 
     @Test
     public void testDecorViewNotAddedToWindowAfterDestroy() throws Exception {
-        final IBinder proxy = mService.onBind(new Intent());
-        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+        final IDreamOverlayClient client = getClient();
 
         // Destroy the service.
         mService.onDestroy();
         mMainExecutor.runAllReady();
 
         // Inform the overlay service of dream starting.
-        overlay.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
+        client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
                 false /*shouldShowComplication*/);
         mMainExecutor.runAllReady();
 
@@ -372,11 +379,10 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
 
     @Test
     public void testResetCurrentOverlayWhenConnectedToNewDream() throws RemoteException {
-        final IBinder proxy = mService.onBind(new Intent());
-        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+        final IDreamOverlayClient client = getClient();
 
         // Inform the overlay service of dream starting. Do not show dream complications.
-        overlay.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
+        client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
                 false /*shouldShowComplication*/);
         mMainExecutor.runAllReady();
 
@@ -393,7 +399,7 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
         // New dream starting with dream complications showing. Note that when a new dream is
         // binding to the dream overlay service, it receives the same instance of IBinder as the
         // first one.
-        overlay.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
+        client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
                 true /*shouldShowComplication*/);
         mMainExecutor.runAllReady();
 
@@ -412,11 +418,10 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
 
     @Test
     public void testWakeUp() throws RemoteException {
-        final IBinder proxy = mService.onBind(new Intent());
-        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+        final IDreamOverlayClient client = getClient();
 
         // Inform the overlay service of dream starting.
-        overlay.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
+        client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
                 true /*shouldShowComplication*/);
         mMainExecutor.runAllReady();
 

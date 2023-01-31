@@ -63,7 +63,7 @@ class SurfaceSyncGroupController {
         if (callback == null) {
             return false;
         }
-        outAddToSyncGroupResult.mParentSyncGroup = root;
+        outAddToSyncGroupResult.mParentSyncGroup = root.mISurfaceSyncGroup;
         outAddToSyncGroupResult.mTransactionReadyCallback = callback;
         return true;
     }

@@ -3768,7 +3768,7 @@ public final class ViewRootImpl implements ViewParent,
             Log.d(mTag, "Setup new sync=" + mWmsRequestSyncGroup.getName());
         }
 
-        mWmsRequestSyncGroup.addToSync(this);
+        mWmsRequestSyncGroup.add(this, null /* runnable */);
         Trace.traceEnd(Trace.TRACE_TAG_VIEW);
     }
 
@@ -11354,7 +11354,7 @@ public final class ViewRootImpl implements ViewParent,
                 // pendingDrawFinished.
                 if ((syncResult
                         & (SYNC_LOST_SURFACE_REWARD_IF_FOUND | SYNC_CONTEXT_IS_STOPPED)) != 0) {
-                    surfaceSyncGroup.addTransactionToSync(
+                    surfaceSyncGroup.addTransaction(
                             mBlastBufferQueue.gatherPendingTransactions(frame));
                     surfaceSyncGroup.markSyncReady();
                     return null;
@@ -11368,7 +11368,7 @@ public final class ViewRootImpl implements ViewParent,
                     mBlastBufferQueue.syncNextTransaction(new Consumer<Transaction>() {
                         @Override
                         public void accept(Transaction transaction) {
-                            surfaceSyncGroup.addTransactionToSync(transaction);
+                            surfaceSyncGroup.addTransaction(transaction);
                             surfaceSyncGroup.markSyncReady();
                         }
                     });
@@ -11391,7 +11391,7 @@ public final class ViewRootImpl implements ViewParent,
                         // since the frame didn't draw on this vsync. It's possible the frame will
                         // draw later, but it's better to not be sync than to block on a frame that
                         // may never come.
-                        surfaceSyncGroup.addTransactionToSync(
+                        surfaceSyncGroup.addTransaction(
                                 mBlastBufferQueue.gatherPendingTransactions(frame));
                         surfaceSyncGroup.markSyncReady();
                         return;
@@ -11481,7 +11481,7 @@ public final class ViewRootImpl implements ViewParent,
         if (mActiveSurfaceSyncGroup == null) {
             return;
         }
-        mActiveSurfaceSyncGroup.addToSync(syncable, false /* parentSyncGroupMerge */);
+        mActiveSurfaceSyncGroup.add(syncable, null /* Runnable */);
     }
 
     @Override

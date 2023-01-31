@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import androidx.annotation.NonNull;
  * never an empty area (black color). The test uses {@link SurfaceSyncGroup} class to gather the
  * content it wants to synchronize.
  */
-public class SurfaceSyncGroupValidatorTestCase implements ISurfaceValidatorTestCase {
+public class SurfaceViewSyncValidatorTestCase implements ISurfaceValidatorTestCase {
     private static final String TAG = "SurfaceSyncGroupValidatorTestCase";
 
     private final Runnable mRunnable = new Runnable() {
@@ -76,7 +76,7 @@ public class SurfaceSyncGroupValidatorTestCase implements ISurfaceValidatorTestC
         public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width,
                 int height) {
             if (mSyncGroup != null) {
-                mSyncGroup.addToSync(mSurfaceView, frameCallback ->
+                mSyncGroup.add(mSurfaceView, frameCallback ->
                         mRenderingThread.setFrameCallback(frameCallback));
                 mSyncGroup.markSyncReady();
                 mSyncGroup = null;
@@ -133,7 +133,7 @@ public class SurfaceSyncGroupValidatorTestCase implements ISurfaceValidatorTestC
 
         mRenderingThread.pauseRendering();
         mSyncGroup = new SurfaceSyncGroup(TAG);
-        mSyncGroup.addToSync(mParent.getRootSurfaceControl());
+        mSyncGroup.add(mParent.getRootSurfaceControl(), null /* runanble */);
 
         ViewGroup.LayoutParams svParams = mSurfaceView.getLayoutParams();
         svParams.height = height;

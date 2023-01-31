@@ -19,6 +19,7 @@ package com.android.server.notification;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.Notification.EXTRA_ALLOW_DURING_SETUP;
 import static android.app.Notification.FLAG_AUTO_CANCEL;
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.Notification.FLAG_CAN_COLORIZE;
@@ -217,6 +218,7 @@ import com.android.server.notification.NotificationManagerService.NotificationAs
 import com.android.server.notification.NotificationManagerService.NotificationListeners;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
@@ -305,6 +307,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     ActivityManager mActivityManager;
     @Mock
     TelecomManager mTelecomManager;
+
+    @Mock
+    PermissionManagerServiceInternal mPermissionInternal;
     @Mock
     Resources mResources;
     @Mock
@@ -518,7 +523,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mAppOpsManager, mAppOpsService, mUm, mHistoryManager, mStatsManager,
                 mock(TelephonyManager.class),
                 mAmi, mToastRateLimiter, mPermissionHelper, mock(UsageStatsManagerInternal.class),
-                mTelecomManager, mLogger);
+                mTelecomManager, mLogger, mPermissionInternal);
         // Return first true for RoleObserver main-thread check
         when(mMainLooper.isCurrentThread()).thenReturn(true).thenReturn(false);
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY, mMainLooper);
@@ -4168,8 +4173,35 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testNoNotificationDuringSetupPermission() throws Exception {
+        when(mPermissionInternal.checkPermission(any(), any(), anyInt()))
+                .thenReturn(PERMISSION_DENIED);
+        Bundle extras = new Bundle();
+        extras.putBoolean(EXTRA_ALLOW_DURING_SETUP, true);
+        Notification.Builder nb = new Notification.Builder(mContext,
+                mTestNotificationChannel.getId())
+                .setContentTitle("foo")
+                .addExtras(extras)
+                .setSmallIcon(android.R.drawable.sym_def_app_icon);
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
+                "testNoNotificationDuringSetupPermission", mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, sbn.getTag(),
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+
+        NotificationRecord posted = mService.findNotificationLocked(
+                PKG, nr.getSbn().getTag(), nr.getSbn().getId(), nr.getSbn().getUserId());
+
+        assertFalse(posted.getNotification().extras.containsKey(EXTRA_ALLOW_DURING_SETUP));
+    }
+
+    @Test
     public void testNoFakeColorizedPermission() throws Exception {
-        when(mPackageManagerClient.checkPermission(any(), any())).thenReturn(PERMISSION_DENIED);
+        when(mPermissionInternal.checkPermission(any(), any(), anyInt()))
+                .thenReturn(PERMISSION_DENIED);
         Notification.Builder nb = new Notification.Builder(mContext,
                 mTestNotificationChannel.getId())
                 .setContentTitle("foo")
@@ -4194,7 +4226,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testMediaStyleRemote_hasPermission() throws RemoteException {
         String deviceName = "device";
-        when(mPackageManager.checkPermission(
+        when(mPermissionInternal.checkPermission(
                 eq(android.Manifest.permission.MEDIA_CONTENT_CONTROL), any(), anyInt()))
                 .thenReturn(PERMISSION_GRANTED);
         Notification.MediaStyle style = new Notification.MediaStyle();
@@ -4223,7 +4255,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testMediaStyleRemote_noPermission() throws RemoteException {
         String deviceName = "device";
-        when(mPackageManager.checkPermission(
+        when(mPermissionInternal.checkPermission(
                 eq(android.Manifest.permission.MEDIA_CONTENT_CONTROL), any(), anyInt()))
                 .thenReturn(PERMISSION_DENIED);
         Notification.MediaStyle style = new Notification.MediaStyle();
@@ -4251,7 +4283,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testSubstituteAppName_hasPermission() throws RemoteException {
         String subName = "Substitute Name";
-        when(mPackageManager.checkPermission(
+        when(mPermissionInternal.checkPermission(
                 eq(android.Manifest.permission.SUBSTITUTE_NOTIFICATION_APP_NAME), any(), anyInt()))
                 .thenReturn(PERMISSION_GRANTED);
         Bundle extras = new Bundle();
@@ -4278,7 +4310,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testSubstituteAppName_noPermission() throws RemoteException {
-        when(mPackageManager.checkPermission(
+        when(mPermissionInternal.checkPermission(
                 eq(android.Manifest.permission.SUBSTITUTE_NOTIFICATION_APP_NAME), any(), anyInt()))
                 .thenReturn(PERMISSION_DENIED);
         Bundle extras = new Bundle();
@@ -5788,7 +5820,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testCanUseManagedServices_hasPermission() throws Exception {
-        when(mPackageManager.checkPermission("perm", "pkg", 0))
+        when(mPermissionInternal.checkPermission("perm", "pkg", 0))
                 .thenReturn(PackageManager.PERMISSION_GRANTED);
 
         assertEquals(true, mService.canUseManagedServices("pkg", 0, "perm"));
@@ -5796,7 +5828,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testCanUseManagedServices_noPermission() throws Exception {
-        when(mPackageManager.checkPermission("perm", "pkg", 0))
+        when(mPermissionInternal.checkPermission("perm", "pkg", 0))
                 .thenReturn(PackageManager.PERMISSION_DENIED);
 
         assertEquals(false, mService.canUseManagedServices("pkg", 0, "perm"));
@@ -6751,7 +6783,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     private void setIfPackageHasPermissionToAvoidToastRateLimiting(
             String pkg, boolean hasPermission) throws Exception {
-        when(mPackageManager.checkPermission(android.Manifest.permission.UNLIMITED_TOASTS,
+        when(mPermissionInternal.checkPermission(android.Manifest.permission.UNLIMITED_TOASTS,
                 pkg, UserHandle.getUserId(mUid)))
                 .thenReturn(hasPermission ? PERMISSION_GRANTED : PERMISSION_DENIED);
     }

@@ -2926,6 +2926,39 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    public void testUpdateResolvedBoundsHorizontalPosition_leftInsets_appCentered() {
+        // Set up folded display
+        final DisplayContent display = new TestDisplayContent.Builder(mAtm, 1100, 2100)
+                .setCanRotate(true)
+                .build();
+        display.setIgnoreOrientationRequest(true);
+        final DisplayPolicy policy = display.getDisplayPolicy();
+        DisplayPolicy.DecorInsets.Info decorInfo = policy.getDecorInsetsInfo(ROTATION_90,
+                display.mBaseDisplayHeight, display.mBaseDisplayWidth);
+        decorInfo.mNonDecorInsets.set(130, 0,  60, 0);
+        spyOn(policy);
+        doReturn(decorInfo).when(policy).getDecorInsetsInfo(ROTATION_90,
+                display.mBaseDisplayHeight, display.mBaseDisplayWidth);
+        mWm.mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(0.5f);
+
+        setUpApp(display);
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+
+        // Resize the display to simulate unfolding in portrait
+        resizeDisplay(mTask.mDisplayContent, 2200, 1800);
+        assertTrue(mActivity.inSizeCompatMode());
+
+        // Simulate real display not taking non-decor insets into consideration
+        display.getWindowConfiguration().setAppBounds(0, 0, 2200, 1800);
+
+        // Rotate display to landscape
+        rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
+
+        // App is centered
+        assertEquals(mActivity.getBounds(), new Rect(350, 50, 1450, 2150));
+    }
+
+    @Test
     public void testUpdateResolvedBoundsHorizontalPosition_left() {
         // Display configured as (2800, 1400).
         assertHorizontalPositionForDifferentDisplayConfigsForPortraitActivity(
@@ -3071,6 +3104,20 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    public void testApplyAspectRatio_containingRatioAlmostEqualToMaxRatio_boundsUnchanged() {
+        setUpDisplaySizeWithApp(1981, 2576);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mWm.mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(0.5f);
+
+        final Rect originalBounds = new Rect(mActivity.getBounds());
+        prepareUnresizable(mActivity, 1.3f, SCREEN_ORIENTATION_UNSPECIFIED);
+
+        // The containing aspect ratio is now 1.3003534, while the desired aspect ratio is 1.3. The
+        // bounds of the activity should not be changed as the difference is too small
+        assertEquals(mActivity.getBounds(), originalBounds);
+    }
+
+    @Test
     public void testUpdateResolvedBoundsHorizontalPosition_activityFillParentWidth() {
         // When activity width equals parent width, multiplier shouldn't have any effect.
         assertHorizontalPositionForDifferentDisplayConfigsForLandscapeActivity(
@@ -3079,6 +3126,39 @@ public class SizeCompatTests extends WindowTestsBase {
                 /* letterboxHorizontalPositionMultiplier */ 0.5f);
         assertHorizontalPositionForDifferentDisplayConfigsForLandscapeActivity(
                 /* letterboxHorizontalPositionMultiplier */ 1.0f);
+    }
+
+    @Test
+    public void testUpdateResolvedBoundsVerticalPosition_topInsets_appCentered() {
+        // Set up folded display
+        final DisplayContent display = new TestDisplayContent.Builder(mAtm, 2100, 1100)
+                .setCanRotate(true)
+                .build();
+        display.setIgnoreOrientationRequest(true);
+        final DisplayPolicy policy = display.getDisplayPolicy();
+        DisplayPolicy.DecorInsets.Info decorInfo = policy.getDecorInsetsInfo(ROTATION_90,
+                display.mBaseDisplayHeight, display.mBaseDisplayWidth);
+        decorInfo.mNonDecorInsets.set(0, 130,  0, 60);
+        spyOn(policy);
+        doReturn(decorInfo).when(policy).getDecorInsetsInfo(ROTATION_90,
+                display.mBaseDisplayHeight, display.mBaseDisplayWidth);
+        mWm.mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(0.5f);
+
+        setUpApp(display);
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_LANDSCAPE);
+
+        // Resize the display to simulate unfolding in portrait
+        resizeDisplay(mTask.mDisplayContent, 1800, 2200);
+        assertTrue(mActivity.inSizeCompatMode());
+
+        // Simulate real display not taking non-decor insets into consideration
+        display.getWindowConfiguration().setAppBounds(0, 0, 1800, 2200);
+
+        // Rotate display to landscape
+        rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
+
+        // App is centered
+        assertEquals(mActivity.getBounds(), new Rect(50, 350, 2150, 1450));
     }
 
     @Test

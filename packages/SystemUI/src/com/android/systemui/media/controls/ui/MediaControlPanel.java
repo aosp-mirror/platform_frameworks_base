@@ -62,6 +62,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -755,43 +756,16 @@ public class MediaControlPanel {
         int width = mMediaViewHolder.getAlbumView().getMeasuredWidth();
         int height = mMediaViewHolder.getAlbumView().getMeasuredHeight();
 
-        // WallpaperColors.fromBitmap takes a good amount of time. We do that work
-        // on the background executor to avoid stalling animations on the UI Thread.
         mBackgroundExecutor.execute(() -> {
             // Album art
             ColorScheme mutableColorScheme = null;
             Drawable artwork;
             boolean isArtworkBound;
             Icon artworkIcon = data.getArtwork();
-            WallpaperColors wallpaperColors = null;
-            if (artworkIcon != null) {
-                if (artworkIcon.getType() == Icon.TYPE_BITMAP
-                        || artworkIcon.getType() == Icon.TYPE_ADAPTIVE_BITMAP) {
-                    // Avoids extra processing if this is already a valid bitmap
-                    wallpaperColors = WallpaperColors
-                            .fromBitmap(artworkIcon.getBitmap());
-                } else {
-                    Drawable artworkDrawable = artworkIcon.loadDrawable(mContext);
-                    if (artworkDrawable != null) {
-                        wallpaperColors = WallpaperColors
-                                .fromDrawable(artworkIcon.loadDrawable(mContext));
-                    }
-                }
-            }
+            WallpaperColors wallpaperColors = getWallpaperColor(artworkIcon);
             if (wallpaperColors != null) {
                 mutableColorScheme = new ColorScheme(wallpaperColors, true, Style.CONTENT);
-                Drawable albumArt = getScaledBackground(artworkIcon, width, height);
-                GradientDrawable gradient = (GradientDrawable) mContext
-                        .getDrawable(R.drawable.qs_media_scrim);
-                gradient.setColors(new int[] {
-                        ColorUtilKt.getColorWithAlpha(
-                                MediaColorSchemesKt.backgroundStartFromScheme(mutableColorScheme),
-                                0.25f),
-                        ColorUtilKt.getColorWithAlpha(
-                                MediaColorSchemesKt.backgroundEndFromScheme(mutableColorScheme),
-                                0.9f),
-                });
-                artwork = new LayerDrawable(new Drawable[] { albumArt, gradient });
+                artwork = addGradientToIcon(artworkIcon, mutableColorScheme, width, height);
                 isArtworkBound = true;
             } else {
                 // If there's no artwork, use colors from the app icon
@@ -868,6 +842,96 @@ public class MediaControlPanel {
                 Trace.endAsyncSection(traceName, traceCookie);
             });
         });
+    }
+
+    private void bindRecommendationArtwork(
+            SmartspaceAction recommendation,
+            String packageName,
+            int itemIndex
+    ) {
+        final int traceCookie = recommendation.hashCode();
+        final String traceName =
+                "MediaControlPanel#bindRecommendationArtwork<" + packageName + ">";
+        Trace.beginAsyncSection(traceName, traceCookie);
+
+        // Capture width & height from views in foreground for artwork scaling in background
+        int width = mRecommendationViewHolder.getMediaCoverContainers().get(0).getMeasuredWidth();
+        int height = mRecommendationViewHolder.getMediaCoverContainers().get(0).getMeasuredHeight();
+
+        mBackgroundExecutor.execute(() -> {
+            // Album art
+            ColorScheme mutableColorScheme = null;
+            Drawable artwork;
+            Icon artworkIcon = recommendation.getIcon();
+            WallpaperColors wallpaperColors = getWallpaperColor(artworkIcon);
+            if (wallpaperColors != null) {
+                mutableColorScheme = new ColorScheme(wallpaperColors, true, Style.CONTENT);
+                artwork = addGradientToIcon(artworkIcon, mutableColorScheme, width, height);
+            } else {
+                artwork = new ColorDrawable(Color.TRANSPARENT);
+            }
+
+            mMainExecutor.execute(() -> {
+                // Bind the artwork drawable to media cover.
+                ImageView mediaCover =
+                        mRecommendationViewHolder.getMediaCoverItems().get(itemIndex);
+                mediaCover.setImageDrawable(artwork);
+
+                // Set up the app icon.
+                ImageView appIconView = mRecommendationViewHolder.getMediaAppIcons().get(itemIndex);
+                appIconView.clearColorFilter();
+                try {
+                    Drawable icon = mContext.getPackageManager()
+                            .getApplicationIcon(packageName);
+                    appIconView.setImageDrawable(icon);
+                } catch (PackageManager.NameNotFoundException e) {
+                    Log.w(TAG, "Cannot find icon for package " + packageName, e);
+                    appIconView.setImageResource(R.drawable.ic_music_note);
+                }
+                Trace.endAsyncSection(traceName, traceCookie);
+            });
+        });
+    }
+
+    // This method should be called from a background thread. WallpaperColors.fromBitmap takes a
+    // good amount of time. We do that work on the background executor to avoid stalling animations
+    // on the UI Thread.
+    private WallpaperColors getWallpaperColor(Icon artworkIcon) {
+        if (artworkIcon != null) {
+            if (artworkIcon.getType() == Icon.TYPE_BITMAP
+                    || artworkIcon.getType() == Icon.TYPE_ADAPTIVE_BITMAP) {
+                // Avoids extra processing if this is already a valid bitmap
+                return WallpaperColors
+                        .fromBitmap(artworkIcon.getBitmap());
+            } else {
+                Drawable artworkDrawable = artworkIcon.loadDrawable(mContext);
+                if (artworkDrawable != null) {
+                    return WallpaperColors
+                            .fromDrawable(artworkIcon.loadDrawable(mContext));
+                }
+            }
+        }
+        return null;
+    }
+
+    private LayerDrawable addGradientToIcon(
+            Icon artworkIcon,
+            ColorScheme mutableColorScheme,
+            int width,
+            int height
+    ) {
+        Drawable albumArt = getScaledBackground(artworkIcon, width, height);
+        GradientDrawable gradient = (GradientDrawable) AppCompatResources
+                .getDrawable(mContext, R.drawable.qs_media_scrim);
+        gradient.setColors(new int[] {
+                ColorUtilKt.getColorWithAlpha(
+                        MediaColorSchemesKt.backgroundStartFromScheme(mutableColorScheme),
+                        0.25f),
+                ColorUtilKt.getColorWithAlpha(
+                        MediaColorSchemesKt.backgroundEndFromScheme(mutableColorScheme),
+                        0.9f),
+        });
+        return new LayerDrawable(new Drawable[] { albumArt, gradient });
     }
 
     private void scaleTransitionDrawableLayer(TransitionDrawable transitionDrawable, int layer,
@@ -1227,8 +1291,10 @@ public class MediaControlPanel {
         PackageManager packageManager = mContext.getPackageManager();
         // Set up media source app's logo.
         Drawable icon = packageManager.getApplicationIcon(applicationInfo);
-        ImageView headerLogoImageView = mRecommendationViewHolder.getCardIcon();
-        headerLogoImageView.setImageDrawable(icon);
+        if (!mFeatureFlags.isEnabled(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE)) {
+            ImageView headerLogoImageView = mRecommendationViewHolder.getCardIcon();
+            headerLogoImageView.setImageDrawable(icon);
+        }
         fetchAndUpdateRecommendationColors(icon);
 
         // Set up media rec card's tap action if applicable.
@@ -1248,7 +1314,15 @@ public class MediaControlPanel {
 
             // Set up media item cover.
             ImageView mediaCoverImageView = mediaCoverItems.get(itemIndex);
-            mediaCoverImageView.setImageIcon(recommendation.getIcon());
+            if (mFeatureFlags.isEnabled(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE)) {
+                bindRecommendationArtwork(
+                        recommendation,
+                        data.getPackageName(),
+                        itemIndex
+                );
+            } else {
+                mediaCoverImageView.setImageIcon(recommendation.getIcon());
+            }
 
             // Set up the media item's click listener if applicable.
             ViewGroup mediaCoverContainer = mediaCoverContainers.get(itemIndex);
@@ -1277,7 +1351,6 @@ public class MediaControlPanel {
                                 R.string.controls_media_smartspace_rec_item_description,
                                 recommendation.getTitle(), artistName, appName));
             }
-
 
             // Set up title
             CharSequence title = recommendation.getTitle();
@@ -1355,6 +1428,10 @@ public class MediaControlPanel {
         int backgroundColor = MediaColorSchemesKt.surfaceFromScheme(colorScheme);
         int textPrimaryColor = MediaColorSchemesKt.textPrimaryFromScheme(colorScheme);
         int textSecondaryColor = MediaColorSchemesKt.textSecondaryFromScheme(colorScheme);
+
+        if (mFeatureFlags.isEnabled(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE)) {
+            mRecommendationViewHolder.getCardTitle().setTextColor(textPrimaryColor);
+        }
 
         mRecommendationViewHolder.getRecommendations()
                 .setBackgroundTintList(ColorStateList.valueOf(backgroundColor));

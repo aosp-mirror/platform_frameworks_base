@@ -131,8 +131,8 @@ public class SurfaceControlViewHostSyncTest extends Activity implements SurfaceH
 
         if (mSync) {
             SurfaceSyncGroup syncGroup = new SurfaceSyncGroup(TAG);
-            syncGroup.addToSync(getWindow().getRootSurfaceControl(), svResizeRunnable);
-            syncGroup.addToSync(mSurfacePackage, resizeRunnable);
+            syncGroup.add(getWindow().getRootSurfaceControl(), svResizeRunnable);
+            syncGroup.add(mSurfacePackage, resizeRunnable);
             syncGroup.markSyncReady();
         } else {
             svResizeRunnable.run();

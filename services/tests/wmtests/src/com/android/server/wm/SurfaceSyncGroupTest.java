@@ -55,7 +55,7 @@ public class SurfaceSyncGroupTest {
         SurfaceSyncGroup syncGroup = new SurfaceSyncGroup(TAG);
         syncGroup.addSyncCompleteCallback(mExecutor, finishedLatch::countDown);
         SyncTarget syncTarget = new SyncTarget();
-        syncGroup.addToSync(syncTarget, false /* parentSyncGroupMerge */);
+        syncGroup.add(syncTarget, null /* runnable */);
         syncGroup.markSyncReady();
 
         syncTarget.onBufferReady();
@@ -73,9 +73,9 @@ public class SurfaceSyncGroupTest {
         SyncTarget syncTarget2 = new SyncTarget();
         SyncTarget syncTarget3 = new SyncTarget();
 
-        syncGroup.addToSync(syncTarget1, false /* parentSyncGroupMerge */);
-        syncGroup.addToSync(syncTarget2, false /* parentSyncGroupMerge */);
-        syncGroup.addToSync(syncTarget3, false /* parentSyncGroupMerge */);
+        syncGroup.add(syncTarget1, null /* runnable */);
+        syncGroup.add(syncTarget2, null /* runnable */);
+        syncGroup.add(syncTarget3, null /* runnable */);
         syncGroup.markSyncReady();
 
         syncTarget1.onBufferReady();
@@ -97,11 +97,11 @@ public class SurfaceSyncGroupTest {
         SyncTarget syncTarget1 = new SyncTarget();
         SyncTarget syncTarget2 = new SyncTarget();
 
-        assertTrue(syncGroup.addToSync(syncTarget1, false /* parentSyncGroupMerge */));
+        assertTrue(syncGroup.add(syncTarget1, null /* runnable */));
         syncGroup.markSyncReady();
         // Adding to a sync that has been completed is also invalid since the sync id has been
         // cleared.
-        assertFalse(syncGroup.addToSync(syncTarget2, false /* parentSyncGroupMerge */));
+        assertFalse(syncGroup.add(syncTarget2, null /* runnable */));
     }
 
     @Test
@@ -117,8 +117,8 @@ public class SurfaceSyncGroupTest {
         SyncTarget syncTarget1 = new SyncTarget();
         SyncTarget syncTarget2 = new SyncTarget();
 
-        assertTrue(syncGroup1.addToSync(syncTarget1, false /* parentSyncGroupMerge */));
-        assertTrue(syncGroup2.addToSync(syncTarget2, false /* parentSyncGroupMerge */));
+        assertTrue(syncGroup1.add(syncTarget1, null /* runnable */));
+        assertTrue(syncGroup2.add(syncTarget2, null /* runnable */));
         syncGroup1.markSyncReady();
         syncGroup2.markSyncReady();
 
@@ -147,10 +147,10 @@ public class SurfaceSyncGroupTest {
         SyncTarget syncTarget1 = new SyncTarget();
         SyncTarget syncTarget2 = new SyncTarget();
 
-        assertTrue(syncGroup1.addToSync(syncTarget1, false /* parentSyncGroupMerge */));
-        assertTrue(syncGroup2.addToSync(syncTarget2, false /* parentSyncGroupMerge */));
+        assertTrue(syncGroup1.add(syncTarget1, null /* runnable */));
+        assertTrue(syncGroup2.add(syncTarget2, null /* runnable */));
         syncGroup1.markSyncReady();
-        syncGroup2.addToSync(syncGroup1, false /* parentSyncGroupMerge */);
+        syncGroup2.add(syncGroup1, null /* runnable */);
         syncGroup2.markSyncReady();
 
         // Finish syncTarget2 first to test that the syncGroup is not complete until the merged sync
@@ -183,8 +183,8 @@ public class SurfaceSyncGroupTest {
         SyncTarget syncTarget1 = new SyncTarget();
         SyncTarget syncTarget2 = new SyncTarget();
 
-        assertTrue(syncGroup1.addToSync(syncTarget1, false /* parentSyncGroupMerge */));
-        assertTrue(syncGroup2.addToSync(syncTarget2, false /* parentSyncGroupMerge */));
+        assertTrue(syncGroup1.add(syncTarget1, null /* runnable */));
+        assertTrue(syncGroup2.add(syncTarget2, null /* runnable */));
         syncGroup1.markSyncReady();
         syncTarget1.onBufferReady();
 
@@ -192,7 +192,7 @@ public class SurfaceSyncGroupTest {
         finishedLatch1.await(5, TimeUnit.SECONDS);
         assertEquals(0, finishedLatch1.getCount());
 
-        syncGroup2.addToSync(syncGroup1, false /* parentSyncGroupMerge */);
+        syncGroup2.add(syncGroup1, null /* runnable */);
         syncGroup2.markSyncReady();
         syncTarget2.onBufferReady();
 
@@ -216,12 +216,12 @@ public class SurfaceSyncGroupTest {
         SyncTarget syncTarget2 = new SyncTarget();
         SyncTarget syncTarget3 = new SyncTarget();
 
-        assertTrue(syncGroup1.addToSync(syncTarget1, false /* parentSyncGroupMerge */));
-        assertTrue(syncGroup1.addToSync(syncTarget2, false /* parentSyncGroupMerge */));
+        assertTrue(syncGroup1.add(syncTarget1, null /* runnable */));
+        assertTrue(syncGroup1.add(syncTarget2, null /* runnable */));
 
         // Add syncTarget1 to syncGroup2 so it forces syncGroup1 into syncGroup2
-        assertTrue(syncGroup2.addToSync(syncTarget1, false /* parentSyncGroupMerge */));
-        assertTrue(syncGroup2.addToSync(syncTarget3, false /* parentSyncGroupMerge */));
+        assertTrue(syncGroup2.add(syncTarget1, null /* runnable */));
+        assertTrue(syncGroup2.add(syncTarget3, null /* runnable */));
 
         syncGroup1.markSyncReady();
         syncGroup2.markSyncReady();
@@ -261,13 +261,13 @@ public class SurfaceSyncGroupTest {
         SyncTarget syncTarget2 = new SyncTarget();
         SyncTarget syncTarget3 = new SyncTarget();
 
-        assertTrue(syncGroup1.addToSync(syncTarget1, false /* parentSyncGroupMerge */));
-        assertTrue(syncGroup1.addToSync(syncTarget2, false /* parentSyncGroupMerge */));
+        assertTrue(syncGroup1.add(syncTarget1, null /* runnable */));
+        assertTrue(syncGroup1.add(syncTarget2, null /* runnable */));
         syncTarget2.onBufferReady();
 
         // Add syncTarget1 to syncGroup2 so it forces syncGroup1 into syncGroup2
-        assertTrue(syncGroup2.addToSync(syncTarget1, false /* parentSyncGroupMerge */));
-        assertTrue(syncGroup2.addToSync(syncTarget3, false /* parentSyncGroupMerge */));
+        assertTrue(syncGroup2.add(syncTarget1, null /* runnable */));
+        assertTrue(syncGroup2.add(syncTarget3, null /* runnable */));
 
         syncGroup1.markSyncReady();
         syncGroup2.markSyncReady();
@@ -303,7 +303,9 @@ public class SurfaceSyncGroupTest {
         SurfaceSyncGroup.setTransactionFactory(() -> targetTransaction);
 
         SyncTarget syncTarget = new SyncTarget();
-        assertTrue(syncGroup.addToSync(syncTarget, true /* parentSyncGroupMerge */));
+        assertTrue(
+                syncGroup.add(syncTarget.mISurfaceSyncGroup, true /* parentSyncGroupMerge */,
+                        null /* runnable */));
         syncTarget.markSyncReady();
 
         // When parentSyncGroupMerge is true, the transaction passed in merges the main SyncGroup
@@ -328,7 +330,7 @@ public class SurfaceSyncGroupTest {
         SurfaceSyncGroup.setTransactionFactory(() -> targetTransaction);
 
         SyncTarget syncTarget = new SyncTarget();
-        assertTrue(syncGroup.addToSync(syncTarget, false /* parentSyncGroupMerge */));
+        assertTrue(syncGroup.add(syncTarget, null /* runnable */));
         syncTarget.markSyncReady();
 
         // When parentSyncGroupMerge is false, the transaction passed in should not merge
@@ -343,9 +345,9 @@ public class SurfaceSyncGroupTest {
         SurfaceSyncGroup syncGroup = new SurfaceSyncGroup(TAG);
         syncGroup.addSyncCompleteCallback(mExecutor, finishedLatch::countDown);
         SyncTarget syncTarget = new SyncTarget();
-        syncGroup.addToSync(syncTarget, false /* parentSyncGroupMerge */);
+        syncGroup.add(syncTarget, null /* runnable */);
         // Add the syncTarget to the same syncGroup and ensure it doesn't crash.
-        syncGroup.addToSync(syncTarget, false /* parentSyncGroupMerge */);
+        syncGroup.add(syncTarget, null /* runnable */);
         syncGroup.markSyncReady();
 
         syncTarget.onBufferReady();

@@ -126,6 +126,7 @@ import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.SparseSetArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.CompositeRWLock;
@@ -363,6 +364,19 @@ public class OomAdjuster {
      */
     @GuardedBy("mService")
     private boolean mPendingFullOomAdjUpdate = false;
+
+    /**
+     * PIDs that has a SHORT_SERVICE. We need to access it with the PowerManager lock held,
+     * so we use a fine-grained lock here.
+     */
+    @GuardedBy("mPidsWithShortFgs")
+    private final ArraySet<Integer> mPidsWithShortFgs = new ArraySet<>();
+
+    /**
+     * UIDs -> PIDs map, used with mPidsWithShortFgs.
+     */
+    @GuardedBy("mPidsWithShortFgs")
+    private final SparseSetArray<Integer> mUidsToPidsWithShortFgs = new SparseSetArray<>();
 
     /** Overrideable by a test */
     @VisibleForTesting
@@ -1849,6 +1863,11 @@ public class OomAdjuster {
 
         int capabilityFromFGS = 0; // capability from foreground service.
 
+        final boolean hasForegroundServices = psr.hasForegroundServices();
+        final boolean hasNonShortForegroundServices = psr.hasNonShortForegroundServices();
+        final boolean hasShortForegroundServices = hasForegroundServices
+                && !psr.areAllShortForegroundServicesProcstateTimedOut(now);
+
         // Adjust for FGS or "has-overlay-ui".
         if (adj > PERCEPTIBLE_APP_ADJ
                 || procState > PROCESS_STATE_FOREGROUND_SERVICE) {
@@ -1856,7 +1875,7 @@ public class OomAdjuster {
             int newAdj = 0;
             int newProcState = 0;
 
-            if (psr.hasForegroundServices() && psr.hasNonShortForegroundServices()) {
+            if (hasForegroundServices && hasNonShortForegroundServices) {
                 // For regular (non-short) FGS.
                 adjType = "fg-service";
                 newAdj = PERCEPTIBLE_APP_ADJ;
@@ -1867,11 +1886,11 @@ public class OomAdjuster {
                 newAdj = PERCEPTIBLE_APP_ADJ;
                 newProcState = PROCESS_STATE_IMPORTANT_FOREGROUND;
 
-            } else if (psr.hasForegroundServices()) {
+            } else if (hasForegroundServices) {
                 // If we get here, hasNonShortForegroundServices() must be false.
 
                 // TODO(short-service): Proactively run OomAjudster when the grace period finish.
-                if (psr.areAllShortForegroundServicesProcstateTimedOut(now)) {
+                if (!hasShortForegroundServices) {
                     // All the short-FGSes within this process are timed out. Don't promote to FGS.
                     // TODO(short-service): Should we set some unique oom-adj to make it detectable,
                     // in a long trace?
@@ -1907,6 +1926,7 @@ public class OomAdjuster {
                 }
             }
         }
+        updateShortFgsOwner(psr.mApp.uid, psr.mApp.mPid, hasShortForegroundServices);
 
         // If the app was recently in the foreground and moved to a foreground service status,
         // allow it to get a higher rank in memory for some time, compared to other foreground
@@ -3336,5 +3356,41 @@ public class OomAdjuster {
         } else if (state.getSetAdj() < CACHED_APP_MIN_ADJ) {
             mCachedAppOptimizer.unfreezeAppLSP(app, oomAdjReason);
         }
+    }
+
+    /**
+     * Update {@link #mPidsWithShortFgs} and {@link #mUidsToPidsWithShortFgs} to keep track
+     * of which UID/PID has a short FGS.
+     *
+     * TODO(short-FGS): Remove it and all the relevant code once SHORT_FGS use the FGS procstate.
+     */
+    void updateShortFgsOwner(int uid, int pid, boolean add) {
+        synchronized (mPidsWithShortFgs) {
+            if (add) {
+                mUidsToPidsWithShortFgs.add(uid, pid);
+                mPidsWithShortFgs.add(pid);
+            } else {
+                mUidsToPidsWithShortFgs.remove(uid, pid);
+                mPidsWithShortFgs.remove(pid);
+            }
+        }
+    }
+
+    /**
+     * Whether a UID has a (non-timed-out) short FGS or not.
+     * It's indirectly called by PowerManager, so we can't hold the AM lock in it.
+     */
+    boolean hasUidShortForegroundService(int uid) {
+        synchronized (mPidsWithShortFgs) {
+            final ArraySet<Integer> pids = mUidsToPidsWithShortFgs.get(uid);
+            if (pids == null || pids.size() == 0) {
+                return false;
+            }
+            for (int i = pids.size() - 1; i >= 0; i--) {
+                final int pid = pids.valueAt(i);
+                return mPidsWithShortFgs.contains(pid);
+            }
+        }
+        return false;
     }
 }

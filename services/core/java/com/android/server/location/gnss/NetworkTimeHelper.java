@@ -15,8 +15,13 @@
  */
 package com.android.server.location.gnss;
 
+import android.annotation.CurrentTimeMillisLong;
+import android.annotation.ElapsedRealtimeLong;
+import android.annotation.NonNull;
 import android.content.Context;
 import android.os.Looper;
+
+import java.io.PrintWriter;
 
 /**
  * An abstraction for use by {@link GnssLocationProvider}. This class allows switching between
@@ -32,15 +37,16 @@ abstract class NetworkTimeHelper {
      * the looper passed to {@link #create(Context, Looper, InjectTimeCallback)}.
      */
     interface InjectTimeCallback {
-        void injectTime(long unixEpochTimeMillis, long elapsedRealtimeMillis,
-                int uncertaintyMillis);
+        void injectTime(@CurrentTimeMillisLong long unixEpochTimeMillis,
+                @ElapsedRealtimeLong long elapsedRealtimeMillis, int uncertaintyMillis);
     }
 
     /**
      * Creates the {@link NetworkTimeHelper} instance for use by {@link GnssLocationProvider}.
      */
     static NetworkTimeHelper create(
-            Context context, Looper looper, InjectTimeCallback injectTimeCallback) {
+            @NonNull Context context, @NonNull Looper looper,
+            @NonNull InjectTimeCallback injectTimeCallback) {
         return new NtpNetworkTimeHelper(context, looper, injectTimeCallback);
     }
 
@@ -72,4 +78,8 @@ abstract class NetworkTimeHelper {
      */
     abstract void onNetworkAvailable();
 
+    /**
+     * Dumps internal state during bugreports useful for debugging.
+     */
+    abstract void dump(@NonNull PrintWriter pw);
 }

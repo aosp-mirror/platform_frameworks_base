@@ -26,6 +26,7 @@ import junit.framework.Assert.assertNull
 import junit.framework.Assert.assertTrue
 import org.junit.After
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -258,6 +259,13 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
         // View is restored to GONE once the dialog is dismissed.
         runOnMainThreadAndWaitForIdleSync { dialog.dismiss() }
         assertThat(touchSurface.visibility).isEqualTo(View.GONE)
+    }
+
+    @Test
+    fun creatingControllerFromNormalViewThrows() {
+        assertThrows(IllegalArgumentException::class.java) {
+            DialogLaunchAnimator.Controller.fromView(FrameLayout(mContext))
+        }
     }
 
     private fun createAndShowDialog(
