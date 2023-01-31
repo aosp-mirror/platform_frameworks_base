@@ -17,7 +17,7 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.PROCESS_CAPABILITY_ALL;
-import static android.app.ActivityManager.PROCESS_CAPABILITY_NETWORK;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_BFSL;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
@@ -38,6 +38,7 @@ import static android.app.ActivityManager.PROCESS_STATE_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_TOP_SLEEPING;
 import static android.app.ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
@@ -226,6 +227,15 @@ public class MockingOomAdjusterTests {
         }
     }
 
+    private static void assertBfsl(ProcessRecord app) {
+        assertEquals(PROCESS_CAPABILITY_BFSL,
+                app.mState.getSetCapability() & PROCESS_CAPABILITY_BFSL);
+    }
+
+    private static void assertNoBfsl(ProcessRecord app) {
+        assertEquals(0, app.mState.getSetCapability() & PROCESS_CAPABILITY_BFSL);
+    }
+
     /**
      * Replace the process LRU with the given processes.
      * @param apps
@@ -264,6 +274,7 @@ public class MockingOomAdjusterTests {
 
         assertProcStates(app, PROCESS_STATE_BOUND_FOREGROUND_SERVICE, PERSISTENT_PROC_ADJ,
                 SCHED_GROUP_RESTRICTED);
+        assertBfsl(app);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -335,6 +346,7 @@ public class MockingOomAdjusterTests {
 
         assertProcStates(app, PROCESS_STATE_FOREGROUND_SERVICE, FOREGROUND_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -447,6 +459,7 @@ public class MockingOomAdjusterTests {
 
         assertProcStates(app, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -460,6 +473,7 @@ public class MockingOomAdjusterTests {
 
         assertProcStates(app, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -471,7 +485,7 @@ public class MockingOomAdjusterTests {
         ServiceRecord s = ServiceRecord.newEmptyInstanceForTest(sService);
         s.startRequested = true;
         s.isForeground = true;
-        s.foregroundServiceType = ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
+        s.foregroundServiceType = FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
         s.setShortFgsInfo(SystemClock.uptimeMillis());
 
         // SHORT_SERVICE FGS will get IMP_FG and a slightly different recent-adjustment.
@@ -480,16 +494,15 @@ public class MockingOomAdjusterTests {
                     MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, true));
             app.mServices.startService(s);
             app.mServices.setHasForegroundServices(true,
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE, /* hasNoneType=*/false);
+                    FOREGROUND_SERVICE_TYPE_SHORT_SERVICE, /* hasNoneType=*/false);
             app.mState.setLastTopTime(SystemClock.uptimeMillis());
             sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
 
             updateOomAdj(app);
 
-            assertProcStates(app, PROCESS_STATE_IMPORTANT_FOREGROUND,
+            assertProcStates(app, PROCESS_STATE_FOREGROUND_SERVICE,
                     PERCEPTIBLE_RECENT_FOREGROUND_APP_ADJ + 1, SCHED_GROUP_DEFAULT);
-            // Should get network access.
-            assertTrue((app.mState.getSetCapability() & PROCESS_CAPABILITY_NETWORK) != 0);
+            assertNoBfsl(app);
         }
 
         // SHORT_SERVICE, but no longer recent.
@@ -497,7 +510,7 @@ public class MockingOomAdjusterTests {
             ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
                     MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, true));
             app.mServices.setHasForegroundServices(true,
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE, /* hasNoneType=*/false);
+                    FOREGROUND_SERVICE_TYPE_SHORT_SERVICE, /* hasNoneType=*/false);
             app.mServices.startService(s);
             app.mState.setLastTopTime(SystemClock.uptimeMillis()
                     - sService.mConstants.TOP_TO_FGS_GRACE_DURATION);
@@ -505,17 +518,16 @@ public class MockingOomAdjusterTests {
 
             updateOomAdj(app);
 
-            assertProcStates(app, PROCESS_STATE_IMPORTANT_FOREGROUND,
+            assertProcStates(app, PROCESS_STATE_FOREGROUND_SERVICE,
                     PERCEPTIBLE_MEDIUM_APP_ADJ + 1, SCHED_GROUP_DEFAULT);
-            // Still should get network access.
-            assertTrue((app.mState.getSetCapability() & PROCESS_CAPABILITY_NETWORK) != 0);
+            assertNoBfsl(app);
         }
 
         // SHORT_SERVICE, timed out already.
         s = ServiceRecord.newEmptyInstanceForTest(sService);
         s.startRequested = true;
         s.isForeground = true;
-        s.foregroundServiceType = ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
+        s.foregroundServiceType = FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
         s.setShortFgsInfo(SystemClock.uptimeMillis()
                 - sService.mConstants.mShortFgsTimeoutDuration
                 - sService.mConstants.mShortFgsProcStateExtraWaitDuration);
@@ -523,7 +535,7 @@ public class MockingOomAdjusterTests {
             ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
                     MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, true));
             app.mServices.setHasForegroundServices(true,
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE, /* hasNoneType=*/false);
+                    FOREGROUND_SERVICE_TYPE_SHORT_SERVICE, /* hasNoneType=*/false);
             app.mServices.startService(s);
             app.mState.setLastTopTime(SystemClock.uptimeMillis()
                     - sService.mConstants.TOP_TO_FGS_GRACE_DURATION);
@@ -533,9 +545,7 @@ public class MockingOomAdjusterTests {
 
             // Procstate should be lower than FGS. (It should be SERVICE)
             assertEquals(app.mState.getSetProcState(), PROCESS_STATE_SERVICE);
-
-            // Shouldn't have the network capability now.
-            assertTrue((app.mState.getSetCapability() & PROCESS_CAPABILITY_NETWORK) == 0);
+            assertNoBfsl(app);
         }
     }
 
@@ -564,6 +574,7 @@ public class MockingOomAdjusterTests {
 
         assertProcStates(app, PROCESS_STATE_FOREGROUND_SERVICE,
                 PERCEPTIBLE_RECENT_FOREGROUND_APP_ADJ, SCHED_GROUP_DEFAULT);
+        assertBfsl(app);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -925,6 +936,7 @@ public class MockingOomAdjusterTests {
 
         assertProcStates(app, PROCESS_STATE_BOUND_FOREGROUND_SERVICE, VISIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -940,6 +952,7 @@ public class MockingOomAdjusterTests {
         updateOomAdj(client, app);
 
         assertEquals(FOREGROUND_APP_ADJ, app.mState.getSetAdj());
+        assertNoBfsl(app);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -973,6 +986,8 @@ public class MockingOomAdjusterTests {
 
         assertEquals(PROCESS_STATE_BOUND_FOREGROUND_SERVICE, app.mState.getSetProcState());
         assertEquals(PROCESS_STATE_PERSISTENT, client.mState.getSetProcState());
+        assertBfsl(client);
+        assertBfsl(app);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -988,6 +1003,7 @@ public class MockingOomAdjusterTests {
         updateOomAdj(app);
 
         assertEquals(PROCESS_STATE_TRANSIENT_BACKGROUND, app.mState.getSetProcState());
+        assertNoBfsl(app);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1002,7 +1018,92 @@ public class MockingOomAdjusterTests {
         sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
         updateOomAdj(client, app);
 
+        assertEquals(PROCESS_STATE_FOREGROUND_SERVICE, client.mState.getSetProcState());
+        assertBfsl(client);
         assertEquals(PROCESS_STATE_FOREGROUND_SERVICE, app.mState.getSetProcState());
+        assertBfsl(app);
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testUpdateOomAdj_DoOne_Service_ImportantFgService_ShortFgs() {
+        // Client has a SHORT_SERVICE FGS, which isn't allowed BFSL.
+        ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
+        ProcessRecord client = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
+        bindService(app, client, null, 0, mock(IBinder.class));
+
+        // In order to trick OomAdjuster to think it has a short-service, we need this logic.
+        ServiceRecord s = ServiceRecord.newEmptyInstanceForTest(sService);
+        s.startRequested = true;
+        s.isForeground = true;
+        s.foregroundServiceType = FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
+        s.setShortFgsInfo(SystemClock.uptimeMillis());
+        client.mServices.startService(s);
+        client.mState.setLastTopTime(SystemClock.uptimeMillis());
+
+        client.mServices.setHasForegroundServices(true, FOREGROUND_SERVICE_TYPE_SHORT_SERVICE,
+                /* hasNoneType=*/false);
+        sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
+        updateOomAdj(client, app);
+
+        // Client only has a SHORT_FGS, so it doesn't have BFSL, and that's propagated.
+        assertEquals(PROCESS_STATE_FOREGROUND_SERVICE, client.mState.getSetProcState());
+        assertNoBfsl(client);
+        assertEquals(PROCESS_STATE_FOREGROUND_SERVICE, app.mState.getSetProcState());
+        assertNoBfsl(app);
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testUpdateOomAdj_DoOne_Service_BoundForegroundService_with_ShortFgs() {
+
+        // app2, which is bound by app1 (which makes it BFGS)
+        // but it also has a short-fgs.
+        ProcessRecord app2 = spy(makeDefaultProcessRecord(MOCKAPP3_PID, MOCKAPP3_UID,
+                MOCKAPP3_PROCESSNAME, MOCKAPP3_PACKAGENAME, false));
+
+        // In order to trick OomAdjuster to think it has a short-service, we need this logic.
+        ServiceRecord s = ServiceRecord.newEmptyInstanceForTest(sService);
+        s.startRequested = true;
+        s.isForeground = true;
+        s.foregroundServiceType = FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
+        s.setShortFgsInfo(SystemClock.uptimeMillis());
+        app2.mServices.startService(s);
+        app2.mState.setLastTopTime(SystemClock.uptimeMillis());
+
+        app2.mServices.setHasForegroundServices(true, FOREGROUND_SERVICE_TYPE_SHORT_SERVICE,
+                /* hasNoneType=*/false);
+        sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
+        updateOomAdj(app2);
+
+        // Client only has a SHORT_FGS, so it doesn't have BFSL, and that's propagated.
+        assertEquals(PROCESS_STATE_FOREGROUND_SERVICE, app2.mState.getSetProcState());
+        assertNoBfsl(app2);
+
+        // Now, create a BFGS process (app1), and make it bind to app 2
+
+        // Persistent process
+        ProcessRecord pers = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
+        pers.mState.setMaxAdj(PERSISTENT_PROC_ADJ);
+
+        // app1, which is bound by pers (which makes it BFGS)
+        ProcessRecord app1 = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
+
+        bindService(app1, pers, null, Context.BIND_FOREGROUND_SERVICE, mock(IBinder.class));
+        bindService(app2, app1, null, 0, mock(IBinder.class));
+
+        updateOomAdj(pers, app1, app2);
+
+        assertEquals(PROCESS_STATE_BOUND_FOREGROUND_SERVICE, app1.mState.getSetProcState());
+        assertBfsl(app1);
+
+        // Now, app2 gets BFSL from app1.
+        assertEquals(PROCESS_STATE_FOREGROUND_SERVICE, app2.mState.getSetProcState());
+        assertBfsl(app2);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1022,11 +1123,13 @@ public class MockingOomAdjusterTests {
         doReturn(null).when(sService.mBackupTargets).get(anyInt());
 
         assertEquals(BACKUP_APP_ADJ, app.mState.getSetAdj());
+        assertNoBfsl(app);
 
         client.mState.setMaxAdj(PERSISTENT_PROC_ADJ);
         updateOomAdj(app);
 
         assertEquals(PERSISTENT_SERVICE_ADJ, app.mState.getSetAdj());
+        assertBfsl(app);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1172,6 +1275,7 @@ public class MockingOomAdjusterTests {
         updateOomAdj(client, app);
 
         assertEquals(PROCESS_STATE_IMPORTANT_BACKGROUND, app.mState.getSetProcState());
+        assertNoBfsl(app);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1231,6 +1335,42 @@ public class MockingOomAdjusterTests {
 
         assertProcStates(app, PROCESS_STATE_BOUND_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app);
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testUpdateOomAdj_DoOne_Provider_FgService_ShortFgs() {
+        // Client has a SHORT_SERVICE FGS, which isn't allowed BFSL.
+        ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
+        ProcessRecord client = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
+
+        // In order to trick OomAdjuster to think it has a short-service, we need this logic.
+        ServiceRecord s = ServiceRecord.newEmptyInstanceForTest(sService);
+        s.startRequested = true;
+        s.isForeground = true;
+        s.foregroundServiceType = FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
+        s.setShortFgsInfo(SystemClock.uptimeMillis());
+        client.mServices.startService(s);
+        client.mState.setLastTopTime(SystemClock.uptimeMillis());
+
+        client.mServices.setHasForegroundServices(true, FOREGROUND_SERVICE_TYPE_SHORT_SERVICE,
+                /* hasNoneType=*/false);
+        bindProvider(app, client, null, null, false);
+        sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
+        updateOomAdj(client, app);
+
+        // Client only has a SHORT_FGS, so it doesn't have BFSL, and that's propagated.
+        assertProcStates(app, PROCESS_STATE_BOUND_FOREGROUND_SERVICE,
+                PERCEPTIBLE_RECENT_FOREGROUND_APP_ADJ + 1,
+                SCHED_GROUP_DEFAULT);
+        assertNoBfsl(client);
+        assertProcStates(app, PROCESS_STATE_BOUND_FOREGROUND_SERVICE,
+                PERCEPTIBLE_RECENT_FOREGROUND_APP_ADJ + 1,
+                SCHED_GROUP_DEFAULT);
+        assertNoBfsl(app);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1299,6 +1439,7 @@ public class MockingOomAdjusterTests {
 
         assertProcStates(app, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1318,6 +1459,7 @@ public class MockingOomAdjusterTests {
 
         assertProcStates(app, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1346,6 +1488,9 @@ public class MockingOomAdjusterTests {
                 SCHED_GROUP_DEFAULT);
         assertProcStates(client2, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app);
+        assertBfsl(client);
+        assertBfsl(client2);
 
         client2.mServices.setHasForegroundServices(false, 0, /* hasNoneType=*/false);
         sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
@@ -1354,6 +1499,9 @@ public class MockingOomAdjusterTests {
         assertEquals(PROCESS_STATE_CACHED_EMPTY, client2.mState.getSetProcState());
         assertEquals(PROCESS_STATE_CACHED_EMPTY, client.mState.getSetProcState());
         assertEquals(PROCESS_STATE_CACHED_EMPTY, app.mState.getSetProcState());
+        assertNoBfsl(app);
+        assertNoBfsl(client);
+        assertNoBfsl(client2);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1378,6 +1526,9 @@ public class MockingOomAdjusterTests {
                 SCHED_GROUP_DEFAULT);
         assertProcStates(client2, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app);
+        assertBfsl(client);
+        assertBfsl(client2);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1402,6 +1553,9 @@ public class MockingOomAdjusterTests {
                 SCHED_GROUP_DEFAULT);
         assertProcStates(client2, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app);
+        assertBfsl(client);
+        assertBfsl(client2);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1437,6 +1591,11 @@ public class MockingOomAdjusterTests {
                 SCHED_GROUP_DEFAULT);
         assertProcStates(client4, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app);
+        assertBfsl(client);
+        assertBfsl(client2);
+        assertBfsl(client3);
+        assertBfsl(client4);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1461,6 +1620,7 @@ public class MockingOomAdjusterTests {
 
         assertProcStates(app, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1542,6 +1702,7 @@ public class MockingOomAdjusterTests {
 
         assertProcStates(app, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1567,6 +1728,7 @@ public class MockingOomAdjusterTests {
 
         assertProcStates(app, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1586,6 +1748,7 @@ public class MockingOomAdjusterTests {
 
         assertProcStates(app, PROCESS_STATE_BOUND_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1606,6 +1769,7 @@ public class MockingOomAdjusterTests {
 
         assertProcStates(app, PROCESS_STATE_BOUND_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1625,6 +1789,7 @@ public class MockingOomAdjusterTests {
 
         assertProcStates(app, PROCESS_STATE_BOUND_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1645,6 +1810,7 @@ public class MockingOomAdjusterTests {
 
         assertProcStates(app, PROCESS_STATE_BOUND_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1672,6 +1838,8 @@ public class MockingOomAdjusterTests {
                 SCHED_GROUP_DEFAULT);
         assertProcStates(app2, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app1);
+        assertBfsl(app2);
 
         bindService(app1, client1, null, Context.BIND_SCHEDULE_LIKE_TOP_APP, mock(IBinder.class));
         bindService(app2, client2, null, Context.BIND_SCHEDULE_LIKE_TOP_APP, mock(IBinder.class));
@@ -1688,6 +1856,7 @@ public class MockingOomAdjusterTests {
                 SCHED_GROUP_TOP_APP);
         assertProcStates(app2, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app2);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1770,6 +1939,7 @@ public class MockingOomAdjusterTests {
 
         assertProcStates(app1, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app1);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1790,6 +1960,7 @@ public class MockingOomAdjusterTests {
 
         assertProcStates(app1, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app1);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1912,6 +2083,7 @@ public class MockingOomAdjusterTests {
                 SCHED_GROUP_DEFAULT);
         assertProcStates(app2, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app2);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1931,6 +2103,8 @@ public class MockingOomAdjusterTests {
                 SCHED_GROUP_DEFAULT);
         assertProcStates(app2, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app);
+        assertBfsl(app2);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1964,6 +2138,9 @@ public class MockingOomAdjusterTests {
         assertEquals(false, app.mState.isEmpty());
         assertEquals(false, app2.mState.isEmpty());
         assertEquals(false, app3.mState.isEmpty());
+        assertBfsl(app);
+        assertBfsl(app2);
+        assertBfsl(app3);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -2001,6 +2178,11 @@ public class MockingOomAdjusterTests {
                 SCHED_GROUP_DEFAULT);
         assertProcStates(app5, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app);
+        assertBfsl(app2);
+        assertBfsl(app3);
+        // 4 is IMP_FG
+        assertBfsl(app5);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -2038,6 +2220,11 @@ public class MockingOomAdjusterTests {
                 SCHED_GROUP_DEFAULT);
         assertProcStates(app5, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app);
+        assertBfsl(app2);
+        assertBfsl(app3);
+        // 4 is IMP_FG
+        assertBfsl(app5);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -2075,6 +2262,11 @@ public class MockingOomAdjusterTests {
                 SCHED_GROUP_DEFAULT);
         assertProcStates(app5, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app);
+        assertBfsl(app2);
+        assertBfsl(app3);
+        // 4 is IMP_FG
+        assertBfsl(app5);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -2096,7 +2288,7 @@ public class MockingOomAdjusterTests {
         sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
         updateOomAdj(app, client, client2, client3);
 
-        final int expected = PROCESS_CAPABILITY_ALL;
+        final int expected = PROCESS_CAPABILITY_ALL & ~PROCESS_CAPABILITY_BFSL;
         assertEquals(expected, client.mState.getSetCapability());
         assertEquals(expected, client2.mState.getSetCapability());
         assertEquals(expected, app.mState.getSetCapability());
@@ -2137,6 +2329,11 @@ public class MockingOomAdjusterTests {
                 SCHED_GROUP_DEFAULT);
         assertProcStates(app5, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertBfsl(app);
+        assertBfsl(app2);
+        assertBfsl(app3);
+        // 4 is IMP_FG
+        assertBfsl(app5);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -2444,6 +2641,15 @@ public class MockingOomAdjusterTests {
         assertEquals(expectedProcState, state.getSetProcState());
         assertEquals(expectedAdj, state.getSetAdj());
         assertEquals(expectedSchedGroup, state.getSetSchedGroup());
+
+        // Below BFGS should never have BFSL.
+        if (expectedProcState > PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
+            assertNoBfsl(app);
+        }
+        // Above FGS should always have BFSL.
+        if (expectedProcState < PROCESS_STATE_FOREGROUND_SERVICE) {
+            assertBfsl(app);
+        }
     }
 
     private void assertProcStates(ProcessRecord app, boolean expectedCached,
@@ -2453,5 +2659,14 @@ public class MockingOomAdjusterTests {
         assertEquals(expectedProcState, state.getSetProcState());
         assertEquals(expectedAdj, state.getSetAdj());
         assertEquals(expectedAdjType, state.getAdjType());
+
+        // Below BFGS should never have BFSL.
+        if (expectedProcState > PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
+            assertNoBfsl(app);
+        }
+        // Above FGS should always have BFSL.
+        if (expectedProcState < PROCESS_STATE_FOREGROUND_SERVICE) {
+            assertBfsl(app);
+        }
     }
 }

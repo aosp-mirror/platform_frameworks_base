@@ -16,6 +16,10 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_CAMERA;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_NETWORK;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM;
@@ -1823,16 +1827,20 @@ final class ActivityManagerShellCommand extends ShellCommand {
         final InputStream mInput;
         final int mUid;
 
+        final int mMask;
+
         static final int STATE_NORMAL = 0;
 
         int mState;
 
-        MyUidObserver(ActivityManagerService service, PrintWriter pw, InputStream input, int uid) {
+        MyUidObserver(ActivityManagerService service, PrintWriter pw, InputStream input, int uid,
+                int mask) {
             mInterface = service;
             mInternal = service;
             mPw = pw;
             mInput = input;
             mUid = uid;
+            mMask = mask;
         }
 
         @Override
@@ -1847,7 +1855,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     mPw.print(" seq ");
                     mPw.print(procStateSeq);
                     mPw.print(" capability ");
-                    mPw.println(capability);
+                    mPw.println(capability & mMask);
                     mPw.flush();
                 } finally {
                     StrictMode.setThreadPolicy(oldPolicy);
@@ -1998,9 +2006,19 @@ final class ActivityManagerShellCommand extends ShellCommand {
     int runWatchUids(PrintWriter pw) throws RemoteException {
         String opt;
         int uid = -1;
+
+        // Because a lot of CTS won't ignore capabilities newly added, we report
+        // only the following capabilities -- the ones we had on Android T -- by default.
+        int mask = PROCESS_CAPABILITY_FOREGROUND_LOCATION
+                | PROCESS_CAPABILITY_FOREGROUND_CAMERA
+                | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE
+                | PROCESS_CAPABILITY_NETWORK;
+
         while ((opt=getNextOption()) != null) {
             if (opt.equals("--oom")) {
                 uid = Integer.parseInt(getNextArgRequired());
+            } else if (opt.equals("--mask")) {
+                mask = Integer.parseInt(getNextArgRequired());
             } else {
                 getErrPrintWriter().println("Error: Unknown option: " + opt);
                 return -1;
@@ -2008,7 +2026,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             }
         }
 
-        MyUidObserver controller = new MyUidObserver(mInternal, pw, getRawInputStream(), uid);
+        MyUidObserver controller = new MyUidObserver(mInternal, pw, getRawInputStream(), uid, mask);
         controller.run();
         return 0;
     }
@@ -4079,9 +4097,14 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      -p: only show events related to a specific process / package");
             pw.println("      -s: simple mode, only show a summary line for each event");
             pw.println("      -c: assume the input is always [c]ontinue");
-            pw.println("  watch-uids [--oom <uid>]");
+            pw.println("  watch-uids [--oom <uid>] [--mask <capabilities integer>]");
             pw.println("      Start watching for and reporting uid state changes.");
             pw.println("      --oom: specify a uid for which to report detailed change messages.");
+            pw.println("      --mask: Specify PROCESS_CAPABILITY_XXX mask to report. ");
+            pw.println("              By default, it only reports FOREGROUND_LOCATION (1)");
+            pw.println("              FOREGROUND_CAMERA (2), FOREGROUND_MICROPHONE (4)");
+            pw.println("              and NETWORK (8). New capabilities added on or after");
+            pw.println("              Android UDC will not be reported by default.");
             pw.println("  hang [--allow-restart]");
             pw.println("      Hang the system.");
             pw.println("      --allow-restart: allow watchdog to perform normal system restart");
