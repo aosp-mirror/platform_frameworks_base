@@ -77,6 +77,17 @@ open class ModernStatusBarView(context: Context, attrs: AttributeSet?) :
         return binding.getShouldIconBeVisible()
     }
 
+    /** See [StatusBarIconView.getDrawingRect]. */
+    override fun getDrawingRect(outRect: Rect) {
+        super.getDrawingRect(outRect)
+        val translationX = translationX.toInt()
+        val translationY = translationY.toInt()
+        outRect.left += translationX
+        outRect.right += translationX
+        outRect.top += translationY
+        outRect.bottom += translationY
+    }
+
     /**
      * Initializes this view.
      *
