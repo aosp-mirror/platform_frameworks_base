@@ -6083,4 +6083,7 @@
     <!-- Whether the lock screen is allowed to run its own live wallpaper,
          different from the home screen wallpaper. -->
     <bool name="config_independentLockscreenLiveWallpaper">false</bool>
+
+    <!-- Whether to show weather on the lock screen by default. -->
+    <bool name="config_lockscreenWeatherEnabledByDefault">false</bool>
 </resources>
