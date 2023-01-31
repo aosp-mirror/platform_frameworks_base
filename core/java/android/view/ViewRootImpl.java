@@ -11428,33 +11428,25 @@ public final class ViewRootImpl implements ViewParent,
         });
     }
 
-    private class VRISurfaceSyncGroup extends SurfaceSyncGroup {
-        VRISurfaceSyncGroup(String name) {
-            super(name);
-        }
-
-        @Override
-        public void onSyncReady() {
-            Runnable runnable = () -> {
-                mNumPausedForSync--;
-                if (!mIsInTraversal && mNumPausedForSync == 0) {
-                    scheduleTraversals();
-                }
-            };
-
-            if (Thread.currentThread() == mThread) {
-                runnable.run();
-            } else {
-                mHandler.post(runnable);
-            }
-        }
-    }
-
     @Override
     public SurfaceSyncGroup getOrCreateSurfaceSyncGroup() {
         boolean newSyncGroup = false;
         if (mActiveSurfaceSyncGroup == null) {
-            mActiveSurfaceSyncGroup = new VRISurfaceSyncGroup(mTag);
+            mActiveSurfaceSyncGroup = new SurfaceSyncGroup(mTag);
+            mActiveSurfaceSyncGroup.setAddedToSyncListener(() -> {
+                Runnable runnable = () -> {
+                    mNumPausedForSync--;
+                    if (!mIsInTraversal && mNumPausedForSync == 0) {
+                        scheduleTraversals();
+                    }
+                };
+
+                if (Thread.currentThread() == mThread) {
+                    runnable.run();
+                } else {
+                    mHandler.post(runnable);
+                }
+            });
             updateSyncInProgressCount(mActiveSurfaceSyncGroup);
             newSyncGroup = true;
         }

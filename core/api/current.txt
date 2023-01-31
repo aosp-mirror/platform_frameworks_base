@@ -60278,7 +60278,7 @@ package android.window {
     method @UiThread public void remove();
   }
 
-  public class SurfaceSyncGroup {
+  public final class SurfaceSyncGroup {
     ctor public SurfaceSyncGroup(@NonNull String);
     method @UiThread public boolean add(@Nullable android.view.AttachedSurfaceControl, @Nullable Runnable);
     method public boolean add(@NonNull android.view.SurfaceControlViewHost.SurfacePackage, @Nullable Runnable);
