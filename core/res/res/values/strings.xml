@@ -5067,6 +5067,13 @@
     <string name="managed_profile_label_badge_2">2nd Work <xliff:g id="label" example="Email">%1$s</xliff:g></string>
     <string name="managed_profile_label_badge_3">3rd Work <xliff:g id="label" example="Email">%1$s</xliff:g></string>
 
+    <!--
+        Used to wrap a label for content description for a Clone profile, e.g. "Clone Messenger"
+        instead of Messenger when the Messenger app is cloned.
+        [CHAR LIMIT=20]
+    -->
+    <string name="clone_profile_label_badge">Clone <xliff:g id="label" example="Messenger">%1$s</xliff:g></string>
+
     <!-- DO NOT TRANSLATE -->
     <string name="time_placeholder">--</string>
 
