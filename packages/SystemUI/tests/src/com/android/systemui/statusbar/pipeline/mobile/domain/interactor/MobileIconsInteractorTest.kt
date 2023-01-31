@@ -28,6 +28,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobile
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSetupRepository
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.util.CarrierConfigTracker
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -77,6 +78,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
             MobileIconsInteractorImpl(
                 connectionsRepository,
                 carrierConfigTracker,
+                logger = mock(),
                 userSetupRepository,
                 testScope.backgroundScope,
             )
