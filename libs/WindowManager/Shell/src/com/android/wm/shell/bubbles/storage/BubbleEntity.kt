@@ -28,5 +28,5 @@ data class BubbleEntity(
     val title: String? = null,
     val taskId: Int,
     val locus: String? = null,
-    val isClearable: Boolean = false
+    val isDismissable: Boolean = false
 )

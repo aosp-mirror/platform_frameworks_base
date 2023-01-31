@@ -35,7 +35,7 @@ class BubbleXmlHelperTest : ShellTestCase() {
 
     private val user0Bubbles = listOf(
             BubbleEntity(0, "com.example.messenger", "shortcut-1", "0k1", 120, 0, null, 1,
-                    isClearable = true),
+                    isDismissable = true),
             BubbleEntity(10, "com.example.chat", "alice and bob", "0k2", 0, 16537428, "title", 2,
                     null),
             BubbleEntity(0, "com.example.messenger", "shortcut-2", "0k3", 120, 0, null,
@@ -44,7 +44,7 @@ class BubbleXmlHelperTest : ShellTestCase() {
 
     private val user1Bubbles = listOf(
             BubbleEntity(1, "com.example.messenger", "shortcut-1", "1k1", 120, 0, null, 3,
-                    isClearable = true),
+                    isDismissable = true),
             BubbleEntity(12, "com.example.chat", "alice and bob", "1k2", 0, 16537428, "title", 4,
                     null),
             BubbleEntity(1, "com.example.messenger", "shortcut-2", "1k3", 120, 0, null,
