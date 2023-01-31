@@ -23,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewStub;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.LockIconView;
 import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
@@ -67,6 +68,7 @@ import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.settings.SecureSettings;
@@ -299,7 +301,9 @@ public abstract class StatusBarViewModule {
             OperatorNameViewController.Factory operatorNameViewControllerFactory,
             SecureSettings secureSettings,
             @Main Executor mainExecutor,
-            DumpManager dumpManager
+            DumpManager dumpManager,
+            StatusBarWindowStateController statusBarWindowStateController,
+            KeyguardUpdateMonitor keyguardUpdateMonitor
     ) {
         return new CollapsedStatusBarFragment(statusBarFragmentComponentFactory,
                 ongoingCallController,
@@ -320,7 +324,9 @@ public abstract class StatusBarViewModule {
                 operatorNameViewControllerFactory,
                 secureSettings,
                 mainExecutor,
-                dumpManager);
+                dumpManager,
+                statusBarWindowStateController,
+                keyguardUpdateMonitor);
     }
 
     /**
