@@ -1171,7 +1171,8 @@ final class InstallPackageHelper {
         request.setName(pkgName);
         if (parsedPackage.isTestOnly()) {
             if ((installFlags & PackageManager.INSTALL_ALLOW_TEST) == 0) {
-                throw new PrepareFailure(INSTALL_FAILED_TEST_ONLY, "installPackageLI");
+                throw new PrepareFailure(INSTALL_FAILED_TEST_ONLY,
+                        "Failed to install test-only apk. Did you forget to add -t?");
             }
         }
 
