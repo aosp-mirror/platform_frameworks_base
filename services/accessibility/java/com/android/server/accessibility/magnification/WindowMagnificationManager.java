@@ -37,6 +37,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.util.MathUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -715,18 +716,21 @@ public class WindowMagnificationManager implements
      *         scale if none is available
      */
     float getPersistedScale(int displayId) {
-        return mScaleProvider.getScale(displayId);
+        return MathUtils.constrain(mScaleProvider.getScale(displayId),
+                2.0f, MagnificationScaleProvider.MAX_SCALE);
     }
 
     /**
-     * Persists the default display magnification scale to the current user's settings. Only the
+     * Persists the default display magnification scale to the current user's settings
+     *     <strong>if scale is >= 2.0</strong>. Only the
      * value of the default display is persisted in user's settings.
      */
     void persistScale(int displayId) {
         float scale = getScale(displayId);
-        if (scale != 1.0f) {
-            mScaleProvider.putScale(scale, displayId);
+        if (scale < 2.0f) {
+            return;
         }
+        mScaleProvider.putScale(scale, displayId);
     }
 
     /**

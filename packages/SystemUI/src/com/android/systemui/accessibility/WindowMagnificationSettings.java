@@ -92,7 +92,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     private ImageButton mChangeModeButton;
     private boolean mAllowDiagonalScrolling = false;
     private static final float A11Y_CHANGE_SCALE_DIFFERENCE = 1.0f;
-    private static final float A11Y_SCALE_MIN_VALUE = 2.0f;
+    private static final float A11Y_SCALE_MIN_VALUE = 1.0f;
     private WindowMagnificationSettingsCallback mCallback;
 
     @Retention(RetentionPolicy.SOURCE)
@@ -136,9 +136,12 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             float scale = progress * A11Y_CHANGE_SCALE_DIFFERENCE + A11Y_SCALE_MIN_VALUE;
-            mSecureSettings.putFloatForUser(
-                    Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, scale,
-                    UserHandle.USER_CURRENT);
+            // update persisted scale only when scale >= 2.0
+            if (scale >= 2.0f) {
+                Settings.Secure.putFloatForUser(mContext.getContentResolver(),
+                        Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, scale,
+                        UserHandle.USER_CURRENT);
+            }
             mCallback.onMagnifierScale(scale);
         }
 
@@ -516,12 +519,16 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         boolean enabled = mSecureSettings.getIntForUser(
                 Settings.Secure.ACCESSIBILITY_ALLOW_DIAGONAL_SCROLLING, 0,
                 UserHandle.USER_CURRENT) == 1;
+        setDiagonalScrolling(!enabled);
+    }
 
-        mSecureSettings.putIntForUser(
-                Settings.Secure.ACCESSIBILITY_ALLOW_DIAGONAL_SCROLLING, enabled ? 0 : 1,
+    @VisibleForTesting
+    void setDiagonalScrolling(boolean enabled) {
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_ALLOW_DIAGONAL_SCROLLING, enabled ? 1 : 0,
                 UserHandle.USER_CURRENT);
 
-        mCallback.onSetDiagonalScrolling(!enabled);
+        mCallback.onSetDiagonalScrolling(enabled);
     }
 
     private void setEditMagnifierSizeMode(boolean enable) {
