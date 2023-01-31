@@ -21,6 +21,7 @@ import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -88,6 +89,7 @@ import com.android.systemui.decor.OverlayWindow;
 import com.android.systemui.decor.PrivacyDotCornerDecorProviderImpl;
 import com.android.systemui.decor.PrivacyDotDecorProviderFactory;
 import com.android.systemui.decor.RoundedCornerResDelegate;
+import com.android.systemui.log.ScreenDecorationsLogger;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.settings.UserTracker;
@@ -219,11 +221,14 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 mAuthController,
                 mStatusBarStateController,
                 mKeyguardUpdateMonitor,
-                mExecutor));
+                mExecutor,
+                new ScreenDecorationsLogger(logcatLogBuffer("TestLogBuffer"))));
 
         mScreenDecorations = spy(new ScreenDecorations(mContext, mExecutor, mSecureSettings,
                 mTunerService, mUserTracker, mDisplayTracker, mDotViewController, mThreadFactory,
-                mPrivacyDotDecorProviderFactory, mFaceScanningProviderFactory) {
+                mPrivacyDotDecorProviderFactory, mFaceScanningProviderFactory,
+                new ScreenDecorationsLogger(logcatLogBuffer("TestLogBuffer")),
+                mAuthController) {
             @Override
             public void start() {
                 super.start();
