@@ -224,6 +224,8 @@ public:
 
     void setSyncDelayDuration(nsecs_t duration);
 
+    void startHintSession();
+
 private:
     CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
                   IContextFactory* contextFactory, std::unique_ptr<IRenderPipeline> renderPipeline,
