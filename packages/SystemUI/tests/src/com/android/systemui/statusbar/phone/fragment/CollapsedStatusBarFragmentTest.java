@@ -23,10 +23,12 @@ import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedul
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -45,6 +47,7 @@ import android.widget.FrameLayout;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.dump.DumpManager;
@@ -67,6 +70,8 @@ import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.window.StatusBarWindowStateController;
+import com.android.systemui.statusbar.window.StatusBarWindowStateListener;
 import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.SecureSettings;
@@ -78,6 +83,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
@@ -118,6 +126,12 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     private StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     @Mock
     private DumpManager mDumpManager;
+    @Mock
+    private StatusBarWindowStateController mStatusBarWindowStateController;
+    @Mock
+    private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+
+    private List<StatusBarWindowStateListener> mStatusBarWindowStateListeners = new ArrayList<>();
 
     public CollapsedStatusBarFragmentTest() {
         super(CollapsedStatusBarFragment.class);
@@ -127,6 +141,14 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     public void setup() {
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
         mDependency.injectMockDependency(DarkIconDispatcher.class);
+
+        // Keep the window state listeners so we can dispatch to them to test the status bar
+        // fragment's response.
+        doAnswer(invocation -> {
+            mStatusBarWindowStateListeners.add(invocation.getArgument(0));
+            return null;
+        }).when(mStatusBarWindowStateController).addListener(
+                any(StatusBarWindowStateListener.class));
     }
 
     @Test
@@ -414,6 +436,27 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertFalse(contains);
     }
 
+    @Test
+    public void testStatusBarIcons_hiddenThroughoutCameraLaunch() {
+        final CollapsedStatusBarFragment fragment = resumeAndGetFragment();
+
+        mockSecureCameraLaunch(fragment, true /* launched */);
+
+        // Status icons should be invisible or gone, but certainly not VISIBLE.
+        assertNotEquals(View.VISIBLE, getEndSideContentView().getVisibility());
+        assertNotEquals(View.VISIBLE, getClockView().getVisibility());
+
+        mockSecureCameraLaunchFinished();
+
+        assertNotEquals(View.VISIBLE, getEndSideContentView().getVisibility());
+        assertNotEquals(View.VISIBLE, getClockView().getVisibility());
+
+        mockSecureCameraLaunch(fragment, false /* launched */);
+
+        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
+        assertEquals(View.VISIBLE, getClockView().getVisibility());
+    }
+
     @Override
     protected Fragment instantiate(Context context, String className, Bundle arguments) {
         MockitoAnnotations.initMocks(this);
@@ -455,7 +498,9 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mOperatorNameViewControllerFactory,
                 mSecureSettings,
                 mExecutor,
-                mDumpManager);
+                mDumpManager,
+                mStatusBarWindowStateController,
+                mKeyguardUpdateMonitor);
     }
 
     private void setUpDaggerComponent() {
@@ -476,6 +521,35 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         when(mMockNotificationAreaController.getNotificationInnerAreaView()).thenReturn(
                 mNotificationAreaInner);
+    }
+
+    /**
+     * Configure mocks to return values consistent with the secure camera animating itself launched
+     * over the keyguard.
+     */
+    private void mockSecureCameraLaunch(CollapsedStatusBarFragment fragment, boolean launched) {
+        when(mKeyguardUpdateMonitor.isSecureCameraLaunchedOverKeyguard()).thenReturn(launched);
+        when(mKeyguardStateController.isOccluded()).thenReturn(launched);
+
+        if (launched) {
+            fragment.onCameraLaunchGestureDetected(0 /* source */);
+        } else {
+            for (StatusBarWindowStateListener listener : mStatusBarWindowStateListeners) {
+                listener.onStatusBarWindowStateChanged(StatusBarManager.WINDOW_STATE_SHOWING);
+            }
+        }
+
+        fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
+    }
+
+    /**
+     * Configure mocks to return values consistent with the secure camera showing over the keyguard
+     * with its launch animation finished.
+     */
+    private void mockSecureCameraLaunchFinished() {
+        for (StatusBarWindowStateListener listener : mStatusBarWindowStateListeners) {
+            listener.onStatusBarWindowStateChanged(StatusBarManager.WINDOW_STATE_HIDDEN);
+        }
     }
 
     private CollapsedStatusBarFragment resumeAndGetFragment() {
