@@ -10218,7 +10218,7 @@ public class AudioService extends IAudioService.Stub
     private static final int CHECK_MODE_FOR_UID_PERIOD_MS = 6000;
 
     private static final String ACTION_CHECK_MUSIC_ACTIVE =
-            AudioService.class.getSimpleName() + ".CHECK_MUSIC_ACTIVE";
+            "com.android.server.audio.action.CHECK_MUSIC_ACTIVE";
     private static final int REQUEST_CODE_CHECK_MUSIC_ACTIVE = 1;
 
     private int safeMediaVolumeIndex(int device) {
