@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ALLOW_IGNORE_ORIENTATION_REQUEST;
 import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY;
 
 import android.annotation.IntDef;
@@ -311,9 +312,20 @@ final class LetterboxConfiguration {
         mDeviceConfig.updateFlagActiveStatus(
                 /* isActive */ mIsDisplayRotationImmersiveAppCompatPolicyEnabled,
                 /* key */ KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY);
+        mDeviceConfig.updateFlagActiveStatus(
+                /* isActive */ true,
+                /* key */ KEY_ALLOW_IGNORE_ORIENTATION_REQUEST);
 
         mLetterboxConfigurationPersister = letterboxConfigurationPersister;
         mLetterboxConfigurationPersister.start();
+    }
+
+    /**
+     * Whether enabling ignoreOrientationRequest is allowed on the device. This value is controlled
+     * via {@link android.provider.DeviceConfig}.
+     */
+    boolean isIgnoreOrientationRequestAllowed() {
+        return mDeviceConfig.getFlag(KEY_ALLOW_IGNORE_ORIENTATION_REQUEST);
     }
 
     /**

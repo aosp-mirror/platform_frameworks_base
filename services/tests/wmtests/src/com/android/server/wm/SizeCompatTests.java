@@ -2313,6 +2313,29 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    public void testDisplayIgnoreOrientationRequest_disabledViaDeviceConfig_orientationRespected() {
+        // Set up a display in landscape
+        setUpDisplaySizeWithApp(2800, 1400);
+
+        final ActivityRecord activity = buildActivityRecord(/* supportsSizeChanges= */ false,
+                RESIZE_MODE_UNRESIZEABLE, SCREEN_ORIENTATION_PORTRAIT);
+        activity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+
+        spyOn(activity.mWmService.mLetterboxConfiguration);
+        doReturn(true).when(activity.mWmService.mLetterboxConfiguration)
+                .isIgnoreOrientationRequestAllowed();
+
+        // Display should not be rotated.
+        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, activity.mDisplayContent.getOrientation());
+
+        doReturn(false).when(activity.mWmService.mLetterboxConfiguration)
+                .isIgnoreOrientationRequestAllowed();
+
+        // Display should be rotated.
+        assertEquals(SCREEN_ORIENTATION_PORTRAIT, activity.mDisplayContent.getOrientation());
+    }
+
+    @Test
     public void testSandboxDisplayApis_unresizableAppNotSandboxed() {
         // Set up a display in landscape with an unresizable app.
         setUpDisplaySizeWithApp(2500, 1000);
