@@ -3212,7 +3212,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS,
                 callingMethod);
 
-        if (callingUid != Process.ROOT_UID && callingUid != Process.SYSTEM_UID
+        if (!PackageManagerServiceUtils.isSystemOrRoot(callingUid)
                 && UserHandle.getUserId(callingUid) != userId) {
             throw new SecurityException("Calling uid " + callingUid + " cannot call for user "
                     + userId);
@@ -5323,7 +5323,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             snapshot.enforceCrossUserPermission(callingUid, userId, false /*requireFullPermission*/,
                     true /*checkShell*/, "isPackageStateProtected");
 
-            if (callingAppId != Process.SYSTEM_UID && callingAppId != Process.ROOT_UID
+            if (!PackageManagerServiceUtils.isSystemOrRoot(callingAppId)
                     && snapshot.checkUidPermission(MANAGE_DEVICE_ADMINS, callingUid)
                     != PERMISSION_GRANTED) {
                 throw new SecurityException("Caller must have the "
@@ -5858,8 +5858,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             snapshot.enforceCrossUserPermission(callingUid, userId, true /*requireFullPermission*/,
                     true /*checkShell*/, "setHarmfulAppInfo");
 
-            if (callingAppId != Process.SYSTEM_UID && callingAppId != Process.ROOT_UID &&
-                    snapshot.checkUidPermission(SET_HARMFUL_APP_WARNINGS, callingUid)
+            if (!PackageManagerServiceUtils.isSystemOrRoot(callingAppId)
+                    && snapshot.checkUidPermission(SET_HARMFUL_APP_WARNINGS, callingUid)
                             != PERMISSION_GRANTED) {
                 throw new SecurityException("Caller must have the "
                         + SET_HARMFUL_APP_WARNINGS + " permission.");
@@ -6613,7 +6613,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         public void uninstallApex(String packageName, long versionCode, int userId,
                 IntentSender intentSender, int flags) {
             final int callerUid = Binder.getCallingUid();
-            if (callerUid != Process.ROOT_UID && callerUid != Process.SHELL_UID) {
+            if (!PackageManagerServiceUtils.isRootOrShell(callerUid)) {
                 throw new SecurityException("Not allowed to uninstall apexes");
             }
             PackageInstallerService.PackageDeleteObserverAdapter adapter =
@@ -6658,7 +6658,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             final int callingUid = Binder.getCallingUid();
             final Computer snapshot = snapshotComputer();
             final String[] callerPackageNames = snapshot.getPackagesForUid(callingUid);
-            if (callingUid != Process.SHELL_UID && callingUid != Process.ROOT_UID
+            if (!PackageManagerServiceUtils.isRootOrShell(callingUid)
                     && !ArrayUtils.contains(callerPackageNames, packageName)) {
                 throw new SecurityException("dumpProfiles");
             }

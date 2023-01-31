@@ -1856,8 +1856,7 @@ public class ComputerEngine implements Computer {
         // Figure out which lib versions the caller can see
         LongSparseLongArray versionsCallerCanSee = null;
         final int callingAppId = UserHandle.getAppId(callingUid);
-        if (callingAppId != Process.SYSTEM_UID && callingAppId != Process.SHELL_UID
-                && callingAppId != Process.ROOT_UID) {
+        if (!PackageManagerServiceUtils.isSystemOrRootOrShell(callingAppId)) {
             versionsCallerCanSee = new LongSparseLongArray();
             String libName = versionedLib.valueAt(0).getName();
             String[] uidPackages = getPackagesForUidInternal(callingUid, callingUid);
@@ -2034,8 +2033,7 @@ public class ComputerEngine implements Computer {
         if ((flags & PackageManager.MATCH_STATIC_SHARED_AND_SDK_LIBRARIES) != 0) {
             // System/shell/root get to see all static libs
             final int appId = UserHandle.getAppId(uid);
-            if (appId == Process.SYSTEM_UID || appId == Process.SHELL_UID
-                    || appId == Process.ROOT_UID) {
+            if (PackageManagerServiceUtils.isSystemOrRootOrShell(appId)) {
                 return false;
             }
             // Installer gets to see all static libs.
@@ -2091,8 +2089,7 @@ public class ComputerEngine implements Computer {
         if ((flags & PackageManager.MATCH_STATIC_SHARED_AND_SDK_LIBRARIES) != 0) {
             // System/shell/root get to see all SDK libs.
             final int appId = UserHandle.getAppId(uid);
-            if (appId == Process.SYSTEM_UID || appId == Process.SHELL_UID
-                    || appId == Process.ROOT_UID) {
+            if (PackageManagerServiceUtils.isSystemOrRootOrShell(appId)) {
                 return false;
             }
             // Installer gets to see all SDK libs.
@@ -2152,7 +2149,7 @@ public class ComputerEngine implements Computer {
         if (!requirePermissionWhenSameUser && userId == callingUserId) {
             return true;
         }
-        if (callingUid == Process.SYSTEM_UID || callingUid == Process.ROOT_UID) {
+        if (PackageManagerServiceUtils.isSystemOrRoot(callingUid)) {
             return true;
         }
         if (requireFullPermission) {
@@ -3813,8 +3810,7 @@ public class ComputerEngine implements Computer {
     public boolean canRequestPackageInstalls(@NonNull String packageName, int callingUid,
             int userId, boolean throwIfPermNotDeclared) {
         int uid = getPackageUidInternal(packageName, 0, userId, callingUid);
-        if (callingUid != uid && callingUid != Process.ROOT_UID
-                && callingUid != Process.SYSTEM_UID) {
+        if (callingUid != uid && !PackageManagerServiceUtils.isSystemOrRoot(callingUid)) {
             throw new SecurityException(
                     "Caller uid " + callingUid + " does not own package " + packageName);
         }
@@ -5540,8 +5536,8 @@ public class ComputerEngine implements Computer {
         enforceCrossUserPermission(callingUid, userId, true /*requireFullPermission*/,
                 true /*checkShell*/, "getHarmfulAppInfo");
 
-        if (callingAppId != Process.SYSTEM_UID && callingAppId != Process.ROOT_UID &&
-                checkUidPermission(SET_HARMFUL_APP_WARNINGS, callingUid) != PERMISSION_GRANTED) {
+        if (!PackageManagerServiceUtils.isSystemOrRoot(callingAppId)
+                && checkUidPermission(SET_HARMFUL_APP_WARNINGS, callingUid) != PERMISSION_GRANTED) {
             throw new SecurityException("Caller must have the "
                     + SET_HARMFUL_APP_WARNINGS + " permission.");
         }
