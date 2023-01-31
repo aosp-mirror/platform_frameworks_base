@@ -7255,40 +7255,40 @@ package android.media.soundtrigger {
     method public final void operationFinished(@Nullable java.util.UUID, int);
   }
 
-  public final class SoundTriggerDetector {
-    method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public boolean startRecognition(int);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public boolean stopRecognition();
-    field public static final int RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS = 2; // 0x2
-    field public static final int RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO = 1; // 0x1
-    field public static final int RECOGNITION_FLAG_ENABLE_AUDIO_ECHO_CANCELLATION = 4; // 0x4
-    field public static final int RECOGNITION_FLAG_ENABLE_AUDIO_NOISE_SUPPRESSION = 8; // 0x8
-    field public static final int RECOGNITION_FLAG_RUN_IN_BATTERY_SAVER = 16; // 0x10
+  @Deprecated public final class SoundTriggerDetector {
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public boolean startRecognition(int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public boolean stopRecognition();
+    field @Deprecated public static final int RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS = 2; // 0x2
+    field @Deprecated public static final int RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO = 1; // 0x1
+    field @Deprecated public static final int RECOGNITION_FLAG_ENABLE_AUDIO_ECHO_CANCELLATION = 4; // 0x4
+    field @Deprecated public static final int RECOGNITION_FLAG_ENABLE_AUDIO_NOISE_SUPPRESSION = 8; // 0x8
+    field @Deprecated public static final int RECOGNITION_FLAG_RUN_IN_BATTERY_SAVER = 16; // 0x10
   }
 
-  public abstract static class SoundTriggerDetector.Callback {
-    ctor public SoundTriggerDetector.Callback();
-    method public abstract void onAvailabilityChanged(int);
-    method public abstract void onDetected(@NonNull android.media.soundtrigger.SoundTriggerDetector.EventPayload);
-    method public abstract void onError();
-    method public abstract void onRecognitionPaused();
-    method public abstract void onRecognitionResumed();
+  @Deprecated public abstract static class SoundTriggerDetector.Callback {
+    ctor @Deprecated public SoundTriggerDetector.Callback();
+    method @Deprecated public abstract void onAvailabilityChanged(int);
+    method @Deprecated public abstract void onDetected(@NonNull android.media.soundtrigger.SoundTriggerDetector.EventPayload);
+    method @Deprecated public abstract void onError();
+    method @Deprecated public abstract void onRecognitionPaused();
+    method @Deprecated public abstract void onRecognitionResumed();
   }
 
-  public static class SoundTriggerDetector.EventPayload {
-    method @Nullable public android.media.AudioFormat getCaptureAudioFormat();
-    method @Nullable public byte[] getTriggerAudio();
+  @Deprecated public static class SoundTriggerDetector.EventPayload {
+    method @Deprecated @Nullable public android.media.AudioFormat getCaptureAudioFormat();
+    method @Deprecated @Nullable public byte[] getTriggerAudio();
   }
 
   public final class SoundTriggerManager {
-    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public android.media.soundtrigger.SoundTriggerDetector createSoundTriggerDetector(java.util.UUID, @NonNull android.media.soundtrigger.SoundTriggerDetector.Callback, @Nullable android.os.Handler);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public void deleteModel(java.util.UUID);
+    method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public android.media.soundtrigger.SoundTriggerDetector createSoundTriggerDetector(java.util.UUID, @NonNull android.media.soundtrigger.SoundTriggerDetector.Callback, @Nullable android.os.Handler);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public void deleteModel(java.util.UUID);
     method public int getDetectionServiceOperationsTimeout();
-    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public android.media.soundtrigger.SoundTriggerManager.Model getModel(java.util.UUID);
+    method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public android.media.soundtrigger.SoundTriggerManager.Model getModel(java.util.UUID);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public android.hardware.soundtrigger.SoundTrigger.ModuleProperties getModuleProperties();
     method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int getParameter(@NonNull java.util.UUID, int);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public android.hardware.soundtrigger.SoundTrigger.ModelParamRange queryParameter(@Nullable java.util.UUID, int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int setParameter(@Nullable java.util.UUID, int, int);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public void updateModel(android.media.soundtrigger.SoundTriggerManager.Model);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public void updateModel(android.media.soundtrigger.SoundTriggerManager.Model);
   }
 
   public static class SoundTriggerManager.Model {
