@@ -175,6 +175,7 @@ class DebugActivity : ComponentActivity() {
         RegularScaffold(title = "Page - ${page.debugBrief()}") {
             Text(text = "id = ${page.id}")
             Text(text = page.debugArguments())
+            Text(text = "enabled = ${page.isEnabled()}")
             Text(text = "Entry size: ${pageWithEntry.entries.size}")
             Preference(model = object : PreferenceModel {
                 override val title = "open page"

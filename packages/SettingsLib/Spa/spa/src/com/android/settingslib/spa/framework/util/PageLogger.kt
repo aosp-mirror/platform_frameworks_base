@@ -16,32 +16,27 @@
 
 package com.android.settingslib.spa.framework.util
 
-import android.os.Bundle
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.core.os.bundleOf
 import com.android.settingslib.spa.framework.common.LOG_DATA_DISPLAY_NAME
 import com.android.settingslib.spa.framework.common.LOG_DATA_SESSION_NAME
 import com.android.settingslib.spa.framework.common.LogCategory
 import com.android.settingslib.spa.framework.common.LogEvent
 import com.android.settingslib.spa.framework.common.SettingsPage
-import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
-import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.LifecycleEffect
 import com.android.settingslib.spa.framework.compose.LocalNavController
 import com.android.settingslib.spa.framework.compose.NavControllerWrapper
 
 @Composable
-internal fun SettingsPageProvider.PageWithEvent(arguments: Bundle? = null) {
-    if (!isEnabled(arguments)) return
-    val page = remember(arguments) { createSettingsPage(arguments) }
+internal fun SettingsPage.PageWithEvent() {
+    if (!isEnabled()) return
     val navController = LocalNavController.current
     LifecycleEffect(
-        onStart = { page.logPageEvent(LogEvent.PAGE_ENTER, navController) },
-        onStop = { page.logPageEvent(LogEvent.PAGE_LEAVE, navController) },
+        onStart = { logPageEvent(LogEvent.PAGE_ENTER, navController) },
+        onStop = { logPageEvent(LogEvent.PAGE_LEAVE, navController) },
     )
-    Page(arguments)
+    UiLayout()
 }
 
 private fun SettingsPage.logPageEvent(event: LogEvent, navController: NavControllerWrapper) {

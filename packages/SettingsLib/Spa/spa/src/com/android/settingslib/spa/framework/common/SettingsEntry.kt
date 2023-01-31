@@ -198,6 +198,7 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
             toPage = toPage,
 
             // attributes
+            // TODO: set isEnabled & (isAllowSearch, hasSliceSupport) separately
             isAllowSearch = isEnabled && isAllowSearch,
             isSearchDataDynamic = isSearchDataDynamic,
             hasMutableStatus = hasMutableStatus,
