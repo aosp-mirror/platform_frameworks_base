@@ -47,7 +47,8 @@
         android:singleLine="true"
         android:textSize="12sp"
         android:gravity="top"
-        android:layout_gravity="bottom"/>
+        android:layout_gravity="bottom"
+        android:importantForAccessibility="no"/>
 
     <!-- Album name -->
     <TextView
@@ -61,7 +62,8 @@
         android:singleLine="true"
         android:textSize="11sp"
         android:gravity="center_vertical"
-        android:layout_gravity="bottom"/>
+        android:layout_gravity="bottom"
+        android:importantForAccessibility="no"/>
 
     <!-- Seek Bar -->
     <SeekBar
