@@ -4958,8 +4958,12 @@ public final class NotificationPanelViewController implements Dumpable {
             beginJankMonitoring();
         }
         mInitialOffsetOnTouch = expandedHeight;
-        mInitialExpandY = newY;
-        mInitialExpandX = newX;
+        if (!mTracking || isFullyCollapsed()) {
+            mInitialExpandY = newY;
+            mInitialExpandX = newX;
+        } else {
+            mShadeLog.d("not setting mInitialExpandY in startExpandMotion");
+        }
         mInitialTouchFromKeyguard = mKeyguardStateController.isShowing();
         if (startTracking) {
             mTouchSlopExceeded = true;
@@ -6143,8 +6147,12 @@ public final class NotificationPanelViewController implements Dumpable {
                                 + " false");
                         return true;
                     }
-                    mInitialExpandY = y;
-                    mInitialExpandX = x;
+                    if (!mTracking || isFullyCollapsed()) {
+                        mInitialExpandY = y;
+                        mInitialExpandX = x;
+                    } else {
+                        mShadeLog.d("not setting mInitialExpandY in onInterceptTouch");
+                    }
                     mTouchStartedInEmptyArea = !isInContentBounds(x, y);
                     mTouchSlopExceeded = mTouchSlopExceededBeforeDown;
                     mMotionAborted = false;
@@ -6333,7 +6341,8 @@ public final class NotificationPanelViewController implements Dumpable {
             final float x = event.getX(pointerIndex);
             final float y = event.getY(pointerIndex);
 
-            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            if (event.getActionMasked() == MotionEvent.ACTION_DOWN
+                    || event.getActionMasked() == MotionEvent.ACTION_MOVE) {
                 mGestureWaitForTouchSlop = shouldGestureWaitForTouchSlop();
                 mIgnoreXTouchSlop = true;
             }
