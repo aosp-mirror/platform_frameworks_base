@@ -9321,7 +9321,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public CharSequence getDeviceOwnerLockScreenInfo() {
-        return mLockPatternUtils.getDeviceOwnerInfo();
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(
+                isDefaultDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(caller));
+        return mInjector.binderWithCleanCallingIdentity(() ->
+            mLockPatternUtils.getDeviceOwnerInfo());
     }
 
     private void clearUserPoliciesLocked(int userId) {
