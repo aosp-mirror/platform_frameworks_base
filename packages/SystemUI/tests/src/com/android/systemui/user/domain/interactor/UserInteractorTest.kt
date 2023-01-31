@@ -28,7 +28,6 @@ import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings
 import androidx.test.filters.SmallTest
-import com.android.internal.R.drawable.ic_account_circle
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.GuestResetOrExitSessionReceiver
 import com.android.systemui.GuestResumeSessionReceiver
@@ -87,6 +86,7 @@ class UserInteractorTest : SysuiTestCase() {
 
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var manager: UserManager
+    @Mock private lateinit var headlessSystemUserMode: HeadlessSystemUserMode
     @Mock private lateinit var activityManager: ActivityManager
     @Mock private lateinit var deviceProvisionedController: DeviceProvisionedController
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
@@ -145,6 +145,7 @@ class UserInteractorTest : SysuiTestCase() {
                         featureFlags = featureFlags,
                     ),
                 manager = manager,
+                headlessSystemUserMode = headlessSystemUserMode,
                 applicationScope = testScope.backgroundScope,
                 telephonyInteractor =
                     TelephonyInteractor(
@@ -846,6 +847,50 @@ class UserInteractorTest : SysuiTestCase() {
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = false))
             val selectedUser = collectLastValue(underTest.selectedUser)
             assertThat(selectedUser()).isNotNull()
+        }
+
+    @Test
+    fun userRecords_isActionAndNoUsersUnlocked_actionIsDisabled() =
+        testScope.runTest {
+            keyguardRepository.setKeyguardShowing(true)
+            whenever(manager.getUserSwitchability(any()))
+                .thenReturn(UserManager.SWITCHABILITY_STATUS_SYSTEM_USER_LOCKED)
+            val userInfos = createUserInfos(count = 3, includeGuest = false).toMutableList()
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[1])
+            userRepository.setSettings(
+                UserSwitcherSettingsModel(
+                    isUserSwitcherEnabled = true,
+                    isAddUsersFromLockscreen = true
+                )
+            )
+
+            runCurrent()
+            underTest.userRecords.value
+                .filter { it.info == null }
+                .forEach { action -> assertThat(action.isSwitchToEnabled).isFalse() }
+        }
+
+    @Test
+    fun userRecords_isActionAndNoUsersUnlocked_actionIsDisabled_HeadlessMode() =
+        testScope.runTest {
+            keyguardRepository.setKeyguardShowing(true)
+            whenever(headlessSystemUserMode.isHeadlessSystemUserMode()).thenReturn(true)
+            whenever(manager.isUserUnlocked(anyInt())).thenReturn(false)
+            val userInfos = createUserInfos(count = 3, includeGuest = false).toMutableList()
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[1])
+            userRepository.setSettings(
+                UserSwitcherSettingsModel(
+                    isUserSwitcherEnabled = true,
+                    isAddUsersFromLockscreen = true
+                )
+            )
+
+            runCurrent()
+            underTest.userRecords.value
+                .filter { it.info == null }
+                .forEach { action -> assertThat(action.isSwitchToEnabled).isFalse() }
         }
 
     private fun assertUsers(
