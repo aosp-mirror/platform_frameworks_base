@@ -8293,7 +8293,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void recomputeConfiguration() {
-        onRequestedOverrideConfigurationChanged(getRequestedOverrideConfiguration());
+        // We check if the current activity is transparent. In that case we need to
+        // recomputeConfiguration of the first opaque activity beneath, to allow a
+        // proper computation of the new bounds.
+        if (!mLetterboxUiController.applyOnOpaqueActivityBelow(
+                ActivityRecord::recomputeConfiguration)) {
+            onRequestedOverrideConfigurationChanged(getRequestedOverrideConfiguration());
+        }
     }
 
     boolean isInTransition() {
