@@ -3961,6 +3961,7 @@ public class DevicePolicyManager {
      *
      * @throws SecurityException if caller is not device owner or profile owner of org-owned device
      *     or if called on a parent instance
+     * @throws UnsupportedOperationException if the device does not support MTE
      * @param policy the MTE policy to be set
      */
     public void setMtePolicy(@MtePolicy int policy) {
