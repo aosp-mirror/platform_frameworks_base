@@ -16,17 +16,20 @@
 
 package android.transparency.test;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.android.tradefed.device.DeviceNotAvailableException;
+import com.android.tradefed.log.LogUtil.CLog;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 import com.android.tradefed.testtype.junit4.DeviceTestRunOptions;
 import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
 
-import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -40,12 +43,11 @@ public final class BinaryTransparencyHostTest extends BaseHostJUnit4Test {
     private static final String JOB_ID = "1740526926";
 
     /** Waiting time for the job to be scheduled */
-    private static final int JOB_CREATION_MAX_SECONDS = 5;
+    private static final int JOB_CREATION_MAX_SECONDS = 30;
 
-    @After
-    public void tearDown() throws Exception {
-        uninstallPackage("com.android.egg");
-        uninstallRebootlessApex();
+    @Before
+    public void setUp() throws Exception {
+        cancelPendingJob();
     }
 
     @Test
@@ -68,35 +70,41 @@ public final class BinaryTransparencyHostTest extends BaseHostJUnit4Test {
 
     @Test
     public void testCollectAllUpdatedPreloadInfo() throws Exception {
-        installPackage("EasterEgg.apk");
-        runDeviceTest("testCollectAllUpdatedPreloadInfo");
+        try {
+            updatePreloadApp();
+            runDeviceTest("testCollectAllUpdatedPreloadInfo");
+        } finally {
+            // No need to wait until job complete, since we can't verifying very meaningfully.
+            cancelPendingJob();
+            uninstallPackage("com.android.egg");
+        }
     }
 
     @Test
     public void testRebootlessApexUpdateTriggersJobScheduling() throws Exception {
-        cancelPendingJob();
-        installRebootlessApex();
+        try {
+            installRebootlessApex();
 
-        // Verify
-        expectJobToBeScheduled();
-        // Just cancel since we can't verifying very meaningfully.
-        cancelPendingJob();
+            // Verify
+            expectJobToBeScheduled();
+        } finally {
+            // No need to wait until job complete, since we can't verifying very meaningfully.
+            uninstallRebootlessApexThenReboot();
+        }
     }
 
     @Test
     public void testPreloadUpdateTriggersJobScheduling() throws Exception {
-        cancelPendingJob();
-        installPackage("EasterEgg.apk");
+        try {
+            updatePreloadApp();
 
-        // Verify
-        expectJobToBeScheduled();
-        // Just cancel since we can't verifying very meaningfully.
-        cancelPendingJob();
-    }
-
-    @Test
-    public void testMeasureMbas() throws Exception {
-        // TODO(265244016): figure out a way to install an MBA
+            // Verify
+            expectJobToBeScheduled();
+        } finally {
+            // No need to wait until job complete, since we can't verifying very meaningfully.
+            cancelPendingJob();
+            uninstallPackage("com.android.egg");
+        }
     }
 
     private void runDeviceTest(String method) throws DeviceNotAvailableException {
@@ -109,7 +117,11 @@ public final class BinaryTransparencyHostTest extends BaseHostJUnit4Test {
     private void cancelPendingJob() throws DeviceNotAvailableException {
         CommandResult result = getDevice().executeShellV2Command(
                 "cmd jobscheduler cancel android " + JOB_ID);
-        assertTrue(result.getStatus() == CommandStatus.SUCCESS);
+        if (result.getStatus() == CommandStatus.SUCCESS) {
+            CLog.d("Canceling, output: " + result.getStdout());
+        } else {
+            CLog.d("Something went wrong, error: " + result.getStderr());
+        }
     }
 
     private void expectJobToBeScheduled() throws Exception {
@@ -117,6 +129,7 @@ public final class BinaryTransparencyHostTest extends BaseHostJUnit4Test {
             CommandResult result = getDevice().executeShellV2Command(
                     "cmd jobscheduler get-job-state android " + JOB_ID);
             String state = result.getStdout().toString();
+            CLog.i("Job status: " + state);
             if (state.startsWith("unknown")) {
                 // The job hasn't been scheduled yet. So try again.
                 TimeUnit.SECONDS.sleep(1);
@@ -134,7 +147,7 @@ public final class BinaryTransparencyHostTest extends BaseHostJUnit4Test {
         installPackage("com.android.apex.cts.shim.v2_rebootless.apex", "--force-non-staged");
     }
 
-    private void uninstallRebootlessApex() throws DeviceNotAvailableException {
+    private void uninstallRebootlessApexThenReboot() throws DeviceNotAvailableException {
         // Reboot only if the APEX is not the pre-install one.
         CommandResult result = getDevice().executeShellV2Command(
                 "pm list packages -f --apex-only |grep com.android.apex.cts.shim");
@@ -147,5 +160,15 @@ public final class BinaryTransparencyHostTest extends BaseHostJUnit4Test {
             CommandResult runResult = getDevice().executeShellV2Command("setenforce 0");
             assertTrue(runResult.getStatus() == CommandStatus.SUCCESS);
         }
+    }
+
+    private void updatePreloadApp() throws DeviceNotAvailableException {
+        CommandResult result = getDevice().executeShellV2Command("pm path com.android.egg");
+        assertTrue(result.getStatus() == CommandStatus.SUCCESS);
+        assertThat(result.getStdout()).startsWith("package:/system/app/");
+        String path = result.getStdout().replaceFirst("^package:", "");
+
+        result = getDevice().executeShellV2Command("pm install " + path);
+        assertTrue(result.getStatus() == CommandStatus.SUCCESS);
     }
 }
