@@ -18,7 +18,6 @@ package com.android.server.locksettings;
 
 import static android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE;
 import static android.Manifest.permission.MANAGE_BIOMETRIC;
-import static android.Manifest.permission.READ_CONTACTS;
 import static android.Manifest.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS;
 import static android.Manifest.permission.SET_INITIAL_LOCK;
 import static android.app.admin.DevicePolicyManager.DEPRECATE_USERMANAGERINTERNAL_DEVICEPOLICY_DEFAULT;
@@ -96,7 +95,6 @@ import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
-import android.provider.Settings.Secure;
 import android.security.AndroidKeyStoreMaintenance;
 import android.security.Authorization;
 import android.security.KeyStore;
@@ -1048,27 +1046,21 @@ public class LockSettingsService extends ILockSettings.Stub {
         mContext.enforceCallingOrSelfPermission(PERMISSION, "LockSettingsHave");
     }
 
-    private final void checkReadPermission(String requestedKey, int userId) {
-        final int callingUid = Binder.getCallingUid();
+    private static final String[] UNPROTECTED_SETTINGS = {
+        // These three LOCK_PATTERN_* settings have traditionally been readable via the public API
+        // android.provider.Settings.{System,Secure}.getString() without any permission.
+        Settings.Secure.LOCK_PATTERN_ENABLED,
+        Settings.Secure.LOCK_PATTERN_VISIBLE,
+        Settings.Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED,
+    };
 
-        for (int i = 0; i < READ_CONTACTS_PROTECTED_SETTINGS.length; i++) {
-            String key = READ_CONTACTS_PROTECTED_SETTINGS[i];
-            if (key.equals(requestedKey) && mContext.checkCallingOrSelfPermission(READ_CONTACTS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("uid=" + callingUid
-                        + " needs permission " + READ_CONTACTS + " to read "
-                        + requestedKey + " for user " + userId);
-            }
+    private final void checkDatabaseReadPermission(String requestedKey, int userId) {
+        if (ArrayUtils.contains(UNPROTECTED_SETTINGS, requestedKey)) {
+            return;
         }
-
-        for (int i = 0; i < READ_PASSWORD_PROTECTED_SETTINGS.length; i++) {
-            String key = READ_PASSWORD_PROTECTED_SETTINGS[i];
-            if (key.equals(requestedKey) && mContext.checkCallingOrSelfPermission(PERMISSION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("uid=" + callingUid
-                        + " needs permission " + PERMISSION + " to read "
-                        + requestedKey + " for user " + userId);
-            }
+        if (!hasPermission(PERMISSION)) {
+            throw new SecurityException("uid=" + getCallingUid() + " needs permission "
+                    + PERMISSION + " to read " + requestedKey + " for user " + userId);
         }
     }
 
@@ -1097,7 +1089,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     public boolean getSeparateProfileChallengeEnabled(int userId) {
-        checkReadPermission(SEPARATE_PROFILE_CHALLENGE_KEY, userId);
+        checkDatabaseReadPermission(SEPARATE_PROFILE_CHALLENGE_KEY, userId);
         return getSeparateProfileChallengeEnabledInternal(userId);
     }
 
@@ -1178,7 +1170,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     public boolean getBoolean(String key, boolean defaultValue, int userId) {
-        checkReadPermission(key, userId);
+        checkDatabaseReadPermission(key, userId);
         if (Settings.Secure.LOCK_PATTERN_ENABLED.equals(key)) {
             return getCredentialTypeInternal(userId) == CREDENTIAL_TYPE_PATTERN;
         }
@@ -1187,13 +1179,13 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     public long getLong(String key, long defaultValue, int userId) {
-        checkReadPermission(key, userId);
+        checkDatabaseReadPermission(key, userId);
         return mStorage.getLong(key, defaultValue, userId);
     }
 
     @Override
     public String getString(String key, String defaultValue, int userId) {
-        checkReadPermission(key, userId);
+        checkDatabaseReadPermission(key, userId);
         return mStorage.getString(key, defaultValue, userId);
     }
 
@@ -2533,20 +2525,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
         mRecoverableKeyStoreManager.validateRemoteLockscreen(encryptedCredential);
     }
-
-    // Reading these settings needs the contacts permission
-    private static final String[] READ_CONTACTS_PROTECTED_SETTINGS = new String[] {
-            Secure.LOCK_SCREEN_OWNER_INFO_ENABLED,
-            Secure.LOCK_SCREEN_OWNER_INFO
-    };
-
-    // Reading these settings needs the same permission as checking the password
-    private static final String[] READ_PASSWORD_PROTECTED_SETTINGS = new String[] {
-            LockPatternUtils.LOCK_PASSWORD_SALT_KEY,
-            LockPatternUtils.PASSWORD_HISTORY_KEY,
-            LockPatternUtils.PASSWORD_TYPE_KEY,
-            SEPARATE_PROFILE_CHALLENGE_KEY
-    };
 
     private class GateKeeperDiedRecipient implements IBinder.DeathRecipient {
         @Override
