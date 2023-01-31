@@ -2649,6 +2649,8 @@
   <java-symbol type="array" name="config_biometric_sensors" />
   <java-symbol type="bool" name="allow_test_udfps" />
   <java-symbol type="array" name="config_udfps_sensor_props" />
+  <java-symbol type="array" name="config_udfps_touch_detection_options" />
+  <java-symbol type="integer" name="config_selected_udfps_touch_detection" />
   <java-symbol type="array" name="config_sfps_sensor_props" />
   <java-symbol type="bool" name="config_is_powerbutton_fps" />
   <java-symbol type="array" name="config_udfps_enroll_stage_thresholds" />
