@@ -85,7 +85,8 @@ class DefaultClockController(
         animations = DefaultClockAnimations(dozeFraction, foldFraction)
         events.onColorPaletteChanged(resources)
         events.onTimeZoneChanged(TimeZone.getDefault())
-        events.onTimeTick()
+        smallClock.events.onTimeTick()
+        largeClock.events.onTimeTick()
     }
 
     open inner class DefaultClockFaceController(
@@ -109,6 +110,8 @@ class DefaultClockController(
 
         override val events =
             object : ClockFaceEvents {
+                override fun onTimeTick() = view.refreshTime()
+
                 override fun onRegionDarknessChanged(isRegionDark: Boolean) {
                     this@DefaultClockFaceController.isRegionDark = isRegionDark
                     updateColor()
@@ -169,8 +172,6 @@ class DefaultClockController(
     }
 
     inner class DefaultClockEvents : ClockEvents {
-        override fun onTimeTick() = clocks.forEach { it.refreshTime() }
-
         override fun onTimeFormatChanged(is24Hr: Boolean) =
             clocks.forEach { it.refreshFormat(is24Hr) }
 
