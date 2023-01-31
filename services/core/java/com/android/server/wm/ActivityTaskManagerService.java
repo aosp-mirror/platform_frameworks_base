@@ -4748,16 +4748,27 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         updateResumedAppTrace(r);
         mLastResumedActivity = r;
 
-        final boolean changed = r.mDisplayContent.setFocusedApp(r);
-        if (changed) {
-            mWindowManager.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL,
-                    true /*updateInputWindows*/);
-        }
-        if (prevTask == null || task != prevTask) {
-            if (prevTask != null) {
-                mTaskChangeNotificationController.notifyTaskFocusChanged(prevTask.mTaskId, false);
+        // Don't take focus when transient launching. We don't want the app to know anything
+        // until we've committed to the gesture. The focus will be transferred at the end of
+        // the transition (if the transient launch is committed) or early if explicitly requested
+        // via `setFocused*`.
+        if (!getTransitionController().isTransientCollect(r)) {
+            final Task prevFocusTask = r.mDisplayContent.mFocusedApp != null
+                    ? r.mDisplayContent.mFocusedApp.getTask() : null;
+            final boolean changed = r.mDisplayContent.setFocusedApp(r);
+            if (changed) {
+                mWindowManager.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL,
+                        true /*updateInputWindows*/);
             }
-            mTaskChangeNotificationController.notifyTaskFocusChanged(task.mTaskId, true);
+            if (task != prevFocusTask) {
+                if (prevFocusTask != null) {
+                    mTaskChangeNotificationController.notifyTaskFocusChanged(
+                            prevFocusTask.mTaskId, false);
+                }
+                mTaskChangeNotificationController.notifyTaskFocusChanged(task.mTaskId, true);
+            }
+        }
+        if (task != prevTask) {
             mTaskSupervisor.mRecentTasks.add(task);
         }
 

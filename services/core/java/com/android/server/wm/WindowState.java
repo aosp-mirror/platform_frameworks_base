@@ -3160,15 +3160,25 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 + (mActivityRecord == null || mActivityRecord.windowsAreFocusable(fromUserTouch))
                 + " canReceiveTouchInput=" + canReceiveTouchInput()
                 + " displayIsOnTop=" + getDisplayContent().isOnTop()
-                + " displayIsTrusted=" + getDisplayContent().isTrusted();
+                + " displayIsTrusted=" + getDisplayContent().isTrusted()
+                + " transitShouldKeepFocus=" + (mActivityRecord != null
+                        && mTransitionController.shouldKeepFocus(mActivityRecord));
     }
 
     public boolean canReceiveKeys(boolean fromUserTouch) {
+        if (mActivityRecord != null && mTransitionController.shouldKeepFocus(mActivityRecord)) {
+            // During transient launch, the transient-hide windows are not visibleRequested
+            // or on-top but are kept focusable and thus can receive keys.
+            return true;
+        }
         final boolean canReceiveKeys = isVisibleRequestedOrAdding()
                 && (mViewVisibility == View.VISIBLE) && !mRemoveOnExit
                 && ((mAttrs.flags & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) == 0)
                 && (mActivityRecord == null || mActivityRecord.windowsAreFocusable(fromUserTouch))
-                && canReceiveTouchInput();
+                // can it receive touches
+                && (mActivityRecord == null || mActivityRecord.getTask() == null
+                        || !mActivityRecord.getTask().getRootTask().shouldIgnoreInput());
+
         if (!canReceiveKeys) {
             return false;
         }
@@ -3192,6 +3202,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      **/
     boolean canReceiveTouchInput() {
         if (mActivityRecord == null  || mActivityRecord.getTask() == null) {
+            return true;
+        }
+        // During transient launch, the transient-hide windows are not visibleRequested
+        // or on-top but are kept focusable and thus can receive touch input.
+        if (mTransitionController.shouldKeepFocus(mActivityRecord)) {
             return true;
         }
 
