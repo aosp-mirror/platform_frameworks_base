@@ -535,12 +535,6 @@ object Flags {
     // TODO(b/266983474) Tracking Bug
     val SHARESHEET_IMAGE_AND_TEXT_PREVIEW = unreleasedFlag(1503, "sharesheet_image_text_preview")
 
-    // 1600 - accessibility
-    // TODO(b/262224538): Tracking Bug
-    @JvmField
-    val A11Y_FLOATING_MENU_FLING_SPRING_ANIMATIONS =
-        releasedFlag(1600, "a11y_floating_menu_fling_spring_animations")
-
     // 1700 - clipboard
     @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = releasedFlag(1701, "clipboard_remote_behavior")
 
