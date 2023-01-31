@@ -52,6 +52,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.regionsampling.RegionSampler
 import com.android.systemui.shared.regionsampling.UpdateColorCallback
+import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.DATE_SMARTSPACE_DATA_PLUGIN
 import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.WEATHER_SMARTSPACE_DATA_PLUGIN
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -84,6 +85,8 @@ constructor(
         @Main private val uiExecutor: Executor,
         @Background private val bgExecutor: Executor,
         @Main private val handler: Handler,
+        @Named(DATE_SMARTSPACE_DATA_PLUGIN)
+        optionalDatePlugin: Optional<BcSmartspaceDataPlugin>,
         @Named(WEATHER_SMARTSPACE_DATA_PLUGIN)
         optionalWeatherPlugin: Optional<BcSmartspaceDataPlugin>,
         optionalPlugin: Optional<BcSmartspaceDataPlugin>,
@@ -94,6 +97,7 @@ constructor(
     }
 
     private var session: SmartspaceSession? = null
+    private val datePlugin: BcSmartspaceDataPlugin? = optionalDatePlugin.orElse(null)
     private val weatherPlugin: BcSmartspaceDataPlugin? = optionalWeatherPlugin.orElse(null)
     private val plugin: BcSmartspaceDataPlugin? = optionalPlugin.orElse(null)
     private val configPlugin: BcSmartspaceConfigPlugin? = optionalConfigPlugin.orElse(null)
@@ -223,12 +227,31 @@ constructor(
         execution.assertIsMainThread()
 
         return featureFlags.isEnabled(Flags.SMARTSPACE_DATE_WEATHER_DECOUPLED) &&
-                weatherPlugin != null
+                datePlugin != null && weatherPlugin != null
     }
 
     private fun updateBypassEnabled() {
         val bypassEnabled = bypassController.bypassEnabled
         smartspaceViews.forEach { it.setKeyguardBypassEnabled(bypassEnabled) }
+    }
+
+    /**
+     * Constructs the date view and connects it to the smartspace service.
+     */
+    fun buildAndConnectDateView(parent: ViewGroup): View? {
+        execution.assertIsMainThread()
+
+        if (!isEnabled()) {
+            throw RuntimeException("Cannot build view when not enabled")
+        }
+        if (!isDateWeatherDecoupled()) {
+            throw RuntimeException("Cannot build date view when not decoupled")
+        }
+
+        val view = buildView(parent, datePlugin)
+        connectSession()
+
+        return view
     }
 
     /**
@@ -309,7 +332,7 @@ constructor(
     }
 
     private fun connectSession() {
-        if (weatherPlugin == null && plugin == null) return
+        if (datePlugin == null && weatherPlugin == null && plugin == null) return
         if (session != null || smartspaceViews.isEmpty()) {
             return
         }
@@ -347,6 +370,7 @@ constructor(
         statusBarStateController.addCallback(statusBarStateListener)
         bypassController.registerOnBypassStateChangedListener(bypassStateChangedListener)
 
+        datePlugin?.registerSmartspaceEventNotifier { e -> session?.notifySmartspaceEvent(e) }
         weatherPlugin?.registerSmartspaceEventNotifier { e -> session?.notifySmartspaceEvent(e) }
         plugin?.registerSmartspaceEventNotifier { e -> session?.notifySmartspaceEvent(e) }
 
@@ -383,6 +407,8 @@ constructor(
         statusBarStateController.removeCallback(statusBarStateListener)
         bypassController.unregisterOnBypassStateChangedListener(bypassStateChangedListener)
         session = null
+
+        datePlugin?.registerSmartspaceEventNotifier(null)
 
         weatherPlugin?.registerSmartspaceEventNotifier(null)
         weatherPlugin?.onTargetsAvailable(emptyList())
