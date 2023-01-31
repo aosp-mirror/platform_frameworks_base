@@ -71,9 +71,11 @@ public class DeviceProvisionedCoordinator implements Coordinator {
      * marking them as relevant for setup are allowed to show when device is unprovisioned
      */
     private boolean showNotificationEvenIfUnprovisioned(StatusBarNotification sbn) {
-        // system_server checks the permission so systemui can just check whether the
-        // extra exists
-        return sbn.getNotification().extras.getBoolean(Notification.EXTRA_ALLOW_DURING_SETUP);
+        final boolean hasPermission = checkUidPermission(
+                Manifest.permission.NOTIFICATION_DURING_SETUP,
+                sbn.getUid()) == PackageManager.PERMISSION_GRANTED;
+        return hasPermission
+                && sbn.getNotification().extras.getBoolean(Notification.EXTRA_ALLOW_DURING_SETUP);
     }
 
     private int checkUidPermission(String permission, int uid) {

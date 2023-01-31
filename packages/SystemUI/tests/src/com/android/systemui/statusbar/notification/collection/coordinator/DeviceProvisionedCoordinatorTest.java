@@ -117,6 +117,10 @@ public class DeviceProvisionedCoordinatorTest extends SysuiTestCase {
         extras.putBoolean(SHOW_WHEN_UNPROVISIONED_FLAG, true);
         mNotification.extras = extras;
 
+        // GIVEN notification has the permission to display during setup
+        when(mIPackageManager.checkUidPermission(SETUP_NOTIF_PERMISSION, NOTIF_UID))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+
         // THEN don't filter out the notification
         assertFalse(mDeviceProvisionedFilter.shouldFilterOut(mEntry, 0));
     }
@@ -126,9 +130,14 @@ public class DeviceProvisionedCoordinatorTest extends SysuiTestCase {
         // GIVEN device is unprovisioned
         when(mDeviceProvisionedController.isDeviceProvisioned()).thenReturn(false);
 
-        // GIVEN notification does not have the flag to allow the notification during setup
+        // GIVEN notification has a flag to allow the notification during setup
         Bundle extras = new Bundle();
+        extras.putBoolean(SHOW_WHEN_UNPROVISIONED_FLAG, true);
         mNotification.extras = extras;
+
+        // GIVEN notification does NOT have permission to display during setup
+        when(mIPackageManager.checkUidPermission(SETUP_NOTIF_PERMISSION, NOTIF_UID))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
 
         // THEN filter out the notification
         assertTrue(mDeviceProvisionedFilter.shouldFilterOut(mEntry, 0));
