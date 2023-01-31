@@ -66,6 +66,7 @@ import android.view.contentcapture.IContentCaptureManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
+import com.android.internal.app.IVisualQueryDetectionAttentionListener;
 import com.android.internal.infra.ServiceConnector;
 import com.android.server.LocalServices;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
@@ -326,6 +327,15 @@ final class HotwordDetectionConnection {
             return;
         }
         session.startListeningFromMicLocked(audioFormat, callback);
+    }
+
+    public void setVisualQueryDetectionAttentionListenerLocked(
+            @Nullable IVisualQueryDetectionAttentionListener listener) {
+        final VisualQueryDetectorSession session = getVisualQueryDetectorSessionLocked();
+        if (session == null) {
+            return;
+        }
+        session.setVisualQueryDetectionAttentionListenerLocked(listener);
     }
 
     /**
