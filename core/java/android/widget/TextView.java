@@ -108,6 +108,7 @@ import android.text.Highlights;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Layout;
+import android.text.NoCopySpan;
 import android.text.ParcelableSpan;
 import android.text.PrecomputedText;
 import android.text.SegmentFinder;
@@ -904,6 +905,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private long mLastScroll;
     private Scroller mScroller;
     private TextPaint mTempTextPaint;
+
+    private Object mTempCursor;
 
     @UnsupportedAppUsage
     private BoringLayout.Metrics mBoring;
@@ -10060,10 +10063,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
         int offset = mLayout.getOffsetForHorizontal(line, point.x);
         String textToInsert = gesture.getTextToInsert();
-        getEditableText().insert(offset, textToInsert);
-        Selection.setSelection(getEditableText(), offset + textToInsert.length());
+        return tryInsertTextForHandwritingGesture(offset, textToInsert, gesture);
         // TODO(b/243980426): Insert extra spaces if necessary.
-        return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
     }
 
     /** @hide */
@@ -10163,12 +10164,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (startOffset < endOffset) {
             getEditableText().delete(startOffset, endOffset);
             Selection.setSelection(getEditableText(), startOffset);
+            return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
         } else {
             // No whitespace found, so insert a space.
-            getEditableText().insert(startOffset, " ");
-            Selection.setSelection(getEditableText(), startOffset + 1);
+            return tryInsertTextForHandwritingGesture(startOffset, " ", gesture);
         }
-        return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
     }
 
     /** @hide */
@@ -10250,6 +10250,32 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         return mLayout.getRangeForRect(
                 area, segmentFinder, Layout.INCLUSION_STRATEGY_CONTAINS_CENTER);
+    }
+
+    private int tryInsertTextForHandwritingGesture(
+            int offset, String textToInsert, HandwritingGesture gesture) {
+        // A temporary cursor span is placed at the insertion offset. The span will be pushed
+        // forward when text is inserted, then the real cursor can be placed after the inserted
+        // text. A temporary cursor span is used in order to avoid modifying the real selection span
+        // in the case that the text is filtered out.
+        Editable editableText = getEditableText();
+        if (mTempCursor == null) {
+            mTempCursor = new NoCopySpan.Concrete();
+        }
+        editableText.setSpan(mTempCursor, offset, offset, Spanned.SPAN_POINT_POINT);
+
+        editableText.insert(offset, textToInsert);
+
+        int newOffset = editableText.getSpanStart(mTempCursor);
+        editableText.removeSpan(mTempCursor);
+        if (newOffset == offset) {
+            // The inserted text was filtered out.
+            return handleGestureFailure(gesture);
+        } else {
+            // Place the cursor after the inserted text.
+            Selection.setSelection(editableText, newOffset);
+            return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
+        }
     }
 
     private Pattern getWhitespacePattern() {
