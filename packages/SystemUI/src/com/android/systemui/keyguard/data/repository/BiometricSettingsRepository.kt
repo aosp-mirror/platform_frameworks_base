@@ -47,12 +47,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 
 /**
- * Acts as source of truth for biometric features.
+ * Acts as source of truth for biometric authentication related settings like enrollments, device
+ * policy, etc.
  *
  * Abstracts-away data sources and their schemas so the rest of the app doesn't need to worry about
  * upstream changes.
  */
-interface BiometricRepository {
+interface BiometricSettingsRepository {
     /** Whether any fingerprints are enrolled for the current user. */
     val isFingerprintEnrolled: StateFlow<Boolean>
 
@@ -68,7 +69,7 @@ interface BiometricRepository {
 }
 
 @SysUISingleton
-class BiometricRepositoryImpl
+class BiometricSettingsRepositoryImpl
 @Inject
 constructor(
     context: Context,
@@ -80,7 +81,7 @@ constructor(
     @Application scope: CoroutineScope,
     @Background backgroundDispatcher: CoroutineDispatcher,
     @Main looper: Looper,
-) : BiometricRepository {
+) : BiometricSettingsRepository {
 
     /** UserId of the current selected user. */
     private val selectedUserId: Flow<Int> =
@@ -88,7 +89,7 @@ constructor(
 
     override val isFingerprintEnrolled: StateFlow<Boolean> =
         selectedUserId
-            .flatMapLatest { userId ->
+            .flatMapLatest {
                 conflatedCallbackFlow {
                     val callback =
                         object : AuthController.Callback {

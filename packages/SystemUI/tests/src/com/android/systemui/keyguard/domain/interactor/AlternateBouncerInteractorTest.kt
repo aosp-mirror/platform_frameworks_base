@@ -22,7 +22,7 @@ import com.android.keyguard.ViewMediatorCallback
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.data.repository.FakeBiometricRepository
+import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepositoryImpl
@@ -47,7 +47,7 @@ import org.mockito.MockitoAnnotations
 class AlternateBouncerInteractorTest : SysuiTestCase() {
     private lateinit var underTest: AlternateBouncerInteractor
     private lateinit var bouncerRepository: KeyguardBouncerRepository
-    private lateinit var biometricRepository: FakeBiometricRepository
+    private lateinit var biometricSettingsRepository: FakeBiometricSettingsRepository
     private lateinit var deviceEntryFingerprintAuthRepository:
         FakeDeviceEntryFingerprintAuthRepository
     @Mock private lateinit var systemClock: SystemClock
@@ -65,13 +65,13 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
                 TestCoroutineScope(),
                 bouncerLogger,
             )
-        biometricRepository = FakeBiometricRepository()
+        biometricSettingsRepository = FakeBiometricSettingsRepository()
         deviceEntryFingerprintAuthRepository = FakeDeviceEntryFingerprintAuthRepository()
         featureFlags = FakeFeatureFlags().apply { this.set(Flags.MODERN_ALTERNATE_BOUNCER, true) }
         underTest =
             AlternateBouncerInteractor(
                 bouncerRepository,
-                biometricRepository,
+                biometricSettingsRepository,
                 deviceEntryFingerprintAuthRepository,
                 systemClock,
                 keyguardUpdateMonitor,
@@ -96,7 +96,7 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun canShowAlternateBouncerForFingerprint_noFingerprintsEnrolled() {
         givenCanShowAlternateBouncer()
-        biometricRepository.setFingerprintEnrolled(false)
+        biometricSettingsRepository.setFingerprintEnrolled(false)
 
         assertFalse(underTest.canShowAlternateBouncerForFingerprint())
     }
@@ -104,7 +104,7 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun canShowAlternateBouncerForFingerprint_strongBiometricNotAllowed() {
         givenCanShowAlternateBouncer()
-        biometricRepository.setStrongBiometricAllowed(false)
+        biometricSettingsRepository.setStrongBiometricAllowed(false)
 
         assertFalse(underTest.canShowAlternateBouncerForFingerprint())
     }
@@ -112,7 +112,7 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun canShowAlternateBouncerForFingerprint_devicePolicyDoesNotAllowFingerprint() {
         givenCanShowAlternateBouncer()
-        biometricRepository.setFingerprintEnabledByDevicePolicy(false)
+        biometricSettingsRepository.setFingerprintEnabledByDevicePolicy(false)
 
         assertFalse(underTest.canShowAlternateBouncerForFingerprint())
     }
@@ -159,13 +159,13 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
 
     private fun givenCanShowAlternateBouncer() {
         bouncerRepository.setAlternateBouncerUIAvailable(true)
-        biometricRepository.setFingerprintEnrolled(true)
-        biometricRepository.setStrongBiometricAllowed(true)
-        biometricRepository.setFingerprintEnabledByDevicePolicy(true)
+        biometricSettingsRepository.setFingerprintEnrolled(true)
+        biometricSettingsRepository.setStrongBiometricAllowed(true)
+        biometricSettingsRepository.setFingerprintEnabledByDevicePolicy(true)
         deviceEntryFingerprintAuthRepository.setLockedOut(false)
     }
 
     private fun givenCannotShowAlternateBouncer() {
-        biometricRepository.setFingerprintEnrolled(false)
+        biometricSettingsRepository.setFingerprintEnrolled(false)
     }
 }
