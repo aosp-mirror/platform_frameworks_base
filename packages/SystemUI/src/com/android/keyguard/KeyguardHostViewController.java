@@ -527,4 +527,9 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
             mKeyguardSecurityContainerController.updateKeyguardPosition(x);
         }
     }
+
+    /** Set true if the view can be interacted with */
+    public void setInteractable(boolean isInteractable) {
+        mView.setInteractable(isInteractable);
+    }
 }

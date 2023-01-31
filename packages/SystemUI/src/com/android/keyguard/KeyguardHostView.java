@@ -19,6 +19,7 @@ package com.android.keyguard;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.widget.FrameLayout;
 
 /**
@@ -33,7 +34,7 @@ import android.widget.FrameLayout;
 public class KeyguardHostView extends FrameLayout {
 
     protected ViewMediatorCallback mViewMediatorCallback;
-
+    private boolean mIsInteractable;
 
     public KeyguardHostView(Context context) {
         this(context, null);
@@ -53,5 +54,25 @@ public class KeyguardHostView extends FrameLayout {
 
     public void setViewMediatorCallback(ViewMediatorCallback viewMediatorCallback) {
         mViewMediatorCallback = viewMediatorCallback;
+    }
+
+    /** Set true if the view can be interacted with */
+    public void setInteractable(boolean isInteractable) {
+        mIsInteractable = isInteractable;
+    }
+
+    /**
+     * Make sure to disallow touches while transitioning the bouncer, otherwise
+     * it can remain interactable even when barely visible.
+     */
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        return !mIsInteractable;
+    }
+
+    /** True to consume any events that are sent to it */
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        return true;
     }
 }

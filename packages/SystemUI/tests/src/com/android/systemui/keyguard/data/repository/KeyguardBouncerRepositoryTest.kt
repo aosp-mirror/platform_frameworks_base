@@ -45,7 +45,7 @@ class KeyguardBouncerRepositoryTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         val testCoroutineScope = TestCoroutineScope()
         underTest =
-            KeyguardBouncerRepository(
+            KeyguardBouncerRepositoryImpl(
                 viewMediatorCallback,
                 systemClock,
                 testCoroutineScope,
