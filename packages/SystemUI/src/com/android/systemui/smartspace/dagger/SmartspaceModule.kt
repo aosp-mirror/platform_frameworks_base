@@ -44,6 +44,11 @@ abstract class SmartspaceModule {
         const val DREAM_SMARTSPACE_PRECONDITION = "dream_smartspace_precondition"
 
         /**
+         * The BcSmartspaceDataPlugin for the standalone date (+alarm+dnd).
+         */
+        const val DATE_SMARTSPACE_DATA_PLUGIN = "date_smartspace_data_plugin"
+
+        /**
          * The BcSmartspaceDataPlugin for the standalone weather.
          */
         const val WEATHER_SMARTSPACE_DATA_PLUGIN = "weather_smartspace_data_plugin"
