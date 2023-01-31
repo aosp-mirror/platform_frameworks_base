@@ -18,10 +18,7 @@
 
 #include <SkRuntimeEffect.h>
 #include <log/log.h>
-// libshaders only exists on Android devices
-#ifdef __ANDROID__
 #include <shaders/shaders.h>
-#endif
 
 #include "utils/Color.h"
 
@@ -29,8 +26,6 @@ namespace android::uirenderer {
 
 namespace {
 
-// custom tonemapping only exists on Android devices
-#ifdef __ANDROID__
 class ColorFilterRuntimeEffectBuilder : public SkRuntimeEffectBuilder {
 public:
     explicit ColorFilterRuntimeEffectBuilder(sk_sp<SkRuntimeEffect> effect)
@@ -64,21 +59,20 @@ static sk_sp<SkColorFilter> createLinearEffectColorFilter(const shaders::LinearE
     return effectBuilder.makeColorFilter();
 }
 
-static ui::Dataspace extractTransfer(ui::Dataspace dataspace) {
-    return static_cast<ui::Dataspace>(dataspace & HAL_DATASPACE_TRANSFER_MASK);
+static bool extractTransfer(ui::Dataspace dataspace) {
+    return dataspace & HAL_DATASPACE_TRANSFER_MASK;
 }
 
 static bool isHdrDataspace(ui::Dataspace dataspace) {
     const auto transfer = extractTransfer(dataspace);
 
-    return transfer == ui::Dataspace::TRANSFER_ST2084 || transfer == ui::Dataspace::TRANSFER_HLG;
+    return transfer == HAL_DATASPACE_TRANSFER_ST2084 || transfer == HAL_DATASPACE_TRANSFER_HLG;
 }
 
 static ui::Dataspace getDataspace(const SkImageInfo& image) {
     return static_cast<ui::Dataspace>(
             ColorSpaceToADataSpace(image.colorSpace(), image.colorType()));
 }
-#endif
 
 }  // namespace
 
@@ -86,8 +80,6 @@ static ui::Dataspace getDataspace(const SkImageInfo& image) {
 // shader and tag it on the supplied paint.
 void tonemapPaint(const SkImageInfo& source, const SkImageInfo& destination, float maxLuminanceNits,
                   SkPaint& paint) {
-// custom tonemapping only exists on Android devices
-#ifdef __ANDROID__
     const auto sourceDataspace = getDataspace(source);
     const auto destinationDataspace = getDataspace(destination);
 
@@ -110,9 +102,6 @@ void tonemapPaint(const SkImageInfo& source, const SkImageInfo& destination, flo
             paint.setColorFilter(colorFilter);
         }
     }
-#else
-    return;
-#endif
 }
 
 }  // namespace android::uirenderer
