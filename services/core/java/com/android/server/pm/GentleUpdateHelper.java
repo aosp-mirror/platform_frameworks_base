@@ -145,7 +145,7 @@ public class GentleUpdateHelper {
         mHandler.post(() -> {
             var pendingCheck = new PendingInstallConstraintsCheck(
                     packageNames, constraints, resultFuture, timeoutMillis);
-            var deviceIdleFuture = constraints.isRequireDeviceIdle()
+            var deviceIdleFuture = constraints.isDeviceIdleRequired()
                     ? checkDeviceIdle() : CompletableFuture.completedFuture(false);
             deviceIdleFuture.thenAccept(isIdle -> {
                 Preconditions.checkState(mHandler.getLooper().isCurrentThread());
@@ -217,14 +217,14 @@ public class GentleUpdateHelper {
     @WorkerThread
     private boolean areConstraintsSatisfied(List<String> packageNames,
             InstallConstraints constraints, boolean isIdle) {
-        return (!constraints.isRequireDeviceIdle() || isIdle)
-                && (!constraints.isRequireAppNotForeground()
+        return (!constraints.isDeviceIdleRequired() || isIdle)
+                && (!constraints.isAppNotForegroundRequired()
                 || !mAppStateHelper.hasForegroundApp(packageNames))
-                && (!constraints.isRequireAppNotInteracting()
+                && (!constraints.isAppNotInteractingRequired()
                 || !mAppStateHelper.hasInteractingApp(packageNames))
-                && (!constraints.isRequireAppNotTopVisible()
+                && (!constraints.isAppNotTopVisibleRequired()
                 || !mAppStateHelper.hasTopVisibleApp(packageNames))
-                && (!constraints.isRequireNotInCall()
+                && (!constraints.isNotInCallRequired()
                 || !mAppStateHelper.isInCall());
     }
 
