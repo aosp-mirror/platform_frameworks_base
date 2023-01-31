@@ -16,6 +16,7 @@
 
 package com.android.systemui.stylus
 
+import android.app.ActivityManager
 import android.app.Notification
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -27,6 +28,7 @@ import android.testing.AndroidTestingRunner
 import android.view.InputDevice
 import androidx.core.app.NotificationManagerCompat
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any
@@ -54,14 +56,22 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class StylusUsiPowerUiTest : SysuiTestCase() {
     @Mock lateinit var notificationManager: NotificationManagerCompat
+
     @Mock lateinit var inputManager: InputManager
+
     @Mock lateinit var handler: Handler
+
     @Mock lateinit var btStylusDevice: InputDevice
+
+    @Mock lateinit var uiEventLogger: UiEventLogger
+
     @Captor lateinit var notificationCaptor: ArgumentCaptor<Notification>
 
     private lateinit var stylusUsiPowerUi: StylusUsiPowerUI
     private lateinit var broadcastReceiver: BroadcastReceiver
     private lateinit var contextSpy: Context
+
+    private val uid = ActivityManager.getCurrentUser()
 
     @Before
     fun setUp() {
@@ -80,7 +90,8 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
         whenever(btStylusDevice.supportsSource(InputDevice.SOURCE_STYLUS)).thenReturn(true)
         whenever(btStylusDevice.bluetoothAddress).thenReturn("SO:ME:AD:DR:ES")
 
-        stylusUsiPowerUi = StylusUsiPowerUI(contextSpy, notificationManager, inputManager, handler)
+        stylusUsiPowerUi =
+            StylusUsiPowerUI(contextSpy, notificationManager, inputManager, handler, uiEventLogger)
         broadcastReceiver = stylusUsiPowerUi.receiver
     }
 
@@ -197,6 +208,19 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
     }
 
     @Test
+    fun updateBatteryState_showsNotification_logsNotificationShown() {
+        stylusUsiPowerUi.updateBatteryState(0, FixedCapacityBatteryState(0.1f))
+
+        verify(uiEventLogger, times(1))
+            .logWithPosition(
+                StylusUiEvent.STYLUS_LOW_BATTERY_NOTIFICATION_SHOWN,
+                uid,
+                contextSpy.packageName,
+                10
+            )
+    }
+
+    @Test
     fun broadcastReceiver_clicked_hasInputDeviceId_startsUsiDetailsActivity() {
         val intent = Intent(StylusUsiPowerUI.ACTION_CLICKED_LOW_BATTERY)
         val activityIntentCaptor = argumentCaptor<Intent>()
@@ -218,5 +242,33 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
         broadcastReceiver.onReceive(contextSpy, intent)
 
         verify(contextSpy, never()).startActivity(any())
+    }
+
+    @Test
+    fun broadcastReceiver_clicked_logsNotificationClicked() {
+        val intent = Intent(StylusUsiPowerUI.ACTION_CLICKED_LOW_BATTERY)
+        broadcastReceiver.onReceive(contextSpy, intent)
+
+        verify(uiEventLogger, times(1))
+            .logWithPosition(
+                StylusUiEvent.STYLUS_LOW_BATTERY_NOTIFICATION_CLICKED,
+                uid,
+                contextSpy.packageName,
+                100
+            )
+    }
+
+    @Test
+    fun broadcastReceiver_dismissed_logsNotificationDismissed() {
+        val intent = Intent(StylusUsiPowerUI.ACTION_DISMISSED_LOW_BATTERY)
+        broadcastReceiver.onReceive(contextSpy, intent)
+
+        verify(uiEventLogger, times(1))
+            .logWithPosition(
+                StylusUiEvent.STYLUS_LOW_BATTERY_NOTIFICATION_DISMISSED,
+                uid,
+                contextSpy.packageName,
+                100
+            )
     }
 }
