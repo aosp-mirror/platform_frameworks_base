@@ -3151,17 +3151,11 @@ public final class NotificationPanelViewController implements Dumpable {
         }
         // The padding on this area is large enough that we can use a cheaper clipping strategy
         mKeyguardStatusViewController.setClipBounds(clipStatusView ? mLastQsClipBounds : null);
-        if (!qsVisible && mSplitShadeEnabled) {
-            // On the lockscreen when qs isn't visible, we don't want the bounds of the shade to
-            // be visible, otherwise you can see the bounds once swiping up to see bouncer
-            mScrimController.setNotificationsBounds(0, 0, 0, 0);
-        } else {
-            // Increase the height of the notifications scrim when not in split shade
-            // (e.g. portrait tablet) so the rounded corners are not visible at the bottom,
-            // in this case they are rendered off-screen
-            final int notificationsScrimBottom = mSplitShadeEnabled ? bottom : bottom + radius;
-            mScrimController.setNotificationsBounds(left, top, right, notificationsScrimBottom);
-        }
+        // Increase the height of the notifications scrim when not in split shade
+        // (e.g. portrait tablet) so the rounded corners are not visible at the bottom,
+        // in this case they are rendered off-screen
+        final int notificationsScrimBottom = mSplitShadeEnabled ? bottom : bottom + radius;
+        mScrimController.setNotificationsBounds(left, top, right, notificationsScrimBottom);
 
         if (mSplitShadeEnabled) {
             mKeyguardStatusBarViewController.setNoTopClipping();
@@ -3222,6 +3216,12 @@ public final class NotificationPanelViewController implements Dumpable {
     private int calculateQsBottomPosition(float qsExpansionFraction) {
         if (mTransitioningToFullShadeProgress > 0.0f) {
             return mTransitionToFullShadeQSPosition;
+        } else if (mSplitShadeEnabled) {
+            // in split shade - outside lockscreen transition handled above - we simply jump between
+            // two qs expansion values - either shade is closed and qs expansion is 0 or shade is
+            // open and qs expansion is 1
+            int qsBottomTarget = mQs.getDesiredHeight() + mLargeScreenShadeHeaderHeight;
+            return qsExpansionFraction > 0 ? qsBottomTarget : 0;
         } else {
             int qsBottomYFrom = (int) getHeaderTranslation() + mQs.getQsMinExpansionHeight();
             int expandedTopMargin = mUseLargeScreenShadeHeader ? mLargeScreenShadeHeaderHeight : 0;
