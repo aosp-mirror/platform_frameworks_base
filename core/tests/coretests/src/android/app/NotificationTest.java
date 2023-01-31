@@ -31,6 +31,7 @@ import static android.app.Notification.EXTRA_LARGE_ICON_BIG;
 import static android.app.Notification.EXTRA_MEDIA_REMOTE_INTENT;
 import static android.app.Notification.EXTRA_MEDIA_SESSION;
 import static android.app.Notification.EXTRA_MESSAGING_PERSON;
+import static android.app.Notification.EXTRA_PEOPLE_LIST;
 import static android.app.Notification.EXTRA_PICTURE;
 import static android.app.Notification.EXTRA_PICTURE_ICON;
 import static android.app.Notification.MessagingStyle.Message.KEY_DATA_URI;
@@ -814,6 +815,23 @@ public class NotificationTest {
             assertEquals(cDay.getContrastColor(), cNight.getContrastColor());
             assertEquals(cDay.getRippleAlpha(), cNight.getRippleAlpha());
         }
+    }
+
+    @Test
+    public void testRecoverBuilder_nullExtraPeopleList_noCrash() {
+        Bundle extras = new Bundle();
+        extras.putParcelable(EXTRA_PEOPLE_LIST, null);
+
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(0)
+                .addExtras(extras)
+                .build();
+        Bundle fakeTypes = new Bundle();
+        fakeTypes.putParcelable(EXTRA_BUILDER_APPLICATION_INFO, new Bundle());
+
+        Notification.Builder.recoverBuilder(mContext, n);
+
+        // no crash, good
     }
 
     @Test
