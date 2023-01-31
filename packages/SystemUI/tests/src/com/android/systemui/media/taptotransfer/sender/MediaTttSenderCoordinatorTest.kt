@@ -622,7 +622,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun commandQueueCallback_receiverSucceededThenReceiverTriggered_invalidTransitionLogged() {
+    fun commandQueueCallback_receiverSucceededThenThisDeviceSucceeded_invalidTransitionLogged() {
         displayReceiverTriggered()
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
@@ -632,7 +632,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         reset(windowManager)
 
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
-            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED,
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
             routeInfo,
             null
         )
@@ -642,7 +642,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun commandQueueCallback_thisDeviceSucceededThenThisDeviceTriggered_invalidTransitionLogged() {
+    fun commandQueueCallback_thisDeviceSucceededThenReceiverSucceeded_invalidTransitionLogged() {
         displayThisDeviceTriggered()
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
@@ -652,7 +652,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         reset(windowManager)
 
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
-            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED,
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
             routeInfo,
             null
         )
