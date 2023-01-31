@@ -113,6 +113,8 @@ constructor(
                 0f
             }
         }
+    /** Allow for interaction when just about fully visible */
+    val isInteractable: Flow<Boolean> = bouncerExpansion.map { it > 0.9 }
 
     // TODO(b/243685699): Move isScrimmed logic to data layer.
     // TODO(b/243695312): Encapsulate all of the show logic for the bouncer.

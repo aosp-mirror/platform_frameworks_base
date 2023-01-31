@@ -37,4 +37,7 @@ interface KeyguardRepositoryModule {
     fun deviceEntryFingerprintAuthRepository(
         impl: DeviceEntryFingerprintAuthRepositoryImpl
     ): DeviceEntryFingerprintAuthRepository
+
+    @Binds
+    fun keyguardBouncerRepository(impl: KeyguardBouncerRepositoryImpl): KeyguardBouncerRepository
 }
