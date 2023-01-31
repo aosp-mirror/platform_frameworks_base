@@ -1475,6 +1475,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Make keyguard locked and set the top activity show-when-locked.
         KeyguardController keyguardController = activity.mTaskSupervisor.getKeyguardController();
         int displayId = activity.getDisplayId();
+        doReturn(true).when(keyguardController).isKeyguardLocked(eq(displayId));
         final ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(task).build();
         topActivity.setVisibleRequested(true);
         topActivity.nowVisible = true;
@@ -1484,24 +1485,18 @@ public class ActivityRecordTests extends WindowTestsBase {
                 anyBoolean() /* preserveWindows */, anyBoolean() /* notifyClients */);
         topActivity.setShowWhenLocked(true);
 
-        try {
-            keyguardController.setKeyguardShown(displayId, true, false);
+        // Verify the stack-top activity is occluded keyguard.
+        assertEquals(topActivity, task.topRunningActivity());
+        assertTrue(keyguardController.isDisplayOccluded(DEFAULT_DISPLAY));
 
-            // Verify the stack-top activity is occluded keyguard.
-            assertEquals(topActivity, task.topRunningActivity());
-            assertTrue(keyguardController.isDisplayOccluded(DEFAULT_DISPLAY));
+        // Finish the top activity
+        topActivity.setState(PAUSED, "true");
+        topActivity.finishing = true;
+        topActivity.completeFinishing("test");
 
-            // Finish the top activity
-            topActivity.setState(PAUSED, "true");
-            topActivity.finishing = true;
-            topActivity.completeFinishing("test");
-
-            // Verify new top activity does not occlude keyguard.
-            assertEquals(activity, task.topRunningActivity());
-            assertFalse(keyguardController.isDisplayOccluded(DEFAULT_DISPLAY));
-        } finally {
-            keyguardController.setKeyguardShown(displayId, false, false);
-        }
+        // Verify new top activity does not occlude keyguard.
+        assertEquals(activity, task.topRunningActivity());
+        assertFalse(keyguardController.isDisplayOccluded(DEFAULT_DISPLAY));
     }
 
     /**

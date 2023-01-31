@@ -44,7 +44,6 @@ import android.view.SurfaceControlViewHost;
 import android.view.WindowInfo;
 import android.view.WindowManager.DisplayImePolicy;
 import android.view.inputmethod.ImeTracker;
-import android.window.TransitionInfo;
 
 import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.server.input.InputManagerService;
@@ -213,7 +212,7 @@ public abstract class WindowManagerInternal {
      * Abstract class to be notified about {@link com.android.server.wm.AppTransition} events. Held
      * as an abstract class so a listener only needs to implement the methods of its interest.
      */
-    public abstract static class AppTransitionListener {
+    public static abstract class AppTransitionListener {
 
         /**
          * Called when an app transition is being setup and about to be executed.
@@ -248,20 +247,6 @@ public abstract class WindowManagerInternal {
          */
         public int onAppTransitionStartingLocked(long statusBarAnimationStartTime,
                 long statusBarAnimationDuration) {
-            return 0;
-        }
-
-        /**
-         * Called when an app transition gets started when WM shell is enabled.
-         *
-         * @param info Information about what is changing during a transition.
-         *
-         * @return Return any bit set of {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_LAYOUT},
-         * {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_CONFIG},
-         * {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_WALLPAPER},
-         * or {@link WindowManagerPolicy#FINISH_LAYOUT_REDO_ANIM}.
-         */
-        public int onAppTransitionStartingLocked(TransitionInfo info) {
             return 0;
         }
 

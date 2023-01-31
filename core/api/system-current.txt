@@ -457,6 +457,7 @@ package android {
     field public static final int config_systemAutomotiveProjection = 17039401; // 0x1040029
     field public static final int config_systemCompanionDeviceProvider = 17039417; // 0x1040039
     field public static final int config_systemContacts = 17039403; // 0x104002b
+    field public static final int config_systemFinancedDeviceController;
     field public static final int config_systemGallery = 17039399; // 0x1040027
     field public static final int config_systemNotificationIntelligence = 17039413; // 0x1040035
     field public static final int config_systemSettingsIntelligence = 17039426; // 0x1040042

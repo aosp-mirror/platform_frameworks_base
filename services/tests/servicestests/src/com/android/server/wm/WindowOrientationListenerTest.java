@@ -132,6 +132,19 @@ public class WindowOrientationListenerTest {
         assertThat(mFinalizedRotation).isEqualTo(DEFAULT_SENSOR_ROTATION);
     }
 
+    @Test
+    public void testOnSensorChanged_screenLocked_doNotCallRotationResolverReturnDefaultRotation() {
+        mWindowOrientationListener = new TestableWindowOrientationListener(mMockContext,
+                mHandler, /* defaultRotation */ Surface.ROTATION_180);
+        mWindowOrientationListener.mRotationResolverService = mFakeRotationResolverInternal;
+        mWindowOrientationListener.mIsScreenLocked = true;
+
+        mWindowOrientationListener.mOrientationJudge.onSensorChanged(mFakeSensorEvent);
+
+        assertThat(mWindowOrientationListener.mIsOnProposedRotationChangedCalled).isFalse();
+        assertThat(mFinalizedRotation).isEqualTo(Surface.ROTATION_180);
+    }
+
     static final class TestableRotationResolver extends RotationResolverInternal {
         @Surface.Rotation
         RotationResolverCallbackInternal mCallback;
@@ -166,21 +179,17 @@ public class WindowOrientationListenerTest {
         }
     }
 
-    @Test
-    public void testOnSensorChanged_inLockScreen_doNotCallRotationResolver() {
-        mWindowOrientationListener.mIsScreenLocked = true;
-
-        mWindowOrientationListener.mOrientationJudge.onSensorChanged(mFakeSensorEvent);
-
-        assertThat(mWindowOrientationListener.mIsOnProposedRotationChangedCalled).isFalse();
-    }
-
     final class TestableWindowOrientationListener extends WindowOrientationListener {
         private boolean mIsOnProposedRotationChangedCalled = false;
         private boolean mIsScreenLocked;
 
         TestableWindowOrientationListener(Context context, Handler handler) {
-            super(context, handler);
+            this(context, handler, Surface.ROTATION_0);
+        }
+
+        TestableWindowOrientationListener(Context context, Handler handler,
+                @Surface.Rotation int defaultRotation) {
+            super(context, handler, defaultRotation);
             this.mOrientationJudge = new OrientationSensorJudge();
         }
 

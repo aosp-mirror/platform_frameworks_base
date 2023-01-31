@@ -225,19 +225,6 @@ package com.android.server.role {
 
 }
 
-package com.android.server.security {
-
-  public class FileIntegrityService extends com.android.server.SystemService {
-    method public void onStart();
-    method public static void setUpFsVerity(@NonNull String) throws java.io.IOException;
-  }
-
-  public class KeyChainSystemService extends com.android.server.SystemService {
-    method public void onStart();
-  }
-
-}
-
 package com.android.server.stats {
 
   public final class StatsHelper {

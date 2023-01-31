@@ -146,6 +146,8 @@
     <public name="config_systemWearHealthService" />
     <!-- @hide @SystemApi -->
     <public name="config_defaultNotes" />
+    <!-- @hide @SystemApi -->
+    <public name="config_systemFinancedDeviceController" />
   </staging-public-group>
 
   <staging-public-group type="dimen" first-id="0x01ca0000">
