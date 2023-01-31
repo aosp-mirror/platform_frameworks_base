@@ -2206,19 +2206,19 @@ public class AudioService extends IAudioService.Stub
                 AudioSystem.STREAM_ASSISTANT : AudioSystem.STREAM_MUSIC;
 
         if (mIsSingleVolume) {
-            mStreamVolumeAlias = STREAM_VOLUME_ALIAS_TELEVISION;
+            mStreamVolumeAlias = STREAM_VOLUME_ALIAS_TELEVISION.clone();
             dtmfStreamAlias = AudioSystem.STREAM_MUSIC;
         } else if (mUseVolumeGroupAliases) {
-            mStreamVolumeAlias = STREAM_VOLUME_ALIAS_NONE;
+            mStreamVolumeAlias = STREAM_VOLUME_ALIAS_NONE.clone();
             dtmfStreamAlias = AudioSystem.STREAM_DTMF;
         } else {
             switch (mPlatformType) {
                 case AudioSystem.PLATFORM_VOICE:
-                    mStreamVolumeAlias = STREAM_VOLUME_ALIAS_VOICE;
+                    mStreamVolumeAlias = STREAM_VOLUME_ALIAS_VOICE.clone();
                     dtmfStreamAlias = AudioSystem.STREAM_RING;
                     break;
                 default:
-                    mStreamVolumeAlias = STREAM_VOLUME_ALIAS_DEFAULT;
+                    mStreamVolumeAlias = STREAM_VOLUME_ALIAS_DEFAULT.clone();
                     dtmfStreamAlias = AudioSystem.STREAM_MUSIC;
             }
             if (!mNotifAliasRing) {
