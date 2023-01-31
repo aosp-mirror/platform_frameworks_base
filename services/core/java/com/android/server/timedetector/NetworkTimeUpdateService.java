@@ -181,24 +181,6 @@ public class NetworkTimeUpdateService extends Binder {
     }
 
     /**
-     * Clears the cached NTP time. For use during tests to simulate when no NTP time is available.
-     *
-     * <p>This operation takes place in the calling thread rather than the service's handler thread.
-     */
-    @RequiresPermission(android.Manifest.permission.SET_TIME)
-    void clearTimeForTests() {
-        mContext.enforceCallingPermission(
-                android.Manifest.permission.SET_TIME, "clear latest network time");
-
-        final long token = Binder.clearCallingIdentity();
-        try {
-            mNtpTrustedTime.clearCachedTimeResult();
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
-    /**
      * Forces the service to refresh the NTP time.
      *
      * <p>This operation takes place in the calling thread rather than the service's handler thread.
