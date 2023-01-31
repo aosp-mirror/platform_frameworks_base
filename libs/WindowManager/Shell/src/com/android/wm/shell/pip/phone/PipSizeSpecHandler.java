@@ -45,8 +45,9 @@ public class PipSizeSpecHandler {
     @VisibleForTesting
     final SizeSpecSource mSizeSpecSourceImpl;
 
-    /** The preferred minimum (and default) size specified by apps. */
+    /** The preferred minimum (and default minimum) size specified by apps. */
     @Nullable private Size mOverrideMinSize;
+    private int mOverridableMinSize;
 
     /** Used to store values obtained from resource files. */
     private Point mScreenEdgeInsets;
@@ -386,6 +387,8 @@ public class PipSizeSpecHandler {
 
         mDefaultMinSize = res.getDimensionPixelSize(
                 R.dimen.default_minimal_size_pip_resizable_task);
+        mOverridableMinSize = res.getDimensionPixelSize(
+                R.dimen.overridable_minimal_size_pip_resizable_task);
 
         final String screenEdgeInsetsDpString = res.getString(
                 R.string.config_defaultPictureInPictureScreenEdgeInsets);
@@ -443,13 +446,19 @@ public class PipSizeSpecHandler {
     /** Returns the preferred minimal size specified by the activity in PIP. */
     @Nullable
     public Size getOverrideMinSize() {
+        if (mOverrideMinSize != null
+                && (mOverrideMinSize.getWidth() < mOverridableMinSize
+                || mOverrideMinSize.getHeight() < mOverridableMinSize)) {
+            return new Size(mOverridableMinSize, mOverridableMinSize);
+        }
+
         return mOverrideMinSize;
     }
 
     /** Returns the minimum edge size of the override minimum size, or 0 if not set. */
     public int getOverrideMinEdgeSize() {
         if (mOverrideMinSize == null) return 0;
-        return Math.min(mOverrideMinSize.getWidth(), mOverrideMinSize.getHeight());
+        return Math.min(getOverrideMinSize().getWidth(), getOverrideMinSize().getHeight());
     }
 
     public int getMinEdgeSize() {
@@ -505,7 +514,7 @@ public class PipSizeSpecHandler {
         if (mOverrideMinSize == null) {
             return null;
         }
-        final Size size = mOverrideMinSize;
+        final Size size = getOverrideMinSize();
         final float sizeAspectRatio = size.getWidth() / (float) size.getHeight();
         if (sizeAspectRatio > aspectRatio) {
             // Size is wider, fix the width and increase the height
