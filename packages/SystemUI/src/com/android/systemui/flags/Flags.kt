@@ -462,7 +462,7 @@ object Flags {
     @Keep
     @JvmField
     val WM_ENABLE_PREDICTIVE_BACK_ANIM =
-        sysPropBooleanFlag(1201, "persist.wm.debug.predictive_back_anim", default = false)
+        sysPropBooleanFlag(1201, "persist.wm.debug.predictive_back_anim", default = true)
 
     @Keep
     @JvmField
@@ -495,7 +495,7 @@ object Flags {
     // TODO(b/238475428): Tracking Bug
     @JvmField
     val WM_SHADE_ANIMATE_BACK_GESTURE =
-        unreleasedFlag(1208, "persist.wm.debug.shade_animate_back_gesture", teamfood = true)
+        unreleasedFlag(1208, "persist.wm.debug.shade_animate_back_gesture", teamfood = false)
 
     // TODO(b/265639042): Tracking Bug
     @JvmField

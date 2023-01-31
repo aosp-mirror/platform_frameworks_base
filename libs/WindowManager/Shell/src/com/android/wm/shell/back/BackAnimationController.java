@@ -78,7 +78,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
      /** Flag for U animation features */
     public static boolean IS_U_ANIMATION_ENABLED =
             SystemProperties.getInt("persist.wm.debug.predictive_back_anim",
-                    SETTING_VALUE_OFF) == SETTING_VALUE_ON;
+                    SETTING_VALUE_ON) == SETTING_VALUE_ON;
     /** Predictive back animation developer option */
     private final AtomicBoolean mEnableAnimations = new AtomicBoolean(false);
     /**
