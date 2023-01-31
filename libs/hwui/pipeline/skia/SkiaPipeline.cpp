@@ -621,6 +621,11 @@ void SkiaPipeline::setSurfaceColorProperties(ColorMode colorMode) {
             mSurfaceColorSpace = SkColorSpace::MakeRGB(
                     GetExtendedTransferFunction(mTargetSdrHdrRatio), SkNamedGamut::kDisplayP3);
             break;
+        case ColorMode::Hdr10:
+            mSurfaceColorType = SkColorType::kRGBA_1010102_SkColorType;
+            mSurfaceColorSpace = SkColorSpace::MakeRGB(
+                    GetExtendedTransferFunction(mTargetSdrHdrRatio), SkNamedGamut::kDisplayP3);
+            break;
         case ColorMode::A8:
             mSurfaceColorType = SkColorType::kAlpha_8_SkColorType;
             mSurfaceColorSpace = nullptr;
@@ -629,7 +634,7 @@ void SkiaPipeline::setSurfaceColorProperties(ColorMode colorMode) {
 }
 
 void SkiaPipeline::setTargetSdrHdrRatio(float ratio) {
-    if (mColorMode == ColorMode::Hdr) {
+    if (mColorMode == ColorMode::Hdr || mColorMode == ColorMode::Hdr10) {
         mTargetSdrHdrRatio = ratio;
         mSurfaceColorSpace = SkColorSpace::MakeRGB(GetExtendedTransferFunction(mTargetSdrHdrRatio),
                                                    SkNamedGamut::kDisplayP3);

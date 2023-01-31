@@ -455,6 +455,7 @@ Result<EGLSurface, EGLint> EglManager::createSurface(EGLNativeWindowType window,
                 // composer3 support, just treat HDR as equivalent to wide color gamut if
                 // the GLES path is still being hit
                 case ColorMode::Hdr:
+                case ColorMode::Hdr10:
                 case ColorMode::WideColorGamut: {
                     skcms_Matrix3x3 colorGamut;
                     LOG_ALWAYS_FATAL_IF(!colorSpace->toXYZD50(&colorGamut),

@@ -134,7 +134,7 @@ void RenderProxy::setOpaque(bool opaque) {
 float RenderProxy::setColorMode(ColorMode mode) {
     // We only need to figure out what the renderer supports for HDR, otherwise this can stay
     // an async call since we already know the return value
-    if (mode == ColorMode::Hdr) {
+    if (mode == ColorMode::Hdr || mode == ColorMode::Hdr10) {
         return mRenderThread.queue().runSync(
                 [=]() -> float { return mContext->setColorMode(mode); });
     } else {
