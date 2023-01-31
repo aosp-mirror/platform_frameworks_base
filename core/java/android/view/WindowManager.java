@@ -815,8 +815,8 @@ public interface WindowManager extends ViewManager {
     }
 
     /**
-     * Activity level {@link android.content.pm.PackageManager.Property PackageManager
-     * .Property} for an app to inform the system that the activity can be opted-in or opted-out
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager
+     * .Property} for an app to inform the system that the app can be opted-in or opted-out
      * from the compatibility treatment that avoids {@link
      * android.app.Activity#setRequestedOrientation} loops. The loop can be trigerred by
      * ignoreRequestedOrientation display setting enabled on the device or by the landscape natural
@@ -834,17 +834,17 @@ public interface WindowManager extends ViewManager {
      *     <li>Camera compatibility force rotation treatment is active for the package.
      * </ul>
      *
-     * <p>Setting this property to {@code false} informs the system that the activity must be
+     * <p>Setting this property to {@code false} informs the system that the app must be
      * opted-out from the compatibility treatment even if the device manufacturer has opted the app
      * into the treatment.
      *
      * <p><b>Syntax:</b>
      * <pre>
-     * &lt;activity&gt;
+     * &lt;application&gt;
      *   &lt;property
      *     android:name="android.window.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION"
      *     android:value="true|false"/&gt;
-     * &lt;/activity&gt;
+     * &lt;/application&gt;
      * </pre>
      *
      * @hide
@@ -854,8 +854,8 @@ public interface WindowManager extends ViewManager {
             "android.window.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION";
 
     /**
-     * Activity level {@link android.content.pm.PackageManager.Property PackageManager
-     * .Property} for an app to inform the system that the activity should be excluded from the
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager
+     * .Property} for an app to inform the system that the app should be excluded from the
      * camera compatibility force rotation treatment.
      *
      * <p>The camera compatibility treatment aligns orientations of portrait app window and natural
@@ -880,11 +880,11 @@ public interface WindowManager extends ViewManager {
      *
      * <p><b>Syntax:</b>
      * <pre>
-     * &lt;activity&gt;
+     * &lt;application&gt;
      *   &lt;property
      *     android:name="android.window.PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION"
      *     android:value="true|false"/&gt;
-     * &lt;/activity&gt;
+     * &lt;/application&gt;
      * </pre>
      *
      * @hide
@@ -894,8 +894,8 @@ public interface WindowManager extends ViewManager {
             "android.window.PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION";
 
     /**
-     * Activity level {@link android.content.pm.PackageManager.Property PackageManager
-     * .Property} for an app to inform the system that the activity should be excluded
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager
+     * .Property} for an app to inform the system that the app should be excluded
      * from the activity "refresh" after the camera compatibility force rotation treatment.
      *
      * <p>The camera compatibility treatment aligns orientations of portrait app window and natural
@@ -927,11 +927,11 @@ public interface WindowManager extends ViewManager {
      *
      * <p><b>Syntax:</b>
      * <pre>
-     * &lt;activity&gt;
+     * &lt;application&gt;
      *   &lt;property
      *     android:name="android.window.PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH"
      *     android:value="true|false"/&gt;
-     * &lt;/activity&gt;
+     * &lt;/application&gt;
      * </pre>
      *
      * @hide
@@ -941,7 +941,7 @@ public interface WindowManager extends ViewManager {
             "android.window.PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH";
 
     /**
-     * Activity level {@link android.content.pm.PackageManager.Property PackageManager
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager
      * .Property} for an app to inform the system that the activity should be or shouldn't be
      * "refreshed" after the camera compatibility force rotation treatment using "paused ->
      * resumed" cycle rather than "stopped -> resumed".
@@ -977,11 +977,11 @@ public interface WindowManager extends ViewManager {
      *
      * <p><b>Syntax:</b>
      * <pre>
-     * &lt;activity&gt;
+     * &lt;application&gt;
      *   &lt;property
      *     android:name="android.window.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE"
      *     android:value="true|false"/&gt;
-     * &lt;/activity&gt;
+     * &lt;/application&gt;
      * </pre>
      *
      * @hide
@@ -991,23 +991,23 @@ public interface WindowManager extends ViewManager {
             "android.window.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE";
 
     /**
-     * Activity level {@link android.content.pm.PackageManager.Property PackageManager
-     * .Property} for an app to inform the system that the activity should be excluded from the
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager
+     * .Property} for an app to inform the system that the app should be excluded from the
      * compatibility override for orientation set by the device manufacturer.
      *
      * <p>With this property set to {@code true} or unset, device manufacturers can override
-     * orientation for the activity using their discretion to improve display compatibility.
+     * orientation for the app using their discretion to improve display compatibility.
      *
      * <p>With this property set to {@code false}, device manufactured per-app override for
      * orientation won't be applied.
      *
      * <p><b>Syntax:</b>
      * <pre>
-     * &lt;activity&gt;
+     * &lt;application&gt;
      *   &lt;property
      *     android:name="android.window.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE"
      *     android:value="true|false"/&gt;
-     * &lt;/activity&gt;
+     * &lt;/application&gt;
      * </pre>
      *
      * @hide
@@ -1017,8 +1017,8 @@ public interface WindowManager extends ViewManager {
             "android.window.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE";
 
     /**
-     * Activity level {@link android.content.pm.PackageManager.Property PackageManager
-     * .Property} for an app to inform the system that the activity should be opted-out from the
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager
+     * .Property} for an app to inform the system that the app should be opted-out from the
      * compatibility override that fixes display orientation to landscape natural orientation when
      * an activity is fullscreen.
      *
@@ -1048,11 +1048,11 @@ public interface WindowManager extends ViewManager {
      *
      * <p><b>Syntax:</b>
      * <pre>
-     * &lt;activity&gt;
+     * &lt;application&gt;
      *   &lt;property
      *     android:name="android.window.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE"
      *     android:value="true|false"/&gt;
-     * &lt;/activity&gt;
+     * &lt;/application&gt;
      * </pre>
      *
      * @hide
