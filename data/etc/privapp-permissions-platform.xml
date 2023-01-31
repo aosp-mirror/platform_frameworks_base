@@ -470,7 +470,7 @@ applications that come with the platform
         <permission name="android.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED"/>
         <!-- Permission required for CTS test - CallAudioInterceptionTest -->
         <permission name="android.permission.CALL_AUDIO_INTERCEPTION"/>
-        <!-- Permission required for CTS test - CtsPermission5TestCases -->
+        <!-- Permission required for CTS test - CtsAttributionSourceTestCases -->
         <permission name="android.permission.RENOUNCE_PERMISSIONS" />
         <permission name="android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS" />
         <permission name="android.permission.GET_PROCESS_STATE_AND_OOM_SCORE" />
