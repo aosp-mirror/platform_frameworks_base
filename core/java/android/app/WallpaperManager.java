@@ -784,6 +784,7 @@ public class WallpaperManager {
      * @return true if the lockscreen wallpaper always uses a wallpaperService, not a static image
      * @hide
      */
+    @TestApi
     public boolean isLockscreenLiveWallpaperEnabled() {
         return mLockscreenLiveWallpaper;
     }
@@ -1258,6 +1259,8 @@ public class WallpaperManager {
      * @param which Specifies home or lock screen
      * @hide
      */
+    @TestApi
+    @Nullable
     public Bitmap getBitmapAsUser(int userId, boolean hardware, @SetWallpaperFlags int which) {
         final ColorManagementProxy cmProxy = getColorManagementProxy();
         return sGlobals.peekWallpaperBitmap(mContext, true, which, userId, hardware, cmProxy);
@@ -2421,6 +2424,7 @@ public class WallpaperManager {
      *
      * @hide
      */
+    @TestApi
     public void setWallpaperZoomOut(@NonNull IBinder windowToken, float zoom) {
         if (zoom < 0 || zoom > 1f) {
             throw new IllegalArgumentException("zoom must be between 0 and 1: " + zoom);
