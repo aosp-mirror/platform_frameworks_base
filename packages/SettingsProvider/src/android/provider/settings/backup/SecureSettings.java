@@ -227,6 +227,7 @@ public class SecureSettings {
         Settings.Secure.BLUETOOTH_LE_BROADCAST_CODE,
         Settings.Secure.BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME,
         Settings.Secure.CUSTOM_BUGREPORT_HANDLER_APP,
-        Settings.Secure.CUSTOM_BUGREPORT_HANDLER_USER
+        Settings.Secure.CUSTOM_BUGREPORT_HANDLER_USER,
+        Settings.Secure.LOCK_SCREEN_WEATHER_ENABLED
     };
 }

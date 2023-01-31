@@ -6276,4 +6276,7 @@
         "stopped" during initial boot of a device, or after an OTA update. Stopped state of
         an app is not changed during subsequent reboots.  -->
     <bool name="config_stopSystemPackagesByDefault">false</bool>
+
+    <!-- Whether to show weather on the lock screen by default. -->
+    <bool name="config_lockscreenWeatherEnabledByDefault">false</bool>
 </resources>
