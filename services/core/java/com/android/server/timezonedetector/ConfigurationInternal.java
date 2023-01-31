@@ -243,6 +243,8 @@ public final class ConfigurationInternal {
         }
         builder.setConfigureAutoDetectionEnabledCapability(configureAutoDetectionEnabledCapability);
 
+        builder.setUseLocationEnabled(mLocationEnabledSetting);
+
         boolean deviceHasLocationTimeZoneDetection = isGeoDetectionSupported();
         boolean deviceHasTelephonyDetection = isTelephonyDetectionSupported();
 
