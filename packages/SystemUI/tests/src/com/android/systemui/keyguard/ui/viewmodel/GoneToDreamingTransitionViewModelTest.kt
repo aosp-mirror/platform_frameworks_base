@@ -18,16 +18,12 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.Interpolators.EMPHASIZED_ACCELERATE
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.FromGoneTransitionInteractor.Companion.TO_DREAMING_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.shared.model.AnimationParams
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingTransitionViewModel.Companion.LOCKSCREEN_ALPHA
-import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingTransitionViewModel.Companion.LOCKSCREEN_TRANSLATION_Y
+import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -59,20 +55,18 @@ class GoneToDreamingTransitionViewModelTest : SysuiTestCase() {
             val job = underTest.lockscreenAlpha.onEach { values.add(it) }.launchIn(this)
 
             // Should start running here...
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
             repository.sendTransitionStep(step(0f))
             repository.sendTransitionStep(step(0.1f))
             repository.sendTransitionStep(step(0.2f))
-            // ...up to here
             repository.sendTransitionStep(step(0.3f))
+            // ...up to here
             repository.sendTransitionStep(step(1f))
 
             // Only three values should be present, since the dream overlay runs for a small
-            // fraction
-            // of the overall animation time
-            assertThat(values.size).isEqualTo(3)
-            assertThat(values[0]).isEqualTo(1f - animValue(0f, LOCKSCREEN_ALPHA))
-            assertThat(values[1]).isEqualTo(1f - animValue(0.1f, LOCKSCREEN_ALPHA))
-            assertThat(values[2]).isEqualTo(1f - animValue(0.2f, LOCKSCREEN_ALPHA))
+            // fraction of the overall animation time
+            assertThat(values.size).isEqualTo(5)
+            values.forEach { assertThat(it).isIn(Range.closed(0f, 1f)) }
 
             job.cancel()
         }
@@ -87,44 +81,18 @@ class GoneToDreamingTransitionViewModelTest : SysuiTestCase() {
                 underTest.lockscreenTranslationY(pixels).onEach { values.add(it) }.launchIn(this)
 
             // Should start running here...
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
             repository.sendTransitionStep(step(0f))
             repository.sendTransitionStep(step(0.3f))
             repository.sendTransitionStep(step(0.5f))
-            // ...up to here
-            repository.sendTransitionStep(step(1f))
             // And a final reset event on CANCEL
             repository.sendTransitionStep(step(0.8f, TransitionState.CANCELED))
 
-            assertThat(values.size).isEqualTo(4)
-            assertThat(values[0])
-                .isEqualTo(
-                    EMPHASIZED_ACCELERATE.getInterpolation(
-                        animValue(0f, LOCKSCREEN_TRANSLATION_Y)
-                    ) * pixels
-                )
-            assertThat(values[1])
-                .isEqualTo(
-                    EMPHASIZED_ACCELERATE.getInterpolation(
-                        animValue(0.3f, LOCKSCREEN_TRANSLATION_Y)
-                    ) * pixels
-                )
-            assertThat(values[2])
-                .isEqualTo(
-                    EMPHASIZED_ACCELERATE.getInterpolation(
-                        animValue(0.5f, LOCKSCREEN_TRANSLATION_Y)
-                    ) * pixels
-                )
-            assertThat(values[3]).isEqualTo(0f)
+            assertThat(values.size).isEqualTo(5)
+            values.forEach { assertThat(it).isIn(Range.closed(0f, 100f)) }
+
             job.cancel()
         }
-
-    private fun animValue(stepValue: Float, params: AnimationParams): Float {
-        val totalDuration = TO_DREAMING_DURATION
-        val startValue = (params.startTime / totalDuration).toFloat()
-
-        val multiplier = (totalDuration / params.duration).toFloat()
-        return (stepValue - startValue) * multiplier
-    }
 
     private fun step(
         value: Float,

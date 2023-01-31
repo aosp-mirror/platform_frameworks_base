@@ -20,14 +20,10 @@ import com.android.systemui.animation.Interpolators.EMPHASIZED_ACCELERATE
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor.Companion.TO_OCCLUDED_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.shared.model.AnimationParams
-import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
 
 /**
  * Breaks down LOCKSCREEN->OCCLUDED transition into discrete steps for corresponding views to
@@ -39,33 +35,28 @@ class LockscreenToOccludedTransitionViewModel
 constructor(
     private val interactor: KeyguardTransitionInteractor,
 ) {
+    private val transitionAnimation =
+        KeyguardTransitionAnimationFlow(
+            transitionDuration = TO_OCCLUDED_DURATION,
+            transitionFlow = interactor.lockscreenToOccludedTransition,
+        )
+
+    /** Lockscreen views alpha */
+    val lockscreenAlpha: Flow<Float> =
+        transitionAnimation.createFlow(
+            duration = 250.milliseconds,
+            onStep = { 1f - it },
+        )
 
     /** Lockscreen views y-translation */
     fun lockscreenTranslationY(translatePx: Int): Flow<Float> {
-        return merge(
-            flowForAnimation(LOCKSCREEN_TRANSLATION_Y).map { value ->
-                (EMPHASIZED_ACCELERATE.getInterpolation(value) * translatePx)
-            },
-            // On end, reset the translation to 0
-            interactor.lockscreenToOccludedTransition
-                .filter { step -> step.transitionState == TransitionState.FINISHED }
-                .map { 0f }
+        return transitionAnimation.createFlow(
+            duration = TO_OCCLUDED_DURATION,
+            onStep = { value -> value * translatePx },
+            // Reset on cancel or finish
+            onFinish = { 0f },
+            onCancel = { 0f },
+            interpolator = EMPHASIZED_ACCELERATE,
         )
-    }
-
-    /** Lockscreen views alpha */
-    val lockscreenAlpha: Flow<Float> = flowForAnimation(LOCKSCREEN_ALPHA).map { 1f - it }
-
-    private fun flowForAnimation(params: AnimationParams): Flow<Float> {
-        return interactor.transitionStepAnimation(
-            interactor.lockscreenToOccludedTransition,
-            params,
-            totalDuration = TO_OCCLUDED_DURATION
-        )
-    }
-
-    companion object {
-        val LOCKSCREEN_TRANSLATION_Y = AnimationParams(duration = TO_OCCLUDED_DURATION)
-        val LOCKSCREEN_ALPHA = AnimationParams(duration = 250.milliseconds)
     }
 }
