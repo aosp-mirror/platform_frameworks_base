@@ -44,6 +44,7 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
@@ -72,6 +73,8 @@ import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentCom
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallListener;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.window.StatusBarWindowStateController;
+import com.android.systemui.statusbar.window.StatusBarWindowStateListener;
 import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.CarrierConfigTracker.CarrierConfigChangedListener;
 import com.android.systemui.util.CarrierConfigTracker.DefaultDataSubscriptionChangedListener;
@@ -129,6 +132,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private final SecureSettings mSecureSettings;
     private final Executor mMainExecutor;
     private final DumpManager mDumpManager;
+    private final StatusBarWindowStateController mStatusBarWindowStateController;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     private List<String> mBlockedIcons = new ArrayList<>();
     private Map<Startable, Startable.State> mStartableStates = new ArrayMap<>();
@@ -164,6 +169,22 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                 }
             };
 
+    /**
+     * Whether we've launched the secure camera over the lockscreen, but haven't yet received a
+     * status bar window state change afterward.
+     *
+     * We wait for this state change (which will tell us whether to show/hide the status bar icons)
+     * so that there is no flickering/jump cutting during the camera launch.
+     */
+    private boolean mWaitingForWindowStateChangeAfterCameraLaunch = false;
+
+    /**
+     * Listener that updates {@link #mWaitingForWindowStateChangeAfterCameraLaunch} when it receives
+     * a new status bar window state.
+     */
+    private final StatusBarWindowStateListener mStatusBarWindowStateListener = state ->
+            mWaitingForWindowStateChangeAfterCameraLaunch = false;
+
     @SuppressLint("ValidFragment")
     public CollapsedStatusBarFragment(
             StatusBarFragmentComponent.Factory statusBarFragmentComponentFactory,
@@ -185,7 +206,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             OperatorNameViewController.Factory operatorNameViewControllerFactory,
             SecureSettings secureSettings,
             @Main Executor mainExecutor,
-            DumpManager dumpManager
+            DumpManager dumpManager,
+            StatusBarWindowStateController statusBarWindowStateController,
+            KeyguardUpdateMonitor keyguardUpdateMonitor
     ) {
         mStatusBarFragmentComponentFactory = statusBarFragmentComponentFactory;
         mOngoingCallController = ongoingCallController;
@@ -207,6 +230,20 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mSecureSettings = secureSettings;
         mMainExecutor = mainExecutor;
         mDumpManager = dumpManager;
+        mStatusBarWindowStateController = statusBarWindowStateController;
+        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mStatusBarWindowStateController.addListener(mStatusBarWindowStateListener);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mStatusBarWindowStateController.removeListener(mStatusBarWindowStateListener);
     }
 
     @Override
@@ -252,6 +289,11 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                 new StatusBarSystemEventAnimator(mEndSideContent, getResources());
         mCarrierConfigTracker.addCallback(mCarrierConfigCallback);
         mCarrierConfigTracker.addDefaultDataSubscriptionChangedListener(mDefaultDataListener);
+    }
+
+    @Override
+    public void onCameraLaunchGestureDetected(int source) {
+        mWaitingForWindowStateChangeAfterCameraLaunch = true;
     }
 
     @VisibleForTesting
@@ -466,6 +508,27 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                 && mNotificationPanelViewController.hideStatusBarIconsWhenExpanded()) {
             return true;
         }
+
+        // When launching the camera over the lockscreen, the icons become visible momentarily
+        // before animating out, since we're not yet aware that the launching camera activity is
+        // fullscreen. Even once the activity finishes launching, it takes a short time before WM
+        // decides that the top app wants to hide the icons and tells us to hide them. To ensure
+        // that this high-visibility animation is smooth, keep the icons hidden during a camera
+        // launch until we receive a window state change which indicates that the activity is done
+        // launching and WM has decided to show/hide the icons. For extra safety (to ensure the
+        // icons don't remain hidden somehow) we double check that the camera is still showing, the
+        // status bar window isn't hidden, and we're still occluded as well, though these checks
+        // are typically unnecessary.
+        final boolean hideIconsForSecureCamera =
+                (mWaitingForWindowStateChangeAfterCameraLaunch ||
+                        !mStatusBarWindowStateController.windowIsShowing()) &&
+                        mKeyguardUpdateMonitor.isSecureCameraLaunchedOverKeyguard() &&
+                        mKeyguardStateController.isOccluded();
+
+        if (hideIconsForSecureCamera) {
+            return true;
+        }
+
         return mStatusBarHideIconsForBouncerManager.getShouldHideStatusBarIconsForBouncer();
     }
 
