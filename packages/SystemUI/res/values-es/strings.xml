@@ -827,8 +827,8 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Poner <xliff:g id="SONG_NAME">%1$s</xliff:g> de <xliff:g id="ARTIST_NAME">%2$s</xliff:g> en <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Poner <xliff:g id="SONG_NAME">%1$s</xliff:g> en <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Deshacer"</string>
-    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Acércate a <xliff:g id="DEVICENAME">%1$s</xliff:g> para que se reproduzca en ese dispositivo"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Acércate a <xliff:g id="DEVICENAME">%1$s</xliff:g> para jugar aquí"</string>
+    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Acércate a <xliff:g id="DEVICENAME">%1$s</xliff:g> para reproducir contenido ahí"</string>
+    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Acércate a <xliff:g id="DEVICENAME">%1$s</xliff:g> para reproducir contenido aquí"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Reproduciendo en <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Se ha producido un error. Inténtalo de nuevo."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactivo, comprobar aplicación"</string>
