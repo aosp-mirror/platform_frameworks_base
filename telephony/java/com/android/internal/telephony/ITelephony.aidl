@@ -66,6 +66,7 @@ import android.telephony.ims.aidl.IImsRcsFeature;
 import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.telephony.ims.aidl.IRcsConfigCallback;
+import android.telephony.satellite.ISatellitePositionUpdateCallback;
 import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.IBooleanConsumer;
@@ -2636,14 +2637,14 @@ interface ITelephony {
      */
     boolean isRemovableEsimDefaultEuicc(String callingPackage);
 
-     /**
-      * Get the component name of the default app to direct respond-via-message intent for the
-      * user associated with this subscription, update the cache if there is no respond-via-message
-      * application currently configured for this user.
-      * @return component name of the app and class to direct Respond Via Message intent to, or
-      * {@code null} if the functionality is not supported.
-      * @hide
-      */
+    /**
+     * Get the component name of the default app to direct respond-via-message intent for the
+     * user associated with this subscription, update the cache if there is no respond-via-message
+     * application currently configured for this user.
+     * @return component name of the app and class to direct Respond Via Message intent to, or
+     * {@code null} if the functionality is not supported.
+     * @hide
+     */
     ComponentName getDefaultRespondViaMessageApplication(int subId, boolean updateIfNeeded);
 
     /**
@@ -2667,12 +2668,12 @@ interface ITelephony {
     void setNullCipherAndIntegrityEnabled(boolean enabled);
 
     /**
-    * Get whether the radio is able to connect with null ciphering or integrity
-    * algorithms. Note that this retrieves the phone-global preference and not
-    * the state of the radio.
-    *
-    * @hide
-    */
+     * Get whether the radio is able to connect with null ciphering or integrity
+     * algorithms. Note that this retrieves the phone-global preference and not
+     * the state of the radio.
+     *
+     * @hide
+     */
     boolean isNullCipherAndIntegrityPreferenceEnabled();
 
     /**
@@ -2696,5 +2697,16 @@ interface ITelephony {
     /**
      * Get the carrier restriction status of the device.
      */
-     void getCarrierRestrictionStatus(IIntegerConsumer internalCallback, String packageName);
+    void getCarrierRestrictionStatus(IIntegerConsumer internalCallback, String packageName);
+
+    /**
+     * Start receiving satellite pointing updates.
+     */
+    int startSatellitePositionUpdates(int subId, int callbackId,
+            in ISatellitePositionUpdateCallback callback);
+
+    /**
+     * Stop receiving satellite pointing updates.
+     */
+    int stopSatellitePositionUpdates(int subId, int callbackId);
 }

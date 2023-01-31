@@ -6198,6 +6198,16 @@ public abstract class Context {
     public static final String GRAMMATICAL_INFLECTION_SERVICE = "grammatical_inflection";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.telephony.satellite.SatelliteManager} for accessing satellite functionality.
+     *
+     * @see #getSystemService(String)
+     * @see android.telephony.satellite.SatelliteManager
+     * @hide
+     */
+    public static final String SATELLITE_SERVICE = "satellite";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *
