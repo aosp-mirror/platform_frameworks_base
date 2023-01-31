@@ -207,4 +207,25 @@
          be set by OEMs for devices which use eUICCs. -->
     <integer-array name="non_removable_euicc_slots"></integer-array>
 
+    <!-- Device state identifiers and strings for system notifications. The string arrays must have
+         the same length and order as the identifier array. -->
+    <integer-array name="device_state_notification_state_identifiers">
+        <!-- TODO(b/267231269) change to concurrent display identifier when ready -->
+        <item>-1</item>
+    </integer-array>
+    <string-array name="device_state_notification_names">
+        <item>@string/concurrent_display_notification_name</item>
+    </string-array>
+    <string-array name="device_state_notification_active_titles">
+        <item>@string/concurrent_display_notification_active_title</item>
+    </string-array>
+    <string-array name="device_state_notification_active_contents">
+        <item>@string/concurrent_display_notification_active_content</item>
+    </string-array>
+    <string-array name="device_state_notification_thermal_titles">
+        <item>@string/concurrent_display_notification_thermal_title</item>
+    </string-array>
+    <string-array name="device_state_notification_thermal_contents">
+        <item>@string/concurrent_display_notification_thermal_content</item>
+    </string-array>
 </resources>

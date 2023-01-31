@@ -19,7 +19,11 @@ package com.android.server.devicestate;
 import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE;
 import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE;
 
+import android.annotation.IntDef;
 import android.annotation.IntRange;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Responsible for providing the set of supported {@link DeviceState device states} as well as the
@@ -28,12 +32,42 @@ import android.annotation.IntRange;
  * @see DeviceStatePolicy
  */
 public interface DeviceStateProvider {
+    int SUPPORTED_DEVICE_STATES_CHANGED_DEFAULT = 0;
+
+    /**
+     * Indicating that the supported device states changed callback is trigger for initial listener
+     * registration.
+     */
+    int SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED = 1;
+
+    /**
+     * Indicating that the supported device states have changed because the thermal condition
+     * returned to normal status from critical status.
+     */
+    int SUPPORTED_DEVICE_STATES_CHANGED_THERMAL_NORMAL = 2;
+
+    /**
+     * Indicating that the supported device states have changed because of thermal critical
+     * condition.
+     */
+    int SUPPORTED_DEVICE_STATES_CHANGED_THERMAL_CRITICAL = 3;
+
+    @IntDef(prefix = { "SUPPORTED_DEVICE_STATES_CHANGED_" }, value = {
+            SUPPORTED_DEVICE_STATES_CHANGED_DEFAULT,
+            SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED,
+            SUPPORTED_DEVICE_STATES_CHANGED_THERMAL_NORMAL,
+            SUPPORTED_DEVICE_STATES_CHANGED_THERMAL_CRITICAL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface SupportedStatesUpdatedReason {}
+
     /**
      * Registers a listener for changes in provider state.
      * <p>
-     * It is <b>required</b> that {@link Listener#onSupportedDeviceStatesChanged(DeviceState[])} be
-     * called followed by {@link Listener#onStateChanged(int)} with the initial values on successful
-     * registration of the listener.
+     * It is <b>required</b> that
+     * {@link Listener#onSupportedDeviceStatesChanged(DeviceState[], int)} be called followed by
+     * {@link Listener#onStateChanged(int)} with the initial values on successful registration of
+     * the listener.
      */
     void setListener(Listener listener);
 
@@ -53,18 +87,20 @@ public interface DeviceStateProvider {
          * to zero and there must always be at least one supported device state.
          *
          * @param newDeviceStates array of supported device states.
+         * @param reason the reason for the supported device states change.
          *
          * @throws IllegalArgumentException if the list of device states is empty or if one of the
          * provided states contains an invalid identifier.
          */
-        void onSupportedDeviceStatesChanged(DeviceState[] newDeviceStates);
+        void onSupportedDeviceStatesChanged(DeviceState[] newDeviceStates,
+                @SupportedStatesUpdatedReason int reason);
 
         /**
          * Called to notify the listener of a change in current device state. Required to be called
          * once on successful registration of the listener and then once on every subsequent change
          * in device state. Value must have been included in the set of supported device states
          * provided in the most recent call to
-         * {@link #onSupportedDeviceStatesChanged(DeviceState[])}.
+         * {@link #onSupportedDeviceStatesChanged(DeviceState[], int)}.
          *
          * @param identifier the identifier of the new device state.
          *
