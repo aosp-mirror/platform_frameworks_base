@@ -59,9 +59,7 @@ import kotlin.Unit;
 @RunWith(AndroidTestingRunner.class)
 public class WorkProfileMessageControllerTest extends SysuiTestCase {
     private static final String DEFAULT_LABEL = "default label";
-    private static final String BADGED_DEFAULT_LABEL = "badged default label";
     private static final String APP_LABEL = "app label";
-    private static final String BADGED_APP_LABEL = "badged app label";
     private static final UserHandle NON_WORK_USER = UserHandle.of(0);
     private static final UserHandle WORK_USER = UserHandle.of(10);
 
@@ -91,10 +89,6 @@ public class WorkProfileMessageControllerTest extends SysuiTestCase {
                 eq(WorkProfileMessageController.SHARED_PREFERENCES_NAME),
                 eq(Context.MODE_PRIVATE))).thenReturn(mSharedPreferences);
         when(mMockContext.getString(ArgumentMatchers.anyInt())).thenReturn(DEFAULT_LABEL);
-        when(mPackageManager.getUserBadgedLabel(eq(DEFAULT_LABEL), any()))
-                .thenReturn(BADGED_DEFAULT_LABEL);
-        when(mPackageManager.getUserBadgedLabel(eq(APP_LABEL), any()))
-                .thenReturn(BADGED_APP_LABEL);
         when(mPackageManager.getActivityIcon(any(ComponentName.class)))
                 .thenReturn(mActivityIcon);
         when(mPackageManager.getUserBadgedIcon(
@@ -133,7 +127,7 @@ public class WorkProfileMessageControllerTest extends SysuiTestCase {
         WorkProfileMessageController.WorkProfileFirstRunData data =
                 mMessageController.onScreenshotTaken(WORK_USER);
 
-        assertEquals(BADGED_DEFAULT_LABEL, data.getAppName());
+        assertEquals(DEFAULT_LABEL, data.getAppName());
         assertNull(data.getIcon());
     }
 
@@ -142,7 +136,7 @@ public class WorkProfileMessageControllerTest extends SysuiTestCase {
         WorkProfileMessageController.WorkProfileFirstRunData data =
                 mMessageController.onScreenshotTaken(WORK_USER);
 
-        assertEquals(BADGED_APP_LABEL, data.getAppName());
+        assertEquals(APP_LABEL, data.getAppName());
         assertEquals(mBadgedActivityIcon, data.getIcon());
     }
 
@@ -151,7 +145,7 @@ public class WorkProfileMessageControllerTest extends SysuiTestCase {
         ViewGroup layout = (ViewGroup) LayoutInflater.from(mContext).inflate(
                 R.layout.screenshot_work_profile_first_run, null);
         WorkProfileMessageController.WorkProfileFirstRunData data =
-                new WorkProfileMessageController.WorkProfileFirstRunData(BADGED_APP_LABEL,
+                new WorkProfileMessageController.WorkProfileFirstRunData(APP_LABEL,
                         mBadgedActivityIcon);
         final CountDownLatch countdown = new CountDownLatch(1);
         mMessageController.populateView(layout, data, () -> {
@@ -163,7 +157,7 @@ public class WorkProfileMessageControllerTest extends SysuiTestCase {
         assertEquals(mBadgedActivityIcon, image.getDrawable());
         TextView text = layout.findViewById(R.id.screenshot_message_content);
         // The app name is used in a template, but at least validate that it was inserted.
-        assertTrue(text.getText().toString().contains(BADGED_APP_LABEL));
+        assertTrue(text.getText().toString().contains(APP_LABEL));
 
         // Validate that clicking the dismiss button calls back properly.
         assertEquals(1, countdown.getCount());
