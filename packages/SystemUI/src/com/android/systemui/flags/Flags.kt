@@ -235,7 +235,7 @@ object Flags {
     // TODO(b/258517050): Clean up after the feature is launched.
     @JvmField
     val SMARTSPACE_DATE_WEATHER_DECOUPLED =
-        sysPropBooleanFlag(403, "persist.sysui.ss.dw_decoupled", default = false)
+        sysPropBooleanFlag(403, "persist.sysui.ss.dw_decoupled", default = true)
 
     // 500 - quick settings
 
