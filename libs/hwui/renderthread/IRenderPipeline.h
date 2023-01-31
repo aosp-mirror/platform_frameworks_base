@@ -16,17 +16,19 @@
 
 #pragma once
 
+#include <SkColorSpace.h>
+#include <SkRect.h>
+#include <android-base/unique_fd.h>
+#include <utils/RefBase.h>
+
+#include "ColorMode.h"
 #include "DamageAccumulator.h"
 #include "FrameInfoVisualizer.h"
+#include "HardwareBufferRenderParams.h"
 #include "LayerUpdateQueue.h"
 #include "Lighting.h"
 #include "SwapBehavior.h"
 #include "hwui/Bitmap.h"
-#include "ColorMode.h"
-
-#include <SkColorSpace.h>
-#include <SkRect.h>
-#include <utils/RefBase.h>
 
 class GrDirectContext;
 
@@ -64,10 +66,14 @@ public:
                             const LightGeometry& lightGeometry, LayerUpdateQueue* layerUpdateQueue,
                             const Rect& contentDrawBounds, bool opaque, const LightInfo& lightInfo,
                             const std::vector<sp<RenderNode>>& renderNodes,
-                            FrameInfoVisualizer* profiler) = 0;
+                            FrameInfoVisualizer* profiler,
+                            const HardwareBufferRenderParams& bufferParams) = 0;
     virtual bool swapBuffers(const Frame& frame, bool drew, const SkRect& screenDirty,
                              FrameInfo* currentFrameInfo, bool* requireSwap) = 0;
     virtual DeferredLayerUpdater* createTextureLayer() = 0;
+    [[nodiscard]] virtual android::base::unique_fd flush() = 0;
+    virtual void setHardwareBuffer(AHardwareBuffer* hardwareBuffer) = 0;
+    virtual bool hasHardwareBuffer() = 0;
     virtual bool setSurface(ANativeWindow* window, SwapBehavior swapBehavior) = 0;
     virtual void onStop() = 0;
     virtual bool isSurfaceReady() = 0;

@@ -38,7 +38,7 @@ RENDERTHREAD_TEST(CanvasContext, create) {
     std::unique_ptr<CanvasContext> canvasContext(
             CanvasContext::create(renderThread, false, rootNode.get(), &contextFactory, 0, 0));
 
-    ASSERT_FALSE(canvasContext->hasSurface());
+    ASSERT_FALSE(canvasContext->hasOutputTarget());
 
     canvasContext->destroy();
 }
