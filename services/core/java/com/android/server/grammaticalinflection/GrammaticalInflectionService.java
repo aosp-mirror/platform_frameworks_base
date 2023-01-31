@@ -26,6 +26,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.SystemProperties;
+import android.util.Log;
 
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
@@ -38,7 +39,7 @@ import com.android.server.wm.ActivityTaskManagerInternal;
  * <p>This service is API entry point for storing app-specific grammatical inflection.
  */
 public class GrammaticalInflectionService extends SystemService {
-
+    private final String TAG = "GrammaticalInflection";
     private final GrammaticalInflectionBackupHelper mBackupHelper;
     private final ActivityTaskManagerInternal mActivityTaskManagerInternal;
     private PackageManagerInternal mPackageManagerInternal;
@@ -114,23 +115,25 @@ public class GrammaticalInflectionService extends SystemService {
 
     protected void setRequestedApplicationGrammaticalGender(
             String appPackageName, int userId, int gender) {
+        int preValue = getApplicationGrammaticalGender(appPackageName, userId);
+        final ActivityTaskManagerInternal.PackageConfigurationUpdater updater =
+                mActivityTaskManagerInternal.createPackageConfigurationUpdater(appPackageName,
+                        userId);
+
         if (!SystemProperties.getBoolean(GRAMMATICAL_INFLECTION_ENABLED, true)) {
+            if (preValue != GRAMMATICAL_GENDER_NOT_SPECIFIED) {
+                Log.d(TAG, "Clearing the user's grammatical gender setting");
+                updater.setGrammaticalGender(GRAMMATICAL_GENDER_NOT_SPECIFIED).commit();
+            }
             return;
         }
 
-        final int uid = mPackageManagerInternal
-                .getPackageUid(appPackageName, /* flags */ 0, userId);
-        int preValue = getApplicationGrammaticalGender(appPackageName, userId);
-
+        final int uid = mPackageManagerInternal.getPackageUid(appPackageName, 0, userId);
         FrameworkStatsLog.write(FrameworkStatsLog.GRAMMATICAL_INFLECTION_CHANGED,
                 FrameworkStatsLog.APPLICATION_GRAMMATICAL_INFLECTION_CHANGED__SOURCE_ID__OTHERS,
                 uid,
                 gender != GRAMMATICAL_GENDER_NOT_SPECIFIED,
                 preValue != GRAMMATICAL_GENDER_NOT_SPECIFIED);
-
-        final ActivityTaskManagerInternal.PackageConfigurationUpdater updater =
-                mActivityTaskManagerInternal.createPackageConfigurationUpdater(appPackageName,
-                        userId);
 
         updater.setGrammaticalGender(gender).commit();
     }
