@@ -1626,6 +1626,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     int status, int mRequest, long mFunctions, boolean mChargingFunctions);
 
         public abstract void getUsbSpeedCb(int speed);
+
+        public abstract void resetCb(int status);
     }
 
     private static final class UsbHandlerLegacy extends UsbHandler {
@@ -1987,13 +1989,29 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             return true;
         }
 
+        /**
+         * This callback function is only applicable for USB Gadget HAL,
+         * USBHandlerLegacy does not supported it.
+         */
         @Override
         public void setCurrentUsbFunctionsCb(long functions,
                     int status, int mRequest, long mFunctions, boolean mChargingFunctions){
         }
 
+        /**
+         * This callback function is only applicable for USB Gadget HAL,
+         * USBHandlerLegacy does not supported it.
+         */
         @Override
         public void getUsbSpeedCb(int speed){
+        }
+
+        /**
+         * This callback function is only applicable for USB Gadget HAL,
+         * USBHandlerLegacy does not supported it.
+         */
+        @Override
+        public void resetCb(int status){
         }
     }
 
@@ -2146,6 +2164,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     }
                     break;
                 case MSG_RESET_USB_GADGET:
+                    operationId = sUsbOperationCount.incrementAndGet();
                     synchronized (mGadgetProxyLock) {
                         if (mUsbGadgetHal == null) {
                             Slog.e(TAG, "reset Usb Gadget mUsbGadgetHal is null");
@@ -2159,7 +2178,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                             if (mConfigured) {
                                 mResetUsbGadgetDisableDebounce = true;
                             }
-                            mUsbGadgetHal.reset();
+                            mUsbGadgetHal.reset(operationId);
                         } catch (Exception e) {
                             Slog.e(TAG, "reset Usb Gadget failed", e);
                             mResetUsbGadgetDisableDebounce = false;
@@ -2219,6 +2238,12 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         @Override
         public void getUsbSpeedCb(int speed) {
             mUsbSpeed = speed;
+        }
+
+        @Override
+        public void resetCb(int status) {
+            if (status != Status.SUCCESS)
+                Slog.e(TAG, "resetCb fail");
         }
 
         private void setUsbConfig(long config, boolean chargingFunctions, int operationId) {
@@ -2360,6 +2385,10 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
 
     public void getUsbSpeedCb(int speed) {
         mHandler.getUsbSpeedCb(speed);
+    }
+
+    public void resetCb(int status) {
+        mHandler.resetCb(status);
     }
 
     /**

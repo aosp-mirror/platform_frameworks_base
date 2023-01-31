@@ -148,6 +148,10 @@ public class UsbHandlerTest {
         public void getUsbSpeedCb(int speed){
         }
 
+        @Override
+        public void resetCb(int status){
+        }
+
     }
 
     @Before
