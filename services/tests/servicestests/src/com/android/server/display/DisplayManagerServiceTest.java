@@ -157,7 +157,7 @@ public class DisplayManagerServiceTest {
        VirtualDisplayAdapter getVirtualDisplayAdapter(SyncRoot syncRoot, Context context,
                Handler handler, DisplayAdapter.Listener displayAdapterListener) {
            return new VirtualDisplayAdapter(syncRoot, context, handler, displayAdapterListener,
-                   (String name, boolean secure) -> mMockDisplayToken);
+                   (String name, boolean secure, float refreshRate) -> mMockDisplayToken);
        }
 
        @Override
