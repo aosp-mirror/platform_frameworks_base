@@ -126,7 +126,7 @@ public class Bubble implements BubbleViewProvider {
     private Icon mIcon;
     private boolean mIsBubble;
     private boolean mIsTextChanged;
-    private boolean mIsClearable;
+    private boolean mIsDismissable;
     private boolean mShouldSuppressNotificationDot;
     private boolean mShouldSuppressNotificationList;
     private boolean mShouldSuppressPeek;
@@ -181,7 +181,7 @@ public class Bubble implements BubbleViewProvider {
     @VisibleForTesting(visibility = PRIVATE)
     public Bubble(@NonNull final String key, @NonNull final ShortcutInfo shortcutInfo,
             final int desiredHeight, final int desiredHeightResId, @Nullable final String title,
-            int taskId, @Nullable final String locus, boolean isClearable, Executor mainExecutor,
+            int taskId, @Nullable final String locus, boolean isDismissable, Executor mainExecutor,
             final Bubbles.BubbleMetadataFlagListener listener) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(shortcutInfo);
@@ -190,7 +190,7 @@ public class Bubble implements BubbleViewProvider {
         mKey = key;
         mGroupKey = null;
         mLocusId = locus != null ? new LocusId(locus) : null;
-        mIsClearable = isClearable;
+        mIsDismissable = isDismissable;
         mFlags = 0;
         mUser = shortcutInfo.getUserHandle();
         mPackageName = shortcutInfo.getPackage();
@@ -248,8 +248,8 @@ public class Bubble implements BubbleViewProvider {
     }
 
     @Hide
-    public boolean isClearable() {
-        return mIsClearable;
+    public boolean isDismissable() {
+        return mIsDismissable;
     }
 
     /**
@@ -533,7 +533,7 @@ public class Bubble implements BubbleViewProvider {
             mDeleteIntent = entry.getBubbleMetadata().getDeleteIntent();
         }
 
-        mIsClearable = entry.isClearable();
+        mIsDismissable = entry.isDismissable();
         mShouldSuppressNotificationDot = entry.shouldSuppressNotificationDot();
         mShouldSuppressNotificationList = entry.shouldSuppressNotificationList();
         mShouldSuppressPeek = entry.shouldSuppressPeek();
@@ -612,7 +612,7 @@ public class Bubble implements BubbleViewProvider {
      * Whether this notification should be shown in the shade.
      */
     boolean showInShade() {
-        return !shouldSuppressNotification() || !mIsClearable;
+        return !shouldSuppressNotification() || !mIsDismissable;
     }
 
     /**
@@ -877,7 +877,7 @@ public class Bubble implements BubbleViewProvider {
         pw.print("  desiredHeight: "); pw.println(getDesiredHeightString());
         pw.print("  suppressNotif: "); pw.println(shouldSuppressNotification());
         pw.print("  autoExpand:    "); pw.println(shouldAutoExpand());
-        pw.print("  isClearable:   "); pw.println(mIsClearable);
+        pw.print("  isDismissable: "); pw.println(mIsDismissable);
         pw.println("  bubbleMetadataFlagListener null: " + (mBubbleMetadataFlagListener == null));
         if (mExpandedView != null) {
             mExpandedView.dump(pw);
