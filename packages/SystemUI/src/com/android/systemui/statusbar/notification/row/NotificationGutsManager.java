@@ -586,7 +586,9 @@ public class NotificationGutsManager implements NotifGutsViewManager {
         }
 
         final ExpandableNotificationRow row = (ExpandableNotificationRow) view;
-        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+        if (view.isLongClickable()) {
+            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+        }
         if (row.areGutsExposed()) {
             closeAndSaveGuts(false /* removeLeavebehind */, false /* force */,
                     true /* removeControls */, -1 /* x */, -1 /* y */,
