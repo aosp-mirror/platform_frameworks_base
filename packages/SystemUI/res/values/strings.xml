@@ -240,7 +240,7 @@
     <!-- Content description for the right boundary of the screenshot being cropped, with the current position as a percentage. [CHAR LIMIT=NONE] -->
     <string name="screenshot_right_boundary_pct">Right boundary <xliff:g id="percent" example="50">%1$d</xliff:g> percent</string>
     <!-- Notification displayed when a screenshot is saved in a work profile. [CHAR LIMIT=NONE] -->
-    <string name="screenshot_work_profile_notification">Work screenshots are saved in the <xliff:g id="app" example="Work Files">%1$s</xliff:g> app</string>
+    <string name="screenshot_work_profile_notification">Saved in <xliff:g id="app" example="Files">%1$s</xliff:g> in the work profile</string>
     <!-- Default name referring to the app on the device that lets the user browse stored files. [CHAR LIMIT=NONE] -->
     <string name="screenshot_default_files_app_name">Files</string>
     <!-- A notice shown to the user to indicate that an app has detected the screenshot that the user has just taken. [CHAR LIMIT=75] -->

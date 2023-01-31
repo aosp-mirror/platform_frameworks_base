@@ -67,10 +67,7 @@ constructor(
             }
 
             // If label wasn't loaded, use a default
-            val badgedLabel =
-                packageManager.getUserBadgedLabel(label ?: defaultFileAppName(), userHandle)
-
-            return WorkProfileFirstRunData(badgedLabel, badgedIcon)
+            return WorkProfileFirstRunData(label ?: defaultFileAppName(), badgedIcon)
         }
         return null
     }
