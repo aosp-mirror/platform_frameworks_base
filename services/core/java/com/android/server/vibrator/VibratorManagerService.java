@@ -385,12 +385,13 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     }
 
     /**
-     * An internal-only version of vibrate that allows the caller access to the {@link Vibration}.
+     * An internal-only version of vibrate that allows the caller access to the
+     * {@link HalVibration}.
      * The Vibration is only returned if it is ongoing after this method returns.
      */
     @VisibleForTesting
     @Nullable
-    Vibration vibrateInternal(int uid, int displayId, String opPkg,
+    HalVibration vibrateInternal(int uid, int displayId, String opPkg,
             @NonNull CombinedVibration effect, @Nullable VibrationAttributes attrs,
             String reason, IBinder token) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "vibrate, reason = " + reason);
@@ -407,8 +408,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             }
             attrs = fixupVibrationAttributes(attrs, effect);
             // Create Vibration.Stats as close to the received request as possible, for tracking.
-            Vibration vib = new Vibration(token, mNextVibrationId.getAndIncrement(), effect, attrs,
-                    uid, displayId, opPkg, reason);
+            HalVibration vib = new HalVibration(token, mNextVibrationId.getAndIncrement(), effect,
+                    attrs, uid, displayId, opPkg, reason);
             fillVibrationFallbacks(vib, effect);
 
             if (attrs.isFlagSet(VibrationAttributes.FLAG_INVALIDATE_SETTINGS_CACHE)) {
@@ -639,7 +640,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 return;
             }
 
-            Vibration vib = mCurrentVibration.getVibration();
+            HalVibration vib = mCurrentVibration.getVibration();
             Vibration.Status ignoreStatus = shouldIgnoreVibrationLocked(
                     vib.uid, vib.displayId, vib.opPkg, vib.attrs);
 
@@ -683,7 +684,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     }
 
     @GuardedBy("mLock")
-    private Vibration.Status startVibrationLocked(Vibration vib) {
+    private Vibration.Status startVibrationLocked(HalVibration vib) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "startVibrationLocked");
         try {
             vib.updateEffects(effect -> mVibrationScaler.scale(effect, vib.attrs.getUsage()));
@@ -716,7 +717,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     private Vibration.Status startVibrationOnThreadLocked(VibrationStepConductor conductor) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "startVibrationThreadLocked");
         try {
-            Vibration vib = conductor.getVibration();
+            HalVibration vib = conductor.getVibration();
             int mode = startAppOpModeLocked(vib.uid, vib.opPkg, vib.attrs);
             switch (mode) {
                 case AppOpsManager.MODE_ALLOWED:
@@ -741,7 +742,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     }
 
     @GuardedBy("mLock")
-    private void endVibrationLocked(Vibration vib, Vibration.EndInfo vibrationEndInfo,
+    private void endVibrationLocked(HalVibration vib, Vibration.EndInfo vibrationEndInfo,
             boolean shouldWriteStats) {
         vib.end(vibrationEndInfo);
         logVibrationStatus(vib.uid, vib.attrs, vibrationEndInfo.status);
@@ -763,7 +764,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 vib.getStatsInfo(/* completionUptimeMillis= */ SystemClock.uptimeMillis()));
     }
 
-    private void logVibrationStatus(int uid, VibrationAttributes attrs, Vibration.Status status) {
+    private void logVibrationStatus(int uid, VibrationAttributes attrs,
+            Vibration.Status status) {
         switch (status) {
             case IGNORED_BACKGROUND:
                 Slog.e(TAG, "Ignoring incoming vibration as process with"
@@ -813,7 +815,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "reportFinishVibrationLocked");
         Trace.asyncTraceEnd(Trace.TRACE_TAG_VIBRATOR, "vibration", 0);
         try {
-            Vibration vib = mCurrentVibration.getVibration();
+            HalVibration vib = mCurrentVibration.getVibration();
             if (DEBUG) {
                 Slog.d(TAG, "Reporting vibration " + vib.id + " finished with " + vibrationEndInfo);
             }
@@ -857,13 +859,13 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
      */
     @GuardedBy("mLock")
     @Nullable
-    private Vibration.Status shouldIgnoreVibrationForOngoingLocked(Vibration vib) {
+    private Vibration.Status shouldIgnoreVibrationForOngoingLocked(HalVibration vib) {
         if (mCurrentVibration == null || vib.isRepeating()) {
             // Incoming repeating vibrations always take precedence over ongoing vibrations.
             return null;
         }
 
-        Vibration currentVibration = mCurrentVibration.getVibration();
+        HalVibration currentVibration = mCurrentVibration.getVibration();
         if (currentVibration.hasEnded() || mCurrentVibration.wasNotifiedToCancel()) {
             // Current vibration has ended or is cancelling, should not block incoming vibrations.
             return null;
@@ -945,7 +947,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
      * @param token       The binder token to identify the vibration origin. Only vibrations
      *                    started with the same token can be cancelled with it.
      */
-    private boolean shouldCancelVibration(Vibration vib, int usageFilter, IBinder token) {
+    private boolean shouldCancelVibration(HalVibration vib, int usageFilter, IBinder token) {
         return (vib.token == token) && shouldCancelVibration(vib.attrs, usageFilter);
     }
 
@@ -1041,7 +1043,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
      * Sets fallback effects to all prebaked ones in given combination of effects, based on {@link
      * VibrationSettings#getFallbackEffect}.
      */
-    private void fillVibrationFallbacks(Vibration vib, CombinedVibration effect) {
+    private void fillVibrationFallbacks(HalVibration vib, CombinedVibration effect) {
         if (effect instanceof CombinedVibration.Mono) {
             fillVibrationFallbacks(vib, ((CombinedVibration.Mono) effect).getEffect());
         } else if (effect instanceof CombinedVibration.Stereo) {
@@ -1059,7 +1061,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
     }
 
-    private void fillVibrationFallbacks(Vibration vib, VibrationEffect effect) {
+    private void fillVibrationFallbacks(HalVibration vib, VibrationEffect effect) {
         VibrationEffect.Composed composed = (VibrationEffect.Composed) effect;
         int segmentCount = composed.getSegments().size();
         for (int i = 0; i < segmentCount; i++) {
@@ -1183,7 +1185,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         if (conductor == null) {
             return false;
         }
-        Vibration vib = conductor.getVibration();
+        HalVibration vib = conductor.getVibration();
         return mVibrationSettings.shouldCancelVibrationOnScreenOff(
                 vib.uid, vib.opPkg, vib.attrs.getUsage(), vib.stats().getCreateUptimeMillis());
     }
@@ -1535,7 +1537,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             mPreviousVibrationsLimit = limit;
         }
 
-        synchronized void record(Vibration vib) {
+        synchronized void record(HalVibration vib) {
             int usage = vib.attrs.getUsage();
             if (!mPreviousVibrations.contains(usage)) {
                 mPreviousVibrations.put(usage, new LinkedList<>());
@@ -1870,7 +1872,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             // only cancel background vibrations.
             IBinder deathBinder = commonOptions.background ? VibratorManagerService.this
                     : mShellCallbacksToken;
-            Vibration vib = vibrateInternal(Binder.getCallingUid(), Display.DEFAULT_DISPLAY,
+            HalVibration vib = vibrateInternal(Binder.getCallingUid(), Display.DEFAULT_DISPLAY,
                     SHELL_PACKAGE_NAME, combined, attrs, commonOptions.description, deathBinder);
             if (vib != null && !commonOptions.background) {
                 try {

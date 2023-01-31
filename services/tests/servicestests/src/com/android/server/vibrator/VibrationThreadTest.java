@@ -516,7 +516,7 @@ public class VibrationThreadTest {
 
         long vibrationId = 1;
         VibrationEffect fallback = VibrationEffect.createOneShot(10, 100);
-        Vibration vibration = createVibration(vibrationId, CombinedVibration.createParallel(
+        HalVibration vibration = createVibration(vibrationId, CombinedVibration.createParallel(
                 VibrationEffect.get(VibrationEffect.EFFECT_CLICK)));
         vibration.addFallback(VibrationEffect.EFFECT_CLICK, fallback);
         startThreadAndDispatcher(vibration);
@@ -683,7 +683,7 @@ public class VibrationThreadTest {
                 .addEffect(VibrationEffect.get(VibrationEffect.EFFECT_TICK))
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 0.5f)
                 .compose();
-        Vibration vib = createVibration(vibrationId, CombinedVibration.createParallel(effect));
+        HalVibration vib = createVibration(vibrationId, CombinedVibration.createParallel(effect));
         vib.addFallback(VibrationEffect.EFFECT_TICK, fallback);
         startThreadAndDispatcher(vib);
         waitForCompletion();
@@ -1592,7 +1592,7 @@ public class VibrationThreadTest {
         return startThreadAndDispatcher(createVibration(vibrationId, effect));
     }
 
-    private VibrationStepConductor startThreadAndDispatcher(Vibration vib) {
+    private VibrationStepConductor startThreadAndDispatcher(HalVibration vib) {
         mControllers = createVibratorControllers();
         VibrationStepConductor conductor = new VibrationStepConductor(vib, mVibrationSettings,
                 mEffectAdapter, mControllers, mManagerHooks);
@@ -1624,8 +1624,8 @@ public class VibrationThreadTest {
         mTestLooper.dispatchAll();  // Flush callbacks
     }
 
-    private Vibration createVibration(long id, CombinedVibration effect) {
-        return new Vibration(mVibrationToken, (int) id, effect, ATTRS, UID, DISPLAY_ID,
+    private HalVibration createVibration(long id, CombinedVibration effect) {
+        return new HalVibration(mVibrationToken, (int) id, effect, ATTRS, UID, DISPLAY_ID,
                 PACKAGE_NAME, "reason");
     }
 
