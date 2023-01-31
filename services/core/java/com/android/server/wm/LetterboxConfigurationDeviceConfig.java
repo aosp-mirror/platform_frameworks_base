@@ -38,10 +38,16 @@ final class LetterboxConfigurationDeviceConfig
     private static final boolean DEFAULT_VALUE_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY =
             true;
 
+    static final String KEY_ALLOW_IGNORE_ORIENTATION_REQUEST =
+            "allow_ignore_orientation_request";
+    private static final boolean DEFAULT_VALUE_ALLOW_IGNORE_ORIENTATION_REQUEST = true;
+
     @VisibleForTesting
     static final Map<String, Boolean> sKeyToDefaultValueMap = Map.of(
             KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY,
-            DEFAULT_VALUE_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY
+            DEFAULT_VALUE_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY,
+            KEY_ALLOW_IGNORE_ORIENTATION_REQUEST,
+            DEFAULT_VALUE_ALLOW_IGNORE_ORIENTATION_REQUEST
     );
 
     // Whether enabling rotation compat policy for immersive apps that prevents auto rotation
@@ -51,6 +57,10 @@ final class LetterboxConfigurationDeviceConfig
     // such rotations accidentally when auto rotation is on.
     private boolean mIsDisplayRotationImmersiveAppCompatPolicyEnabled =
             DEFAULT_VALUE_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY;
+
+    // Whether enabling ignoreOrientationRequest is allowed on the device.
+    private boolean mIsAllowIgnoreOrientationRequest =
+            DEFAULT_VALUE_ALLOW_IGNORE_ORIENTATION_REQUEST;
 
     // Set of active device configs that need to be updated in
     // DeviceConfig.OnPropertiesChangedListener#onPropertiesChanged.
@@ -93,6 +103,8 @@ final class LetterboxConfigurationDeviceConfig
         switch (key) {
             case KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY:
                 return mIsDisplayRotationImmersiveAppCompatPolicyEnabled;
+            case KEY_ALLOW_IGNORE_ORIENTATION_REQUEST:
+                return mIsAllowIgnoreOrientationRequest;
             default:
                 throw new AssertionError("Unexpected flag name: " + key);
         }
@@ -106,6 +118,10 @@ final class LetterboxConfigurationDeviceConfig
         switch (key) {
             case KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY:
                 mIsDisplayRotationImmersiveAppCompatPolicyEnabled =
+                        getDeviceConfig(key, defaultValue);
+                break;
+            case KEY_ALLOW_IGNORE_ORIENTATION_REQUEST:
+                mIsAllowIgnoreOrientationRequest =
                         getDeviceConfig(key, defaultValue);
                 break;
             default:
