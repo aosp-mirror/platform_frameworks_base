@@ -819,6 +819,9 @@
     <!-- Permission required for CTS test - ActivityCaptureCallbackTests -->
     <uses-permission android:name="android.permission.DETECT_SCREEN_CAPTURE" />
 
+    <!-- Permission required for CTS test - CtsTelephonyProviderTestCases -->
+    <uses-permission android:name="android.permission.WRITE_APN_SETTINGS" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
