@@ -3538,6 +3538,7 @@ package android.accessibilityservice {
     method public float getCenterY();
     method public int getMode();
     method public float getScale();
+    method public boolean isActivated();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.accessibilityservice.MagnificationConfig> CREATOR;
     field public static final int MAGNIFICATION_MODE_DEFAULT = 0; // 0x0
@@ -3548,6 +3549,7 @@ package android.accessibilityservice {
   public static final class MagnificationConfig.Builder {
     ctor public MagnificationConfig.Builder();
     method @NonNull public android.accessibilityservice.MagnificationConfig build();
+    method @NonNull public android.accessibilityservice.MagnificationConfig.Builder setActivated(boolean);
     method @NonNull public android.accessibilityservice.MagnificationConfig.Builder setCenterX(float);
     method @NonNull public android.accessibilityservice.MagnificationConfig.Builder setCenterY(float);
     method @NonNull public android.accessibilityservice.MagnificationConfig.Builder setMode(int);
