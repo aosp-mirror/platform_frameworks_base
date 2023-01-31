@@ -113,6 +113,9 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     private lateinit var handler: Handler
 
     @Mock
+    private lateinit var datePlugin: BcSmartspaceDataPlugin
+
+    @Mock
     private lateinit var weatherPlugin: BcSmartspaceDataPlugin
 
     @Mock
@@ -155,6 +158,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         KeyguardBypassController.OnBypassStateChangedListener
     private lateinit var deviceProvisionedListener: DeviceProvisionedListener
 
+    private lateinit var dateSmartspaceView: SmartspaceView
     private lateinit var weatherSmartspaceView: SmartspaceView
     private lateinit var smartspaceView: SmartspaceView
 
@@ -190,6 +194,8 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         `when`(secureSettings.getUriFor(NOTIF_ON_LOCKSCREEN_SETTING))
                 .thenReturn(fakeNotifOnLockscreenSettingUri)
         `when`(smartspaceManager.createSmartspaceSession(any())).thenReturn(smartspaceSession)
+        `when`(datePlugin.getView(any())).thenReturn(
+                createDateSmartspaceView(), createDateSmartspaceView())
         `when`(weatherPlugin.getView(any())).thenReturn(
                 createWeatherSmartspaceView(), createWeatherSmartspaceView())
         `when`(plugin.getView(any())).thenReturn(createSmartspaceView(), createSmartspaceView())
@@ -221,6 +227,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
                 executor,
                 bgExecutor,
                 handler,
+                Optional.of(datePlugin),
                 Optional.of(weatherPlugin),
                 Optional.of(plugin),
                 Optional.of(configPlugin),
@@ -275,7 +282,8 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
         // THEN the listener is registered to the underlying plugin
         verify(plugin).registerListener(controllerListener)
-        // The listener is registered only for the plugin, not the weather plugin.
+        // The listener is registered only for the plugin, not the date, or weather plugin.
+        verify(datePlugin, never()).registerListener(any())
         verify(weatherPlugin, never()).registerListener(any())
     }
 
@@ -289,7 +297,8 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
         // THEN the listener is subsequently registered
         verify(plugin).registerListener(controllerListener)
-        // The listener is registered only for the plugin, not the weather plugin.
+        // The listener is registered only for the plugin, not the date, or the weather plugin.
+        verify(datePlugin, never()).registerListener(any())
         verify(weatherPlugin, never()).registerListener(any())
     }
 
@@ -308,6 +317,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         verify(plugin).registerSmartspaceEventNotifier(null)
         verify(weatherPlugin).onTargetsAvailable(emptyList())
         verify(weatherPlugin).registerSmartspaceEventNotifier(null)
+        verify(datePlugin).registerSmartspaceEventNotifier(null)
     }
 
     @Test
@@ -357,6 +367,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         configChangeListener.onThemeChanged()
 
         // We update the new text color to match the wallpaper color
+        verify(dateSmartspaceView).setPrimaryTextColor(anyInt())
         verify(weatherSmartspaceView).setPrimaryTextColor(anyInt())
         verify(smartspaceView).setPrimaryTextColor(anyInt())
     }
@@ -384,6 +395,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         statusBarStateListener.onDozeAmountChanged(0.1f, 0.7f)
 
         // We pass that along to the view
+        verify(dateSmartspaceView).setDozeAmount(0.7f)
         verify(weatherSmartspaceView).setDozeAmount(0.7f)
         verify(smartspaceView).setDozeAmount(0.7f)
     }
@@ -502,6 +514,8 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         verify(plugin).onTargetsAvailable(eq(listOf(targets[0], targets[1], targets[2])))
         // No filtering is applied for the weather plugin
         verify(weatherPlugin).onTargetsAvailable(eq(targets))
+        // No targets needed for the date plugin
+        verify(datePlugin, never()).onTargetsAvailable(any())
     }
 
     @Test
@@ -633,6 +647,18 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
     private fun connectSession() {
         if (controller.isDateWeatherDecoupled()) {
+            val dateView = controller.buildAndConnectDateView(fakeParent)
+            dateSmartspaceView = dateView as SmartspaceView
+            fakeParent.addView(dateView)
+            controller.stateChangeListener.onViewAttachedToWindow(dateView)
+
+            verify(dateSmartspaceView).setUiSurface(
+                    BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
+            verify(dateSmartspaceView).registerDataProvider(datePlugin)
+
+            verify(dateSmartspaceView).setPrimaryTextColor(anyInt())
+            verify(dateSmartspaceView).setDozeAmount(0.5f)
+
             val weatherView = controller.buildAndConnectWeatherView(fakeParent)
             weatherSmartspaceView = weatherView as SmartspaceView
             fakeParent.addView(weatherView)
@@ -686,6 +712,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         verify(smartspaceView).setDozeAmount(0.5f)
 
         if (controller.isDateWeatherDecoupled()) {
+            clearInvocations(dateSmartspaceView)
             clearInvocations(weatherSmartspaceView)
         }
         clearInvocations(smartspaceView)
@@ -734,7 +761,38 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         ).thenReturn(if (value) 1 else 0)
     }
 
-    // Separate function for the weather view, which doesn't implement all functions in interface.
+    // Separate function for the date view, which implements a specific subset of all functions.
+    private fun createDateSmartspaceView(): SmartspaceView {
+        return spy(object : View(context), SmartspaceView {
+            override fun registerDataProvider(plugin: BcSmartspaceDataPlugin?) {
+            }
+
+            override fun setPrimaryTextColor(color: Int) {
+            }
+
+            override fun setIsDreaming(isDreaming: Boolean) {
+            }
+
+            override fun setUiSurface(uiSurface: String) {
+            }
+
+            override fun setDozeAmount(amount: Float) {
+            }
+
+            override fun setIntentStarter(intentStarter: BcSmartspaceDataPlugin.IntentStarter?) {
+            }
+
+            override fun setFalsingManager(falsingManager: FalsingManager?) {
+            }
+
+            override fun setDnd(image: Drawable?, description: String?) {
+            }
+
+            override fun setNextAlarm(image: Drawable?, description: String?) {
+            }
+        })
+    }
+    // Separate function for the weather view, which implements a specific subset of all functions.
     private fun createWeatherSmartspaceView(): SmartspaceView {
         return spy(object : View(context), SmartspaceView {
             override fun registerDataProvider(plugin: BcSmartspaceDataPlugin?) {
