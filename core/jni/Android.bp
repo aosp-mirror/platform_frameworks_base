@@ -40,6 +40,12 @@ cc_library_shared {
 
     cppflags: ["-Wno-conversion-null"],
 
+    product_variables: {
+        eng: {
+            cflags: ["-DNO_RESET_STACK_PROTECTOR"],
+        },
+    },
+
     cpp_std: "gnu++20",
 
     srcs: [
