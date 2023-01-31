@@ -1017,10 +1017,10 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Kamida bitta qurilma mavjud"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Bosib turish yorligʻi"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Bekor qilish"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Hozir aylantirish"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Almashtirish"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Yaxshiroq selfi olish uchun telefonni yoying"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Old ekran sizga qaragan holda aylantirdingizmi?"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Keng va yuqori tiniqlikdagi suratga olish uchun orqa kameradan foydalaning."</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Yaxshiroq selfi uchun old ekranga almashilsinmi?"</string>
+    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Keng burchakli va yuqori aniqlikda suratga olish uchun orqa kameradan foydalaning."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Bu ekran oʻchiriladi"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Buklanadigan qurilma ochilmoqda"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Buklanadigan qurilma aylantirilmoqda"</string>

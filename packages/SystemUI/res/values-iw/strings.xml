@@ -1017,7 +1017,7 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• יש לפחות מכשיר אחד זמין"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"מקש קיצור ללחיצה ארוכה"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"ביטול"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"הפכת את המכשיר"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"אני רוצה להפוך"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"כדי לצלם תמונת סלפי טובה יותר, פותחים את הטלפון"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"להפוך למסך הקדמי כדי לצלם תמונת סלפי טובה יותר?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"במצלמה האחורית אפשר לצלם תמונה רחבה יותר ברזולוציה גבוהה יותר."</string>

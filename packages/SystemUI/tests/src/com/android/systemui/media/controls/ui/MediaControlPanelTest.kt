@@ -204,6 +204,9 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var coverContainer1: ViewGroup
     @Mock private lateinit var coverContainer2: ViewGroup
     @Mock private lateinit var coverContainer3: ViewGroup
+    @Mock private lateinit var recAppIconItem: CachingIconView
+    @Mock private lateinit var recCardTitle: TextView
+    @Mock private lateinit var coverItem: ImageView
     private lateinit var coverItem1: ImageView
     private lateinit var coverItem2: ImageView
     private lateinit var coverItem3: ImageView
@@ -220,6 +223,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
             this.set(Flags.UMO_TURBULENCE_NOISE, false)
             this.set(Flags.MEDIA_FALSING_PENALTY, true)
             this.set(Flags.MEDIA_EXPLICIT_INDICATOR, true)
+            this.set(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE, false)
         }
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
@@ -2056,6 +2060,51 @@ public class MediaControlPanelTest : SysuiTestCase() {
         assertThat(expandedSet.getVisibility(recSubtitle1.id)).isEqualTo(ConstraintSet.GONE)
         assertThat(expandedSet.getVisibility(recSubtitle2.id)).isEqualTo(ConstraintSet.GONE)
         assertThat(expandedSet.getVisibility(recSubtitle3.id)).isEqualTo(ConstraintSet.GONE)
+    }
+
+    @Test
+    fun bindRecommendation_setAfterExecutors() {
+        fakeFeatureFlag.set(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE, true)
+        whenever(recommendationViewHolder.mediaAppIcons)
+            .thenReturn(listOf(recAppIconItem, recAppIconItem, recAppIconItem))
+        whenever(recommendationViewHolder.cardTitle).thenReturn(recCardTitle)
+        whenever(recommendationViewHolder.mediaCoverItems)
+            .thenReturn(listOf(coverItem, coverItem, coverItem))
+
+        val bmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bmp)
+        canvas.drawColor(Color.RED)
+        val albumArt = Icon.createWithBitmap(bmp)
+        val data =
+            smartspaceData.copy(
+                recommendations =
+                    listOf(
+                        SmartspaceAction.Builder("id1", "title1")
+                            .setSubtitle("subtitle1")
+                            .setIcon(albumArt)
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                        SmartspaceAction.Builder("id2", "title2")
+                            .setSubtitle("subtitle1")
+                            .setIcon(albumArt)
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                        SmartspaceAction.Builder("id3", "title3")
+                            .setSubtitle("subtitle1")
+                            .setIcon(albumArt)
+                            .setExtras(Bundle.EMPTY)
+                            .build()
+                    )
+            )
+
+        player.attachRecommendation(recommendationViewHolder)
+        player.bindRecommendation(data)
+        bgExecutor.runAllReady()
+        mainExecutor.runAllReady()
+
+        verify(recCardTitle).setTextColor(any<Int>())
+        verify(recAppIconItem, times(3)).setImageDrawable(any(Drawable::class.java))
+        verify(coverItem, times(3)).setImageDrawable(any(Drawable::class.java))
     }
 
     @Test

@@ -40,6 +40,7 @@ import com.android.systemui.animation.back.BackAnimationSpec
 import com.android.systemui.animation.back.applyTo
 import com.android.systemui.animation.back.floatingSystemSurfacesForSysUi
 import com.android.systemui.animation.back.onBackAnimationCallbackFrom
+import java.lang.IllegalArgumentException
 import kotlin.math.roundToInt
 
 private const val TAG = "DialogLaunchAnimator"
@@ -157,12 +158,23 @@ constructor(
              * Create a [Controller] that can animate [source] to and from a dialog.
              *
              * Important: The view must be attached to a [ViewGroup] when calling this function and
-             * during the animation. For safety, this method will return null when it is not.
+             * during the animation. For safety, this method will return null when it is not. The
+             * view must also implement [LaunchableView], otherwise this method will throw.
              *
              * Note: The background of [view] should be a (rounded) rectangle so that it can be
              * properly animated.
              */
             fun fromView(source: View, cuj: DialogCuj? = null): Controller? {
+                // Make sure the View we launch from implements LaunchableView to avoid visibility
+                // issues.
+                if (source !is LaunchableView) {
+                    throw IllegalArgumentException(
+                        "A DialogLaunchAnimator.Controller was created from a View that does not " +
+                            "implement LaunchableView. This can lead to subtle bugs where the " +
+                            "visibility of the View we are launching from is not what we expected."
+                    )
+                }
+
                 if (source.parent !is ViewGroup) {
                     Log.e(
                         TAG,
@@ -248,23 +260,6 @@ constructor(
                 Controller.fromView(it, controller.cuj)
             }
                 ?: controller
-
-        if (
-            animatedParent == null &&
-                controller is ViewDialogLaunchAnimatorController &&
-                controller.source !is LaunchableView
-        ) {
-            // Make sure the View we launch from implements LaunchableView to avoid visibility
-            // issues. Given that we don't own dialog decorViews so we can't enforce it for launches
-            // from a dialog.
-            // TODO(b/243636422): Throw instead of logging to enforce this.
-            Log.w(
-                TAG,
-                "A dialog was launched from a View that does not implement LaunchableView. This " +
-                    "can lead to subtle bugs where the visibility of the View we are " +
-                    "launching from is not what we expected."
-            )
-        }
 
         // Make sure we don't run the launch animation from the same source twice at the same time.
         if (openedDialogs.any { it.controller.sourceIdentity == controller.sourceIdentity }) {
@@ -613,10 +608,16 @@ private class AnimatedDialog(
                 }
 
                 // Animate that view with the background. Throw if we didn't find one, because
-                // otherwise
-                // it's not clear what we should animate.
+                // otherwise it's not clear what we should animate.
+                if (viewGroupWithBackground == null) {
+                    error("Unable to find ViewGroup with background")
+                }
+
+                if (viewGroupWithBackground !is LaunchableView) {
+                    error("The animated ViewGroup with background must implement LaunchableView")
+                }
+
                 viewGroupWithBackground
-                    ?: throw IllegalStateException("Unable to find ViewGroup with background")
             } else {
                 // We will make the dialog window (and therefore its DecorView) fullscreen to make
                 // it possible to animate outside its bounds.
@@ -639,7 +640,7 @@ private class AnimatedDialog(
                     FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
                 )
 
-                val dialogContentWithBackground = FrameLayout(dialog.context)
+                val dialogContentWithBackground = LaunchableFrameLayout(dialog.context)
                 dialogContentWithBackground.background = decorView.background
 
                 // Make the window background transparent. Note that setting the window (or
@@ -720,7 +721,10 @@ private class AnimatedDialog(
 
         // Make the background view invisible until we start the animation. We use the transition
         // visibility like GhostView does so that we don't mess up with the accessibility tree (see
-        // b/204944038#comment17).
+        // b/204944038#comment17). Given that this background implements LaunchableView, we call
+        // setShouldBlockVisibilityChanges() early so that the current visibility (VISIBLE) is
+        // restored at the end of the animation.
+        dialogContentWithBackground.setShouldBlockVisibilityChanges(true)
         dialogContentWithBackground.setTransitionVisibility(View.INVISIBLE)
 
         // Make sure the dialog is visible instantly and does not do any window animation.

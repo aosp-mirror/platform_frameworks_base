@@ -1014,7 +1014,7 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Ofrohet të paktën një pajisje"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Prek dhe mbaj shtypur shkurtoren"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Anulo"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"U kthye tani"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Ktheje tani"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Shpalos telefonin për një selfi më të mirë"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Të kthehet tek ekrani para për selfi më të mirë?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Përdor lenten e kamerës së pasme për një fotografi më të gjerë me rezolucion më të lartë."</string>

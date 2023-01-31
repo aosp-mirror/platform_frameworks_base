@@ -34,8 +34,8 @@ import com.android.systemui.mediaprojection.appselector.data.RecentTaskThumbnail
 import com.android.systemui.mediaprojection.appselector.data.ShellRecentTaskListProvider
 import com.android.systemui.mediaprojection.appselector.view.MediaProjectionRecentsViewController
 import com.android.systemui.mediaprojection.appselector.view.TaskPreviewSizeProvider
-import com.android.systemui.settings.UserTracker
-import com.android.systemui.shared.system.ActivityManagerWrapper
+import com.android.systemui.mediaprojection.devicepolicy.MediaProjectionDevicePolicyModule
+import com.android.systemui.mediaprojection.devicepolicy.PersonalProfile
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl
 import com.android.systemui.statusbar.policy.ConfigurationController
 import dagger.Binds
@@ -54,13 +54,12 @@ import kotlinx.coroutines.SupervisorJob
 
 @Qualifier @Retention(AnnotationRetention.BINARY) annotation class HostUserHandle
 
-@Qualifier @Retention(AnnotationRetention.BINARY) annotation class PersonalProfile
-
-@Qualifier @Retention(AnnotationRetention.BINARY) annotation class WorkProfile
-
 @Retention(AnnotationRetention.RUNTIME) @Scope annotation class MediaProjectionAppSelectorScope
 
-@Module(subcomponents = [MediaProjectionAppSelectorComponent::class])
+@Module(
+    subcomponents = [MediaProjectionAppSelectorComponent::class],
+    includes = [MediaProjectionDevicePolicyModule::class]
+)
 interface MediaProjectionModule {
     @Binds
     @IntoMap
@@ -108,20 +107,6 @@ interface MediaProjectionAppSelectorModule {
         fun bindConfigurationController(
             activity: MediaProjectionAppSelectorActivity
         ): ConfigurationController = ConfigurationControllerImpl(activity)
-
-        @Provides
-        @PersonalProfile
-        @MediaProjectionAppSelectorScope
-        fun personalUserHandle(activityManagerWrapper: ActivityManagerWrapper): UserHandle {
-            // Current foreground user is the 'personal' profile
-            return UserHandle.of(activityManagerWrapper.currentUserId)
-        }
-
-        @Provides
-        @WorkProfile
-        @MediaProjectionAppSelectorScope
-        fun workProfileUserHandle(userTracker: UserTracker): UserHandle? =
-            userTracker.userProfiles.find { it.isManagedProfile }?.userHandle
 
         @Provides
         @HostUserHandle

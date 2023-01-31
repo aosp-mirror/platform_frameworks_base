@@ -1019,7 +1019,7 @@
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"取消"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"立即翻转"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"展开手机可拍出更好的自拍照"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"要翻转到外屏以拍出更好的自拍照吗？"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"翻转到外屏后自拍效果更好，要试试吗？"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"您可以使用后置摄像头拍摄视角更广、分辨率更高的照片。"</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ 此屏幕将会关闭"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"正在展开可折叠设备"</string>

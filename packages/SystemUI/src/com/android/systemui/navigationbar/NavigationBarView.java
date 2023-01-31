@@ -301,7 +301,8 @@ public class NavigationBarView extends FrameLayout {
                 R.dimen.floating_rotation_button_taskbar_left_margin,
                 R.dimen.floating_rotation_button_taskbar_bottom_margin,
                 R.dimen.floating_rotation_button_diameter,
-                R.dimen.key_button_ripple_max_width);
+                R.dimen.key_button_ripple_max_width,
+                R.bool.floating_rotation_button_position_left);
         mRotationButtonController = new RotationButtonController(mLightContext, mLightIconColor,
                 mDarkIconColor, R.drawable.ic_sysbar_rotate_button_ccw_start_0,
                 R.drawable.ic_sysbar_rotate_button_ccw_start_90,

@@ -800,8 +800,8 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"Odaberite aplikaciju da dodate kontrole"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Dodana je # kontrola.}one{Dodana je # kontrola.}few{Dodane su # kontrole.}other{Dodano je # kontrola.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Uklonjeno"</string>
-    <string name="controls_panel_authorization_title" msgid="267429338785864842">"Želite li dodati aplikaciju <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <string name="controls_panel_authorization" msgid="4540047176861801815">"Kada dodate aplikaciju <xliff:g id="APPNAME">%s</xliff:g>, može dodati kontrole i sadržaj na ovu ploču. U nekim aplikacijama možete odabrati koje se kontrole prikazuju ovdje."</string>
+    <string name="controls_panel_authorization_title" msgid="267429338785864842">"Dodati aplikaciju <xliff:g id="APPNAME">%s</xliff:g>?"</string>
+    <string name="controls_panel_authorization" msgid="4540047176861801815">"Kada dodate aplikaciju <xliff:g id="APPNAME">%s</xliff:g>, ona može dodavati kontrole i sadržaj na ovu ploču. U nekim aplikacijama možete odabrati koje kontrole se prikazuju ovdje."</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Dodano u omiljeno"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Dodano u omiljeno, pozicija <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Uklonjeno iz omiljenog"</string>
@@ -868,7 +868,7 @@
     <string name="controls_error_failed" msgid="960228639198558525">"Greška, pokušajte ponovo"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Dodaj kontrole"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Uredi kontrole"</string>
-    <string name="controls_menu_add_another_app" msgid="8661172304650786705">"Dodavanje aplikacije"</string>
+    <string name="controls_menu_add_another_app" msgid="8661172304650786705">"Dodaj aplikaciju"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Dodajte izlaze"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Grupa"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Odabran je 1 uređaj"</string>

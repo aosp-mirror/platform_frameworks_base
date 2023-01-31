@@ -18,6 +18,7 @@ package com.android.systemui.surfaceeffects.ripple
 import android.graphics.PointF
 import android.graphics.RuntimeShader
 import android.util.MathUtils
+import com.android.systemui.animation.Interpolators
 import com.android.systemui.surfaceeffects.shaderutil.SdfShaderLibrary
 import com.android.systemui.surfaceeffects.shaderutil.ShaderUtilLibrary
 
@@ -47,7 +48,6 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
             """
             uniform vec2 in_center;
             uniform vec2 in_size;
-            uniform float in_progress;
             uniform float in_cornerRadius;
             uniform float in_thickness;
             uniform float in_time;
@@ -162,21 +162,15 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
         maxSize.y = height
     }
 
-    /** Progress of the ripple. Float value between [0, 1]. */
-    var progress: Float = 0.0f
+    /**
+     * Linear progress of the ripple. Float value between [0, 1].
+     *
+     * <p>Note that the progress here is expected to be linear without any curve applied.
+     */
+    var rawProgress: Float = 0.0f
         set(value) {
             field = value
-            setFloatUniform("in_progress", value)
-            val curvedProg = 1 - (1 - value) * (1 - value) * (1 - value)
-
-            currentWidth = maxSize.x * curvedProg
-            currentHeight = maxSize.y * curvedProg
-            setFloatUniform("in_size", /* width= */ currentWidth, /* height= */ currentHeight)
-            setFloatUniform("in_thickness", maxSize.y * curvedProg * 0.5f)
-            // radius should not exceed width and height values.
-            setFloatUniform("in_cornerRadius", Math.min(maxSize.x, maxSize.y) * curvedProg)
-
-            setFloatUniform("in_blur", MathUtils.lerp(1.25f, 0.5f, value))
+            progress = Interpolators.STANDARD.getInterpolation(value)
 
             val fadeIn = subProgress(0f, 0.1f, value)
             val fadeOutNoise = subProgress(0.4f, 1f, value)
@@ -189,6 +183,20 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
             setFloatUniform("in_fadeSparkle", Math.min(fadeIn, 1 - fadeOutNoise))
             setFloatUniform("in_fadeFill", 1 - fadeFill)
             setFloatUniform("in_fadeRing", Math.min(fadeIn, 1 - fadeOutRipple))
+        }
+
+    /** Progress with Standard easing curve applied. */
+    private var progress: Float = 0.0f
+        set(value) {
+            currentWidth = maxSize.x * value
+            currentHeight = maxSize.y * value
+            setFloatUniform("in_size", currentWidth, currentHeight)
+
+            setFloatUniform("in_thickness", maxSize.y * value * 0.5f)
+            // radius should not exceed width and height values.
+            setFloatUniform("in_cornerRadius", Math.min(maxSize.x, maxSize.y) * value)
+
+            setFloatUniform("in_blur", MathUtils.lerp(1.25f, 0.5f, value))
         }
 
     /** Play time since the start of the effect. */
@@ -220,7 +228,7 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
     var distortionStrength: Float = 0.0f
         set(value) {
             field = value
-            setFloatUniform("in_distort_radial", 75 * progress * value)
+            setFloatUniform("in_distort_radial", 75 * rawProgress * value)
             setFloatUniform("in_distort_xy", 75 * value)
         }
 

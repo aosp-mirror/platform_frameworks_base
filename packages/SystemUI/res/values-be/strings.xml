@@ -1019,7 +1019,7 @@
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Скасаваць"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Пераключыць"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Каб атрымаць лепшае сэлфі, раскрыйце тэлефон"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Пераключыць на пярэднюю камеру для лепшага сэлфі?"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Пераключыць на пярэдні дысплэй для лепшага сэлфі?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Каб зрабіць шырэйшае фота з больш высокай раздзяляльнасцю, скарыстайце заднюю камеру."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Гэты экран будзе выключаны"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Складная прылада ў раскладзеным выглядзе"</string>

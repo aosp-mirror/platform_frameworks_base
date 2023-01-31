@@ -248,25 +248,39 @@ public class DreamService extends Service implements Window.Callback {
     private OverlayConnection mOverlayConnection;
 
     private static class OverlayConnection extends PersistentServiceConnection<IDreamOverlay> {
-        // Overlay set during onBind.
-        private IDreamOverlay mOverlay;
+        // Retrieved Client
+        private IDreamOverlayClient mClient;
+
         // A list of pending requests to execute on the overlay.
-        private final ArrayList<Consumer<IDreamOverlay>> mConsumers = new ArrayList<>();
+        private final ArrayList<Consumer<IDreamOverlayClient>> mConsumers = new ArrayList<>();
+
+        private final IDreamOverlayClientCallback mClientCallback =
+                new IDreamOverlayClientCallback.Stub() {
+            @Override
+            public void onDreamOverlayClient(IDreamOverlayClient client) {
+                mClient = client;
+
+                for (Consumer<IDreamOverlayClient> consumer : mConsumers) {
+                    consumer.accept(mClient);
+                }
+            }
+        };
 
         private final Callback<IDreamOverlay> mCallback = new Callback<IDreamOverlay>() {
             @Override
             public void onConnected(ObservableServiceConnection<IDreamOverlay> connection,
                     IDreamOverlay service) {
-                mOverlay = service;
-                for (Consumer<IDreamOverlay> consumer : mConsumers) {
-                    consumer.accept(mOverlay);
+                try {
+                    service.getClient(mClientCallback);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "could not get DreamOverlayClient", e);
                 }
             }
 
             @Override
             public void onDisconnected(ObservableServiceConnection<IDreamOverlay> connection,
                     int reason) {
-                mOverlay = null;
+                mClient = null;
             }
         };
 
@@ -296,16 +310,16 @@ public class DreamService extends Service implements Window.Callback {
             super.unbind();
         }
 
-        public void addConsumer(Consumer<IDreamOverlay> consumer) {
+        public void addConsumer(Consumer<IDreamOverlayClient> consumer) {
             execute(() -> {
                 mConsumers.add(consumer);
-                if (mOverlay != null) {
-                    consumer.accept(mOverlay);
+                if (mClient != null) {
+                    consumer.accept(mClient);
                 }
             });
         }
 
-        public void removeConsumer(Consumer<IDreamOverlay> consumer) {
+        public void removeConsumer(Consumer<IDreamOverlayClient> consumer) {
             execute(() -> mConsumers.remove(consumer));
         }
 
@@ -1050,6 +1064,24 @@ public class DreamService extends Service implements Window.Callback {
      * </p>
      */
     public final void finish() {
+        // If there is an active overlay connection, signal that the dream is ending before
+        // continuing. Note that the overlay cannot rely on the unbound state, since another dream
+        // might have bound to it in the meantime.
+        if (mOverlayConnection != null) {
+            mOverlayConnection.addConsumer(overlay -> {
+                try {
+                    overlay.endDream();
+                    mOverlayConnection.unbind();
+                    mOverlayConnection = null;
+                    finish();
+                } catch (RemoteException e) {
+                    Log.e(mTag, "could not inform overlay of dream end:" + e);
+                }
+            });
+            mOverlayConnection.clearConsumers();
+            return;
+        }
+
         if (mDebug) Slog.v(mTag, "finish(): mFinished=" + mFinished);
 
         Activity activity = mActivity;
@@ -1065,10 +1097,6 @@ public class DreamService extends Service implements Window.Callback {
             return;
         }
         mFinished = true;
-
-        if (mOverlayConnection != null) {
-            mOverlayConnection.unbind();
-        }
 
         if (mDreamToken == null) {
             if (mDebug) Slog.v(mTag, "finish() called when not attached.");
@@ -1365,7 +1393,7 @@ public class DreamService extends Service implements Window.Callback {
 
         mWindow.getDecorView().addOnAttachStateChangeListener(
                 new View.OnAttachStateChangeListener() {
-                    private Consumer<IDreamOverlay> mDreamStartOverlayConsumer;
+                    private Consumer<IDreamOverlayClient> mDreamStartOverlayConsumer;
 
                     @Override
                     public void onViewAttachedToWindow(View v) {
@@ -1389,17 +1417,6 @@ public class DreamService extends Service implements Window.Callback {
 
                     @Override
                     public void onViewDetachedFromWindow(View v) {
-                        if (mOverlayConnection != null) {
-                            mOverlayConnection.addConsumer(overlay -> {
-                                try {
-                                    overlay.endDream();
-                                } catch (RemoteException e) {
-                                    Log.e(mTag, "could not inform overlay of dream end:" + e);
-                                }
-                            });
-                            mOverlayConnection.clearConsumers();
-                        }
-
                         if (mActivity == null || !mActivity.isChangingConfigurations()) {
                             // Only stop the dream if the view is not detached by relaunching
                             // activity for configuration changes. It is important to also clear
@@ -1407,6 +1424,10 @@ public class DreamService extends Service implements Window.Callback {
                             mWindow = null;
                             mActivity = null;
                             finish();
+                        }
+
+                        if (mOverlayConnection != null && mDreamStartOverlayConsumer != null) {
+                            mOverlayConnection.removeConsumer(mDreamStartOverlayConsumer);
                         }
                     }
                 });
