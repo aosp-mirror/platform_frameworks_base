@@ -368,7 +368,7 @@ constructor(
                     data: SmartspaceMediaData,
                     shouldPrioritize: Boolean
                 ) {
-                    debugLogger.logRecommendationLoaded(key)
+                    debugLogger.logRecommendationLoaded(key, data.isActive)
                     // Log the case where the hidden media carousel with the existed inactive resume
                     // media is shown by the Smartspace signal.
                     if (data.isActive) {
@@ -442,7 +442,12 @@ constructor(
                             logSmartspaceImpression(mediaCarouselScrollHandler.qsExpanded)
                         }
                     } else {
-                        onSmartspaceMediaDataRemoved(data.targetId, immediately = true)
+                        if (!mediaFlags.isPersistentSsCardEnabled()) {
+                            // Handle update to inactive as a removal
+                            onSmartspaceMediaDataRemoved(data.targetId, immediately = true)
+                        } else {
+                            addSmartspaceMediaRecommendations(key, data, shouldPrioritize)
+                        }
                     }
                 }
 
@@ -633,7 +638,19 @@ constructor(
     ) =
         traceSection("MediaCarouselController#addSmartspaceMediaRecommendations") {
             if (DEBUG) Log.d(TAG, "Updating smartspace target in carousel")
-            if (MediaPlayerData.getMediaPlayer(key) != null) {
+            MediaPlayerData.getMediaPlayer(key)?.let {
+                if (mediaFlags.isPersistentSsCardEnabled()) {
+                    // The card exists, but could have changed active state, so update for sorting
+                    MediaPlayerData.addMediaRecommendation(
+                        key,
+                        data,
+                        it,
+                        shouldPrioritize,
+                        systemClock,
+                        debugLogger,
+                        update = true,
+                    )
+                }
                 Log.w(TAG, "Skip adding smartspace target in carousel")
                 return
             }
@@ -672,7 +689,7 @@ constructor(
                 newRecs,
                 shouldPrioritize,
                 systemClock,
-                debugLogger
+                debugLogger,
             )
             updatePlayerToState(newRecs, noAnimation = true)
             reorderAllPlayers(curVisibleMediaKey)
@@ -1225,17 +1242,18 @@ internal object MediaPlayerData {
         player: MediaControlPanel,
         shouldPrioritize: Boolean,
         clock: SystemClock,
-        debugLogger: MediaCarouselControllerLogger? = null
+        debugLogger: MediaCarouselControllerLogger? = null,
+        update: Boolean = false
     ) {
         shouldPrioritizeSs = shouldPrioritize
         val removedPlayer = removeMediaPlayer(key)
-        if (removedPlayer != null && removedPlayer != player) {
+        if (!update && removedPlayer != null && removedPlayer != player) {
             debugLogger?.logPotentialMemoryLeak(key)
         }
         val sortKey =
             MediaSortKey(
                 isSsMediaRec = true,
-                EMPTY.copy(isPlaying = false),
+                EMPTY.copy(active = data.isActive, isPlaying = false),
                 key,
                 clock.currentTimeMillis(),
                 isSsReactivated = true
