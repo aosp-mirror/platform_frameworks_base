@@ -38,6 +38,7 @@ import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
@@ -66,6 +67,8 @@ public class KeyguardIndicationRotateTextViewControllerTest extends SysuiTestCas
     private KeyguardIndicationTextView mView;
     @Mock
     private StatusBarStateController mStatusBarStateController;
+    @Mock
+    private KeyguardLogger mLogger;
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStatusBarStateListenerCaptor;
 
@@ -77,7 +80,7 @@ public class KeyguardIndicationRotateTextViewControllerTest extends SysuiTestCas
         MockitoAnnotations.initMocks(this);
         when(mView.getTextColors()).thenReturn(ColorStateList.valueOf(Color.WHITE));
         mController = new KeyguardIndicationRotateTextViewController(mView, mExecutor,
-                mStatusBarStateController);
+                mStatusBarStateController, mLogger);
         mController.onViewAttached();
 
         verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());

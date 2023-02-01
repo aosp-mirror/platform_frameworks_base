@@ -94,6 +94,7 @@ import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.plugins.log.LogLevel;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
@@ -126,7 +127,7 @@ import javax.inject.Inject;
 @SysUISingleton
 public class KeyguardIndicationController {
 
-    private static final String TAG = "KeyguardIndication";
+    public static final String TAG = "KeyguardIndication";
     private static final boolean DEBUG_CHARGING_SPEED = false;
 
     private static final int MSG_SHOW_ACTION_TO_UNLOCK = 1;
@@ -326,9 +327,11 @@ public class KeyguardIndicationController {
         mInitialTextColorState = mTopIndicationView != null
                 ? mTopIndicationView.getTextColors() : ColorStateList.valueOf(Color.WHITE);
         mRotateTextViewController = new KeyguardIndicationRotateTextViewController(
-            mLockScreenIndicationView,
-            mExecutor,
-            mStatusBarStateController);
+                mLockScreenIndicationView,
+                mExecutor,
+                mStatusBarStateController,
+                mKeyguardLogger
+        );
         updateDeviceEntryIndication(false /* animate */);
         updateOrganizedOwnedDevice();
         if (mBroadcastReceiver == null) {
@@ -827,6 +830,7 @@ public class KeyguardIndicationController {
      * may continuously be cycled through.
      */
     protected final void updateDeviceEntryIndication(boolean animate) {
+        mKeyguardLogger.logUpdateDeviceEntryIndication(animate, mVisible, mDozing);
         if (!mVisible) {
             return;
         }
@@ -1396,6 +1400,7 @@ public class KeyguardIndicationController {
         public void onKeyguardShowingChanged() {
             // All transient messages are gone the next time keyguard is shown
             if (!mKeyguardStateController.isShowing()) {
+                mKeyguardLogger.log(TAG, LogLevel.DEBUG, "clear messages");
                 mTopIndicationView.clearMessages();
                 mRotateTextViewController.clearMessages();
             } else {
