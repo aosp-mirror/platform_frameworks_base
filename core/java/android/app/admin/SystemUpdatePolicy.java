@@ -50,8 +50,8 @@ import java.util.stream.Collectors;
 
 /**
  * Determines when over-the-air system updates are installed on a device. Only a device policy
- * controller (DPC) running in device owner mode can set an update policy for the device—by calling
- * the {@code DevicePolicyManager} method
+ * controller (DPC) running in device owner mode or in profile owner mode for an organization-owned
+ * device can set an update policy for the device—by calling the {@code DevicePolicyManager} method
  * {@link DevicePolicyManager#setSystemUpdatePolicy setSystemUpdatePolicy()}. An update
  * policy affects the pending system update (if there is one) and any future updates for the device.
  *
