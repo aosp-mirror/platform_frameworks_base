@@ -567,6 +567,10 @@ MissingNullability: android.telephony.SmsManager#checkSmsShortCodeDestination(St
     Missing nullability on parameter `destAddress` in method `checkSmsShortCodeDestination`
 MissingNullability: android.telephony.SmsManager#checkSmsShortCodeDestination(String, String) parameter #1:
     Missing nullability on parameter `countryIso` in method `checkSmsShortCodeDestination`
+MissingNullability: android.telephony.TelephonyManager#HAL_VERSION_UNKNOWN:
+    Missing nullability on field `HAL_VERSION_UNKNOWN` in class `class android.telephony.TelephonyManager`
+MissingNullability: android.telephony.TelephonyManager#HAL_VERSION_UNSUPPORTED:
+    Missing nullability on field `HAL_VERSION_UNSUPPORTED` in class `class android.telephony.TelephonyManager`
 MissingNullability: android.telephony.TelephonyManager#getLine1AlphaTag():
     Missing nullability on method `getLine1AlphaTag` return
 MissingNullability: android.telephony.TelephonyManager#getRadioHalVersion():
@@ -873,6 +877,8 @@ NoSettingsProvider: android.provider.Settings.Secure#ACCESSIBILITY_SHORTCUT_TARG
     New setting keys are not allowed (Field: ACCESSIBILITY_SHORTCUT_TARGET_SERVICE); use getters/setters in relevant manager class
 NoSettingsProvider: android.provider.Settings.Secure#AUTOFILL_SERVICE:
     New setting keys are not allowed (Field: AUTOFILL_SERVICE); use getters/setters in relevant manager class
+NoSettingsProvider: android.provider.Settings.Secure#BIOMETRIC_VIRTUAL_ENABLED:
+    New setting keys are not allowed (Field: BIOMETRIC_VIRTUAL_ENABLED); use getters/setters in relevant manager class
 NoSettingsProvider: android.provider.Settings.Secure#CONTENT_CAPTURE_ENABLED:
     New setting keys are not allowed (Field: CONTENT_CAPTURE_ENABLED); use getters/setters in relevant manager class
 NoSettingsProvider: android.provider.Settings.Secure#DISABLED_PRINT_SERVICES:
@@ -901,6 +907,8 @@ PackageLayering: android.util.FeatureFlagUtils:
     Method parameter type `android.content.Context` violates package layering: nothing in `package android.util` should depend on `package android.content`
 
 
+ParcelConstructor: android.credentials.ui.ProviderData#ProviderData(android.os.Parcel):
+    Parcelable inflation is exposed through CREATOR, not raw constructors, in android.credentials.ui.ProviderData
 ParcelConstructor: android.os.StrictMode.ViolationInfo#ViolationInfo(android.os.Parcel):
     Parcelable inflation is exposed through CREATOR, not raw constructors, in android.os.StrictMode.ViolationInfo
 ParcelConstructor: android.os.health.HealthStatsParceler#HealthStatsParceler(android.os.Parcel):
@@ -1011,7 +1019,7 @@ UserHandleName: android.content.ContentCaptureOptions:
     Classes holding a set of parameters should be called `FooParams`, was `ContentCaptureOptions`
 
 
-VisiblySynchronized: PsiThisExpression:this:
+VisiblySynchronized: PsiThisExpression:
     Internal locks must not be exposed (synchronizing on this or class is still externally observable): method android.content.res.AssetManager.getApkPaths()
 VisiblySynchronized: android.content.res.AssetManager#getApkPaths():
     Internal locks must not be exposed (synchronizing on this or class is still externally observable): method android.content.res.AssetManager.getApkPaths()

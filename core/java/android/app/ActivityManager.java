@@ -29,6 +29,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -80,8 +81,6 @@ import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Singleton;
 import android.util.Size;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.window.TaskSnapshot;
 
 import com.android.internal.app.LocalePicker;
@@ -91,6 +90,8 @@ import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
@@ -403,6 +404,13 @@ public class ActivityManager {
     public static final int START_FLAG_NATIVE_DEBUGGING = 1<<3;
 
     /**
+     * Flag for IActivityManaqer.startActivity: launch the app for
+     * debugging and suspend threads.
+     * @hide
+     */
+    public static final int START_FLAG_DEBUG_SUSPEND = 1 << 4;
+
+    /**
      * Result for IActivityManaqer.broadcastIntent: success!
      * @hide
      */
@@ -627,19 +635,19 @@ public class ActivityManager {
     public @interface ProcessCapability {}
 
     /** @hide Process does not have any capability */
-    @TestApi
+    @SystemApi
     public static final int PROCESS_CAPABILITY_NONE = 0;
 
     /** @hide Process can access location while in foreground */
-    @TestApi
+    @SystemApi
     public static final int PROCESS_CAPABILITY_FOREGROUND_LOCATION = 1 << 0;
 
     /** @hide Process can access camera while in foreground */
-    @TestApi
+    @SystemApi
     public static final int PROCESS_CAPABILITY_FOREGROUND_CAMERA = 1 << 1;
 
     /** @hide Process can access microphone while in foreground */
-    @TestApi
+    @SystemApi
     public static final int PROCESS_CAPABILITY_FOREGROUND_MICROPHONE = 1 << 2;
 
     /** @hide Process can access network despite any power saving resrictions */
@@ -2210,7 +2218,6 @@ public class ActivityManager {
             pw.print(((baseIntent.getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) != 0));
             pw.print(" activityType="); pw.print(activityTypeToString(getActivityType()));
             pw.print(" windowingMode="); pw.print(windowingModeToString(getWindowingMode()));
-            pw.print(" supportsSplitScreenMultiWindow="); pw.print(supportsSplitScreenMultiWindow);
             pw.print(" supportsMultiWindow=");
             pw.println(supportsMultiWindow);
             if (taskDescription != null) {
@@ -2813,6 +2820,15 @@ public class ActivityManager {
      */
     public static class MemoryInfo implements Parcelable {
         /**
+         * The advertised memory of the system, as the end user would encounter in a retail display
+         * environment. This value might be different from {@code totalMem}. This could be due to
+         * many reasons. For example, the ODM could reserve part of the memory for the Trusted
+         * Execution Environment (TEE) which the kernel doesn't have access or knowledge about it.
+         */
+        @SuppressLint("MutableBareField")
+        public long advertisedMem;
+
+        /**
          * The available memory on the system.  This number should not
          * be considered absolute: due to the nature of the kernel, a significant
          * portion of this memory is actually in use and needed for the overall
@@ -2861,6 +2877,7 @@ public class ActivityManager {
         }
 
         public void writeToParcel(Parcel dest, int flags) {
+            dest.writeLong(advertisedMem);
             dest.writeLong(availMem);
             dest.writeLong(totalMem);
             dest.writeLong(threshold);
@@ -2872,6 +2889,7 @@ public class ActivityManager {
         }
 
         public void readFromParcel(Parcel source) {
+            advertisedMem = source.readLong();
             availMem = source.readLong();
             totalMem = source.readLong();
             threshold = source.readLong();
@@ -3129,7 +3147,13 @@ public class ActivityManager {
         /**
          * All packages that have been loaded into the process.
          */
-        public String pkgList[];
+        public String[] pkgList;
+
+        /**
+         * Additional packages loaded into the process as dependency.
+         * @hide
+         */
+        public String[] pkgDeps;
 
         /**
          * Constant for {@link #flags}: this is an app that is unable to
@@ -3510,6 +3534,7 @@ public class ActivityManager {
             dest.writeInt(pid);
             dest.writeInt(uid);
             dest.writeStringArray(pkgList);
+            dest.writeStringArray(pkgDeps);
             dest.writeInt(this.flags);
             dest.writeInt(lastTrimLevel);
             dest.writeInt(importance);
@@ -3528,6 +3553,7 @@ public class ActivityManager {
             pid = source.readInt();
             uid = source.readInt();
             pkgList = source.readStringArray();
+            pkgDeps = source.readStringArray();
             flags = source.readInt();
             lastTrimLevel = source.readInt();
             importance = source.readInt();
@@ -3934,6 +3960,10 @@ public class ActivityManager {
      * processes to reclaim memory; the system will take care of restarting
      * these processes in the future as needed.
      *
+     * <p class="note">On devices with a {@link Build.VERSION#SECURITY_PATCH} of 2022-12-01 or
+     * greater, third party applications can only use this API to kill their own processes.
+     * </p>
+     *
      * @param packageName The name of the package whose processes are to
      * be killed.
      */
@@ -4209,13 +4239,23 @@ public class ActivityManager {
         }
     }*/
 
+    /** @hide
+     * Determines whether the given UID can access unexported components
+     * @param uid the calling UID
+     * @return true if the calling UID is ROOT or SYSTEM
+     */
+    public static boolean canAccessUnexportedComponents(int uid) {
+        final int appId = UserHandle.getAppId(uid);
+        return (appId == Process.ROOT_UID || appId == Process.SYSTEM_UID);
+    }
+
     /** @hide */
     @UnsupportedAppUsage
     public static int checkComponentPermission(String permission, int uid,
             int owningUid, boolean exported) {
         // Root, system server get to do everything.
         final int appId = UserHandle.getAppId(uid);
-        if (appId == Process.ROOT_UID || appId == Process.SYSTEM_UID) {
+        if (canAccessUnexportedComponents(uid)) {
             return PackageManager.PERMISSION_GRANTED;
         }
         // Isolated processes don't get any permissions.
@@ -4337,10 +4377,68 @@ public class ActivityManager {
     @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.CREATE_USERS})
     public boolean switchUser(@NonNull UserHandle user) {
-        if (user == null) {
-            throw new IllegalArgumentException("UserHandle cannot be null.");
-        }
+        Preconditions.checkArgument(user != null, "UserHandle cannot be null.");
+
         return switchUser(user.getIdentifier());
+    }
+
+    /**
+     * Starts the given user in background and assign the user to the given display.
+     *
+     * <p>This method will allow the user to launch activities on that display, and it's typically
+     * used only on automotive builds when the vehicle has multiple displays (you can verify if it's
+     * supported by calling {@link UserManager#isVisibleBackgroundUsersSupported()}).
+     *
+     * <p><b>NOTE:</b> differently from {@link #switchUser(int)}, which stops the current foreground
+     * user before starting a new one, this method does not stop the previous user running in
+     * background in the display, and it will return {@code false} in this case. It's up to the
+     * caller to call {@link #stopUser(int, boolean)} before starting a new user.
+     *
+     * @param userId user to be started in the display. It will return {@code false} if the user is
+     * a profile, the {@link #getCurrentUser()}, the {@link UserHandle#SYSTEM system user}, or
+     * does not exist.
+     *
+     * @param displayId id of the display.
+     *
+     * @return whether the operation succeeded. Notice that if the user was already started in such
+     * display before, it will return {@code false}.
+     *
+     * @throws UnsupportedOperationException if the device does not support background users on
+     * secondary displays.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
+    public boolean startUserInBackgroundVisibleOnDisplay(@UserIdInt int userId, int displayId) {
+        if (!UserManager.isVisibleBackgroundUsersEnabled()) {
+            throw new UnsupportedOperationException(
+                    "device does not support users on secondary displays");
+        }
+        try {
+            return getService().startUserInBackgroundVisibleOnDisplay(userId, displayId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the id of displays that can be used by
+     * {@link #startUserInBackgroundOnSecondaryDisplay(int, int)}.
+     *
+     * @hide
+     */
+    @TestApi
+    @Nullable
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
+    public int[] getDisplayIdsForStartingVisibleBackgroundUsers() {
+        try {
+            return getService().getDisplayIdsForStartingVisibleBackgroundUsers();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -4496,6 +4594,10 @@ public class ActivityManager {
     /**
      * Stops the given {@code userId}.
      *
+     * <p><b>NOTE:</b> on systems that support
+     * {@link UserManager#isVisibleBackgroundUsersSupported() background users on secondary
+     * displays}, this method will also unassign the user from the display it was started on.
+     *
      * @hide
      */
     @TestApi
@@ -4605,7 +4707,7 @@ public class ActivityManager {
      * @hide
      */
     public static void broadcastStickyIntent(Intent intent, int userId) {
-        broadcastStickyIntent(intent, AppOpsManager.OP_NONE, userId);
+        broadcastStickyIntent(intent, AppOpsManager.OP_NONE, null, userId);
     }
 
     /**
@@ -4614,11 +4716,20 @@ public class ActivityManager {
      * @hide
      */
     public static void broadcastStickyIntent(Intent intent, int appOp, int userId) {
+        broadcastStickyIntent(intent, appOp, null, userId);
+    }
+
+    /**
+     * Convenience for sending a sticky broadcast.  For internal use only.
+     *
+     * @hide
+     */
+    public static void broadcastStickyIntent(Intent intent, int appOp, Bundle options, int userId) {
         try {
             getService().broadcastIntentWithFeature(
                     null, null, intent, null, null, Activity.RESULT_OK, null, null,
                     null /*requiredPermissions*/, null /*excludedPermissions*/,
-                    null /*excludedPackages*/, appOp, null, false, true, userId);
+                    null /*excludedPackages*/, appOp, options, false, true, userId);
         } catch (RemoteException ex) {
         }
     }
@@ -5125,7 +5236,7 @@ public class ActivityManager {
         Preconditions.checkNotNull(listener);
         Preconditions.checkNotNull(executor);
         try {
-            listener.init(mContext, executor, this);
+            listener.init(mContext, executor);
             getService().registerProcessObserver(listener.mObserver);
             // Notify upon first registration.
             executor.execute(() ->
@@ -5200,6 +5311,55 @@ public class ActivityManager {
     }
 
     /**
+     * Delays delivering broadcasts to the specified package.
+     *
+     * <p> When {@code delayedDurationMs} is {@code 0}, it will clears any previously
+     * set forced delays.
+     *
+     * <p><b>Note: This method is only intended for testing and it only
+     * works for packages that are already running.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.DUMP)
+    public void forceDelayBroadcastDelivery(@NonNull String targetPackage,
+            @IntRange(from = 0) long delayedDurationMs) {
+        try {
+            getService().forceDelayBroadcastDelivery(targetPackage, delayedDurationMs);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Checks if the "modern" broadcast queue is enabled.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.DUMP)
+    public boolean isModernBroadcastQueueEnabled() {
+        try {
+            return getService().isModernBroadcastQueueEnabled();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Checks if the process represented by the given {@code pid} is frozen.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.DUMP)
+    public boolean isProcessFrozen(int pid) {
+        try {
+            return getService().isProcessFrozen(pid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * @return The reason code of whether or not the given UID should be exempted from background
      * restrictions here.
      *
@@ -5218,6 +5378,31 @@ public class ActivityManager {
             e.rethrowFromSystemServer();
         }
         return PowerExemptionManager.REASON_DENIED;
+    }
+
+    /**
+     * Notifies {@link #getRunningAppProcesses app processes} that the system properties
+     * have changed.
+     *
+     * @see SystemProperties#addChangeCallback
+     *
+     * @hide
+     */
+    @TestApi
+    public void notifySystemPropertiesChanged() {
+        // Note: this cannot use {@link ServiceManager#listServices()} to notify all the services,
+        // as that is not available from tests.
+        final var binder = ActivityManager.getService().asBinder();
+        if (binder != null) {
+            var data = Parcel.obtain();
+            try {
+                binder.transact(IBinder.SYSPROPS_TRANSACTION, data, null /* reply */,
+                        0 /* flags */);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            data.recycle();
+        }
     }
 
     /**

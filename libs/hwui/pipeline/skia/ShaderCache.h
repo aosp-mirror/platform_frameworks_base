@@ -17,11 +17,14 @@
 #pragma once
 
 #include <GrContextOptions.h>
+#include <SkRefCnt.h>
 #include <cutils/compiler.h>
 #include <memory>
 #include <mutex>
 #include <string>
 #include <vector>
+
+class SkData;
 
 namespace android {
 
@@ -45,7 +48,7 @@ public:
      * and puts the ShaderCache into an initialized state, such that it is
      * able to insert and retrieve entries from the cache. If identity is
      * non-null and validation fails, the cache is initialized but contains
-     * no data. If size is less than zero, the cache is initilaized but
+     * no data. If size is less than zero, the cache is initialized but
      * contains no data.
      *
      * This should be called when HWUI pipeline is initialized. When not in

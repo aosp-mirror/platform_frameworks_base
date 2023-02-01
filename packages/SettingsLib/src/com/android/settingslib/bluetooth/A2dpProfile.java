@@ -81,12 +81,13 @@ public class A2dpProfile implements LocalBluetoothProfile {
                 device.onProfileStateChanged(A2dpProfile.this, BluetoothProfile.STATE_CONNECTED);
                 device.refresh();
             }
-            mIsProfileReady=true;
+            mIsProfileReady = true;
             mProfileManager.callServiceConnectedListeners();
         }
 
         public void onServiceDisconnected(int profile) {
-            mIsProfileReady=false;
+            mIsProfileReady = false;
+            mProfileManager.callServiceDisconnectedListeners();
         }
     }
 
@@ -234,7 +235,7 @@ public class A2dpProfile implements LocalBluetoothProfile {
     /**
      * @return whether high quality audio is enabled or not
      */
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     public boolean isHighQualityAudioEnabled(BluetoothDevice device) {
         BluetoothDevice bluetoothDevice = (device != null) ? device : getActiveDevice();
         if (bluetoothDevice == null) {
@@ -286,7 +287,7 @@ public class A2dpProfile implements LocalBluetoothProfile {
      * @param device to get codec label from
      * @return the label associated with the device codec
      */
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     public String getHighQualityAudioOptionLabel(BluetoothDevice device) {
         BluetoothDevice bluetoothDevice = (device != null) ? device : getActiveDevice();
         int unknownCodecId = R.string.bluetooth_profile_a2dp_high_quality_unknown_codec;
@@ -328,6 +329,12 @@ public class A2dpProfile implements LocalBluetoothProfile {
            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC:
                index = 5;
                break;
+            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_LC3:
+                index = 6;
+                break;
+            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_OPUS:
+                index = 7;
+                break;
            }
 
         if (index < 0) {

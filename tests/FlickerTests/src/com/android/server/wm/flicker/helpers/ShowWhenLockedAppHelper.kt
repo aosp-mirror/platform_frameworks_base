@@ -17,18 +17,15 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
-import android.support.test.launcherhelper.ILauncherStrategy
-import android.support.test.launcherhelper.LauncherStrategyFactory
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.parser.toFlickerComponent
 
-class ShowWhenLockedAppHelper @JvmOverloads constructor(
+class ShowWhenLockedAppHelper
+@JvmOverloads
+constructor(
     instr: Instrumentation,
-    launcherName: String = ActivityOptions.SHOW_WHEN_LOCKED_ACTIVITY_LAUNCHER_NAME,
-    component: FlickerComponentName =
-            ActivityOptions.SHOW_WHEN_LOCKED_ACTIVITY_COMPONENT_NAME.toFlickerComponent(),
-    launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
-            .getInstance(instr)
-            .launcherStrategy
-) : StandardAppHelper(instr, launcherName, component, launcherStrategy)
+    launcherName: String = ActivityOptions.ShowWhenLockedActivity.LABEL,
+    component: ComponentNameMatcher =
+        ActivityOptions.ShowWhenLockedActivity.COMPONENT.toFlickerComponent()
+) : StandardAppHelper(instr, launcherName, component)

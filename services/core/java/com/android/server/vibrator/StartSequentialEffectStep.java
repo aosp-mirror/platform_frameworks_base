@@ -93,10 +93,8 @@ final class StartSequentialEffectStep extends Step {
             }
 
             mVibratorsOnMaxDuration = startVibrating(effectMapping, nextSteps);
-            if (mVibratorsOnMaxDuration > 0) {
-                conductor.vibratorManagerHooks.noteVibratorOn(conductor.getVibration().uid,
-                        mVibratorsOnMaxDuration);
-            }
+            conductor.vibratorManagerHooks.noteVibratorOn(conductor.getVibration().uid,
+                    mVibratorsOnMaxDuration);
         } finally {
             if (mVibratorsOnMaxDuration >= 0) {
                 // It least one vibrator was started then add a finish step to wait for all
@@ -194,41 +192,44 @@ final class StartSequentialEffectStep extends Step {
         // delivered asynchronously but enqueued until the step processing is finished.
         boolean hasPrepared = false;
         boolean hasTriggered = false;
+        boolean hasFailed = false;
         long maxDuration = 0;
-        try {
-            hasPrepared = conductor.vibratorManagerHooks.prepareSyncedVibration(
-                    effectMapping.getRequiredSyncCapabilities(),
-                    effectMapping.getVibratorIds());
+        hasPrepared = conductor.vibratorManagerHooks.prepareSyncedVibration(
+                effectMapping.getRequiredSyncCapabilities(),
+                effectMapping.getVibratorIds());
 
-            for (AbstractVibratorStep step : steps) {
-                long duration = startVibrating(step, nextSteps);
-                if (duration < 0) {
-                    // One vibrator has failed, fail this entire sync attempt.
-                    return maxDuration = -1;
-                }
-                maxDuration = Math.max(maxDuration, duration);
+        for (AbstractVibratorStep step : steps) {
+            long duration = startVibrating(step, nextSteps);
+            if (duration < 0) {
+                // One vibrator has failed, fail this entire sync attempt.
+                hasFailed = true;
+                break;
             }
+            maxDuration = Math.max(maxDuration, duration);
+        }
 
-            // Check if sync was prepared and if any step was accepted by a vibrator,
-            // otherwise there is nothing to trigger here.
-            if (hasPrepared && maxDuration > 0) {
-                hasTriggered = conductor.vibratorManagerHooks.triggerSyncedVibration(
-                        getVibration().id);
-            }
-            return maxDuration;
-        } finally {
-            if (hasPrepared && !hasTriggered) {
-                // Trigger has failed or all steps were ignored by the vibrators.
-                conductor.vibratorManagerHooks.cancelSyncedVibration();
-                nextSteps.clear();
-            } else if (maxDuration < 0) {
-                // Some vibrator failed without being prepared so other vibrators might be
-                // active. Cancel and remove every pending step from output list.
-                for (int i = nextSteps.size() - 1; i >= 0; i--) {
-                    nextSteps.remove(i).cancelImmediately();
-                }
+        // Check if sync was prepared and if any step was accepted by a vibrator,
+        // otherwise there is nothing to trigger here.
+        if (hasPrepared && !hasFailed && maxDuration > 0) {
+            hasTriggered = conductor.vibratorManagerHooks.triggerSyncedVibration(getVibration().id);
+            hasFailed &= hasTriggered;
+        }
+
+        if (hasFailed) {
+            // Something failed, possibly after other vibrators were activated.
+            // Cancel and remove every pending step from output list.
+            for (int i = nextSteps.size() - 1; i >= 0; i--) {
+                nextSteps.remove(i).cancelImmediately();
             }
         }
+
+        // Cancel the preparation if trigger failed or all
+        if (hasPrepared && !hasTriggered) {
+            // Trigger has failed or was skipped, so abort the synced vibration.
+            conductor.vibratorManagerHooks.cancelSyncedVibration();
+        }
+
+        return hasFailed ? -1 : maxDuration;
     }
 
     private long startVibrating(AbstractVibratorStep step, List<Step> nextSteps) {

@@ -26,6 +26,7 @@ import android.widget.TextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.android.wm.shell.R;
+import com.android.wm.shell.compatui.DialogContainerSupplier;
 
 /**
  * Container for Letterbox Education Dialog and background dim.
@@ -33,11 +34,7 @@ import com.android.wm.shell.R;
  * <p>This layout should fill the entire task and the background around the dialog acts as the
  * background dim which dismisses the dialog when clicked.
  */
-class LetterboxEduDialogLayout extends ConstraintLayout {
-
-    // The alpha of a background is a number between 0 (fully transparent) to 255 (fully opaque).
-    // 204 is simply 255 * 0.8.
-    static final int BACKGROUND_DIM_ALPHA = 204;
+class LetterboxEduDialogLayout extends ConstraintLayout implements DialogContainerSupplier {
 
     private View mDialogContainer;
     private TextView mDialogTitle;
@@ -60,16 +57,18 @@ class LetterboxEduDialogLayout extends ConstraintLayout {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
-    View getDialogContainer() {
+    @Override
+    public View getDialogContainerView() {
         return mDialogContainer;
+    }
+
+    @Override
+    public Drawable getBackgroundDimDrawable() {
+        return mBackgroundDim;
     }
 
     TextView getDialogTitle() {
         return mDialogTitle;
-    }
-
-    Drawable getBackgroundDim() {
-        return mBackgroundDim;
     }
 
     /**

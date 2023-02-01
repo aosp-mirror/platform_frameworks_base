@@ -20,15 +20,13 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainRunna
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.graphics.ImageFormat;
 import android.hardware.ICameraService;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraExtensionCharacteristics;
-import android.hardware.camera2.CameraExtensionSession;
-import android.hardware.camera2.CameraOfflineSession;
 import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.CameraExtensionCharacteristics;
+import android.hardware.camera2.CameraOfflineSession;
 import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
@@ -63,17 +61,17 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * HAL2.1+ implementation of CameraDevice. Use CameraManager#open to instantiate
@@ -87,6 +85,7 @@ public class CameraDeviceImpl extends CameraDevice
 
     // TODO: guard every function with if (!mRemoteDevice) check (if it was closed)
     private ICameraDeviceUserWrapper mRemoteDevice;
+    private boolean mRemoteDeviceInit = false;
 
     // Lock to synchronize cross-thread access to device public interface
     final Object mInterfaceLock = new Object(); // access from this class and Session only!
@@ -338,6 +337,8 @@ public class CameraDeviceImpl extends CameraDevice
 
             mDeviceExecutor.execute(mCallOnOpened);
             mDeviceExecutor.execute(mCallOnUnconfigured);
+
+            mRemoteDeviceInit = true;
         }
     }
 
@@ -1754,8 +1755,8 @@ public class CameraDeviceImpl extends CameraDevice
         }
 
         synchronized(mInterfaceLock) {
-            if (mRemoteDevice == null) {
-                return; // Camera already closed
+            if (mRemoteDevice == null && mRemoteDeviceInit) {
+                return; // Camera already closed, user is not interested in errors anymore.
             }
 
             // Redirect device callback to the offline session in case we are in the middle
@@ -2025,12 +2026,16 @@ public class CameraDeviceImpl extends CameraDevice
                     resultExtras.getLastCompletedReprocessFrameNumber();
             final long lastCompletedZslFrameNumber =
                     resultExtras.getLastCompletedZslFrameNumber();
+            final boolean hasReadoutTimestamp = resultExtras.hasReadoutTimestamp();
+            final long readoutTimestamp = resultExtras.getReadoutTimestamp();
 
             if (DEBUG) {
                 Log.d(TAG, "Capture started for id " + requestId + " frame number " + frameNumber
                         + ": completedRegularFrameNumber " + lastCompletedRegularFrameNumber
                         + ", completedReprocessFrameNUmber " + lastCompletedReprocessFrameNumber
-                        + ", completedZslFrameNumber " + lastCompletedZslFrameNumber);
+                        + ", completedZslFrameNumber " + lastCompletedZslFrameNumber
+                        + ", hasReadoutTimestamp " + hasReadoutTimestamp
+                        + (hasReadoutTimestamp ? ", readoutTimestamp " + readoutTimestamp : "")) ;
             }
             final CaptureCallbackHolder holder;
 
@@ -2082,14 +2087,26 @@ public class CameraDeviceImpl extends CameraDevice
                                                 CameraDeviceImpl.this,
                                                 holder.getRequest(i),
                                                 timestamp - (subsequenceId - i) *
-                                                NANO_PER_SECOND/fpsRange.getUpper(),
+                                                NANO_PER_SECOND / fpsRange.getUpper(),
                                                 frameNumber - (subsequenceId - i));
+                                            if (hasReadoutTimestamp) {
+                                                holder.getCallback().onReadoutStarted(
+                                                    CameraDeviceImpl.this,
+                                                    holder.getRequest(i),
+                                                    readoutTimestamp - (subsequenceId - i) *
+                                                    NANO_PER_SECOND / fpsRange.getUpper(),
+                                                    frameNumber - (subsequenceId - i));
+                                            }
                                         }
                                     } else {
                                         holder.getCallback().onCaptureStarted(
-                                            CameraDeviceImpl.this,
-                                            holder.getRequest(resultExtras.getSubsequenceId()),
+                                            CameraDeviceImpl.this, request,
                                             timestamp, frameNumber);
+                                        if (hasReadoutTimestamp) {
+                                            holder.getCallback().onReadoutStarted(
+                                                CameraDeviceImpl.this, request,
+                                                readoutTimestamp, frameNumber);
+                                        }
                                     }
                                 }
                             }

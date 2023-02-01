@@ -190,7 +190,7 @@ class GnssNetworkConnectivityHandler {
         mContext = context;
         mGnssNetworkListener = gnssNetworkListener;
 
-    SubscriptionManager subManager = mContext.getSystemService(SubscriptionManager.class);
+        SubscriptionManager subManager = mContext.getSystemService(SubscriptionManager.class);
         if (subManager != null) {
             subManager.addOnSubscriptionsChangedListener(mOnSubscriptionsChangeListener);
         }
@@ -301,6 +301,10 @@ class GnssNetworkConnectivityHandler {
         mConnMgr.registerNetworkCallback(networkRequest, mNetworkConnectivityCallback, mHandler);
     }
 
+    void unregisterNetworkCallbacks() {
+        mConnMgr.unregisterNetworkCallback(mNetworkConnectivityCallback);
+    }
+
     /**
      * @return {@code true} if there is a data network available for outgoing connections,
      * {@code false} otherwise.
@@ -308,6 +312,13 @@ class GnssNetworkConnectivityHandler {
     boolean isDataNetworkConnected() {
         NetworkInfo activeNetworkInfo = mConnMgr.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    /**
+     * Returns the active Sub ID for emergency SUPL connection.
+     */
+    int getActiveSubId() {
+        return mActiveSubId;
     }
 
     /**
@@ -554,7 +565,7 @@ class GnssNetworkConnectivityHandler {
                 mAGpsDataConnectionIpAddr = InetAddress.getByAddress(suplIpAddr);
                 if (DEBUG) Log.d(TAG, "IP address converted to: " + mAGpsDataConnectionIpAddr);
             } catch (UnknownHostException e) {
-                Log.e(TAG, "Bad IP Address: " + suplIpAddr, e);
+                Log.e(TAG, "Bad IP Address: " + Arrays.toString(suplIpAddr), e);
             }
         }
 
@@ -749,6 +760,10 @@ class GnssNetworkConnectivityHandler {
             return APN_IPV6;
         }
         return APN_INVALID;
+    }
+
+    protected boolean isNativeAgpsRilSupported() {
+        return native_is_agps_ril_supported();
     }
 
     // AGPS support

@@ -224,7 +224,7 @@ public class IntentForwarderActivity extends Activity  {
         int selectedProfile = findSelectedProfile(className);
         sanitizeIntent(intentReceived);
         intentReceived.putExtra(EXTRA_SELECTED_PROFILE, selectedProfile);
-        Intent innerIntent = intentReceived.getParcelableExtra(Intent.EXTRA_INTENT);
+        Intent innerIntent = intentReceived.getParcelableExtra(Intent.EXTRA_INTENT, android.content.Intent.class);
         if (innerIntent == null) {
             Slog.wtf(TAG, "Cannot start a chooser intent with no extra " + Intent.EXTRA_INTENT);
             return;

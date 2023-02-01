@@ -23,7 +23,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -111,11 +110,10 @@ public class InputDeviceLightsManagerTest {
     }
 
     private InputDevice createInputDevice(int id) {
-        return new InputDevice(id, 0 /* generation */, 0 /* controllerNumber */, "name",
-                0 /* vendorId */, 0 /* productId */, "descriptor", true /* isExternal */,
-                0 /* sources */, 0 /* keyboardType */, null /* keyCharacterMap */,
-                false /* hasVibrator */, false /* hasMicrophone */, false /* hasButtonUnderpad */,
-                false /* hasSensor */, false /* hasBattery */);
+        return new InputDevice.Builder()
+                .setId(id)
+                .setName("Test Device " + id)
+                .build();
     }
 
     private void mockLights(Light[] lights) throws Exception {
@@ -133,7 +131,7 @@ public class InputDeviceLightsManagerTest {
             new Light(1 /* id */, "Light1", 0 /* ordinal */, Light.LIGHT_TYPE_INPUT,
                         Light.LIGHT_CAPABILITY_BRIGHTNESS),
             new Light(2 /* id */, "Light2", 0 /* ordinal */, Light.LIGHT_TYPE_INPUT,
-                        Light.LIGHT_CAPABILITY_RGB),
+                        Light.LIGHT_CAPABILITY_COLOR_RGB),
             new Light(3 /* id */, "Light3", 0 /* ordinal */, Light.LIGHT_TYPE_INPUT,
                         0 /* capabilities */)
         };
@@ -152,13 +150,13 @@ public class InputDeviceLightsManagerTest {
 
         Light[] mockedLights = {
             new Light(1 /* id */, "Light1", 0 /* ordinal */, Light.LIGHT_TYPE_INPUT,
-                        Light.LIGHT_CAPABILITY_RGB),
+                        Light.LIGHT_CAPABILITY_COLOR_RGB),
             new Light(2 /* id */, "Light2", 0 /* ordinal */, Light.LIGHT_TYPE_INPUT,
-                        Light.LIGHT_CAPABILITY_RGB),
+                        Light.LIGHT_CAPABILITY_COLOR_RGB),
             new Light(3 /* id */, "Light3", 0 /* ordinal */, Light.LIGHT_TYPE_INPUT,
-                        Light.LIGHT_CAPABILITY_RGB),
+                        Light.LIGHT_CAPABILITY_COLOR_RGB),
             new Light(4 /* id */, "Light4", 0 /* ordinal */, Light.LIGHT_TYPE_INPUT,
-                        Light.LIGHT_CAPABILITY_RGB)
+                        Light.LIGHT_CAPABILITY_COLOR_RGB)
         };
         mockLights(mockedLights);
 
@@ -206,7 +204,7 @@ public class InputDeviceLightsManagerTest {
                 new Light(1 /* id */, "Light1", 0 /* ordinal */, Light.LIGHT_TYPE_PLAYER_ID,
                             0 /* capabilities */),
                 new Light(2 /* id */, "Light2", 0 /* ordinal */, Light.LIGHT_TYPE_INPUT,
-                            Light.LIGHT_CAPABILITY_RGB | Light.LIGHT_CAPABILITY_BRIGHTNESS),
+                            Light.LIGHT_CAPABILITY_COLOR_RGB | Light.LIGHT_CAPABILITY_BRIGHTNESS),
                 new Light(3 /* id */, "Light3", 0 /* ordinal */, Light.LIGHT_TYPE_INPUT,
                             Light.LIGHT_CAPABILITY_BRIGHTNESS)
         };
@@ -241,9 +239,9 @@ public class InputDeviceLightsManagerTest {
     @Test
     public void testLightCapabilities() throws Exception {
         Light light = new Light(1 /* id */, "Light1", 0 /* ordinal */, Light.LIGHT_TYPE_INPUT,
-                Light.LIGHT_CAPABILITY_RGB | Light.LIGHT_CAPABILITY_BRIGHTNESS);
+                Light.LIGHT_CAPABILITY_COLOR_RGB | Light.LIGHT_CAPABILITY_BRIGHTNESS);
         assertThat(light.getType()).isEqualTo(Light.LIGHT_TYPE_INPUT);
-        assertThat(light.getCapabilities()).isEqualTo(Light.LIGHT_CAPABILITY_RGB
+        assertThat(light.getCapabilities()).isEqualTo(Light.LIGHT_CAPABILITY_COLOR_RGB
                 | Light.LIGHT_CAPABILITY_BRIGHTNESS);
         assertTrue(light.hasBrightnessControl());
         assertTrue(light.hasRgbControl());

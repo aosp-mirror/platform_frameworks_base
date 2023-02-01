@@ -44,7 +44,7 @@ public abstract class DisplayEventReceiver {
      * When retrieving vsync events, this specifies that the vsync event should happen at the normal
      * vsync-app tick.
      * <p>
-     * Needs to be kept in sync with frameworks/native/include/gui/ISurfaceComposer.h
+     * Keep in sync with frameworks/native/libs/gui/aidl/android/gui/ISurfaceComposer.aidl
      */
     public static final int VSYNC_SOURCE_APP = 0;
 
@@ -52,21 +52,21 @@ public abstract class DisplayEventReceiver {
      * When retrieving vsync events, this specifies that the vsync event should happen whenever
      * Surface Flinger is processing a frame.
      * <p>
-     * Needs to be kept in sync with frameworks/native/include/gui/ISurfaceComposer.h
+     * Keep in sync with frameworks/native/libs/gui/aidl/android/gui/ISurfaceComposer.aidl
      */
     public static final int VSYNC_SOURCE_SURFACE_FLINGER = 1;
 
     /**
      * Specifies to generate mode changed events from Surface Flinger.
      * <p>
-     * Needs to be kept in sync with frameworks/native/include/gui/ISurfaceComposer.h
+     * Keep in sync with frameworks/native/libs/gui/aidl/android/gui/ISurfaceComposer.aidl
      */
     public static final int EVENT_REGISTRATION_MODE_CHANGED_FLAG = 0x1;
 
     /**
      * Specifies to generate frame rate override events from Surface Flinger.
      * <p>
-     * Needs to be kept in sync with frameworks/native/include/gui/ISurfaceComposer.h
+     * Keep in sync with frameworks/native/libs/gui/aidl/android/gui/ISurfaceComposer.aidl
      */
     public static final int EVENT_REGISTRATION_FRAME_RATE_OVERRIDE_FLAG = 0x2;
 
@@ -227,8 +227,10 @@ public abstract class DisplayEventReceiver {
      * timebase.
      * @param physicalDisplayId Stable display ID that uniquely describes a (display, port) pair.
      * @param modeId The new mode Id
+     * @param renderPeriod The render frame period, which is a multiple of the mode's vsync period
      */
-    public void onModeChanged(long timestampNanos, long physicalDisplayId, int modeId) {
+    public void onModeChanged(long timestampNanos, long physicalDisplayId, int modeId,
+            long renderPeriod) {
     }
 
     /**
@@ -303,8 +305,9 @@ public abstract class DisplayEventReceiver {
 
     // Called from native code.
     @SuppressWarnings("unused")
-    private void dispatchModeChanged(long timestampNanos, long physicalDisplayId, int modeId) {
-        onModeChanged(timestampNanos, physicalDisplayId, modeId);
+    private void dispatchModeChanged(long timestampNanos, long physicalDisplayId, int modeId,
+            long renderPeriod) {
+        onModeChanged(timestampNanos, physicalDisplayId, modeId, renderPeriod);
     }
 
     // Called from native code.

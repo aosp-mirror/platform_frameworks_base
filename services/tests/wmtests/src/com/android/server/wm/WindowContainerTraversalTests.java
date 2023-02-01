@@ -45,7 +45,7 @@ import java.util.function.Consumer;
 @RunWith(WindowTestRunner.class)
 public class WindowContainerTraversalTests extends WindowTestsBase {
 
-    @UseTestDisplay(addWindows = { W_DOCK_DIVIDER, W_INPUT_METHOD })
+    @SetupWindows(addWindows = { W_DOCK_DIVIDER, W_INPUT_METHOD })
     @Test
     public void testDockedDividerPosition() {
         final WindowState splitScreenWindow = createWindow(null,

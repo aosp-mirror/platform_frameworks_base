@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard;
 
 import android.annotation.AnyThread;
-import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -52,6 +51,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIAppComponentFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -140,6 +140,8 @@ public class KeyguardSliceProvider extends SliceProvider implements
     public KeyguardBypassController mKeyguardBypassController;
     @Inject
     public KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    @Inject
+    UserTracker mUserTracker;
     private CharSequence mMediaTitle;
     private CharSequence mMediaArtist;
     protected boolean mDozing;
@@ -355,7 +357,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
         synchronized (this) {
             if (withinNHoursLocked(mNextAlarmInfo, ALARM_VISIBILITY_HOURS)) {
                 String pattern = android.text.format.DateFormat.is24HourFormat(getContext(),
-                        ActivityManager.getCurrentUser()) ? "HH:mm" : "h:mm";
+                        mUserTracker.getUserId()) ? "HH:mm" : "h:mm";
                 mNextAlarm = android.text.format.DateFormat.format(pattern,
                         mNextAlarmInfo.getTriggerTime()).toString();
             } else {
@@ -414,7 +416,11 @@ public class KeyguardSliceProvider extends SliceProvider implements
         if (mDateFormat == null) {
             final Locale l = Locale.getDefault();
             DateFormat format = DateFormat.getInstanceForSkeleton(mDatePattern, l);
-            format.setContext(DisplayContext.CAPITALIZATION_FOR_STANDALONE);
+            // The use of CAPITALIZATION_FOR_BEGINNING_OF_SENTENCE instead of
+            // CAPITALIZATION_FOR_STANDALONE is to address
+            // https://unicode-org.atlassian.net/browse/ICU-21631
+            // TODO(b/229287642): Switch back to CAPITALIZATION_FOR_STANDALONE
+            format.setContext(DisplayContext.CAPITALIZATION_FOR_BEGINNING_OF_SENTENCE);
             mDateFormat = format;
         }
         mCurrentTime.setTime(System.currentTimeMillis());

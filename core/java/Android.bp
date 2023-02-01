@@ -15,14 +15,6 @@ filegroup {
         "**/*.java",
         "**/*.aidl",
     ],
-    exclude_srcs: [
-        // Remove election toolbar code from build time
-        "android/service/selectiontoolbar/*.aidl",
-        "android/service/selectiontoolbar/*.java",
-        "android/view/selectiontoolbar/*.aidl",
-        "android/view/selectiontoolbar/*.java",
-        "com/android/internal/widget/floatingtoolbar/RemoteFloatingToolbarPopup.java",
-    ],
     visibility: ["//frameworks/base"],
 }
 
@@ -195,8 +187,6 @@ filegroup {
         "com/android/internal/util/IndentingPrintWriter.java",
         "com/android/internal/util/MessageUtils.java",
         "com/android/internal/util/WakeupMessage.java",
-        // TODO: delete as soon as NetworkStatsFactory stops using
-        "com/android/internal/util/ProcFileReader.java",
     ],
 }
 
@@ -378,6 +368,20 @@ aidl_interface {
     },
 }
 
+// Build Rust bindings for remote provisioning. Needed by keystore2.
+aidl_interface {
+    name: "android.security.rkp_aidl",
+    unstable: true,
+    srcs: [
+        "android/security/rkp/*.aidl",
+    ],
+    backend: {
+        rust: {
+            enabled: true,
+        },
+    },
+}
+
 aidl_interface {
     name: "android.debug_aidl",
     unstable: true,
@@ -424,6 +428,17 @@ filegroup {
         "android/os/RegistrantList.java",
         "android/os/Registrant.java",
         "com/android/internal/os/SomeArgs.java",
+    ],
+}
+
+// This file group is used by service fuzzer
+filegroup {
+    name: "framework-core-sources-for-fuzzers",
+    srcs: [
+        "android/os/IInterface.java",
+        "android/os/Binder.java",
+        "android/os/IBinder.java",
+        "android/os/Parcelable.java",
     ],
 }
 
@@ -487,14 +502,3 @@ java_library {
 }
 
 // protolog end
-
-// temporary placeholder until the real module is available
-java_library {
-    name: "framework-configinfrastructure",
-    sdk_version: "module_current",
-}
-
-java_library {
-    name: "framework-configinfrastructure.stubs.module_lib",
-    sdk_version: "module_current",
-}

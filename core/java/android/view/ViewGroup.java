@@ -3723,7 +3723,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final View child = (preorderedList == null)
                     ? mChildren[childIndex] : preorderedList.get(childIndex);
             if ((flags & AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0
-                    || child.isImportantForAutofill()) {
+                    || child.isImportantForAutofill()
+                    || (child.isMatchingAutofillableHeuristics()
+                        && !child.isActivityDeniedForAutofillForUnimportantView())) {
                 list.add(child);
             } else if (child instanceof ViewGroup) {
                 ((ViewGroup) child).populateChildrenForAutofill(list, flags);
@@ -3916,6 +3918,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @Override
     public boolean onNestedPrePerformAccessibilityAction(View target, int action, Bundle args) {
         return false;
+    }
+
+    @Override
+    void calculateAccessibilityDataPrivate() {
+        super.calculateAccessibilityDataPrivate();
+        for (int i = 0; i < mChildrenCount; i++) {
+            mChildren[i].calculateAccessibilityDataPrivate();
+        }
     }
 
     @Override
@@ -4158,7 +4168,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * @hide
      */
-    protected void onDebugDrawMargins(Canvas canvas, Paint paint) {
+    protected void onDebugDrawMargins(@NonNull Canvas canvas, Paint paint) {
         for (int i = 0; i < getChildCount(); i++) {
             View c = getChildAt(i);
             c.getLayoutParams().onDebugDraw(c, canvas, paint);
@@ -4168,7 +4178,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * @hide
      */
-    protected void onDebugDraw(Canvas canvas) {
+    protected void onDebugDraw(@NonNull Canvas canvas) {
         Paint paint = getDebugPaint();
 
         // Draw optical bounds
@@ -4216,7 +4226,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
-    protected void dispatchDraw(Canvas canvas) {
+    protected void dispatchDraw(@NonNull Canvas canvas) {
         final int childrenCount = mChildrenCount;
         final View[] children = mChildren;
         int flags = mGroupFlags;
@@ -4525,7 +4535,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @param drawingTime The time at which draw is occurring
      * @return True if an invalidate() was issued
      */
-    protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
+    protected boolean drawChild(@NonNull Canvas canvas, View child, long drawingTime) {
         return child.draw(canvas, this, drawingTime);
     }
 
@@ -9200,7 +9210,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    private static void drawRect(Canvas canvas, Paint paint, int x1, int y1, int x2, int y2) {
+    private static void drawRect(@NonNull Canvas canvas, Paint paint, int x1, int y1,
+                                 int x2, int y2) {
         if (sDebugLines== null) {
             // TODO: This won't work with multiple UI threads in a single process
             sDebugLines = new float[16];

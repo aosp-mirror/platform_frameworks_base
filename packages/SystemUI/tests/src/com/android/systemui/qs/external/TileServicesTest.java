@@ -26,6 +26,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Handler;
@@ -42,11 +43,12 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
+import com.android.systemui.settings.UserFileManager;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
@@ -57,6 +59,7 @@ import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -118,6 +121,8 @@ public class TileServicesTest extends SysuiTestCase {
     private TileLifecycleManager.Factory mTileLifecycleManagerFactory;
     @Mock
     private TileLifecycleManager mTileLifecycleManager;
+    @Mock
+    private UserFileManager mUserFileManager;
 
     @Before
     public void setUp() throws Exception {
@@ -149,7 +154,8 @@ public class TileServicesTest extends SysuiTestCase {
                 mSecureSettings,
                 mock(CustomTileStatePersister.class),
                 mTileServiceRequestControllerBuilder,
-                mTileLifecycleManagerFactory);
+                mTileLifecycleManagerFactory,
+                mUserFileManager);
         mTileService = new TestTileServices(host, provider, mBroadcastDispatcher,
                 mUserTracker, mKeyguardStateController, mCommandQueue);
     }
@@ -239,6 +245,32 @@ public class TileServicesTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
         verify(manager).setBindRequested(true);
         verify(manager.getTileService()).onStartListening();
+    }
+
+    @Test
+    public void testValidCustomTileStartsActivity() {
+        CustomTile tile = mock(CustomTile.class);
+        PendingIntent pi = mock(PendingIntent.class);
+        ComponentName componentName = mock(ComponentName.class);
+        when(tile.getComponent()).thenReturn(componentName);
+        when(componentName.getPackageName()).thenReturn(this.getContext().getPackageName());
+
+        mTileService.startActivity(tile, pi);
+
+        verify(tile).startActivityAndCollapse(pi);
+    }
+
+    @Test
+    public void testInvalidCustomTileDoesNotStartActivity() {
+        CustomTile tile = mock(CustomTile.class);
+        PendingIntent pi = mock(PendingIntent.class);
+        ComponentName componentName = mock(ComponentName.class);
+        when(tile.getComponent()).thenReturn(componentName);
+        when(componentName.getPackageName()).thenReturn("invalid.package.name");
+
+        Assert.assertThrows(SecurityException.class, () -> mTileService.startActivity(tile, pi));
+
+        verify(tile, never()).startActivityAndCollapse(pi);
     }
 
     private class TestTileServices extends TileServices {

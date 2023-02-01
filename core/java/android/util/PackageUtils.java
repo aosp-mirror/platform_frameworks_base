@@ -224,7 +224,7 @@ public final class PackageUtils {
         byte[] resultBytes = messageDigest.digest();
 
         if (separator == null) {
-            return HexEncoding.encodeToString(resultBytes, true);
+            return HexEncoding.encodeToString(resultBytes, false);
         }
 
         int length = resultBytes.length;

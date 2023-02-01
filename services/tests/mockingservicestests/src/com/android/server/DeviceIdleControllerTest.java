@@ -325,7 +325,7 @@ public class DeviceIdleControllerTest {
         doNothing().when(mAlarmManager).set(anyInt(), anyLong(), anyString(), any(), any());
         doNothing().when(mAlarmManager).setExact(anyInt(), anyLong(), anyString(), any(), any());
         doNothing().when(mAlarmManager)
-                .setWindow(anyInt(), anyLong(), anyLong(), anyString(), any(), any());
+                .setWindow(anyInt(), anyLong(), anyLong(), anyString(), any(), any(Handler.class));
         doReturn(mock(Sensor.class)).when(mSensorManager)
                 .getDefaultSensor(eq(Sensor.TYPE_SIGNIFICANT_MOTION), eq(true));
         doReturn(true).when(mSensorManager).registerListener(any(), any(), anyInt());
@@ -1111,12 +1111,12 @@ public class DeviceIdleControllerTest {
         alarmManagerInOrder.verify(mAlarmManager).setWindow(
                 eq(AlarmManager.ELAPSED_REALTIME),
                 eq(idleAfterInactiveExpiryTime),
-                anyLong(), anyString(), any(), any());
+                anyLong(), anyString(), any(), any(Handler.class));
         // Maintenance alarm
         alarmManagerInOrder.verify(mAlarmManager).setWindow(
                 eq(AlarmManager.ELAPSED_REALTIME_WAKEUP),
                 eq(idleAfterInactiveExpiryTime + idlingTimeMs),
-                anyLong(), anyString(), any(), any());
+                anyLong(), anyString(), any(), any(Handler.class));
 
         final AlarmManager.OnAlarmListener progressionListener =
                 alarmListenerCaptor.getAllValues().get(0);
@@ -1130,7 +1130,7 @@ public class DeviceIdleControllerTest {
         alarmManagerInOrder.verify(mAlarmManager).setWindow(
                 eq(AlarmManager.ELAPSED_REALTIME_WAKEUP),
                 eq(mInjector.nowElapsed + idlingTimeMs),
-                anyLong(), anyString(), any(), any());
+                anyLong(), anyString(), any(), any(Handler.class));
 
         for (int i = 0; i < 2; ++i) {
             // IDLE->MAINTENANCE alarm
@@ -1144,12 +1144,12 @@ public class DeviceIdleControllerTest {
             alarmManagerInOrder.verify(mAlarmManager).setWindow(
                     eq(AlarmManager.ELAPSED_REALTIME),
                     eq(maintenanceExpiryTime),
-                    anyLong(), anyString(), any(), any());
+                    anyLong(), anyString(), any(), any(Handler.class));
             // Set IDLE->MAINTENANCE
             alarmManagerInOrder.verify(mAlarmManager).setWindow(
                     eq(AlarmManager.ELAPSED_REALTIME_WAKEUP),
                     eq(maintenanceExpiryTime + idlingTimeMs),
-                    anyLong(), anyString(), any(), any());
+                    anyLong(), anyString(), any(), any(Handler.class));
 
             // MAINTENANCE->IDLE alarm
             mInjector.nowElapsed = mDeviceIdleController.getNextLightAlarmTimeForTesting();
@@ -1159,7 +1159,7 @@ public class DeviceIdleControllerTest {
             alarmManagerInOrder.verify(mAlarmManager).setWindow(
                     eq(AlarmManager.ELAPSED_REALTIME_WAKEUP),
                     eq(mInjector.nowElapsed + idlingTimeMs),
-                    anyLong(), anyString(), any(), any());
+                    anyLong(), anyString(), any(), any(Handler.class));
         }
     }
 
@@ -2019,7 +2019,8 @@ public class DeviceIdleControllerTest {
         final ArgumentCaptor<AlarmManager.OnAlarmListener> alarmListener = ArgumentCaptor
                 .forClass(AlarmManager.OnAlarmListener.class);
         doNothing().when(mAlarmManager).setWindow(
-                anyInt(), anyLong(), anyLong(), eq("DeviceIdleController.motion"), any(), any());
+                anyInt(), anyLong(), anyLong(), eq("DeviceIdleController.motion"), any(),
+                any(Handler.class));
         doNothing().when(mAlarmManager).setWindow(anyInt(), anyLong(), anyLong(),
                 eq("DeviceIdleController.motion_registration"),
                 alarmListener.capture(), any());
@@ -2063,7 +2064,8 @@ public class DeviceIdleControllerTest {
         final ArgumentCaptor<AlarmManager.OnAlarmListener> alarmListener = ArgumentCaptor
                 .forClass(AlarmManager.OnAlarmListener.class);
         doNothing().when(mAlarmManager).setWindow(
-                anyInt(), anyLong(), anyLong(), eq("DeviceIdleController.motion"), any(), any());
+                anyInt(), anyLong(), anyLong(), eq("DeviceIdleController.motion"), any(),
+                any(Handler.class));
         doNothing().when(mAlarmManager).setWindow(anyInt(), anyLong(), anyLong(),
                 eq("DeviceIdleController.motion_registration"),
                 alarmListener.capture(), any());
@@ -2130,7 +2132,7 @@ public class DeviceIdleControllerTest {
                         eq(SensorManager.SENSOR_DELAY_NORMAL));
         inOrder.verify(mAlarmManager).setWindow(
                 anyInt(), eq(mInjector.nowElapsed + mConstants.MOTION_INACTIVE_TIMEOUT), anyLong(),
-                eq("DeviceIdleController.motion"), any(), any());
+                eq("DeviceIdleController.motion"), any(), any(Handler.class));
         final SensorEventListener listener = listenerCaptor.getValue();
 
         // Trigger motion
@@ -2140,7 +2142,7 @@ public class DeviceIdleControllerTest {
         final ArgumentCaptor<Long> registrationTimeCaptor = ArgumentCaptor.forClass(Long.class);
         inOrder.verify(mAlarmManager).setWindow(
                 anyInt(), registrationTimeCaptor.capture(), anyLong(),
-                eq("DeviceIdleController.motion_registration"), any(), any());
+                eq("DeviceIdleController.motion_registration"), any(), any(Handler.class));
 
         // Make sure the listener is re-registered.
         mInjector.nowElapsed = registrationTimeCaptor.getValue();
@@ -2150,7 +2152,7 @@ public class DeviceIdleControllerTest {
                         eq(SensorManager.SENSOR_DELAY_NORMAL));
         final ArgumentCaptor<Long> timeoutCaptor = ArgumentCaptor.forClass(Long.class);
         inOrder.verify(mAlarmManager).setWindow(anyInt(), timeoutCaptor.capture(), anyLong(),
-                eq("DeviceIdleController.motion"), any(), any());
+                eq("DeviceIdleController.motion"), any(), any(Handler.class));
 
         // No motion before timeout
         stationaryListener.motionExpected = false;

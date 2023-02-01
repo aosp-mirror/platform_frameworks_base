@@ -23,11 +23,6 @@
         xmlns:tools="http://schemas.android.com/tools"
         coreApp="true">
 
-    <!-- Using OpenGL ES 2.0 -->
-    <uses-feature
-        android:glEsVersion="0x00020000"
-        android:required="true" />
-
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <!-- Used to read wallpaper -->
@@ -94,6 +89,7 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.MANAGE_SENSOR_PRIVACY" />
     <uses-permission android:name="android.permission.OBSERVE_SENSOR_PRIVACY" />
+    <uses-permission android:name="android.permission.ACCESS_AMBIENT_CONTEXT_EVENT" />
 
     <!-- ActivityManager -->
     <uses-permission android:name="android.permission.REAL_GET_TASKS" />
@@ -125,6 +121,9 @@
     <uses-permission android:name="android.permission.ALLOW_SLIPPERY_TOUCHES" />
     <uses-permission android:name="android.permission.INPUT_CONSUMER" />
 
+    <!-- DeviceStateManager -->
+    <uses-permission android:name="android.permission.CONTROL_DEVICE_STATE" />
+
     <!-- DreamManager -->
     <uses-permission android:name="android.permission.READ_DREAM_STATE" />
     <uses-permission android:name="android.permission.WRITE_DREAM_STATE" />
@@ -151,6 +150,9 @@
     <uses-permission android:name="android.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.GET_RUNTIME_PERMISSIONS" />
 
+    <!-- For auto-grant the access to the Settings' slice preferences, e.g. volume slices. -->
+    <uses-permission android:name="android.permission.READ_SEARCH_INDEXABLES" />
+
     <!-- Needed for WallpaperManager.clear in ImageWallpaper.updateWallpaperLocked -->
     <uses-permission android:name="android.permission.SET_WALLPAPER"/>
 
@@ -168,6 +170,7 @@
 
     <!-- Screen Recording -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT"/>
 
@@ -176,6 +179,9 @@
 
     <!-- Doze mode temp whitelisting for notification dispatching. -->
     <uses-permission android:name="android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST" />
+
+    <!-- Tag user-initiated PendingIntent invocations as "interactive" when appropriate -->
+    <uses-permission android:name="android.permission.COMPONENT_OPTION_INTERACTIVE" />
 
     <!-- Listen for keyboard attachment / detachment -->
     <uses-permission android:name="android.permission.TABLET_MODE" />
@@ -190,6 +196,9 @@
 
     <permission android:name="com.android.systemui.permission.FLAGS"
                 android:protectionLevel="signature" />
+
+    <permission android:name="android.permission.CUSTOMIZE_SYSTEM_UI"
+        android:protectionLevel="signature|privileged" />
 
     <!-- Adding Quick Settings tiles -->
     <uses-permission android:name="android.permission.BIND_QUICK_SETTINGS_TILE" />
@@ -285,6 +294,12 @@
     <!-- Query all packages on device on R+ -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
 
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.CREATE_NOTE" />
+        </intent>
+    </queries>
+
     <!-- Permission to register process observer -->
     <uses-permission android:name="android.permission.SET_ACTIVITY_WATCHER"/>
 
@@ -328,6 +343,7 @@
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settings.flashlight.action.FLASHLIGHT_CHANGED" />
+    <protected-broadcast android:name="com.android.systemui.STARTED" />
 
     <application
         android:name=".SystemUIApplication"
@@ -394,7 +410,16 @@
                   android:label="@string/screenshot_scroll_label"
                   android:finishOnTaskLaunch="true" />
 
-        <service android:name=".screenrecord.RecordingService" />
+        <service android:name=".screenshot.ScreenshotProxyService"
+                 android:permission="com.android.systemui.permission.SELF"
+                 android:exported="false" />
+
+        <service android:name=".screenshot.ScreenshotCrossProfileService"
+                 android:permission="com.android.systemui.permission.SELF"
+                 android:exported="false" />
+
+        <service android:name=".screenrecord.RecordingService"
+                 android:foregroundServiceType="systemExempted"/>
 
         <receiver android:name=".SysuiRestartReceiver"
             android:exported="false">
@@ -405,7 +430,7 @@
             </intent-filter>
         </receiver>
 
-        <service android:name=".ImageWallpaper"
+        <service android:name=".wallpapers.ImageWallpaper"
                 android:singleUser="true"
                 android:permission="android.permission.BIND_WALLPAPER"
                 android:exported="true" />
@@ -539,6 +564,16 @@
                   android:showForAllUsers="true">
         </activity>
 
+        <!-- started from SensoryPrivacyService -->
+        <activity android:name=".sensorprivacy.television.TvSensorPrivacyChangedActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:permission="android.permission.MANAGE_SENSOR_PRIVACY"
+            android:theme="@style/BottomSheet"
+            android:finishOnCloseSystemDialogs="true"
+            android:showForAllUsers="true">
+        </activity>
+
 
         <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbAccessoryUriActivity"
@@ -618,6 +653,17 @@
             android:excludeFromRecents="true"
             android:visibleToInstantApps="true"/>
 
+        <activity
+            android:name=".media.MediaProjectionAppSelectorActivity"
+            android:theme="@style/Theme.SystemUI.MediaProjectionAppSelector"
+            android:finishOnCloseSystemDialogs="true"
+            android:excludeFromRecents="true"
+            android:documentLaunchMode="never"
+            android:relinquishTaskIdentity="true"
+            android:configChanges=
+                "screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
+            android:visibleToInstantApps="true"/>
+
         <!-- started from TvNotificationPanel -->
         <activity
             android:name=".statusbar.tv.notifications.TvNotificationPanelActivity"
@@ -632,6 +678,21 @@
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true"
             android:exported="true" />
+
+        <!-- started from Telecomm(CallsManager) -->
+        <activity
+            android:name=".telephony.ui.activity.SwitchToManagedProfileForCallActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:finishOnCloseSystemDialogs="true"
+            android:permission="android.permission.MODIFY_PHONE_STATE"
+            android:theme="@style/Theme.SystemUI.Dialog.Alert">
+            <intent-filter>
+                <action android:name="android.telecom.action.SHOW_SWITCH_TO_WORK_PROFILE_FOR_CALL_DIALOG" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="tel" />
+            </intent-filter>
+        </activity>
 
         <!-- platform logo easter egg activity -->
         <activity
@@ -713,7 +774,7 @@
 
         <service
             android:name=".dreams.DreamOverlayService"
-            android:enabled="@bool/config_dreamOverlayServiceEnabled"
+            android:enabled="false"
             android:exported="true" />
 
         <activity android:name=".keyguard.WorkLockActivity"
@@ -855,7 +916,7 @@
                   android:showForAllUsers="true"
                   android:finishOnTaskLaunch="true"
                   android:launchMode="singleInstance"
-                  android:configChanges="screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
                   android:visibleToInstantApps="true">
         </activity>
 
@@ -868,6 +929,29 @@
 
         <service android:name=".controls.controller.AuxiliaryPersistenceWrapper$DeletionJobService"
                  android:permission="android.permission.BIND_JOB_SERVICE"/>
+
+        <!-- region Note Task -->
+        <activity
+            android:name=".notetask.shortcut.CreateNoteTaskShortcutActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.NoDisplay"
+            android:label="@string/note_task_button_label"
+            android:icon="@drawable/ic_note_task_shortcut_widget">
+
+            <intent-filter>
+                <action android:name="android.intent.action.CREATE_SHORTCUT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".notetask.shortcut.LaunchNoteTaskActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.NoDisplay" />
+        <!-- endregion -->
 
         <!-- started from ControlsRequestReceiver -->
         <activity
@@ -932,12 +1016,33 @@
 
         <receiver android:name=".media.dialog.MediaOutputDialogReceiver"
                   android:exported="true">
-            <intent-filter>
+            <intent-filter android:priority="1">
                 <action android:name="com.android.systemui.action.LAUNCH_MEDIA_OUTPUT_DIALOG" />
                 <action android:name="com.android.systemui.action.LAUNCH_MEDIA_OUTPUT_BROADCAST_DIALOG" />
                 <action android:name="com.android.systemui.action.DISMISS_MEDIA_OUTPUT_DIALOG" />
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".volume.VolumePanelDialogReceiver"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.settings.panel.action.VOLUME" />
+                <action android:name="com.android.systemui.action.LAUNCH_VOLUME_PANEL_DIALOG" />
+                <action android:name="com.android.systemui.action.DISMISS_VOLUME_PANEL_DIALOG" />
+            </intent-filter>
+        </receiver>
+
+        <activity android:name=".logcat.LogAccessDialogActivity"
+                  android:theme="@android:style/Theme.Translucent.NoTitleBar"
+                  android:excludeFromRecents="true"
+                  android:exported="false">
+        </activity>
+
+        <provider
+            android:authorities="com.android.systemui.customization"
+            android:name="com.android.systemui.keyguard.CustomizationProvider"
+            android:exported="true"
+            android:permission="android.permission.CUSTOMIZE_SYSTEM_UI"
+            />
     </application>
 </manifest>

@@ -49,7 +49,6 @@ import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
-import android.hardware.biometrics.common.OperationContext;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -61,7 +60,9 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricFrameworkStatsLogger;
+import com.android.server.biometrics.log.OperationContextExt;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -106,6 +107,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
     }
 
     private final Context mContext;
+    @NonNull private final BiometricContext mBiometricContext;
     private final IStatusBarService mStatusBarService;
     @VisibleForTesting final IBiometricSysuiReceiver mSysuiReceiver;
     private final KeyStore mKeyStore;
@@ -148,6 +150,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
     private long mAuthenticatedTimeMs;
 
     AuthSession(@NonNull Context context,
+            @NonNull BiometricContext biometricContext,
             @NonNull IStatusBarService statusBarService,
             @NonNull IBiometricSysuiReceiver sysuiReceiver,
             @NonNull KeyStore keystore,
@@ -166,6 +169,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
             @NonNull List<FingerprintSensorPropertiesInternal> fingerprintSensorProperties) {
         Slog.d(TAG, "Creating AuthSession with: " + preAuthInfo);
         mContext = context;
+        mBiometricContext = biometricContext;
         mStatusBarService = statusBarService;
         mSysuiReceiver = sysuiReceiver;
         mKeyStore = keystore;
@@ -694,10 +698,8 @@ public final class AuthSession implements IBinder.DeathRecipient {
                         + ", Latency: " + latency);
             }
 
-            final OperationContext operationContext = new OperationContext();
-            operationContext.isCrypto = isCrypto();
             BiometricFrameworkStatsLogger.getInstance().authenticate(
-                    operationContext,
+                    mBiometricContext.updateContext(new OperationContextExt(), isCrypto()),
                     statsModality(),
                     BiometricsProtoEnums.ACTION_UNKNOWN,
                     BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
@@ -726,10 +728,8 @@ public final class AuthSession implements IBinder.DeathRecipient {
                         + ", Latency: " + latency);
             }
             // Auth canceled
-            final OperationContext operationContext = new OperationContext();
-            operationContext.isCrypto = isCrypto();
             BiometricFrameworkStatsLogger.getInstance().error(
-                    operationContext,
+                    mBiometricContext.updateContext(new OperationContextExt(), isCrypto()),
                     statsModality(),
                     BiometricsProtoEnums.ACTION_AUTHENTICATE,
                     BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,

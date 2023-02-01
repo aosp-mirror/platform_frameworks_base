@@ -16,34 +16,54 @@
 
 package com.android.server.wm.flicker.ime
 
-import androidx.test.filters.FlakyTest
+import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.annotation.Group4
+import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import org.junit.Assume
 import org.junit.Before
-
 import org.junit.FixMethodOrder
+import org.junit.Ignore
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test IME windows switching with 2-Buttons or gestural navigation.
- * To run this test: `atest FlickerTests:SwitchImeWindowsFromGestureNavTest`
+ * Test IME windows switching with 2-Buttons or gestural navigation. To run this test: `atest
+ * FlickerTests:SwitchImeWindowsFromGestureNavTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group4
-@FlakyTest(bugId = 228012334)
-class SwitchImeWindowsFromGestureNavTest_ShellTransit(testSpec: FlickerTestParameter)
-    : SwitchImeWindowsFromGestureNavTest(testSpec) {
+class SwitchImeWindowsFromGestureNavTest_ShellTransit(flicker: FlickerTest) :
+    SwitchImeWindowsFromGestureNavTest(flicker) {
     @Before
     override fun before() {
         Assume.assumeTrue(isShellTransitionsEnabled)
     }
+
+    @Presubmit @Test override fun entireScreenCovered() = super.entireScreenCovered()
+
+    @Presubmit
+    @Test
+    override fun imeLayerIsVisibleWhenSwitchingToImeApp() =
+        super.imeLayerIsVisibleWhenSwitchingToImeApp()
+
+    @Presubmit
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    @Presubmit
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+
+    /** {@inheritDoc} */
+    @Ignore("Nav bar window becomes invisible during quick switch")
+    @Test
+    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 }

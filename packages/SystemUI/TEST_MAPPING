@@ -1,25 +1,6 @@
 {
   // Looking for unit test presubmit configuration?
   // This currently lives in ATP config apct/system_ui/unit_test
-  "presubmit-large": [
-    {
-      "name": "PlatformScenarioTests",
-      "options": [
-        {
-            "include-filter": "android.platform.test.scenario.sysui"
-        },
-        {
-            "include-annotation": "android.platform.test.scenario.annotation.Scenario"
-        },
-        {
-            "exclude-annotation": "org.junit.Ignore"
-        },
-        {
-            "exclude-annotation": "android.platform.test.annotations.Postsubmit"
-        }
-      ]
-    }
-  ],
   "presubmit-sysui": [
     {
       "name": "PlatformScenarioTests",
@@ -35,6 +16,9 @@
         },
         {
             "exclude-annotation": "android.platform.test.annotations.Postsubmit"
+        },
+        {
+            "exclude-annotation": "android.platform.test.annotations.FlakyTest"
         }
       ]
     }
@@ -42,6 +26,18 @@
   "presubmit": [
     {
       "name": "SystemUIGoogleTests",
+      "options": [
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      // TODO(b/251476085): Consider merging with SystemUIGoogleScreenshotTests (in U+)
+      "name": "SystemUIGoogleBiometricsScreenshotTests",
       "options": [
         {
           "exclude-annotation": "org.junit.Ignore"
@@ -80,18 +76,18 @@
   // Curious where your @Scenario tests will run?
   //
   // @Ignore: nowhere
-  // @Staging or @FlakyTest: in staged-postsubmit, but not postsubmit or
-  // 	presubmit
+  // @FlakyTest: in staged-postsubmit, but not blocking postsubmit or
+  // presubmit
   // @Postsubmit: in postsubmit and staged-postsubmit, but not presubmit
   // none of the above: in presubmit, postsubmit, and staged-postsubmit
   //
-  // Therefore, please annotate new tests with @Staging, then with @Postsubmit
-  // once they're ready for postsubmit, then with neither once they're ready
-  // for presubmit.
+  // Ideally, please annotate new tests with @FlakyTest, then with @Postsubmit
+  // once they're ready for postsubmit as they will immediately block go/android-platinum,
+  // then with neither once they're ready for presubmit.
   //
-  // If you don't use @Staging or @Postsubmit, your new test will immediately
+  // If you don't use @Postsubmit, your new test will immediately
   // block presubmit, which is probably not what you want!
-  "platinum-postsubmit": [
+  "sysui-platinum-postsubmit": [
     {
       "name": "PlatformScenarioTests",
       "options": [
@@ -106,11 +102,14 @@
         },
         {
             "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+            "exclude-annotation": "android.platform.test.annotations.FlakyTest"
         }
       ]
     }
   ],
-  "staged-platinum-postsubmit": [
+  "sysui-staged-platinum-postsubmit": [
     {
       "name": "PlatformScenarioTests",
       "options": [
@@ -122,6 +121,25 @@
         },
         {
             "exclude-annotation": "org.junit.Ignore"
+        }
+      ]
+    }
+  ],
+  "ironwood-postsubmit": [
+    {
+      "name": "PlatformScenarioTests",
+      "options": [
+        {
+            "include-annotation": "android.platform.test.annotations.IwTest"
+        },
+        {
+            "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+            "include-filter": "android.platform.test.scenario.sysui"
+        },
+        {
+            "exclude-annotation": "android.platform.test.annotations.FlakyTest"
         }
       ]
     }

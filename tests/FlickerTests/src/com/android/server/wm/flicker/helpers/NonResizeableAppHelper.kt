@@ -17,18 +17,15 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
-import android.support.test.launcherhelper.ILauncherStrategy
-import android.support.test.launcherhelper.LauncherStrategyFactory
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.parser.toFlickerComponent
 
-class NonResizeableAppHelper @JvmOverloads constructor(
+class NonResizeableAppHelper
+@JvmOverloads
+constructor(
     instr: Instrumentation,
-    launcherName: String = ActivityOptions.NON_RESIZEABLE_ACTIVITY_LAUNCHER_NAME,
-    component: FlickerComponentName =
-        ActivityOptions.NON_RESIZEABLE_ACTIVITY_COMPONENT_NAME.toFlickerComponent(),
-    launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
-        .getInstance(instr)
-        .launcherStrategy
-) : StandardAppHelper(instr, launcherName, component, launcherStrategy)
+    launcherName: String = ActivityOptions.NonResizeableActivity.LABEL,
+    component: ComponentNameMatcher =
+        ActivityOptions.NonResizeableActivity.COMPONENT.toFlickerComponent()
+) : StandardAppHelper(instr, launcherName, component)

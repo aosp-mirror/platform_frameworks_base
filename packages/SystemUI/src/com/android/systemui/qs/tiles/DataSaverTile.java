@@ -24,10 +24,12 @@ import android.widget.Switch;
 
 import androidx.annotation.Nullable;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -45,6 +47,8 @@ import javax.inject.Inject;
 
 public class DataSaverTile extends QSTileImpl<BooleanState> implements
         DataSaverController.Listener{
+
+    private static final String INTERACTION_JANK_TAG = "start_data_saver";
 
     private final DataSaverController mDataSaverController;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
@@ -102,7 +106,9 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
             dialog.setShowForAllUsers(true);
 
             if (view != null) {
-                mDialogLaunchAnimator.showFromView(dialog, view);
+                mDialogLaunchAnimator.showFromView(dialog, view, new DialogCuj(
+                        InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
+                        INTERACTION_JANK_TAG));
             } else {
                 dialog.show();
             }
@@ -122,13 +128,13 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
-        state.value = arg instanceof Boolean ? (Boolean) arg
+        state.value = arg instanceof Boolean ? ((Boolean) arg).booleanValue()
                 : mDataSaverController.isDataSaverEnabled();
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.label = mContext.getString(R.string.data_saver);
         state.contentDescription = state.label;
-        state.icon = ResourceIcon.get(state.value ? R.drawable.ic_data_saver
-                : R.drawable.ic_data_saver_off);
+        state.icon = ResourceIcon.get(state.value ? R.drawable.qs_data_saver_icon_on
+                : R.drawable.qs_data_saver_icon_off);
         state.expandedAccessibilityClassName = Switch.class.getName();
     }
 

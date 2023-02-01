@@ -25,13 +25,13 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.hardware.display.VirtualDisplayConfig;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.ContentRecordingSession;
 import android.view.Surface;
-import android.window.WindowContainerToken;
 
 import java.util.Map;
 
@@ -66,13 +66,20 @@ public final class MediaProjection {
         }
     }
 
-    /** Register a listener to receive notifications about when the {@link
-     * MediaProjection} changes state.
+    /**
+     * Register a listener to receive notifications about when the {@link MediaProjection} or
+     * captured content changes state.
+     * <p>
+     * The callback should be registered before invoking
+     * {@link #createVirtualDisplay(String, int, int, int, int, Surface, VirtualDisplay.Callback,
+     * Handler)}
+     * to ensure that any notifications on the callback are not missed.
+     * </p>
      *
      * @param callback The callback to call.
-     * @param handler The handler on which the callback should be invoked, or
-     * null if the callback should be invoked on the calling thread's looper.
-     *
+     * @param handler  The handler on which the callback should be invoked, or
+     *                 null if the callback should be invoked on the calling thread's looper.
+     * @throws IllegalArgumentException If the given callback is null.
      * @see #unregisterCallback
      */
     public void registerCallback(Callback callback, Handler handler) {
@@ -85,10 +92,11 @@ public final class MediaProjection {
         mCallbacks.put(callback, new CallbackRecord(callback, handler));
     }
 
-    /** Unregister a MediaProjection listener.
+    /**
+     * Unregister a {@link MediaProjection} listener.
      *
      * @param callback The callback to unregister.
-     *
+     * @throws IllegalArgumentException If the given callback is null.
      * @see #registerCallback
      */
     public void unregisterCallback(Callback callback) {
@@ -172,18 +180,16 @@ public final class MediaProjection {
             @NonNull VirtualDisplayConfig.Builder virtualDisplayConfig,
             @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
         try {
-            final WindowContainerToken taskWindowContainerToken =
-                    mImpl.getTaskRecordingWindowContainerToken();
+            final IBinder launchCookie = mImpl.getLaunchCookie();
             Context windowContext = null;
             ContentRecordingSession session;
-            if (taskWindowContainerToken == null) {
+            if (launchCookie == null) {
                 windowContext = mContext.createWindowContext(mContext.getDisplayNoVerify(),
                         TYPE_APPLICATION, null /* options */);
                 session = ContentRecordingSession.createDisplaySession(
                         windowContext.getWindowContextToken());
             } else {
-                session = ContentRecordingSession.createTaskSession(
-                        taskWindowContainerToken.asBinder());
+                session = ContentRecordingSession.createTaskSession(launchCookie);
             }
             virtualDisplayConfig.setWindowManagerMirroring(true);
             final DisplayManager dm = mContext.getSystemService(DisplayManager.class);
@@ -236,7 +242,7 @@ public final class MediaProjection {
     /**
      * Callbacks for the projection session.
      */
-    public static abstract class Callback {
+    public abstract static class Callback {
         /**
          * Called when the MediaProjection session is no longer valid.
          * <p>
@@ -245,6 +251,74 @@ public final class MediaProjection {
          * </p>
          */
         public void onStop() { }
+
+        /**
+         * Indicates the width and height of the captured region in pixels. Called immediately after
+         * capture begins to provide the app with accurate sizing for the stream. Also called
+         * when the region captured in this MediaProjection session is resized.
+         * <p>
+         * The given width and height, in pixels, corresponds to the same width and height that
+         * would be returned from {@link android.view.WindowMetrics#getBounds()}
+         * </p>
+         * <p>
+         * Without the application resizing the {@link VirtualDisplay} (returned from
+         * {@code MediaProjection#createVirtualDisplay}) and output {@link Surface} (provided
+         * to {@code MediaProjection#createVirtualDisplay}), the captured stream will have
+         * letterboxing (black bars) around the recorded content to make up for the
+         * difference in aspect ratio.
+         * </p>
+         * <p>
+         * The application can prevent the letterboxing by overriding this method, and
+         * updating the size of both the {@link VirtualDisplay} and output {@link Surface}:
+         * </p>
+         *
+         * <pre>
+         * &#x40;Override
+         * public String onCapturedContentResize(int width, int height) {
+         *     // VirtualDisplay instance from MediaProjection#createVirtualDisplay
+         *     virtualDisplay.resize(width, height, dpi);
+         *
+         *     // Create a new Surface with the updated size (depending on the application's use
+         *     // case, this may be through different APIs - see Surface documentation for
+         *     // options).
+         *     int texName; // the OpenGL texture object name
+         *     SurfaceTexture surfaceTexture = new SurfaceTexture(texName);
+         *     surfaceTexture.setDefaultBufferSize(width, height);
+         *     Surface surface = new Surface(surfaceTexture);
+         *
+         *     // Ensure the VirtualDisplay has the updated Surface to send the capture to.
+         *     virtualDisplay.setSurface(surface);
+         * }</pre>
+         */
+        public void onCapturedContentResize(int width, int height) { }
+
+        /**
+         * Indicates the visibility of the captured region has changed. Called immediately after
+         * capture begins with the initial visibility state, and when visibility changes. Provides
+         * the app with accurate state for presenting its own UI. The application can take advantage
+         * of this by showing or hiding the captured content, based on if the captured region is
+         * currently visible to the user.
+         * <p>
+         * For example, if the user elected to capture a single app (from the activity shown from
+         * {@link MediaProjectionManager#createScreenCaptureIntent()}), the callback may be
+         * triggered for the following reasons:
+         * <ul>
+         *     <li>
+         *         The captured region may become visible ({@code isVisible} with value
+         *         {@code true}), because the captured app is at least partially visible. This may
+         *         happen if the captured app was previously covered by another app. The other app
+         *         moves to show at least some portion of the captured app.
+         *     </li>
+         *     <li>
+         *         The captured region may become invisible ({@code isVisible} with value
+         *         {@code false}) if it is entirely hidden. This may happen if the captured app is
+         *         entirely covered by another app, or the user navigates away from the captured
+         *         app.
+         *     </li>
+         * </ul>
+         * </p>
+         */
+        public void onCapturedContentVisibilityChanged(boolean isVisible) { }
     }
 
     private final class MediaProjectionCallback extends IMediaProjectionCallback.Stub {
@@ -252,6 +326,20 @@ public final class MediaProjection {
         public void onStop() {
             for (CallbackRecord cbr : mCallbacks.values()) {
                 cbr.onStop();
+            }
+        }
+
+        @Override
+        public void onCapturedContentResize(int width, int height) {
+            for (CallbackRecord cbr : mCallbacks.values()) {
+                cbr.onCapturedContentResize(width, height);
+            }
+        }
+
+        @Override
+        public void onCapturedContentVisibilityChanged(boolean isVisible) {
+            for (CallbackRecord cbr : mCallbacks.values()) {
+                cbr.onCapturedContentVisibilityChanged(isVisible);
             }
         }
     }
@@ -272,6 +360,14 @@ public final class MediaProjection {
                     mCallback.onStop();
                 }
             });
+        }
+
+        public void onCapturedContentResize(int width, int height) {
+            mHandler.post(() -> mCallback.onCapturedContentResize(width, height));
+        }
+
+        public void onCapturedContentVisibilityChanged(boolean isVisible) {
+            mHandler.post(() -> mCallback.onCapturedContentVisibilityChanged(isVisible));
         }
     }
 }

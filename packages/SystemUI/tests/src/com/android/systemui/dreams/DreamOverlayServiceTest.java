@@ -19,30 +19,39 @@ package com.android.systemui.dreams;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.IBinder;
-import android.service.dreams.DreamService;
+import android.os.RemoteException;
 import android.service.dreams.IDreamOverlay;
 import android.service.dreams.IDreamOverlayCallback;
+import android.service.dreams.IDreamOverlayClient;
+import android.service.dreams.IDreamOverlayClientCallback;
 import android.testing.AndroidTestingRunner;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 
 import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dreams.complication.ComplicationLayoutEngine;
+import com.android.systemui.dreams.complication.dagger.ComplicationComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
+import com.android.systemui.dreams.dreamcomplication.HideComplicationTouchHandler;
 import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
+import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
@@ -51,17 +60,23 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class DreamOverlayServiceTest extends SysuiTestCase {
+    private static final ComponentName LOW_LIGHT_COMPONENT = new ComponentName("package",
+            "lowlight");
+    private static final String DREAM_COMPONENT = "package/dream";
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
 
     @Mock
-    LifecycleOwner mLifecycleOwner;
+    DreamOverlayLifecycleOwner mLifecycleOwner;
 
     @Mock
     LifecycleRegistry mLifecycleRegistry;
@@ -76,6 +91,26 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
 
     @Mock
     WindowManagerImpl mWindowManager;
+
+    @Mock
+    ComplicationComponent.Factory mComplicationComponentFactory;
+
+    @Mock
+    ComplicationComponent mComplicationComponent;
+
+    @Mock
+    ComplicationLayoutEngine mComplicationVisibilityController;
+
+    @Mock
+    com.android.systemui.dreams.dreamcomplication.dagger.ComplicationComponent.Factory
+            mDreamComplicationComponentFactory;
+
+    @Mock
+    com.android.systemui.dreams.dreamcomplication.dagger.ComplicationComponent
+            mDreamComplicationComponent;
+
+    @Mock
+    HideComplicationTouchHandler mHideComplicationTouchHandler;
 
     @Mock
     DreamOverlayComponent.Factory mDreamOverlayComponentFactory;
@@ -102,43 +137,81 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     ViewGroup mDreamOverlayContainerViewParent;
 
     @Mock
+    TouchInsetManager mTouchInsetManager;
+
+    @Mock
     UiEventLogger mUiEventLogger;
+
+    @Mock
+    DreamOverlayCallbackController mDreamOverlayCallbackController;
+
+    @Captor
+    ArgumentCaptor<View> mViewCaptor;
 
     DreamOverlayService mService;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mContext.addMockSystemService(WindowManager.class, mWindowManager);
 
         when(mDreamOverlayComponent.getDreamOverlayContainerViewController())
                 .thenReturn(mDreamOverlayContainerViewController);
-        when(mDreamOverlayComponent.getLifecycleOwner())
-                .thenReturn(mLifecycleOwner);
-        when(mDreamOverlayComponent.getLifecycleRegistry())
+        when(mLifecycleOwner.getRegistry())
                 .thenReturn(mLifecycleRegistry);
         when(mDreamOverlayComponent.getDreamOverlayTouchMonitor())
                 .thenReturn(mDreamOverlayTouchMonitor);
-        when(mDreamOverlayComponentFactory
+        when(mComplicationComponentFactory
+                .create(any(), any(), any(), any()))
+                .thenReturn(mComplicationComponent);
+        when(mComplicationComponent.getVisibilityController())
+                .thenReturn(mComplicationVisibilityController);
+        when(mDreamComplicationComponent.getHideComplicationTouchHandler())
+                .thenReturn(mHideComplicationTouchHandler);
+        when(mDreamComplicationComponentFactory
                 .create(any(), any()))
+                .thenReturn(mDreamComplicationComponent);
+        when(mDreamOverlayComponentFactory
+                .create(any(), any(), any(), any()))
                 .thenReturn(mDreamOverlayComponent);
         when(mDreamOverlayContainerViewController.getContainerView())
                 .thenReturn(mDreamOverlayContainerView);
 
-        mService = new DreamOverlayService(mContext, mMainExecutor,
+        mService = new DreamOverlayService(
+                mContext,
+                mLifecycleOwner,
+                mMainExecutor,
+                mWindowManager,
+                mComplicationComponentFactory,
+                mDreamComplicationComponentFactory,
                 mDreamOverlayComponentFactory,
                 mStateController,
                 mKeyguardUpdateMonitor,
-                mUiEventLogger);
+                mUiEventLogger,
+                mTouchInsetManager,
+                LOW_LIGHT_COMPONENT,
+                mDreamOverlayCallbackController);
+    }
+
+    public IDreamOverlayClient getClient() throws RemoteException {
+        final IBinder proxy = mService.onBind(new Intent());
+        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+        final IDreamOverlayClientCallback callback =
+                Mockito.mock(IDreamOverlayClientCallback.class);
+        overlay.getClient(callback);
+        final ArgumentCaptor<IDreamOverlayClient> clientCaptor =
+                ArgumentCaptor.forClass(IDreamOverlayClient.class);
+        verify(callback).onDreamOverlayClient(clientCaptor.capture());
+
+        return clientCaptor.getValue();
     }
 
     @Test
     public void testOnStartMetricsLogged() throws Exception {
-        final IBinder proxy = mService.onBind(new Intent());
-        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+        final IDreamOverlayClient client = getClient();
 
         // Inform the overlay service of dream starting.
-        overlay.startDream(mWindowParams, mDreamOverlayCallback);
+        client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
+                false /*shouldShowComplication*/);
         mMainExecutor.runAllReady();
 
         verify(mUiEventLogger).log(DreamOverlayService.DreamOverlayEvent.DREAM_OVERLAY_ENTER_START);
@@ -148,11 +221,11 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
 
     @Test
     public void testOverlayContainerViewAddedToWindow() throws Exception {
-        final IBinder proxy = mService.onBind(new Intent());
-        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+        final IDreamOverlayClient client = getClient();
 
         // Inform the overlay service of dream starting.
-        overlay.startDream(mWindowParams, mDreamOverlayCallback);
+        client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
+                false /*shouldShowComplication*/);
         mMainExecutor.runAllReady();
 
         verify(mWindowManager).addView(any(), any());
@@ -160,11 +233,11 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
 
     @Test
     public void testDreamOverlayContainerViewControllerInitialized() throws Exception {
-        final IBinder proxy = mService.onBind(new Intent());
-        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+        final IDreamOverlayClient client = getClient();
 
         // Inform the overlay service of dream starting.
-        overlay.startDream(mWindowParams, mDreamOverlayCallback);
+        client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
+                false /*shouldShowComplication*/);
         mMainExecutor.runAllReady();
 
         verify(mDreamOverlayContainerViewController).init();
@@ -177,60 +250,193 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 .thenReturn(mDreamOverlayContainerViewParent)
                 .thenReturn(null);
 
-        final IBinder proxy = mService.onBind(new Intent());
-        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+        final IDreamOverlayClient client = getClient();
 
         // Inform the overlay service of dream starting.
-        overlay.startDream(mWindowParams, mDreamOverlayCallback);
+        client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
+                false /*shouldShowComplication*/);
         mMainExecutor.runAllReady();
 
         verify(mDreamOverlayContainerViewParent).removeView(mDreamOverlayContainerView);
     }
 
     @Test
-    public void testShouldShowComplicationsFalseByDefault() {
-        mService.onBind(new Intent());
+    public void testShouldShowComplicationsSetByStartDream() throws RemoteException {
+        final IDreamOverlayClient client = getClient();
 
-        assertThat(mService.shouldShowComplications()).isFalse();
-    }
-
-    @Test
-    public void testShouldShowComplicationsSetByIntentExtra() {
-        final Intent intent = new Intent();
-        intent.putExtra(DreamService.EXTRA_SHOW_COMPLICATIONS, true);
-        mService.onBind(intent);
+        // Inform the overlay service of dream starting.
+        client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
+                true /*shouldShowComplication*/);
 
         assertThat(mService.shouldShowComplications()).isTrue();
     }
 
     @Test
-    public void testDestroy() {
+    public void testLowLightSetByStartDream() throws RemoteException {
+        final IDreamOverlayClient client = getClient();
+
+        // Inform the overlay service of dream starting.
+        client.startDream(mWindowParams, mDreamOverlayCallback,
+                LOW_LIGHT_COMPONENT.flattenToString(), false /*shouldShowComplication*/);
+        mMainExecutor.runAllReady();
+
+        assertThat(mService.getDreamComponent()).isEqualTo(LOW_LIGHT_COMPONENT);
+        verify(mStateController).setLowLightActive(true);
+    }
+
+    @Test
+    public void testOnEndDream() throws RemoteException {
+        final IDreamOverlayClient client = getClient();
+
+        // Inform the overlay service of dream starting.
+        client.startDream(mWindowParams, mDreamOverlayCallback,
+                LOW_LIGHT_COMPONENT.flattenToString(), false /*shouldShowComplication*/);
+        mMainExecutor.runAllReady();
+
+        // Verify view added.
+        verify(mWindowManager).addView(mViewCaptor.capture(), any());
+
+        // Service destroyed.
+        mService.onEndDream();
+        mMainExecutor.runAllReady();
+
+        // Verify view removed.
+        verify(mWindowManager).removeView(mViewCaptor.getValue());
+
+        // Verify state correctly set.
+        verify(mStateController).setOverlayActive(false);
+        verify(mStateController).setLowLightActive(false);
+        verify(mStateController).setEntryAnimationsFinished(false);
+    }
+
+    @Test
+    public void testDestroy() throws RemoteException {
+        final IDreamOverlayClient client = getClient();
+
+        // Inform the overlay service of dream starting.
+        client.startDream(mWindowParams, mDreamOverlayCallback,
+                LOW_LIGHT_COMPONENT.flattenToString(), false /*shouldShowComplication*/);
+        mMainExecutor.runAllReady();
+
+        // Verify view added.
+        verify(mWindowManager).addView(mViewCaptor.capture(), any());
+
+        // Service destroyed.
         mService.onDestroy();
         mMainExecutor.runAllReady();
 
+        // Verify view removed.
+        verify(mWindowManager).removeView(mViewCaptor.getValue());
+
+        // Verify state correctly set.
         verify(mKeyguardUpdateMonitor).removeCallback(any());
         verify(mLifecycleRegistry).setCurrentState(Lifecycle.State.DESTROYED);
         verify(mStateController).setOverlayActive(false);
+        verify(mStateController).setLowLightActive(false);
+        verify(mStateController).setEntryAnimationsFinished(false);
+    }
+
+    @Test
+    public void testDoNotRemoveViewOnDestroyIfOverlayNotStarted() {
+        // Service destroyed without ever starting dream.
+        mService.onDestroy();
+        mMainExecutor.runAllReady();
+
+        // Verify no view is removed.
+        verify(mWindowManager, never()).removeView(any());
+
+        // Verify state still correctly set.
+        verify(mKeyguardUpdateMonitor).removeCallback(any());
+        verify(mLifecycleRegistry).setCurrentState(Lifecycle.State.DESTROYED);
+        verify(mStateController).setOverlayActive(false);
+        verify(mStateController).setLowLightActive(false);
     }
 
     @Test
     public void testDecorViewNotAddedToWindowAfterDestroy() throws Exception {
-        when(mDreamOverlayContainerView.getParent())
-                .thenReturn(mDreamOverlayContainerViewParent)
-                .thenReturn(null);
-
-        final IBinder proxy = mService.onBind(new Intent());
-        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
-
-        // Inform the overlay service of dream starting.
-        overlay.startDream(mWindowParams, mDreamOverlayCallback);
+        final IDreamOverlayClient client = getClient();
 
         // Destroy the service.
         mService.onDestroy();
+        mMainExecutor.runAllReady();
 
-        // Run executor tasks.
+        // Inform the overlay service of dream starting.
+        client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
+                false /*shouldShowComplication*/);
         mMainExecutor.runAllReady();
 
         verify(mWindowManager, never()).addView(any(), any());
+    }
+
+    @Test
+    public void testNeverRemoveDecorViewIfNotAdded() {
+        // Service destroyed before dream started.
+        mService.onDestroy();
+        mMainExecutor.runAllReady();
+
+        verify(mWindowManager, never()).removeView(any());
+    }
+
+    @Test
+    public void testResetCurrentOverlayWhenConnectedToNewDream() throws RemoteException {
+        final IDreamOverlayClient client = getClient();
+
+        // Inform the overlay service of dream starting. Do not show dream complications.
+        client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
+                false /*shouldShowComplication*/);
+        mMainExecutor.runAllReady();
+
+        // Verify that a new window is added.
+        verify(mWindowManager).addView(mViewCaptor.capture(), any());
+        final View windowDecorView = mViewCaptor.getValue();
+
+        // Assert that the overlay is not showing complications.
+        assertThat(mService.shouldShowComplications()).isFalse();
+
+        clearInvocations(mDreamOverlayComponent);
+        clearInvocations(mWindowManager);
+
+        // New dream starting with dream complications showing. Note that when a new dream is
+        // binding to the dream overlay service, it receives the same instance of IBinder as the
+        // first one.
+        client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
+                true /*shouldShowComplication*/);
+        mMainExecutor.runAllReady();
+
+        // Assert that the overlay is showing complications.
+        assertThat(mService.shouldShowComplications()).isTrue();
+
+        // Verify that the old overlay window has been removed, and a new one created.
+        verify(mWindowManager).removeView(windowDecorView);
+        verify(mWindowManager).addView(any(), any());
+
+        // Verify that new instances of overlay container view controller and overlay touch monitor
+        // are created.
+        verify(mDreamOverlayComponent).getDreamOverlayContainerViewController();
+        verify(mDreamOverlayComponent).getDreamOverlayTouchMonitor();
+    }
+
+    @Test
+    public void testWakeUp() throws RemoteException {
+        final IDreamOverlayClient client = getClient();
+
+        // Inform the overlay service of dream starting.
+        client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
+                true /*shouldShowComplication*/);
+        mMainExecutor.runAllReady();
+
+        final Runnable callback = mock(Runnable.class);
+        mService.onWakeUp(callback);
+        mMainExecutor.runAllReady();
+        verify(mDreamOverlayContainerViewController).wakeUp(callback, mMainExecutor);
+        verify(mDreamOverlayCallbackController).onWakeUp();
+    }
+
+    @Test
+    public void testWakeUpBeforeStartDoesNothing() {
+        final Runnable callback = mock(Runnable.class);
+        mService.onWakeUp(callback);
+        mMainExecutor.runAllReady();
+        verify(mDreamOverlayContainerViewController, never()).wakeUp(callback, mMainExecutor);
     }
 }

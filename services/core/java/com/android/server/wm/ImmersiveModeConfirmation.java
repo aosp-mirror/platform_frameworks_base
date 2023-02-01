@@ -57,7 +57,6 @@ import android.view.WindowInsets;
 import android.view.WindowInsets.Type;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
-import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.Button;
@@ -99,23 +98,21 @@ public class ImmersiveModeConfirmation {
     // Local copy of vr mode enabled state, to avoid calling into VrManager with
     // the lock held.
     private boolean mVrModeEnabled;
+    private boolean mCanSystemBarsBeShownByUser;
     private int mLockTaskState = LOCK_TASK_MODE_NONE;
 
-    ImmersiveModeConfirmation(Context context, Looper looper, boolean vrModeEnabled) {
+    ImmersiveModeConfirmation(Context context, Looper looper, boolean vrModeEnabled,
+            boolean canSystemBarsBeShownByUser) {
         final Display display = context.getDisplay();
         final Context uiContext = ActivityThread.currentActivityThread().getSystemUiContext();
         mContext = display.getDisplayId() == DEFAULT_DISPLAY
                 ? uiContext : uiContext.createDisplayContext(display);
         mHandler = new H(looper);
-        mShowDelayMs = getNavBarExitDuration() * 3;
+        mShowDelayMs = context.getResources().getInteger(R.integer.dock_enter_exit_duration) * 3L;
         mPanicThresholdMs = context.getResources()
                 .getInteger(R.integer.config_immersive_mode_confirmation_panic);
         mVrModeEnabled = vrModeEnabled;
-    }
-
-    private long getNavBarExitDuration() {
-        Animation exit = AnimationUtils.loadAnimation(mContext, R.anim.dock_bottom_exit);
-        return exit != null ? exit.getDuration() : 0;
+        mCanSystemBarsBeShownByUser = canSystemBarsBeShownByUser;
     }
 
     static boolean loadSetting(int currentUserId, Context context) {
@@ -171,6 +168,7 @@ public class ImmersiveModeConfirmation {
             if ((DEBUG_SHOW_EVERY_TIME || !sConfirmed)
                     && userSetupComplete
                     && !mVrModeEnabled
+                    && mCanSystemBarsBeShownByUser
                     && !navBarEmpty
                     && !UserManager.isDeviceInDemoMode(mContext)
                     && (mLockTaskState != LOCK_TASK_MODE_LOCKED)) {

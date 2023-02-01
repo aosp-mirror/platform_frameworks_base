@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothLeAudio;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothStatusCodes;
 import android.content.Context;
@@ -73,6 +74,10 @@ public class CachedBluetoothDeviceTest {
     private PanProfile mPanProfile;
     @Mock
     private HearingAidProfile mHearingAidProfile;
+    @Mock
+    private HapClientProfile mHapClientProfile;
+    @Mock
+    private LeAudioProfile mLeAudioProfile;
     @Mock
     private BluetoothDevice mDevice;
     @Mock
@@ -354,7 +359,7 @@ public class CachedBluetoothDeviceTest {
         assertThat(mCachedDevice.getConnectionSummary()).isNull();
 
         // Set device as Active for Hearing Aid and test connection state summary
-        mCachedDevice.setDeviceSide(HearingAidProfile.DeviceSide.SIDE_LEFT);
+        mCachedDevice.setHearingAidInfo(getLeftAshaHearingAidInfo());
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEARING_AID);
         assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active, left only");
 
@@ -399,7 +404,7 @@ public class CachedBluetoothDeviceTest {
         //   1. Profile:       {HEARING_AID, Connected, Active, Right ear}
         //   2. Audio Manager: In Call
         updateProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
-        mCachedDevice.setDeviceSide(HearingAidProfile.DeviceSide.SIDE_RIGHT);
+        mCachedDevice.setHearingAidInfo(getRightAshaHearingAidInfo());
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEARING_AID);
         mAudioManager.setMode(AudioManager.MODE_IN_CALL);
 
@@ -413,9 +418,9 @@ public class CachedBluetoothDeviceTest {
         // Arrange:
         //   1. Profile:       {HEARING_AID, Connected, Active, Both ear}
         //   2. Audio Manager: In Call
-        mCachedDevice.setDeviceSide(HearingAidProfile.DeviceSide.SIDE_RIGHT);
+        mCachedDevice.setHearingAidInfo(getRightAshaHearingAidInfo());
         updateProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
-        mSubCachedDevice.setDeviceSide(HearingAidProfile.DeviceSide.SIDE_LEFT);
+        mSubCachedDevice.setHearingAidInfo(getLeftAshaHearingAidInfo());
         updateSubDeviceProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
         mCachedDevice.setSubDevice(mSubCachedDevice);
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEARING_AID);
@@ -440,6 +445,26 @@ public class CachedBluetoothDeviceTest {
         // Act & Assert:
         //   Get "Active, 10% battery" result with Battery Level 10.
         assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active, 10% battery");
+    }
+
+    @Test
+    public void getConnectionSummary_testActiveDeviceLeAudioHearingAid() {
+        // Test without battery level
+        // Set HAP Client and LE Audio profile to be connected and test connection state summary
+        when(mProfileManager.getHapClientProfile()).thenReturn(mHapClientProfile);
+        updateProfileStatus(mHapClientProfile, BluetoothProfile.STATE_CONNECTED);
+        updateProfileStatus(mLeAudioProfile, BluetoothProfile.STATE_CONNECTED);
+        assertThat(mCachedDevice.getConnectionSummary()).isNull();
+
+        // Set device as Active for LE Audio and test connection state summary
+        mCachedDevice.setHearingAidInfo(getLeftLeAudioHearingAidInfo());
+        mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.LE_AUDIO);
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active, left only");
+
+        // Set LE Audio profile to be disconnected and test connection state summary
+        mCachedDevice.onActiveDeviceChanged(false, BluetoothProfile.LE_AUDIO);
+        mCachedDevice.onProfileStateChanged(mLeAudioProfile, BluetoothProfile.STATE_DISCONNECTED);
+        assertThat(mCachedDevice.getConnectionSummary()).isNull();
     }
 
     @Test
@@ -859,21 +884,21 @@ public class CachedBluetoothDeviceTest {
     }
 
     @Test
-    public void isConnectedHearingAidDevice_connected_returnTrue() {
+    public void isConnectedAshaHearingAidDevice_connected_returnTrue() {
         when(mProfileManager.getHearingAidProfile()).thenReturn(mHearingAidProfile);
         when(mHearingAidProfile.getConnectionStatus(mDevice)).
                 thenReturn(BluetoothProfile.STATE_CONNECTED);
 
-        assertThat(mCachedDevice.isConnectedHearingAidDevice()).isTrue();
+        assertThat(mCachedDevice.isConnectedAshaHearingAidDevice()).isTrue();
     }
 
     @Test
-    public void isConnectedHearingAidDevice_disconnected_returnFalse() {
+    public void isConnectedAshaHearingAidDevice_disconnected_returnFalse() {
         when(mProfileManager.getHearingAidProfile()).thenReturn(mHearingAidProfile);
         when(mHearingAidProfile.getConnectionStatus(mDevice)).
                 thenReturn(BluetoothProfile.STATE_DISCONNECTED);
 
-        assertThat(mCachedDevice.isConnectedHearingAidDevice()).isFalse();
+        assertThat(mCachedDevice.isConnectedAshaHearingAidDevice()).isFalse();
     }
 
     @Test
@@ -891,10 +916,10 @@ public class CachedBluetoothDeviceTest {
     }
 
     @Test
-    public void isConnectedHearingAidDevice_profileIsNull_returnFalse() {
+    public void isConnectedAshaHearingAidDevice_profileIsNull_returnFalse() {
         when(mProfileManager.getHearingAidProfile()).thenReturn(null);
 
-        assertThat(mCachedDevice.isConnectedHearingAidDevice()).isFalse();
+        assertThat(mCachedDevice.isConnectedAshaHearingAidDevice()).isFalse();
     }
 
     @Test
@@ -965,33 +990,33 @@ public class CachedBluetoothDeviceTest {
 
         mCachedDevice.mRssi = RSSI_1;
         mCachedDevice.mJustDiscovered = JUSTDISCOVERED_1;
-        mCachedDevice.setDeviceSide(HearingAidProfile.DeviceSide.SIDE_LEFT);
+        mCachedDevice.setHearingAidInfo(getLeftAshaHearingAidInfo());
         mSubCachedDevice.mRssi = RSSI_2;
         mSubCachedDevice.mJustDiscovered = JUSTDISCOVERED_2;
-        mSubCachedDevice.setDeviceSide(HearingAidProfile.DeviceSide.SIDE_RIGHT);
+        mSubCachedDevice.setHearingAidInfo(getRightAshaHearingAidInfo());
         mCachedDevice.setSubDevice(mSubCachedDevice);
 
         mCachedDevice.switchSubDeviceContent();
 
+        verify(mCachedDevice).release();
         assertThat(mCachedDevice.mRssi).isEqualTo(RSSI_2);
         assertThat(mCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_2);
         assertThat(mCachedDevice.mDevice).isEqualTo(mSubDevice);
-        assertThat(mCachedDevice.getDeviceSide()).isEqualTo(
-                HearingAidProfile.DeviceSide.SIDE_RIGHT);
+        assertThat(mCachedDevice.getDeviceSide()).isEqualTo(HearingAidInfo.DeviceSide.SIDE_RIGHT);
+        verify(mSubCachedDevice).release();
         assertThat(mSubCachedDevice.mRssi).isEqualTo(RSSI_1);
         assertThat(mSubCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_1);
         assertThat(mSubCachedDevice.mDevice).isEqualTo(mDevice);
-        assertThat(mSubCachedDevice.getDeviceSide()).isEqualTo(
-                HearingAidProfile.DeviceSide.SIDE_LEFT);
+        assertThat(mSubCachedDevice.getDeviceSide()).isEqualTo(HearingAidInfo.DeviceSide.SIDE_LEFT);
     }
 
     @Test
     public void getConnectionSummary_profileConnectedFail_showErrorMessage() {
-        final A2dpProfile profle = mock(A2dpProfile.class);
-        mCachedDevice.onProfileStateChanged(profle, BluetoothProfile.STATE_CONNECTED);
+        final A2dpProfile profile = mock(A2dpProfile.class);
+        mCachedDevice.onProfileStateChanged(profile, BluetoothProfile.STATE_CONNECTED);
         mCachedDevice.setProfileConnectedStatus(BluetoothProfile.A2DP, true);
 
-        when(profle.getConnectionStatus(mDevice)).thenReturn(BluetoothProfile.STATE_CONNECTED);
+        when(profile.getConnectionStatus(mDevice)).thenReturn(BluetoothProfile.STATE_CONNECTED);
 
         assertThat(mCachedDevice.getConnectionSummary()).isEqualTo(
                 mContext.getString(R.string.profile_connect_timeout_subtext));
@@ -1049,5 +1074,75 @@ public class CachedBluetoothDeviceTest {
         mCachedDevice.releaseLruCache();
 
         assertThat(mCachedDevice.mDrawableCache.size()).isEqualTo(0);
+    }
+
+    @Test
+    public void switchMemberDeviceContent_switchMainDevice_switchesSuccessful() {
+        mCachedDevice.mRssi = RSSI_1;
+        mCachedDevice.mJustDiscovered = JUSTDISCOVERED_1;
+        mSubCachedDevice.mRssi = RSSI_2;
+        mSubCachedDevice.mJustDiscovered = JUSTDISCOVERED_2;
+        mCachedDevice.addMemberDevice(mSubCachedDevice);
+
+        mCachedDevice.switchMemberDeviceContent(mSubCachedDevice);
+
+        assertThat(mCachedDevice.mRssi).isEqualTo(RSSI_2);
+        assertThat(mCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_2);
+        assertThat(mCachedDevice.mDevice).isEqualTo(mSubDevice);
+        assertThat(mSubCachedDevice.mRssi).isEqualTo(RSSI_1);
+        assertThat(mSubCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_1);
+        assertThat(mSubCachedDevice.mDevice).isEqualTo(mDevice);
+        assertThat(mCachedDevice.getMemberDevice().contains(mSubCachedDevice)).isTrue();
+    }
+
+    @Test
+    public void isConnectedHearingAidDevice_isConnectedAshaHearingAidDevice_returnTrue() {
+        when(mProfileManager.getHearingAidProfile()).thenReturn(mHearingAidProfile);
+
+        updateProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
+
+        assertThat(mCachedDevice.isConnectedHearingAidDevice()).isTrue();
+    }
+
+    @Test
+    public void isConnectedHearingAidDevice_isConnectedLeAudioHearingAidDevice_returnTrue() {
+        when(mProfileManager.getHapClientProfile()).thenReturn(mHapClientProfile);
+        when(mProfileManager.getLeAudioProfile()).thenReturn(mLeAudioProfile);
+
+        updateProfileStatus(mHapClientProfile, BluetoothProfile.STATE_CONNECTED);
+        updateProfileStatus(mLeAudioProfile, BluetoothProfile.STATE_CONNECTED);
+
+        assertThat(mCachedDevice.isConnectedHearingAidDevice()).isTrue();
+    }
+
+    @Test
+    public void isConnectedHearingAidDevice_isNotAnyConnectedHearingAidDevice_returnFalse() {
+        when(mProfileManager.getHearingAidProfile()).thenReturn(mHearingAidProfile);
+        when(mProfileManager.getHapClientProfile()).thenReturn(mHapClientProfile);
+        when(mProfileManager.getLeAudioProfile()).thenReturn(mLeAudioProfile);
+
+        updateProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_DISCONNECTED);
+        updateProfileStatus(mHapClientProfile, BluetoothProfile.STATE_DISCONNECTED);
+        updateProfileStatus(mLeAudioProfile, BluetoothProfile.STATE_DISCONNECTED);
+
+        assertThat(mCachedDevice.isConnectedHearingAidDevice()).isFalse();
+    }
+
+    private HearingAidInfo getLeftAshaHearingAidInfo() {
+        return new HearingAidInfo.Builder()
+                .setAshaDeviceSide(HearingAidProfile.DeviceSide.SIDE_LEFT)
+                .build();
+    }
+
+    private HearingAidInfo getRightAshaHearingAidInfo() {
+        return new HearingAidInfo.Builder()
+                .setAshaDeviceSide(HearingAidProfile.DeviceSide.SIDE_RIGHT)
+                .build();
+    }
+
+    private HearingAidInfo getLeftLeAudioHearingAidInfo() {
+        return new HearingAidInfo.Builder()
+                .setLeAudioLocation(BluetoothLeAudio.AUDIO_LOCATION_SIDE_LEFT)
+                .build();
     }
 }

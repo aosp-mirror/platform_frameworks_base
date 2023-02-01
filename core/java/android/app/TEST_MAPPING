@@ -115,10 +115,22 @@
             "file_patterns": ["(/|^)VoiceInteract[^/]*"]
         },
         {
+            "name": "CtsLocalVoiceInteraction",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                }
+            ],
+            "file_patterns": ["(/|^)VoiceInteract[^/]*"]
+        },
+        {
             "name": "CtsOsTestCases",
             "options": [
                 {
                     "include-annotation": "android.platform.test.annotations.Presubmit"
+                },
+                {
+                    "exclude-annotation": "android.platform.test.annotations.LargeTest"
                 },
                 {
                     "exclude-annotation": "androidx.test.filters.FlakyTest"
@@ -154,6 +166,57 @@
                 {
                     "exclude-annotation": "androidx.test.filters.FlakyTest"
                 }
+            ]
+        },
+        {
+            "name": "FrameworksCoreTests",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                },
+                {
+                    "include-filter": "android.app.KeyguardManagerTest"
+                }
+            ],
+            "file_patterns": [
+                "(/|^)KeyguardManager.java"
+            ]
+        },
+        {
+            "name": "FrameworksCoreTests",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                },
+                {
+                    "include-filter": "android.app.PropertyInvalidatedCacheTests"
+                }
+            ],
+            "file_patterns": [
+                "(/|^)PropertyInvalidatedCache.java"
+            ]
+        },
+        {
+            "name": "FrameworksCoreGameManagerTests",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                },
+                {
+                    "include-filter": "android.app"
+                }
+            ],
+            "file_patterns": [
+                "(/|^)GameManager[^/]*", "(/|^)GameMode[^/]*"
             ]
         }
     ],

@@ -16,21 +16,18 @@
 
 package com.android.server.wm.flicker.ime
 
-import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
-import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
-import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.FlickerBuilderProvider
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.BaseTest
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.flicker.helpers.ImeStateInitializeHelper
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
+import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,114 +40,91 @@ import org.junit.runners.Parameterized
  * To run this test: `atest FlickerTests:LaunchAppShowImeOnStartTest`
  *
  * Actions:
+ * ```
  *     Make sure no apps are running on the device
  *     Launch an app [testApp] that automatically displays IME and wait animation to complete
- *
+ * ```
  * To run only the presubmit assertions add: `--
+ * ```
  *      --module-arg FlickerTests:exclude-annotation:androidx.test.filters.FlakyTest
  *      --module-arg FlickerTests:include-annotation:android.platform.test.annotations.Presubmit`
- *
+ * ```
  * To run only the postsubmit assertions add: `--
+ * ```
  *      --module-arg FlickerTests:exclude-annotation:androidx.test.filters.FlakyTest
  *      --module-arg FlickerTests:include-annotation:android.platform.test.annotations.Postsubmit`
- *
+ * ```
  * To run only the flaky assertions add: `--
+ * ```
  *      --module-arg FlickerTests:include-annotation:androidx.test.filters.FlakyTest`
- *
+ * ```
  * Notes:
+ * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
  *        are inherited [CloseAppTransition]
  *     2. Part of the test setup occurs automatically via
  *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
  *        including configuring navigation mode, initial orientation and ensuring no
  *        apps are running before setup
+ * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class LaunchAppShowImeOnStartTest(private val testSpec: FlickerTestParameter) {
-    private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
-    private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
+open class LaunchAppShowImeOnStartTest(flicker: FlickerTest) : BaseTest(flicker) {
+    private val testApp = ImeAppAutoFocusHelper(instrumentation, flicker.scenario.startRotation)
     private val initializeApp = ImeStateInitializeHelper(instrumentation)
 
-    @FlickerBuilderProvider
-    fun buildFlicker(): FlickerBuilder {
-        return FlickerBuilder(instrumentation).apply {
-            setup {
-                eachRun {
-                    initializeApp.launchViaIntent()
-                    this.setRotation(testSpec.startRotation)
-                }
-            }
-            teardown {
-                eachRun {
-                    initializeApp.exit()
-                    testApp.exit()
-                }
-            }
-            transitions {
-                testApp.launchViaIntent(wmHelper)
-                wmHelper.waitImeShown()
-            }
+    /** {@inheritDoc} */
+    override val transition: FlickerBuilder.() -> Unit = {
+        setup {
+            initializeApp.launchViaIntent(wmHelper)
+            this.setRotation(flicker.scenario.startRotation)
+        }
+        teardown {
+            initializeApp.exit(wmHelper)
+            testApp.exit(wmHelper)
+        }
+        transitions {
+            testApp.launchViaIntent(wmHelper)
+            wmHelper.StateSyncBuilder().withImeShown().waitForAndVerify()
         }
     }
 
-    /**
-     * Checks that [FlickerComponentName.IME] window becomes visible during the transition
-     */
-    @Presubmit
-    @Test
-    fun imeWindowBecomesVisible() = testSpec.imeWindowBecomesVisible()
+    /** Checks that [ComponentNameMatcher.IME] window becomes visible during the transition */
+    @Presubmit @Test fun imeWindowBecomesVisible() = flicker.imeWindowBecomesVisible()
 
-    /**
-     * Checks that [FlickerComponentName.IME] layer becomes visible during the transition
-     */
-    @Presubmit
-    @Test
-    fun imeLayerBecomesVisible() = testSpec.imeLayerBecomesVisible()
+    /** Checks that [ComponentNameMatcher.IME] layer becomes visible during the transition */
+    @Presubmit @Test fun imeLayerBecomesVisible() = flicker.imeLayerBecomesVisible()
 
-    /**
-     * Checks that [FlickerComponentName.IME] layer is invisible at the start of the transition
-     */
+    /** Checks that [ComponentNameMatcher.IME] layer is invisible at the start of the transition */
     @Presubmit
     @Test
     fun imeLayerNotExistsStart() {
-        testSpec.assertLayersStart {
-            this.isInvisible(FlickerComponentName.IME)
-        }
+        flicker.assertLayersStart { this.isInvisible(ComponentNameMatcher.IME) }
     }
 
-    /**
-     * Checks that [FlickerComponentName.IME] layer is visible at the end of the transition
-     */
+    /** Checks that [ComponentNameMatcher.IME] layer is visible at the end of the transition */
     @Presubmit
     @Test
     fun imeLayerExistsEnd() {
-        testSpec.assertLayersEnd {
-            this.isVisible(FlickerComponentName.IME)
-        }
+        flicker.assertLayersEnd { this.isVisible(ComponentNameMatcher.IME) }
     }
 
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(
-                    repetitions = 3,
-                    supportedRotations = listOf(Surface.ROTATION_0),
-                    supportedNavigationModes = listOf(
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                    )
-                )
+        fun getParams(): Collection<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+            )
         }
     }
 }

@@ -16,7 +16,19 @@
 
 #include "SkiaRecordingCanvas.h"
 #include "hwui/Paint.h"
+#include <SkBlendMode.h>
+#include <SkData.h>
+#include <SkDrawable.h>
+#include <SkImage.h>
 #include <SkImagePriv.h>
+#include <SkMatrix.h>
+#include <SkPaint.h>
+#include <SkPoint.h>
+#include <SkRect.h>
+#include <SkRefCnt.h>
+#include <SkRRect.h>
+#include <SkSamplingOptions.h>
+#include <SkTypes.h>
 #include "CanvasTransform.h"
 #ifdef __ANDROID__ // Layoutlib does not support Layers
 #include "Layer.h"
@@ -30,6 +42,8 @@
 #include "pipeline/skia/VkFunctorDrawable.h"
 #include "pipeline/skia/VkInteropFunctorDrawable.h"
 #endif
+#include <log/log.h>
+#include <ui/FatVector.h>
 
 namespace android {
 namespace uirenderer {
@@ -42,7 +56,7 @@ namespace skiapipeline {
 void SkiaRecordingCanvas::initDisplayList(uirenderer::RenderNode* renderNode, int width,
                                           int height) {
     mCurrentBarrier = nullptr;
-    SkASSERT(mDisplayList.get() == nullptr);
+    LOG_FATAL_IF(mDisplayList.get() != nullptr);
 
     if (renderNode) {
         mDisplayList = renderNode->detachAvailableList();
@@ -56,20 +70,22 @@ void SkiaRecordingCanvas::initDisplayList(uirenderer::RenderNode* renderNode, in
     mDisplayList->setHasHolePunches(false);
 }
 
-void SkiaRecordingCanvas::punchHole(const SkRRect& rect) {
-    // Add the marker annotation to allow HWUI to determine where the current
-    // clip/transformation should be applied
+void SkiaRecordingCanvas::punchHole(const SkRRect& rect, float alpha) {
+    // Add the marker annotation to allow HWUI to determine the current
+    // clip/transformation and alpha should be applied
     SkVector vector = rect.getSimpleRadii();
-    float data[2];
+    float data[3];
     data[0] = vector.x();
     data[1] = vector.y();
+    data[2] = alpha;
     mRecorder.drawAnnotation(rect.rect(), HOLE_PUNCH_ANNOTATION.c_str(),
-                             SkData::MakeWithCopy(data, 2 * sizeof(float)));
+                             SkData::MakeWithCopy(data, sizeof(data)));
 
     // Clear the current rect within the layer itself
     SkPaint paint = SkPaint();
-    paint.setColor(0);
-    paint.setBlendMode(SkBlendMode::kClear);
+    paint.setColor(SkColors::kBlack);
+    paint.setAlphaf(alpha);
+    paint.setBlendMode(SkBlendMode::kDstOut);
     mRecorder.drawRRect(rect, paint);
 
     mDisplayList->setHasHolePunches(true);
@@ -265,10 +281,12 @@ void SkiaRecordingCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& ch
         numFlags = (lattice.fXCount + 1) * (lattice.fYCount + 1);
     }
 
-    SkAutoSTMalloc<25, SkCanvas::Lattice::RectType> flags(numFlags);
-    SkAutoSTMalloc<25, SkColor> colors(numFlags);
+    // Most times, we do not have very many flags/colors, so the stack allocated part of
+    // FatVector will save us a heap allocation.
+    FatVector<SkCanvas::Lattice::RectType, 25> flags(numFlags);
+    FatVector<SkColor, 25> colors(numFlags);
     if (numFlags > 0) {
-        NinePatchUtils::SetLatticeFlags(&lattice, flags.get(), numFlags, chunk, colors.get());
+        NinePatchUtils::SetLatticeFlags(&lattice, flags.data(), numFlags, chunk, colors.data());
     }
 
     lattice.fBounds = nullptr;

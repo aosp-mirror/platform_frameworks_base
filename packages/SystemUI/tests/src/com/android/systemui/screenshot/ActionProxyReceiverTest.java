@@ -32,7 +32,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.testing.AndroidTestingRunner;
@@ -40,6 +39,7 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 
@@ -68,6 +68,7 @@ public class ActionProxyReceiverTest extends SysuiTestCase {
     private PendingIntent mMockPendingIntent;
 
     private Intent mIntent;
+    private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
 
     @Before
     public void setup() throws InterruptedException, ExecutionException, TimeoutException {
@@ -115,7 +116,7 @@ public class ActionProxyReceiverTest extends SysuiTestCase {
         actionProxyReceiver.onReceive(mContext, mIntent);
 
         verify(mMockScreenshotSmartActions, never())
-                .notifyScreenshotAction(any(Context.class), anyString(), anyString(), anyBoolean(),
+                .notifyScreenshotAction(anyString(), anyString(), anyBoolean(),
                         any(Intent.class));
     }
 
@@ -129,17 +130,18 @@ public class ActionProxyReceiverTest extends SysuiTestCase {
         actionProxyReceiver.onReceive(mContext, mIntent);
 
         verify(mMockScreenshotSmartActions).notifyScreenshotAction(
-                mContext, testId, ACTION_TYPE_SHARE, false, null);
+                testId, ACTION_TYPE_SHARE, false, null);
     }
 
     private ActionProxyReceiver constructActionProxyReceiver(boolean withStatusBar) {
         if (withStatusBar) {
             return new ActionProxyReceiver(
                     Optional.of(mMockCentralSurfaces), mMockActivityManagerWrapper,
-                    mMockScreenshotSmartActions);
+                    mMockScreenshotSmartActions, mDisplayTracker);
         } else {
             return new ActionProxyReceiver(
-                    Optional.empty(), mMockActivityManagerWrapper, mMockScreenshotSmartActions);
+                    Optional.empty(), mMockActivityManagerWrapper, mMockScreenshotSmartActions,
+                    mDisplayTracker);
         }
     }
 }

@@ -1,6 +1,9 @@
 {
     "presubmit": [
         {
+            "name": "CtsLocationFineTestCases"
+        },
+        {
             "name": "CtsLocationCoarseTestCases"
         },
         {
@@ -69,7 +72,8 @@
     ],
     "postsubmit": [
         {
-            "name": "CtsLocationFineTestCases"
+            "name": "BinaryTransparencyHostTest",
+            "file_patterns": ["BinaryTransparencyService\\.java"]
         }
     ]
 }

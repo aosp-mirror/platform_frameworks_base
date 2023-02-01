@@ -17,10 +17,9 @@
 package com.android.server.companion;
 
 import android.companion.AssociationInfo;
+import android.net.MacAddress;
 import android.os.Binder;
 import android.os.ShellCommand;
-import android.util.Log;
-import android.util.Slog;
 
 import com.android.server.companion.presence.CompanionDevicePresenceMonitor;
 
@@ -28,7 +27,7 @@ import java.io.PrintWriter;
 import java.util.List;
 
 class CompanionDeviceShellCommand extends ShellCommand {
-    private static final String TAG = "CompanionDevice_ShellCommand";
+    private static final String TAG = "CDM_CompanionDeviceShellCommand";
 
     private final CompanionDeviceManagerService mService;
     private final AssociationStore mAssociationStore;
@@ -65,7 +64,9 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     int userId = getNextIntArgRequired();
                     String packageName = getNextArgRequired();
                     String address = getNextArgRequired();
-                    mService.legacyCreateAssociation(userId, address, packageName, null);
+                    final MacAddress macAddress = MacAddress.fromString(address);
+                    mService.createNewAssociation(userId, packageName, macAddress,
+                            null, null, false);
                 }
                 break;
 
@@ -81,11 +82,10 @@ class CompanionDeviceShellCommand extends ShellCommand {
                 }
                 break;
 
-                case "clear-association-memory-cache": {
+                case "clear-association-memory-cache":
                     mService.persistState();
                     mService.loadAssociationsFromDisk();
-                }
-                break;
+                    break;
 
                 case "simulate-device-appeared":
                     associationId = getNextIntArgRequired();
@@ -110,12 +110,18 @@ class CompanionDeviceShellCommand extends ShellCommand {
                 default:
                     return handleDefaultCommands(cmd);
             }
-            return 0;
-        } catch (Throwable t) {
-            Slog.e(TAG, "Error running a command: $ " + cmd, t);
-            getErrPrintWriter().println(Log.getStackTraceString(t));
+        } catch (Throwable e) {
+            final PrintWriter errOut = getErrPrintWriter();
+            errOut.println();
+            errOut.println("Exception occurred while executing '" + cmd + "':");
+            e.printStackTrace(errOut);
             return 1;
         }
+        return 0;
+    }
+
+    private int getNextIntArgRequired() {
+        return Integer.parseInt(getNextArgRequired());
     }
 
     @Override
@@ -159,9 +165,5 @@ class CompanionDeviceShellCommand extends ShellCommand {
         pw.println("      for a long time (90 days or as configured via ");
         pw.println("      \"debug.cdm.cdmservice.cleanup_time_window\" system property). ");
         pw.println("      USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
-    }
-
-    private int getNextIntArgRequired() {
-        return Integer.parseInt(getNextArgRequired());
     }
 }

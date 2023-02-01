@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
@@ -31,6 +32,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
@@ -147,7 +149,7 @@ public class ZOrderingTests extends WindowTestsBase {
     }
 
     private static class HierarchyRecordingBuilderFactory implements Function<SurfaceSession,
-                SurfaceControl.Builder> {
+            SurfaceControl.Builder> {
         private LayerRecordingTransaction mTransaction;
 
         HierarchyRecordingBuilderFactory(LayerRecordingTransaction transaction) {
@@ -328,7 +330,6 @@ public class ZOrderingTests extends WindowTestsBase {
         assertWindowHigher(mImeWindow, imeSystemOverlayTarget);
         assertWindowHigher(mImeWindow, mChildAppWindowAbove);
         assertWindowHigher(mImeWindow, mAppWindow);
-        assertWindowHigher(mImeWindow, mDockedDividerWindow);
 
         // The IME has a higher base layer than the status bar so we may expect it to go
         // above the status bar once they are both in the Non-App layer, as past versions of this
@@ -349,7 +350,6 @@ public class ZOrderingTests extends WindowTestsBase {
 
         assertWindowHigher(mImeWindow, mChildAppWindowAbove);
         assertWindowHigher(mImeWindow, mAppWindow);
-        assertWindowHigher(mImeWindow, mDockedDividerWindow);
         assertWindowHigher(mImeWindow, mStatusBarWindow);
 
         // And, IME dialogs should always have an higher layer than the IME.
@@ -489,77 +489,6 @@ public class ZOrderingTests extends WindowTestsBase {
     }
 
     @Test
-    public void testDockedDividerPosition() {
-        final Task pinnedTask =
-                createTask(mDisplayContent, WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD);
-        final WindowState pinnedWindow =
-                createAppWindow(pinnedTask, ACTIVITY_TYPE_STANDARD, "pinnedWindow");
-
-        final Task belowTask =
-                createTask(mDisplayContent, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        final WindowState belowTaskWindow =
-                createAppWindow(belowTask, ACTIVITY_TYPE_STANDARD, "belowTaskWindow");
-
-        final Task splitScreenTask1 =
-                createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
-        final WindowState splitWindow1 =
-                createAppWindow(splitScreenTask1, ACTIVITY_TYPE_STANDARD, "splitWindow1");
-        final Task splitScreenTask2 =
-                createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
-        final WindowState splitWindow2 =
-                createAppWindow(splitScreenTask2, ACTIVITY_TYPE_STANDARD, "splitWindow2");
-        splitScreenTask1.setAdjacentTaskFragment(splitScreenTask2, true /* moveTogether */);
-        splitScreenTask2.setAdjacentTaskFragment(splitScreenTask1, true /* moveTogether */);
-
-        final Task aboveTask =
-                createTask(mDisplayContent, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        final WindowState aboveTaskWindow =
-                createAppWindow(aboveTask, ACTIVITY_TYPE_STANDARD, "aboveTaskWindow");
-
-        mDisplayContent.assignChildLayers(mTransaction);
-
-        assertWindowHigher(splitWindow1, belowTaskWindow);
-        assertWindowHigher(splitWindow2, belowTaskWindow);
-        assertWindowHigher(mDockedDividerWindow, splitWindow1);
-        assertWindowHigher(mDockedDividerWindow, splitWindow2);
-        assertWindowHigher(aboveTaskWindow, mDockedDividerWindow);
-        assertWindowHigher(pinnedWindow, aboveTaskWindow);
-    }
-
-
-    @Test
-    public void testDockedDividerPosition_noAboveTask() {
-        final Task pinnedTask =
-                createTask(mDisplayContent, WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD);
-        final WindowState pinnedWindow =
-                createAppWindow(pinnedTask, ACTIVITY_TYPE_STANDARD, "pinnedWindow");
-
-        final Task belowTask =
-                createTask(mDisplayContent, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        final WindowState belowTaskWindow =
-                createAppWindow(belowTask, ACTIVITY_TYPE_STANDARD, "belowTaskWindow");
-
-        final Task splitScreenTask1 =
-                createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
-        final WindowState splitWindow1 =
-                createAppWindow(splitScreenTask1, ACTIVITY_TYPE_STANDARD, "splitWindow1");
-        final Task splitScreenTask2 =
-                createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
-        final WindowState splitWindow2 =
-                createAppWindow(splitScreenTask2, ACTIVITY_TYPE_STANDARD, "splitWindow2");
-        splitScreenTask1.setAdjacentTaskFragment(splitScreenTask2, true /* moveTogether */);
-        splitScreenTask2.setAdjacentTaskFragment(splitScreenTask1, true /* moveTogether */);
-
-        mDisplayContent.assignChildLayers(mTransaction);
-
-        assertWindowHigher(splitWindow1, belowTaskWindow);
-        assertWindowHigher(splitWindow2, belowTaskWindow);
-        assertWindowHigher(mDockedDividerWindow, splitWindow1);
-        assertWindowHigher(mDockedDividerWindow, splitWindow2);
-        assertWindowHigher(pinnedWindow, mDockedDividerWindow);
-    }
-
-    @Test
     public void testAttachNavBarWhenEnteringRecents_expectNavBarHigherThanIme() {
         // create RecentsAnimationController
         IRecentsAnimationRunner mockRunner = mock(IRecentsAnimationRunner.class);
@@ -614,6 +543,30 @@ public class ZOrderingTests extends WindowTestsBase {
         verify(popupWindow).needsRelativeLayeringToIme();
         assertThat(popupWindow.needsRelativeLayeringToIme()).isTrue();
         assertZOrderGreaterThan(mTransaction, popupWindow.getSurfaceControl(),
+                mDisplayContent.getImeContainer().getSurfaceControl());
+    }
+
+    @Test
+    public void testSystemDialogWindow_expectHigherThanIme_inMultiWindow() {
+        // Simulate the app window is in multi windowing mode and being IME target
+        mAppWindow.getConfiguration().windowConfiguration.setWindowingMode(
+                WINDOWING_MODE_MULTI_WINDOW);
+        mDisplayContent.setImeLayeringTarget(mAppWindow);
+        mDisplayContent.setImeInputTarget(mAppWindow);
+        makeWindowVisible(mImeWindow);
+
+        // Create a popupWindow
+        final WindowState systemDialogWindow = createWindow(null, TYPE_SECURE_SYSTEM_OVERLAY,
+                mDisplayContent, "SystemDialog", true);
+        systemDialogWindow.mAttrs.flags |= FLAG_ALT_FOCUSABLE_IM;
+        spyOn(systemDialogWindow);
+
+        mDisplayContent.assignChildLayers(mTransaction);
+
+        // Verify the surface layer of the popupWindow should higher than IME
+        verify(systemDialogWindow).needsRelativeLayeringToIme();
+        assertThat(systemDialogWindow.needsRelativeLayeringToIme()).isTrue();
+        assertZOrderGreaterThan(mTransaction, systemDialogWindow.getSurfaceControl(),
                 mDisplayContent.getImeContainer().getSurfaceControl());
     }
 }

@@ -22,13 +22,8 @@
 
 #include "MouseCursorController.h"
 
+#include <input/Input.h>
 #include <log/log.h>
-
-#include <SkBitmap.h>
-#include <SkBlendMode.h>
-#include <SkCanvas.h>
-#include <SkColor.h>
-#include <SkPaint.h>
 
 namespace {
 // Time to spend fading out the pointer completely.
@@ -204,8 +199,7 @@ static void getNonRotatedSize(const DisplayViewport& viewport, int32_t& width, i
     width = viewport.deviceWidth;
     height = viewport.deviceHeight;
 
-    if (viewport.orientation == DISPLAY_ORIENTATION_90 ||
-        viewport.orientation == DISPLAY_ORIENTATION_270) {
+    if (viewport.orientation == ui::ROTATION_90 || viewport.orientation == ui::ROTATION_270) {
         std::swap(width, height);
     }
 }
@@ -249,37 +243,41 @@ void MouseCursorController::setDisplayViewport(const DisplayViewport& viewport,
 
         // Undo the previous rotation.
         switch (oldViewport.orientation) {
-            case DISPLAY_ORIENTATION_90:
+            case ui::ROTATION_90:
                 temp = x;
                 x = oldViewport.deviceHeight - y;
                 y = temp;
                 break;
-            case DISPLAY_ORIENTATION_180:
+            case ui::ROTATION_180:
                 x = oldViewport.deviceWidth - x;
                 y = oldViewport.deviceHeight - y;
                 break;
-            case DISPLAY_ORIENTATION_270:
+            case ui::ROTATION_270:
                 temp = x;
                 x = y;
                 y = oldViewport.deviceWidth - temp;
+                break;
+            case ui::ROTATION_0:
                 break;
         }
 
         // Perform the new rotation.
         switch (viewport.orientation) {
-            case DISPLAY_ORIENTATION_90:
+            case ui::ROTATION_90:
                 temp = x;
                 x = y;
                 y = viewport.deviceHeight - temp;
                 break;
-            case DISPLAY_ORIENTATION_180:
+            case ui::ROTATION_180:
                 x = viewport.deviceWidth - x;
                 y = viewport.deviceHeight - y;
                 break;
-            case DISPLAY_ORIENTATION_270:
+            case ui::ROTATION_270:
                 temp = x;
                 x = viewport.deviceWidth - y;
                 y = temp;
+                break;
+            case ui::ROTATION_0:
                 break;
         }
 
@@ -292,7 +290,7 @@ void MouseCursorController::setDisplayViewport(const DisplayViewport& viewport,
     updatePointerLocked();
 }
 
-void MouseCursorController::updatePointerIcon(int32_t iconId) {
+void MouseCursorController::updatePointerIcon(PointerIconStyle iconId) {
     std::scoped_lock lock(mLock);
 
     if (mLocked.requestedPointerType != iconId) {
@@ -305,7 +303,7 @@ void MouseCursorController::updatePointerIcon(int32_t iconId) {
 void MouseCursorController::setCustomPointerIcon(const SpriteIcon& icon) {
     std::scoped_lock lock(mLock);
 
-    const int32_t iconId = mContext.getPolicy()->getCustomPointerIconId();
+    const PointerIconStyle iconId = mContext.getPolicy()->getCustomPointerIconId();
     mLocked.additionalMouseResources[iconId] = icon;
     mLocked.requestedPointerType = iconId;
     mLocked.updatePointerIcon = true;
@@ -340,7 +338,7 @@ bool MouseCursorController::doFadingAnimationLocked(nsecs_t timestamp) REQUIRES(
 }
 
 bool MouseCursorController::doBitmapAnimationLocked(nsecs_t timestamp) REQUIRES(mLock) {
-    std::map<int32_t, PointerAnimation>::const_iterator iter =
+    std::map<PointerIconStyle, PointerAnimation>::const_iterator iter =
             mLocked.animationResources.find(mLocked.requestedPointerType);
     if (iter == mLocked.animationResources.end()) {
         return false;
@@ -386,10 +384,10 @@ void MouseCursorController::updatePointerLocked() REQUIRES(mLock) {
         if (mLocked.requestedPointerType == mContext.getPolicy()->getDefaultPointerIconId()) {
             mLocked.pointerSprite->setIcon(mLocked.pointerIcon);
         } else {
-            std::map<int32_t, SpriteIcon>::const_iterator iter =
+            std::map<PointerIconStyle, SpriteIcon>::const_iterator iter =
                     mLocked.additionalMouseResources.find(mLocked.requestedPointerType);
             if (iter != mLocked.additionalMouseResources.end()) {
-                std::map<int32_t, PointerAnimation>::const_iterator anim_iter =
+                std::map<PointerIconStyle, PointerAnimation>::const_iterator anim_iter =
                         mLocked.animationResources.find(mLocked.requestedPointerType);
                 if (anim_iter != mLocked.animationResources.end()) {
                     mLocked.animationFrameIndex = 0;

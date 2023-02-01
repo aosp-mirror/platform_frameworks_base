@@ -153,6 +153,8 @@ public final class DeviceIdleJobsController extends StateController {
                 changed = true;
             }
             mDeviceIdleMode = enabled;
+            logDeviceWideConstraintStateToStatsd(JobStatus.CONSTRAINT_DEVICE_NOT_DOZING,
+                    !mDeviceIdleMode);
             if (DEBUG) Slog.d(TAG, "mDeviceIdleMode=" + mDeviceIdleMode);
             mDeviceIdleUpdateFunctor.prepare();
             if (enabled) {
@@ -223,8 +225,7 @@ public final class DeviceIdleJobsController extends StateController {
     }
 
     @Override
-    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
-            boolean forUpdate) {
+    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob) {
         if ((jobStatus.getFlags()&JobInfo.FLAG_IMPORTANT_WHILE_FOREGROUND) != 0) {
             mAllowInIdleJobs.remove(jobStatus);
         }

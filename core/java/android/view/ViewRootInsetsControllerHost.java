@@ -145,15 +145,17 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
     }
 
     @Override
-    public void updateCompatSysUiVisibility(int type, boolean visible, boolean hasControl) {
-        mViewRoot.updateCompatSysUiVisibility(type, visible, hasControl);
+    public void updateCompatSysUiVisibility(int visibleTypes, int requestedVisibleTypes,
+            int controllableTypes) {
+        mViewRoot.updateCompatSysUiVisibility(visibleTypes, requestedVisibleTypes,
+                controllableTypes);
     }
 
     @Override
-    public void updateRequestedVisibilities(InsetsVisibilities vis) {
+    public void updateRequestedVisibleTypes(@WindowInsets.Type.InsetsType int types) {
         try {
             if (mViewRoot.mAdded) {
-                mViewRoot.mWindowSession.updateRequestedVisibilities(mViewRoot.mWindow, vis);
+                mViewRoot.mWindowSession.updateRequestedVisibleTypes(mViewRoot.mWindow, types);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to call insetsModified", e);

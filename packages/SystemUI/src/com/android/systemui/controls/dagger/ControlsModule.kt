@@ -20,6 +20,8 @@ import android.app.Activity
 import android.content.pm.PackageManager
 import com.android.systemui.controls.ControlsMetricsLogger
 import com.android.systemui.controls.ControlsMetricsLoggerImpl
+import com.android.systemui.controls.settings.ControlsSettingsRepository
+import com.android.systemui.controls.settings.ControlsSettingsRepositoryImpl
 import com.android.systemui.controls.controller.ControlsBindingController
 import com.android.systemui.controls.controller.ControlsBindingControllerImpl
 import com.android.systemui.controls.controller.ControlsController
@@ -32,6 +34,10 @@ import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.management.ControlsListingControllerImpl
 import com.android.systemui.controls.management.ControlsProviderSelectorActivity
 import com.android.systemui.controls.management.ControlsRequestDialog
+import com.android.systemui.controls.panels.AuthorizedPanelsRepository
+import com.android.systemui.controls.panels.AuthorizedPanelsRepositoryImpl
+import com.android.systemui.controls.settings.ControlsSettingsDialogManager
+import com.android.systemui.controls.settings.ControlsSettingsDialogManagerImpl
 import com.android.systemui.controls.ui.ControlActionCoordinator
 import com.android.systemui.controls.ui.ControlActionCoordinatorImpl
 import com.android.systemui.controls.ui.ControlsActivity
@@ -83,12 +89,27 @@ abstract class ControlsModule {
     abstract fun provideUiController(controller: ControlsUiControllerImpl): ControlsUiController
 
     @Binds
+    abstract fun provideSettingsManager(
+            manager: ControlsSettingsRepositoryImpl
+    ): ControlsSettingsRepository
+
+    @Binds
+    abstract fun provideDialogManager(
+            manager: ControlsSettingsDialogManagerImpl
+    ): ControlsSettingsDialogManager
+
+    @Binds
     abstract fun provideMetricsLogger(logger: ControlsMetricsLoggerImpl): ControlsMetricsLogger
 
     @Binds
     abstract fun provideControlActionCoordinator(
         coordinator: ControlActionCoordinatorImpl
     ): ControlActionCoordinator
+
+    @Binds
+    abstract fun provideAuthorizedPanelsRepository(
+        repository: AuthorizedPanelsRepositoryImpl
+    ): AuthorizedPanelsRepository
 
     @BindsOptionalOf
     abstract fun optionalPersistenceWrapper(): ControlsFavoritePersistenceWrapper

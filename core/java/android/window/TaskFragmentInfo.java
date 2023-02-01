@@ -83,6 +83,12 @@ public final class TaskFragmentInfo implements Parcelable {
     private final boolean mIsTaskFragmentClearedForPip;
 
     /**
+     * Whether the last running activity of the TaskFragment was removed because it was reordered to
+     * front of the Task.
+     */
+    private final boolean mIsClearedForReorderActivityToFront;
+
+    /**
      * The maximum {@link ActivityInfo.WindowLayout#minWidth} and
      * {@link ActivityInfo.WindowLayout#minHeight} aggregated from the TaskFragment's child
      * activities.
@@ -96,7 +102,7 @@ public final class TaskFragmentInfo implements Parcelable {
             @NonNull Configuration configuration, int runningActivityCount,
             boolean isVisible, @NonNull List<IBinder> activities, @NonNull Point positionInParent,
             boolean isTaskClearedForReuse, boolean isTaskFragmentClearedForPip,
-            @NonNull Point minimumDimensions) {
+            boolean isClearedForReorderActivityToFront, @NonNull Point minimumDimensions) {
         mFragmentToken = requireNonNull(fragmentToken);
         mToken = requireNonNull(token);
         mConfiguration.setTo(configuration);
@@ -106,6 +112,7 @@ public final class TaskFragmentInfo implements Parcelable {
         mPositionInParent.set(positionInParent);
         mIsTaskClearedForReuse = isTaskClearedForReuse;
         mIsTaskFragmentClearedForPip = isTaskFragmentClearedForPip;
+        mIsClearedForReorderActivityToFront = isClearedForReorderActivityToFront;
         mMinimumDimensions.set(minimumDimensions);
     }
 
@@ -160,6 +167,11 @@ public final class TaskFragmentInfo implements Parcelable {
         return mIsTaskFragmentClearedForPip;
     }
 
+    /** @hide */
+    public boolean isClearedForReorderActivityToFront() {
+        return mIsClearedForReorderActivityToFront;
+    }
+
     @WindowingMode
     public int getWindowingMode() {
         return mConfiguration.windowConfiguration.getWindowingMode();
@@ -188,6 +200,10 @@ public final class TaskFragmentInfo implements Parcelable {
     /**
      * Returns {@code true} if the parameters that are important for task fragment organizers are
      * equal between this {@link TaskFragmentInfo} and {@param that}.
+     * Note that this method is usually called with
+     * {@link com.android.server.wm.WindowOrganizerController#configurationsAreEqualForOrganizer(
+     * Configuration, Configuration)} to determine if this {@link TaskFragmentInfo} should
+     * be dispatched to the client.
      */
     public boolean equalsForTaskFragmentOrganizer(@Nullable TaskFragmentInfo that) {
         if (that == null) {
@@ -203,6 +219,7 @@ public final class TaskFragmentInfo implements Parcelable {
                 && mPositionInParent.equals(that.mPositionInParent)
                 && mIsTaskClearedForReuse == that.mIsTaskClearedForReuse
                 && mIsTaskFragmentClearedForPip == that.mIsTaskFragmentClearedForPip
+                && mIsClearedForReorderActivityToFront == that.mIsClearedForReorderActivityToFront
                 && mMinimumDimensions.equals(that.mMinimumDimensions);
     }
 
@@ -216,6 +233,7 @@ public final class TaskFragmentInfo implements Parcelable {
         mPositionInParent.readFromParcel(in);
         mIsTaskClearedForReuse = in.readBoolean();
         mIsTaskFragmentClearedForPip = in.readBoolean();
+        mIsClearedForReorderActivityToFront = in.readBoolean();
         mMinimumDimensions.readFromParcel(in);
     }
 
@@ -231,6 +249,7 @@ public final class TaskFragmentInfo implements Parcelable {
         mPositionInParent.writeToParcel(dest, flags);
         dest.writeBoolean(mIsTaskClearedForReuse);
         dest.writeBoolean(mIsTaskFragmentClearedForPip);
+        dest.writeBoolean(mIsClearedForReorderActivityToFront);
         mMinimumDimensions.writeToParcel(dest, flags);
     }
 
@@ -258,8 +277,9 @@ public final class TaskFragmentInfo implements Parcelable {
                 + " activities=" + mActivities
                 + " positionInParent=" + mPositionInParent
                 + " isTaskClearedForReuse=" + mIsTaskClearedForReuse
-                + " isTaskFragmentClearedForPip" + mIsTaskFragmentClearedForPip
-                + " minimumDimensions" + mMinimumDimensions
+                + " isTaskFragmentClearedForPip=" + mIsTaskFragmentClearedForPip
+                + " mIsClearedForReorderActivityToFront=" + mIsClearedForReorderActivityToFront
+                + " minimumDimensions=" + mMinimumDimensions
                 + "}";
     }
 

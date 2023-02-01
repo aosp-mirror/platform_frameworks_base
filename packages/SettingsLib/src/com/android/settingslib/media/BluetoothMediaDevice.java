@@ -39,7 +39,7 @@ public class BluetoothMediaDevice extends MediaDevice {
 
     BluetoothMediaDevice(Context context, CachedBluetoothDevice device,
             MediaRouter2Manager routerManager, MediaRoute2Info info, String packageName) {
-        super(context, routerManager, info, packageName);
+        super(context, routerManager, info, packageName, null);
         mCachedDevice = device;
         mAudioManager = context.getSystemService(AudioManager.class);
         initDeviceRecord();
@@ -59,14 +59,14 @@ public class BluetoothMediaDevice extends MediaDevice {
 
     @Override
     public Drawable getIcon() {
-        return BluetoothUtils.isAdvancedDetailsHeader(mCachedDevice.getDevice())
+        return BluetoothUtils.isAdvancedUntetheredDevice(mCachedDevice.getDevice())
                 ? mContext.getDrawable(R.drawable.ic_earbuds_advanced)
                 : BluetoothUtils.getBtClassDrawableWithDescription(mContext, mCachedDevice).first;
     }
 
     @Override
     public Drawable getIconWithoutBackground() {
-        return BluetoothUtils.isAdvancedDetailsHeader(mCachedDevice.getDevice())
+        return BluetoothUtils.isAdvancedUntetheredDevice(mCachedDevice.getDevice())
                 ? mContext.getDrawable(R.drawable.ic_earbuds_advanced)
                 : BluetoothUtils.getBtClassDrawableWithDescription(mContext, mCachedDevice).first;
     }

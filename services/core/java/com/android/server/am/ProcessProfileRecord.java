@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
-import static android.app.ActivityManager.processStateAmToProto;
 
 import android.annotation.IntDef;
 import android.app.IApplicationThread;
@@ -31,9 +30,9 @@ import com.android.internal.annotations.CompositeRWLock;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.procstats.ProcessState;
 import com.android.internal.app.procstats.ProcessStats;
-import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.am.ProcessList.ProcStateMemTracker;
+import com.android.server.power.stats.BatteryStatsImpl;
 
 import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -318,12 +317,6 @@ final class ProcessProfileRecord {
                             origBase.setState(ProcessStats.STATE_NOTHING,
                                     tracker.getMemFactorLocked(), SystemClock.uptimeMillis(),
                                     pkgList.getPackageListLocked());
-                            pkgList.forEachPackage((pkgName, holder) ->
-                                    FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_STATE_CHANGED,
-                                        mApp.uid, mApp.processName, pkgName,
-                                        processStateAmToProto(ProcessStats.STATE_NOTHING),
-                                        holder.appVersion)
-                            );
                         }
                         origBase.makeInactive();
                     }
@@ -362,12 +355,6 @@ final class ProcessProfileRecord {
                         origBase.setState(ProcessStats.STATE_NOTHING,
                                 tracker.getMemFactorLocked(), SystemClock.uptimeMillis(),
                                 pkgList.getPackageListLocked());
-                        pkgList.forEachPackage((pkgName, holder) ->
-                                FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_STATE_CHANGED,
-                                    mApp.uid, mApp.processName, pkgName,
-                                    processStateAmToProto(ProcessStats.STATE_NOTHING),
-                                    holder.appVersion)
-                        );
                     }
                     origBase.makeInactive();
                     setBaseProcessTracker(null);

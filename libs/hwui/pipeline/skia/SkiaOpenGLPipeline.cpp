@@ -53,8 +53,14 @@ SkiaOpenGLPipeline::~SkiaOpenGLPipeline() {
 }
 
 MakeCurrentResult SkiaOpenGLPipeline::makeCurrent() {
-    // TODO: Figure out why this workaround is needed, see b/13913604
-    // In the meantime this matches the behavior of GLRenderer, so it is not a regression
+    // In case the surface was destroyed (e.g. a previous trimMemory call) we
+    // need to recreate it here.
+    if (mHardwareBuffer) {
+        mRenderThread.requireGlContext();
+    } else if (!isSurfaceReady() && mNativeWindow) {
+        setSurface(mNativeWindow.get(), mSwapBehavior);
+    }
+
     EGLint error = 0;
     if (!mEglManager.makeCurrent(mEglSurface, &error)) {
         return MakeCurrentResult::AlreadyCurrent;
@@ -63,17 +69,24 @@ MakeCurrentResult SkiaOpenGLPipeline::makeCurrent() {
 }
 
 Frame SkiaOpenGLPipeline::getFrame() {
-    LOG_ALWAYS_FATAL_IF(mEglSurface == EGL_NO_SURFACE,
-                        "drawRenderNode called on a context with no surface!");
-    return mEglManager.beginFrame(mEglSurface);
+    if (mHardwareBuffer) {
+        AHardwareBuffer_Desc description;
+        AHardwareBuffer_describe(mHardwareBuffer, &description);
+        return Frame(description.width, description.height, 0);
+    } else {
+        LOG_ALWAYS_FATAL_IF(mEglSurface == EGL_NO_SURFACE,
+                            "drawRenderNode called on a context with no surface!");
+        return mEglManager.beginFrame(mEglSurface);
+    }
 }
 
 IRenderPipeline::DrawResult SkiaOpenGLPipeline::draw(
         const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
         const LightGeometry& lightGeometry, LayerUpdateQueue* layerUpdateQueue,
         const Rect& contentDrawBounds, bool opaque, const LightInfo& lightInfo,
-        const std::vector<sp<RenderNode>>& renderNodes, FrameInfoVisualizer* profiler) {
-    if (!isCapturingSkp()) {
+        const std::vector<sp<RenderNode>>& renderNodes, FrameInfoVisualizer* profiler,
+        const HardwareBufferRenderParams& bufferParams) {
+    if (!isCapturingSkp() && !mHardwareBuffer) {
         mEglManager.damageFrame(frame, dirty);
     }
 
@@ -100,19 +113,31 @@ IRenderPipeline::DrawResult SkiaOpenGLPipeline::draw(
     SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
     SkASSERT(mRenderThread.getGrContext() != nullptr);
-    sk_sp<SkSurface> surface(SkSurface::MakeFromBackendRenderTarget(
-            mRenderThread.getGrContext(), backendRT, this->getSurfaceOrigin(), colorType,
-            mSurfaceColorSpace, &props));
+    sk_sp<SkSurface> surface;
+    SkMatrix preTransform;
+    if (mHardwareBuffer) {
+        surface = getBufferSkSurface(bufferParams);
+        preTransform = bufferParams.getTransform();
+    } else {
+        surface = SkSurface::MakeFromBackendRenderTarget(mRenderThread.getGrContext(), backendRT,
+                                                         getSurfaceOrigin(), colorType,
+                                                         mSurfaceColorSpace, &props);
+        preTransform = SkMatrix::I();
+    }
 
-    LightingInfo::updateLighting(lightGeometry, lightInfo);
+    SkPoint lightCenter = preTransform.mapXY(lightGeometry.center.x, lightGeometry.center.y);
+    LightGeometry localGeometry = lightGeometry;
+    localGeometry.center.x = lightCenter.fX;
+    localGeometry.center.y = lightCenter.fY;
+    LightingInfo::updateLighting(localGeometry, lightInfo);
     renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface,
-                SkMatrix::I());
+                preTransform);
 
     // Draw visual debugging features
     if (CC_UNLIKELY(Properties::showDirtyRegions ||
                     ProfileType::None != Properties::getProfileType())) {
         SkCanvas* profileCanvas = surface->getCanvas();
-        SkiaProfileRenderer profileRenderer(profileCanvas);
+        SkiaProfileRenderer profileRenderer(profileCanvas, frame.width(), frame.height());
         profiler->draw(profileRenderer);
     }
 
@@ -137,6 +162,10 @@ bool SkiaOpenGLPipeline::swapBuffers(const Frame& frame, bool drew, const SkRect
     // Even if we decided to cancel the frame, from the perspective of jank
     // metrics the frame was swapped at this point
     currentFrameInfo->markSwapBuffers();
+
+    if (mHardwareBuffer) {
+        return false;
+    }
 
     *requireSwap = drew || mEglManager.damageRequiresSwap();
 
@@ -166,6 +195,9 @@ void SkiaOpenGLPipeline::onStop() {
 }
 
 bool SkiaOpenGLPipeline::setSurface(ANativeWindow* surface, SwapBehavior swapBehavior) {
+    mNativeWindow = surface;
+    mSwapBehavior = swapBehavior;
+
     if (mEglSurface != EGL_NO_SURFACE) {
         mEglManager.destroySurface(mEglSurface);
         mEglSurface = EGL_NO_SURFACE;
@@ -182,11 +214,32 @@ bool SkiaOpenGLPipeline::setSurface(ANativeWindow* surface, SwapBehavior swapBeh
 
     if (mEglSurface != EGL_NO_SURFACE) {
         const bool preserveBuffer = (swapBehavior != SwapBehavior::kSwap_discardBuffer);
-        mBufferPreserved = mEglManager.setPreserveBuffer(mEglSurface, preserveBuffer);
+        const bool isPreserved = mEglManager.setPreserveBuffer(mEglSurface, preserveBuffer);
+        ALOGE_IF(preserveBuffer != isPreserved, "Unable to match the desired swap behavior.");
         return true;
     }
 
     return false;
+}
+
+[[nodiscard]] android::base::unique_fd SkiaOpenGLPipeline::flush() {
+    int fence = -1;
+    EGLSyncKHR sync = EGL_NO_SYNC_KHR;
+    mEglManager.createReleaseFence(true, &sync, &fence);
+    // If a sync object is returned here then the device does not support native
+    // fences, we block on the returned sync and return -1 as a file descriptor
+    if (sync != EGL_NO_SYNC_KHR) {
+        EGLDisplay display = mEglManager.eglDisplay();
+        EGLint result = eglClientWaitSyncKHR(display, sync, 0, 1000000000);
+        if (result == EGL_FALSE) {
+            ALOGE("EglManager::createReleaseFence: error waiting for previous fence: %#x",
+                  eglGetError());
+        } else if (result == EGL_TIMEOUT_EXPIRED_KHR) {
+            ALOGE("EglManager::createReleaseFence: timeout waiting for previous fence");
+        }
+        eglDestroySyncKHR(display, sync);
+    }
+    return android::base::unique_fd(fence);
 }
 
 bool SkiaOpenGLPipeline::isSurfaceReady() {

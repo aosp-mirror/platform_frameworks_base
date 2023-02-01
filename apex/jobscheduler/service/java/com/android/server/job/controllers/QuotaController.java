@@ -28,7 +28,6 @@ import static com.android.server.job.JobSchedulerService.RARE_INDEX;
 import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 import static com.android.server.job.JobSchedulerService.WORKING_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
-import static com.android.server.job.controllers.Package.packageToString;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -44,6 +43,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.UserPackage;
 import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.Looper;
@@ -532,7 +532,7 @@ public final class QuotaController extends StateController {
      */
     private final SparseSetArray<String> mSystemInstallers = new SparseSetArray<>();
 
-    /** An app has reached its quota. The message should contain a {@link Package} object. */
+    /** An app has reached its quota. The message should contain a {@link UserPackage} object. */
     @VisibleForTesting
     static final int MSG_REACHED_QUOTA = 0;
     /** Drop any old timing sessions. */
@@ -542,7 +542,7 @@ public final class QuotaController extends StateController {
     /** Process state for a UID has changed. */
     private static final int MSG_UID_PROCESS_STATE_CHANGED = 3;
     /**
-     * An app has reached its expedited job quota. The message should contain a {@link Package}
+     * An app has reached its expedited job quota. The message should contain a {@link UserPackage}
      * object.
      */
     @VisibleForTesting
@@ -641,6 +641,9 @@ public final class QuotaController extends StateController {
             mTopStartedJobs.add(jobStatus);
             // Top jobs won't count towards quota so there's no need to involve the Timer.
             return;
+        } else if (jobStatus.shouldTreatAsUserInitiatedJob()) {
+            // User-initiated jobs won't count towards quota.
+            return;
         }
 
         final int userId = jobStatus.getSourceUserId();
@@ -673,15 +676,14 @@ public final class QuotaController extends StateController {
 
     @Override
     @GuardedBy("mLock")
-    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
-            boolean forUpdate) {
+    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob) {
         if (jobStatus.clearTrackingController(JobStatus.TRACKING_QUOTA)) {
             unprepareFromExecutionLocked(jobStatus);
             final int userId = jobStatus.getSourceUserId();
             final String pkgName = jobStatus.getSourcePackageName();
             ArraySet<JobStatus> jobs = mTrackedJobs.get(userId, pkgName);
             if (jobs != null && jobs.remove(jobStatus) && jobs.size() == 0) {
-                mInQuotaAlarmQueue.removeAlarmForKey(new Package(userId, pkgName));
+                mInQuotaAlarmQueue.removeAlarmForKey(UserPackage.of(userId, pkgName));
             }
         }
     }
@@ -747,7 +749,7 @@ public final class QuotaController extends StateController {
         }
         mTimingEvents.delete(userId, packageName);
         mEJTimingSessions.delete(userId, packageName);
-        mInQuotaAlarmQueue.removeAlarmForKey(new Package(userId, packageName));
+        mInQuotaAlarmQueue.removeAlarmForKey(UserPackage.of(userId, packageName));
         mExecutionStatsCache.delete(userId, packageName);
         mEJStats.delete(userId, packageName);
         mTopAppTrackers.delete(userId, packageName);
@@ -893,7 +895,8 @@ public final class QuotaController extends StateController {
         //   1. it was started while the app was in the TOP state
         //   2. the app is currently in the foreground
         //   3. the app overall is within its quota
-        return isTopStartedJobLocked(jobStatus)
+        return jobStatus.shouldTreatAsUserInitiatedJob()
+                || isTopStartedJobLocked(jobStatus)
                 || isUidInForeground(jobStatus.getSourceUid())
                 || isWithinQuotaLocked(
                 jobStatus.getSourceUserId(), jobStatus.getSourcePackageName(), standbyBucket);
@@ -1726,7 +1729,7 @@ public final class QuotaController extends StateController {
             // exempted.
             maybeScheduleStartAlarmLocked(userId, packageName, realStandbyBucket);
         } else {
-            mInQuotaAlarmQueue.removeAlarmForKey(new Package(userId, packageName));
+            mInQuotaAlarmQueue.removeAlarmForKey(UserPackage.of(userId, packageName));
         }
         return changedJobs;
     }
@@ -1765,7 +1768,7 @@ public final class QuotaController extends StateController {
                     && isWithinQuotaLocked(userId, packageName, realStandbyBucket)) {
                 // TODO(141645789): we probably shouldn't cancel the alarm until we've verified
                 // that all jobs for the userId-package are within quota.
-                mInQuotaAlarmQueue.removeAlarmForKey(new Package(userId, packageName));
+                mInQuotaAlarmQueue.removeAlarmForKey(UserPackage.of(userId, packageName));
             } else {
                 mToScheduleStartAlarms.add(userId, packageName, realStandbyBucket);
             }
@@ -1815,7 +1818,7 @@ public final class QuotaController extends StateController {
         if (jobs == null || jobs.size() == 0) {
             Slog.e(TAG, "maybeScheduleStartAlarmLocked called for "
                     + packageToString(userId, packageName) + " that has no jobs");
-            mInQuotaAlarmQueue.removeAlarmForKey(new Package(userId, packageName));
+            mInQuotaAlarmQueue.removeAlarmForKey(UserPackage.of(userId, packageName));
             return;
         }
 
@@ -1839,7 +1842,7 @@ public final class QuotaController extends StateController {
                         + getRemainingExecutionTimeLocked(userId, packageName, standbyBucket)
                         + "ms in its quota.");
             }
-            mInQuotaAlarmQueue.removeAlarmForKey(new Package(userId, packageName));
+            mInQuotaAlarmQueue.removeAlarmForKey(UserPackage.of(userId, packageName));
             mHandler.obtainMessage(MSG_CHECK_PACKAGE, userId, 0, packageName).sendToTarget();
             return;
         }
@@ -1904,7 +1907,7 @@ public final class QuotaController extends StateController {
                             + nowElapsed + ", inQuotaTime=" + inQuotaTimeElapsed + ": " + stats);
             inQuotaTimeElapsed = nowElapsed + 5 * MINUTE_IN_MILLIS;
         }
-        mInQuotaAlarmQueue.addAlarm(new Package(userId, packageName), inQuotaTimeElapsed);
+        mInQuotaAlarmQueue.addAlarm(UserPackage.of(userId, packageName), inQuotaTimeElapsed);
     }
 
     private boolean setConstraintSatisfied(@NonNull JobStatus jobStatus, long nowElapsed,
@@ -2099,7 +2102,7 @@ public final class QuotaController extends StateController {
     }
 
     private final class Timer {
-        private final Package mPkg;
+        private final UserPackage mPkg;
         private final int mUid;
         private final boolean mRegularJobTimer;
 
@@ -2111,12 +2114,19 @@ public final class QuotaController extends StateController {
         private long mDebitAdjustment;
 
         Timer(int uid, int userId, String packageName, boolean regularJobTimer) {
-            mPkg = new Package(userId, packageName);
+            mPkg = UserPackage.of(userId, packageName);
             mUid = uid;
             mRegularJobTimer = regularJobTimer;
         }
 
         void startTrackingJobLocked(@NonNull JobStatus jobStatus) {
+            if (jobStatus.shouldTreatAsUserInitiatedJob()) {
+                if (DEBUG) {
+                    Slog.v(TAG, "Timer ignoring " + jobStatus.toShortString()
+                            + " because it's user-initiated");
+                }
+                return;
+            }
             if (isTopStartedJobLocked(jobStatus)) {
                 // We intentionally don't pay attention to fg state changes after a TOP job has
                 // started.
@@ -2366,7 +2376,7 @@ public final class QuotaController extends StateController {
     }
 
     private final class TopAppTimer {
-        private final Package mPkg;
+        private final UserPackage mPkg;
 
         // List of jobs currently running for this app that started when the app wasn't in the
         // foreground.
@@ -2374,7 +2384,7 @@ public final class QuotaController extends StateController {
         private long mStartTimeElapsed;
 
         TopAppTimer(int userId, String packageName) {
-            mPkg = new Package(userId, packageName);
+            mPkg = UserPackage.of(userId, packageName);
         }
 
         private int calculateTimeChunks(final long nowElapsed) {
@@ -2657,7 +2667,7 @@ public final class QuotaController extends StateController {
             synchronized (mLock) {
                 switch (msg.what) {
                     case MSG_REACHED_QUOTA: {
-                        Package pkg = (Package) msg.obj;
+                        UserPackage pkg = (UserPackage) msg.obj;
                         if (DEBUG) {
                             Slog.d(TAG, "Checking if " + pkg + " has reached its quota.");
                         }
@@ -2686,7 +2696,7 @@ public final class QuotaController extends StateController {
                         break;
                     }
                     case MSG_REACHED_EJ_QUOTA: {
-                        Package pkg = (Package) msg.obj;
+                        UserPackage pkg = (UserPackage) msg.obj;
                         if (DEBUG) {
                             Slog.d(TAG, "Checking if " + pkg + " has reached its EJ quota.");
                         }
@@ -2888,21 +2898,21 @@ public final class QuotaController extends StateController {
     }
 
     /** Track when UPTCs are expected to come back into quota. */
-    private class InQuotaAlarmQueue extends AlarmQueue<Package> {
+    private class InQuotaAlarmQueue extends AlarmQueue<UserPackage> {
         private InQuotaAlarmQueue(Context context, Looper looper) {
             super(context, looper, ALARM_TAG_QUOTA_CHECK, "In quota", false,
                     QcConstants.DEFAULT_MIN_QUOTA_CHECK_DELAY_MS);
         }
 
         @Override
-        protected boolean isForUser(@NonNull Package key, int userId) {
+        protected boolean isForUser(@NonNull UserPackage key, int userId) {
             return key.userId == userId;
         }
 
         @Override
-        protected void processExpiredAlarms(@NonNull ArraySet<Package> expired) {
+        protected void processExpiredAlarms(@NonNull ArraySet<UserPackage> expired) {
             for (int i = 0; i < expired.size(); ++i) {
-                Package p = expired.valueAt(i);
+                UserPackage p = expired.valueAt(i);
                 mHandler.obtainMessage(MSG_CHECK_PACKAGE, p.userId, 0, p.packageName)
                         .sendToTarget();
             }

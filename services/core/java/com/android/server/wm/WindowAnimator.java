@@ -205,10 +205,10 @@ public class WindowAnimator {
         if (runningExpensiveAnimations && !mRunningExpensiveAnimations) {
             // Usually app transitions put quite a load onto the system already (with all the things
             // happening in app), so pause task snapshot persisting to not increase the load.
-            mService.mTaskSnapshotController.setPersisterPaused(true);
+            mService.mSnapshotPersistQueue.setPaused(true);
             mTransaction.setEarlyWakeupStart();
         } else if (!runningExpensiveAnimations && mRunningExpensiveAnimations) {
-            mService.mTaskSnapshotController.setPersisterPaused(false);
+            mService.mSnapshotPersistQueue.setPaused(false);
             mTransaction.setEarlyWakeupEnd();
         }
         mRunningExpensiveAnimations = runningExpensiveAnimations;

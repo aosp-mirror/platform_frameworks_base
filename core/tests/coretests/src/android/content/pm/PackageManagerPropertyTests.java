@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import android.content.pm.PackageManager.Property;
@@ -162,40 +163,30 @@ public class PackageManagerPropertyTests {
 
     @Test
     public void testProperty_invalidName() throws Exception {
-        try {
+        assertThrows(NullPointerException.class, () -> {
             final Property p = new Property(null, 1, "android", null);
-            fail("expected assertion error");
-        } catch (AssertionError expected) {
-        }
+        });
     }
 
     @Test
     public void testProperty_invalidType() throws Exception {
-        try {
+        assertThrows(IllegalArgumentException.class, () -> {
             final Property p = new Property("invalidTypeProperty", 0, "android", null);
-            fail("expected assertion error");
-        } catch (AssertionError expected) {
-        }
+        });
 
-        try {
+        assertThrows(IllegalArgumentException.class, () -> {
             final Property p = new Property("invalidTypeProperty", 6, "android", null);
-            fail("expected assertion error");
-        } catch (AssertionError expected) {
-        }
+        });
 
-        try {
+        assertThrows(IllegalArgumentException.class, () -> {
             final Property p = new Property("invalidTypeProperty", -1, "android", null);
-            fail("expected assertion error");
-        } catch (AssertionError expected) {
-        }
+        });
     }
 
     @Test
     public void testProperty_noPackageName() throws Exception {
-        try {
+        assertThrows(NullPointerException.class, () -> {
             final Property p = new Property(null, 1, null, null);
-            fail("expected assertion error");
-        } catch (AssertionError expected) {
-        }
+        });
     }
 }

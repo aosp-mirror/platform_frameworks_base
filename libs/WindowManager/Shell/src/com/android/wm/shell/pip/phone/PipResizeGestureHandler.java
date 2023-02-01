@@ -96,6 +96,7 @@ public class PipResizeGestureHandler {
     private final Rect mDisplayBounds = new Rect();
     private final Function<Rect, Rect> mMovementBoundsSupplier;
     private final Runnable mUpdateMovementBoundsRunnable;
+    private final Consumer<Rect> mUpdateResizeBoundsCallback;
 
     private int mDelta;
     private float mTouchSlop;
@@ -137,6 +138,13 @@ public class PipResizeGestureHandler {
         mPhonePipMenuController = menuActivityController;
         mPipUiEventLogger = pipUiEventLogger;
         mPinchResizingAlgorithm = new PipPinchResizingAlgorithm();
+
+        mUpdateResizeBoundsCallback = (rect) -> {
+            mUserResizeBounds.set(rect);
+            mMotionHelper.synchronizePinnedStackBounds();
+            mUpdateMovementBoundsRunnable.run();
+            resetState();
+        };
     }
 
     public void init() {
@@ -508,15 +516,50 @@ public class PipResizeGestureHandler {
         }
     }
 
+    private void snapToMovementBoundsEdge(Rect bounds, Rect movementBounds) {
+        final int leftEdge = bounds.left;
+
+
+        final int fromLeft = Math.abs(leftEdge - movementBounds.left);
+        final int fromRight = Math.abs(movementBounds.right - leftEdge);
+
+        // The PIP will be snapped to either the right or left edge, so calculate which one
+        // is closest to the current position.
+        final int newLeft = fromLeft < fromRight
+                ? movementBounds.left : movementBounds.right;
+
+        bounds.offsetTo(newLeft, mLastResizeBounds.top);
+    }
+
+    /**
+     * Resizes the pip window and updates user-resized bounds.
+     *
+     * @param bounds target bounds to resize to
+     * @param snapFraction snap fraction to apply after resizing
+     */
+    void userResizeTo(Rect bounds, float snapFraction) {
+        Rect finalBounds = new Rect(bounds);
+
+        // get the current movement bounds
+        final Rect movementBounds = mPipBoundsAlgorithm.getMovementBounds(finalBounds);
+
+        // snap the target bounds to the either left or right edge, by choosing the closer one
+        snapToMovementBoundsEdge(finalBounds, movementBounds);
+
+        // apply the requested snap fraction onto the target bounds
+        mPipBoundsAlgorithm.applySnapFraction(finalBounds, snapFraction);
+
+        // resize from current bounds to target bounds without animation
+        mPipTaskOrganizer.scheduleUserResizePip(mPipBoundsState.getBounds(), finalBounds, null);
+        // set the flag that pip has been resized
+        mPipBoundsState.setHasUserResizedPip(true);
+
+        // finish the resize operation and update the state of the bounds
+        mPipTaskOrganizer.scheduleFinishResizePip(finalBounds, mUpdateResizeBoundsCallback);
+    }
+
     private void finishResize() {
         if (!mLastResizeBounds.isEmpty()) {
-            final Consumer<Rect> callback = (rect) -> {
-                mUserResizeBounds.set(mLastResizeBounds);
-                mMotionHelper.synchronizePinnedStackBounds();
-                mUpdateMovementBoundsRunnable.run();
-                resetState();
-            };
-
             // Pinch-to-resize needs to re-calculate snap fraction and animate to the snapped
             // position correctly. Drag-resize does not need to move, so just finalize resize.
             if (mOngoingPinchToResize) {
@@ -526,24 +569,23 @@ public class PipResizeGestureHandler {
                         || mLastResizeBounds.height() >= PINCH_RESIZE_AUTO_MAX_RATIO * mMaxSize.y) {
                     resizeRectAboutCenter(mLastResizeBounds, mMaxSize.x, mMaxSize.y);
                 }
-                final int leftEdge = mLastResizeBounds.left;
-                final Rect movementBounds =
-                        mPipBoundsAlgorithm.getMovementBounds(mLastResizeBounds);
-                final int fromLeft = Math.abs(leftEdge - movementBounds.left);
-                final int fromRight = Math.abs(movementBounds.right - leftEdge);
-                // The PIP will be snapped to either the right or left edge, so calculate which one
-                // is closest to the current position.
-                final int newLeft = fromLeft < fromRight
-                        ? movementBounds.left : movementBounds.right;
-                mLastResizeBounds.offsetTo(newLeft, mLastResizeBounds.top);
+
+                // get the current movement bounds
+                final Rect movementBounds = mPipBoundsAlgorithm
+                        .getMovementBounds(mLastResizeBounds);
+
+                // snap mLastResizeBounds to the correct edge based on movement bounds
+                snapToMovementBoundsEdge(mLastResizeBounds, movementBounds);
+
                 final float snapFraction = mPipBoundsAlgorithm.getSnapFraction(
                         mLastResizeBounds, movementBounds);
                 mPipBoundsAlgorithm.applySnapFraction(mLastResizeBounds, snapFraction);
                 mPipTaskOrganizer.scheduleAnimateResizePip(startBounds, mLastResizeBounds,
-                        PINCH_RESIZE_SNAP_DURATION, mAngle, callback);
+                        PINCH_RESIZE_SNAP_DURATION, mAngle, mUpdateResizeBoundsCallback);
             } else {
                 mPipTaskOrganizer.scheduleFinishResizePip(mLastResizeBounds,
-                        PipAnimationController.TRANSITION_DIRECTION_USER_RESIZE, callback);
+                        PipAnimationController.TRANSITION_DIRECTION_USER_RESIZE,
+                        mUpdateResizeBoundsCallback);
             }
             final float magnetRadiusPercent = (float) mLastResizeBounds.width() / mMinSize.x / 2.f;
             mPipDismissTargetHandler
@@ -625,8 +667,7 @@ public class PipResizeGestureHandler {
 
     class PipResizeInputEventReceiver extends BatchedInputEventReceiver {
         PipResizeInputEventReceiver(InputChannel channel, Looper looper) {
-            // TODO(b/222697646): remove getSfInstance usage and use vsyncId for transactions
-            super(channel, looper, Choreographer.getSfInstance());
+            super(channel, looper, Choreographer.getInstance());
         }
 
         public void onInputEvent(InputEvent event) {

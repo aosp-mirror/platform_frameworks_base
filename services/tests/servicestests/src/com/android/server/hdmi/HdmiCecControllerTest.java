@@ -108,6 +108,7 @@ public class HdmiCecControllerTest {
         doAnswer(__ -> mCecVersion).when(mHdmiControlServiceSpy).getCecVersion();
         doNothing().when(mHdmiControlServiceSpy)
                 .writeStringSystemProperty(anyString(), anyString());
+        mHdmiControlServiceSpy.setDeviceConfig(new FakeDeviceConfigWrapper());
 
         mNativeWrapper = new FakeNativeWrapper();
         mHdmiCecController = HdmiCecController.createWithNativeWrapper(
@@ -132,9 +133,7 @@ public class HdmiCecControllerTest {
         mHdmiControlServiceSpy.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
         mTestLooper.dispatchAll();
 
-        synchronized (playbackDevice.mLock) {
-            mPlaybackLogicalAddress = playbackDevice.getDeviceInfo().getLogicalAddress();
-        }
+        mPlaybackLogicalAddress = playbackDevice.getDeviceInfo().getLogicalAddress();
         mTestLooper.dispatchAll();
     }
 

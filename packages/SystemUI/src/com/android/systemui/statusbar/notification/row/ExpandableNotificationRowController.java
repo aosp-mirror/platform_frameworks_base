@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.row;
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
+import static com.android.systemui.statusbar.notification.NotificationUtils.logKey;
 
 import android.util.Log;
 import android.view.View;
@@ -32,9 +33,9 @@ import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
@@ -82,13 +83,11 @@ public class ExpandableNotificationRowController implements NotifViewController 
     private final GroupExpansionManager mGroupExpansionManager;
     private final RowContentBindStage mRowContentBindStage;
     private final NotificationLogger mNotificationLogger;
+    private final NotificationRowLogger mLogBufferLogger;
     private final HeadsUpManager mHeadsUpManager;
     private final ExpandableNotificationRow.OnExpandClickListener mOnExpandClickListener;
     private final StatusBarStateController mStatusBarStateController;
     private final MetricsLogger mMetricsLogger;
-
-    private final ExpandableNotificationRow.ExpansionLogger mExpansionLogger =
-            this::logNotificationExpansion;
     private final ExpandableNotificationRow.CoordinateOnClickListener mOnFeedbackClickListener;
     private final NotificationGutsManager mNotificationGutsManager;
     private final OnUserInteractionCallback mOnUserInteractionCallback;
@@ -100,8 +99,32 @@ public class ExpandableNotificationRowController implements NotifViewController 
     private final Optional<BubblesManager> mBubblesManagerOptional;
     private final SmartReplyConstants mSmartReplyConstants;
     private final SmartReplyController mSmartReplyController;
-
     private final ExpandableNotificationRowDragController mDragController;
+    private final ExpandableNotificationRow.ExpandableNotificationRowLogger mLoggerCallback =
+            new ExpandableNotificationRow.ExpandableNotificationRowLogger() {
+                @Override
+                public void logNotificationExpansion(String key, boolean userAction,
+                        boolean expanded) {
+                    mNotificationLogger.onExpansionChanged(key, userAction, expanded);
+                }
+
+                @Override
+                public void logKeepInParentChildDetached(
+                        NotificationEntry child,
+                        NotificationEntry oldParent
+                ) {
+                    mLogBufferLogger.logKeepInParentChildDetached(child, oldParent);
+                }
+
+                @Override
+                public void logSkipAttachingKeepInParentChild(
+                        NotificationEntry child,
+                        NotificationEntry newParent
+                ) {
+                    mLogBufferLogger.logSkipAttachingKeepInParentChild(child, newParent);
+                }
+            };
+
 
     @Inject
     public ExpandableNotificationRowController(
@@ -109,6 +132,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
             ActivatableNotificationViewController activatableNotificationViewController,
             RemoteInputViewSubcomponent.Factory rivSubcomponentFactory,
             MetricsLogger metricsLogger,
+            NotificationRowLogger logBufferLogger,
             NotificationListContainer listContainer,
             NotificationMediaManager mediaManager,
             SmartReplyConstants smartReplyConstants,
@@ -162,6 +186,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
         mBubblesManagerOptional = bubblesManagerOptional;
         mDragController = dragController;
         mMetricsLogger = metricsLogger;
+        mLogBufferLogger = logBufferLogger;
         mSmartReplyConstants = smartReplyConstants;
         mSmartReplyController = smartReplyController;
     }
@@ -176,7 +201,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
                 mRemoteInputViewSubcomponentFactory,
                 mAppName,
                 mNotificationKey,
-                mExpansionLogger,
+                mLoggerCallback,
                 mKeyguardBypassController,
                 mGroupMembershipManager,
                 mGroupExpansionManager,
@@ -194,7 +219,8 @@ public class ExpandableNotificationRowController implements NotifViewController 
                 mNotificationGutsManager,
                 mMetricsLogger,
                 mSmartReplyConstants,
-                mSmartReplyController
+                mSmartReplyController,
+                mFeatureFlags
         );
         mView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         if (mAllowLongPress) {
@@ -230,6 +256,8 @@ public class ExpandableNotificationRowController implements NotifViewController 
                 mStatusBarStateController.removeCallback(mStatusBarStateListener);
             }
         });
+        mView.useRoundnessSourceTypes(
+                mFeatureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES));
     }
 
     private final StatusBarStateController.StateListener mStatusBarStateListener =
@@ -240,14 +268,10 @@ public class ExpandableNotificationRowController implements NotifViewController 
                 }
             };
 
-    private void logNotificationExpansion(String key, boolean userAction, boolean expanded) {
-        mNotificationLogger.onExpansionChanged(key, userAction, expanded);
-    }
-
     @Override
     @NonNull
     public String getNodeLabel() {
-        return mView.getEntry().getKey();
+        return logKey(mView.getEntry());
     }
 
     @Override
@@ -332,5 +356,35 @@ public class ExpandableNotificationRowController implements NotifViewController 
     @Override
     public void setFeedbackIcon(@Nullable FeedbackIcon icon) {
         mView.setFeedbackIcon(icon);
+    }
+
+    @Override
+    public boolean offerToKeepInParentForAnimation() {
+        //If the User dismissed the notification's parent, we want to keep it attached until the
+        //dismiss animation is ongoing. Therefore we don't want to remove it in the ShadeViewDiffer.
+        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_GROUP_DISMISSAL_ANIMATION)
+                && mView.isParentDismissed()) {
+            mView.setKeepInParentForDismissAnimation(true);
+            return true;
+        }
+
+        //Otherwise the view system doesn't do the removal, so we rely on the ShadeViewDiffer
+        return false;
+    }
+
+    @Override
+    public boolean removeFromParentIfKeptForAnimation() {
+        ExpandableNotificationRow parent = mView.getNotificationParent();
+        if (mView.keepInParentForDismissAnimation() && parent != null) {
+            parent.removeChildNotification(mView);
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public void resetKeepInParentForAnimation() {
+        mView.setKeepInParentForDismissAnimation(false);
     }
 }

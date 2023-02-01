@@ -28,6 +28,9 @@ android_test {
         "**/*.java",
         "**/*.kt",
     ],
+    resource_dirs: [
+        "res",
+    ],
 
     static_libs: [
         "WindowManager-Shell",
@@ -65,4 +68,12 @@ android_test {
     optimize: {
         enabled: false,
     },
+
+    platform_apis: true,
+    certificate: "platform",
+
+    aaptflags: [
+        "--extra-packages",
+        "com.android.wm.shell.tests",
+    ],
 }

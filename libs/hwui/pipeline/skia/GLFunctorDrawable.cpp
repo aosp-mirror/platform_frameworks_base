@@ -24,6 +24,7 @@
 #include "SkClipStack.h"
 #include "SkRect.h"
 #include "SkM44.h"
+#include "include/gpu/GpuTypes.h" // from Skia
 #include "utils/GLUtils.h"
 
 namespace android {
@@ -92,7 +93,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
         SkImageInfo surfaceInfo =
                 canvas->imageInfo().makeWH(clipBounds.width(), clipBounds.height());
         tmpSurface =
-                SkSurface::MakeRenderTarget(directContext, SkBudgeted::kYes, surfaceInfo);
+                SkSurface::MakeRenderTarget(directContext, skgpu::Budgeted::kYes, surfaceInfo);
         tmpSurface->getCanvas()->clear(SK_ColorTRANSPARENT);
 
         GrGLFramebufferInfo fboInfo;

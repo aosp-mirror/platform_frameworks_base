@@ -28,6 +28,7 @@ import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.view.Display;
 import android.view.SurfaceControl;
+import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 import android.view.accessibility.IWindowMagnificationConnection;
@@ -39,7 +40,9 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.util.settings.SecureSettings;
 
 import java.io.PrintWriter;
 
@@ -52,15 +55,17 @@ import javax.inject.Inject;
  * when {@code IStatusBar#requestWindowMagnificationConnection(boolean)} is called.
  */
 @SysUISingleton
-public class WindowMagnification extends CoreStartable implements WindowMagnifierCallback,
+public class WindowMagnification implements CoreStartable, WindowMagnifierCallback,
         CommandQueue.Callbacks {
     private static final String TAG = "WindowMagnification";
 
     private final ModeSwitchesController mModeSwitchesController;
+    private final Context mContext;
     private final Handler mHandler;
     private final AccessibilityManager mAccessibilityManager;
     private final CommandQueue mCommandQueue;
     private final OverviewProxyService mOverviewProxyService;
+    private final DisplayTracker mDisplayTracker;
 
     private WindowMagnificationConnectionImpl mWindowMagnificationConnectionImpl;
     private SysUiState mSysUiState;
@@ -72,26 +77,36 @@ public class WindowMagnification extends CoreStartable implements WindowMagnifie
         private final Handler mHandler;
         private final WindowMagnifierCallback mWindowMagnifierCallback;
         private final SysUiState mSysUiState;
+        private final SecureSettings mSecureSettings;
 
         ControllerSupplier(Context context, Handler handler,
                 WindowMagnifierCallback windowMagnifierCallback,
-                DisplayManager displayManager, SysUiState sysUiState) {
+                DisplayManager displayManager, SysUiState sysUiState,
+                SecureSettings secureSettings) {
             super(displayManager);
             mContext = context;
             mHandler = handler;
             mWindowMagnifierCallback = windowMagnifierCallback;
             mSysUiState = sysUiState;
+            mSecureSettings = secureSettings;
         }
 
         @Override
         protected WindowMagnificationController createInstance(Display display) {
             final Context windowContext = mContext.createWindowContext(display,
                     TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY, /* options */ null);
+            windowContext.setTheme(com.android.systemui.R.style.Theme_SystemUI);
             return new WindowMagnificationController(
                     windowContext,
-                    mHandler, new WindowMagnificationAnimationController(windowContext),
-                    new SfVsyncFrameCallbackProvider(), null,
-                    new SurfaceControl.Transaction(), mWindowMagnifierCallback, mSysUiState);
+                    mHandler,
+                    new WindowMagnificationAnimationController(windowContext),
+                    new SfVsyncFrameCallbackProvider(),
+                    null,
+                    new SurfaceControl.Transaction(),
+                    mWindowMagnifierCallback,
+                    mSysUiState,
+                    WindowManagerGlobal::getWindowSession,
+                    mSecureSettings);
         }
     }
 
@@ -101,16 +116,19 @@ public class WindowMagnification extends CoreStartable implements WindowMagnifie
     @Inject
     public WindowMagnification(Context context, @Main Handler mainHandler,
             CommandQueue commandQueue, ModeSwitchesController modeSwitchesController,
-            SysUiState sysUiState, OverviewProxyService overviewProxyService) {
-        super(context);
+            SysUiState sysUiState, OverviewProxyService overviewProxyService,
+            SecureSettings secureSettings, DisplayTracker displayTracker) {
+        mContext = context;
         mHandler = mainHandler;
         mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
         mCommandQueue = commandQueue;
         mModeSwitchesController = modeSwitchesController;
         mSysUiState = sysUiState;
         mOverviewProxyService = overviewProxyService;
+        mDisplayTracker = displayTracker;
         mMagnificationControllerSupplier = new ControllerSupplier(context,
-                mHandler, this, context.getSystemService(DisplayManager.class), sysUiState);
+                mHandler, this, context.getSystemService(DisplayManager.class), sysUiState,
+                secureSettings);
     }
 
     @Override
@@ -129,14 +147,14 @@ public class WindowMagnification extends CoreStartable implements WindowMagnifie
     private void updateSysUiStateFlag() {
         //TODO(b/187510533): support multi-display once SysuiState supports it.
         final WindowMagnificationController controller =
-                mMagnificationControllerSupplier.valueAt(Display.DEFAULT_DISPLAY);
+                mMagnificationControllerSupplier.valueAt(mDisplayTracker.getDefaultDisplayId());
         if (controller != null) {
             controller.updateSysUIStateFlag();
         } else {
             // The instance is initialized when there is an IPC request. Considering
             // self-crash cases, we need to reset the flag in such situation.
             mSysUiState.setFlag(SYSUI_STATE_MAGNIFICATION_OVERLAP, false)
-                    .commitUpdate(Display.DEFAULT_DISPLAY);
+                    .commitUpdate(mDisplayTracker.getDefaultDisplayId());
         }
     }
 
@@ -223,6 +241,13 @@ public class WindowMagnification extends CoreStartable implements WindowMagnifie
     public void onMove(int displayId) {
         if (mWindowMagnificationConnectionImpl != null) {
             mWindowMagnificationConnectionImpl.onMove(displayId);
+        }
+    }
+
+    @Override
+    public void onModeSwitch(int displayId, int newMode) {
+        if (mWindowMagnificationConnectionImpl != null) {
+            mWindowMagnificationConnectionImpl.onChangeMagnificationMode(displayId, newMode);
         }
     }
 

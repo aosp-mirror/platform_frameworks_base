@@ -17,8 +17,6 @@
 package com.android.wm.shell.bubbles
 
 import android.graphics.PointF
-import android.os.Handler
-import android.os.Looper
 import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.View
@@ -143,6 +141,12 @@ abstract class RelativeTouchListener : View.OnTouchListener {
                     v.handler.removeCallbacksAndMessages(null)
                 }
 
+                velocityTracker.clear()
+                movedEnough = false
+            }
+
+            MotionEvent.ACTION_CANCEL -> {
+                v.handler.removeCallbacksAndMessages(null)
                 velocityTracker.clear()
                 movedEnough = false
             }

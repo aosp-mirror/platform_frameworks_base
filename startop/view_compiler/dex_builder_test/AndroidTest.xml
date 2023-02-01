@@ -21,7 +21,7 @@
         <option name="test-file-name" value="dex-builder-test.apk" />
     </target_preparer>
 
-    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
+    <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
         <option name="cleanup" value="true" />
         <option name="push" value="trivial.dex->/data/local/tmp/dex-builder-test/trivial.dex" />
         <option name="push" value="simple.dex->/data/local/tmp/dex-builder-test/simple.dex" />

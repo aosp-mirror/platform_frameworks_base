@@ -77,6 +77,8 @@ public final class UsbMidiDevice implements Closeable {
     // only accessed from JNI code
     private int mPipeFD = -1;
 
+    private PowerBoostSetter mPowerBoostSetter = null;
+
     private final MidiDeviceServer.Callback mCallback = new MidiDeviceServer.Callback() {
         @Override
         public void onDeviceStatusChanged(MidiDeviceServer server, MidiDeviceStatus status) {
@@ -167,6 +169,8 @@ public final class UsbMidiDevice implements Closeable {
         for (int port = 0; port < numOutputs; port++) {
             mMidiInputPortReceivers[port] = new InputReceiverProxy();
         }
+
+        mPowerBoostSetter = new PowerBoostSetter();
     }
 
     private boolean openLocked() {
@@ -240,6 +244,11 @@ public final class UsbMidiDevice implements Closeable {
 
                                         int count = mInputStreams[index].read(buffer);
                                         outputReceivers[index].send(buffer, 0, count, timestamp);
+
+                                        // If messages are more than size 1, boost power.
+                                        if (mPowerBoostSetter != null && count > 1) {
+                                            mPowerBoostSetter.boostPower();
+                                        }
                                     }
                                 }
                             }

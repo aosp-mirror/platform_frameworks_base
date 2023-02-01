@@ -64,7 +64,7 @@ import android.util.apk.VerityBuilder;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.security.VerityUtils;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -650,7 +650,7 @@ public class ApkChecksums {
         // Skip /product folder.
         // TODO(b/231354111): remove this hack once we are allowed to change SELinux rules.
         if (!containsFile(Environment.getProductDirectory(), filePath)) {
-            byte[] verityHash = VerityUtils.getFsverityRootHash(filePath);
+            byte[] verityHash = VerityUtils.getFsverityDigest(filePath);
             if (verityHash != null) {
                 return new ApkChecksum(split, TYPE_WHOLE_MERKLE_ROOT_4K_SHA256, verityHash);
             }

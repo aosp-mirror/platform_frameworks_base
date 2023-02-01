@@ -328,10 +328,12 @@ java_library {
 
 java_library {
     name: "android_test_stubs_current",
-    // Modules do not have test APIs, but we want to include their SystemApis, like we include
-    // the SystemApi of framework-non-updatable-sources.
     static_libs: [
-        "all-modules-system-stubs",
+        // Updatable modules do not have test APIs, but we want to include their SystemApis, like we
+        // include the SystemApi of framework-non-updatable-sources.
+        "all-updatable-modules-system-stubs",
+        // Non-updatable modules on the other hand can have test APIs, so include their test-stubs.
+        "all-non-updatable-modules-test-stubs",
         "android-non-updatable.stubs.test",
         "private-stub-annotations-jar",
     ],
@@ -376,6 +378,67 @@ java_library {
     },
 }
 
+java_library {
+    name: "android_stubs_private_jar",
+    defaults: ["android.jar_defaults"],
+    visibility: [
+        "//visibility:override",
+        "//visibility:private",
+    ],
+    static_libs: [
+        "stable.core.platform.api.stubs",
+        "core-lambda-stubs-for-system-modules",
+        "core-generated-annotation-stubs",
+        "framework",
+        "ext",
+        "framework-res-package-jar",
+        // The order of this matters, it has to be last to provide a
+        // package-private androidx.annotation.RecentlyNonNull without
+        // overriding the public android.annotation.Nullable in framework.jar
+        // with its own package-private android.annotation.Nullable.
+        "private-stub-annotations-jar",
+    ],
+}
+
+java_genrule {
+    name: "android_stubs_private_hjar",
+    visibility: ["//visibility:private"],
+    srcs: [":android_stubs_private_jar{.hjar}"],
+    out: ["android_stubs_private.jar"],
+    cmd: "cp $(in) $(out)",
+}
+
+java_library {
+    name: "android_stubs_private",
+    defaults: ["android_stubs_dists_default"],
+    visibility: ["//visibility:private"],
+    sdk_version: "none",
+    system_modules: "none",
+    static_libs: ["android_stubs_private_hjar"],
+    dist: {
+        dir: "apistubs/android/private",
+    },
+}
+
+java_genrule {
+    name: "android_stubs_private_framework_aidl",
+    visibility: ["//visibility:private"],
+    tools: ["sdkparcelables"],
+    srcs: [":android_stubs_private"],
+    out: ["framework.aidl"],
+    cmd: "rm -f $(genDir)/framework.aidl.merged && " +
+        "for i in $(in); do " +
+        "  rm -f $(genDir)/framework.aidl.tmp && " +
+        "  $(location sdkparcelables) $$i $(genDir)/framework.aidl.tmp && " +
+        "  cat $(genDir)/framework.aidl.tmp >> $(genDir)/framework.aidl.merged; " +
+        "done && " +
+        "sort -u $(genDir)/framework.aidl.merged > $(out)",
+    dist: {
+        targets: ["sdk"],
+        dir: "apistubs/android/private",
+    },
+}
+
 ////////////////////////////////////////////////////////////////////////
 // api-versions.xml generation, for public and system. This API database
 // also contains the android.test.* APIs.
@@ -411,6 +474,36 @@ java_library {
     ],
 }
 
+java_library {
+    name: "android_module_stubs_current_with_test_libs",
+    static_libs: [
+        "android_module_lib_stubs_current",
+        "android.test.base.stubs",
+        "android.test.mock.stubs",
+        "android.test.runner.stubs",
+    ],
+    defaults: ["android.jar_defaults"],
+    visibility: [
+        "//visibility:override",
+        "//visibility:private",
+    ],
+}
+
+java_library {
+    name: "android_system_server_stubs_current_with_test_libs",
+    static_libs: [
+        "android_system_server_stubs_current",
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
+        "android.test.runner.stubs.system",
+    ],
+    defaults: ["android.jar_defaults"],
+    visibility: [
+        "//visibility:override",
+        "//visibility:private",
+    ],
+}
+
 droidstubs {
     name: "api_versions_public",
     srcs: [":android_stubs_current_with_test_libs{.jar}"],
@@ -420,6 +513,8 @@ droidstubs {
         "sdk-dir",
         "api-versions-jars-dir",
     ],
+    api_levels_sdk_type: "public",
+    extensions_info_file: ":sdk-extensions-info",
 }
 
 droidstubs {
@@ -432,6 +527,33 @@ droidstubs {
         "api-versions-jars-dir",
     ],
     api_levels_sdk_type: "system",
+    extensions_info_file: ":sdk-extensions-info",
+}
+
+droidstubs {
+    name: "api_versions_module_lib",
+    srcs: [":android_module_stubs_current_with_test_libs{.jar}"],
+    generate_stubs: false,
+    api_levels_annotations_enabled: true,
+    api_levels_annotations_dirs: [
+        "sdk-dir",
+        "api-versions-jars-dir",
+    ],
+    api_levels_sdk_type: "module-lib",
+    extensions_info_file: ":sdk-extensions-info",
+}
+
+droidstubs {
+    name: "api_versions_system_server",
+    srcs: [":android_system_server_stubs_current_with_test_libs{.jar}"],
+    generate_stubs: false,
+    api_levels_annotations_enabled: true,
+    api_levels_annotations_dirs: [
+        "sdk-dir",
+        "api-versions-jars-dir",
+    ],
+    api_levels_sdk_type: "system-server",
+    extensions_info_file: ":sdk-extensions-info",
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -475,4 +597,13 @@ java_library {
         ":hwbinder-stubs-docs",
     ],
     visibility: ["//visibility:public"],
+}
+
+java_api_contribution {
+    name: "frameworks-base-core-api-module-lib-stubs",
+    api_surface: "module-lib",
+    api_file: "core/api/module-lib-current.txt",
+    visibility: [
+        "//build/orchestrator/apis",
+    ],
 }

@@ -23,7 +23,6 @@ import android.content.pm.FeatureGroupInfo
 import android.content.pm.FeatureInfo
 import android.content.pm.PackageManager
 import android.content.pm.SigningDetails
-import com.android.server.pm.pkg.parsing.ParsingPackage
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
@@ -31,8 +30,9 @@ import android.util.ArraySet
 import android.util.SparseArray
 import android.util.SparseIntArray
 import com.android.internal.R
-import com.android.server.pm.parsing.pkg.AndroidPackage
+import com.android.server.pm.parsing.pkg.AndroidPackageUtils
 import com.android.server.pm.parsing.pkg.PackageImpl
+import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.pm.pkg.component.ParsedActivityImpl
 import com.android.server.pm.pkg.component.ParsedApexSystemServiceImpl
 import com.android.server.pm.pkg.component.ParsedAttributionImpl
@@ -49,10 +49,15 @@ import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
 import java.security.KeyPairGenerator
 import java.security.PublicKey
+import java.util.UUID
 import kotlin.contracts.ExperimentalContracts
 
 @ExperimentalContracts
 class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, PackageImpl::class) {
+
+    companion object {
+        private val TEST_UUID = UUID.fromString("57554103-df3e-4475-ae7a-8feba49353ac")
+    }
 
     override val defaultImpl = PackageImpl.forTesting("com.example.test")
     override val creator = PackageImpl.CREATOR
@@ -62,15 +67,21 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         "toAppInfoToString",
         "toAppInfoWithoutState",
         "toAppInfoWithoutStateWithoutFlags",
+        "addMimeGroupsFromComponent",
         "assignDerivedFields",
+        "assignDerivedFields2",
+        "makeImmutable",
         "buildFakeForDeletion",
+        "buildAppClassNamesByProcess",
         "capPermissionPriorities",
         "forParsing",
         "forTesting",
         "getBaseAppDataCredentialProtectedDirForSystemUser",
         "getBaseAppDataDeviceProtectedDirForSystemUser",
         "getBoolean",
+        "getBoolean2",
         "setBoolean",
+        "setBoolean2",
         "hideAsFinal",
         "hideAsParsed",
         "markNotActivitiesAsNotExportedIfSingleUser",
@@ -78,13 +89,15 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         "sortReceivers",
         "sortServices",
         "setAllComponentsDirectBootAware",
+        "getUsesLibrariesSorted",
+        "getUsesOptionalLibrariesSorted",
+        "getUsesSdkLibrariesSorted",
+        "getUsesStaticLibrariesSorted",
         // Tested through setting minor/major manually
         "setLongVersionCode",
         "getLongVersionCode",
         // Tested through constructor
         "getManifestPackageName",
-        // Utility methods
-        "getStorageUuid",
         // Removal not tested, irrelevant for parcelling concerns
         "removeUsesOptionalLibrary",
         "clearAdoptPermissions",
@@ -96,8 +109,10 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         // Tested manually
         "getMimeGroups",
         "getRequestedPermissions",
+        "getStorageUuid",
         // Tested through asSplit
         "asSplit",
+        "getSplits",
         "getSplitNames",
         "getSplitCodePaths",
         "getSplitRevisionCodes",
@@ -116,31 +131,47 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         "addUsesStaticLibrary",
         "getUsesStaticLibraries",
         "getUsesStaticLibrariesVersions",
-        "getUsesStaticLibrariesCertDigests"
+        "getUsesStaticLibrariesCertDigests",
+
+        // Tested through getSetByValue via AndroidPackageHidden APIs, to be removed eventually
+        "setOdm",
+        "setOem",
+        "setPrivileged",
+        "setProduct",
+        "setSystem",
+        "setSystemExt",
+        "setVendor",
+        "isOdm",
+        "isOem",
+        "isPrivileged",
+        "isProduct",
+        "isSystem",
+        "isSystemExt",
+        "isVendor",
     )
 
     override val baseParams = listOf(
+        AndroidPackage::getApplicationClassName,
         AndroidPackage::getAppComponentFactory,
         AndroidPackage::getAutoRevokePermissions,
         AndroidPackage::getBackupAgentName,
-        AndroidPackage::getBanner,
+        AndroidPackage::getBannerRes,
         AndroidPackage::getBaseApkPath,
         AndroidPackage::getBaseRevisionCode,
         AndroidPackage::getCategory,
         AndroidPackage::getClassLoaderName,
-        AndroidPackage::getClassName,
         AndroidPackage::getCompatibleWidthLimitDp,
         AndroidPackage::getCompileSdkVersion,
         AndroidPackage::getCompileSdkVersionCodeName,
-        AndroidPackage::getDataExtractionRules,
+        AndroidPackage::getDataExtractionRulesRes,
         AndroidPackage::getDescriptionRes,
-        AndroidPackage::getFullBackupContent,
+        AndroidPackage::getFullBackupContentRes,
         AndroidPackage::getGwpAsanMode,
         AndroidPackage::getIconRes,
         AndroidPackage::getInstallLocation,
         AndroidPackage::getLabelRes,
         AndroidPackage::getLargestWidthLimitDp,
-        AndroidPackage::getLogo,
+        AndroidPackage::getLogoRes,
         AndroidPackage::getLocaleConfigRes,
         AndroidPackage::getManageSpaceActivityName,
         AndroidPackage::getMaxSdkVersion,
@@ -165,19 +196,18 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         AndroidPackage::getResizeableActivity,
         AndroidPackage::getRestrictedAccountType,
         AndroidPackage::getRoundIconRes,
-        PackageImpl::getSeInfo,
         PackageImpl::getSecondaryCpuAbi,
         AndroidPackage::getSecondaryNativeLibraryDir,
         AndroidPackage::getSharedUserId,
-        AndroidPackage::getSharedUserLabel,
-        AndroidPackage::getSdkLibName,
+        AndroidPackage::getSharedUserLabelRes,
+        AndroidPackage::getSdkLibraryName,
         AndroidPackage::getSdkLibVersionMajor,
-        AndroidPackage::getStaticSharedLibName,
-        AndroidPackage::getStaticSharedLibVersion,
+        AndroidPackage::getStaticSharedLibraryName,
+        AndroidPackage::getStaticSharedLibraryVersion,
         AndroidPackage::getTargetSandboxVersion,
         AndroidPackage::getTargetSdkVersion,
         AndroidPackage::getTaskAffinity,
-        AndroidPackage::getTheme,
+        AndroidPackage::getThemeRes,
         AndroidPackage::getUiOptions,
         AndroidPackage::getUid,
         AndroidPackage::getVersionName,
@@ -188,8 +218,9 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         AndroidPackage::isAllowClearUserDataOnFailedRestore,
         AndroidPackage::isAllowNativeHeapPointerTagging,
         AndroidPackage::isAllowTaskReparenting,
+        AndroidPackage::isAllowUpdateOwnership,
         AndroidPackage::isBackupInForeground,
-        AndroidPackage::isBaseHardwareAccelerated,
+        AndroidPackage::isHardwareAccelerated,
         AndroidPackage::isCantSaveState,
         AndroidPackage::isCoreApp,
         AndroidPackage::isCrossProfile,
@@ -200,6 +231,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         AndroidPackage::isExternalStorage,
         AndroidPackage::isExtractNativeLibs,
         AndroidPackage::isFactoryTest,
+        AndroidPackage::isApex,
         AndroidPackage::isForceQueryable,
         AndroidPackage::isFullBackupOnly,
         AndroidPackage::isGame,
@@ -211,14 +243,11 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         AndroidPackage::isLargeHeap,
         AndroidPackage::isMultiArch,
         AndroidPackage::isNativeLibraryRootRequiresIsa,
-        AndroidPackage::isOdm,
-        AndroidPackage::isOem,
-        AndroidPackage::isOverlay,
+        AndroidPackage::isOnBackInvokedCallbackEnabled,
+        AndroidPackage::isResourceOverlay,
         AndroidPackage::isOverlayIsStatic,
         AndroidPackage::isPartiallyDirectBootAware,
         AndroidPackage::isPersistent,
-        AndroidPackage::isPrivileged,
-        AndroidPackage::isProduct,
         AndroidPackage::isProfileableByShell,
         AndroidPackage::isRequestLegacyExternalStorage,
         AndroidPackage::isRequiredForAllUsers,
@@ -229,17 +258,14 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         AndroidPackage::isStaticSharedLibrary,
         AndroidPackage::isStub,
         AndroidPackage::isSupportsRtl,
-        AndroidPackage::isSystem,
-        AndroidPackage::isSystemExt,
         AndroidPackage::isTestOnly,
         AndroidPackage::isUse32BitAbi,
         AndroidPackage::isUseEmbeddedDex,
         AndroidPackage::isUsesCleartextTraffic,
         AndroidPackage::isUsesNonSdkApi,
-        AndroidPackage::isVendor,
         AndroidPackage::isVisibleToInstantApps,
         AndroidPackage::isVmSafeMode,
-        AndroidPackage::isLeavingSharedUid,
+        AndroidPackage::isLeavingSharedUser,
         AndroidPackage::isResetEnabledSettingsOnAppDataCleared,
         AndroidPackage::getMaxAspectRatio,
         AndroidPackage::getMinAspectRatio,
@@ -249,7 +275,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
     )
 
     override fun extraParams() = listOf(
-        getter(AndroidPackage::getVolumeUuid, "57554103-df3e-4475-ae7a-8feba49353ac"),
+        getter(AndroidPackage::getVolumeUuid, TEST_UUID.toString()),
         getter(AndroidPackage::isProfileable, true),
         getter(PackageImpl::getVersionCode, 3),
         getter(PackageImpl::getVersionCodeMajor, 9),
@@ -272,8 +298,8 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         adder(AndroidPackage::getUsesOptionalLibraries, "testUsesOptionalLibrary"),
         adder(AndroidPackage::getUsesOptionalNativeLibraries, "testUsesOptionalNativeLibrary"),
         getSetByValue(
-            AndroidPackage::areAttributionsUserVisible,
-            ParsingPackage::setAttributionsAreUserVisible,
+            AndroidPackage::isAttributionsUserVisible,
+            PackageImpl::setAttributionsAreUserVisible,
             true
         ),
         getSetByValue2(
@@ -507,11 +533,38 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
             }
         ),
         getter(AndroidPackage::getKnownActivityEmbeddingCerts, setOf("TESTEMBEDDINGCERT")),
+        getSetByValue({ AndroidPackageUtils.isOdm(it) }, "isOdm", PackageImpl::setOdm, true),
+        getSetByValue({ AndroidPackageUtils.isOem(it) }, "isOem", PackageImpl::setOem, true),
         getSetByValue(
-            AndroidPackage::isOnBackInvokedCallbackEnabled,
-            ParsingPackage::setOnBackInvokedCallbackEnabled,
+            { AndroidPackageUtils.isPrivileged(it) },
+            "isPrivileged",
+            PackageImpl::setPrivileged,
             true
-        )
+        ),
+        getSetByValue(
+            { AndroidPackageUtils.isProduct(it) },
+            "isProduct",
+            PackageImpl::setProduct,
+            true
+        ),
+        getSetByValue(
+            { AndroidPackageUtils.isVendor(it) },
+            "isVendor",
+            PackageImpl::setVendor,
+            true
+        ),
+        getSetByValue(
+            { AndroidPackageUtils.isSystem(it) },
+            "isSystem",
+            PackageImpl::setSystem,
+            true
+        ),
+        getSetByValue(
+            { AndroidPackageUtils.isSystemExt(it) },
+            "isSystemExt",
+            PackageImpl::setSystemExt,
+            true
+        ),
     )
 
     override fun initialObject() = PackageImpl.forParsing(
@@ -548,15 +601,19 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
             SparseArray<IntArray>().apply {
                 put(0, intArrayOf(-1))
                 put(1, intArrayOf(0))
+                put(2, intArrayOf(1))
             }
         )
         .setSplitHasCode(0, true)
         .setSplitHasCode(1, false)
         .setSplitClassLoaderName(0, "testSplitClassLoaderNameZero")
         .setSplitClassLoaderName(1, "testSplitClassLoaderNameOne")
-
         .addUsesSdkLibrary("testSdk", 2L, arrayOf("testCertDigest1"))
         .addUsesStaticLibrary("testStatic", 3L, arrayOf("testCertDigest2"))
+
+    override fun finalizeObject(parcelable: Parcelable) {
+        (parcelable as PackageImpl).hideAsParsed().hideAsFinal()
+    }
 
     override fun extraAssertions(before: Parcelable, after: Parcelable) {
         super.extraAssertions(before, after)
@@ -594,9 +651,10 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
 
         expect.that(after.splitDependencies).isNotNull()
         after.splitDependencies?.let {
-            expect.that(it.size()).isEqualTo(2)
+            expect.that(it.size()).isEqualTo(3)
             expect.that(it.get(0)).asList().containsExactly(-1)
             expect.that(it.get(1)).asList().containsExactly(0)
+            expect.that(it.get(2)).asList().containsExactly(1)
         }
 
         expect.that(after.usesSdkLibraries).containsExactly("testSdk")
@@ -610,6 +668,8 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         expect.that(after.usesStaticLibrariesCertDigests!!.size).isEqualTo(1)
         expect.that(after.usesStaticLibrariesCertDigests!![0]).asList()
                 .containsExactly("testCertDigest2")
+
+        expect.that(after.storageUuid).isEqualTo(TEST_UUID)
     }
 
     private fun testKey() = KeyPairGenerator.getInstance("RSA")

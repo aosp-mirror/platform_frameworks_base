@@ -62,6 +62,7 @@ import android.security.KeyStore;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.server.biometrics.log.BiometricContext;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -81,6 +82,7 @@ public class AuthSessionTest {
     private static final long TEST_REQUEST_ID = 22;
 
     @Mock private Context mContext;
+    @Mock private BiometricContext mBiometricContext;
     @Mock private ITrustManager mTrustManager;
     @Mock private DevicePolicyManager mDevicePolicyManager;
     @Mock private BiometricService.SettingObserver mSettingObserver;
@@ -102,6 +104,8 @@ public class AuthSessionTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         when(mClientReceiver.asBinder()).thenReturn(mock(Binder.class));
+        when(mBiometricContext.updateContext(any(), anyBoolean()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
         mRandom = new Random();
         mToken = new Binder();
         mSensors = new ArrayList<>();
@@ -437,9 +441,9 @@ public class AuthSessionTest {
 
         final PreAuthInfo preAuthInfo = createPreAuthInfo(sensors, userId, promptInfo,
                 checkDevicePolicyManager);
-        return new AuthSession(mContext, mStatusBarService, mSysuiReceiver, mKeyStore,
-                mRandom, mClientDeathReceiver, preAuthInfo, mToken, requestId, operationId, userId,
-                mSensorReceiver, mClientReceiver, TEST_PACKAGE, promptInfo,
+        return new AuthSession(mContext, mBiometricContext, mStatusBarService, mSysuiReceiver,
+                mKeyStore, mRandom, mClientDeathReceiver, preAuthInfo, mToken, requestId,
+                operationId, userId, mSensorReceiver, mClientReceiver, TEST_PACKAGE, promptInfo,
                 false /* debugEnabled */, mFingerprintSensorProps);
     }
 

@@ -48,6 +48,9 @@ struct ManifestFixerOptions {
   // <overlay>.
   std::optional<std::string> rename_overlay_target_package;
 
+  // The category to use instead of the one defined in 'android:category' in <overlay>.
+  std::optional<std::string> rename_overlay_category;
+
   // The version name to set if 'android:versionName' is not defined in <manifest> or if
   // replace_version is set.
   std::optional<std::string> version_name_default;
@@ -96,7 +99,7 @@ class ManifestFixer : public IXmlResourceConsumer {
  private:
   DISALLOW_COPY_AND_ASSIGN(ManifestFixer);
 
-  bool BuildRules(xml::XmlActionExecutor* executor, IDiagnostics* diag);
+  bool BuildRules(xml::XmlActionExecutor* executor, android::IDiagnostics* diag);
 
   ManifestFixerOptions options_;
 };

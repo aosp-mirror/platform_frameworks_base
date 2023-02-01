@@ -24,12 +24,11 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.android.internal.util.Preconditions;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.dreams.dagger.DreamOverlayComponent;
-
-import javax.inject.Named;
 
 import dagger.Module;
 import dagger.Provides;
+
+import javax.inject.Named;
 
 /**
  * Module for providing a scoped host view.
@@ -37,10 +36,11 @@ import dagger.Provides;
 @Module
 public abstract class ComplicationHostViewModule {
     public static final String SCOPED_COMPLICATIONS_LAYOUT = "scoped_complications_layout";
-    public static final String COMPLICATION_MARGIN = "complication_margin";
+    public static final String COMPLICATION_MARGIN_DEFAULT = "complication_margin_default";
     public static final String COMPLICATIONS_FADE_OUT_DURATION = "complications_fade_out_duration";
     public static final String COMPLICATIONS_FADE_IN_DURATION = "complications_fade_in_duration";
     public static final String COMPLICATIONS_RESTORE_TIMEOUT = "complication_restore_timeout";
+    public static final String COMPLICATIONS_FADE_OUT_DELAY = "complication_fade_out_delay";
 
     /**
      * Generates a {@link ConstraintLayout}, which can host
@@ -48,7 +48,7 @@ public abstract class ComplicationHostViewModule {
      */
     @Provides
     @Named(SCOPED_COMPLICATIONS_LAYOUT)
-    @DreamOverlayComponent.DreamOverlayScope
+    @ComplicationModule.ComplicationScope
     static ConstraintLayout providesComplicationHostView(
             LayoutInflater layoutInflater) {
         return Preconditions.checkNotNull((ConstraintLayout)
@@ -58,8 +58,7 @@ public abstract class ComplicationHostViewModule {
     }
 
     @Provides
-    @Named(COMPLICATION_MARGIN)
-    @DreamOverlayComponent.DreamOverlayScope
+    @Named(COMPLICATION_MARGIN_DEFAULT)
     static int providesComplicationPadding(@Main Resources resources) {
         return resources.getDimensionPixelSize(R.dimen.dream_overlay_complication_margin);
     }
@@ -69,9 +68,17 @@ public abstract class ComplicationHostViewModule {
      */
     @Provides
     @Named(COMPLICATIONS_FADE_OUT_DURATION)
-    @DreamOverlayComponent.DreamOverlayScope
     static int providesComplicationsFadeOutDuration(@Main Resources resources) {
         return resources.getInteger(R.integer.complicationFadeOutMs);
+    }
+
+    /**
+     * Provides the delay to wait for before fading out complications.
+     */
+    @Provides
+    @Named(COMPLICATIONS_FADE_OUT_DELAY)
+    static int providesComplicationsFadeOutDelay(@Main Resources resources) {
+        return resources.getInteger(R.integer.complicationFadeOutDelayMs);
     }
 
     /**
@@ -79,7 +86,6 @@ public abstract class ComplicationHostViewModule {
      */
     @Provides
     @Named(COMPLICATIONS_FADE_IN_DURATION)
-    @DreamOverlayComponent.DreamOverlayScope
     static int providesComplicationsFadeInDuration(@Main Resources resources) {
         return resources.getInteger(R.integer.complicationFadeInMs);
     }
@@ -89,7 +95,6 @@ public abstract class ComplicationHostViewModule {
      */
     @Provides
     @Named(COMPLICATIONS_RESTORE_TIMEOUT)
-    @DreamOverlayComponent.DreamOverlayScope
     static int providesComplicationsRestoreTimeout(@Main Resources resources) {
         return resources.getInteger(R.integer.complicationRestoreMs);
     }

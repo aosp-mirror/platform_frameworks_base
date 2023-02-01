@@ -24,15 +24,19 @@ import android.testing.TestableLooper.RunWithLooper
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.SecureSettings
+import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -77,6 +81,7 @@ class BatterySaverTileTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
+        `when`(qsHost.context).thenReturn(mContext)
         `when`(qsHost.userContext).thenReturn(userContext)
         `when`(userContext.userId).thenReturn(USER)
 
@@ -132,5 +137,27 @@ class BatterySaverTileTest : SysuiTestCase() {
 
         tile.handleSetListening(false)
         verify(batteryController).clearLastPowerSaverStartView()
+    }
+
+    @Test
+    fun testIcon_whenBatterySaverDisabled_isOffState() {
+        val state = QSTile.BooleanState()
+        tile.onPowerSaveChanged(false)
+
+        tile.handleUpdateState(state, /* arg= */ null)
+
+        assertThat(state.icon)
+                .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_battery_saver_icon_off))
+    }
+
+    @Test
+    fun testIcon_whenBatterySaverEnabled_isOnState() {
+        val state = QSTile.BooleanState()
+        tile.onPowerSaveChanged(true)
+
+        tile.handleUpdateState(state, /* arg= */ null)
+
+        assertThat(state.icon)
+                .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_battery_saver_icon_on))
     }
 }

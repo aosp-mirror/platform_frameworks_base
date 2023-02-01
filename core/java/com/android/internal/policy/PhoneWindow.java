@@ -357,8 +357,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mLayoutInflater = LayoutInflater.from(context);
         mRenderShadowsInCompositor = Settings.Global.getInt(context.getContentResolver(),
                 DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR, 1) != 0;
-        mProxyOnBackInvokedDispatcher = new ProxyOnBackInvokedDispatcher(
-                context.getApplicationInfo().isOnBackInvokedCallbackEnabled());
+        mProxyOnBackInvokedDispatcher = new ProxyOnBackInvokedDispatcher(context);
     }
 
     /**
@@ -786,13 +785,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
     }
 
-    @Override
-    public void reportActivityRelaunched() {
-        if (mDecor != null && mDecor.getViewRootImpl() != null) {
-            mDecor.getViewRootImpl().reportActivityRelaunched();
-        }
-    }
-
     private static void clearMenuViews(PanelFeatureState st) {
         // This can be called on config changes, so we should make sure
         // the views will be reconstructed based on the new orientation, etc.
@@ -913,6 +905,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (lp != null && lp.width == ViewGroup.LayoutParams.MATCH_PARENT) {
                 width = MATCH_PARENT;
             }
+        }
+
+        if (!st.hasPanelItems()) {
+            // Ensure that |st.decorView| has its actual content. Otherwise, an empty window can be
+            // created and cause ANR.
+            return;
         }
 
         st.isHandled = false;
@@ -2154,6 +2152,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     /** Notify when decor view is attached to window and {@link ViewRootImpl} is available. */
     void onViewRootImplSet(ViewRootImpl viewRoot) {
         viewRoot.setActivityConfigCallback(mActivityConfigCallback);
+        viewRoot.getOnBackInvokedDispatcher().updateContext(getContext());
         mProxyOnBackInvokedDispatcher.setActualDispatcher(viewRoot.getOnBackInvokedDispatcher());
         applyDecorFitsSystemWindows();
     }

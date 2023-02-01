@@ -36,7 +36,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiThread;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Insets;
 import android.graphics.Rect;
@@ -64,6 +63,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -102,7 +102,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     private final AtomicBoolean mDisabled = new AtomicBoolean(false);
 
     @NonNull
-    private final Context mContext;
+    private final ContentCaptureManager.StrippedContext mContext;
 
     @NonNull
     private final ContentCaptureManager mManager;
@@ -196,7 +196,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         }
     }
 
-    protected MainContentCaptureSession(@NonNull Context context,
+    protected MainContentCaptureSession(@NonNull ContentCaptureManager.StrippedContext context,
             @NonNull ContentCaptureManager manager, @NonNull Handler handler,
             @NonNull IContentCaptureManager systemServerInterface) {
         mContext = context;
@@ -527,7 +527,12 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     @Override
     @UiThread
     void flush(@FlushReason int reason) {
-        if (mEvents == null) return;
+        if (mEvents == null || mEvents.size() == 0) {
+            if (sVerbose) {
+                Log.v(TAG, "Don't flush for empty event buffer.");
+            }
+            return;
+        }
 
         if (mDisabled.get()) {
             Log.e(TAG, "handleForceFlush(" + getDebugState(reason) + "): should not be when "
@@ -630,7 +635,11 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         mComponentName = null;
         mEvents = null;
         if (mDirectServiceInterface != null) {
-            mDirectServiceInterface.asBinder().unlinkToDeath(mDirectServiceVulture, 0);
+            try {
+                mDirectServiceInterface.asBinder().unlinkToDeath(mDirectServiceVulture, 0);
+            } catch (NoSuchElementException e) {
+                Log.w(TAG, "IContentCaptureDirectManager does not exist");
+            }
         }
         mDirectServiceInterface = null;
         mHandler.removeMessages(MSG_FLUSH);

@@ -42,7 +42,6 @@ import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.DataUnit;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Pools;
@@ -82,6 +81,8 @@ public final class ConnectivityController extends RestrictingController implemen
     private static final boolean DEBUG = JobSchedulerService.DEBUG
             || Log.isLoggable(TAG, Log.DEBUG);
 
+    public static final long UNKNOWN_TIME = -1L;
+
     // The networking stack has a hard limit so we can't make this configurable.
     private static final int MAX_NETWORK_CALLBACKS = 125;
     /**
@@ -97,6 +98,13 @@ public final class ConnectivityController extends RestrictingController implemen
             ~(ConnectivityManager.BLOCKED_REASON_APP_STANDBY
                     | ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER
                     | ConnectivityManager.BLOCKED_REASON_DOZE);
+    // TODO(261999509): allow bypassing data saver & user-restricted. However, when we allow a UI
+    //     job to run while data saver restricts the app, we must ensure that we don't run regular
+    //     jobs when we put a hole in the data saver wall for the UI job
+    private static final int UNBYPASSABLE_UI_BLOCKED_REASONS =
+            ~(ConnectivityManager.BLOCKED_REASON_APP_STANDBY
+                    | ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER
+                    | ConnectivityManager.BLOCKED_REASON_DOZE);
     private static final int UNBYPASSABLE_FOREGROUND_BLOCKED_REASONS =
             ~(ConnectivityManager.BLOCKED_REASON_APP_STANDBY
                     | ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER
@@ -106,6 +114,7 @@ public final class ConnectivityController extends RestrictingController implemen
 
     private final ConnectivityManager mConnManager;
     private final NetworkPolicyManagerInternal mNetPolicyManagerInternal;
+    private final FlexibilityController mFlexibilityController;
 
     /** List of tracked jobs keyed by source UID. */
     @GuardedBy("mLock")
@@ -147,11 +156,13 @@ public final class ConnectivityController extends RestrictingController implemen
             //   2. Waiting connectivity jobs would be ready with connectivity
             //   3. An existing network satisfies a waiting connectivity job's requirements
             //   4. TOP proc state
-            //   5. Existence of treat-as-EJ EJs (not just requested EJs)
-            //   6. FGS proc state
-            //   7. EJ enqueue time
-            //   8. Any other important job priorities/proc states
-            //   9. Enqueue time
+            //   5. Existence of treat-as-UI UIJs (not just requested UIJs)
+            //   6. Existence of treat-as-EJ EJs (not just requested EJs)
+            //   7. FGS proc state
+            //   8. UIJ enqueue time
+            //   9. EJ enqueue time
+            //   10. Any other important job priorities/proc states
+            //   11. Enqueue time
             // TODO: maybe consider number of jobs
             // TODO: consider IMPORTANT_WHILE_FOREGROUND bit
             final int runningPriority = prioritizeExistenceOver(0,
@@ -179,8 +190,13 @@ public final class ConnectivityController extends RestrictingController implemen
             if (topPriority != 0) {
                 return topPriority;
             }
-            // They're either both TOP or both not TOP. Prioritize the app that has runnable EJs
+            // They're either both TOP or both not TOP. Prioritize the app that has runnable UIJs
             // pending.
+            final int uijPriority = prioritizeExistenceOver(0, us1.numUIJs, us2.numUIJs);
+            if (uijPriority != 0) {
+                return uijPriority;
+            }
+            // Still equivalent. Prioritize the app that has runnable EJs pending.
             final int ejPriority = prioritizeExistenceOver(0, us1.numEJs, us2.numEJs);
             if (ejPriority != 0) {
                 return ejPriority;
@@ -192,6 +208,12 @@ public final class ConnectivityController extends RestrictingController implemen
                     us1.baseBias, us2.baseBias);
             if (fgsPriority != 0) {
                 return fgsPriority;
+            }
+            // Order them by UIJ enqueue time to help provide low UIJ latency.
+            if (us1.earliestUIJEnqueueTime < us2.earliestUIJEnqueueTime) {
+                return -1;
+            } else if (us1.earliestUIJEnqueueTime > us2.earliestUIJEnqueueTime) {
+                return 1;
             }
             // Order them by EJ enqueue time to help provide low EJ latency.
             if (us1.earliestEJEnqueueTime < us2.earliestEJEnqueueTime) {
@@ -231,12 +253,14 @@ public final class ConnectivityController extends RestrictingController implemen
 
     private final Handler mHandler;
 
-    public ConnectivityController(JobSchedulerService service) {
+    public ConnectivityController(JobSchedulerService service,
+            @NonNull FlexibilityController flexibilityController) {
         super(service);
         mHandler = new CcHandler(mContext.getMainLooper());
 
         mConnManager = mContext.getSystemService(ConnectivityManager.class);
         mNetPolicyManagerInternal = LocalServices.getService(NetworkPolicyManagerInternal.class);
+        mFlexibilityController = flexibilityController;
 
         // We're interested in all network changes; internally we match these
         // network changes against the active network for each UID with jobs.
@@ -287,8 +311,7 @@ public final class ConnectivityController extends RestrictingController implemen
 
     @GuardedBy("mLock")
     @Override
-    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
-            boolean forUpdate) {
+    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob) {
         if (jobStatus.clearTrackingController(JobStatus.TRACKING_CONNECTIVITY)) {
             ArraySet<JobStatus> jobs = mTrackedJobs.get(jobStatus.getSourceUid());
             if (jobs != null) {
@@ -411,7 +434,7 @@ public final class ConnectivityController extends RestrictingController implemen
         final UidStats uidStats =
                 getUidStats(jobStatus.getSourceUid(), jobStatus.getSourcePackageName(), true);
 
-        if (jobStatus.shouldTreatAsExpeditedJob()) {
+        if (jobStatus.shouldTreatAsExpeditedJob() && jobStatus.shouldTreatAsUserInitiatedJob()) {
             if (!jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY)) {
                 // Don't request a direct hole through any of the firewalls. Instead, mark the
                 // constraint as satisfied if the network is available, and the job will get
@@ -568,9 +591,8 @@ public final class ConnectivityController extends RestrictingController implemen
             // If we don't know the bandwidth, all we can do is hope the job finishes the minimum
             // chunk in time.
             if (bandwidthDown > 0) {
-                // Divide by 8 to convert bits to bytes.
-                final long estimatedMillis = ((minimumChunkBytes * DateUtils.SECOND_IN_MILLIS)
-                        / (DataUnit.KIBIBYTES.toBytes(bandwidthDown) / 8));
+                final long estimatedMillis =
+                        calculateTransferTimeMs(minimumChunkBytes, bandwidthDown);
                 if (estimatedMillis > maxJobExecutionTimeMs) {
                     // If we'd never finish the minimum chunk before the timeout, we'd be insane!
                     Slog.w(TAG, "Minimum chunk " + minimumChunkBytes + " bytes over "
@@ -583,9 +605,8 @@ public final class ConnectivityController extends RestrictingController implemen
             final long bandwidthUp = capabilities.getLinkUpstreamBandwidthKbps();
             // If we don't know the bandwidth, all we can do is hope the job finishes in time.
             if (bandwidthUp > 0) {
-                // Divide by 8 to convert bits to bytes.
-                final long estimatedMillis = ((minimumChunkBytes * DateUtils.SECOND_IN_MILLIS)
-                        / (DataUnit.KIBIBYTES.toBytes(bandwidthUp) / 8));
+                final long estimatedMillis =
+                        calculateTransferTimeMs(minimumChunkBytes, bandwidthUp);
                 if (estimatedMillis > maxJobExecutionTimeMs) {
                     // If we'd never finish the minimum chunk before the timeout, we'd be insane!
                     Slog.w(TAG, "Minimum chunk " + minimumChunkBytes + " bytes over " + bandwidthUp
@@ -613,9 +634,7 @@ public final class ConnectivityController extends RestrictingController implemen
             final long bandwidth = capabilities.getLinkDownstreamBandwidthKbps();
             // If we don't know the bandwidth, all we can do is hope the job finishes in time.
             if (bandwidth > 0) {
-                // Divide by 8 to convert bits to bytes.
-                final long estimatedMillis = ((downloadBytes * DateUtils.SECOND_IN_MILLIS)
-                        / (DataUnit.KIBIBYTES.toBytes(bandwidth) / 8));
+                final long estimatedMillis = calculateTransferTimeMs(downloadBytes, bandwidth);
                 if (estimatedMillis > maxJobExecutionTimeMs) {
                     // If we'd never finish before the timeout, we'd be insane!
                     Slog.w(TAG, "Estimated " + downloadBytes + " download bytes over " + bandwidth
@@ -631,9 +650,7 @@ public final class ConnectivityController extends RestrictingController implemen
             final long bandwidth = capabilities.getLinkUpstreamBandwidthKbps();
             // If we don't know the bandwidth, all we can do is hope the job finishes in time.
             if (bandwidth > 0) {
-                // Divide by 8 to convert bits to bytes.
-                final long estimatedMillis = ((uploadBytes * DateUtils.SECOND_IN_MILLIS)
-                        / (DataUnit.KIBIBYTES.toBytes(bandwidth) / 8));
+                final long estimatedMillis = calculateTransferTimeMs(uploadBytes, bandwidth);
                 if (estimatedMillis > maxJobExecutionTimeMs) {
                     // If we'd never finish before the timeout, we'd be insane!
                     Slog.w(TAG, "Estimated " + uploadBytes + " upload bytes over " + bandwidth
@@ -645,6 +662,48 @@ public final class ConnectivityController extends RestrictingController implemen
         }
 
         return false;
+    }
+
+    /**
+     * Return the estimated amount of time this job will be transferring data,
+     * based on the current network speed.
+     */
+    public long getEstimatedTransferTimeMs(JobStatus jobStatus) {
+        final long downloadBytes = jobStatus.getEstimatedNetworkDownloadBytes();
+        final long uploadBytes = jobStatus.getEstimatedNetworkUploadBytes();
+        if (downloadBytes == JobInfo.NETWORK_BYTES_UNKNOWN
+                && uploadBytes == JobInfo.NETWORK_BYTES_UNKNOWN) {
+            return UNKNOWN_TIME;
+        }
+        if (jobStatus.network == null) {
+            // This job doesn't have a network assigned.
+            return UNKNOWN_TIME;
+        }
+        NetworkCapabilities capabilities = getNetworkCapabilities(jobStatus.network);
+        if (capabilities == null) {
+            return UNKNOWN_TIME;
+        }
+        final long estimatedDownloadTimeMs = calculateTransferTimeMs(downloadBytes,
+                capabilities.getLinkDownstreamBandwidthKbps());
+        final long estimatedUploadTimeMs = calculateTransferTimeMs(uploadBytes,
+                capabilities.getLinkUpstreamBandwidthKbps());
+        if (estimatedDownloadTimeMs == UNKNOWN_TIME) {
+            return estimatedUploadTimeMs;
+        } else if (estimatedUploadTimeMs == UNKNOWN_TIME) {
+            return estimatedDownloadTimeMs;
+        }
+        return estimatedDownloadTimeMs + estimatedUploadTimeMs;
+    }
+
+    @VisibleForTesting
+    static long calculateTransferTimeMs(long transferBytes, long bandwidthKbps) {
+        if (transferBytes == JobInfo.NETWORK_BYTES_UNKNOWN || bandwidthKbps <= 0) {
+            return UNKNOWN_TIME;
+        }
+        return (transferBytes * DateUtils.SECOND_IN_MILLIS)
+                // Multiply by 1000 to convert kilobits to bits.
+                // Divide by 8 to convert bits to bytes.
+                / (bandwidthKbps * 1000 / 8);
     }
 
     private static boolean isCongestionDelayed(JobStatus jobStatus, Network network,
@@ -897,10 +956,12 @@ public final class ConnectivityController extends RestrictingController implemen
             if (us.lastUpdatedElapsed + MIN_STATS_UPDATE_INTERVAL_MS < nowElapsed) {
                 us.earliestEnqueueTime = Long.MAX_VALUE;
                 us.earliestEJEnqueueTime = Long.MAX_VALUE;
+                us.earliestUIJEnqueueTime = Long.MAX_VALUE;
                 us.numReadyWithConnectivity = 0;
                 us.numRequestedNetworkAvailable = 0;
                 us.numRegular = 0;
                 us.numEJs = 0;
+                us.numUIJs = 0;
 
                 for (int j = 0; j < jobs.size(); ++j) {
                     JobStatus job = jobs.valueAt(j);
@@ -917,10 +978,15 @@ public final class ConnectivityController extends RestrictingController implemen
                         if (job.shouldTreatAsExpeditedJob() || job.startedAsExpeditedJob) {
                             us.earliestEJEnqueueTime =
                                     Math.min(us.earliestEJEnqueueTime, job.enqueueTime);
+                        } else if (job.shouldTreatAsUserInitiatedJob()) {
+                            us.earliestUIJEnqueueTime =
+                                    Math.min(us.earliestUIJEnqueueTime, job.enqueueTime);
                         }
                     }
                     if (job.shouldTreatAsExpeditedJob() || job.startedAsExpeditedJob) {
                         us.numEJs++;
+                    } else if (job.shouldTreatAsUserInitiatedJob()) {
+                        us.numUIJs++;
                     } else {
                         us.numRegular++;
                     }
@@ -1021,6 +1087,11 @@ public final class ConnectivityController extends RestrictingController implemen
                 Slog.d(TAG, "Using FG bypass for " + jobStatus.getSourceUid());
             }
             unbypassableBlockedReasons = UNBYPASSABLE_FOREGROUND_BLOCKED_REASONS;
+        } else if (jobStatus.shouldTreatAsUserInitiatedJob()) {
+            if (DEBUG) {
+                Slog.d(TAG, "Using UI bypass for " + jobStatus.getSourceUid());
+            }
+            unbypassableBlockedReasons = UNBYPASSABLE_UI_BLOCKED_REASONS;
         } else if (jobStatus.shouldTreatAsExpeditedJob() || jobStatus.startedAsExpeditedJob) {
             if (DEBUG) {
                 Slog.d(TAG, "Using EJ bypass for " + jobStatus.getSourceUid());
@@ -1057,6 +1128,26 @@ public final class ConnectivityController extends RestrictingController implemen
         final boolean satisfied = isSatisfied(jobStatus, network, capabilities, mConstants);
 
         final boolean changed = jobStatus.setConnectivityConstraintSatisfied(nowElapsed, satisfied);
+
+        if (jobStatus.getPreferUnmetered()) {
+            jobStatus.setHasAccessToUnmetered(satisfied && capabilities != null
+                    && capabilities.hasCapability(NET_CAPABILITY_NOT_METERED));
+
+            jobStatus.setFlexibilityConstraintSatisfied(nowElapsed,
+                    mFlexibilityController.isFlexibilitySatisfiedLocked(jobStatus));
+        }
+
+        // Try to handle network transitions in a reasonable manner. See the lengthy note inside
+        // UidDefaultNetworkCallback for more details.
+        if (!changed && satisfied && jobStatus.network != null
+                && mService.isCurrentlyRunningLocked(jobStatus)) {
+            // The job's connectivity constraint continues to be satisfied even though the network
+            // has changed.
+            // Inform the job of the new network so that it can attempt to switch over. This is the
+            // ideal behavior for certain transitions such as going from a metered network to an
+            // unmetered network.
+            mStateChangedListener.onNetworkChanged(jobStatus, network);
+        }
 
         // Pass along the evaluated network for job to use; prevents race
         // conditions as default routes change over time, and opens the door to
@@ -1351,8 +1442,8 @@ public final class ConnectivityController extends RestrictingController implemen
         // the onBlockedStatusChanged() call, we re-evaluate the job, but keep it running
         // (assuming the new network satisfies constraints). The app continues to use the old
         // network (if they use the network object provided through JobParameters.getNetwork())
-        // because we don't notify them of the default network change. If the old network no
-        // longer satisfies requested constraints, then we have a problem. Depending on the order
+        // because we don't notify them of the default network change. If the old network later
+        // stops satisfying requested constraints, then we have a problem. Depending on the order
         // of calls, if the per-UID callback gets notified of the network change before the
         // general callback gets notified of the capabilities change, then the job's network
         // object will point to the new network and we won't stop the job, even though we told it
@@ -1418,8 +1509,10 @@ public final class ConnectivityController extends RestrictingController implemen
         public int numRequestedNetworkAvailable;
         public int numEJs;
         public int numRegular;
+        public int numUIJs;
         public long earliestEnqueueTime;
         public long earliestEJEnqueueTime;
+        public long earliestUIJEnqueueTime;
         public long lastUpdatedElapsed;
 
         private UidStats(int uid) {
@@ -1437,6 +1530,7 @@ public final class ConnectivityController extends RestrictingController implemen
             pw.print("#reg", numRegular);
             pw.print("earliestEnqueue", earliestEnqueueTime);
             pw.print("earliestEJEnqueue", earliestEJEnqueueTime);
+            pw.print("earliestUIJEnqueue", earliestUIJEnqueueTime);
             pw.print("updated=");
             TimeUtils.formatDuration(lastUpdatedElapsed - nowElapsed, pw);
             pw.println("}");

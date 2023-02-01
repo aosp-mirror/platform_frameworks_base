@@ -78,6 +78,10 @@ class ControlsProviderLifecycleManager(
         private const val DEBUG = true
         private val BIND_FLAGS = Context.BIND_AUTO_CREATE or Context.BIND_FOREGROUND_SERVICE or
             Context.BIND_NOT_PERCEPTIBLE
+        // Use BIND_NOT_PERCEPTIBLE so it will be at lower priority from SystemUI.
+        // However, don't use WAIVE_PRIORITY, as by itself, it will kill the app
+        // once the Task is finished in the device controls panel.
+        private val BIND_FLAGS_PANEL = Context.BIND_AUTO_CREATE or Context.BIND_NOT_PERCEPTIBLE
     }
 
     private val intent = Intent().apply {
@@ -87,18 +91,19 @@ class ControlsProviderLifecycleManager(
         })
     }
 
-    private fun bindService(bind: Boolean) {
+    private fun bindService(bind: Boolean, forPanel: Boolean = false) {
         executor.execute {
             requiresBound = bind
             if (bind) {
-                if (bindTryCount != MAX_BIND_RETRIES) {
+                if (bindTryCount != MAX_BIND_RETRIES && wrapper == null) {
                     if (DEBUG) {
                         Log.d(TAG, "Binding service $intent")
                     }
                     bindTryCount++
                     try {
+                        val flags = if (forPanel) BIND_FLAGS_PANEL else BIND_FLAGS
                         val bound = context
-                            .bindServiceAsUser(intent, serviceConnection, BIND_FLAGS, user)
+                                .bindServiceAsUser(intent, serviceConnection, flags, user)
                         if (!bound) {
                             context.unbindService(serviceConnection)
                         }
@@ -277,6 +282,10 @@ class ControlsProviderLifecycleManager(
      */
     fun bindService() {
         bindService(true)
+    }
+
+    fun bindServiceForPanel() {
+        bindService(bind = true, forPanel = true)
     }
 
     /**

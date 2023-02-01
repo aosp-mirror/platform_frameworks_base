@@ -26,8 +26,8 @@ import static org.mockito.Mockito.when;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.testing.AndroidTestingRunner;
+import android.view.AttachedSurfaceControl;
 import android.view.View;
-import android.view.ViewRootImpl;
 
 import androidx.test.filters.SmallTest;
 
@@ -47,41 +47,78 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 public class TouchInsetManagerTest extends SysuiTestCase {
     @Mock
-    private View mRootView;
-
-    @Mock
-    private ViewRootImpl mRootViewImpl;
+    private AttachedSurfaceControl mAttachedSurfaceControl;
 
     private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        when(mRootView.getViewRootImpl()).thenReturn(mRootViewImpl);
     }
 
     @Test
-    public void testRootViewOnAttachedHandling() {
+    public void testViewOnAttachedHandling() {
         // Create inset manager
-        final TouchInsetManager insetManager = new TouchInsetManager(mFakeExecutor,
-                mRootView);
+        final TouchInsetManager insetManager = new TouchInsetManager(mFakeExecutor);
 
         final ArgumentCaptor<View.OnAttachStateChangeListener> listener =
                 ArgumentCaptor.forClass(View.OnAttachStateChangeListener.class);
+        final View view = createView(new Rect(0, 0, 0, 0));
+        when(view.isAttachedToWindow()).thenReturn(false);
 
+
+        // Create session
+        final TouchInsetManager.TouchInsetSession session = insetManager.createSession();
+        session.addViewToTracking(view);
+
+        mFakeExecutor.runAllReady();
         // Ensure manager has registered to listen to attached state of root view.
-        verify(mRootView).addOnAttachStateChangeListener(listener.capture());
+        verify(view).addOnAttachStateChangeListener(listener.capture());
+
+        clearInvocations(mAttachedSurfaceControl);
+        when(view.isAttachedToWindow()).thenReturn(true);
 
         // Trigger attachment and verify touchable region is set.
-        listener.getValue().onViewAttachedToWindow(mRootView);
-        verify(mRootViewImpl).setTouchableRegion(any());
+        listener.getValue().onViewAttachedToWindow(view);
+
+        mFakeExecutor.runAllReady();
+
+        verify(mAttachedSurfaceControl).setTouchableRegion(any());
+    }
+
+    @Test
+    public void testViewOnDetachedHandling() {
+        // Create inset manager
+        final TouchInsetManager insetManager = new TouchInsetManager(mFakeExecutor);
+
+        final ArgumentCaptor<View.OnAttachStateChangeListener> listener =
+                ArgumentCaptor.forClass(View.OnAttachStateChangeListener.class);
+        final View view = createView(new Rect(0, 0, 0, 0));
+        when(view.isAttachedToWindow()).thenReturn(true);
+
+        // Create session
+        final TouchInsetManager.TouchInsetSession session = insetManager.createSession();
+        session.addViewToTracking(view);
+
+        mFakeExecutor.runAllReady();
+        // Ensure manager has registered to listen to attached state of root view.
+        verify(view).addOnAttachStateChangeListener(listener.capture());
+
+        clearInvocations(mAttachedSurfaceControl);
+        when(view.isAttachedToWindow()).thenReturn(false);
+
+        // Trigger detachment and verify touchable region is set.
+        listener.getValue().onViewDetachedFromWindow(view);
+
+        mFakeExecutor.runAllReady();
+
+        verify(mAttachedSurfaceControl).setTouchableRegion(any());
     }
 
     @Test
     public void testInsetRegionPropagation() {
         // Create inset manager
-        final TouchInsetManager insetManager = new TouchInsetManager(mFakeExecutor,
-                mRootView);
+        final TouchInsetManager insetManager = new TouchInsetManager(mFakeExecutor);
 
         // Create session
         final TouchInsetManager.TouchInsetSession session = insetManager.createSession();
@@ -95,14 +132,13 @@ public class TouchInsetManagerTest extends SysuiTestCase {
         // Check to see if view was properly accounted for.
         final Region expectedRegion = Region.obtain();
         expectedRegion.op(rect, Region.Op.UNION);
-        verify(mRootViewImpl).setTouchableRegion(eq(expectedRegion));
+        verify(mAttachedSurfaceControl).setTouchableRegion(eq(expectedRegion));
     }
 
     @Test
     public void testMultipleRegions() {
         // Create inset manager
-        final TouchInsetManager insetManager = new TouchInsetManager(mFakeExecutor,
-                mRootView);
+        final TouchInsetManager insetManager = new TouchInsetManager(mFakeExecutor);
 
         // Create session
         final TouchInsetManager.TouchInsetSession session = insetManager.createSession();
@@ -112,7 +148,7 @@ public class TouchInsetManagerTest extends SysuiTestCase {
         session.addViewToTracking(createView(firstBounds));
 
         mFakeExecutor.runAllReady();
-        clearInvocations(mRootViewImpl);
+        clearInvocations(mAttachedSurfaceControl);
 
         // Create second session
         final TouchInsetManager.TouchInsetSession secondSession = insetManager.createSession();
@@ -128,27 +164,26 @@ public class TouchInsetManagerTest extends SysuiTestCase {
             final Region expectedRegion = Region.obtain();
             expectedRegion.op(firstBounds, Region.Op.UNION);
             expectedRegion.op(secondBounds, Region.Op.UNION);
-            verify(mRootViewImpl).setTouchableRegion(eq(expectedRegion));
+            verify(mAttachedSurfaceControl).setTouchableRegion(eq(expectedRegion));
         }
 
 
-        clearInvocations(mRootViewImpl);
+        clearInvocations(mAttachedSurfaceControl);
 
         // clear first session, ensure second session is still reflected.
         session.clear();
         mFakeExecutor.runAllReady();
         {
             final Region expectedRegion = Region.obtain();
-            expectedRegion.op(firstBounds, Region.Op.UNION);
-            verify(mRootViewImpl).setTouchableRegion(eq(expectedRegion));
+            expectedRegion.op(secondBounds, Region.Op.UNION);
+            verify(mAttachedSurfaceControl).setTouchableRegion(eq(expectedRegion));
         }
     }
 
     @Test
     public void testMultipleViews() {
         // Create inset manager
-        final TouchInsetManager insetManager = new TouchInsetManager(mFakeExecutor,
-                mRootView);
+        final TouchInsetManager insetManager = new TouchInsetManager(mFakeExecutor);
 
         // Create session
         final TouchInsetManager.TouchInsetSession session = insetManager.createSession();
@@ -159,7 +194,7 @@ public class TouchInsetManagerTest extends SysuiTestCase {
 
         // only capture second invocation.
         mFakeExecutor.runAllReady();
-        clearInvocations(mRootViewImpl);
+        clearInvocations(mAttachedSurfaceControl);
 
         // Add a second view to the session
         final Rect secondViewBounds = new Rect(4, 4, 9, 10);
@@ -173,20 +208,20 @@ public class TouchInsetManagerTest extends SysuiTestCase {
             final Region expectedRegion = Region.obtain();
             expectedRegion.op(firstViewBounds, Region.Op.UNION);
             expectedRegion.op(secondViewBounds, Region.Op.UNION);
-            verify(mRootViewImpl).setTouchableRegion(eq(expectedRegion));
+            verify(mAttachedSurfaceControl).setTouchableRegion(eq(expectedRegion));
         }
 
         // Remove second view.
         session.removeViewFromTracking(secondView);
 
-        clearInvocations(mRootViewImpl);
+        clearInvocations(mAttachedSurfaceControl);
         mFakeExecutor.runAllReady();
 
         // Ensure first view still reflected in touch region.
         {
             final Region expectedRegion = Region.obtain();
             expectedRegion.op(firstViewBounds, Region.Op.UNION);
-            verify(mRootViewImpl).setTouchableRegion(eq(expectedRegion));
+            verify(mAttachedSurfaceControl).setTouchableRegion(eq(expectedRegion));
         }
     }
 
@@ -197,6 +232,8 @@ public class TouchInsetManagerTest extends SysuiTestCase {
             ((Rect) invocation.getArgument(0)).set(rect);
             return null;
         }).when(view).getBoundsOnScreen(any());
+        when(view.isAttachedToWindow()).thenReturn(true);
+        when(view.getRootSurfaceControl()).thenReturn(mAttachedSurfaceControl);
 
         return view;
     }

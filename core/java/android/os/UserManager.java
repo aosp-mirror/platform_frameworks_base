@@ -51,6 +51,7 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.UserInfo;
 import android.content.pm.UserInfo.UserInfoFlag;
+import android.content.pm.UserProperties;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -58,14 +59,12 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.provider.Settings;
-import android.telephony.TelephonyManager;
 import android.util.AndroidException;
 import android.util.ArraySet;
 import android.util.Log;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.R;
-import com.android.internal.os.RoSystemProperties;
 import com.android.internal.util.FrameworkStatsLog;
 
 import java.io.IOException;
@@ -90,6 +89,7 @@ import java.util.Set;
 public class UserManager {
 
     private static final String TAG = "UserManager";
+
     @UnsupportedAppUsage
     private final IUserManager mService;
     /** Holding the Application context (not constructor param context). */
@@ -100,6 +100,9 @@ public class UserManager {
 
     /** The userType of UserHandle.myUserId(); empty string if not a profile; null until cached. */
     private String mProfileTypeOfProcessUser = null;
+
+    /** Whether the device is in headless system user mode; null until cached. */
+    private static Boolean sIsHeadlessSystemUser = null;
 
     /**
      * User type representing a {@link UserHandle#USER_SYSTEM system} user that is a human user.
@@ -317,6 +320,24 @@ public class UserManager {
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_WIFI_TETHERING = "no_wifi_tethering";
+
+    /**
+     * Specifies if a user is disallowed from being granted admin privileges.
+     *
+     * <p>This restriction limits ability of other admin users to grant admin
+     * privileges to selected user.
+     *
+     * <p>This restriction has no effect in a mode that does not allow multiple admins.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_GRANT_ADMIN = "no_grant_admin";
 
     /**
      * Specifies if users are disallowed from sharing Wi-Fi for admin configured networks.
@@ -1468,6 +1489,21 @@ public class UserManager {
     public static final String DISALLOW_BIOMETRIC = "disallow_biometric";
 
     /**
+     * Specifies whether the user is allowed to modify default apps in settings.
+     *
+     * <p>This restriction can be set by device or profile owner.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CONFIG_DEFAULT_APPS = "disallow_config_default_apps";
+
+    /**
      * Application restriction key that is used to indicate the pending arrival
      * of real restrictions for the app.
      *
@@ -1486,6 +1522,46 @@ public class UserManager {
      *      android.content.ComponentName, String)
      */
     public static final String KEY_RESTRICTIONS_PENDING = "restrictions_pending";
+
+    /**
+     * Specifies if a user is not allowed to use 2g networks.
+     *
+     * <p>This restriction can only be set by a device owner or a profile owner of an
+     * organization-owned managed profile on the parent profile.
+     * In all cases, the setting applies globally on the device and will prevent the device from
+     * scanning for or connecting to 2g networks, except in the case of an emergency.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CELLULAR_2G = "no_cellular_2g";
+
+    /**
+     * This user restriction specifies if Ultra-wideband is disallowed on the device. If
+     * Ultra-wideband is disallowed it cannot be turned on via Settings.
+     *
+     * <p>This restriction can only be set by a device owner or a profile owner of an
+     * organization-owned managed profile on the parent profile.
+     * In both cases, the restriction applies globally on the device and will turn off the
+     * ultra-wideband radio if it's currently on and prevent the radio from being turned on in
+     * the future.
+     *
+     * <p>
+     * Ultra-wideband (UWB) is a radio technology that can use a very low energy level
+     * for short-range, high-bandwidth communications over a large portion of the radio spectrum.
+     *
+     * <p>Default is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_ULTRA_WIDEBAND_RADIO = "no_ultra_wideband_radio";
 
     /**
      * List of key values that can be passed into the various user restriction related methods
@@ -1568,9 +1644,42 @@ public class UserManager {
             DISALLOW_SHARING_ADMIN_CONFIGURED_WIFI,
             DISALLOW_WIFI_DIRECT,
             DISALLOW_ADD_WIFI_CONFIG,
+            DISALLOW_CELLULAR_2G,
+            DISALLOW_ULTRA_WIDEBAND_RADIO,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserRestrictionKey {}
+
+    /**
+     * Property used to override whether the device uses headless system user mode.
+     *
+     * <p>Only used on non-user builds.
+     *
+     * <p><b>NOTE: </b>setting this variable directly won't properly change the headless system user
+     * mode behavior and might put the device in a bad state; the system user mode should be changed
+     * using {@code cmd user set-system-user-mode-emulation} instead.
+     *
+     * @hide
+     */
+    public static final String SYSTEM_USER_MODE_EMULATION_PROPERTY =
+            "persist.debug.user_mode_emulation";
+
+    /** @hide */
+    public static final String SYSTEM_USER_MODE_EMULATION_DEFAULT = "default";
+    /** @hide */
+    public static final String SYSTEM_USER_MODE_EMULATION_FULL = "full";
+    /** @hide */
+    public static final String SYSTEM_USER_MODE_EMULATION_HEADLESS = "headless";
+
+    /**
+     * System Property used to override whether users can be created even if their type is disabled
+     * or their limit is reached. Set value to 1 to enable.
+     *
+     * <p>Only used on non-user builds.
+     *
+     * @hide
+     */
+    public static final String DEV_CREATE_OVERRIDE_PROPERTY = "debug.user.creation_override";
 
     private static final String ACTION_CREATE_USER = "android.os.action.CREATE_USER";
 
@@ -1673,7 +1782,7 @@ public class UserManager {
     public static final int SWITCHABILITY_STATUS_SYSTEM_USER_LOCKED = 1 << 2;
 
     /**
-     * Result returned in {@link #getUserSwitchability()} indicating user swichability.
+     * Result returned in {@link #getUserSwitchability()} indicating user switchability.
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
@@ -1750,6 +1859,15 @@ public class UserManager {
     public static final int REMOVE_RESULT_ERROR_SYSTEM_USER = -4;
 
     /**
+     * A response code from {@link #removeUserWhenPossible(UserHandle, boolean)} indicating that
+     * user being removed is a  {@link UserInfo#FLAG_MAIN}  user and can't be removed because
+     * system property {@link com.android.internal.R.bool.isMainUserPermanentAdmin} is true.
+     * @hide
+     */
+    @SystemApi
+    public static final int REMOVE_RESULT_ERROR_MAIN_USER_PERMANENT_ADMIN = -5;
+
+    /**
      * Possible response codes from {@link #removeUserWhenPossible(UserHandle, boolean)}.
      *
      * @hide
@@ -1761,6 +1879,7 @@ public class UserManager {
             REMOVE_RESULT_ERROR_USER_RESTRICTION,
             REMOVE_RESULT_ERROR_USER_NOT_FOUND,
             REMOVE_RESULT_ERROR_SYSTEM_USER,
+            REMOVE_RESULT_ERROR_MAIN_USER_PERMANENT_ADMIN,
             REMOVE_RESULT_ERROR_UNKNOWN,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -1974,7 +2093,8 @@ public class UserManager {
     /** @hide */
     public UserManager(Context context, IUserManager service) {
         mService = service;
-        mContext = context.getApplicationContext();
+        Context appContext = context.getApplicationContext();
+        mContext = (appContext == null ? context : appContext);
         mUserId = context.getUserId();
     }
 
@@ -1990,24 +2110,31 @@ public class UserManager {
     }
 
     /**
-     * @hide
-     * @return Whether the device is running with split system user. It means the system user and
-     * primary user are two separate users. Previously system user and primary user are combined as
-     * a single owner user.  see @link {android.os.UserHandle#USER_OWNER}
-     */
-    @TestApi
-    public static boolean isSplitSystemUser() {
-        return RoSystemProperties.FW_SYSTEM_USER_SPLIT;
-    }
-
-    /**
      * @return Whether guest user is always ephemeral
      * @hide
      */
-    @TestApi
-    public static boolean isGuestUserEphemeral() {
+    public static boolean isGuestUserAlwaysEphemeral() {
         return Resources.getSystem()
                 .getBoolean(com.android.internal.R.bool.config_guestUserEphemeral);
+    }
+
+    /**
+     * @return true, when we want to enable user manager API and UX to allow
+     *           guest user ephemeral state change based on user input
+     * @hide
+     */
+    public static boolean isGuestUserAllowEphemeralStateChange() {
+        return Resources.getSystem()
+                .getBoolean(com.android.internal.R.bool.config_guestUserAllowEphemeralStateChange);
+    }
+
+    /**
+     * Returns whether multiple admins are enabled on the device
+     * @hide
+     */
+    public static boolean isMultipleAdminEnabled() {
+        return Resources.getSystem()
+                .getBoolean(com.android.internal.R.bool.config_enableMultipleAdmins);
     }
 
     /**
@@ -2020,7 +2147,20 @@ public class UserManager {
      * @return whether the device is running in a headless system user mode.
      */
     public static boolean isHeadlessSystemUserMode() {
-        return RoSystemProperties.MULTIUSER_HEADLESS_SYSTEM_USER;
+        // No need for synchronization.  Once it becomes non-null, it'll be non-null forever.
+        // (Its value is determined when UMS is constructed and cannot change.)
+        // Worst case we might end up calling the AIDL method multiple times but that's fine.
+        if (sIsHeadlessSystemUser == null) {
+            // Unfortunately this API is static, but the property no longer is. So go fetch the UMS.
+            try {
+                final IUserManager service = IUserManager.Stub.asInterface(
+                        ServiceManager.getService(Context.USER_SERVICE));
+                sIsHeadlessSystemUser = service.isHeadlessSystemUserMode();
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return sIsHeadlessSystemUser;
     }
 
     /**
@@ -2030,25 +2170,16 @@ public class UserManager {
      * @hide
      */
     @Deprecated
-    @RequiresPermission(allOf = {
-            Manifest.permission.READ_PHONE_STATE,
-            Manifest.permission.MANAGE_USERS}, // Can be INTERACT_ACROSS_USERS instead.
-            conditional = true)
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @UserHandleAware
     public boolean canSwitchUsers() {
-        boolean allowUserSwitchingWhenSystemUserLocked = Settings.Global.getInt(
-                mContext.getContentResolver(),
-                Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED, 0) != 0;
-        boolean isSystemUserUnlocked = isUserUnlocked(UserHandle.SYSTEM);
-        boolean inCall = false;
-        TelephonyManager telephonyManager = mContext.getSystemService(TelephonyManager.class);
-        if (telephonyManager != null) {
-            inCall = telephonyManager.getCallState() != TelephonyManager.CALL_STATE_IDLE;
+        try {
+            return mService.getUserSwitchability(mUserId) == SWITCHABILITY_STATUS_OK;
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
         }
-        boolean isUserSwitchDisallowed = hasUserRestrictionForUser(DISALLOW_USER_SWITCH, mUserId);
-        return (allowUserSwitchingWhenSystemUserLocked || isSystemUserUnlocked) && !inCall
-                && !isUserSwitchDisallowed;
     }
 
     /**
@@ -2063,9 +2194,8 @@ public class UserManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(allOf = {Manifest.permission.READ_PHONE_STATE,
-            android.Manifest.permission.MANAGE_USERS,
-            android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
     @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public @UserSwitchabilityResult int getUserSwitchability() {
         return getUserSwitchability(UserHandle.of(getContextUserIfAppropriate()));
@@ -2082,34 +2212,14 @@ public class UserManager {
      * @return A {@link UserSwitchabilityResult} flag indicating if the user is switchable.
      * @hide
      */
-    @RequiresPermission(allOf = {Manifest.permission.READ_PHONE_STATE,
-            android.Manifest.permission.MANAGE_USERS,
-            android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
     public @UserSwitchabilityResult int getUserSwitchability(UserHandle userHandle) {
-        final TelephonyManager tm =
-                (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
-
-        int flags = SWITCHABILITY_STATUS_OK;
-        if (tm.getCallState() != TelephonyManager.CALL_STATE_IDLE) {
-            flags |= SWITCHABILITY_STATUS_USER_IN_CALL;
+        try {
+            return mService.getUserSwitchability(userHandle.getIdentifier());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
         }
-        if (hasUserRestrictionForUser(DISALLOW_USER_SWITCH, userHandle)) {
-            flags |= SWITCHABILITY_STATUS_USER_SWITCH_DISALLOWED;
-        }
-
-        // System User is always unlocked in Headless System User Mode, so ignore this flag
-        if (!isHeadlessSystemUserMode()) {
-            final boolean allowUserSwitchingWhenSystemUserLocked = Settings.Global.getInt(
-                    mContext.getContentResolver(),
-                    Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED, 0) != 0;
-            final boolean systemUserUnlocked = isUserUnlocked(UserHandle.SYSTEM);
-
-            if (!allowUserSwitchingWhenSystemUserLocked && !systemUserUnlocked) {
-                flags |= SWITCHABILITY_STATUS_SYSTEM_USER_LOCKED;
-            }
-        }
-
-        return flags;
     }
 
     /**
@@ -2243,12 +2353,18 @@ public class UserManager {
     }
 
     /**
-     * Used to check if the context user is the primary user. The primary user
-     * is the first human user on a device. This is not supported in headless system user mode.
+     * Used to check if the context user is the primary user. The primary user is the first human
+     * user on a device. This is not supported in headless system user mode.
      *
      * @return whether the context user is the primary user.
+     *
+     * @deprecated This method always returns true for the system user, who may not be a full user
+     * if {@link #isHeadlessSystemUserMode} is true. Use {@link #isSystemUser}, {@link #isAdminUser}
+     * or {@link #isMainUser} instead.
+     *
      * @hide
      */
+    @Deprecated
     @SystemApi
     @RequiresPermission(anyOf = {
             Manifest.permission.MANAGE_USERS,
@@ -2270,6 +2386,54 @@ public class UserManager {
     @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public boolean isSystemUser() {
         return getContextUserIfAppropriate() == UserHandle.USER_SYSTEM;
+    }
+
+    /**
+     * Returns {@code true} if the context user is the designated "main user" of the device. This
+     * user may have access to certain features which are limited to at most one user. There will
+     * never be more than one main user on a device.
+     *
+     * <p>Currently, on most form factors the first human user on the device will be the main user;
+     * in the future, the concept may be transferable, so a different user (or even no user at all)
+     * may be designated the main user instead. On other form factors there might not be a main
+     * user.
+     *
+     * <p>Note that this will not be the system user on devices for which
+     * {@link #isHeadlessSystemUserMode()} returns true.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS})
+    @UserHandleAware
+    public boolean isMainUser() {
+        final UserInfo user = getUserInfo(mUserId);
+        return user != null && user.isMain();
+    }
+
+    /**
+     * Returns the designated "main user" of the device, or {@code null} if there is no main user.
+     *
+     * @see #isMainUser()
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS})
+    public @Nullable UserHandle getMainUser() {
+        try {
+            final int mainUserId = mService.getMainUserId();
+            if (mainUserId == UserHandle.USER_NULL) {
+                return null;
+            }
+            return UserHandle.of(mainUserId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -2736,7 +2900,7 @@ public class UserManager {
         return isUserRunning(user.getIdentifier());
     }
 
-    /** {@hide} */
+    /** @hide */
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     public boolean isUserRunning(@UserIdInt int userId) {
@@ -2786,6 +2950,110 @@ public class UserManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean isVisibleBackgroundUsersEnabled() {
+        return SystemProperties.getBoolean("fw.visible_bg_users",
+                Resources.getSystem()
+                        .getBoolean(R.bool.config_multiuserVisibleBackgroundUsers));
+    }
+
+    /**
+     * Returns whether the device allows (full) users to be started in background visible in a given
+     * display (which would allow them to launch activities in that display).
+     *
+     * @return {@code false} for most devices, except on automotive builds for vehiches with
+     * passenger displays.
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean isVisibleBackgroundUsersSupported() {
+        return isVisibleBackgroundUsersEnabled();
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean isVisibleBackgroundUsersOnDefaultDisplayEnabled() {
+        return SystemProperties.getBoolean("fw.visible_bg_users_on_default_display",
+                Resources.getSystem()
+                        .getBoolean(R.bool.config_multiuserVisibleBackgroundUsersOnDefaultDisplay));
+    }
+
+    /**
+     * Returns whether the device allows (full) users to be started in background visible in the
+     * {@link android.view.Display#DEFAULT_DISPLAY default display}.
+     *
+     * @return {@code false} for most devices, except passenger-only automotive build (i.e., when
+     * Android runs in a separate system in the back seat to manage the passenger displays).
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean isVisibleBackgroundUsersOnDefaultDisplaySupported() {
+        return isVisibleBackgroundUsersOnDefaultDisplayEnabled();
+    }
+
+    /**
+     * Checks if the user is visible at the moment.
+     *
+     * <p>Roughly speaking, a "visible user" is a user that can present UI on at least one display.
+     * It includes:
+     *
+     * <ol>
+     *   <li>The current foreground user.
+     *   <li>(Running) profiles of the current foreground user.
+     *   <li>Background users assigned to secondary displays (for example, passenger users on
+     *   automotive builds, using the display associated with their seats).
+     * </ol>
+     *
+     * @return whether the user is visible at the moment, as defined above.
+     *
+     * @hide
+     */
+    @SystemApi
+    @UserHandleAware
+    @RequiresPermission(anyOf = {
+            "android.permission.INTERACT_ACROSS_USERS",
+            "android.permission.MANAGE_USERS"
+    })
+    public boolean isUserVisible() {
+        try {
+            return mService.isUserVisible(mUserId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the visible users (as defined by {@link #isUserVisible()}.
+     *
+     * @return visible users at the moment.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            "android.permission.INTERACT_ACROSS_USERS",
+            "android.permission.MANAGE_USERS"
+    })
+    public @NonNull Set<UserHandle> getVisibleUsers() {
+        ArraySet<UserHandle> result = new ArraySet<>();
+        try {
+            int[] visibleUserIds = mService.getVisibleUsers();
+            if (visibleUserIds != null) {
+                for (int userId : visibleUserIds) {
+                    result.add(UserHandle.of(userId));
+                }
+            }
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+        return result;
     }
 
     /**
@@ -2874,7 +3142,7 @@ public class UserManager {
                 }
             };
 
-    /** {@hide} */
+    /** @hide */
     @UnsupportedAppUsage
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
@@ -2882,13 +3150,13 @@ public class UserManager {
         return mIsUserUnlockedCache.query(userId);
     }
 
-    /** {@hide} */
+    /** @hide */
     public void disableIsUserUnlockedCache() {
         mIsUserUnlockedCache.disableLocal();
         mIsUserUnlockingOrUnlockedCache.disableLocal();
     }
 
-    /** {@hide} */
+    /** @hide */
     public static final void invalidateIsUserUnlockedCache() {
         PropertyInvalidatedCache.invalidateCache(CACHE_KEY_IS_USER_UNLOCKED_PROPERTY);
     }
@@ -2918,7 +3186,7 @@ public class UserManager {
         return isUserUnlockingOrUnlocked(user.getIdentifier());
     }
 
-    /** {@hide} */
+    /** @hide */
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     public boolean isUserUnlockingOrUnlocked(@UserIdInt int userId) {
@@ -2986,6 +3254,33 @@ public class UserManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Returns a {@link UserProperties} object describing the properties of the given user.
+     *
+     * Note that the caller may not have permission to access all items; requesting any item for
+     * which permission is lacking will throw a {@link SecurityException}.
+     *
+     * <p> Requires
+     * {@code android.Manifest.permission#MANAGE_USERS},
+     * {@code android.Manifest.permission#QUERY_USERS}, or
+     * {@code android.Manifest.permission#INTERACT_ACROSS_USERS}
+     * permission, or else the caller must be in the same profile group as the caller.
+     *
+     * @param userHandle the user handle of the user whose information is being requested.
+     * @return a UserProperties object for a specific user.
+     * @throws IllegalArgumentException if {@code userHandle} doesn't correspond to an existing user
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.QUERY_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
+    public @NonNull UserProperties getUserProperties(@NonNull UserHandle userHandle) {
+        return mUserPropertiesCache.query(userHandle.getIdentifier());
     }
 
     /**
@@ -3434,6 +3729,20 @@ public class UserManager {
             if (guest != null) {
                 Settings.Secure.putStringForUser(context.getContentResolver(),
                         Settings.Secure.SKIP_FIRST_USE_HINTS, "1", guest.id);
+
+                if (UserManager.isGuestUserAllowEphemeralStateChange()) {
+                    // Mark guest as (changeably) ephemeral if REMOVE_GUEST_ON_EXIT is 1
+                    // This is done so that a user via a UI controller can choose to
+                    // make a guest as ephemeral or not.
+                    // Settings.Global.REMOVE_GUEST_ON_EXIT holds the choice on what the guest state
+                    // should be, with default being ephemeral.
+                    boolean resetGuestOnExit = Settings.Global.getInt(context.getContentResolver(),
+                                                 Settings.Global.REMOVE_GUEST_ON_EXIT, 1) == 1;
+
+                    if (resetGuestOnExit && !guest.isEphemeral()) {
+                        setUserEphemeral(guest.id, true);
+                    }
+                }
             }
             return guest;
         } catch (ServiceSpecificException e) {
@@ -3443,15 +3752,36 @@ public class UserManager {
         }
     }
 
+    // TODO(b/256690588): Remove this after removing its callsites.
     /**
      * Gets the existing guest user if it exists.  This does not include guest users that are dying.
      * @return The existing guest user if it exists. Null otherwise.
      * @hide
+     *
+     * @deprecated Use {@link #getGuestUsers()}
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public UserInfo findCurrentGuestUser() {
         try {
-            return mService.findCurrentGuestUser();
+            final List<UserInfo> guestUsers = mService.getGuestUsers();
+            if (guestUsers.size() == 0) {
+                return null;
+            }
+            return guestUsers.get(0);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the existing guest users.  This does not include guest users that are dying.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public @NonNull List<UserInfo> getGuestUsers() {
+        try {
+            return mService.getGuestUsers();
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -3842,6 +4172,26 @@ public class UserManager {
     }
 
     /**
+     * Revokes admin privileges from the user, if such a user exists.
+     *
+     * <p>Note that this does not alter the user's pre-existing user restrictions.
+     *
+     * @param userId the id of the user to revoke admin rights from
+     * @hide
+     */
+    @RequiresPermission(allOf = {
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            Manifest.permission.MANAGE_USERS
+    })
+    public void revokeUserAdmin(@UserIdInt int userId) {
+        try {
+            mService.revokeUserAdmin(userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Evicts the user's credential encryption key from memory by stopping and restarting the user.
      *
      * @hide
@@ -4042,6 +4392,43 @@ public class UserManager {
     }
 
     /**
+     * Returns the user who was last in the foreground, not including the current user and not
+     * including profiles.
+     *
+     * <p>Returns {@code null} if there is no previous user, for example if there
+     * is only one full user (i.e. only one user which is not a profile) on the device.
+     *
+     * <p>This method may be used for example to find the user to switch back to if the
+     * current user is removed, or if creating a new user is aborted.
+     *
+     * <p>Note that reboots do not interrupt this calculation; the previous user need not have
+     * used the device since it rebooted.
+     *
+     * <p>Note also that on devices that support multiple users on multiple displays, it is possible
+     * that the returned user will be visible on a secondary display, as the foreground user is the
+     * one associated with the main display.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS,
+            android.Manifest.permission.QUERY_USERS
+    })
+    public @Nullable UserHandle getPreviousForegroundUser() {
+        try {
+            final int previousUser = mService.getPreviousFullUserToEnterForeground();
+            if (previousUser == UserHandle.USER_NULL) {
+                return null;
+            }
+            return UserHandle.of(previousUser);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Checks whether it's possible to add more users.
      *
      * @return true if more users can be added, false if limit has been reached.
@@ -4083,7 +4470,11 @@ public class UserManager {
     })
     public boolean canAddMoreUsers(@NonNull String userType) {
         try {
-            return canAddMoreUsers() && mService.canAddMoreUsersOfType(userType);
+            if (userType.equals(USER_TYPE_FULL_GUEST)) {
+                return mService.canAddMoreUsersOfType(userType);
+            } else {
+                return canAddMoreUsers() && mService.canAddMoreUsersOfType(userType);
+            }
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -4184,6 +4575,7 @@ public class UserManager {
      * @return true if the creation of users of the given user type is enabled on this device.
      * @hide
      */
+    @TestApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.CREATE_USERS
@@ -4798,23 +5190,26 @@ public class UserManager {
      * shares media with its parent user (the user that created this profile).
      * Returns false for any other type of user.
      *
-     * <p>Requires {@link android.Manifest.permission#MANAGE_USERS} or
-     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS} permission, otherwise the
-     * caller must be in the same profile group as the user.
-     *
      * @return true if the user shares media with its parent user, false otherwise.
+     *
+     * @deprecated use {@link #getUserProperties(UserHandle)} with
+     *            {@link UserProperties#isMediaSharedWithParent()} instead.
      * @hide
      */
     @SystemApi
-    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
-            Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
-    @UserHandleAware
+    @Deprecated
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCallerProfileGroup = {
+                    Manifest.permission.MANAGE_USERS,
+                    Manifest.permission.QUERY_USERS,
+                    Manifest.permission.INTERACT_ACROSS_USERS})
     @SuppressAutoDoc
     public boolean isMediaSharedWithParent() {
         try {
-            return mService.isMediaSharedWithParent(mUserId);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
+            return getUserProperties(UserHandle.of(mUserId)).isMediaSharedWithParent();
+        } catch (IllegalArgumentException e) {
+            // If the user doesn't exist, return false (for historical reasons)
+            return false;
         }
     }
 
@@ -4824,24 +5219,29 @@ public class UserManager {
      * This API only works for {@link UserManager#isProfile() profiles}
      * and will always return false for any other user type.
      *
+     * @deprecated use {@link #getUserProperties(UserHandle)} with
+     *            {@link UserProperties#isCredentialShareableWithParent()} instead.
      * @hide
      */
     @SystemApi
+    @Deprecated
     @UserHandleAware(
             requiresAnyOfPermissionsIfNotCallerProfileGroup = {
                     Manifest.permission.MANAGE_USERS,
+                    Manifest.permission.QUERY_USERS,
                     Manifest.permission.INTERACT_ACROSS_USERS})
     @SuppressAutoDoc
     public boolean isCredentialSharableWithParent() {
         try {
-            return mService.isCredentialSharableWithParent(mUserId);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
+            return getUserProperties(UserHandle.of(mUserId)).isCredentialShareableWithParent();
+        } catch (IllegalArgumentException e) {
+            // If the user doesn't exist, return false (for historical reasons)
+            return false;
         }
     }
 
     /**
-     * Removes a user and all associated data.
+     * Removes a user and its profiles along with their associated data.
      * @param userId the integer handle of the user.
      * @hide
      */
@@ -4857,7 +5257,7 @@ public class UserManager {
     }
 
     /**
-     * Removes a user and all associated data.
+     * Removes a user and its profiles along with their associated data.
      *
      * @param user the user that needs to be removed.
      * @return {@code true} if the user was successfully removed, {@code false} otherwise.
@@ -4894,9 +5294,9 @@ public class UserManager {
     }
 
     /**
-     * Immediately removes the user or, if the user cannot be removed, such as when the user is
-     * the current user, then set the user as ephemeral so that it will be removed when it is
-     * stopped.
+     * Immediately removes the user and its profiles or, if the user cannot be removed, such as
+     * when the user is the current user, then set the user as ephemeral
+     * so that it will be removed when it is stopped.
      *
      * @param overrideDevicePolicy when {@code true}, user is removed even if the caller has
      * the {@link #DISALLOW_REMOVE_USER} or {@link #DISALLOW_REMOVE_MANAGED_PROFILE} restriction
@@ -4904,8 +5304,9 @@ public class UserManager {
      * @return the {@link RemoveResult} code: {@link #REMOVE_RESULT_REMOVED},
      * {@link #REMOVE_RESULT_DEFERRED}, {@link #REMOVE_RESULT_ALREADY_BEING_REMOVED},
      * {@link #REMOVE_RESULT_ERROR_USER_RESTRICTION}, {@link #REMOVE_RESULT_ERROR_USER_NOT_FOUND},
-     * {@link #REMOVE_RESULT_ERROR_SYSTEM_USER}, or {@link #REMOVE_RESULT_ERROR_UNKNOWN}. All error
-     * codes have negative values.
+     * {@link #REMOVE_RESULT_ERROR_SYSTEM_USER},
+     * {@link #REMOVE_RESULT_ERROR_MAIN_USER_PERMANENT_ADMIN}, or
+     * {@link #REMOVE_RESULT_ERROR_UNKNOWN}. All error codes have negative values.
      *
      * @hide
      */
@@ -4945,6 +5346,31 @@ public class UserManager {
     public void setUserName(@UserIdInt int userId, String name) {
         try {
             mService.setUserName(userId, name);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the user as ephemeral or non-ephemeral.
+     *
+     * If the user was initially created as ephemeral then this
+     * method has no effect and false is returned.
+     *
+     * @param userId the user's integer id
+     * @param enableEphemeral true: change user state to ephemeral,
+     *                        false: change user state to non-ephemeral
+     * @return true: user now has the desired ephemeral state,
+     *         false: desired user ephemeral state could not be set
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS})
+    public boolean setUserEphemeral(@UserIdInt int userId, boolean enableEphemeral) {
+        try {
+            return mService.setUserEphemeral(userId, enableEphemeral);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -5086,48 +5512,12 @@ public class UserManager {
     })
     @UserHandleAware
     public boolean isUserSwitcherEnabled(boolean showEvenIfNotActionable) {
-        if (!supportsMultipleUsers()) {
-            return false;
-        }
-        if (hasUserRestrictionForUser(DISALLOW_USER_SWITCH, mUserId)) {
-            return false;
-        }
-        // If Demo Mode is on, don't show user switcher
-        if (isDeviceInDemoMode(mContext)) {
-            return false;
-        }
-        // Check the Settings.Global.USER_SWITCHER_ENABLED that the user can toggle on/off.
-        final boolean userSwitcherSettingOn = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.USER_SWITCHER_ENABLED,
-                Resources.getSystem().getBoolean(R.bool.config_showUserSwitcherByDefault) ? 1 : 0)
-                != 0;
-        if (!userSwitcherSettingOn) {
-            return false;
-        }
 
-        // The feature is enabled. But is it worth showing?
-        return showEvenIfNotActionable
-                || areThereUsersToWhichToSwitch() // There are switchable users.
-                || !hasUserRestrictionForUser(DISALLOW_ADD_USER, mUserId); // New users can be added
-    }
-
-    /** Returns whether there are any users (other than the current user) to which to switch. */
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.MANAGE_USERS,
-            android.Manifest.permission.CREATE_USERS
-    })
-    private boolean areThereUsersToWhichToSwitch() {
-        final List<UserInfo> users = getAliveUsers();
-        if (users == null) {
-            return false;
+        try {
+            return mService.isUserSwitcherEnabled(showEvenIfNotActionable, mUserId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
         }
-        int switchableUserCount = 0;
-        for (UserInfo user : users) {
-            if (user.supportsSwitchToByUser()) {
-                ++switchableUserCount;
-            }
-        }
-        return switchableUserCount > 1;
     }
 
     /**
@@ -5324,6 +5714,40 @@ public class UserManager {
         }
     }
 
+    /**
+     * Sets the user who should be in the foreground when boot completes. This should be called
+     * during boot, and the provided user must be a full user (i.e. not a profile).
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS})
+    public void setBootUser(@NonNull UserHandle bootUser) {
+        try {
+            mService.setBootUser(bootUser.getIdentifier());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the user who should be in the foreground when boot completes.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS})
+    @SuppressWarnings("[AndroidFrameworkContextUserId]")
+    public @NonNull UserHandle getBootUser() {
+        try {
+            return UserHandle.of(mService.getBootUser());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
     /* Cache key for anything that assumes that userIds cannot be re-used without rebooting. */
     private static final String CACHE_KEY_STATIC_USER_PROPERTIES = "cache_key.static_user_props";
 
@@ -5346,9 +5770,35 @@ public class UserManager {
                 }
             };
 
-    /** {@hide} */
+    /** @hide */
     public static final void invalidateStaticUserProperties() {
         PropertyInvalidatedCache.invalidateCache(CACHE_KEY_STATIC_USER_PROPERTIES);
+    }
+
+    /* Cache key for UserProperties object. */
+    private static final String CACHE_KEY_USER_PROPERTIES = "cache_key.user_properties";
+
+    // TODO: It would be better to somehow have this as static, so that it can work cross-context.
+    private final PropertyInvalidatedCache<Integer, UserProperties> mUserPropertiesCache =
+            new PropertyInvalidatedCache<Integer, UserProperties>(16, CACHE_KEY_USER_PROPERTIES) {
+                @Override
+                public UserProperties recompute(Integer userId) {
+                    try {
+                        // If the userId doesn't exist, this will throw rather than cache garbage.
+                        return mService.getUserPropertiesCopy(userId);
+                    } catch (RemoteException re) {
+                        throw re.rethrowFromSystemServer();
+                    }
+                }
+                @Override
+                public boolean bypass(Integer query) {
+                    return query < 0;
+                }
+            };
+
+    /** @hide */
+    public static final void invalidateUserPropertiesCache() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_USER_PROPERTIES);
     }
 
     /**

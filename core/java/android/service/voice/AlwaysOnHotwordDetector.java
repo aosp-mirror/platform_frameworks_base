@@ -18,6 +18,7 @@ package android.service.voice;
 
 import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
 import static android.Manifest.permission.RECORD_AUDIO;
+import static android.service.voice.VoiceInteractionService.MULTIPLE_ACTIVE_HOTWORD_DETECTORS;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -27,6 +28,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.ActivityThread;
+import android.app.compat.CompatChanges;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
@@ -50,9 +52,11 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.internal.app.IVoiceInteractionSoundTriggerSession;
@@ -62,8 +66,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * A class that lets a VoiceInteractionService implementation interact with
@@ -74,7 +81,7 @@ import java.util.Locale;
  *                    mark and track it as such.
  */
 @SystemApi
-public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
+public class AlwaysOnHotwordDetector extends AbstractDetector {
     //---- States of Keyphrase availability. Return codes for onAvailabilityChanged() ----//
     /**
      * Indicates that this hotword detector is no longer valid for any recognition
@@ -275,18 +282,22 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
      * The metadata of the Keyphrase, derived from the enrollment application.
      * This may be null if this keyphrase isn't supported by the enrollment application.
      */
+    @GuardedBy("mLock")
     @Nullable
     private KeyphraseMetadata mKeyphraseMetadata;
     private final KeyphraseEnrollmentInfo mKeyphraseEnrollmentInfo;
     private final IVoiceInteractionManagerService mModelManagementService;
-    private final IVoiceInteractionSoundTriggerSession mSoundTriggerSession;
+    private IVoiceInteractionSoundTriggerSession mSoundTriggerSession;
     private final SoundTriggerListener mInternalCallback;
     private final Callback mExternalCallback;
     private final Handler mHandler;
     private final IBinder mBinder = new Binder();
     private final int mTargetSdkVersion;
-    private final boolean mSupportHotwordDetectionService;
+    private final boolean mSupportSandboxedDetectionService;
 
+    @GuardedBy("mLock")
+    private boolean mIsAvailabilityOverriddenByTestApi = false;
+    @GuardedBy("mLock")
     private int mAvailability = STATE_NOT_READY;
 
     /**
@@ -717,53 +728,24 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
          */
         public abstract void onDetected(@NonNull EventPayload eventPayload);
 
-        /**
-         * Called when the detection fails due to an error.
-         */
+        /** {@inheritDoc} */
         public abstract void onError();
 
-        /**
-         * Called when the recognition is paused temporarily for some reason.
-         * This is an informational callback, and the clients shouldn't be doing anything here
-         * except showing an indication on their UI if they have to.
-         */
+        /** {@inheritDoc} */
         public abstract void onRecognitionPaused();
 
-        /**
-         * Called when the recognition is resumed after it was temporarily paused.
-         * This is an informational callback, and the clients shouldn't be doing anything here
-         * except showing an indication on their UI if they have to.
-         */
+        /** {@inheritDoc} */
         public abstract void onRecognitionResumed();
 
-        /**
-         * Called when the {@link HotwordDetectionService second stage detection} did not detect the
-         * keyphrase.
-         *
-         * @param result Info about the second stage detection result, provided by the
-         *         {@link HotwordDetectionService}.
-         */
+        /** {@inheritDoc} */
         public void onRejected(@NonNull HotwordRejectedResult result) {
         }
 
-        /**
-         * Called when the {@link HotwordDetectionService} is created by the system and given a
-         * short amount of time to report it's initialization state.
-         *
-         * @param status Info about initialization state of {@link HotwordDetectionService}; the
-         * allowed values are {@link HotwordDetectionService#INITIALIZATION_STATUS_SUCCESS},
-         * 1<->{@link HotwordDetectionService#getMaxCustomInitializationStatus()},
-         * {@link HotwordDetectionService#INITIALIZATION_STATUS_UNKNOWN}.
-         */
+        /** {@inheritDoc} */
         public void onHotwordDetectionServiceInitialized(int status) {
         }
 
-        /**
-         * Called with the {@link HotwordDetectionService} is restarted.
-         *
-         * Clients are expected to call {@link HotwordDetector#updateState} to share the state with
-         * the newly created service.
-         */
+        /** {@inheritDoc} */
         public void onHotwordDetectionServiceRestarted() {
         }
     }
@@ -774,25 +756,16 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
      * @param callback A non-null Callback for receiving the recognition events.
      * @param modelManagementService A service that allows management of sound models.
      * @param targetSdkVersion The target SDK version.
-     * @param supportHotwordDetectionService {@code true} if hotword detection service should be
+     * @param SupportSandboxedDetectionService {@code true} if HotwordDetectionService should be
      * triggered, otherwise {@code false}.
-     * @param options Application configuration data provided by the
-     * {@link VoiceInteractionService}. PersistableBundle does not allow any remotable objects or
-     * other contents that can be used to communicate with other processes.
-     * @param sharedMemory The unrestricted data blob provided by the
-     * {@link VoiceInteractionService}. Use this to provide the hotword models data or other
-     * such data to the trusted process.
      *
      * @hide
      */
     public AlwaysOnHotwordDetector(String text, Locale locale, Callback callback,
             KeyphraseEnrollmentInfo keyphraseEnrollmentInfo,
             IVoiceInteractionManagerService modelManagementService, int targetSdkVersion,
-            boolean supportHotwordDetectionService, @Nullable PersistableBundle options,
-            @Nullable SharedMemory sharedMemory) {
-        super(modelManagementService, callback,
-                supportHotwordDetectionService ? DETECTOR_TYPE_TRUSTED_HOTWORD_DSP
-                        : DETECTOR_TYPE_NORMAL);
+            boolean supportSandboxedDetectionService) {
+        super(modelManagementService, callback);
 
         mHandler = new MyHandler();
         mText = text;
@@ -802,44 +775,100 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         mInternalCallback = new SoundTriggerListener(mHandler);
         mModelManagementService = modelManagementService;
         mTargetSdkVersion = targetSdkVersion;
-        mSupportHotwordDetectionService = supportHotwordDetectionService;
-        if (mSupportHotwordDetectionService) {
-            updateStateLocked(options, sharedMemory, mInternalCallback,
+        mSupportSandboxedDetectionService = supportSandboxedDetectionService;
+    }
+
+    @Override
+    void initialize(@Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory) {
+        if (mSupportSandboxedDetectionService) {
+            initAndVerifyDetector(options, sharedMemory, mInternalCallback,
                     DETECTOR_TYPE_TRUSTED_HOTWORD_DSP);
         }
         try {
             Identity identity = new Identity();
             identity.packageName = ActivityThread.currentOpPackageName();
-            mSoundTriggerSession = mModelManagementService.createSoundTriggerSessionAsOriginator(
-                    identity, mBinder);
+            mSoundTriggerSession =
+                    mModelManagementService.createSoundTriggerSessionAsOriginator(
+                            identity, mBinder);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
-        new RefreshAvailabiltyTask().execute();
+        new RefreshAvailabilityTask().execute();
     }
 
     /**
      * {@inheritDoc}
      *
-     * @throws IllegalStateException if this AlwaysOnHotwordDetector wasn't specified to use a
-     * {@link HotwordDetectionService} when it was created. In addition, if this
-     * AlwaysOnHotwordDetector is in an invalid or error state.
+     * @throws IllegalDetectorStateException Thrown when a caller has a target SDK of API level 33
+     *         or above and this AlwaysOnHotwordDetector wasn't specified to use a
+     *         {@link HotwordDetectionService} when it was created. In addition, the exception can
+     *         be thrown if this AlwaysOnHotwordDetector is in an invalid or error state.
+     * @throws IllegalStateException Thrown when a caller has a target SDK below API level 33 if
+     *         this AlwaysOnHotwordDetector wasn't specified to use a
+     *         {@link HotwordDetectionService} when it was created. In addition, the exception can
+     *         be thrown if this AlwaysOnHotwordDetector is in an invalid or error state.
      */
     @Override
     public final void updateState(@Nullable PersistableBundle options,
-            @Nullable SharedMemory sharedMemory) {
+            @Nullable SharedMemory sharedMemory) throws IllegalDetectorStateException {
         synchronized (mLock) {
-            if (!mSupportHotwordDetectionService) {
+            if (!mSupportSandboxedDetectionService) {
                 throw new IllegalStateException(
                         "updateState called, but it doesn't support hotword detection service");
             }
             if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
+                if (CompatChanges.isChangeEnabled(HOTWORD_DETECTOR_THROW_CHECKED_EXCEPTION)) {
+                    throw new IllegalDetectorStateException(
+                            "updateState called on an invalid detector or error state");
+                }
                 throw new IllegalStateException(
                         "updateState called on an invalid detector or error state");
             }
         }
 
         super.updateState(options, sharedMemory);
+    }
+
+    /**
+     * Test API for manipulating the voice engine and sound model availability.
+     *
+     * After overriding the availability status, the client's
+     * {@link Callback#onAvailabilityChanged(int)} will be called to reflect the updated state.
+     *
+     * When this override is set, all system updates to availability will be ignored.
+     * @hide
+     */
+    @TestApi
+    public void overrideAvailability(int availability) {
+        synchronized (mLock) {
+            // ENROLLED state requires there to be metadata about the sound model so a fake one
+            // is created.
+            if (mKeyphraseMetadata == null && availability == STATE_KEYPHRASE_ENROLLED) {
+                Set<Locale> fakeSupportedLocales = new HashSet<>();
+                fakeSupportedLocales.add(mLocale);
+                mKeyphraseMetadata = new KeyphraseMetadata(1, mText, fakeSupportedLocales,
+                        AlwaysOnHotwordDetector.RECOGNITION_MODE_VOICE_TRIGGER);
+            }
+
+            mAvailability = availability;
+            mIsAvailabilityOverriddenByTestApi = true;
+            notifyStateChangedLocked();
+        }
+    }
+
+    /**
+     * Test API for clearing an availability override set by {@link #overrideAvailability(int)}
+     *
+     * This method will restore the availability to the current system state.
+     * @hide
+     */
+    @TestApi
+    public void resetAvailability() {
+        synchronized (mLock) {
+            mIsAvailabilityOverriddenByTestApi = false;
+        }
+        // Execute a refresh availability task - which should then notify of a change.
+        new RefreshAvailabilityTask().execute();
     }
 
     /**
@@ -878,28 +907,46 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
      * @see #RECOGNITION_MODE_USER_IDENTIFICATION
      * @see #RECOGNITION_MODE_VOICE_TRIGGER
      *
-     * @throws UnsupportedOperationException if the keyphrase itself isn't supported.
-     *         Callers should only call this method after a supported state callback on
-     *         {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
-     * @throws IllegalStateException if the detector is in an invalid or error state.
-     *         This may happen if another detector has been instantiated or the
-     *         {@link VoiceInteractionService} hosting this detector has been shut down.
+     * @throws IllegalDetectorStateException Thrown when a caller has a target SDK of API level 33
+     *         or above. Because the caller receives availability updates via an asynchronous
+     *         callback, it may be due to the availability changing while this call is performed.
+     *         - Throws if the detector is in an invalid or error state.
+     *           This may happen if another detector has been instantiated or the
+     *           {@link VoiceInteractionService} hosting this detector has been shut down.
+     * @throws UnsupportedOperationException Thrown when a caller has a target SDK below API level
+     *         33 Android if the recognition isn't supported. Callers should only call this method
+     *         after a supported state callback on {@link Callback#onAvailabilityChanged(int)} to
+     *         avoid this exception.
+     * @throws IllegalStateException Thrown when a caller has a target SDK below Android API level
+     *         33 if the detector is in an invalid or error state. This may happen if another
+     *         detector has been instantiated or the {@link VoiceInteractionService} hosting this
+     *         detector has been shut down.
      */
-    public @RecognitionModes int getSupportedRecognitionModes() {
+    public @RecognitionModes
+    int getSupportedRecognitionModes() throws IllegalDetectorStateException {
         if (DBG) Slog.d(TAG, "getSupportedRecognitionModes()");
         synchronized (mLock) {
             return getSupportedRecognitionModesLocked();
         }
     }
 
-    private int getSupportedRecognitionModesLocked() {
+    @GuardedBy("mLock")
+    private int getSupportedRecognitionModesLocked() throws IllegalDetectorStateException {
         if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
+            if (CompatChanges.isChangeEnabled(HOTWORD_DETECTOR_THROW_CHECKED_EXCEPTION)) {
+                throw new IllegalDetectorStateException("getSupportedRecognitionModes called on an"
+                        + " invalid detector or error state");
+            }
             throw new IllegalStateException(
                     "getSupportedRecognitionModes called on an invalid detector or error state");
         }
 
         // This method only makes sense if we can actually support a recognition.
         if (mAvailability != STATE_KEYPHRASE_ENROLLED || mKeyphraseMetadata == null) {
+            if (CompatChanges.isChangeEnabled(HOTWORD_DETECTOR_THROW_CHECKED_EXCEPTION)) {
+                throw new IllegalDetectorStateException("Getting supported recognition modes for"
+                        + " the keyphrase is not supported");
+            }
             throw new UnsupportedOperationException(
                     "Getting supported recognition modes for the keyphrase is not supported");
         }
@@ -926,6 +973,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         }
     }
 
+    @GuardedBy("mLock")
     private int getSupportedAudioCapabilitiesLocked() {
         try {
             ModuleProperties properties =
@@ -949,30 +997,77 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
      * @see #RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS
      *
      * @param recognitionFlags The flags to control the recognition properties.
+     * @param data Additional pass-through data to the system voice engine along with the
+     *             startRecognition request. This data is intended to provide additional parameters
+     *             when starting the opaque sound model.
      * @return Indicates whether the call succeeded or not.
-     * @throws UnsupportedOperationException if the recognition isn't supported.
-     *         Callers should only call this method after a supported state callback on
-     *         {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
-     * @throws IllegalStateException if the detector is in an invalid or error state.
-     *         This may happen if another detector has been instantiated or the
-     *         {@link VoiceInteractionService} hosting this detector has been shut down.
+     * @throws IllegalDetectorStateException Thrown when a caller has a target SDK of API level 33
+     *         or above and attempts to start a recognition when the detector is not able based on
+     *         the availability state. This can be thrown even if the state has been checked before
+     *         calling this method because the caller receives availability updates via an
+     *         asynchronous callback, it may be due to the availability changing while this call is
+     *         performed.
+     *         - Throws if the recognition isn't supported.
+     *           Callers should only call this method after a supported state callback on
+     *           {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
+     *         - Also throws if the detector is in an invalid or error state.
+     *           This may happen if another detector has been instantiated or the
+     *           {@link VoiceInteractionService} hosting this detector has been shut down.
+     * @throws UnsupportedOperationException Thrown when a caller has a target SDK below API level
+     *         33 Android if the recognition isn't supported. Callers should only call this method
+     *         after a supported state callback on {@link Callback#onAvailabilityChanged(int)} to
+     *         avoid this exception.
+     * @throws IllegalStateException Thrown when a caller has a target SDK below Android API level
+     *         33 if the detector is in an invalid or error state. This may happen if another
+     *         detector has been instantiated or the {@link VoiceInteractionService} hosting this
+     *         detector has been shut down.
      */
     @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
-    public boolean startRecognition(@RecognitionFlags int recognitionFlags) {
+    public boolean startRecognition(@RecognitionFlags int recognitionFlags, @NonNull byte[] data)
+            throws IllegalDetectorStateException {
+        synchronized (mLock) {
+            return startRecognitionLocked(recognitionFlags, data)
+                    == STATUS_OK;
+        }
+    }
+
+    /**
+     * Starts recognition for the associated keyphrase.
+     * Caller must be the active voice interaction service via
+     * Settings.Secure.VOICE_INTERACTION_SERVICE.
+     *
+     * @see #RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO
+     * @see #RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS
+     *
+     * @param recognitionFlags The flags to control the recognition properties.
+     * @return Indicates whether the call succeeded or not.
+     * @throws IllegalDetectorStateException Thrown when a caller has a target SDK of API level 33
+     *         or above and attempts to start a recognition when the detector is not able based on
+     *         the availability state. This can be thrown even if the state has been checked before
+     *         calling this method because the caller receives availability updates via an
+     *         asynchronous callback, it may be due to the availability changing while this call is
+     *         performed.
+     *         - Throws if the recognition isn't supported.
+     *           Callers should only call this method after a supported state callback on
+     *           {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
+     *         - Also throws if the detector is in an invalid or error state.
+     *           This may happen if another detector has been instantiated or the
+     *           {@link VoiceInteractionService} hosting this detector has been shut down.
+     * @throws UnsupportedOperationException Thrown when a caller has a target SDK below API level
+     *         33 if the recognition isn't supported. Callers should only call this method after a
+     *         supported state callback on {@link Callback#onAvailabilityChanged(int)} to avoid this
+     *         exception.
+     * @throws IllegalStateException Thrown when a caller has a target SDK below API level 33 if the
+     *         detector is in an invalid or error state. This may happen if another detector has
+     *         been instantiated or the {@link VoiceInteractionService} hosting this detector has
+     *         been shut down.
+     */
+    @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
+    public boolean startRecognition(@RecognitionFlags int recognitionFlags)
+            throws IllegalDetectorStateException {
         if (DBG) Slog.d(TAG, "startRecognition(" + recognitionFlags + ")");
         synchronized (mLock) {
-            if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
-                throw new IllegalStateException(
-                        "startRecognition called on an invalid detector or error state");
-            }
-
-            // Check if we can start/stop a recognition.
-            if (mAvailability != STATE_KEYPHRASE_ENROLLED) {
-                throw new UnsupportedOperationException(
-                        "Recognition for the given keyphrase is not supported");
-            }
-
-            return startRecognitionLocked(recognitionFlags) == STATUS_OK;
+            return startRecognitionLocked(recognitionFlags, null /* data */) == STATUS_OK;
         }
     }
 
@@ -983,7 +1078,8 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
      */
     @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
     @Override
-    public boolean startRecognition() {
+    public boolean startRecognition()
+            throws IllegalDetectorStateException {
         return startRecognition(0);
     }
 
@@ -993,28 +1089,44 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
      * Settings.Secure.VOICE_INTERACTION_SERVICE.
      *
      * @return Indicates whether the call succeeded or not.
-     * @throws UnsupportedOperationException if the recognition isn't supported.
-     *         Callers should only call this method after a supported state callback on
-     *         {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
-     * @throws IllegalStateException if the detector is in an invalid or error state.
-     *         This may happen if another detector has been instantiated or the
-     *         {@link VoiceInteractionService} hosting this detector has been shut down.
+     * @throws IllegalDetectorStateException Thrown when a caller has a target SDK of
+     *         API level 33 or above and attempts to stop a recognition when the detector is
+     *         not able based on the state. This can be thrown even if the state has been checked
+     *         before calling this method because the caller receives availability updates via an
+     *         asynchronous callback, it may be due to the availability changing while this call is
+     *         performed.
+     * @throws UnsupportedOperationException Thrown when a caller has a target SDK below API level
+     *         33 if the recognition isn't supported. Callers should only call this method after a
+     *         supported state callback on {@link Callback#onAvailabilityChanged(int)} to avoid this
+     *         exception.
+     * @throws IllegalStateException Thrown when a caller has a target SDK below API level 33 if the
+     *         detector is in an invalid or error state. This may happen if another detector has
+     *         been instantiated or the {@link VoiceInteractionService} hosting this detector has
+     *         been shut down.
      */
     // TODO: Remove this RequiresPermission since it isn't actually enforced. Also fix the javadoc
     // about permissions enforcement (when it throws vs when it just returns false) for other
     // methods in this class.
     @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
     @Override
-    public boolean stopRecognition() {
+    public boolean stopRecognition() throws IllegalDetectorStateException {
         if (DBG) Slog.d(TAG, "stopRecognition()");
         synchronized (mLock) {
             if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
+                if (CompatChanges.isChangeEnabled(HOTWORD_DETECTOR_THROW_CHECKED_EXCEPTION)) {
+                    throw new IllegalDetectorStateException(
+                            "stopRecognition called on an invalid detector or error state");
+                }
                 throw new IllegalStateException(
                         "stopRecognition called on an invalid detector or error state");
             }
 
             // Check if we can start/stop a recognition.
             if (mAvailability != STATE_KEYPHRASE_ENROLLED) {
+                if (CompatChanges.isChangeEnabled(HOTWORD_DETECTOR_THROW_CHECKED_EXCEPTION)) {
+                    throw new IllegalDetectorStateException(
+                            "Recognition for the given keyphrase is not supported");
+                }
                 throw new UnsupportedOperationException(
                         "Recognition for the given keyphrase is not supported");
             }
@@ -1039,18 +1151,28 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
      *         - {@link SoundTrigger#STATUS_BAD_VALUE} invalid input parameter
      *         - {@link SoundTrigger#STATUS_INVALID_OPERATION} if the call is out of sequence or
      *           if API is not supported by HAL
-     * @throws IllegalStateException if the detector is in an invalid or error state.
-     *         This may happen if another detector has been instantiated or the
-     *         {@link VoiceInteractionService} hosting this detector has been shut down.
+     * @throws IllegalDetectorStateException Thrown when a caller has a target SDK of API level 33
+     *         if the detector is in an invalid or error state. This may happen if another detector
+     *         has been instantiated or the {@link VoiceInteractionService} hosting this detector
+     *         has been shut down.
+     * @throws IllegalStateException Thrown when a caller has a target SDK below API level 33 if the
+     *         detector is in an invalid or error state. This may happen if another detector has
+     *         been instantiated or the {@link VoiceInteractionService} hosting this detector has
+     *         been shut down.
      */
     @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
-    public int setParameter(@ModelParams int modelParam, int value) {
+    public int setParameter(@ModelParams int modelParam, int value)
+            throws IllegalDetectorStateException {
         if (DBG) {
             Slog.d(TAG, "setParameter(" + modelParam + ", " + value + ")");
         }
 
         synchronized (mLock) {
             if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
+                if (CompatChanges.isChangeEnabled(HOTWORD_DETECTOR_THROW_CHECKED_EXCEPTION)) {
+                    throw new IllegalDetectorStateException(
+                            "setParameter called on an invalid detector or error state");
+                }
                 throw new IllegalStateException(
                         "setParameter called on an invalid detector or error state");
             }
@@ -1071,18 +1193,27 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
      *
      * @param modelParam   {@link ModelParams}
      * @return value of parameter
-     * @throws IllegalStateException if the detector is in an invalid or error state.
-     *         This may happen if another detector has been instantiated or the
-     *         {@link VoiceInteractionService} hosting this detector has been shut down.
+     * @throws IllegalDetectorStateException Thrown when a caller has a target SDK of API level 33
+     *         if the detector is in an invalid or error state. This may happen if another detector
+     *         has been instantiated or the {@link VoiceInteractionService} hosting this detector
+     *         has been shut down.
+     * @throws IllegalStateException Thrown when a caller has a target SDK below API level 33 if
+     *         the detector is in an invalid or error state. This may happen if another detector has
+     *         been instantiated or the {@link VoiceInteractionService} hosting this detector has
+     *         been shut down.
      */
     @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
-    public int getParameter(@ModelParams int modelParam) {
+    public int getParameter(@ModelParams int modelParam) throws IllegalDetectorStateException {
         if (DBG) {
             Slog.d(TAG, "getParameter(" + modelParam + ")");
         }
 
         synchronized (mLock) {
             if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
+                if (CompatChanges.isChangeEnabled(HOTWORD_DETECTOR_THROW_CHECKED_EXCEPTION)) {
+                    throw new IllegalDetectorStateException(
+                            "getParameter called on an invalid detector or error state");
+                }
                 throw new IllegalStateException(
                         "getParameter called on an invalid detector or error state");
             }
@@ -1100,19 +1231,29 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
      *
      * @param modelParam {@link ModelParams}
      * @return supported range of parameter, null if not supported
-     * @throws IllegalStateException if the detector is in an invalid or error state.
-     *         This may happen if another detector has been instantiated or the
-     *         {@link VoiceInteractionService} hosting this detector has been shut down.
+     * @throws IllegalDetectorStateException Thrown when a caller has a target SDK of API level 33
+     *         if the detector is in an invalid or error state. This may happen if another detector
+     *         has been instantiated or the {@link VoiceInteractionService} hosting this detector
+     *         has been shut down.
+     * @throws IllegalStateException Thrown when a caller has a target SDK below API level 33 if
+     *         the detector is in an invalid or error state. This may happen if another detector has
+     *         been instantiated or the {@link VoiceInteractionService} hosting this detector has
+     *         been shut down.
      */
     @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
     @Nullable
-    public ModelParamRange queryParameter(@ModelParams int modelParam) {
+    public ModelParamRange queryParameter(@ModelParams int modelParam)
+            throws IllegalDetectorStateException {
         if (DBG) {
             Slog.d(TAG, "queryParameter(" + modelParam + ")");
         }
 
         synchronized (mLock) {
             if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
+                if (CompatChanges.isChangeEnabled(HOTWORD_DETECTOR_THROW_CHECKED_EXCEPTION)) {
+                    throw new IllegalDetectorStateException(
+                            "queryParameter called on an invalid detector or error state");
+                }
                 throw new IllegalStateException(
                         "queryParameter called on an invalid detector or error state");
             }
@@ -1129,15 +1270,25 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
      * otherwise {@link #createReEnrollIntent()} should be preferred.
      *
      * @return An {@link Intent} to start enrollment for the given keyphrase.
-     * @throws UnsupportedOperationException if managing they keyphrase isn't supported.
-     *         Callers should only call this method after a supported state callback on
-     *         {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
-     * @throws IllegalStateException if the detector is in an invalid state.
-     *         This may happen if another detector has been instantiated or the
-     *         {@link VoiceInteractionService} hosting this detector has been shut down.
+     * @throws IllegalDetectorStateException Thrown when a caller has a target SDK of API level 33
+     *         or above.
+     *         - Thrown if managing they keyphrase isn't supported. Callers should only call this
+     *           method after a supported state callback on
+     *           {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
+     *         - Thrown if the detector is in an invalid state. This may happen if another detector
+     *           has been instantiated or the {@link VoiceInteractionService} hosting this detector
+     *           has been shut down.
+     * @throws UnsupportedOperationException Thrown when a caller has a target SDK below API level
+     *         33 if managing they keyphrase isn't supported. Callers should only call this method
+     *         after a supported state callback on {@link Callback#onAvailabilityChanged(int)} to
+     *         avoid this exception.
+     * @throws IllegalStateException Thrown when a caller has a target SDK below API level 33 if the
+     *         detector is in an invalid state. This may happen if another detector has been
+     *         instantiated or the {@link VoiceInteractionService} hosting this detector has been
+     *         shut down.
      */
     @Nullable
-    public Intent createEnrollIntent() {
+    public Intent createEnrollIntent() throws IllegalDetectorStateException {
         if (DBG) Slog.d(TAG, "createEnrollIntent");
         synchronized (mLock) {
             return getManageIntentLocked(KeyphraseEnrollmentInfo.MANAGE_ACTION_ENROLL);
@@ -1151,15 +1302,25 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
      * i.e. {@link #STATE_KEYPHRASE_ENROLLED}, otherwise invoking this may result in an error.
      *
      * @return An {@link Intent} to start un-enrollment for the given keyphrase.
-     * @throws UnsupportedOperationException if managing they keyphrase isn't supported.
-     *         Callers should only call this method after a supported state callback on
-     *         {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
-     * @throws IllegalStateException if the detector is in an invalid state.
-     *         This may happen if another detector has been instantiated or the
-     *         {@link VoiceInteractionService} hosting this detector has been shut down.
+     * @throws IllegalDetectorStateException Thrown when a caller has a target SDK of API level 33
+     *         or above.
+     *         - Thrown if managing they keyphrase isn't supported. Callers should only call this
+     *           method after a supported state callback on
+     *           {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
+     *         - Thrown if the detector is in an invalid state. This may happen if another detector
+     *           has been instantiated or the {@link VoiceInteractionService} hosting this detector
+     *           has been shut down.
+     * @throws UnsupportedOperationException Thrown when a caller has a target SDK below API level
+     *         33 if managing they keyphrase isn't supported. Callers should only call this method
+     *         after a supported state callback on {@link Callback#onAvailabilityChanged(int)} to
+     *         avoid this exception.
+     * @throws IllegalStateException Thrown when a caller has a target SDK below API level 33 if the
+     *         detector is in an invalid state. This may happen if another detector has been
+     *         instantiated or the {@link VoiceInteractionService} hosting this detector has been
+     *         shut down.
      */
     @Nullable
-    public Intent createUnEnrollIntent() {
+    public Intent createUnEnrollIntent() throws IllegalDetectorStateException {
         if (DBG) Slog.d(TAG, "createUnEnrollIntent");
         synchronized (mLock) {
             return getManageIntentLocked(KeyphraseEnrollmentInfo.MANAGE_ACTION_UN_ENROLL);
@@ -1173,30 +1334,50 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
      * i.e. {@link #STATE_KEYPHRASE_ENROLLED}, otherwise invoking this may result in an error.
      *
      * @return An {@link Intent} to start re-enrollment for the given keyphrase.
-     * @throws UnsupportedOperationException if managing they keyphrase isn't supported.
-     *         Callers should only call this method after a supported state callback on
-     *         {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
-     * @throws IllegalStateException if the detector is in an invalid or error state.
-     *         This may happen if another detector has been instantiated or the
-     *         {@link VoiceInteractionService} hosting this detector has been shut down.
+     * @throws IllegalDetectorStateException Thrown when a caller has a target SDK of API level 33
+     *         or above.
+     *         - Thrown if managing they keyphrase isn't supported. Callers should only call this
+     *           method after a supported state callback on
+     *           {@link Callback#onAvailabilityChanged(int)} to avoid this exception.
+     *         - Thrown if the detector is in an invalid state. This may happen if another detector
+     *           has been instantiated or the {@link VoiceInteractionService} hosting this detector
+     *           has been shut down.
+     * @throws UnsupportedOperationException Thrown when a caller has a target SDK below API level
+     *         33 if managing they keyphrase isn't supported. Callers should only call this method
+     *         after a supported state callback on {@link Callback#onAvailabilityChanged(int)} to
+     *         avoid this exception.
+     * @throws IllegalStateException Thrown when a caller has a target SDK below API level 33 if the
+     *         detector is in an invalid state. This may happen if another detector has been
+     *         instantiated or the {@link VoiceInteractionService} hosting this detector has been
+     *         shut down.
      */
     @Nullable
-    public Intent createReEnrollIntent() {
+    public Intent createReEnrollIntent() throws IllegalDetectorStateException {
         if (DBG) Slog.d(TAG, "createReEnrollIntent");
         synchronized (mLock) {
             return getManageIntentLocked(KeyphraseEnrollmentInfo.MANAGE_ACTION_RE_ENROLL);
         }
     }
 
-    private Intent getManageIntentLocked(@KeyphraseEnrollmentInfo.ManageActions int action) {
+    @GuardedBy("mLock")
+    private Intent getManageIntentLocked(@KeyphraseEnrollmentInfo.ManageActions int action)
+            throws IllegalDetectorStateException {
         if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
+            if (CompatChanges.isChangeEnabled(HOTWORD_DETECTOR_THROW_CHECKED_EXCEPTION)) {
+                throw new IllegalDetectorStateException(
+                        "getManageIntent called on an invalid detector or error state");
+            }
             throw new IllegalStateException(
-                    "getManageIntent called on an invalid detector or error state");
+                "getManageIntent called on an invalid detector or error state");
         }
 
         // This method only makes sense if we can actually support a recognition.
         if (mAvailability != STATE_KEYPHRASE_ENROLLED
                 && mAvailability != STATE_KEYPHRASE_UNENROLLED) {
+            if (CompatChanges.isChangeEnabled(HOTWORD_DETECTOR_THROW_CHECKED_EXCEPTION)) {
+                throw new IllegalDetectorStateException(
+                        "Managing the given keyphrase is not supported");
+            }
             throw new UnsupportedOperationException(
                     "Managing the given keyphrase is not supported");
         }
@@ -1204,29 +1385,31 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         return mKeyphraseEnrollmentInfo.getManageKeyphraseIntent(action, mText, mLocale);
     }
 
-    /**
-     * Invalidates this hotword detector so that any future calls to this result
-     * in an IllegalStateException.
-     */
+    /** {@inheritDoc} */
     @Override
     public void destroy() {
         synchronized (mLock) {
             if (mAvailability == STATE_KEYPHRASE_ENROLLED) {
-                stopRecognition();
+                try {
+                    stopRecognition();
+                } catch (Exception e) {
+                    Log.i(TAG, "failed to stopRecognition in destroy", e);
+                }
             }
 
             mAvailability = STATE_INVALID;
+            mIsAvailabilityOverriddenByTestApi = false;
             notifyStateChangedLocked();
-
-            if (mSupportHotwordDetectionService) {
-                try {
-                    mModelManagementService.shutdownHotwordDetectionService();
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
-            }
         }
         super.destroy();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean isUsingSandboxedDetectionService() {
+        return mSupportSandboxedDetectionService;
     }
 
     /**
@@ -1241,6 +1424,15 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
                     || mAvailability == STATE_ERROR) {
                 Slog.w(TAG, "Received onSoundModelsChanged for an unsupported keyphrase/config"
                         + " or in the error state");
+                return;
+            }
+
+            // Because this method reflects an update from the system service models, we should not
+            // update the client of an availability change when the availability has been overridden
+            // via a test API.
+            if (mIsAvailabilityOverriddenByTestApi) {
+                Slog.w(TAG, "Suppressing system availability update. "
+                        + "Availability is overridden by test API.");
                 return;
             }
 
@@ -1263,11 +1455,37 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
             }
 
             // Execute a refresh availability task - which should then notify of a change.
-            new RefreshAvailabiltyTask().execute();
+            new RefreshAvailabilityTask().execute();
         }
     }
 
-    private int startRecognitionLocked(int recognitionFlags) {
+    @GuardedBy("mLock")
+    private int startRecognitionLocked(int recognitionFlags,
+            @Nullable byte[] data) throws IllegalDetectorStateException {
+        if (DBG) {
+            Slog.d(TAG, "startRecognition("
+                    + recognitionFlags
+                    + ", " + Arrays.toString(data) + ")");
+        }
+        if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
+            if (CompatChanges.isChangeEnabled(HOTWORD_DETECTOR_THROW_CHECKED_EXCEPTION)) {
+                throw new IllegalDetectorStateException(
+                        "startRecognition called on an invalid detector or error state");
+            }
+            throw new IllegalStateException(
+                    "startRecognition called on an invalid detector or error state");
+        }
+
+        // Check if we can start/stop a recognition.
+        if (mAvailability != STATE_KEYPHRASE_ENROLLED) {
+            if (CompatChanges.isChangeEnabled(HOTWORD_DETECTOR_THROW_CHECKED_EXCEPTION)) {
+                throw new IllegalDetectorStateException(
+                        "Recognition for the given keyphrase is not supported");
+            }
+            throw new UnsupportedOperationException(
+                    "Recognition for the given keyphrase is not supported");
+        }
+
         KeyphraseRecognitionExtra[] recognitionExtra = new KeyphraseRecognitionExtra[1];
         // TODO: Do we need to do something about the confidence level here?
         recognitionExtra[0] = new KeyphraseRecognitionExtra(mKeyphraseMetadata.getId(),
@@ -1291,7 +1509,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
             code = mSoundTriggerSession.startRecognition(
                     mKeyphraseMetadata.getId(), mLocale.toLanguageTag(), mInternalCallback,
                     new RecognitionConfig(captureTriggerAudio, allowMultipleTriggers,
-                            recognitionExtra, null /* additional data */, audioCapabilities),
+                            recognitionExtra, data, audioCapabilities),
                     runInBatterySaver);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1303,6 +1521,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         return code;
     }
 
+    @GuardedBy("mLock")
     private int stopRecognitionLocked() {
         int code;
         try {
@@ -1318,6 +1537,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         return code;
     }
 
+    @GuardedBy("mLock")
     private int setParameterLocked(@ModelParams int modelParam, int value) {
         try {
             int code = mSoundTriggerSession.setParameter(mKeyphraseMetadata.getId(), modelParam,
@@ -1333,6 +1553,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         }
     }
 
+    @GuardedBy("mLock")
     private int getParameterLocked(@ModelParams int modelParam) {
         try {
             return mSoundTriggerSession.getParameter(mKeyphraseMetadata.getId(), modelParam);
@@ -1341,6 +1562,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         }
     }
 
+    @GuardedBy("mLock")
     @Nullable
     private ModelParamRange queryParameterLocked(@ModelParams int modelParam) {
         try {
@@ -1357,15 +1579,19 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         }
     }
 
+    @GuardedBy("mLock")
     private void updateAndNotifyStateChangedLocked(int availability) {
         if (DBG) {
             Slog.d(TAG, "Hotword availability changed from " + mAvailability
                     + " -> " + availability);
         }
-        mAvailability = availability;
+        if (!mIsAvailabilityOverriddenByTestApi) {
+            mAvailability = availability;
+        }
         notifyStateChangedLocked();
     }
 
+    @GuardedBy("mLock")
     private void notifyStateChangedLocked() {
         Message message = Message.obtain(mHandler, MSG_AVAILABILITY_CHANGED);
         message.arg1 = mAvailability;
@@ -1487,7 +1713,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         }
     }
 
-    class RefreshAvailabiltyTask extends AsyncTask<Void, Void, Void> {
+    class RefreshAvailabilityTask extends AsyncTask<Void, Void, Void> {
 
         @Override
         public Void doInBackground(Void... params) {
@@ -1555,7 +1781,26 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         }
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (CompatChanges.isChangeEnabled(MULTIPLE_ACTIVE_HOTWORD_DETECTORS)) {
+            if (!(obj instanceof AlwaysOnHotwordDetector)) {
+                return false;
+            }
+            AlwaysOnHotwordDetector other = (AlwaysOnHotwordDetector) obj;
+            return TextUtils.equals(mText, other.mText) && mLocale.equals(other.mLocale);
+        }
+
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mText, mLocale);
+    }
+
     /** @hide */
+    @Override
     public void dump(String prefix, PrintWriter pw) {
         synchronized (mLock) {
             pw.print(prefix); pw.print("Text="); pw.println(mText);

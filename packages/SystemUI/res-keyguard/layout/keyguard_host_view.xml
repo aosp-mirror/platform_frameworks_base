@@ -27,6 +27,7 @@
     android:layout_height="match_parent"
     android:clipChildren="false"
     android:clipToPadding="false"
+    android:paddingTop="@dimen/keyguard_lock_padding"
     android:importantForAccessibility="yes"> <!-- Needed because TYPE_WINDOW_STATE_CHANGED is sent
                                                   from this view when bouncer is shown -->
 

@@ -53,6 +53,9 @@ final class InkWindow extends PhoneWindow {
         final LayoutParams attrs = getAttributes();
         attrs.layoutInDisplayCutoutMode = LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         attrs.setFitInsetsTypes(0);
+        // disable window animations.
+        // TODO(b/253477462): replace with API when available
+        attrs.windowAnimations = -1;
         // TODO(b/210039666): use INPUT_FEATURE_NO_INPUT_CHANNEL once b/216179339 is fixed.
         setAttributes(attrs);
         // Ink window is not touchable with finger.
@@ -99,7 +102,6 @@ final class InkWindow extends PhoneWindow {
         if (getDecorView() != null) {
             getDecorView().setVisibility(remove ? View.GONE : View.INVISIBLE);
         }
-        //TODO(b/210039666): remove window from WM after a delay. Delay amount TBD.
     }
 
     void setToken(@NonNull IBinder token) {
@@ -164,6 +166,9 @@ final class InkWindow extends PhoneWindow {
         mGlobalLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
+                if (mInkView == null) {
+                    return;
+                }
                 if (mInkView.isVisibleToUser()) {
                     if (mInkViewVisibilityListener != null) {
                         mInkViewVisibilityListener.onInkViewVisible();

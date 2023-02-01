@@ -17,6 +17,8 @@
 package com.android.server.pm;
 
 import static android.app.ActivityOptions.KEY_SPLASH_SCREEN_THEME;
+import static android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
+import static android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_MUTABLE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
@@ -96,7 +98,7 @@ import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.util.ArrayList;
@@ -1143,7 +1145,8 @@ public class LauncherAppsService extends SystemService {
             final int code;
             try {
                 code = mActivityTaskManagerInternal.startActivitiesAsPackage(publisherPackage,
-                        publishedFeatureId, userId, intents, startActivityOptions);
+                        publishedFeatureId, userId, intents,
+                        getActivityOptionsForLauncher(startActivityOptions));
                 if (ActivityManager.isStartResultSuccessful(code)) {
                     return true; // Success
                 } else {
@@ -1156,6 +1159,23 @@ public class LauncherAppsService extends SystemService {
                 }
                 return false;
             }
+        }
+
+        private Bundle getActivityOptionsForLauncher(Bundle startActivityOptions) {
+            // starting a shortcut implies the user's consent, so grant the launchers/senders BAL
+            // privileges (unless the caller explicitly defined the behavior)
+            if (startActivityOptions == null) {
+                return ActivityOptions.makeBasic().setPendingIntentBackgroundActivityStartMode(
+                                MODE_BACKGROUND_ACTIVITY_START_ALLOWED).toBundle();
+            }
+            ActivityOptions activityOptions = ActivityOptions.fromBundle(startActivityOptions);
+            if (activityOptions.getPendingIntentBackgroundActivityStartMode()
+                    == MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED) {
+                // only override if the property was not explicitly set
+                return activityOptions.setPendingIntentBackgroundActivityStartMode(
+                        MODE_BACKGROUND_ACTIVITY_START_ALLOWED).toBundle();
+            }
+            return startActivityOptions;
         }
 
         @Override
@@ -1216,8 +1236,8 @@ public class LauncherAppsService extends SystemService {
             i.setSourceBounds(sourceBounds);
 
             mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage,
-                    callingFeatureId, i, /* resultTo= */ null, Intent.FLAG_ACTIVITY_NEW_TASK, opts,
-                    userId);
+                    callingFeatureId, i, /* resultTo= */ null, Intent.FLAG_ACTIVITY_NEW_TASK,
+                    getActivityOptionsForLauncher(opts), userId);
         }
 
         @Override
@@ -1264,7 +1284,8 @@ public class LauncherAppsService extends SystemService {
 
             mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage,
                     callingFeatureId, launchIntent, /* resultTo= */ null,
-                    Intent.FLAG_ACTIVITY_NEW_TASK, opts, user.getIdentifier());
+                    Intent.FLAG_ACTIVITY_NEW_TASK, getActivityOptionsForLauncher(opts),
+                    user.getIdentifier());
         }
 
         /**
@@ -1347,7 +1368,7 @@ public class LauncherAppsService extends SystemService {
             }
             mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage,
                     callingFeatureId, intent, /* resultTo= */ null, Intent.FLAG_ACTIVITY_NEW_TASK,
-                    opts, user.getIdentifier());
+                    getActivityOptionsForLauncher(opts), user.getIdentifier());
         }
 
         /** Checks if user is a profile of or same as listeningUser.
@@ -1358,10 +1379,19 @@ public class LauncherAppsService extends SystemService {
                     user.getIdentifier(), debugMsg, false);
         }
 
-        /** Returns whether or not the result to the listener should be filtered. */
-        private boolean isPackageVisibleToListener(String packageName, BroadcastCookie cookie) {
+        /**
+         * Returns whether or not the result to the listener should be filtered.
+         *
+         * @param packageName The package to be accessed by the listener.
+         * @param cookie      The listener
+         * @param user        The user where the package resides.
+         */
+        private boolean isPackageVisibleToListener(String packageName, BroadcastCookie cookie,
+                UserHandle user) {
+            // Do not filter the uninstalled package access since it might break callbacks such as
+            // shortcut changes and unavailable packages events.
             return !mPackageManagerInternal.filterAppAccess(packageName, cookie.callingUid,
-                    cookie.user.getIdentifier());
+                    user.getIdentifier(), false /* filterUninstalled */);
         }
 
         /** Returns whether or not the given appId is in allow list */
@@ -1372,10 +1402,11 @@ public class LauncherAppsService extends SystemService {
             return Arrays.binarySearch(appIdAllowList, appId) > -1;
         }
 
-        private String[] getFilteredPackageNames(String[] packageNames, BroadcastCookie cookie) {
+        private String[] getFilteredPackageNames(String[] packageNames, BroadcastCookie cookie,
+                UserHandle user) {
             final List<String> filteredPackageNames = new ArrayList<>();
             for (String packageName : packageNames) {
-                if (!isPackageVisibleToListener(packageName, cookie)) {
+                if (!isPackageVisibleToListener(packageName, cookie, user)) {
                     continue;
                 }
                 filteredPackageNames.add(packageName);
@@ -1619,7 +1650,7 @@ public class LauncherAppsService extends SystemService {
                         if (!isEnabledProfileOf(cookie.user, user, "onPackageAdded")) {
                             continue;
                         }
-                        if (!isPackageVisibleToListener(packageName, cookie)) {
+                        if (!isPackageVisibleToListener(packageName, cookie, user)) {
                             continue;
                         }
                         try {
@@ -1653,7 +1684,7 @@ public class LauncherAppsService extends SystemService {
                         if (!isEnabledProfileOf(cookie.user, user, "onPackageModified")) {
                             continue;
                         }
-                        if (!isPackageVisibleToListener(packageName, cookie)) {
+                        if (!isPackageVisibleToListener(packageName, cookie, user)) {
                             continue;
                         }
                         try {
@@ -1678,7 +1709,8 @@ public class LauncherAppsService extends SystemService {
                         if (!isEnabledProfileOf(cookie.user, user, "onPackagesAvailable")) {
                             continue;
                         }
-                        final String[] filteredPackages = getFilteredPackageNames(packages, cookie);
+                        final String[] filteredPackages =
+                                getFilteredPackageNames(packages, cookie, user);
                         // If all packages are filtered, skip notifying listener.
                         if (ArrayUtils.isEmpty(filteredPackages)) {
                             continue;
@@ -1707,7 +1739,8 @@ public class LauncherAppsService extends SystemService {
                         if (!isEnabledProfileOf(cookie.user, user, "onPackagesUnavailable")) {
                             continue;
                         }
-                        final String[] filteredPackages = getFilteredPackageNames(packages, cookie);
+                        final String[] filteredPackages =
+                                getFilteredPackageNames(packages, cookie, user);
                         // If all packages are filtered, skip notifying listener.
                         if (ArrayUtils.isEmpty(filteredPackages)) {
                             continue;
@@ -1751,7 +1784,7 @@ public class LauncherAppsService extends SystemService {
                             continue;
                         }
                         final String[] filteredPackagesWithoutExtras =
-                                getFilteredPackageNames(packagesNullExtras, cookie);
+                                getFilteredPackageNames(packagesNullExtras, cookie, user);
                         try {
                             if (!ArrayUtils.isEmpty(filteredPackagesWithoutExtras)) {
                                 listener.onPackagesSuspended(user, filteredPackagesWithoutExtras,
@@ -1759,7 +1792,8 @@ public class LauncherAppsService extends SystemService {
                             }
                             for (int idx = 0; idx < packagesWithExtras.size(); idx++) {
                                 Pair<String, Bundle> packageExtraPair = packagesWithExtras.get(idx);
-                                if (!isPackageVisibleToListener(packageExtraPair.first, cookie)) {
+                                if (!isPackageVisibleToListener(
+                                        packageExtraPair.first, cookie, user)) {
                                     continue;
                                 }
                                 listener.onPackagesSuspended(user,
@@ -1786,7 +1820,8 @@ public class LauncherAppsService extends SystemService {
                         if (!isEnabledProfileOf(cookie.user, user, "onPackagesUnsuspended")) {
                             continue;
                         }
-                        final String[] filteredPackages = getFilteredPackageNames(packages, cookie);
+                        final String[] filteredPackages =
+                                getFilteredPackageNames(packages, cookie, user);
                         // If all packages are filtered, skip notifying listener.
                         if (ArrayUtils.isEmpty(filteredPackages)) {
                             continue;
@@ -1822,7 +1857,7 @@ public class LauncherAppsService extends SystemService {
                         if (!isEnabledProfileOf(cookie.user, user, "onShortcutChanged")) {
                             continue;
                         }
-                        if (!isPackageVisibleToListener(packageName, cookie)) {
+                        if (!isPackageVisibleToListener(packageName, cookie, user)) {
                             continue;
                         }
                         final int launcherUserId = cookie.user.getIdentifier();
@@ -1896,7 +1931,7 @@ public class LauncherAppsService extends SystemService {
                         if (!isEnabledProfileOf(cookie.user, mUser, "onLoadingProgressChanged")) {
                             continue;
                         }
-                        if (!isPackageVisibleToListener(mPackageName, cookie)) {
+                        if (!isPackageVisibleToListener(mPackageName, cookie, mUser)) {
                             continue;
                         }
                         try {

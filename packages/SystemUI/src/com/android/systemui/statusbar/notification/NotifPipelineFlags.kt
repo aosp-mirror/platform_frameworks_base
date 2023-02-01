@@ -17,44 +17,33 @@
 package com.android.systemui.statusbar.notification
 
 import android.content.Context
-import android.util.Log
-import android.widget.Toast
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.util.Compile
 import javax.inject.Inject
 
 class NotifPipelineFlags @Inject constructor(
     val context: Context,
     val featureFlags: FeatureFlags
 ) {
-    fun checkLegacyPipelineEnabled(): Boolean {
-        if (!isNewPipelineEnabled()) {
-            return true
-        }
-
-        if (Compile.IS_DEBUG) {
-            Toast.makeText(context, "Old pipeline code running!", Toast.LENGTH_SHORT).show()
-        }
-        if (featureFlags.isEnabled(Flags.NEW_PIPELINE_CRASH_ON_CALL_TO_OLD_PIPELINE)) {
-            throw RuntimeException("Old pipeline code running with new pipeline enabled")
-        } else {
-            Log.d("NotifPipeline", "Old pipeline code running with new pipeline enabled",
-                    Exception())
-        }
-        return false
+    init {
+        featureFlags.addListener(Flags.DISABLE_FSI) { event -> event.requestNoRestart() }
     }
-
-    fun assertLegacyPipelineEnabled(): Unit =
-        check(!isNewPipelineEnabled()) { "Old pipeline code running w/ new pipeline enabled" }
-
-    fun isNewPipelineEnabled(): Boolean =
-        featureFlags.isEnabled(Flags.NEW_NOTIFICATION_PIPELINE_RENDERING)
 
     fun isDevLoggingEnabled(): Boolean =
         featureFlags.isEnabled(Flags.NOTIFICATION_PIPELINE_DEVELOPER_LOGGING)
 
-    fun isSmartspaceDedupingEnabled(): Boolean =
-            featureFlags.isEnabled(Flags.SMARTSPACE) &&
-                    featureFlags.isEnabled(Flags.SMARTSPACE_DEDUPING)
+    fun fullScreenIntentRequiresKeyguard(): Boolean =
+        featureFlags.isEnabled(Flags.FSI_REQUIRES_KEYGUARD)
+
+    fun fsiOnDNDUpdate(): Boolean = featureFlags.isEnabled(Flags.FSI_ON_DND_UPDATE)
+
+    fun disableFsi(): Boolean = featureFlags.isEnabled(Flags.DISABLE_FSI)
+
+    val shouldFilterUnseenNotifsOnKeyguard: Boolean by lazy {
+        featureFlags.isEnabled(Flags.FILTER_UNSEEN_NOTIFS_ON_KEYGUARD)
+    }
+
+    val isNoHunForOldWhenEnabled: Boolean by lazy {
+        featureFlags.isEnabled(Flags.NO_HUN_FOR_OLD_WHEN)
+    }
 }

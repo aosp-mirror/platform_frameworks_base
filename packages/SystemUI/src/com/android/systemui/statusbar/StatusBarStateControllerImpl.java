@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar;
 
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_TRANSITION_FROM_AOD;
@@ -34,9 +32,10 @@ import android.util.FloatProperty;
 import android.util.Log;
 import android.view.Choreographer;
 import android.view.InsetsFlags;
-import android.view.InsetsVisibilities;
 import android.view.View;
 import android.view.ViewDebug;
+import android.view.WindowInsets;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 import android.view.animation.Interpolator;
@@ -54,6 +53,7 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.policy.CallbackController;
 
@@ -128,6 +128,11 @@ public class StatusBarStateControllerImpl implements
     private boolean mIsDozing;
 
     /**
+     * If the device is currently dreaming or not.
+     */
+    private boolean mIsDreaming;
+
+    /**
      * If the status bar is currently expanded or not.
      */
     private boolean mIsExpanded;
@@ -153,13 +158,18 @@ public class StatusBarStateControllerImpl implements
     private Interpolator mDozeInterpolator = Interpolators.FAST_OUT_SLOW_IN;
 
     @Inject
-    public StatusBarStateControllerImpl(UiEventLogger uiEventLogger, DumpManager dumpManager,
-            InteractionJankMonitor interactionJankMonitor) {
+    public StatusBarStateControllerImpl(
+            UiEventLogger uiEventLogger,
+            DumpManager dumpManager,
+            InteractionJankMonitor interactionJankMonitor,
+            ShadeExpansionStateManager shadeExpansionStateManager
+    ) {
         mUiEventLogger = uiEventLogger;
         mInteractionJankMonitor = interactionJankMonitor;
         for (int i = 0; i < HISTORY_SIZE; i++) {
             mHistoricalRecords[i] = new HistoricalState();
         }
+        shadeExpansionStateManager.addFullExpansionListener(this::onShadeExpansionFullyChanged);
 
         dumpManager.registerDumpable(this);
     }
@@ -263,21 +273,6 @@ public class StatusBarStateControllerImpl implements
     }
 
     @Override
-    public boolean setPanelExpanded(boolean expanded) {
-        if (mIsExpanded == expanded) {
-            return false;
-        }
-        mIsExpanded = expanded;
-        String tag = getClass().getSimpleName() + "#setIsExpanded";
-        DejankUtils.startDetectingBlockingIpcs(tag);
-        for (RankedListener rl : new ArrayList<>(mListeners)) {
-            rl.mListener.onExpandedChanged(mIsExpanded);
-        }
-        DejankUtils.stopDetectingBlockingIpcs(tag);
-        return true;
-    }
-
-    @Override
     public float getInterpolatedDozeAmount() {
         return mDozeInterpolator.getInterpolation(mDozeAmount);
     }
@@ -303,8 +298,26 @@ public class StatusBarStateControllerImpl implements
     }
 
     @Override
-    public void setDozeAmount(float dozeAmount, boolean animated) {
-        setAndInstrumentDozeAmount(null, dozeAmount, animated);
+    public boolean setIsDreaming(boolean isDreaming) {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "setIsDreaming:" + isDreaming);
+        }
+        if (mIsDreaming == isDreaming) {
+            return false;
+        }
+
+        mIsDreaming = isDreaming;
+
+        synchronized (mListeners) {
+            String tag = getClass().getSimpleName() + "#setIsDreaming";
+            DejankUtils.startDetectingBlockingIpcs(tag);
+            for (RankedListener rl : new ArrayList<>(mListeners)) {
+                rl.mListener.onDreamingChanged(isDreaming);
+            }
+            DejankUtils.stopDetectingBlockingIpcs(tag);
+        }
+
+        return true;
     }
 
     @Override
@@ -327,6 +340,18 @@ public class StatusBarStateControllerImpl implements
             startDozeAnimation();
         } else {
             setDozeAmountInternal(dozeAmount);
+        }
+    }
+
+    private void onShadeExpansionFullyChanged(Boolean isExpanded) {
+        if (mIsExpanded != isExpanded) {
+            mIsExpanded = isExpanded;
+            String tag = getClass().getSimpleName() + "#setIsExpanded";
+            DejankUtils.startDetectingBlockingIpcs(tag);
+            for (RankedListener rl : new ArrayList<>(mListeners)) {
+                rl.mListener.onExpandedChanged(mIsExpanded);
+            }
+            DejankUtils.stopDetectingBlockingIpcs(tag);
         }
     }
 
@@ -502,9 +527,9 @@ public class StatusBarStateControllerImpl implements
 
     @Override
     public void setSystemBarAttributes(@Appearance int appearance, @Behavior int behavior,
-            InsetsVisibilities requestedVisibilities, String packageName) {
-        boolean isFullscreen = !requestedVisibilities.getVisibility(ITYPE_STATUS_BAR)
-                || !requestedVisibilities.getVisibility(ITYPE_NAVIGATION_BAR);
+            @InsetsType int requestedVisibleTypes, String packageName) {
+        boolean isFullscreen = (requestedVisibleTypes & WindowInsets.Type.statusBars()) == 0
+                || (requestedVisibleTypes & WindowInsets.Type.navigationBars()) == 0;
         if (mIsFullscreen != isFullscreen) {
             mIsFullscreen = isFullscreen;
             synchronized (mListeners) {
@@ -519,12 +544,12 @@ public class StatusBarStateControllerImpl implements
         if (DEBUG_IMMERSIVE_APPS) {
             boolean dim = (appearance & APPEARANCE_LOW_PROFILE_BARS) != 0;
             String behaviorName = ViewDebug.flagsToString(InsetsFlags.class, "behavior", behavior);
-            String requestedVisibilityString = requestedVisibilities.toString();
-            if (requestedVisibilityString.isEmpty()) {
-                requestedVisibilityString = "none";
+            String requestedVisibleTypesString = WindowInsets.Type.toString(requestedVisibleTypes);
+            if (requestedVisibleTypesString.isEmpty()) {
+                requestedVisibleTypesString = "none";
             }
             Log.d(TAG, packageName + " dim=" + dim + " behavior=" + behaviorName
-                    + " requested visibilities: " + requestedVisibilityString);
+                    + " requested visible types: " + requestedVisibleTypesString);
         }
     }
 

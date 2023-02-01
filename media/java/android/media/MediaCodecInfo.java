@@ -981,8 +981,20 @@ public final class MediaCodecInfo {
                     continue;
                 }
 
-                // AAC does not use levels
-                if (level == null || mMime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_AAC)) {
+                // No specific level requested
+                if (level == null) {
+                    return true;
+                }
+
+                // AAC doesn't use levels
+                if (mMime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_AAC)) {
+                    return true;
+                }
+
+                // DTS doesn't use levels
+                if (mMime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_DTS)
+                        || mMime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_DTS_HD)
+                        || mMime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_DTS_UHD)) {
                     return true;
                 }
 
@@ -1410,6 +1422,7 @@ public final class MediaCodecInfo {
             int[] sampleRates = null;
             Range<Integer> sampleRateRange = null, bitRates = null;
             int maxChannels = MAX_INPUT_CHANNEL_COUNT;
+            CodecProfileLevel[] profileLevels = mParent.profileLevels;
             String mime = mParent.getMimeType();
 
             if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_MPEG)) {
@@ -1445,7 +1458,7 @@ public final class MediaCodecInfo {
                 sampleRates = new int[] { 8000, 12000, 16000, 24000, 48000 };
                 maxChannels = 255;
             } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_RAW)) {
-                sampleRateRange = Range.create(1, 96000);
+                sampleRateRange = Range.create(1, 192000);
                 bitRates = Range.create(1, 10000000);
                 maxChannels = AudioSystem.OUT_CHANNEL_COUNT_MAX;
             } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_FLAC)) {
@@ -1473,6 +1486,53 @@ public final class MediaCodecInfo {
                 sampleRates = new int[] { 44100, 48000, 96000, 192000 };
                 bitRates = Range.create(16000, 2688000);
                 maxChannels = 24;
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_DTS)) {
+                sampleRates = new int[] { 44100, 48000 };
+                bitRates = Range.create(96000, 1524000);
+                maxChannels = 6;
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_DTS_HD)) {
+                for (CodecProfileLevel profileLevel: profileLevels) {
+                    switch (profileLevel.profile) {
+                        case CodecProfileLevel.DTS_HDProfileLBR:
+                            sampleRates = new int[]{ 22050, 24000, 44100, 48000 };
+                            bitRates = Range.create(32000, 768000);
+                            break;
+                        case CodecProfileLevel.DTS_HDProfileHRA:
+                        case CodecProfileLevel.DTS_HDProfileMA:
+                            sampleRates = new int[]{ 44100, 48000, 88200, 96000, 176400, 192000 };
+                            bitRates = Range.create(96000, 24500000);
+                            break;
+                        default:
+                            Log.w(TAG, "Unrecognized profile "
+                                    + profileLevel.profile + " for " + mime);
+                            mParent.mError |= ERROR_UNRECOGNIZED;
+                            sampleRates = new int[]{ 44100, 48000, 88200, 96000, 176400, 192000 };
+                            bitRates = Range.create(96000, 24500000);
+                    }
+                }
+                maxChannels = 8;
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_DTS_UHD)) {
+                for (CodecProfileLevel profileLevel: profileLevels) {
+                    switch (profileLevel.profile) {
+                        case CodecProfileLevel.DTS_UHDProfileP2:
+                            sampleRates = new int[]{ 48000 };
+                            bitRates = Range.create(96000, 768000);
+                            maxChannels = 10;
+                            break;
+                        case CodecProfileLevel.DTS_UHDProfileP1:
+                            sampleRates = new int[]{ 44100, 48000, 88200, 96000, 176400, 192000 };
+                            bitRates = Range.create(96000, 24500000);
+                            maxChannels = 32;
+                            break;
+                        default:
+                            Log.w(TAG, "Unrecognized profile "
+                                    + profileLevel.profile + " for " + mime);
+                            mParent.mError |= ERROR_UNRECOGNIZED;
+                            sampleRates = new int[]{ 44100, 48000, 88200, 96000, 176400, 192000 };
+                            bitRates = Range.create(96000, 24500000);
+                            maxChannels = 32;
+                    }
+                }
             } else {
                 Log.w(TAG, "Unsupported mime " + mime);
                 mParent.mError |= ERROR_UNSUPPORTED;
@@ -4105,6 +4165,22 @@ public final class MediaCodecInfo {
         public static final int AV1Level71      = 0x200000;
         public static final int AV1Level72      = 0x400000;
         public static final int AV1Level73      = 0x800000;
+
+        /** DTS codec profile for DTS HRA. */
+        @SuppressLint("AllUpper")
+        public static final int DTS_HDProfileHRA = 0x1;
+        /** DTS codec profile for DTS Express. */
+        @SuppressLint("AllUpper")
+        public static final int DTS_HDProfileLBR = 0x2;
+        /** DTS codec profile for DTS-HD Master Audio */
+        @SuppressLint("AllUpper")
+        public static final int DTS_HDProfileMA = 0x4;
+        /** DTS codec profile for DTS:X Profile 1 */
+        @SuppressLint("AllUpper")
+        public static final int DTS_UHDProfileP1 = 0x1;
+        /** DTS codec profile for DTS:X Profile 2 */
+        @SuppressLint("AllUpper")
+        public static final int DTS_UHDProfileP2 = 0x2;
 
         /**
          * The profile of the media content. Depending on the type of media this can be

@@ -39,6 +39,7 @@ import android.content.LocusId;
 import android.content.pm.Capability;
 import android.content.pm.CapabilityParams;
 import android.content.pm.ShortcutInfo;
+import android.content.pm.UserPackage;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Icon;
@@ -51,7 +52,6 @@ import android.test.MoreAsserts;
 import androidx.test.filters.SmallTest;
 
 import com.android.frameworks.servicestests.R;
-import com.android.server.pm.ShortcutUser.PackageWithUser;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -2413,7 +2413,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
             assertWith(mManager.getDynamicShortcuts()).isEmpty();
         });
         // Make package 1 ephemeral.
-        mEphemeralPackages.add(PackageWithUser.of(USER_0, CALLING_PACKAGE_1));
+        mEphemeralPackages.add(UserPackage.of(USER_0, CALLING_PACKAGE_1));
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertExpectException(IllegalStateException.class, "Ephemeral apps", () -> {

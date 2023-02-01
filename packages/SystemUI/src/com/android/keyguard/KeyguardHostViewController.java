@@ -21,7 +21,6 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.media.AudioManager;
 import android.os.SystemClock;
-import android.service.trust.TrustAgentService;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.MathUtils;
@@ -30,6 +29,9 @@ import android.view.View;
 import android.view.View.OnKeyListener;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
+import android.window.OnBackAnimationCallback;
+
+import androidx.annotation.NonNull;
 
 import com.android.keyguard.KeyguardSecurityContainer.SecurityCallback;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
@@ -68,30 +70,28 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
     private final KeyguardUpdateMonitorCallback mUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
-                public void onTrustGrantedWithFlags(int flags, int userId) {
-                    if (userId != KeyguardUpdateMonitor.getCurrentUser()) return;
-                    boolean bouncerVisible = mView.isVisibleToUser();
-                    boolean temporaryAndRenewable =
-                            (flags & TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE)
-                            != 0;
-                    boolean initiatedByUser =
-                            (flags & TrustAgentService.FLAG_GRANT_TRUST_INITIATED_BY_USER) != 0;
-                    boolean dismissKeyguard =
-                            (flags & TrustAgentService.FLAG_GRANT_TRUST_DISMISS_KEYGUARD) != 0;
-
-                    if (initiatedByUser || dismissKeyguard) {
-                        if ((mViewMediatorCallback.isScreenOn() || temporaryAndRenewable)
-                                && (bouncerVisible || dismissKeyguard)) {
-                            if (!bouncerVisible) {
-                                // The trust agent dismissed the keyguard without the user proving
-                                // that they are present (by swiping up to show the bouncer). That's
-                                // fine if the user proved presence via some other way to the trust
-                                //agent.
-                                Log.i(TAG, "TrustAgent dismissed Keyguard.");
-                            }
-                            mSecurityCallback.dismiss(false /* authenticated */, userId,
-                                    /* bypassSecondaryLockScreen */ false);
-                        } else {
+                public void onTrustGrantedForCurrentUser(
+                        boolean dismissKeyguard,
+                        boolean newlyUnlocked,
+                        TrustGrantFlags flags,
+                        String message
+                ) {
+                    if (dismissKeyguard) {
+                        if (!mView.isVisibleToUser()) {
+                            // The trust agent dismissed the keyguard without the user proving
+                            // that they are present (by swiping up to show the bouncer). That's
+                            // fine if the user proved presence via some other way to the trust
+                            // agent.
+                            Log.i(TAG, "TrustAgent dismissed Keyguard.");
+                        }
+                        mSecurityCallback.dismiss(
+                                false /* authenticated */,
+                                KeyguardUpdateMonitor.getCurrentUser(),
+                                /* bypassSecondaryLockScreen */ false,
+                                SecurityMode.Invalid
+                        );
+                    } else {
+                        if (flags.isInitiatedByUser() || flags.dismissKeyguardRequested()) {
                             mViewMediatorCallback.playTrustedSound();
                         }
                     }
@@ -102,9 +102,9 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
 
         @Override
         public boolean dismiss(boolean authenticated, int targetUserId,
-                boolean bypassSecondaryLockScreen) {
+                boolean bypassSecondaryLockScreen, SecurityMode expectedSecurityMode) {
             return mKeyguardSecurityContainerController.showNextSecurityScreenOrFinish(
-                    authenticated, targetUserId, bypassSecondaryLockScreen);
+                    authenticated, targetUserId, bypassSecondaryLockScreen, expectedSecurityMode);
         }
 
         @Override
@@ -212,7 +212,8 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
      * @return True if the keyguard is done.
      */
     public boolean dismiss(int targetUserId) {
-        return mSecurityCallback.dismiss(false, targetUserId, false);
+        return mSecurityCallback.dismiss(false, targetUserId, false,
+                getCurrentSecurityMode());
     }
 
     /**
@@ -336,6 +337,11 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
         mKeyguardSecurityContainerController.onStartingToHide();
     }
 
+    /** Called when bouncer visibility changes. */
+    public void onBouncerVisibilityChanged(@View.Visibility int visibility) {
+        mKeyguardSecurityContainerController.onBouncerVisibilityChanged(visibility);
+    }
+
     public boolean hasDismissActions() {
         return mDismissAction != null || mCancelAction != null;
     }
@@ -355,10 +361,10 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
     }
 
     public boolean handleBackKey() {
-        if (mKeyguardSecurityContainerController.getCurrentSecurityMode()
-                != SecurityMode.None) {
+        SecurityMode securityMode = mKeyguardSecurityContainerController.getCurrentSecurityMode();
+        if (securityMode != SecurityMode.None) {
             mKeyguardSecurityContainerController.dismiss(
-                    false, KeyguardUpdateMonitor.getCurrentUser());
+                    false, KeyguardUpdateMonitor.getCurrentUser(), securityMode);
             return true;
         }
         return false;
@@ -388,6 +394,14 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
             return true;
         }
         return false;
+    }
+
+    /**
+     * @return the {@link OnBackAnimationCallback} to animate this view during a back gesture.
+     */
+    @NonNull
+    public OnBackAnimationCallback getBackCallback() {
+        return mKeyguardSecurityContainerController.getBackCallback();
     }
 
     /**
@@ -512,5 +526,10 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
         if (mKeyguardSecurityContainerController != null) {
             mKeyguardSecurityContainerController.updateKeyguardPosition(x);
         }
+    }
+
+    /** Set true if the view can be interacted with */
+    public void setInteractable(boolean isInteractable) {
+        mView.setInteractable(isInteractable);
     }
 }

@@ -8,10 +8,16 @@
     <string name="portal_notification_detail" msgid="2295729385924660881">"Toca para acceder al sitio web de %s"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"Ponte en contacto con tu proveedor de servicios (%s)"</string>
     <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Sin conexión de datos móviles"</string>
-    <string name="no_mobile_data_connection" msgid="544980465184147010">"Añade un plan de datos o de itinerancia a través de %s"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"Añade un plan de datos o de roaming a través de %s"</string>
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Estado de la conexión de datos móviles"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"Iniciar sesión en una red móvil"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"La red a la que intentas unirte tiene problemas de seguridad."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"Por ejemplo, es posible que la página de inicio de sesión no pertenezca a la organización mostrada."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"Continuar de todos modos a través del navegador"</string>
+    <string name="performance_boost_notification_channel" msgid="3475440855635538592">"Mejora de rendimiento"</string>
+    <string name="performance_boost_notification_title" msgid="946857427149305992">"Mejora tu experiencia 5G"</string>
+    <string name="performance_boost_notification_detail" msgid="362407668982648351">"%1$s recomienda comprar un plan de mejora del rendimiento. Toca para comprarlo mediante %2$s."</string>
+    <string name="performance_boost_notification_button_not_now" msgid="6459755324243683785">"Ahora no"</string>
+    <string name="performance_boost_notification_button_manage" msgid="4976836444046497973">"Gestionar"</string>
+    <string name="slice_purchase_app_label" msgid="7170191659233241166">"Comprar una mejora de rendimiento."</string>
 </resources>

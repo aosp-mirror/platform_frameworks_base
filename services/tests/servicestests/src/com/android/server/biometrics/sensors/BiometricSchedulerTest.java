@@ -16,7 +16,8 @@
 
 package com.android.server.biometrics.sensors;
 
-import static android.testing.TestableLooper.RunWithLooper;
+import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_ERROR_CANCELED;
+import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_SUCCESS;
 
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
@@ -24,17 +25,19 @@ import static junit.framework.Assert.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.withSettings;
 
 import android.content.Context;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.IBiometricService;
 import android.os.Binder;
@@ -63,46 +66,50 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.function.Supplier;
 
 @Presubmit
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper(setAsMainLooper = true)
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class BiometricSchedulerTest {
 
     private static final String TAG = "BiometricSchedulerTest";
     private static final int TEST_SENSOR_ID = 1;
     private static final int LOG_NUM_RECENT_OPERATIONS = 2;
-
+    @Rule
+    public final TestableContext mContext = new TestableContext(
+            InstrumentationRegistry.getContext(), null);
     private BiometricScheduler mScheduler;
     private IBinder mToken;
-
     @Mock
     private IBiometricService mBiometricService;
-
-    @Rule
-    public final TestableContext mContext =
-            new TestableContext(InstrumentationRegistry.getContext(), null);
+    @Mock
+    private BiometricContext mBiometricContext;
+    @Mock
+    private AuthSessionCoordinator mAuthSessionCoordinator;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mToken = new Binder();
+        when(mAuthSessionCoordinator.getLockoutStateFor(anyInt(), anyInt())).thenReturn(
+                BIOMETRIC_SUCCESS);
+        when(mBiometricContext.getAuthSessionCoordinator()).thenReturn(mAuthSessionCoordinator);
         mScheduler = new BiometricScheduler(TAG, new Handler(TestableLooper.get(this).getLooper()),
                 BiometricScheduler.SENSOR_TYPE_UNKNOWN, null /* gestureAvailabilityTracker */,
-                mBiometricService, LOG_NUM_RECENT_OPERATIONS,
-                CoexCoordinator.getInstance());
+                mBiometricService, LOG_NUM_RECENT_OPERATIONS);
     }
 
     @Test
     public void testClientDuplicateFinish_ignoredBySchedulerAndDoesNotCrash() {
         final Supplier<Object> nonNullDaemon = () -> mock(Object.class);
 
-        final HalClientMonitor<Object> client1 =
-                new TestHalClientMonitor(mContext, mToken, nonNullDaemon);
-        final HalClientMonitor<Object> client2 =
-                new TestHalClientMonitor(mContext, mToken, nonNullDaemon);
+        final HalClientMonitor<Object> client1 = new TestHalClientMonitor(mContext, mToken,
+                nonNullDaemon);
+        final HalClientMonitor<Object> client2 = new TestHalClientMonitor(mContext, mToken,
+                nonNullDaemon);
         mScheduler.scheduleClientMonitor(client1);
         mScheduler.scheduleClientMonitor(client2);
 
@@ -113,10 +120,9 @@ public class BiometricSchedulerTest {
     @Test
     public void testRemovesPendingOperations_whenNullHal_andNotBiometricPrompt() {
         // Even if second client has a non-null daemon, it needs to be canceled.
-        final TestHalClientMonitor client1 = new TestHalClientMonitor(
-                mContext, mToken, () -> null);
-        final TestHalClientMonitor client2 = new TestHalClientMonitor(
-                mContext, mToken, () -> mock(Object.class));
+        final TestHalClientMonitor client1 = new TestHalClientMonitor(mContext, mToken, () -> null);
+        final TestHalClientMonitor client2 = new TestHalClientMonitor(mContext, mToken,
+                () -> mock(Object.class));
 
         final ClientMonitorCallback callback1 = mock(ClientMonitorCallback.class);
         final ClientMonitorCallback callback2 = mock(ClientMonitorCallback.class);
@@ -151,10 +157,10 @@ public class BiometricSchedulerTest {
 
         final ClientMonitorCallbackConverter listener1 = mock(ClientMonitorCallbackConverter.class);
 
-        final TestAuthenticationClient client1 =
-                new TestAuthenticationClient(mContext, () -> null, mToken, listener1);
-        final TestHalClientMonitor client2 =
-                new TestHalClientMonitor(mContext, mToken, () -> daemon2);
+        final TestAuthenticationClient client1 = new TestAuthenticationClient(mContext, () -> null,
+                mToken, listener1, mBiometricContext);
+        final TestHalClientMonitor client2 = new TestHalClientMonitor(mContext, mToken,
+                () -> daemon2);
 
         final ClientMonitorCallback callback1 = mock(ClientMonitorCallback.class);
         final ClientMonitorCallback callback2 = mock(ClientMonitorCallback.class);
@@ -189,15 +195,15 @@ public class BiometricSchedulerTest {
     @Test
     public void testCancelNotInvoked_whenOperationWaitingForCookie() {
         final Supplier<Object> lazyDaemon1 = () -> mock(Object.class);
-        final TestAuthenticationClient client1 = new TestAuthenticationClient(mContext,
-                lazyDaemon1, mToken, mock(ClientMonitorCallbackConverter.class));
+        final TestAuthenticationClient client1 = new TestAuthenticationClient(mContext, lazyDaemon1,
+                mToken, mock(ClientMonitorCallbackConverter.class), mBiometricContext);
         final ClientMonitorCallback callback1 = mock(ClientMonitorCallback.class);
 
         // Schedule a BiometricPrompt authentication request
         mScheduler.scheduleClientMonitor(client1, callback1);
 
-        assertNotEquals(0, mScheduler.mCurrentOperation.isReadyToStart(
-                mock(ClientMonitorCallback.class)));
+        assertNotEquals(0,
+                mScheduler.mCurrentOperation.isReadyToStart(mock(ClientMonitorCallback.class)));
         assertEquals(client1, mScheduler.mCurrentOperation.getClientMonitor());
         assertEquals(0, mScheduler.mPendingOperations.size());
 
@@ -305,7 +311,7 @@ public class BiometricSchedulerTest {
         final TestHalClientMonitor client1 = new TestHalClientMonitor(mContext, mToken, lazyDaemon);
         final ClientMonitorCallbackConverter callback = mock(ClientMonitorCallbackConverter.class);
         final TestAuthenticationClient client2 = new TestAuthenticationClient(mContext, lazyDaemon,
-                mToken, callback);
+                mToken, callback, mBiometricContext);
 
         // Add a non-cancellable client, then add the auth client
         mScheduler.scheduleClientMonitor(client1);
@@ -324,7 +330,7 @@ public class BiometricSchedulerTest {
         client1.getCallback().onClientFinished(client1, true /* success */);
         waitForIdle();
         verify(callback).onError(anyInt(), anyInt(),
-                eq(BiometricConstants.BIOMETRIC_ERROR_CANCELED),
+                eq(BIOMETRIC_ERROR_CANCELED),
                 eq(0) /* vendorCode */);
         assertNull(mScheduler.getCurrentClient());
         assertTrue(client1.isAlreadyDone());
@@ -368,7 +374,8 @@ public class BiometricSchedulerTest {
         final Supplier<Object> lazyDaemon = () -> mock(Object.class);
         final ClientMonitorCallbackConverter callback = mock(ClientMonitorCallbackConverter.class);
         testCancelsWhenRequestId(requestId, cancelRequestId, started,
-                new TestAuthenticationClient(mContext, lazyDaemon, mToken, callback));
+                new TestAuthenticationClient(mContext, lazyDaemon, mToken, callback,
+                        mBiometricContext));
     }
 
     @Test
@@ -449,11 +456,11 @@ public class BiometricSchedulerTest {
         final long requestId2 = 20;
         final Supplier<Object> lazyDaemon = () -> mock(Object.class);
         final ClientMonitorCallbackConverter callback = mock(ClientMonitorCallbackConverter.class);
-        final TestAuthenticationClient client1 = new TestAuthenticationClient(
-                mContext, lazyDaemon, mToken, callback);
+        final TestAuthenticationClient client1 = new TestAuthenticationClient(mContext, lazyDaemon,
+                mToken, callback, mBiometricContext);
         client1.setRequestId(requestId1);
-        final TestAuthenticationClient client2 = new TestAuthenticationClient(
-                mContext, lazyDaemon, mToken, callback);
+        final TestAuthenticationClient client2 = new TestAuthenticationClient(mContext, lazyDaemon,
+                mToken, callback, mBiometricContext);
         client2.setRequestId(requestId2);
 
         mScheduler.scheduleClientMonitor(client1);
@@ -475,8 +482,8 @@ public class BiometricSchedulerTest {
 
     @Test
     public void testInterruptPrecedingClients_whenExpected() {
-        final BaseClientMonitor interruptableMonitor = mock(BaseClientMonitor.class,
-                withSettings().extraInterfaces(Interruptable.class));
+        final BaseClientMonitor interruptableMonitor = mock(BaseClientMonitor.class);
+        when(interruptableMonitor.isInterruptable()).thenReturn(true);
 
         final BaseClientMonitor interrupter = mock(BaseClientMonitor.class);
         when(interrupter.interruptsPrecedingClients()).thenReturn(true);
@@ -485,14 +492,14 @@ public class BiometricSchedulerTest {
         mScheduler.scheduleClientMonitor(interrupter);
         waitForIdle();
 
-        verify((Interruptable) interruptableMonitor).cancel();
+        verify(interruptableMonitor).cancel();
         mScheduler.getInternalCallback().onClientFinished(interruptableMonitor, true /* success */);
     }
 
     @Test
     public void testDoesNotInterruptPrecedingClients_whenNotExpected() {
-        final BaseClientMonitor interruptableMonitor = mock(BaseClientMonitor.class,
-                withSettings().extraInterfaces(Interruptable.class));
+        final BaseClientMonitor interruptableMonitor = mock(BaseClientMonitor.class);
+        when(interruptableMonitor.isInterruptable()).thenReturn(true);
 
         final BaseClientMonitor interrupter = mock(BaseClientMonitor.class);
         when(interrupter.interruptsPrecedingClients()).thenReturn(false);
@@ -501,22 +508,177 @@ public class BiometricSchedulerTest {
         mScheduler.scheduleClientMonitor(interrupter);
         waitForIdle();
 
-        verify((Interruptable) interruptableMonitor, never()).cancel();
+        verify(interruptableMonitor, never()).cancel();
     }
 
     @Test
     public void testClientDestroyed_afterFinish() {
         final Supplier<Object> nonNullDaemon = () -> mock(Object.class);
-        final TestHalClientMonitor client =
-                new TestHalClientMonitor(mContext, mToken, nonNullDaemon);
+        final TestHalClientMonitor client = new TestHalClientMonitor(mContext, mToken,
+                nonNullDaemon);
         mScheduler.scheduleClientMonitor(client);
         client.mCallback.onClientFinished(client, true /* success */);
         waitForIdle();
         assertTrue(client.mDestroyed);
     }
 
+    @Test
+    public void testClearBiometricQueue_clearsHungAuthOperation() {
+        // Creating a hung client
+        final TestableLooper looper = TestableLooper.get(this);
+        final Supplier<Object> lazyDaemon1 = () -> mock(Object.class);
+        final TestAuthenticationClient client1 = new TestAuthenticationClient(mContext,
+                lazyDaemon1, mToken, mock(ClientMonitorCallbackConverter.class), 0 /* cookie */,
+                mBiometricContext);
+        final ClientMonitorCallback callback1 = mock(ClientMonitorCallback.class);
+
+        mScheduler.scheduleClientMonitor(client1, callback1);
+        waitForIdle();
+
+        mScheduler.startWatchdog();
+        waitForIdle();
+
+        //Checking client is hung
+        verify(callback1).onClientStarted(client1);
+        verify(callback1, never()).onClientFinished(any(), anyBoolean());
+        assertNotNull(mScheduler.mCurrentOperation);
+        assertEquals(0, mScheduler.getCurrentPendingCount());
+
+        looper.moveTimeForward(10000);
+        waitForIdle();
+        looper.moveTimeForward(3000);
+        waitForIdle();
+
+        // The hung client did not honor this operation, verify onError and authenticated
+        // were never called.
+        assertFalse(client1.mOnErrorCalled);
+        assertFalse(client1.mAuthenticateCalled);
+        verify(callback1).onClientFinished(client1, false /* success */);
+        assertNull(mScheduler.mCurrentOperation);
+        assertEquals(0, mScheduler.getCurrentPendingCount());
+    }
+
+    @Test
+    public void testAuthWorks_afterClearBiometricQueue() {
+        // Creating a hung client
+        final TestableLooper looper = TestableLooper.get(this);
+        final Supplier<Object> lazyDaemon1 = () -> mock(Object.class);
+        final TestAuthenticationClient client1 = new TestAuthenticationClient(mContext,
+                lazyDaemon1, mToken, mock(ClientMonitorCallbackConverter.class), 0 /* cookie */,
+                mBiometricContext);
+        final ClientMonitorCallback callback1 = mock(ClientMonitorCallback.class);
+
+        mScheduler.scheduleClientMonitor(client1, callback1);
+
+        assertEquals(client1, mScheduler.mCurrentOperation.getClientMonitor());
+        assertEquals(0, mScheduler.getCurrentPendingCount());
+
+        //Checking client is hung
+        waitForIdle();
+        verify(callback1, never()).onClientFinished(any(), anyBoolean());
+
+        //Start watchdog
+        mScheduler.startWatchdog();
+        waitForIdle();
+
+        // The watchdog should kick off the cancellation
+        looper.moveTimeForward(10000);
+        waitForIdle();
+        // After 10 seconds the HAL has 3 seconds to respond to a cancel
+        looper.moveTimeForward(3000);
+        waitForIdle();
+
+        // The hung client did not honor this operation, verify onError and authenticated
+        // were never called.
+        assertFalse(client1.mOnErrorCalled);
+        assertFalse(client1.mAuthenticateCalled);
+        verify(callback1).onClientFinished(client1, false /* success */);
+        assertEquals(0, mScheduler.getCurrentPendingCount());
+        assertNull(mScheduler.mCurrentOperation);
+
+
+        //Run additional auth client
+        final TestAuthenticationClient client2 = new TestAuthenticationClient(mContext,
+                lazyDaemon1, mToken, mock(ClientMonitorCallbackConverter.class), 0 /* cookie */,
+                mBiometricContext);
+        final ClientMonitorCallback callback2 = mock(ClientMonitorCallback.class);
+
+        mScheduler.scheduleClientMonitor(client2, callback2);
+
+        assertEquals(client2, mScheduler.mCurrentOperation.getClientMonitor());
+        assertEquals(0, mScheduler.getCurrentPendingCount());
+
+        //Start watchdog
+        mScheduler.startWatchdog();
+        waitForIdle();
+        mScheduler.scheduleClientMonitor(mock(BaseClientMonitor.class),
+                mock(ClientMonitorCallback.class));
+        waitForIdle();
+
+        //Ensure auth client passes
+        verify(callback2).onClientStarted(client2);
+        client2.getCallback().onClientFinished(client2, true);
+        waitForIdle();
+
+        looper.moveTimeForward(10000);
+        waitForIdle();
+        // After 10 seconds the HAL has 3 seconds to respond to a cancel
+        looper.moveTimeForward(3000);
+        waitForIdle();
+
+        //Asserting auth client passes
+        assertTrue(client2.isAlreadyDone());
+        assertNotNull(mScheduler.mCurrentOperation);
+    }
+
+    @Test
+    public void testClearBiometricQueue_doesNotClearOperationsWhenQueueNotStuck() {
+        //Creating clients
+        final TestableLooper looper = TestableLooper.get(this);
+        final Supplier<Object> lazyDaemon1 = () -> mock(Object.class);
+        final TestAuthenticationClient client1 = new TestAuthenticationClient(mContext,
+                lazyDaemon1, mToken, mock(ClientMonitorCallbackConverter.class), 0 /* cookie */,
+                mBiometricContext);
+        final ClientMonitorCallback callback1 = mock(ClientMonitorCallback.class);
+
+        mScheduler.scheduleClientMonitor(client1, callback1);
+        //Start watchdog
+        mScheduler.startWatchdog();
+        waitForIdle();
+        mScheduler.scheduleClientMonitor(mock(BaseClientMonitor.class),
+                mock(ClientMonitorCallback.class));
+        mScheduler.scheduleClientMonitor(mock(BaseClientMonitor.class),
+                mock(ClientMonitorCallback.class));
+        waitForIdle();
+
+        assertEquals(client1, mScheduler.mCurrentOperation.getClientMonitor());
+        assertEquals(2, mScheduler.getCurrentPendingCount());
+        verify(callback1, never()).onClientFinished(any(), anyBoolean());
+        verify(callback1).onClientStarted(client1);
+
+        //Client finishes successfully
+        client1.getCallback().onClientFinished(client1, true);
+        waitForIdle();
+
+        // The watchdog should kick off the cancellation
+        looper.moveTimeForward(10000);
+        waitForIdle();
+        // After 10 seconds the HAL has 3 seconds to respond to a cancel
+        looper.moveTimeForward(3000);
+        waitForIdle();
+
+        //Watchdog does not clear pending operations
+        assertEquals(1, mScheduler.getCurrentPendingCount());
+        assertNotNull(mScheduler.mCurrentOperation);
+
+    }
+
     private BiometricSchedulerProto getDump(boolean clearSchedulerBuffer) throws Exception {
         return BiometricSchedulerProto.parseFrom(mScheduler.dumpProtoState(clearSchedulerBuffer));
+    }
+
+    private void waitForIdle() {
+        TestableLooper.get(this).processAllMessages();
     }
 
     private static class TestAuthenticationClient extends AuthenticationClient<Object> {
@@ -524,16 +686,27 @@ public class BiometricSchedulerTest {
         boolean mStoppedHal = false;
         boolean mDestroyed = false;
         int mNumCancels = 0;
+        boolean mAuthenticateCalled = false;
+        boolean mOnErrorCalled = false;
 
-        public TestAuthenticationClient(@NonNull Context context,
+        TestAuthenticationClient(@NonNull Context context,
                 @NonNull Supplier<Object> lazyDaemon, @NonNull IBinder token,
-                @NonNull ClientMonitorCallbackConverter listener) {
+                @NonNull ClientMonitorCallbackConverter listener,
+                BiometricContext biometricContext) {
+            this(context, lazyDaemon, token, listener, 1 /* cookie */, biometricContext);
+        }
+
+        TestAuthenticationClient(@NonNull Context context,
+                @NonNull Supplier<Object> lazyDaemon, @NonNull IBinder token,
+                @NonNull ClientMonitorCallbackConverter listener, int cookie,
+                @NonNull BiometricContext biometricContext) {
             super(context, lazyDaemon, token, listener, 0 /* targetUserId */, 0 /* operationId */,
-                    false /* restricted */, TAG, 1 /* cookie */, false /* requireConfirmation */,
-                    TEST_SENSOR_ID, mock(BiometricLogger.class), mock(BiometricContext.class),
+                    false /* restricted */, TAG, cookie, false /* requireConfirmation */,
+                    TEST_SENSOR_ID, mock(BiometricLogger.class), biometricContext,
                     true /* isStrongBiometric */, null /* taskStackListener */,
-                    mock(LockoutTracker.class), false /* isKeyguard */,
-                    true /* shouldVibrate */, false /* isKeyguardBypassEnabled */);
+                    null /* lockoutTracker */, false /* isKeyguard */,
+                    true /* shouldVibrate */, false /* isKeyguardBypassEnabled */,
+                    0 /* sensorStrength */);
         }
 
         @Override
@@ -547,7 +720,19 @@ public class BiometricSchedulerTest {
         }
 
         @Override
-        protected void handleLifecycleAfterAuth(boolean authenticated) {}
+        protected void handleLifecycleAfterAuth(boolean authenticated) {
+        }
+
+        @Override
+        public void onAuthenticated(BiometricAuthenticator.Identifier identifier,
+                boolean authenticated, ArrayList<Byte> hardwareAuthToken) {
+            mAuthenticateCalled = true;
+        }
+
+        @Override
+        protected void onErrorInternal(int errorCode, int vendorCode, boolean finish) {
+            mOnErrorCalled = true;
+        }
 
         @Override
         public boolean wasUserDetected() {
@@ -572,14 +757,12 @@ public class BiometricSchedulerTest {
         boolean mStoppedHal = false;
         int mNumCancels = 0;
 
-        TestEnrollClient(@NonNull Context context,
-                @NonNull Supplier<Object> lazyDaemon, @NonNull IBinder token,
-                @NonNull ClientMonitorCallbackConverter listener) {
+        TestEnrollClient(@NonNull Context context, @NonNull Supplier<Object> lazyDaemon,
+                @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener) {
             super(context, lazyDaemon, token, listener, 0 /* userId */, new byte[69],
-                    "test" /* owner */, mock(BiometricUtils.class),
-                    5 /* timeoutSec */, TEST_SENSOR_ID,
-                    true /* shouldVibrate */,
-                    mock(BiometricLogger.class), mock(BiometricContext.class));
+                    "test" /* owner */, mock(BiometricUtils.class), 5 /* timeoutSec */,
+                    TEST_SENSOR_ID, true /* shouldVibrate */, mock(BiometricLogger.class),
+                    mock(BiometricContext.class));
         }
 
         @Override
@@ -617,9 +800,9 @@ public class BiometricSchedulerTest {
 
         TestHalClientMonitor(@NonNull Context context, @NonNull IBinder token,
                 @NonNull Supplier<Object> lazyDaemon, int cookie, int protoEnum) {
-            super(context, lazyDaemon, token /* token */, null /* listener */, 0 /* userId */,
-                    TAG, cookie, TEST_SENSOR_ID,
-                    mock(BiometricLogger.class), mock(BiometricContext.class));
+            super(context, lazyDaemon, token /* token */, null /* listener */, 0 /* userId */, TAG,
+                    cookie, TEST_SENSOR_ID, mock(BiometricLogger.class),
+                    mock(BiometricContext.class));
             mProtoEnum = protoEnum;
         }
 
@@ -651,9 +834,5 @@ public class BiometricSchedulerTest {
             super.destroy();
             mDestroyed = true;
         }
-    }
-
-    private void waitForIdle() {
-        TestableLooper.get(this).processAllMessages();
     }
 }

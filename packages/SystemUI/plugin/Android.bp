@@ -29,10 +29,12 @@ java_library {
         "src/**/*.java",
         "src/**/*.kt",
         "bcsmartspace/src/**/*.java",
+        "bcsmartspace/src/**/*.kt",
     ],
 
     static_libs: [
         "androidx.annotation_annotation",
+        "error_prone_annotations",
         "PluginCoreLib",
         "SystemUIAnimationLib",
     ],

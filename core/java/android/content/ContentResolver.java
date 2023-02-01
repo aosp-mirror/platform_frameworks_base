@@ -980,7 +980,7 @@ public abstract class ContentResolver implements ContentInterface {
         @Override
         public void onResult(Bundle result) {
             synchronized (this) {
-                ParcelableException e = result.getParcelable(REMOTE_CALLBACK_ERROR);
+                ParcelableException e = result.getParcelable(REMOTE_CALLBACK_ERROR, android.os.ParcelableException.class);
                 if (e != null) {
                     Throwable t = e.getCause();
                     if (t instanceof RuntimeException) {
@@ -1021,7 +1021,7 @@ public abstract class ContentResolver implements ContentInterface {
     private static class UriResultListener extends ResultListener<Uri> {
         @Override
         protected Uri getResultFromBundle(Bundle result) {
-            return result.getParcelable(REMOTE_CALLBACK_RESULT);
+            return result.getParcelable(REMOTE_CALLBACK_RESULT, android.net.Uri.class);
         }
     }
 

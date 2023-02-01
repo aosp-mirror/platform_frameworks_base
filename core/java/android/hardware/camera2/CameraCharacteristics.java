@@ -1286,6 +1286,46 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<android.hardware.camera2.params.HighSpeedVideoConfiguration[]>("android.control.availableHighSpeedVideoConfigurationsMaximumResolution", android.hardware.camera2.params.HighSpeedVideoConfiguration[].class);
 
     /**
+     * <p>List of available settings overrides supported by the camera device that can
+     * be used to speed up certain controls.</p>
+     * <p>When not all controls within a CaptureRequest are required to take effect
+     * at the same time on the outputs, the camera device may apply certain request keys sooner
+     * to improve latency. This list contains such supported settings overrides. Each settings
+     * override corresponds to a set of CaptureRequest keys that can be sped up when applying.</p>
+     * <p>A supported settings override can be passed in via
+     * {@link android.hardware.camera2.CaptureRequest#CONTROL_SETTINGS_OVERRIDE }, and the
+     * CaptureRequest keys corresponding to the override are applied as soon as possible, not
+     * bound by per-frame synchronization. See {@link CaptureRequest#CONTROL_SETTINGS_OVERRIDE android.control.settingsOverride} for the
+     * CaptureRequest keys for each override.</p>
+     * <p>OFF is always included in this list.</p>
+     * <p><b>Range of valid values:</b><br>
+     * Any value listed in {@link CaptureRequest#CONTROL_SETTINGS_OVERRIDE android.control.settingsOverride}</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_SETTINGS_OVERRIDE
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<int[]> CONTROL_AVAILABLE_SETTINGS_OVERRIDES =
+            new Key<int[]>("android.control.availableSettingsOverrides", int[].class);
+
+    /**
+     * <p>Whether the camera device supports {@link CaptureRequest#CONTROL_AUTOFRAMING android.control.autoframing}.</p>
+     * <p>Will be <code>false</code> if auto-framing is not available.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CaptureRequest#CONTROL_AUTOFRAMING
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<Boolean> CONTROL_AUTOFRAMING_AVAILABLE =
+            new Key<Boolean>("android.control.autoframingAvailable", boolean.class);
+
+    /**
      * <p>List of edge enhancement modes for {@link CaptureRequest#EDGE_MODE android.edge.mode} that are supported by this camera
      * device.</p>
      * <p>Full-capability camera devices must always support OFF; camera devices that support
@@ -1326,6 +1366,10 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * {@link android.hardware.camera2.CameraManager#turnOnTorchWithStrengthLevel }.
      * If this value is equal to 1, flashlight brightness control is not supported.
      * The value for this key will be null for devices with no flash unit.</p>
+     * <p>The maximum value is guaranteed to be safe to use for an indefinite duration in
+     * terms of device flashlight lifespan, but may be too bright for comfort for many
+     * use cases. Use the default torch brightness value to avoid problems with an
+     * over-bright flashlight.</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      */
     @PublicKey
@@ -2220,6 +2264,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_REMOSAIC_REPROCESSING REMOSAIC_REPROCESSING}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT DYNAMIC_RANGE_TEN_BIT}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_STREAM_USE_CASE STREAM_USE_CASE}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_COLOR_SPACE_PROFILES COLOR_SPACE_PROFILES}</li>
      * </ul>
      *
      * <p>This key is available on all devices.</p>
@@ -2245,6 +2290,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #REQUEST_AVAILABLE_CAPABILITIES_REMOSAIC_REPROCESSING
      * @see #REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT
      * @see #REQUEST_AVAILABLE_CAPABILITIES_STREAM_USE_CASE
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_COLOR_SPACE_PROFILES
      */
     @PublicKey
     @NonNull
@@ -2467,6 +2513,82 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @NonNull
     public static final Key<Long> REQUEST_RECOMMENDED_TEN_BIT_DYNAMIC_RANGE_PROFILE =
             new Key<Long>("android.request.recommendedTenBitDynamicRangeProfile", long.class);
+
+    /**
+     * <p>An interface for querying the color space profiles supported by a camera device.</p>
+     * <p>A color space profile is a combination of a color space, an image format, and a dynamic
+     * range profile. Camera clients can retrieve the list of supported color spaces by calling
+     * {@link android.hardware.camera2.params.ColorSpaceProfiles#getSupportedColorSpaces } or
+     * {@link android.hardware.camera2.params.ColorSpaceProfiles#getSupportedColorSpacesForDynamicRange }.
+     * If a camera does not support the
+     * {@link android.hardware.camera2.CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT }
+     * capability, the dynamic range profile will always be
+     * {@link android.hardware.camera2.params.DynamicRangeProfiles#STANDARD }. Color space
+     * capabilities are queried in combination with an {@link android.graphics.ImageFormat }.
+     * If a camera client wants to know the general color space capabilities of a camera device
+     * regardless of image format, it can specify {@link android.graphics.ImageFormat#UNKNOWN }.
+     * The color space for a session can be configured by setting the SessionConfiguration
+     * color space via {@link android.hardware.camera2.params.SessionConfiguration#setColorSpace }.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     */
+    @PublicKey
+    @NonNull
+    @SyntheticKey
+    public static final Key<android.hardware.camera2.params.ColorSpaceProfiles> REQUEST_AVAILABLE_COLOR_SPACE_PROFILES =
+            new Key<android.hardware.camera2.params.ColorSpaceProfiles>("android.request.availableColorSpaceProfiles", android.hardware.camera2.params.ColorSpaceProfiles.class);
+
+    /**
+     * <p>A list of all possible color space profiles supported by a camera device.</p>
+     * <p>A color space profile is a combination of a color space, an image format, and a dynamic range
+     * profile. If a camera does not support the
+     * {@link android.hardware.camera2.CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT }
+     * capability, the dynamic range profile will always be
+     * {@link android.hardware.camera2.params.DynamicRangeProfiles#STANDARD }. Camera clients can
+     * use {@link android.hardware.camera2.params.SessionConfiguration#setColorSpace } to select
+     * a color space.</p>
+     * <p><b>Possible values:</b></p>
+     * <ul>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_UNSPECIFIED UNSPECIFIED}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_SRGB SRGB}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_LINEAR_SRGB LINEAR_SRGB}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_EXTENDED_SRGB EXTENDED_SRGB}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_LINEAR_EXTENDED_SRGB LINEAR_EXTENDED_SRGB}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_BT709 BT709}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_BT2020 BT2020}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_DCI_P3 DCI_P3}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_DISPLAY_P3 DISPLAY_P3}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_NTSC_1953 NTSC_1953}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_SMPTE_C SMPTE_C}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_ADOBE_RGB ADOBE_RGB}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_PRO_PHOTO_RGB PRO_PHOTO_RGB}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_ACES ACES}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_ACESCG ACESCG}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_CIE_XYZ CIE_XYZ}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_CIE_LAB CIE_LAB}</li>
+     * </ul>
+     *
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_UNSPECIFIED
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_SRGB
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_LINEAR_SRGB
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_EXTENDED_SRGB
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_LINEAR_EXTENDED_SRGB
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_BT709
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_BT2020
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_DCI_P3
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_DISPLAY_P3
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_NTSC_1953
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_SMPTE_C
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_ADOBE_RGB
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_PRO_PHOTO_RGB
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_ACES
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_ACESCG
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_CIE_XYZ
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_CIE_LAB
+     * @hide
+     */
+    public static final Key<long[]> REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP =
+            new Key<long[]>("android.request.availableColorSpaceProfilesMap", long[].class);
 
     /**
      * <p>The list of image formats that are supported by this
@@ -3634,6 +3756,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_RECORD VIDEO_RECORD}</li>
      *   <li>{@link #SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW_VIDEO_STILL PREVIEW_VIDEO_STILL}</li>
      *   <li>{@link #SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_CALL VIDEO_CALL}</li>
+     *   <li>{@link #SCALER_AVAILABLE_STREAM_USE_CASES_CROPPED_RAW CROPPED_RAW}</li>
      * </ul>
      *
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
@@ -3643,6 +3766,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_RECORD
      * @see #SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW_VIDEO_STILL
      * @see #SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_CALL
+     * @see #SCALER_AVAILABLE_STREAM_USE_CASES_CROPPED_RAW
      */
     @PublicKey
     @NonNull
@@ -4463,6 +4587,43 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @NonNull
     public static final Key<android.graphics.Rect[]> SENSOR_OPTICAL_BLACK_REGIONS =
             new Key<android.graphics.Rect[]>("android.sensor.opticalBlackRegions", android.graphics.Rect[].class);
+
+    /**
+     * <p>Whether or not the camera device supports readout timestamp and
+     * {@code onReadoutStarted} callback.</p>
+     * <p>If this tag is {@code HARDWARE}, the camera device calls
+     * {@link CameraCaptureSession.CaptureCallback#onReadoutStarted } in addition to the
+     * {@link CameraCaptureSession.CaptureCallback#onCaptureStarted } callback for each capture.
+     * The timestamp passed into the callback is the start of camera image readout rather than
+     * the start of the exposure. The timestamp source of
+     * {@link CameraCaptureSession.CaptureCallback#onReadoutStarted } is the same as that of
+     * {@link CameraCaptureSession.CaptureCallback#onCaptureStarted }.</p>
+     * <p>In addition, the application can switch an output surface's timestamp from start of
+     * exposure to start of readout by calling
+     * {@link android.hardware.camera2.params.OutputConfiguration#setReadoutTimestampEnabled }.</p>
+     * <p>The readout timestamp is beneficial for video recording, because the encoder favors
+     * uniform timestamps, and the readout timestamps better reflect the cadence camera sensors
+     * output data.</p>
+     * <p>Note that the camera device produces the start-of-exposure and start-of-readout callbacks
+     * together. As a result, the {@link CameraCaptureSession.CaptureCallback#onReadoutStarted }
+     * is called right after {@link CameraCaptureSession.CaptureCallback#onCaptureStarted }. The
+     * difference in start-of-readout and start-of-exposure is the sensor exposure time, plus
+     * certain constant offset. The offset is usually due to camera sensor level crop, and it is
+     * generally constant over time for the same set of output resolutions and capture settings.</p>
+     * <p><b>Possible values:</b></p>
+     * <ul>
+     *   <li>{@link #SENSOR_READOUT_TIMESTAMP_NOT_SUPPORTED NOT_SUPPORTED}</li>
+     *   <li>{@link #SENSOR_READOUT_TIMESTAMP_HARDWARE HARDWARE}</li>
+     * </ul>
+     *
+     * <p>This key is available on all devices.</p>
+     * @see #SENSOR_READOUT_TIMESTAMP_NOT_SUPPORTED
+     * @see #SENSOR_READOUT_TIMESTAMP_HARDWARE
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<Integer> SENSOR_READOUT_TIMESTAMP =
+            new Key<Integer>("android.sensor.readoutTimestamp", int.class);
 
     /**
      * <p>List of lens shading modes for {@link CaptureRequest#SHADING_MODE android.shading.mode} that are supported by this camera device.</p>
@@ -5407,9 +5568,121 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     public static final Key<Integer> AUTOMOTIVE_LOCATION =
             new Key<Integer>("android.automotive.location", int.class);
 
+    /**
+     * <p>The available Jpeg/R stream
+     * configurations that this camera device supports
+     * (i.e. format, width, height, output/input stream).</p>
+     * <p>The configurations are listed as <code>(format, width, height, input?)</code> tuples.</p>
+     * <p>If the camera device supports Jpeg/R, it will support the same stream combinations with
+     * Jpeg/R as it does with P010. The stream combinations with Jpeg/R (or P010) supported
+     * by the device is determined by the device's hardware level and capabilities.</p>
+     * <p>All the static, control, and dynamic metadata tags related to JPEG apply to Jpeg/R formats.
+     * Configuring JPEG and Jpeg/R streams at the same time is not supported.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfiguration[]> JPEGR_AVAILABLE_JPEG_R_STREAM_CONFIGURATIONS =
+            new Key<android.hardware.camera2.params.StreamConfiguration[]>("android.jpegr.availableJpegRStreamConfigurations", android.hardware.camera2.params.StreamConfiguration[].class);
+
+    /**
+     * <p>This lists the minimum frame duration for each
+     * format/size combination for Jpeg/R output formats.</p>
+     * <p>This should correspond to the frame duration when only that
+     * stream is active, with all processing (typically in android.*.mode)
+     * set to either OFF or FAST.</p>
+     * <p>When multiple streams are used in a request, the minimum frame
+     * duration will be max(individual stream min durations).</p>
+     * <p>See {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration} and
+     * android.scaler.availableStallDurations for more details about
+     * calculating the max frame rate.</p>
+     * <p><b>Units</b>: (format, width, height, ns) x n</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CaptureRequest#SENSOR_FRAME_DURATION
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> JPEGR_AVAILABLE_JPEG_R_MIN_FRAME_DURATIONS =
+            new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.jpegr.availableJpegRMinFrameDurations", android.hardware.camera2.params.StreamConfigurationDuration[].class);
+
+    /**
+     * <p>This lists the maximum stall duration for each
+     * output format/size combination for Jpeg/R streams.</p>
+     * <p>A stall duration is how much extra time would get added
+     * to the normal minimum frame duration for a repeating request
+     * that has streams with non-zero stall.</p>
+     * <p>This functions similarly to
+     * android.scaler.availableStallDurations for Jpeg/R
+     * streams.</p>
+     * <p>All Jpeg/R output stream formats may have a nonzero stall
+     * duration.</p>
+     * <p><b>Units</b>: (format, width, height, ns) x n</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> JPEGR_AVAILABLE_JPEG_R_STALL_DURATIONS =
+            new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.jpegr.availableJpegRStallDurations", android.hardware.camera2.params.StreamConfigurationDuration[].class);
+
+    /**
+     * <p>The available Jpeg/R stream
+     * configurations that this camera device supports
+     * (i.e. format, width, height, output/input stream).</p>
+     * <p>Refer to android.jpegr.availableJpegRStreamConfigurations for details.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfiguration[]> JPEGR_AVAILABLE_JPEG_R_STREAM_CONFIGURATIONS_MAXIMUM_RESOLUTION =
+            new Key<android.hardware.camera2.params.StreamConfiguration[]>("android.jpegr.availableJpegRStreamConfigurationsMaximumResolution", android.hardware.camera2.params.StreamConfiguration[].class);
+
+    /**
+     * <p>This lists the minimum frame duration for each
+     * format/size combination for Jpeg/R output formats for CaptureRequests where
+     * {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p>Refer to android.jpegr.availableJpegRMinFrameDurations for details.</p>
+     * <p><b>Units</b>: (format, width, height, ns) x n</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> JPEGR_AVAILABLE_JPEG_R_MIN_FRAME_DURATIONS_MAXIMUM_RESOLUTION =
+            new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.jpegr.availableJpegRMinFrameDurationsMaximumResolution", android.hardware.camera2.params.StreamConfigurationDuration[].class);
+
+    /**
+     * <p>This lists the maximum stall duration for each
+     * output format/size combination for Jpeg/R streams for CaptureRequests where
+     * {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p>Refer to android.jpegr.availableJpegRStallDurations for details.</p>
+     * <p><b>Units</b>: (format, width, height, ns) x n</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> JPEGR_AVAILABLE_JPEG_R_STALL_DURATIONS_MAXIMUM_RESOLUTION =
+            new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.jpegr.availableJpegRStallDurationsMaximumResolution", android.hardware.camera2.params.StreamConfigurationDuration[].class);
+
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~O@*/
+
+
+
 
 
 

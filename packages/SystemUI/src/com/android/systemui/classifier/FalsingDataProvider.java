@@ -16,6 +16,7 @@
 
 package com.android.systemui.classifier;
 
+import android.hardware.devicestate.DeviceStateManager.FoldStateListener;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
@@ -42,6 +43,7 @@ public class FalsingDataProvider {
     private final int mWidthPixels;
     private final int mHeightPixels;
     private BatteryController mBatteryController;
+    private final FoldStateListener mFoldStateListener;
     private final DockManager mDockManager;
     private final float mXdpi;
     private final float mYdpi;
@@ -59,17 +61,20 @@ public class FalsingDataProvider {
     private MotionEvent mFirstRecentMotionEvent;
     private MotionEvent mLastMotionEvent;
     private boolean mJustUnlockedWithFace;
+    private boolean mA11YAction;
 
     @Inject
     public FalsingDataProvider(
             DisplayMetrics displayMetrics,
             BatteryController batteryController,
+            FoldStateListener foldStateListener,
             DockManager dockManager) {
         mXdpi = displayMetrics.xdpi;
         mYdpi = displayMetrics.ydpi;
         mWidthPixels = displayMetrics.widthPixels;
         mHeightPixels = displayMetrics.heightPixels;
         mBatteryController = batteryController;
+        mFoldStateListener = foldStateListener;
         mDockManager = dockManager;
 
         FalsingClassifier.logInfo("xdpi, ydpi: " + getXdpi() + ", " + getYdpi());
@@ -78,10 +83,10 @@ public class FalsingDataProvider {
 
     void onMotionEvent(MotionEvent motionEvent) {
         List<MotionEvent> motionEvents = unpackMotionEvent(motionEvent);
-        FalsingClassifier.logDebug("Unpacked into: " + motionEvents.size());
+        FalsingClassifier.logVerbose("Unpacked into: " + motionEvents.size());
         if (BrightLineFalsingManager.DEBUG) {
             for (MotionEvent m : motionEvents) {
-                FalsingClassifier.logDebug(
+                FalsingClassifier.logVerbose(
                         "x,y,t: " + m.getX() + "," + m.getY() + "," + m.getEventTime());
             }
         }
@@ -92,7 +97,7 @@ public class FalsingDataProvider {
         }
         mRecentMotionEvents.addAll(motionEvents);
 
-        FalsingClassifier.logDebug("Size: " + mRecentMotionEvents.size());
+        FalsingClassifier.logVerbose("Size: " + mRecentMotionEvents.size());
 
         mMotionEventListeners.forEach(listener -> listener.onMotionEvent(motionEvent));
 
@@ -124,6 +129,7 @@ public class FalsingDataProvider {
             mPriorMotionEvents = mRecentMotionEvents;
             mRecentMotionEvents = new TimeLimitedMotionEventBuffer(MOTION_EVENT_AGE_MS);
         }
+        mA11YAction = false;
     }
 
     /** Returns screen width in pixels. */
@@ -334,6 +340,17 @@ public class FalsingDataProvider {
         mGestureFinalizedListeners.remove(listener);
     }
 
+    /** Return whether last gesture was an A11y action. */
+    public boolean isA11yAction() {
+        return mA11YAction;
+    }
+
+    /** Set whether last gesture was an A11y action. */
+    public void onA11yAction() {
+        completePriorGesture();
+        this.mA11YAction = true;
+    }
+
     void onSessionStarted() {
         mSessionListeners.forEach(SessionListener::onSessionStarted);
     }
@@ -361,6 +378,10 @@ public class FalsingDataProvider {
     /** Returns true if phone is sitting in a dock or is wirelessly charging. */
     public boolean isDocked() {
         return mBatteryController.isWirelessCharging() || mDockManager.isDocked();
+    }
+
+    public boolean isFolded() {
+        return Boolean.TRUE.equals(mFoldStateListener.getFolded());
     }
 
     /** Implement to be alerted abotu the beginning and ending of falsing tracking. */

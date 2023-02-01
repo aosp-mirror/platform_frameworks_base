@@ -77,4 +77,10 @@
         <item name="android:textSize">@dimen/broadcast_dialog_btn_text_size</item>
     </style>
 
+    <style name="EditUserDialogTitle" parent="@android:TextAppearance.DeviceDefault.Headline">
+        <item name="android:textSize">@dimen/broadcast_dialog_title_text_size</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textDirection">locale</item>
+        <item name="android:ellipsize">end</item>
+    </style>
 </resources>

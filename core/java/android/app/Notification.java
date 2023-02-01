@@ -1421,7 +1421,6 @@ public class Notification implements Parcelable
     /**
      * {@link #extras} key: the type of call represented by the
      * {@link android.app.Notification.CallStyle} notification. This extra is an int.
-     * @hide
      */
     public static final String EXTRA_CALL_TYPE = "android.callType";
 
@@ -1783,7 +1782,7 @@ public class Notification implements Parcelable
          * @deprecated Use {@link android.app.Notification.Action.Builder}.
          */
         @Deprecated
-        public Action(int icon, CharSequence title, PendingIntent intent) {
+        public Action(int icon, CharSequence title, @Nullable PendingIntent intent) {
             this(Icon.createWithResource("", icon), title, intent, new Bundle(), null, true,
                     SEMANTIC_ACTION_NONE, false /* isContextual */, false /* requireAuth */);
         }
@@ -1908,10 +1907,12 @@ public class Notification implements Parcelable
              * which may display them in other contexts, for example on a wearable device.
              * @param icon icon to show for this action
              * @param title the title of the action
-             * @param intent the {@link PendingIntent} to fire when users trigger this action
+             * @param intent the {@link PendingIntent} to fire when users trigger this action. May
+             * be null, in which case the action may be rendered in a disabled presentation by the
+             * system UI.
              */
             @Deprecated
-            public Builder(int icon, CharSequence title, PendingIntent intent) {
+            public Builder(int icon, CharSequence title, @Nullable PendingIntent intent) {
                 this(Icon.createWithResource("", icon), title, intent);
             }
 
@@ -1940,9 +1941,11 @@ public class Notification implements Parcelable
              *
              * @param icon icon to show for this action
              * @param title the title of the action
-             * @param intent the {@link PendingIntent} to fire when users trigger this action
+             * @param intent the {@link PendingIntent} to fire when users trigger this action. May
+             * be null, in which case the action may be rendered in a disabled presentation by the
+             * system UI.
              */
-            public Builder(Icon icon, CharSequence title, PendingIntent intent) {
+            public Builder(Icon icon, CharSequence title, @Nullable PendingIntent intent) {
                 this(icon, title, intent, new Bundle(), null, true, SEMANTIC_ACTION_NONE, false);
             }
 
@@ -2842,7 +2845,7 @@ public class Notification implements Parcelable
                 visitor.accept(Uri.parse(extras.getString(EXTRA_BACKGROUND_IMAGE_URI)));
             }
 
-            ArrayList<Person> people = extras.getParcelableArrayList(EXTRA_PEOPLE_LIST);
+            ArrayList<Person> people = extras.getParcelableArrayList(EXTRA_PEOPLE_LIST, android.app.Person.class);
             if (people != null && !people.isEmpty()) {
                 for (Person p : people) {
                     visitor.accept(p.getIconUri());
@@ -3882,8 +3885,11 @@ public class Notification implements Parcelable
                 }
 
                 if (mN.extras.containsKey(EXTRA_PEOPLE_LIST)) {
-                    ArrayList<Person> people = mN.extras.getParcelableArrayList(EXTRA_PEOPLE_LIST);
-                    mPersonList.addAll(people);
+                    ArrayList<Person> people = mN.extras.getParcelableArrayList(EXTRA_PEOPLE_LIST,
+                            android.app.Person.class);
+                    if (people != null && !people.isEmpty()) {
+                        mPersonList.addAll(people);
+                    }
                 }
 
                 if (mN.getSmallIcon() == null && mN.icon != 0) {
@@ -4453,6 +4459,10 @@ public class Notification implements Parcelable
          * <p>Apps targeting {@link Build.VERSION_CODES#Q} and above will have to request
          * a permission ({@link android.Manifest.permission#USE_FULL_SCREEN_INTENT}) in order to
          * use full screen intents.</p>
+         * <p>
+         * To be launched as a full screen intent, the notification must also be posted to a
+         * channel with importance level set to IMPORTANCE_HIGH or higher.
+         * </p>
          *
          * @param intent The pending intent to launch.
          * @param highPriority Passing true will cause this notification to be sent
@@ -7940,8 +7950,6 @@ public class Notification implements Parcelable
          * @hide
          */
         public MessagingStyle setShortcutIcon(@Nullable Icon conversationIcon) {
-            // TODO(b/228941516): This icon should be downscaled to avoid using too much memory,
-            // see reduceImageSizes.
             mShortcutIcon = conversationIcon;
             return this;
         }
@@ -8464,8 +8472,8 @@ public class Notification implements Parcelable
             }
 
             int maxAvatarSize = resources.getDimensionPixelSize(
-                    isLowRam ? R.dimen.notification_person_icon_max_size
-                            : R.dimen.notification_person_icon_max_size_low_ram);
+                    isLowRam ? R.dimen.notification_person_icon_max_size_low_ram
+                            : R.dimen.notification_person_icon_max_size);
             if (mUser != null && mUser.getIcon() != null) {
                 mUser.getIcon().scaleDownIfNecessary(maxAvatarSize, maxAvatarSize);
             }
@@ -9301,11 +9309,43 @@ public class Notification implements Parcelable
      * </pre>
      */
     public static class CallStyle extends Style {
-        /** @hide */
+
+        /**
+         * @hide
+         */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({
+                CALL_TYPE_UNKNOWN,
+                CALL_TYPE_INCOMING,
+                CALL_TYPE_ONGOING,
+                CALL_TYPE_SCREENING
+        })
+        public @interface CallType {};
+
+        /**
+         * Unknown call type.
+         *
+         * See {@link #EXTRA_CALL_TYPE}.
+         */
+        public static final int CALL_TYPE_UNKNOWN = 0;
+
+        /**
+         *  Call type for incoming calls.
+         *
+         *  See {@link #EXTRA_CALL_TYPE}.
+         */
         public static final int CALL_TYPE_INCOMING = 1;
-        /** @hide */
+        /**
+         * Call type for ongoing calls.
+         *
+         * See {@link #EXTRA_CALL_TYPE}.
+         */
         public static final int CALL_TYPE_ONGOING = 2;
-        /** @hide */
+        /**
+         * Call type for calls that are being screened.
+         *
+         * See {@link #EXTRA_CALL_TYPE}.
+         */
         public static final int CALL_TYPE_SCREENING = 3;
 
         /**
@@ -9392,13 +9432,14 @@ public class Notification implements Parcelable
         }
 
         /**
+         * @param callType The type of the call
          * @param person The person displayed for the incoming call.
          *             The user also needs to have a non-empty name associated with it.
          * @param hangUpIntent The intent to be sent when the user taps the hang up action
          * @param declineIntent The intent to be sent when the user taps the decline action
          * @param answerIntent The intent to be sent when the user taps the answer action
          */
-        private CallStyle(int callType, @NonNull Person person,
+        private CallStyle(@CallType int callType, @NonNull Person person,
                 @Nullable PendingIntent hangUpIntent, @Nullable PendingIntent declineIntent,
                 @Nullable PendingIntent answerIntent) {
             if (person == null || TextUtils.isEmpty(person.getName())) {
@@ -9587,21 +9628,16 @@ public class Notification implements Parcelable
         @NonNull
         public ArrayList<Action> getActionsListWithSystemActions() {
             // Define the system actions we expect to see
-            final Action negativeAction = makeNegativeAction();
-            final Action answerAction = makeAnswerAction();
-            // Sort the expected actions into the correct order:
-            // * If there's no answer action, put the hang up / decline action at the end
-            // * Otherwise put the answer action at the end, and put the decline action at start.
-            final Action firstAction = answerAction == null ? null : negativeAction;
-            final Action lastAction = answerAction == null ? negativeAction : answerAction;
+            final Action firstAction = makeNegativeAction();
+            final Action lastAction = makeAnswerAction();
 
             // Start creating the result list.
             int nonContextualActionSlotsRemaining = MAX_ACTION_BUTTONS;
             ArrayList<Action> resultActions = new ArrayList<>(MAX_ACTION_BUTTONS);
-            if (firstAction != null) {
-                resultActions.add(firstAction);
-                --nonContextualActionSlotsRemaining;
-            }
+
+            // Always have a first action.
+            resultActions.add(firstAction);
+            --nonContextualActionSlotsRemaining;
 
             // Copy actions into the new list, correcting system actions.
             if (mBuilder.mActions != null) {
@@ -9617,14 +9653,14 @@ public class Notification implements Parcelable
                         --nonContextualActionSlotsRemaining;
                     }
                     // If there's exactly one action slot left, fill it with the lastAction.
-                    if (nonContextualActionSlotsRemaining == 1) {
+                    if (lastAction != null && nonContextualActionSlotsRemaining == 1) {
                         resultActions.add(lastAction);
                         --nonContextualActionSlotsRemaining;
                     }
                 }
             }
             // If there are any action slots left, the lastAction still needs to be added.
-            if (nonContextualActionSlotsRemaining >= 1) {
+            if (lastAction != null && nonContextualActionSlotsRemaining >= 1) {
                 resultActions.add(lastAction);
             }
             return resultActions;
@@ -9777,7 +9813,7 @@ public class Notification implements Parcelable
             mCallType = extras.getInt(EXTRA_CALL_TYPE);
             mIsVideo = extras.getBoolean(EXTRA_CALL_IS_VIDEO);
             mPerson = extras.getParcelable(EXTRA_CALL_PERSON, Person.class);
-            mVerificationIcon = extras.getParcelable(EXTRA_VERIFICATION_ICON);
+            mVerificationIcon = extras.getParcelable(EXTRA_VERIFICATION_ICON, android.graphics.drawable.Icon.class);
             mVerificationText = extras.getCharSequence(EXTRA_VERIFICATION_TEXT);
             mAnswerIntent = extras.getParcelable(EXTRA_ANSWER_INTENT, PendingIntent.class);
             mDeclineIntent = extras.getParcelable(EXTRA_DECLINE_INTENT, PendingIntent.class);
@@ -10895,7 +10931,7 @@ public class Notification implements Parcelable
         public WearableExtender(Notification notif) {
             Bundle wearableBundle = notif.extras.getBundle(EXTRA_WEARABLE_EXTENSIONS);
             if (wearableBundle != null) {
-                List<Action> actions = wearableBundle.getParcelableArrayList(KEY_ACTIONS);
+                List<Action> actions = wearableBundle.getParcelableArrayList(KEY_ACTIONS, android.app.Notification.Action.class);
                 if (actions != null) {
                     mActions.addAll(actions);
                 }

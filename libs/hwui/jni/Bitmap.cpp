@@ -2,40 +2,42 @@
 #define LOG_TAG "Bitmap"
 #include "Bitmap.h"
 
+#include <hwui/Bitmap.h>
+#include <hwui/Paint.h>
+
+#include "CreateJavaOutputStreamAdaptor.h"
+#include "Gainmap.h"
+#include "GraphicsJNI.h"
+#include "HardwareBufferHelpers.h"
 #include "SkBitmap.h"
+#include "SkBlendMode.h"
 #include "SkCanvas.h"
 #include "SkColor.h"
 #include "SkColorSpace.h"
-#include "SkPixelRef.h"
-#include "SkImageEncoder.h"
+#include "SkData.h"
 #include "SkImageInfo.h"
-#include "GraphicsJNI.h"
+#include "SkPaint.h"
+#include "SkPixmap.h"
+#include "SkPoint.h"
+#include "SkRefCnt.h"
 #include "SkStream.h"
-#include "SkWebpEncoder.h"
-
+#include "SkTypes.h"
 #include "android_nio_utils.h"
-#include "CreateJavaOutputStreamAdaptor.h"
-#include <hwui/Paint.h>
-#include <hwui/Bitmap.h>
-#include <utils/Color.h>
 
 #ifdef __ANDROID__ // Layoutlib does not support graphic buffer, parcel or render thread
 #include <android-base/unique_fd.h>
 #include <android/binder_parcel.h>
 #include <android/binder_parcel_jni.h>
 #include <android/binder_parcel_platform.h>
-#include <android/binder_parcel_utils.h>
-#include <private/android/AHardwareBufferHelpers.h>
 #include <cutils/ashmem.h>
-#include <dlfcn.h>
 #include <renderthread/RenderProxy.h>
 #include <sys/mman.h>
 #endif
 
 #include <inttypes.h>
 #include <string.h>
+
 #include <memory>
-#include <string>
 
 #define DEBUG_PARCEL 0
 
@@ -45,6 +47,8 @@ static jmethodID gBitmap_constructorMethodID;
 static jmethodID gBitmap_reinitMethodID;
 
 namespace android {
+
+jobject Gainmap_extractFromBitmap(JNIEnv* env, const Bitmap& bitmap);
 
 class BitmapWrapper {
 public:
@@ -419,6 +423,11 @@ static jobject Bitmap_copyAshmemConfig(JNIEnv* env, jobject, jlong srcHandle, ji
     auto bitmap = Bitmap_copyAshmemImpl(env, src, dstCT);
     jobject ret = createBitmap(env, bitmap, getPremulBitmapCreateFlags(false));
     return ret;
+}
+
+static jint Bitmap_getAshmemFd(JNIEnv* env, jobject, jlong bitmapHandle) {
+    LocalScopedBitmap bitmap(bitmapHandle);
+    return (bitmap.valid()) ? bitmap->bitmap().getAshmemFd() : -1;
 }
 
 static void Bitmap_destruct(BitmapWrapper* bitmap) {
@@ -1189,18 +1198,11 @@ static jobject Bitmap_copyPreserveInternalConfig(JNIEnv* env, jobject, jlong bit
     return createBitmap(env, bitmap.release(), getPremulBitmapCreateFlags(false));
 }
 
-#ifdef __ANDROID__ // Layoutlib does not support graphic buffer
-typedef AHardwareBuffer* (*AHB_from_HB)(JNIEnv*, jobject);
-AHB_from_HB AHardwareBuffer_fromHardwareBuffer;
-
-typedef jobject (*AHB_to_HB)(JNIEnv*, AHardwareBuffer*);
-AHB_to_HB AHardwareBuffer_toHardwareBuffer;
-#endif
-
 static jobject Bitmap_wrapHardwareBufferBitmap(JNIEnv* env, jobject, jobject hardwareBuffer,
                                                jlong colorSpacePtr) {
 #ifdef __ANDROID__ // Layoutlib does not support graphic buffer
-    AHardwareBuffer* buffer = AHardwareBuffer_fromHardwareBuffer(env, hardwareBuffer);
+    AHardwareBuffer* buffer = uirenderer::HardwareBufferHelpers::AHardwareBuffer_fromHardwareBuffer(
+            env, hardwareBuffer);
     sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer,
                                               GraphicsJNI::getNativeColorSpace(colorSpacePtr));
     if (!bitmap.get()) {
@@ -1223,7 +1225,8 @@ static jobject Bitmap_getHardwareBuffer(JNIEnv* env, jobject, jlong bitmapPtr) {
     }
 
     Bitmap& bitmap = bitmapHandle->bitmap();
-    return AHardwareBuffer_toHardwareBuffer(env, bitmap.hardwareBuffer());
+    return uirenderer::HardwareBufferHelpers::AHardwareBuffer_toHardwareBuffer(
+            env, bitmap.hardwareBuffer());
 #else
     return nullptr;
 #endif
@@ -1251,67 +1254,77 @@ static void Bitmap_setImmutable(JNIEnv* env, jobject, jlong bitmapHandle) {
     return bitmapHolder->bitmap().setImmutable();
 }
 
+static jboolean Bitmap_hasGainmap(CRITICAL_JNI_PARAMS_COMMA jlong bitmapHandle) {
+    LocalScopedBitmap bitmapHolder(bitmapHandle);
+    if (!bitmapHolder.valid()) return false;
+
+    return bitmapHolder->bitmap().hasGainmap();
+}
+
+static jobject Bitmap_extractGainmap(JNIEnv* env, jobject, jlong bitmapHandle) {
+    LocalScopedBitmap bitmapHolder(bitmapHandle);
+    if (!bitmapHolder.valid()) return nullptr;
+    if (!bitmapHolder->bitmap().hasGainmap()) return nullptr;
+
+    return Gainmap_extractFromBitmap(env, bitmapHolder->bitmap());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static const JNINativeMethod gBitmapMethods[] = {
-    {   "nativeCreate",             "([IIIIIIZJ)Landroid/graphics/Bitmap;",
-        (void*)Bitmap_creator },
-    {   "nativeCopy",               "(JIZ)Landroid/graphics/Bitmap;",
-        (void*)Bitmap_copy },
-    {   "nativeCopyAshmem",         "(J)Landroid/graphics/Bitmap;",
-        (void*)Bitmap_copyAshmem },
-    {   "nativeCopyAshmemConfig",   "(JI)Landroid/graphics/Bitmap;",
-        (void*)Bitmap_copyAshmemConfig },
-    {   "nativeGetNativeFinalizer", "()J", (void*)Bitmap_getNativeFinalizer },
-    {   "nativeRecycle",            "(J)V", (void*)Bitmap_recycle },
-    {   "nativeReconfigure",        "(JIIIZ)V", (void*)Bitmap_reconfigure },
-    {   "nativeCompress",           "(JIILjava/io/OutputStream;[B)Z",
-        (void*)Bitmap_compress },
-    {   "nativeErase",              "(JI)V", (void*)Bitmap_erase },
-    {   "nativeErase",              "(JJJ)V", (void*)Bitmap_eraseLong },
-    {   "nativeRowBytes",           "(J)I", (void*)Bitmap_rowBytes },
-    {   "nativeConfig",             "(J)I", (void*)Bitmap_config },
-    {   "nativeHasAlpha",           "(J)Z", (void*)Bitmap_hasAlpha },
-    {   "nativeIsPremultiplied",    "(J)Z", (void*)Bitmap_isPremultiplied},
-    {   "nativeSetHasAlpha",        "(JZZ)V", (void*)Bitmap_setHasAlpha},
-    {   "nativeSetPremultiplied",   "(JZ)V", (void*)Bitmap_setPremultiplied},
-    {   "nativeHasMipMap",          "(J)Z", (void*)Bitmap_hasMipMap },
-    {   "nativeSetHasMipMap",       "(JZ)V", (void*)Bitmap_setHasMipMap },
-    {   "nativeCreateFromParcel",
-        "(Landroid/os/Parcel;)Landroid/graphics/Bitmap;",
-        (void*)Bitmap_createFromParcel },
-    {   "nativeWriteToParcel",      "(JILandroid/os/Parcel;)Z",
-        (void*)Bitmap_writeToParcel },
-    {   "nativeExtractAlpha",       "(JJ[I)Landroid/graphics/Bitmap;",
-        (void*)Bitmap_extractAlpha },
-    {   "nativeGenerationId",       "(J)I", (void*)Bitmap_getGenerationId },
-    {   "nativeGetPixel",           "(JII)I", (void*)Bitmap_getPixel },
-    {   "nativeGetColor",           "(JII)J", (void*)Bitmap_getColor },
-    {   "nativeGetPixels",          "(J[IIIIIII)V", (void*)Bitmap_getPixels },
-    {   "nativeSetPixel",           "(JIII)V", (void*)Bitmap_setPixel },
-    {   "nativeSetPixels",          "(J[IIIIIII)V", (void*)Bitmap_setPixels },
-    {   "nativeCopyPixelsToBuffer", "(JLjava/nio/Buffer;)V",
-                                            (void*)Bitmap_copyPixelsToBuffer },
-    {   "nativeCopyPixelsFromBuffer", "(JLjava/nio/Buffer;)V",
-                                            (void*)Bitmap_copyPixelsFromBuffer },
-    {   "nativeSameAs",             "(JJ)Z", (void*)Bitmap_sameAs },
-    {   "nativePrepareToDraw",      "(J)V", (void*)Bitmap_prepareToDraw },
-    {   "nativeGetAllocationByteCount", "(J)I", (void*)Bitmap_getAllocationByteCount },
-    {   "nativeCopyPreserveInternalConfig", "(J)Landroid/graphics/Bitmap;",
-        (void*)Bitmap_copyPreserveInternalConfig },
-    {   "nativeWrapHardwareBufferBitmap", "(Landroid/hardware/HardwareBuffer;J)Landroid/graphics/Bitmap;",
-        (void*) Bitmap_wrapHardwareBufferBitmap },
-    {   "nativeGetHardwareBuffer", "(J)Landroid/hardware/HardwareBuffer;",
-        (void*) Bitmap_getHardwareBuffer },
-    {   "nativeComputeColorSpace",  "(J)Landroid/graphics/ColorSpace;", (void*)Bitmap_computeColorSpace },
-    {   "nativeSetColorSpace",      "(JJ)V", (void*)Bitmap_setColorSpace },
-    {   "nativeIsSRGB",             "(J)Z", (void*)Bitmap_isSRGB },
-    {   "nativeIsSRGBLinear",       "(J)Z", (void*)Bitmap_isSRGBLinear},
-    {   "nativeSetImmutable",       "(J)V", (void*)Bitmap_setImmutable},
+        {"nativeCreate", "([IIIIIIZJ)Landroid/graphics/Bitmap;", (void*)Bitmap_creator},
+        {"nativeCopy", "(JIZ)Landroid/graphics/Bitmap;", (void*)Bitmap_copy},
+        {"nativeCopyAshmem", "(J)Landroid/graphics/Bitmap;", (void*)Bitmap_copyAshmem},
+        {"nativeCopyAshmemConfig", "(JI)Landroid/graphics/Bitmap;", (void*)Bitmap_copyAshmemConfig},
+        {"nativeGetAshmemFD", "(J)I", (void*)Bitmap_getAshmemFd},
+        {"nativeGetNativeFinalizer", "()J", (void*)Bitmap_getNativeFinalizer},
+        {"nativeRecycle", "(J)V", (void*)Bitmap_recycle},
+        {"nativeReconfigure", "(JIIIZ)V", (void*)Bitmap_reconfigure},
+        {"nativeCompress", "(JIILjava/io/OutputStream;[B)Z", (void*)Bitmap_compress},
+        {"nativeErase", "(JI)V", (void*)Bitmap_erase},
+        {"nativeErase", "(JJJ)V", (void*)Bitmap_eraseLong},
+        {"nativeRowBytes", "(J)I", (void*)Bitmap_rowBytes},
+        {"nativeConfig", "(J)I", (void*)Bitmap_config},
+        {"nativeHasAlpha", "(J)Z", (void*)Bitmap_hasAlpha},
+        {"nativeIsPremultiplied", "(J)Z", (void*)Bitmap_isPremultiplied},
+        {"nativeSetHasAlpha", "(JZZ)V", (void*)Bitmap_setHasAlpha},
+        {"nativeSetPremultiplied", "(JZ)V", (void*)Bitmap_setPremultiplied},
+        {"nativeHasMipMap", "(J)Z", (void*)Bitmap_hasMipMap},
+        {"nativeSetHasMipMap", "(JZ)V", (void*)Bitmap_setHasMipMap},
+        {"nativeCreateFromParcel", "(Landroid/os/Parcel;)Landroid/graphics/Bitmap;",
+         (void*)Bitmap_createFromParcel},
+        {"nativeWriteToParcel", "(JILandroid/os/Parcel;)Z", (void*)Bitmap_writeToParcel},
+        {"nativeExtractAlpha", "(JJ[I)Landroid/graphics/Bitmap;", (void*)Bitmap_extractAlpha},
+        {"nativeGenerationId", "(J)I", (void*)Bitmap_getGenerationId},
+        {"nativeGetPixel", "(JII)I", (void*)Bitmap_getPixel},
+        {"nativeGetColor", "(JII)J", (void*)Bitmap_getColor},
+        {"nativeGetPixels", "(J[IIIIIII)V", (void*)Bitmap_getPixels},
+        {"nativeSetPixel", "(JIII)V", (void*)Bitmap_setPixel},
+        {"nativeSetPixels", "(J[IIIIIII)V", (void*)Bitmap_setPixels},
+        {"nativeCopyPixelsToBuffer", "(JLjava/nio/Buffer;)V", (void*)Bitmap_copyPixelsToBuffer},
+        {"nativeCopyPixelsFromBuffer", "(JLjava/nio/Buffer;)V", (void*)Bitmap_copyPixelsFromBuffer},
+        {"nativeSameAs", "(JJ)Z", (void*)Bitmap_sameAs},
+        {"nativePrepareToDraw", "(J)V", (void*)Bitmap_prepareToDraw},
+        {"nativeGetAllocationByteCount", "(J)I", (void*)Bitmap_getAllocationByteCount},
+        {"nativeCopyPreserveInternalConfig", "(J)Landroid/graphics/Bitmap;",
+         (void*)Bitmap_copyPreserveInternalConfig},
+        {"nativeWrapHardwareBufferBitmap",
+         "(Landroid/hardware/HardwareBuffer;J)Landroid/graphics/Bitmap;",
+         (void*)Bitmap_wrapHardwareBufferBitmap},
+        {"nativeGetHardwareBuffer", "(J)Landroid/hardware/HardwareBuffer;",
+         (void*)Bitmap_getHardwareBuffer},
+        {"nativeComputeColorSpace", "(J)Landroid/graphics/ColorSpace;",
+         (void*)Bitmap_computeColorSpace},
+        {"nativeSetColorSpace", "(JJ)V", (void*)Bitmap_setColorSpace},
+        {"nativeIsSRGB", "(J)Z", (void*)Bitmap_isSRGB},
+        {"nativeIsSRGBLinear", "(J)Z", (void*)Bitmap_isSRGBLinear},
+        {"nativeSetImmutable", "(J)V", (void*)Bitmap_setImmutable},
+        {"nativeExtractGainmap", "(J)Landroid/graphics/Gainmap;", (void*)Bitmap_extractGainmap},
 
-    // ------------ @CriticalNative ----------------
-    {   "nativeIsImmutable",        "(J)Z", (void*)Bitmap_isImmutable},
-    {   "nativeIsBackedByAshmem",   "(J)Z", (void*)Bitmap_isBackedByAshmem}
+        // ------------ @CriticalNative ----------------
+        {"nativeIsImmutable", "(J)Z", (void*)Bitmap_isImmutable},
+        {"nativeIsBackedByAshmem", "(J)Z", (void*)Bitmap_isBackedByAshmem},
+        {"nativeHasGainmap", "(J)Z", (void*)Bitmap_hasGainmap},
 
 };
 
@@ -1321,18 +1334,7 @@ int register_android_graphics_Bitmap(JNIEnv* env)
     gBitmap_nativePtr = GetFieldIDOrDie(env, gBitmap_class, "mNativePtr", "J");
     gBitmap_constructorMethodID = GetMethodIDOrDie(env, gBitmap_class, "<init>", "(JIIIZ[BLandroid/graphics/NinePatch$InsetStruct;Z)V");
     gBitmap_reinitMethodID = GetMethodIDOrDie(env, gBitmap_class, "reinit", "(IIZ)V");
-
-#ifdef __ANDROID__ // Layoutlib does not support graphic buffer or parcel
-    void* handle_ = dlopen("libandroid.so", RTLD_NOW | RTLD_NODELETE);
-    AHardwareBuffer_fromHardwareBuffer =
-            (AHB_from_HB)dlsym(handle_, "AHardwareBuffer_fromHardwareBuffer");
-    LOG_ALWAYS_FATAL_IF(AHardwareBuffer_fromHardwareBuffer == nullptr,
-                        "Failed to find required symbol AHardwareBuffer_fromHardwareBuffer!");
-
-    AHardwareBuffer_toHardwareBuffer = (AHB_to_HB)dlsym(handle_, "AHardwareBuffer_toHardwareBuffer");
-    LOG_ALWAYS_FATAL_IF(AHardwareBuffer_toHardwareBuffer == nullptr,
-                        " Failed to find required symbol AHardwareBuffer_toHardwareBuffer!");
-#endif
+    uirenderer::HardwareBufferHelpers::init();
     return android::RegisterMethodsOrDie(env, "android/graphics/Bitmap", gBitmapMethods,
                                          NELEM(gBitmapMethods));
 }

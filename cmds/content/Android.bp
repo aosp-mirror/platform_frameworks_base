@@ -19,6 +19,6 @@ license {
 
 java_binary {
     name: "content",
-    wrapper: "content",
+    wrapper: "content.sh",
     srcs: ["**/*.java"],
 }

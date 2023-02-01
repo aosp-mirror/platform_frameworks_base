@@ -57,6 +57,7 @@ import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.ShortcutServiceInternal.ShortcutChangeListener;
+import android.content.pm.UserPackage;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Bitmap;
@@ -100,8 +101,6 @@ import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 import android.util.TypedValue;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.IWindowManager;
 
@@ -116,9 +115,10 @@ import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.StatLogger;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.pm.ShortcutUser.PackageWithUser;
 import com.android.server.uri.UriGrantsManagerInternal;
 
 import libcore.io.IoUtils;
@@ -280,6 +280,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     private final Object mLock = new Object();
     private final Object mNonPersistentUsersLock = new Object();
+    private final Object mWtfLock = new Object();
 
     private static List<ResolveInfo> EMPTY_RESOLVE_INFO = new ArrayList<>(0);
 
@@ -444,10 +445,10 @@ public class ShortcutService extends IShortcutService.Stub {
     @interface ShortcutOperation {
     }
 
-    @GuardedBy("mLock")
+    @GuardedBy("mWtfLock")
     private int mWtfCount = 0;
 
-    @GuardedBy("mLock")
+    @GuardedBy("mWtfLock")
     private Exception mLastWtfStacktrace;
 
     @GuardedBy("mLock")
@@ -3773,7 +3774,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
         final long start = getStatStartTime();
         try {
-            final ArrayList<PackageWithUser> gonePackages = new ArrayList<>();
+            final ArrayList<UserPackage> gonePackages = new ArrayList<>();
 
             synchronized (mLock) {
                 final ShortcutUser user = getUserShortcutsLocked(ownerUserId);
@@ -3788,13 +3789,14 @@ public class ShortcutService extends IShortcutService.Stub {
                             Slog.d(TAG, "Uninstalled: " + spi.getPackageName()
                                     + " user " + spi.getPackageUserId());
                         }
-                        gonePackages.add(PackageWithUser.of(spi));
+                        gonePackages.add(
+                                UserPackage.of(spi.getPackageUserId(), spi.getPackageName()));
                     }
                 });
                 if (gonePackages.size() > 0) {
                     for (int i = gonePackages.size() - 1; i >= 0; i--) {
-                        final PackageWithUser pu = gonePackages.get(i);
-                        cleanUpPackageLocked(pu.packageName, ownerUserId, pu.userId,
+                        final UserPackage up = gonePackages.get(i);
+                        cleanUpPackageLocked(up.packageName, ownerUserId, up.userId,
                                 /* appStillExists = */ false);
                     }
                 }
@@ -4727,13 +4729,15 @@ public class ShortcutService extends IShortcutService.Stub {
 
                 mStatLogger.dump(pw, "  ");
 
-                pw.println();
-                pw.print("  #Failures: ");
-                pw.println(mWtfCount);
+                synchronized (mWtfLock) {
+                    pw.println();
+                    pw.print("  #Failures: ");
+                    pw.println(mWtfCount);
 
-                if (mLastWtfStacktrace != null) {
-                    pw.print("  Last failure stack trace: ");
-                    pw.println(Log.getStackTraceString(mLastWtfStacktrace));
+                    if (mLastWtfStacktrace != null) {
+                        pw.print("  Last failure stack trace: ");
+                        pw.println(Log.getStackTraceString(mLastWtfStacktrace));
+                    }
                 }
 
                 pw.println();
@@ -5148,7 +5152,7 @@ public class ShortcutService extends IShortcutService.Stub {
         if (e == null) {
             e = new RuntimeException("Stacktrace");
         }
-        synchronized (mLock) {
+        synchronized (mWtfLock) {
             mWtfCount++;
             mLastWtfStacktrace = new Exception("Last failure was logged here:");
         }
@@ -5271,7 +5275,7 @@ public class ShortcutService extends IShortcutService.Stub {
             final ShortcutUser user = mUsers.get(userId);
             if (user == null) return null;
 
-            return user.getAllLaunchersForTest().get(PackageWithUser.of(userId, packageName));
+            return user.getAllLaunchersForTest().get(UserPackage.of(userId, packageName));
         }
     }
 

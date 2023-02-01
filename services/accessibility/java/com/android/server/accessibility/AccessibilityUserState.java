@@ -26,6 +26,8 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
+import static android.view.accessibility.AccessibilityManager.CONTRAST_DEFAULT_VALUE;
+import static android.view.accessibility.AccessibilityManager.CONTRAST_NOT_SET;
 import static android.view.accessibility.AccessibilityManager.ShortcutType;
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
@@ -44,6 +46,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
@@ -118,6 +121,7 @@ class AccessibilityUserState {
     private boolean mRequestMultiFingerGestures;
     private boolean mRequestTwoFingerPassthrough;
     private boolean mSendMotionEventsEnabled;
+    private SparseArray<Boolean> mServiceDetectsGestures = new SparseArray<>(0);
     private int mUserInteractiveUiTimeout;
     private int mUserNonInteractiveUiTimeout;
     private int mNonInteractiveUiTimeout = 0;
@@ -141,6 +145,8 @@ class AccessibilityUserState {
     private final int mFocusStrokeWidthDefaultValue;
     // The default value of the focus color.
     private final int mFocusColorDefaultValue;
+    /** The color contrast in [-1, 1] */
+    private float mUiContrast = CONTRAST_DEFAULT_VALUE;
 
     private Context mContext;
 
@@ -215,6 +221,7 @@ class AccessibilityUserState {
         mFocusStrokeWidth = mFocusStrokeWidthDefaultValue;
         mFocusColor = mFocusColorDefaultValue;
         mMagnificationFollowTypingEnabled = true;
+        mUiContrast = CONTRAST_NOT_SET;
     }
 
     void addServiceLocked(AccessibilityServiceConnection serviceConnection) {
@@ -381,18 +388,22 @@ class AccessibilityUserState {
     }
 
     /**
-     * Remove service from crashed service list if users disable it.
+     * Remove the service from the crashed and binding service lists if the user disabled it.
      */
-    void updateCrashedServicesIfNeededLocked() {
+    void removeDisabledServicesFromTemporaryStatesLocked() {
         for (int i = 0, count = mInstalledServices.size(); i < count; i++) {
             final AccessibilityServiceInfo installedService = mInstalledServices.get(i);
             final ComponentName componentName = ComponentName.unflattenFromString(
                     installedService.getId());
 
-            if (mCrashedServices.contains(componentName)
-                    && !mEnabledServices.contains(componentName)) {
-                // Remove it from mCrashedServices since users toggle the switch bar to retry.
+            if (!mEnabledServices.contains(componentName)) {
+                // Remove from mCrashedServices, since users may toggle the on/off switch to retry.
                 mCrashedServices.remove(componentName);
+                // Remove from mBindingServices, since services can get stuck in the binding state
+                // if binding starts but never finishes. If the service later attempts to finish
+                // binding but it is not in the enabled list then it will exit before initializing;
+                // see AccessibilityServiceConnection#initializeService().
+                mBindingServices.remove(componentName);
             }
         }
     }
@@ -977,6 +988,7 @@ class AccessibilityUserState {
         return mFocusColor;
     }
 
+
     /**
      * Sets the stroke width and color of the focus rectangle.
      *
@@ -986,5 +998,36 @@ class AccessibilityUserState {
     public void setFocusAppearanceLocked(int strokeWidth, int color) {
         mFocusStrokeWidth = strokeWidth;
         mFocusColor = color;
+    }
+
+    public void setServiceDetectsGesturesEnabled(int displayId, boolean mode) {
+        mServiceDetectsGestures.put(displayId, mode);
+    }
+
+    public void resetServiceDetectsGestures() {
+        mServiceDetectsGestures.clear();
+    }
+
+    public boolean isServiceDetectsGesturesEnabled(int displayId) {
+        if (mServiceDetectsGestures.contains(displayId)) {
+            return mServiceDetectsGestures.get(displayId);
+        }
+        return false;
+    }
+
+    /**
+     * Get the color contrast
+     * @return color contrast in [-1, 1]
+     */
+    public float getUiContrastLocked() {
+        return mUiContrast;
+    }
+
+    /**
+     * Set the color contrast
+     * @param contrast the new color contrast in [-1, 1]
+     */
+    public void setUiContrastLocked(float contrast) {
+        mUiContrast = contrast;
     }
 }

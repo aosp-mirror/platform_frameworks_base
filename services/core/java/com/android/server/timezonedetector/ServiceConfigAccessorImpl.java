@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.app.time.TimeZoneCapabilities;
-import android.app.time.TimeZoneCapabilitiesAndConfig;
 import android.app.time.TimeZoneConfiguration;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -104,8 +103,8 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
     @NonNull private final LocationManager mLocationManager;
 
     @GuardedBy("this")
-    @NonNull private final List<ConfigurationChangeListener> mConfigurationInternalListeners =
-            new ArrayList<>();
+    @NonNull
+    private final List<StateChangeListener> mConfigurationInternalListeners = new ArrayList<>();
 
     /**
      * The mode to use for the primary location time zone provider in a test. Setting this
@@ -206,21 +205,27 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
         }
     }
 
-    private synchronized void handleConfigurationInternalChangeOnMainThread() {
-        for (ConfigurationChangeListener changeListener : mConfigurationInternalListeners) {
+    private void handleConfigurationInternalChangeOnMainThread() {
+        // Copy the listeners holding the "this" lock but don't hold the lock while delivering the
+        // notifications to avoid deadlocks.
+        List<StateChangeListener> configurationInternalListeners;
+        synchronized (this) {
+            configurationInternalListeners = new ArrayList<>(this.mConfigurationInternalListeners);
+        }
+        for (StateChangeListener changeListener : configurationInternalListeners) {
             changeListener.onChange();
         }
     }
 
     @Override
     public synchronized void addConfigurationInternalChangeListener(
-            @NonNull ConfigurationChangeListener listener) {
+            @NonNull StateChangeListener listener) {
         mConfigurationInternalListeners.add(Objects.requireNonNull(listener));
     }
 
     @Override
     public synchronized void removeConfigurationInternalChangeListener(
-            @NonNull ConfigurationChangeListener listener) {
+            @NonNull StateChangeListener listener) {
         mConfigurationInternalListeners.remove(Objects.requireNonNull(listener));
     }
 
@@ -234,13 +239,13 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
 
     @Override
     public synchronized boolean updateConfiguration(@UserIdInt int userId,
-            @NonNull TimeZoneConfiguration requestedConfiguration) {
+            @NonNull TimeZoneConfiguration requestedConfiguration, boolean bypassUserPolicyChecks) {
         Objects.requireNonNull(requestedConfiguration);
 
-        TimeZoneCapabilitiesAndConfig capabilitiesAndConfig =
-                getConfigurationInternal(userId).createCapabilitiesAndConfig();
-        TimeZoneCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
-        TimeZoneConfiguration oldConfiguration = capabilitiesAndConfig.getConfiguration();
+        ConfigurationInternal configurationInternal = getConfigurationInternal(userId);
+        TimeZoneCapabilities capabilities =
+                configurationInternal.asCapabilities(bypassUserPolicyChecks);
+        TimeZoneConfiguration oldConfiguration = configurationInternal.asConfiguration();
 
         final TimeZoneConfiguration newConfiguration =
                 capabilities.tryApplyConfigChanges(oldConfiguration, requestedConfiguration);
@@ -274,15 +279,18 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
             final boolean autoDetectionEnabled = configuration.isAutoDetectionEnabled();
             setAutoDetectionEnabledIfRequired(autoDetectionEnabled);
 
-            // Avoid writing the geo detection enabled setting for devices with settings that
-            // are currently overridden by server flags: otherwise we might overwrite a droidfood
-            // user's real setting permanently.
-            // Also avoid writing the geo detection enabled setting for devices that do not support
-            // geo time zone detection: if we wrote it down then we'd set the value explicitly,
-            // which would prevent detecting "default" later. That might influence what happens on
-            // later releases that start to support geo detection on the same hardware.
+            // Only write the geo detection enabled setting when its values is used, e.g.:
+            // 1) Devices with a setting value that is not currently overridden by server flags
+            // 2) Devices that support both telephony and location detection algorithms
+            //
+            // If we wrote a setting value down when it's not used then we'd be setting the value
+            // explicitly, which would prevent detecting the setting is in "default" state later.
+            // Not being able to detect if the user has actually expressed a preference could
+            // influence what happens on later releases that start to support geo detection on the
+            // user's same hardware.
             if (!getGeoDetectionSettingEnabledOverride().isPresent()
-                    && isGeoTimeZoneDetectionFeatureSupported()) {
+                    && isGeoTimeZoneDetectionFeatureSupported()
+                    && isTelephonyTimeZoneDetectionFeatureSupported()) {
                 final boolean geoDetectionEnabledSetting = configuration.isGeoDetectionEnabled();
                 setGeoDetectionEnabledSettingIfRequired(userId, geoDetectionEnabledSetting);
             }
@@ -292,7 +300,8 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
     @Override
     @NonNull
     public synchronized ConfigurationInternal getConfigurationInternal(@UserIdInt int userId) {
-        return new ConfigurationInternal.Builder(userId)
+        return new ConfigurationInternal.Builder()
+                .setUserId(userId)
                 .setTelephonyDetectionFeatureSupported(
                         isTelephonyTimeZoneDetectionFeatureSupported())
                 .setGeoDetectionFeatureSupported(isGeoTimeZoneDetectionFeatureSupported())
@@ -354,7 +363,7 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
 
     @Override
     public void addLocationTimeZoneManagerConfigListener(
-            @NonNull ConfigurationChangeListener listener) {
+            @NonNull StateChangeListener listener) {
         mServerFlags.addListener(listener, LOCATION_TIME_ZONE_MANAGER_SERVER_FLAGS_KEYS_TO_WATCH);
     }
 

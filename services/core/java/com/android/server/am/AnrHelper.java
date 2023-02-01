@@ -21,12 +21,19 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NA
 
 import android.content.pm.ApplicationInfo;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.TimeoutRecord;
 import com.android.server.wm.WindowProcessController;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -49,6 +56,14 @@ class AnrHelper {
      */
     private static final long CONSECUTIVE_ANR_TIME_MS = TimeUnit.MINUTES.toMillis(2);
 
+    /**
+     * The keep alive time for the threads in the helper threadpool executor
+    */
+    private static final int AUX_THREAD_KEEP_ALIVE_SECOND = 10;
+
+    private static final ThreadFactory sDefaultThreadFactory =  r ->
+            new Thread(r, "AnrAuxiliaryTaskExecutor");
+
     @GuardedBy("mAnrRecords")
     private final ArrayList<AnrRecord> mAnrRecords = new ArrayList<>();
     private final AtomicBoolean mRunning = new AtomicBoolean(false);
@@ -64,40 +79,66 @@ class AnrHelper {
     @GuardedBy("mAnrRecords")
     private int mProcessingPid = -1;
 
+    private final ExecutorService mAuxiliaryTaskExecutor;
+
     AnrHelper(final ActivityManagerService service) {
-        mService = service;
+        this(service, new ThreadPoolExecutor(/* corePoolSize= */ 0, /* maximumPoolSize= */ 1,
+                /* keepAliveTime= */ AUX_THREAD_KEEP_ALIVE_SECOND, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(), sDefaultThreadFactory));
     }
 
-    void appNotResponding(ProcessRecord anrProcess, String annotation) {
+    @VisibleForTesting
+    AnrHelper(ActivityManagerService service, ExecutorService auxExecutor) {
+        mService = service;
+        mAuxiliaryTaskExecutor = auxExecutor;
+    }
+
+    void appNotResponding(ProcessRecord anrProcess, TimeoutRecord timeoutRecord) {
         appNotResponding(anrProcess, null /* activityShortComponentName */, null /* aInfo */,
                 null /* parentShortComponentName */, null /* parentProcess */,
-                false /* aboveSystem */, annotation);
+                false /* aboveSystem */, timeoutRecord, /*isContinuousAnr*/ false);
     }
 
     void appNotResponding(ProcessRecord anrProcess, String activityShortComponentName,
             ApplicationInfo aInfo, String parentShortComponentName,
-            WindowProcessController parentProcess, boolean aboveSystem, String annotation) {
-        final int incomingPid = anrProcess.mPid;
-        synchronized (mAnrRecords) {
-            if (incomingPid == 0) {
-                // Extreme corner case such as zygote is no response to return pid for the process.
-                Slog.i(TAG, "Skip zero pid ANR, process=" + anrProcess.processName);
-                return;
-            }
-            if (mProcessingPid == incomingPid) {
-                Slog.i(TAG, "Skip duplicated ANR, pid=" + incomingPid + " " + annotation);
-                return;
-            }
-            for (int i = mAnrRecords.size() - 1; i >= 0; i--) {
-                if (mAnrRecords.get(i).mPid == incomingPid) {
-                    Slog.i(TAG, "Skip queued ANR, pid=" + incomingPid + " " + annotation);
+            WindowProcessController parentProcess, boolean aboveSystem,
+            TimeoutRecord timeoutRecord, boolean isContinuousAnr) {
+        try {
+            timeoutRecord.mLatencyTracker.appNotRespondingStarted();
+            final int incomingPid = anrProcess.mPid;
+            timeoutRecord.mLatencyTracker.waitingOnAnrRecordLockStarted();
+            synchronized (mAnrRecords) {
+                timeoutRecord.mLatencyTracker.waitingOnAnrRecordLockEnded();
+                if (incomingPid == 0) {
+                    // Extreme corner case such as zygote is no response
+                    // to return pid for the process.
+                    Slog.i(TAG, "Skip zero pid ANR, process=" + anrProcess.processName);
                     return;
                 }
+                if (mProcessingPid == incomingPid) {
+                    Slog.i(TAG,
+                            "Skip duplicated ANR, pid=" + incomingPid + " "
+                            + timeoutRecord.mReason);
+                    return;
+                }
+                for (int i = mAnrRecords.size() - 1; i >= 0; i--) {
+                    if (mAnrRecords.get(i).mPid == incomingPid) {
+                        Slog.i(TAG,
+                                "Skip queued ANR, pid=" + incomingPid + " "
+                                + timeoutRecord.mReason);
+                        return;
+                    }
+                }
+                timeoutRecord.mLatencyTracker.anrRecordPlacingOnQueueWithSize(mAnrRecords.size());
+                mAnrRecords.add(new AnrRecord(anrProcess, activityShortComponentName, aInfo,
+                        parentShortComponentName, parentProcess, aboveSystem,
+                        mAuxiliaryTaskExecutor, timeoutRecord, isContinuousAnr));
             }
-            mAnrRecords.add(new AnrRecord(anrProcess, activityShortComponentName, aInfo,
-                    parentShortComponentName, parentProcess, aboveSystem, annotation));
+            startAnrConsumerIfNeeded();
+        } finally {
+            timeoutRecord.mLatencyTracker.appNotRespondingEnded();
         }
-        startAnrConsumerIfNeeded();
+
     }
 
     private void startAnrConsumerIfNeeded() {
@@ -122,6 +163,8 @@ class AnrHelper {
                 }
                 final AnrRecord record = mAnrRecords.remove(0);
                 mProcessingPid = record.mPid;
+                record.mTimeoutRecord.mLatencyTracker.anrRecordsQueueSizeWhenPopped(
+                        mAnrRecords.size());
                 return record;
             }
         }
@@ -139,8 +182,8 @@ class AnrHelper {
                     continue;
                 }
                 final long startTime = SystemClock.uptimeMillis();
-                // If there are many ANR at the same time, the latency may be larger. If the latency
-                // is too large, the stack trace might not be meaningful.
+                // If there are many ANR at the same time, the latency may be larger.
+                // If the latency is too large, the stack trace might not be meaningful.
                 final long reportLatency = startTime - r.mTimestamp;
                 final boolean onlyDumpSelf = reportLatency > EXPIRED_REPORT_TIME_MS;
                 r.appNotResponding(onlyDumpSelf);
@@ -163,11 +206,17 @@ class AnrHelper {
     }
 
     private void scheduleBinderHeavyHitterAutoSamplerIfNecessary() {
-        final long now = SystemClock.uptimeMillis();
-        if (mLastAnrTimeMs + CONSECUTIVE_ANR_TIME_MS > now) {
-            mService.scheduleBinderHeavyHitterAutoSampler();
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                    "scheduleBinderHeavyHitterAutoSamplerIfNecessary()");
+            final long now = SystemClock.uptimeMillis();
+            if (mLastAnrTimeMs + CONSECUTIVE_ANR_TIME_MS > now) {
+                mService.scheduleBinderHeavyHitterAutoSampler();
+            }
+            mLastAnrTimeMs = now;
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
-        mLastAnrTimeMs = now;
     }
 
     private static class AnrRecord {
@@ -175,29 +224,40 @@ class AnrHelper {
         final int mPid;
         final String mActivityShortComponentName;
         final String mParentShortComponentName;
-        final String mAnnotation;
+        final TimeoutRecord mTimeoutRecord;
         final ApplicationInfo mAppInfo;
         final WindowProcessController mParentProcess;
         final boolean mAboveSystem;
+        final ExecutorService mAuxiliaryTaskExecutor;
         final long mTimestamp = SystemClock.uptimeMillis();
-
+        final boolean mIsContinuousAnr;
         AnrRecord(ProcessRecord anrProcess, String activityShortComponentName,
                 ApplicationInfo aInfo, String parentShortComponentName,
-                WindowProcessController parentProcess, boolean aboveSystem, String annotation) {
+                WindowProcessController parentProcess, boolean aboveSystem,
+                ExecutorService auxiliaryTaskExecutor, TimeoutRecord timeoutRecord,
+                boolean isContinuousAnr) {
             mApp = anrProcess;
             mPid = anrProcess.mPid;
             mActivityShortComponentName = activityShortComponentName;
             mParentShortComponentName = parentShortComponentName;
-            mAnnotation = annotation;
+            mTimeoutRecord = timeoutRecord;
             mAppInfo = aInfo;
             mParentProcess = parentProcess;
             mAboveSystem = aboveSystem;
+            mAuxiliaryTaskExecutor = auxiliaryTaskExecutor;
+            mIsContinuousAnr = isContinuousAnr;
         }
 
         void appNotResponding(boolean onlyDumpSelf) {
-            mApp.mErrorState.appNotResponding(mActivityShortComponentName, mAppInfo,
-                    mParentShortComponentName, mParentProcess, mAboveSystem, mAnnotation,
-                    onlyDumpSelf);
+            try {
+                mTimeoutRecord.mLatencyTracker.anrProcessingStarted();
+                mApp.mErrorState.appNotResponding(mActivityShortComponentName, mAppInfo,
+                        mParentShortComponentName, mParentProcess, mAboveSystem,
+                        mTimeoutRecord, mAuxiliaryTaskExecutor, onlyDumpSelf,
+                        mIsContinuousAnr);
+            } finally {
+                mTimeoutRecord.mLatencyTracker.anrProcessingEnded();
+            }
         }
     }
 }

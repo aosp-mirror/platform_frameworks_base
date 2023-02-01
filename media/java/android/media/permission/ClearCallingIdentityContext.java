@@ -47,13 +47,12 @@ public class ClearCallingIdentityContext implements SafeCloseable {
         return new ClearCallingIdentityContext();
     }
 
-    @SuppressWarnings("AndroidFrameworkBinderIdentity")
+    @SuppressWarnings("ResultOfClearIdentityCallNotStoredInVariable")
     private ClearCallingIdentityContext() {
         mRestoreKey = Binder.clearCallingIdentity();
     }
 
     @Override
-    @SuppressWarnings("AndroidFrameworkBinderIdentity")
     public void close() {
         Binder.restoreCallingIdentity(mRestoreKey);
     }

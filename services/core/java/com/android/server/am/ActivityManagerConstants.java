@@ -146,6 +146,7 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_NETWORK_ACCESS_TIMEOUT_MS = "network_access_timeout_ms";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
+    private static final boolean DEFAULT_PRIORITIZE_ALARM_BROADCASTS = true;
     private static final long DEFAULT_FGSERVICE_MIN_SHOWN_TIME = 2*1000;
     private static final long DEFAULT_FGSERVICE_MIN_REPORT_TIME = 3*1000;
     private static final long DEFAULT_FGSERVICE_SCREEN_ON_BEFORE_TIME = 1*1000;
@@ -196,6 +197,8 @@ final class ActivityManagerConstants extends ContentObserver {
     static final long DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME_MS = 60 * 1000;
     static final boolean DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE = true;
 
+    static final int DEFAULT_MAX_SERVICE_CONNECTIONS_PER_PROCESS = 3000;
+
     /**
      * Same as {@link TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED}
      */
@@ -244,6 +247,18 @@ final class ActivityManagerConstants extends ContentObserver {
      * Maximum number of cached processes.
      */
     private static final String KEY_MAX_PHANTOM_PROCESSES = "max_phantom_processes";
+
+    /**
+     * Enables proactive killing of cached apps
+     */
+    private static final String KEY_PROACTIVE_KILLS_ENABLED = "proactive_kills_enabled";
+
+    /**
+      * Trim LRU cached app when swap falls below this minimum percentage.
+      *
+      * Depends on KEY_PROACTIVE_KILLS_ENABLED
+      */
+    private static final String KEY_LOW_SWAP_THRESHOLD_PERCENT = "low_swap_threshold_percent";
 
     /**
      * Default value for mFlagBackgroundActivityStartsEnabled if not explicitly set in
@@ -303,6 +318,12 @@ final class ActivityManagerConstants extends ContentObserver {
             "deferred_fgs_notification_interval";
 
     /**
+     * Same as {@link #KEY_DEFERRED_FGS_NOTIFICATION_INTERVAL} but for "short FGS".
+     */
+    private static final String KEY_DEFERRED_FGS_NOTIFICATION_INTERVAL_FOR_SHORT =
+            "deferred_fgs_notification_interval_for_short";
+
+    /**
      * Time in milliseconds; once an FGS notification for a given uid has been
      * deferred, no subsequent FGS notification from that uid will be deferred
      * until this amount of time has passed.  Default is two minutes
@@ -310,6 +331,12 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     private static final String KEY_DEFERRED_FGS_NOTIFICATION_EXCLUSION_TIME =
             "deferred_fgs_notification_exclusion_time";
+
+    /**
+     * Same as {@link #KEY_DEFERRED_FGS_NOTIFICATION_EXCLUSION_TIME} but for "short FGS".
+     */
+    private static final String KEY_DEFERRED_FGS_NOTIFICATION_EXCLUSION_TIME_FOR_SHORT =
+            "deferred_fgs_notification_exclusion_time_for_short";
 
     /**
      * Default value for mPushMessagingOverQuotaBehavior if not explicitly set in
@@ -323,6 +350,14 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     private static final String KEY_PROCESS_KILL_TIMEOUT = "process_kill_timeout";
 
+    /**
+     * {@code true} to send in-flight alarm broadcasts ahead of non-alarms; {@code false}
+     * to queue alarm broadcasts identically to non-alarms [i.e. the pre-U behavior]; or
+     * {@code null} or empty string in order to fall back to whatever the build-time default
+     * was for the device.
+     */
+    private static final String KEY_PRIORITIZE_ALARM_BROADCASTS = "prioritize_alarm_broadcasts";
+
     private static final String KEY_DEFER_BOOT_COMPLETED_BROADCAST =
             "defer_boot_completed_broadcast";
 
@@ -334,6 +369,9 @@ final class ActivityManagerConstants extends ContentObserver {
 
     private static final String KEY_SERVICE_BIND_ALMOST_PERCEPTIBLE_TIMEOUT_MS =
             "service_bind_almost_perceptible_timeout_ms";
+
+    private static final String KEY_MAX_SERVICE_CONNECTIONS_PER_PROCESS =
+            "max_service_connections_per_process";
 
     // Maximum number of cached processes we will allow.
     public int MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
@@ -475,7 +513,7 @@ final class ActivityManagerConstants extends ContentObserver {
 
     // Allow app just moving from TOP to FOREGROUND_SERVICE to stay in a higher adj value for
     // this long.
-    public long TOP_TO_FGS_GRACE_DURATION = DEFAULT_TOP_TO_FGS_GRACE_DURATION;
+    public volatile long TOP_TO_FGS_GRACE_DURATION = DEFAULT_TOP_TO_FGS_GRACE_DURATION;
 
     /**
      * Allow app just leaving TOP with an already running ALMOST_PERCEPTIBLE service to stay in
@@ -557,9 +595,20 @@ final class ActivityManagerConstants extends ContentObserver {
     // the foreground state.
     volatile long mFgsNotificationDeferralInterval = 10_000;
 
+    /**
+     * Same as {@link #mFgsNotificationDeferralInterval} but used for "short FGS".
+     */
+    volatile long mFgsNotificationDeferralIntervalForShort = mFgsNotificationDeferralInterval;
+
     // Rate limit: minimum time after an app's FGS notification is deferred
     // before another FGS notification from that app can be deferred.
     volatile long mFgsNotificationDeferralExclusionTime = 2 * 60 * 1000L;
+
+    /**
+     * Same as {@link #mFgsNotificationDeferralExclusionTime} but used for "short FGS".
+     */
+    volatile long mFgsNotificationDeferralExclusionTimeForShort =
+            mFgsNotificationDeferralExclusionTime;
 
     /**
      * When server pushing message is over the quote, select one of the temp allow list type as
@@ -662,6 +711,12 @@ final class ActivityManagerConstants extends ContentObserver {
             DEFAULT_DEFER_BOOT_COMPLETED_BROADCAST;
 
     /**
+     * Whether alarm broadcasts are delivered immediately, or queued along with the rest
+     * of the pending ordered broadcasts.
+     */
+    volatile boolean mPrioritizeAlarmBroadcasts = DEFAULT_PRIORITIZE_ALARM_BROADCASTS;
+
+    /**
      * How long the Context.startForegroundService() grace period is to get around to
      * calling Service.startForeground() before we generate ANR.
      */
@@ -687,6 +742,12 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     volatile String mComponentAliasOverrides = DEFAULT_COMPONENT_ALIAS_OVERRIDES;
 
+    /**
+     *  The max number of outgoing ServiceConnection a process is allowed to bind to a service
+     *  (or multiple services).
+     */
+    volatile int mMaxServiceConnectionsPerProcess = DEFAULT_MAX_SERVICE_CONNECTIONS_PER_PROCESS;
+
     private final ActivityManagerService mService;
     private ContentResolver mResolver;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -709,6 +770,9 @@ final class ActivityManagerConstants extends ContentObserver {
     // initialized in the constructor.
     public int CUR_MAX_EMPTY_PROCESSES;
 
+    /** @see mEnforceReceiverExportedFlagRequirement */
+    private static final String KEY_ENFORCE_RECEIVER_EXPORTED_FLAG_REQUIREMENT =
+            "enforce_exported_flag_requirement";
 
     /** @see #mNoKillCachedProcessesUntilBootCompleted */
     private static final String KEY_NO_KILL_CACHED_PROCESSES_UNTIL_BOOT_COMPLETED =
@@ -718,12 +782,24 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final String KEY_NO_KILL_CACHED_PROCESSES_POST_BOOT_COMPLETED_DURATION_MILLIS =
             "no_kill_cached_processes_post_boot_completed_duration_millis";
 
+    /** @see mEnforceReceiverExportedFlagRequirement */
+    private static final boolean DEFAULT_ENFORCE_RECEIVER_EXPORTED_FLAG_REQUIREMENT = true;
+
     /** @see #mNoKillCachedProcessesUntilBootCompleted */
     private static final boolean DEFAULT_NO_KILL_CACHED_PROCESSES_UNTIL_BOOT_COMPLETED = true;
 
     /** @see #mNoKillCachedProcessesPostBootCompletedDurationMillis */
     private static final long
             DEFAULT_NO_KILL_CACHED_PROCESSES_POST_BOOT_COMPLETED_DURATION_MILLIS = 600_000;
+
+    /**
+     * If true, enforce the requirement that dynamically registered receivers specify one of
+     * {@link android.content.Context#RECEIVER_EXPORTED} or
+     * {@link android.content.Context#RECEIVER_NOT_EXPORTED} if registering for any non-system
+     * broadcasts.
+     */
+    volatile boolean mEnforceReceiverExportedFlagRequirement =
+            DEFAULT_ENFORCE_RECEIVER_EXPORTED_FLAG_REQUIREMENT;
 
     /**
      * If true, do not kill excessive cached processes proactively, until user-0 is unlocked.
@@ -833,6 +909,10 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     private static final long DEFAULT_MIN_ASSOC_LOG_DURATION = 5 * 60 * 1000; // 5 mins
 
+    private static final boolean DEFAULT_PROACTIVE_KILLS_ENABLED = false;
+
+    private static final float DEFAULT_LOW_SWAP_THRESHOLD_PERCENT = 0.10f;
+
     private static final String KEY_MIN_ASSOC_LOG_DURATION = "min_assoc_log_duration";
 
     public static long MIN_ASSOC_LOG_DURATION = DEFAULT_MIN_ASSOC_LOG_DURATION;
@@ -863,6 +943,48 @@ final class ActivityManagerConstants extends ContentObserver {
     public static boolean BINDER_HEAVY_HITTER_AUTO_SAMPLER_ENABLED;
     public static int BINDER_HEAVY_HITTER_AUTO_SAMPLER_BATCHSIZE;
     public static float BINDER_HEAVY_HITTER_AUTO_SAMPLER_THRESHOLD;
+    public static boolean PROACTIVE_KILLS_ENABLED = DEFAULT_PROACTIVE_KILLS_ENABLED;
+    public static float LOW_SWAP_THRESHOLD_PERCENT = DEFAULT_LOW_SWAP_THRESHOLD_PERCENT;
+
+    /** Timeout for a "short service" FGS, in milliseconds. */
+    private static final String KEY_SHORT_FGS_TIMEOUT_DURATION =
+            "short_fgs_timeout_duration";
+
+    /** @see #KEY_SHORT_FGS_TIMEOUT_DURATION */
+    static final long DEFAULT_SHORT_FGS_TIMEOUT_DURATION = 3 * 60_000;
+
+    /** @see #KEY_SHORT_FGS_TIMEOUT_DURATION */
+    public volatile long mShortFgsTimeoutDuration = DEFAULT_SHORT_FGS_TIMEOUT_DURATION;
+
+    /**
+     * If a "short service" doesn't finish within this after the timeout (
+     * {@link #KEY_SHORT_FGS_TIMEOUT_DURATION}), then we'll lower the procstate.
+     */
+    private static final String KEY_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION =
+            "short_fgs_proc_state_extra_wait_duration";
+
+    /** @see #KEY_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION */
+    static final long DEFAULT_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION = 5_000;
+
+    /** @see #KEY_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION */
+    public volatile long mShortFgsProcStateExtraWaitDuration =
+            DEFAULT_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION;
+
+    /**
+     * If a "short service" doesn't finish within this after the timeout (
+     * {@link #KEY_SHORT_FGS_TIMEOUT_DURATION}), then we'll declare an ANR.
+     * i.e. if the timeout is 60 seconds, and this ANR extra duration is 5 seconds, then
+     * the app will be ANR'ed in 65 seconds after a short service starts and it's not stopped.
+     */
+    private static final String KEY_SHORT_FGS_ANR_EXTRA_WAIT_DURATION =
+            "short_fgs_anr_extra_wait_duration";
+
+    /** @see #KEY_SHORT_FGS_ANR_EXTRA_WAIT_DURATION */
+    static final long DEFAULT_SHORT_FGS_ANR_EXTRA_WAIT_DURATION = 10_000;
+
+    /** @see #KEY_SHORT_FGS_ANR_EXTRA_WAIT_DURATION */
+    public volatile long mShortFgsAnrExtraWaitDuration =
+            DEFAULT_SHORT_FGS_ANR_EXTRA_WAIT_DURATION;
 
     private final OnPropertiesChangedListener mOnDeviceConfigChangedListener =
             new OnPropertiesChangedListener() {
@@ -902,6 +1024,12 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_DEFERRED_FGS_NOTIFICATION_EXCLUSION_TIME:
                                 updateFgsNotificationDeferralExclusionTime();
+                                break;
+                            case KEY_DEFERRED_FGS_NOTIFICATION_INTERVAL_FOR_SHORT:
+                                updateFgsNotificationDeferralIntervalForShort();
+                                break;
+                            case KEY_DEFERRED_FGS_NOTIFICATION_EXCLUSION_TIME_FOR_SHORT:
+                                updateFgsNotificationDeferralExclusionTimeForShort();
                                 break;
                             case KEY_PUSH_MESSAGING_OVER_QUOTA_BEHAVIOR:
                                 updatePushMessagingOverQuotaBehavior();
@@ -966,6 +1094,9 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_PROCESS_KILL_TIMEOUT:
                                 updateProcessKillTimeout();
                                 break;
+                            case KEY_PRIORITIZE_ALARM_BROADCASTS:
+                                updatePrioritizeAlarmBroadcasts();
+                                break;
                             case KEY_DEFER_BOOT_COMPLETED_BROADCAST:
                                 updateDeferBootCompletedBroadcast();
                                 break;
@@ -981,6 +1112,9 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_NO_KILL_CACHED_PROCESSES_UNTIL_BOOT_COMPLETED:
                                 updateNoKillCachedProcessesUntilBootCompleted();
                                 break;
+                            case KEY_ENFORCE_RECEIVER_EXPORTED_FLAG_REQUIREMENT:
+                                updateEnforceReceiverExportedFlagRequirement();
+                                break;
                             case KEY_NO_KILL_CACHED_PROCESSES_POST_BOOT_COMPLETED_DURATION_MILLIS:
                                 updateNoKillCachedProcessesPostBootCompletedDurationMillis();
                                 break;
@@ -990,6 +1124,26 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_NETWORK_ACCESS_TIMEOUT_MS:
                                 updateNetworkAccessTimeoutMs();
                                 break;
+                            case KEY_MAX_SERVICE_CONNECTIONS_PER_PROCESS:
+                                updateMaxServiceConnectionsPerProcess();
+                                break;
+                            case KEY_SHORT_FGS_TIMEOUT_DURATION:
+                                updateShortFgsTimeoutDuration();
+                                break;
+                            case KEY_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION:
+                                updateShortFgsProcStateExtraWaitDuration();
+                                break;
+                            case KEY_SHORT_FGS_ANR_EXTRA_WAIT_DURATION:
+                                updateShortFgsAnrExtraWaitDuration();
+                                break;
+                            case KEY_PROACTIVE_KILLS_ENABLED:
+                                updateProactiveKillsEnabled();
+                                break;
+                            case KEY_LOW_SWAP_THRESHOLD_PERCENT:
+                                updateLowSwapThresholdPercent();
+                                break;
+                            case KEY_TOP_TO_FGS_GRACE_DURATION:
+                                updateTopToFgsGraceDuration();
                             default:
                                 break;
                         }
@@ -1207,8 +1361,6 @@ final class ActivityManagerConstants extends ContentObserver {
                     DEFAULT_PROCESS_START_ASYNC);
             MEMORY_INFO_THROTTLE_TIME = mParser.getLong(KEY_MEMORY_INFO_THROTTLE_TIME,
                     DEFAULT_MEMORY_INFO_THROTTLE_TIME);
-            TOP_TO_FGS_GRACE_DURATION = mParser.getDurationMillis(KEY_TOP_TO_FGS_GRACE_DURATION,
-                    DEFAULT_TOP_TO_FGS_GRACE_DURATION);
             TOP_TO_ALMOST_PERCEPTIBLE_GRACE_DURATION = mParser.getDurationMillis(
                     KEY_TOP_TO_ALMOST_PERCEPTIBLE_GRACE_DURATION,
                     DEFAULT_TOP_TO_ALMOST_PERCEPTIBLE_GRACE_DURATION);
@@ -1300,10 +1452,24 @@ final class ActivityManagerConstants extends ContentObserver {
                 /*default value*/ 10_000L);
     }
 
+    private void updateFgsNotificationDeferralIntervalForShort() {
+        mFgsNotificationDeferralIntervalForShort = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_DEFERRED_FGS_NOTIFICATION_INTERVAL_FOR_SHORT,
+                /*default value*/ 10_000L);
+    }
+
     private void updateFgsNotificationDeferralExclusionTime() {
         mFgsNotificationDeferralExclusionTime = DeviceConfig.getLong(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_DEFERRED_FGS_NOTIFICATION_EXCLUSION_TIME,
+                /*default value*/ 2 * 60 * 1000L);
+    }
+
+    private void updateFgsNotificationDeferralExclusionTimeForShort() {
+        mFgsNotificationDeferralExclusionTimeForShort = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_DEFERRED_FGS_NOTIFICATION_EXCLUSION_TIME_FOR_SHORT,
                 /*default value*/ 2 * 60 * 1000L);
     }
 
@@ -1432,11 +1598,29 @@ final class ActivityManagerConstants extends ContentObserver {
         }
     }
 
+    private void updatePrioritizeAlarmBroadcasts() {
+        // Flag value can be something that evaluates to `true` or `false`,
+        // or empty/null.  If it's empty/null, the platform default is used.
+        final String flag = DeviceConfig.getString(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_PRIORITIZE_ALARM_BROADCASTS,
+                "");
+        mPrioritizeAlarmBroadcasts = TextUtils.isEmpty(flag)
+                ? DEFAULT_PRIORITIZE_ALARM_BROADCASTS
+                : Boolean.parseBoolean(flag);
+    }
     private void updateDeferBootCompletedBroadcast() {
         mDeferBootCompletedBroadcast = DeviceConfig.getInt(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_DEFER_BOOT_COMPLETED_BROADCAST,
                 DEFAULT_DEFER_BOOT_COMPLETED_BROADCAST);
+    }
+
+    private void updateEnforceReceiverExportedFlagRequirement() {
+        mEnforceReceiverExportedFlagRequirement = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_ENFORCE_RECEIVER_EXPORTED_FLAG_REQUIREMENT,
+                DEFAULT_ENFORCE_RECEIVER_EXPORTED_FLAG_REQUIREMENT);
     }
 
     private void updateNoKillCachedProcessesUntilBootCompleted() {
@@ -1592,6 +1776,27 @@ final class ActivityManagerConstants extends ContentObserver {
         CUR_TRIM_CACHED_PROCESSES = (MAX_CACHED_PROCESSES-rawMaxEmptyProcesses)/3;
     }
 
+    private void updateProactiveKillsEnabled() {
+        PROACTIVE_KILLS_ENABLED = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_PROACTIVE_KILLS_ENABLED,
+                DEFAULT_PROACTIVE_KILLS_ENABLED);
+    }
+
+    private void updateLowSwapThresholdPercent() {
+        LOW_SWAP_THRESHOLD_PERCENT = DeviceConfig.getFloat(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_LOW_SWAP_THRESHOLD_PERCENT,
+                DEFAULT_LOW_SWAP_THRESHOLD_PERCENT);
+    }
+
+    private void updateTopToFgsGraceDuration() {
+        TOP_TO_FGS_GRACE_DURATION = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_TOP_TO_FGS_GRACE_DURATION,
+                DEFAULT_TOP_TO_FGS_GRACE_DURATION);
+    }
+
     private void updateMinAssocLogDuration() {
         MIN_ASSOC_LOG_DURATION = DeviceConfig.getLong(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER, KEY_MIN_ASSOC_LOG_DURATION,
@@ -1631,6 +1836,34 @@ final class ActivityManagerConstants extends ContentObserver {
         if (oldVal > MAX_PHANTOM_PROCESSES) {
             mService.mHandler.post(mService.mPhantomProcessList::trimPhantomProcessesIfNecessary);
         }
+    }
+
+    private void updateMaxServiceConnectionsPerProcess() {
+        mMaxServiceConnectionsPerProcess = DeviceConfig.getInt(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_MAX_SERVICE_CONNECTIONS_PER_PROCESS,
+                DEFAULT_MAX_SERVICE_CONNECTIONS_PER_PROCESS);
+    }
+
+    private void updateShortFgsTimeoutDuration() {
+        mShortFgsTimeoutDuration = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_SHORT_FGS_TIMEOUT_DURATION,
+                DEFAULT_SHORT_FGS_TIMEOUT_DURATION);
+    }
+
+    private void updateShortFgsProcStateExtraWaitDuration() {
+        mShortFgsProcStateExtraWaitDuration = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION,
+                DEFAULT_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION);
+    }
+
+    private void updateShortFgsAnrExtraWaitDuration() {
+        mShortFgsAnrExtraWaitDuration = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_SHORT_FGS_ANR_EXTRA_WAIT_DURATION,
+                DEFAULT_SHORT_FGS_ANR_EXTRA_WAIT_DURATION);
     }
 
     @NeverCompile // Avoid size overhead of debugging code.
@@ -1765,8 +1998,12 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(mComponentAliasOverrides);
         pw.print("  "); pw.print(KEY_DEFER_BOOT_COMPLETED_BROADCAST);
         pw.print("="); pw.println(mDeferBootCompletedBroadcast);
+        pw.print("  "); pw.print(KEY_PRIORITIZE_ALARM_BROADCASTS);
+        pw.print("="); pw.println(mPrioritizeAlarmBroadcasts);
         pw.print("  "); pw.print(KEY_NO_KILL_CACHED_PROCESSES_UNTIL_BOOT_COMPLETED);
         pw.print("="); pw.println(mNoKillCachedProcessesUntilBootCompleted);
+        pw.print("  "); pw.print(KEY_ENFORCE_RECEIVER_EXPORTED_FLAG_REQUIREMENT);
+        pw.print("="); pw.println(mEnforceReceiverExportedFlagRequirement);
         pw.print("  "); pw.print(KEY_NO_KILL_CACHED_PROCESSES_POST_BOOT_COMPLETED_DURATION_MILLIS);
         pw.print("="); pw.println(mNoKillCachedProcessesPostBootCompletedDurationMillis);
         pw.print("  "); pw.print(KEY_MAX_EMPTY_TIME_MILLIS);
@@ -1779,6 +2016,34 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(mServiceBindAlmostPerceptibleTimeoutMs);
         pw.print("  "); pw.print(KEY_NETWORK_ACCESS_TIMEOUT_MS);
         pw.print("="); pw.println(mNetworkAccessTimeoutMs);
+        pw.print("  "); pw.print(KEY_MAX_SERVICE_CONNECTIONS_PER_PROCESS);
+        pw.print("="); pw.println(mMaxServiceConnectionsPerProcess);
+        pw.print("  "); pw.print(KEY_PROACTIVE_KILLS_ENABLED);
+        pw.print("="); pw.println(PROACTIVE_KILLS_ENABLED);
+        pw.print("  "); pw.print(KEY_LOW_SWAP_THRESHOLD_PERCENT);
+        pw.print("="); pw.println(LOW_SWAP_THRESHOLD_PERCENT);
+
+        pw.print("  "); pw.print(KEY_DEFERRED_FGS_NOTIFICATIONS_ENABLED);
+        pw.print("="); pw.println(mFlagFgsNotificationDeferralEnabled);
+        pw.print("  "); pw.print(KEY_DEFERRED_FGS_NOTIFICATIONS_API_GATED);
+        pw.print("="); pw.println(mFlagFgsNotificationDeferralApiGated);
+
+        pw.print("  "); pw.print(KEY_DEFERRED_FGS_NOTIFICATION_INTERVAL);
+        pw.print("="); pw.println(mFgsNotificationDeferralInterval);
+        pw.print("  "); pw.print(KEY_DEFERRED_FGS_NOTIFICATION_INTERVAL_FOR_SHORT);
+        pw.print("="); pw.println(mFgsNotificationDeferralIntervalForShort);
+
+        pw.print("  "); pw.print(KEY_DEFERRED_FGS_NOTIFICATION_EXCLUSION_TIME);
+        pw.print("="); pw.println(mFgsNotificationDeferralExclusionTime);
+        pw.print("  "); pw.print(KEY_DEFERRED_FGS_NOTIFICATION_EXCLUSION_TIME_FOR_SHORT);
+        pw.print("="); pw.println(mFgsNotificationDeferralExclusionTimeForShort);
+
+        pw.print("  "); pw.print(KEY_SHORT_FGS_TIMEOUT_DURATION);
+        pw.print("="); pw.println(mShortFgsTimeoutDuration);
+        pw.print("  "); pw.print(KEY_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION);
+        pw.print("="); pw.println(mShortFgsProcStateExtraWaitDuration);
+        pw.print("  "); pw.print(KEY_SHORT_FGS_ANR_EXTRA_WAIT_DURATION);
+        pw.print("="); pw.println(mShortFgsAnrExtraWaitDuration);
 
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {

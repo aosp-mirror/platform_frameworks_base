@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.phone;
 
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.app.IWallpaperManager;
 import android.app.IWallpaperManagerCallback;
 import android.app.WallpaperColors;
@@ -45,6 +44,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.NotificationMediaManager;
 
 import libcore.io.IoUtils;
@@ -82,10 +82,11 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             DumpManager dumpManager,
             NotificationMediaManager mediaManager,
-            @Main Handler mainHandler) {
+            @Main Handler mainHandler,
+            UserTracker userTracker) {
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
         mWallpaperManager = wallpaperManager;
-        mCurrentUserId = ActivityManager.getCurrentUser();
+        mCurrentUserId = userTracker.getUserId();
         mUpdateMonitor = keyguardUpdateMonitor;
         mMediaManager = mediaManager;
         mH = mainHandler;
@@ -120,6 +121,10 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
 
     public LoaderResult loadBitmap(int currentUserId, UserHandle selectedUser) {
         // May be called on any thread - only use thread safe operations.
+
+        if (mWallpaperManager.isLockscreenLiveWallpaperEnabled()) {
+            return LoaderResult.success(null);
+        }
 
         if (!mWallpaperManager.isWallpaperSupported()) {
             // When wallpaper is not supported, show the system wallpaper

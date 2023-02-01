@@ -19,6 +19,14 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -31,6 +39,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.settings.UserTracker;
 
 import org.junit.After;
@@ -38,37 +47,45 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class TileServiceManagerTest extends SysuiTestCase {
 
+    @Mock
     private TileServices mTileServices;
+    @Mock
     private TileLifecycleManager mTileLifecycle;
+    @Mock
+    private UserTracker mUserTracker;
+    @Mock
+    private QSTileHost mQSTileHost;
+    @Mock
+    private Context mMockContext;
+
     private HandlerThread mThread;
     private Handler mHandler;
     private TileServiceManager mTileServiceManager;
-    private UserTracker mUserTracker;
-    private Context mMockContext;
+    private ComponentName mComponentName;
 
     @Before
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
         mThread = new HandlerThread("TestThread");
         mThread.start();
         mHandler = Handler.createAsync(mThread.getLooper());
-        mTileServices = Mockito.mock(TileServices.class);
-        mUserTracker = Mockito.mock(UserTracker.class);
-        Mockito.when(mUserTracker.getUserId()).thenReturn(UserHandle.USER_SYSTEM);
-        Mockito.when(mUserTracker.getUserHandle()).thenReturn(UserHandle.SYSTEM);
+        when(mUserTracker.getUserId()).thenReturn(UserHandle.USER_SYSTEM);
+        when(mUserTracker.getUserHandle()).thenReturn(UserHandle.SYSTEM);
 
-        mMockContext = Mockito.mock(Context.class);
-        Mockito.when(mTileServices.getContext()).thenReturn(mMockContext);
-        mTileLifecycle = Mockito.mock(TileLifecycleManager.class);
-        Mockito.when(mTileLifecycle.isActiveTile()).thenReturn(false);
-        ComponentName componentName = new ComponentName(mContext,
-                TileServiceManagerTest.class);
-        Mockito.when(mTileLifecycle.getComponent()).thenReturn(componentName);
+        when(mTileServices.getContext()).thenReturn(mMockContext);
+        when(mTileServices.getHost()).thenReturn(mQSTileHost);
+        when(mTileLifecycle.getUserId()).thenAnswer(invocation -> mUserTracker.getUserId());
+        when(mTileLifecycle.isActiveTile()).thenReturn(false);
+
+        mComponentName = new ComponentName(mContext, TileServiceManagerTest.class);
+        when(mTileLifecycle.getComponent()).thenReturn(mComponentName);
         mTileServiceManager = new TileServiceManager(mTileServices, mHandler, mUserTracker,
                 mTileLifecycle);
     }
@@ -80,17 +97,44 @@ public class TileServiceManagerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testSetTileAddedIfNotAdded() {
+        when(mQSTileHost.isTileAdded(eq(mComponentName), anyInt())).thenReturn(false);
+        mTileServiceManager.startLifecycleManagerAndAddTile();
+
+        verify(mQSTileHost).setTileAdded(mComponentName, mUserTracker.getUserId(), true);
+    }
+
+    @Test
+    public void testNotSetTileAddedIfAdded() {
+        when(mQSTileHost.isTileAdded(eq(mComponentName), anyInt())).thenReturn(true);
+        mTileServiceManager.startLifecycleManagerAndAddTile();
+
+        verify(mQSTileHost, never()).setTileAdded(eq(mComponentName), anyInt(), eq(true));
+    }
+
+    @Test
+    public void testSetTileAddedCorrectUser() {
+        int user = 10;
+        when(mUserTracker.getUserId()).thenReturn(user);
+        when(mQSTileHost.isTileAdded(eq(mComponentName), anyInt())).thenReturn(false);
+        mTileServiceManager.startLifecycleManagerAndAddTile();
+
+        verify(mQSTileHost).setTileAdded(mComponentName, user, true);
+    }
+
+    @Test
     public void testUninstallReceiverExported() {
+        mTileServiceManager.startLifecycleManagerAndAddTile();
         ArgumentCaptor<IntentFilter> intentFilterCaptor =
                 ArgumentCaptor.forClass(IntentFilter.class);
 
-        Mockito.verify(mMockContext).registerReceiverAsUser(
-                Mockito.any(),
-                Mockito.any(),
+        verify(mMockContext).registerReceiverAsUser(
+                any(),
+                any(),
                 intentFilterCaptor.capture(),
-                Mockito.any(),
-                Mockito.any(),
-                Mockito.eq(Context.RECEIVER_EXPORTED)
+                any(),
+                any(),
+                eq(Context.RECEIVER_EXPORTED)
         );
         IntentFilter filter = intentFilterCaptor.getValue();
         assertTrue(filter.hasAction(Intent.ACTION_PACKAGE_REMOVED));
@@ -99,38 +143,41 @@ public class TileServiceManagerTest extends SysuiTestCase {
 
     @Test
     public void testSetBindRequested() {
+        mTileServiceManager.startLifecycleManagerAndAddTile();
         // Request binding.
         mTileServiceManager.setBindRequested(true);
         mTileServiceManager.setLastUpdate(0);
         mTileServiceManager.calculateBindPriority(5);
-        Mockito.verify(mTileServices, Mockito.times(2)).recalculateBindAllowance();
+        verify(mTileServices, times(2)).recalculateBindAllowance();
         assertEquals(5, mTileServiceManager.getBindPriority());
 
         // Verify same state doesn't trigger recalculating for no reason.
         mTileServiceManager.setBindRequested(true);
-        Mockito.verify(mTileServices, Mockito.times(2)).recalculateBindAllowance();
+        verify(mTileServices, times(2)).recalculateBindAllowance();
 
         mTileServiceManager.setBindRequested(false);
         mTileServiceManager.calculateBindPriority(5);
-        Mockito.verify(mTileServices, Mockito.times(3)).recalculateBindAllowance();
+        verify(mTileServices, times(3)).recalculateBindAllowance();
         assertEquals(Integer.MIN_VALUE, mTileServiceManager.getBindPriority());
     }
 
     @Test
     public void testPendingClickPriority() {
-        Mockito.when(mTileLifecycle.hasPendingClick()).thenReturn(true);
+        mTileServiceManager.startLifecycleManagerAndAddTile();
+        when(mTileLifecycle.hasPendingClick()).thenReturn(true);
         mTileServiceManager.calculateBindPriority(0);
         assertEquals(Integer.MAX_VALUE, mTileServiceManager.getBindPriority());
     }
 
     @Test
     public void testBind() {
+        mTileServiceManager.startLifecycleManagerAndAddTile();
         // Trigger binding requested and allowed.
         mTileServiceManager.setBindRequested(true);
         mTileServiceManager.setBindAllowed(true);
 
         ArgumentCaptor<Boolean> captor = ArgumentCaptor.forClass(Boolean.class);
-        Mockito.verify(mTileLifecycle, Mockito.times(1)).setBindService(captor.capture());
+        verify(mTileLifecycle, times(1)).setBindService(captor.capture());
         assertTrue((boolean) captor.getValue());
 
         mTileServiceManager.setBindRequested(false);
@@ -141,7 +188,7 @@ public class TileServiceManagerTest extends SysuiTestCase {
 
         mTileServiceManager.setBindAllowed(false);
         captor = ArgumentCaptor.forClass(Boolean.class);
-        Mockito.verify(mTileLifecycle, Mockito.times(2)).setBindService(captor.capture());
+        verify(mTileLifecycle, times(2)).setBindService(captor.capture());
         assertFalse((boolean) captor.getValue());
     }
 }

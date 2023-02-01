@@ -44,6 +44,7 @@ import org.junit.runner.RunWith;
 public class OwnersTest extends DpmTestBase {
 
     private static final String TESTDPC_PACKAGE = "com.afwsamples.testdpc";
+    private final DeviceStateCacheImpl mDeviceStateCache = new DeviceStateCacheImpl();
 
     @Before
     public void setUp() throws Exception {
@@ -120,6 +121,6 @@ public class OwnersTest extends DpmTestBase {
         final MockSystemServices services = getServices();
         return new Owners(services.userManager, services.userManagerInternal,
                 services.packageManagerInternal, services.activityTaskManagerInternal,
-                services.activityManagerInternal, services.pathProvider);
+                services.activityManagerInternal, mDeviceStateCache, services.pathProvider);
     }
 }

@@ -81,7 +81,9 @@ public class InsetsState implements Parcelable {
             ITYPE_BOTTOM_MANDATORY_GESTURES,
             ITYPE_LEFT_MANDATORY_GESTURES,
             ITYPE_RIGHT_MANDATORY_GESTURES,
+            ITYPE_LEFT_TAPPABLE_ELEMENT,
             ITYPE_TOP_TAPPABLE_ELEMENT,
+            ITYPE_RIGHT_TAPPABLE_ELEMENT,
             ITYPE_BOTTOM_TAPPABLE_ELEMENT,
             ITYPE_LEFT_DISPLAY_CUTOUT,
             ITYPE_TOP_DISPLAY_CUTOUT,
@@ -90,8 +92,10 @@ public class InsetsState implements Parcelable {
             ITYPE_IME,
             ITYPE_CLIMATE_BAR,
             ITYPE_EXTRA_NAVIGATION_BAR,
-            ITYPE_LOCAL_NAVIGATION_BAR_1,
-            ITYPE_LOCAL_NAVIGATION_BAR_2
+            ITYPE_LEFT_GENERIC_OVERLAY,
+            ITYPE_TOP_GENERIC_OVERLAY,
+            ITYPE_RIGHT_GENERIC_OVERLAY,
+            ITYPE_BOTTOM_GENERIC_OVERLAY
     })
     public @interface InternalInsetsType {}
 
@@ -135,10 +139,12 @@ public class InsetsState implements Parcelable {
     public static final int ITYPE_EXTRA_NAVIGATION_BAR = 21;
 
     /** Additional types for local insets. **/
-    public static final int ITYPE_LOCAL_NAVIGATION_BAR_1 = 22;
-    public static final int ITYPE_LOCAL_NAVIGATION_BAR_2 = 23;
+    public static final int ITYPE_LEFT_GENERIC_OVERLAY = 22;
+    public static final int ITYPE_TOP_GENERIC_OVERLAY = 23;
+    public static final int ITYPE_RIGHT_GENERIC_OVERLAY = 24;
+    public static final int ITYPE_BOTTOM_GENERIC_OVERLAY = 25;
 
-    static final int LAST_TYPE = ITYPE_LOCAL_NAVIGATION_BAR_2;
+    static final int LAST_TYPE = ITYPE_BOTTOM_GENERIC_OVERLAY;
     public static final int SIZE = LAST_TYPE + 1;
 
     // Derived types
@@ -191,6 +197,9 @@ public class InsetsState implements Parcelable {
     private PrivacyIndicatorBounds mPrivacyIndicatorBounds =
             new PrivacyIndicatorBounds();
 
+    /** The display shape */
+    private DisplayShape mDisplayShape = DisplayShape.NONE;
+
     public InsetsState() {
     }
 
@@ -236,7 +245,7 @@ public class InsetsState implements Parcelable {
 
             // IME won't be reported in max insets as the size depends on the EditorInfo of the IME
             // target.
-            if (source.getType() != ITYPE_IME) {
+            if (source.getType() != WindowInsets.Type.ime()) {
                 InsetsSource ignoringVisibilitySource = ignoringVisibilityState != null
                         ? ignoringVisibilityState.getSource(type)
                         : source;
@@ -265,6 +274,7 @@ public class InsetsState implements Parcelable {
                 alwaysConsumeSystemBars, calculateRelativeCutout(frame),
                 calculateRelativeRoundedCorners(frame),
                 calculateRelativePrivacyIndicatorBounds(frame),
+                calculateRelativeDisplayShape(frame),
                 compatInsetsTypes, (legacySystemUiFlags & SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0);
     }
 
@@ -329,6 +339,16 @@ public class InsetsState implements Parcelable {
         return mPrivacyIndicatorBounds.inset(insetLeft, insetTop, insetRight, insetBottom);
     }
 
+    private DisplayShape calculateRelativeDisplayShape(Rect frame) {
+        if (mDisplayFrame.equals(frame)) {
+            return mDisplayShape;
+        }
+        if (frame == null) {
+            return DisplayShape.NONE;
+        }
+        return mDisplayShape.setOffset(-frame.left, -frame.top);
+    }
+
     public Insets calculateInsets(Rect frame, @InsetsType int types, boolean ignoreVisibility) {
         Insets insets = Insets.NONE;
         for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
@@ -346,7 +366,7 @@ public class InsetsState implements Parcelable {
     }
 
     public Insets calculateInsets(Rect frame, @InsetsType int types,
-            InsetsVisibilities overrideVisibilities) {
+            @InsetsType int requestedVisibleTypes) {
         Insets insets = Insets.NONE;
         for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
             InsetsSource source = mSources[type];
@@ -354,10 +374,7 @@ public class InsetsState implements Parcelable {
                 continue;
             }
             int publicType = InsetsState.toPublicType(type);
-            if ((publicType & types) == 0) {
-                continue;
-            }
-            if (!overrideVisibilities.getVisibility(type)) {
+            if ((publicType & types & requestedVisibleTypes) == 0) {
                 continue;
             }
             insets = Insets.max(source.calculateInsets(frame, true), insets);
@@ -404,27 +421,20 @@ public class InsetsState implements Parcelable {
             if (source == null) {
                 continue;
             }
-            if (!canControlSide(frame, getInsetSide(
-                    source.calculateInsets(frame, true /* ignoreVisibility */)))) {
+            if (!canControlSource(frame, source)) {
                 blocked |= toPublicType(type);
             }
         }
         return blocked;
     }
 
-    private boolean canControlSide(Rect frame, int side) {
-        switch (side) {
-            case ISIDE_LEFT:
-            case ISIDE_RIGHT:
-                return frame.left == mDisplayFrame.left && frame.right == mDisplayFrame.right;
-            case ISIDE_TOP:
-            case ISIDE_BOTTOM:
-                return frame.top == mDisplayFrame.top && frame.bottom == mDisplayFrame.bottom;
-            case ISIDE_FLOATING:
-                return true;
-            default:
-                return false;
-        }
+    private static boolean canControlSource(Rect frame, InsetsSource source) {
+        final Insets insets = source.calculateInsets(frame, true /* ignoreVisibility */);
+        final Rect sourceFrame = source.getFrame();
+        final int sourceWidth = sourceFrame.width();
+        final int sourceHeight = sourceFrame.height();
+        return insets.left == sourceWidth || insets.right == sourceWidth
+                || insets.top == sourceHeight || insets.bottom == sourceHeight;
     }
 
     private void processSource(InsetsSource source, Rect relativeFrame, boolean ignoreVisibility,
@@ -432,7 +442,7 @@ public class InsetsState implements Parcelable {
             @Nullable boolean[] typeVisibilityMap) {
         Insets insets = source.calculateInsets(relativeFrame, ignoreVisibility);
 
-        int type = toPublicType(source.getType());
+        final int type = source.getType();
         processSourceAsPublicType(source, typeInsetsMap, typeSideMap, typeVisibilityMap,
                 insets, type);
 
@@ -476,7 +486,7 @@ public class InsetsState implements Parcelable {
         if (typeSideMap != null) {
             @InternalInsetsSide int insetSide = getInsetSide(insets);
             if (insetSide != ISIDE_UNKNOWN) {
-                typeSideMap.put(source.getType(), insetSide);
+                typeSideMap.put(source.getId(), insetSide);
             }
         }
     }
@@ -509,7 +519,7 @@ public class InsetsState implements Parcelable {
         if (source != null) {
             return source;
         }
-        source = new InsetsSource(type);
+        source = new InsetsSource(type, toPublicType(type));
         mSources[type] = source;
         return source;
     }
@@ -593,6 +603,14 @@ public class InsetsState implements Parcelable {
         return mPrivacyIndicatorBounds;
     }
 
+    public void setDisplayShape(DisplayShape displayShape) {
+        mDisplayShape = displayShape;
+    }
+
+    public DisplayShape getDisplayShape() {
+        return mDisplayShape;
+    }
+
     /**
      * Modifies the state of this class to exclude a certain type to make it ready for dispatching
      * to the client.
@@ -632,6 +650,7 @@ public class InsetsState implements Parcelable {
         mRoundedCorners = mRoundedCorners.scale(scale);
         mRoundedCornerFrame.scale(scale);
         mPrivacyIndicatorBounds = mPrivacyIndicatorBounds.scale(scale);
+        mDisplayShape = mDisplayShape.setScale(scale);
         for (int i = 0; i < SIZE; i++) {
             final InsetsSource source = mSources[i];
             if (source != null) {
@@ -654,6 +673,7 @@ public class InsetsState implements Parcelable {
         mRoundedCorners = other.getRoundedCorners();
         mRoundedCornerFrame.set(other.mRoundedCornerFrame);
         mPrivacyIndicatorBounds = other.getPrivacyIndicatorBounds();
+        mDisplayShape = other.getDisplayShape();
         if (copySources) {
             for (int i = 0; i < SIZE; i++) {
                 InsetsSource source = other.mSources[i];
@@ -679,6 +699,7 @@ public class InsetsState implements Parcelable {
         mRoundedCorners = other.getRoundedCorners();
         mRoundedCornerFrame.set(other.mRoundedCornerFrame);
         mPrivacyIndicatorBounds = other.getPrivacyIndicatorBounds();
+        mDisplayShape = other.getDisplayShape();
         final ArraySet<Integer> t = toInternalType(types);
         for (int i = t.size() - 1; i >= 0; i--) {
             final int type = t.valueAt(i);
@@ -687,7 +708,7 @@ public class InsetsState implements Parcelable {
     }
 
     public void addSource(InsetsSource source) {
-        mSources[source.getType()] = source;
+        mSources[source.getId()] = source;
     }
 
     public static boolean clearsCompatInsets(int windowType, int windowFlags, int windowingMode) {
@@ -705,8 +726,12 @@ public class InsetsState implements Parcelable {
         if ((types & Type.NAVIGATION_BARS) != 0) {
             result.add(ITYPE_NAVIGATION_BAR);
             result.add(ITYPE_EXTRA_NAVIGATION_BAR);
-            result.add(ITYPE_LOCAL_NAVIGATION_BAR_1);
-            result.add(ITYPE_LOCAL_NAVIGATION_BAR_2);
+        }
+        if ((types & Type.SYSTEM_OVERLAYS) != 0) {
+            result.add(ITYPE_LEFT_GENERIC_OVERLAY);
+            result.add(ITYPE_TOP_GENERIC_OVERLAY);
+            result.add(ITYPE_RIGHT_GENERIC_OVERLAY);
+            result.add(ITYPE_BOTTOM_GENERIC_OVERLAY);
         }
         if ((types & Type.CAPTION_BAR) != 0) {
             result.add(ITYPE_CAPTION_BAR);
@@ -747,9 +772,12 @@ public class InsetsState implements Parcelable {
                 return Type.STATUS_BARS;
             case ITYPE_NAVIGATION_BAR:
             case ITYPE_EXTRA_NAVIGATION_BAR:
-            case ITYPE_LOCAL_NAVIGATION_BAR_1:
-            case ITYPE_LOCAL_NAVIGATION_BAR_2:
                 return Type.NAVIGATION_BARS;
+            case ITYPE_LEFT_GENERIC_OVERLAY:
+            case ITYPE_TOP_GENERIC_OVERLAY:
+            case ITYPE_RIGHT_GENERIC_OVERLAY:
+            case ITYPE_BOTTOM_GENERIC_OVERLAY:
+                return Type.SYSTEM_OVERLAYS;
             case ITYPE_CAPTION_BAR:
                 return Type.CAPTION_BAR;
             case ITYPE_IME:
@@ -804,6 +832,7 @@ public class InsetsState implements Parcelable {
         pw.println(newPrefix + "mRoundedCorners=" + mRoundedCorners);
         pw.println(newPrefix + "mRoundedCornerFrame=" + mRoundedCornerFrame);
         pw.println(newPrefix + "mPrivacyIndicatorBounds=" + mPrivacyIndicatorBounds);
+        pw.println(newPrefix + "mDisplayShape=" + mDisplayShape);
         for (int i = 0; i < SIZE; i++) {
             InsetsSource source = mSources[i];
             if (source == null) continue;
@@ -868,10 +897,14 @@ public class InsetsState implements Parcelable {
                 return "ITYPE_CLIMATE_BAR";
             case ITYPE_EXTRA_NAVIGATION_BAR:
                 return "ITYPE_EXTRA_NAVIGATION_BAR";
-            case ITYPE_LOCAL_NAVIGATION_BAR_1:
-                return "ITYPE_LOCAL_NAVIGATION_BAR_1";
-            case ITYPE_LOCAL_NAVIGATION_BAR_2:
-                return "ITYPE_LOCAL_NAVIGATION_BAR_2";
+            case ITYPE_LEFT_GENERIC_OVERLAY:
+                return "ITYPE_LEFT_GENERIC_OVERLAY";
+            case ITYPE_TOP_GENERIC_OVERLAY:
+                return "ITYPE_TOP_GENERIC_OVERLAY";
+            case ITYPE_RIGHT_GENERIC_OVERLAY:
+                return "ITYPE_RIGHT_GENERIC_OVERLAY";
+            case ITYPE_BOTTOM_GENERIC_OVERLAY:
+                return "ITYPE_BOTTOM_GENERIC_OVERLAY";
             default:
                 return "ITYPE_UNKNOWN_" + type;
         }
@@ -904,7 +937,8 @@ public class InsetsState implements Parcelable {
                 || !mDisplayCutout.equals(state.mDisplayCutout)
                 || !mRoundedCorners.equals(state.mRoundedCorners)
                 || !mRoundedCornerFrame.equals(state.mRoundedCornerFrame)
-                || !mPrivacyIndicatorBounds.equals(state.mPrivacyIndicatorBounds)) {
+                || !mPrivacyIndicatorBounds.equals(state.mPrivacyIndicatorBounds)
+                || !mDisplayShape.equals(state.mDisplayShape)) {
             return false;
         }
         for (int i = 0; i < SIZE; i++) {
@@ -914,6 +948,11 @@ public class InsetsState implements Parcelable {
             InsetsSource source = mSources[i];
             InsetsSource otherSource = state.mSources[i];
             if (source == null && otherSource == null) {
+                continue;
+            }
+            if (excludeInvisibleImeFrames && i == ITYPE_IME
+                    && ((source == null && !otherSource.isVisible())
+                            || (otherSource == null && !source.isVisible()))) {
                 continue;
             }
             if (source == null || otherSource == null) {
@@ -929,7 +968,7 @@ public class InsetsState implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(mDisplayFrame, mDisplayCutout, Arrays.hashCode(mSources),
-                mRoundedCorners, mPrivacyIndicatorBounds, mRoundedCornerFrame);
+                mRoundedCorners, mPrivacyIndicatorBounds, mRoundedCornerFrame, mDisplayShape);
     }
 
     public InsetsState(Parcel in) {
@@ -949,6 +988,7 @@ public class InsetsState implements Parcelable {
         dest.writeTypedObject(mRoundedCorners, flags);
         mRoundedCornerFrame.writeToParcel(dest, flags);
         dest.writeTypedObject(mPrivacyIndicatorBounds, flags);
+        dest.writeTypedObject(mDisplayShape, flags);
     }
 
     public static final @NonNull Creator<InsetsState> CREATOR = new Creator<InsetsState>() {
@@ -969,6 +1009,7 @@ public class InsetsState implements Parcelable {
         mRoundedCorners = in.readTypedObject(RoundedCorners.CREATOR);
         mRoundedCornerFrame.readFromParcel(in);
         mPrivacyIndicatorBounds = in.readTypedObject(PrivacyIndicatorBounds.CREATOR);
+        mDisplayShape = in.readTypedObject(DisplayShape.CREATOR);
     }
 
     @Override
@@ -986,6 +1027,7 @@ public class InsetsState implements Parcelable {
                 + ", mRoundedCorners=" + mRoundedCorners
                 + "  mRoundedCornerFrame=" + mRoundedCornerFrame
                 + ", mPrivacyIndicatorBounds=" + mPrivacyIndicatorBounds
+                + ", mDisplayShape=" + mDisplayShape
                 + ", mSources= { " + joiner
                 + " }";
     }

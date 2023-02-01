@@ -8,12 +8,20 @@
 #include "MimeType.h"
 #include "NinePatchPeeker.h"
 #include "SkAndroidCodec.h"
+#include "SkBitmap.h"
+#include "SkBlendMode.h"
 #include "SkCanvas.h"
-#include "SkMath.h"
+#include "SkColorSpace.h"
+#include "SkEncodedImageFormat.h"
+#include "SkImageInfo.h"
+#include "SkPaint.h"
 #include "SkPixelRef.h"
+#include "SkRect.h"
+#include "SkRefCnt.h"
+#include "SkSamplingOptions.h"
+#include "SkSize.h"
 #include "SkStream.h"
 #include "SkString.h"
-#include "SkUtils.h"
 #include "Utils.h"
 
 #include <HardwareBitmapUploader.h>
@@ -24,6 +32,7 @@
 #include <fcntl.h>
 #include <memory>
 #include <stdio.h>
+#include <stdint.h>
 #include <sys/stat.h>
 
 jfieldID gOptions_justBoundsFieldID;
@@ -132,7 +141,7 @@ public:
         }
 
         const size_t size = info.computeByteSize(bitmap->rowBytes());
-        if (size > SK_MaxS32) {
+        if (size > INT32_MAX) {
             ALOGW("bitmap is too large");
             return false;
         }

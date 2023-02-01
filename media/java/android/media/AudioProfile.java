@@ -46,11 +46,17 @@ public class AudioProfile implements Parcelable {
      * Encapsulation format is defined in standard IEC 61937.
      */
     public static final int AUDIO_ENCAPSULATION_TYPE_IEC61937 = 1;
+    /**
+     * Encapsulation format is PCM, which can be used by other formats that can be wrapped in
+     * a PCM frame, such as DSD(Direct Stream Digital).
+     */
+    public static final int AUDIO_ENCAPSULATION_TYPE_PCM = 2;
 
     /** @hide */
     @IntDef({
             AUDIO_ENCAPSULATION_TYPE_NONE,
             AUDIO_ENCAPSULATION_TYPE_IEC61937,
+            AUDIO_ENCAPSULATION_TYPE_PCM,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EncapsulationType {}
@@ -122,6 +128,7 @@ public class AudioProfile implements Parcelable {
      *
      * @see #AUDIO_ENCAPSULATION_TYPE_NONE
      * @see #AUDIO_ENCAPSULATION_TYPE_IEC61937
+     * @see #AUDIO_ENCAPSULATION_TYPE_PCM
      */
     public @EncapsulationType int getEncapsulationType() {
         return mEncapsulationType;

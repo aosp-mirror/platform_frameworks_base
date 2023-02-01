@@ -18,11 +18,11 @@ package com.android.server.devicestate;
 
 import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE;
 import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE;
-import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.hardware.devicestate.DeviceStateManager;
 
 import com.android.internal.util.Preconditions;
 
@@ -55,10 +55,36 @@ public final class DeviceState {
      */
     public static final int FLAG_APP_INACCESSIBLE = 1 << 1;
 
+    /**
+     * Some device states can be both entered through a physical configuration as well as emulation
+     * through {@link DeviceStateManager#requestState}, while some states can only be entered
+     * through emulation and have no physical configuration to match.
+     *
+     * This flag indicates that the corresponding state can only be entered through emulation.
+     */
+    public static final int FLAG_EMULATED_ONLY = 1 << 2;
+
+    /**
+     * This flag indicates that the corresponding state should be automatically canceled when the
+     * requesting app is no longer on top. The app is considered not on top when (1) the top
+     * activity in the system is from a different app, (2) the device is in sleep mode, or
+     * (3) the keyguard shows up.
+     */
+    public static final int FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP = 1 << 3;
+
+    /**
+     * This flag indicates that the corresponding state should be disabled when the device is
+     * overheating and reaching the critical status.
+     */
+    public static final int FLAG_DISABLE_WHEN_THERMAL_STATUS_CRITICAL = 1 << 4;
+
     /** @hide */
     @IntDef(prefix = {"FLAG_"}, flag = true, value = {
             FLAG_CANCEL_OVERRIDE_REQUESTS,
-            FLAG_APP_INACCESSIBLE
+            FLAG_APP_INACCESSIBLE,
+            FLAG_EMULATED_ONLY,
+            FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP,
+            FLAG_DISABLE_WHEN_THERMAL_STATUS_CRITICAL
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DeviceStateFlags {}

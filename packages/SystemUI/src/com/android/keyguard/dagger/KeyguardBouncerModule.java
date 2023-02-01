@@ -16,6 +16,10 @@
 
 package com.android.keyguard.dagger;
 
+import static com.android.systemui.biometrics.SideFpsControllerKt.hasSideFpsSensor;
+
+import android.annotation.Nullable;
+import android.hardware.fingerprint.FingerprintManager;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -23,14 +27,19 @@ import com.android.keyguard.KeyguardHostView;
 import com.android.keyguard.KeyguardSecurityContainer;
 import com.android.keyguard.KeyguardSecurityViewFlipper;
 import com.android.systemui.R;
+import com.android.systemui.biometrics.SideFpsController;
 import com.android.systemui.dagger.qualifiers.RootView;
-import com.android.systemui.statusbar.phone.KeyguardBouncer;
+import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
+
+import java.util.Optional;
+
+import javax.inject.Provider;
 
 import dagger.Module;
 import dagger.Provides;
 
 /**
- * Module to create and access view related to the {@link KeyguardBouncer}.
+ * Module to create and access view related to the {@link PrimaryBouncerInteractor}.
  */
 @Module
 public interface KeyguardBouncerModule {
@@ -59,5 +68,17 @@ public interface KeyguardBouncerModule {
     static KeyguardSecurityViewFlipper providesKeyguardSecurityViewFlipper(
             KeyguardSecurityContainer containerView) {
         return containerView.findViewById(R.id.view_flipper);
+    }
+
+    /** Provides {@link SideFpsController} if the device has the side fingerprint sensor. */
+    @Provides
+    @KeyguardBouncerScope
+    static Optional<SideFpsController> providesOptionalSidefpsController(
+            @Nullable FingerprintManager fingerprintManager,
+            Provider<SideFpsController> sidefpsControllerProvider) {
+        if (!hasSideFpsSensor(fingerprintManager)) {
+            return Optional.empty();
+        }
+        return Optional.of(sidefpsControllerProvider.get());
     }
 }

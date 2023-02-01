@@ -68,6 +68,7 @@ class ImageUtils {
             case ImageFormat.RAW_DEPTH10:
             case ImageFormat.DEPTH_JPEG:
             case ImageFormat.HEIC:
+            case ImageFormat.JPEG_R:
                 return 1;
             case ImageFormat.PRIVATE:
                 return 0;
@@ -84,6 +85,7 @@ class ImageUtils {
     public static int getNumPlanesForHardwareBufferFormat(int hardwareBufferFormat) {
         switch(hardwareBufferFormat) {
             case HardwareBuffer.YCBCR_420_888:
+            case HardwareBuffer.YCBCR_P010:
                 return 3;
             case HardwareBuffer.RGBA_8888:
             case HardwareBuffer.RGBX_8888:
@@ -231,6 +233,7 @@ class ImageUtils {
             case ImageFormat.DEPTH_POINT_CLOUD:
             case ImageFormat.DEPTH_JPEG:
             case ImageFormat.HEIC:
+            case ImageFormat.JPEG_R:
                 estimatedBytePerPixel = 0.3;
                 break;
             case ImageFormat.Y8:
@@ -255,10 +258,10 @@ class ImageUtils {
             case ImageFormat.RAW_SENSOR:
             case ImageFormat.RAW_PRIVATE: // round estimate, real size is unknown
             case ImageFormat.DEPTH16:
-            case ImageFormat.YCBCR_P010:
                 estimatedBytePerPixel = 2.0;
                 break;
             case PixelFormat.RGB_888:
+            case ImageFormat.YCBCR_P010:
                 estimatedBytePerPixel = 3.0;
                 break;
             case PixelFormat.RGBA_8888:
@@ -304,6 +307,7 @@ class ImageUtils {
             case ImageFormat.RAW_DEPTH:
             case ImageFormat.RAW_DEPTH10:
             case ImageFormat.HEIC:
+            case ImageFormat.JPEG_R:
                 return new Size(image.getWidth(), image.getHeight());
             case ImageFormat.PRIVATE:
                 return new Size(0, 0);

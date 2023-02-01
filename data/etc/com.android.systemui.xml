@@ -24,6 +24,7 @@
         <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"/>
         <permission name="android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST"/>
         <permission name="android.permission.CHANGE_OVERLAY_PACKAGES"/>
+        <permission name="android.permission.COMPONENT_OPTION_INTERACTIVE"/>
         <permission name="android.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS"/>
         <permission name="android.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS"/>
         <permission name="android.permission.CONTROL_VPN"/>
@@ -81,5 +82,7 @@
         <permission name="android.permission.READ_DEVICE_CONFIG" />
         <permission name="android.permission.READ_SAFETY_CENTER_STATUS" />
         <permission name="android.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS" />
+        <permission name="android.permission.READ_SEARCH_INDEXABLES" />
+        <permission name="android.permission.ACCESS_AMBIENT_CONTEXT_EVENT"/>
     </privapp-permissions>
 </permissions>

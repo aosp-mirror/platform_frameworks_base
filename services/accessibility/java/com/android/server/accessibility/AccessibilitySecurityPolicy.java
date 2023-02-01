@@ -696,7 +696,7 @@ public class AccessibilitySecurityPolicy {
         final ResolveInfo resolveInfo = service.getServiceInfo().getResolveInfo();
 
         if (resolveInfo == null) {
-            // For InteractionBridge and UiAutomation
+            // For InteractionBridge, UiAutomation, and Proxy.
             return true;
         }
 

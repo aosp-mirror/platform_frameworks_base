@@ -16,6 +16,10 @@
 
 package com.android.server.dreams;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
+
+import android.app.ActivityTaskManager;
+import android.app.BroadcastOptions;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -34,14 +38,16 @@ import android.os.UserHandle;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamService;
 import android.util.Slog;
-import android.view.IWindowManager;
-import android.view.WindowManagerGlobal;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Internal controller for starting and stopping the current dream and managing related state.
@@ -60,42 +66,62 @@ final class DreamController {
     private final Context mContext;
     private final Handler mHandler;
     private final Listener mListener;
-    private final IWindowManager mIWindowManager;
-    private long mDreamStartTime;
-    private String mSavedStopReason;
+    private final ActivityTaskManager mActivityTaskManager;
 
     private final Intent mDreamingStartedIntent = new Intent(Intent.ACTION_DREAMING_STARTED)
             .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
     private final Intent mDreamingStoppedIntent = new Intent(Intent.ACTION_DREAMING_STOPPED)
             .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+    private static final String DREAMING_DELIVERY_GROUP_NAMESPACE = UUID.randomUUID().toString();
+    private static final String DREAMING_DELIVERY_GROUP_KEY = UUID.randomUUID().toString();
+    private final Bundle mDreamingStartedStoppedOptions = createDreamingStartedStoppedOptions();
 
     private final Intent mCloseNotificationShadeIntent;
 
     private DreamRecord mCurrentDream;
 
-    private final Runnable mStopUnconnectedDreamRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if (mCurrentDream != null && mCurrentDream.mBound && !mCurrentDream.mConnected) {
-                Slog.w(TAG, "Bound dream did not connect in the time allotted");
-                stopDream(true /*immediate*/, "slow to connect");
-            }
-        }
-    };
+    // Whether a dreaming started intent has been broadcast.
+    private boolean mSentStartBroadcast = false;
 
-    private final Runnable mStopStubbornDreamRunnable = () -> {
-        Slog.w(TAG, "Stubborn dream did not finish itself in the time allotted");
-        stopDream(true /*immediate*/, "slow to finish");
-        mSavedStopReason = null;
-    };
+    // When a new dream is started and there is an existing dream, the existing dream is allowed to
+    // live a little longer until the new dream is started, for a smoother transition. This dream is
+    // stopped as soon as the new dream is started, and this list is cleared. Usually there should
+    // only be one previous dream while waiting for a new dream to start, but we store a list to
+    // proof the edge case of multiple previous dreams.
+    private final ArrayList<DreamRecord> mPreviousDreams = new ArrayList<>();
 
     public DreamController(Context context, Handler handler, Listener listener) {
         mContext = context;
         mHandler = handler;
         mListener = listener;
-        mIWindowManager = WindowManagerGlobal.getWindowManagerService();
+        mActivityTaskManager = mContext.getSystemService(ActivityTaskManager.class);
         mCloseNotificationShadeIntent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         mCloseNotificationShadeIntent.putExtra("reason", "dream");
+    }
+
+    /**
+     * Create the {@link BroadcastOptions} bundle that will be used with sending the
+     * {@link Intent#ACTION_DREAMING_STARTED} and {@link Intent#ACTION_DREAMING_STOPPED}
+     * broadcasts.
+     */
+    private Bundle createDreamingStartedStoppedOptions() {
+        final BroadcastOptions options = BroadcastOptions.makeBasic();
+        // This allows the broadcasting system to discard any older broadcasts
+        // waiting to be delivered to a process.
+        options.setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT);
+        // Set namespace and key to identify which older broadcasts can be discarded.
+        // We could use any strings here with the following requirements:
+        // - namespace needs to be unlikely to be reused with in
+        //   the system_server process, as that could result in potentially discarding some
+        //   non-dreaming_started/stopped related broadcast.
+        // - key needs to be the same for both DREAMING_STARTED and DREAMING_STOPPED broadcasts
+        //   so that dreaming_stopped can also clear any older dreaming_started broadcasts that
+        //   are yet to be delivered.
+        options.setDeliveryGroupMatchingKey(
+                DREAMING_DELIVERY_GROUP_NAMESPACE, DREAMING_DELIVERY_GROUP_KEY);
+        // This allows the broadcast delivery to be delayed to apps in the Cached state.
+        options.setDeferUntilActive(true);
+        return options.toBundle();
     }
 
     public void dump(PrintWriter pw) {
@@ -109,18 +135,17 @@ final class DreamController {
             pw.println("    mUserId=" + mCurrentDream.mUserId);
             pw.println("    mBound=" + mCurrentDream.mBound);
             pw.println("    mService=" + mCurrentDream.mService);
-            pw.println("    mSentStartBroadcast=" + mCurrentDream.mSentStartBroadcast);
             pw.println("    mWakingGently=" + mCurrentDream.mWakingGently);
         } else {
             pw.println("  mCurrentDream: null");
         }
+
+        pw.println("  mSentStartBroadcast=" + mSentStartBroadcast);
     }
 
     public void startDream(Binder token, ComponentName name,
             boolean isPreviewMode, boolean canDoze, int userId, PowerManager.WakeLock wakeLock,
-            ComponentName overlayComponentName) {
-        stopDream(true /*immediate*/, "starting new dream");
-
+            ComponentName overlayComponentName, String reason) {
         Trace.traceBegin(Trace.TRACE_TAG_POWER, "startDream");
         try {
             // Close the notification shade. No need to send to all, but better to be explicit.
@@ -128,11 +153,24 @@ final class DreamController {
 
             Slog.i(TAG, "Starting dream: name=" + name
                     + ", isPreviewMode=" + isPreviewMode + ", canDoze=" + canDoze
-                    + ", userId=" + userId);
+                    + ", userId=" + userId + ", reason='" + reason + "'");
 
+            final DreamRecord oldDream = mCurrentDream;
             mCurrentDream = new DreamRecord(token, name, isPreviewMode, canDoze, userId, wakeLock);
+            if (oldDream != null) {
+                if (!oldDream.mWakingGently) {
+                    // We will stop these previous dreams once the new dream is started.
+                    mPreviousDreams.add(oldDream);
+                } else if (Objects.equals(oldDream.mName, mCurrentDream.mName)) {
+                    // We are attempting to start a dream that is currently waking up gently.
+                    // Let's silently stop the old instance here to clear the dream state.
+                    // This should happen after the new mCurrentDream is set to avoid announcing
+                    // a "dream stopped" state.
+                    stopDreamInstance(/* immediately */ true, "restarting same dream", oldDream);
+                }
+            }
 
-            mDreamStartTime = SystemClock.elapsedRealtime();
+            mCurrentDream.mDreamStartTime = SystemClock.elapsedRealtime();
             MetricsLogger.visible(mContext,
                     mCurrentDream.mCanDoze ? MetricsEvent.DOZING : MetricsEvent.DREAMING);
 
@@ -155,31 +193,49 @@ final class DreamController {
             }
 
             mCurrentDream.mBound = true;
-            mHandler.postDelayed(mStopUnconnectedDreamRunnable, DREAM_CONNECTION_TIMEOUT);
+            mHandler.postDelayed(mCurrentDream.mStopUnconnectedDreamRunnable,
+                    DREAM_CONNECTION_TIMEOUT);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_POWER);
         }
     }
 
+    /**
+     * Stops dreaming.
+     *
+     * The current dream, if any, and any unstopped previous dreams are stopped. The device stops
+     * dreaming.
+     */
     public void stopDream(boolean immediate, String reason) {
-        if (mCurrentDream == null) {
+        stopPreviousDreams();
+        stopDreamInstance(immediate, reason, mCurrentDream);
+    }
+
+    /**
+     * Stops the given dream instance.
+     *
+     * The device may still be dreaming afterwards if there are other dreams running.
+     */
+    private void stopDreamInstance(boolean immediate, String reason, DreamRecord dream) {
+        if (dream == null) {
             return;
         }
 
         Trace.traceBegin(Trace.TRACE_TAG_POWER, "stopDream");
         try {
             if (!immediate) {
-                if (mCurrentDream.mWakingGently) {
+                if (dream.mWakingGently) {
                     return; // already waking gently
                 }
 
-                if (mCurrentDream.mService != null) {
+                if (dream.mService != null) {
                     // Give the dream a moment to wake up and finish itself gently.
-                    mCurrentDream.mWakingGently = true;
+                    dream.mWakingGently = true;
                     try {
-                        mSavedStopReason = reason;
-                        mCurrentDream.mService.wakeUp();
-                        mHandler.postDelayed(mStopStubbornDreamRunnable, DREAM_FINISH_TIMEOUT);
+                        dream.mStopReason = reason;
+                        dream.mService.wakeUp();
+                        mHandler.postDelayed(dream.mStopStubbornDreamRunnable,
+                                DREAM_FINISH_TIMEOUT);
                         return;
                     } catch (RemoteException ex) {
                         // oh well, we tried, finish immediately instead
@@ -187,51 +243,78 @@ final class DreamController {
                 }
             }
 
-            final DreamRecord oldDream = mCurrentDream;
-            mCurrentDream = null;
-            Slog.i(TAG, "Stopping dream: name=" + oldDream.mName
-                    + ", isPreviewMode=" + oldDream.mIsPreviewMode
-                    + ", canDoze=" + oldDream.mCanDoze
-                    + ", userId=" + oldDream.mUserId
+            Slog.i(TAG, "Stopping dream: name=" + dream.mName
+                    + ", isPreviewMode=" + dream.mIsPreviewMode
+                    + ", canDoze=" + dream.mCanDoze
+                    + ", userId=" + dream.mUserId
                     + ", reason='" + reason + "'"
-                    + (mSavedStopReason == null ? "" : "(from '" + mSavedStopReason + "')"));
+                    + (dream.mStopReason == null ? "" : "(from '"
+                    + dream.mStopReason + "')"));
             MetricsLogger.hidden(mContext,
-                    oldDream.mCanDoze ? MetricsEvent.DOZING : MetricsEvent.DREAMING);
+                    dream.mCanDoze ? MetricsEvent.DOZING : MetricsEvent.DREAMING);
             MetricsLogger.histogram(mContext,
-                    oldDream.mCanDoze ? "dozing_minutes" : "dreaming_minutes" ,
-                    (int) ((SystemClock.elapsedRealtime() - mDreamStartTime) / (1000L * 60L)));
+                    dream.mCanDoze ? "dozing_minutes" : "dreaming_minutes",
+                    (int) ((SystemClock.elapsedRealtime() - dream.mDreamStartTime) / (1000L
+                            * 60L)));
 
-            mHandler.removeCallbacks(mStopUnconnectedDreamRunnable);
-            mHandler.removeCallbacks(mStopStubbornDreamRunnable);
-            mSavedStopReason = null;
+            mHandler.removeCallbacks(dream.mStopUnconnectedDreamRunnable);
+            mHandler.removeCallbacks(dream.mStopStubbornDreamRunnable);
 
-            if (oldDream.mSentStartBroadcast) {
-                mContext.sendBroadcastAsUser(mDreamingStoppedIntent, UserHandle.ALL);
-            }
-
-            if (oldDream.mService != null) {
+            if (dream.mService != null) {
                 try {
-                    oldDream.mService.detach();
+                    dream.mService.detach();
                 } catch (RemoteException ex) {
                     // we don't care; this thing is on the way out
                 }
 
                 try {
-                    oldDream.mService.asBinder().unlinkToDeath(oldDream, 0);
+                    dream.mService.asBinder().unlinkToDeath(dream, 0);
                 } catch (NoSuchElementException ex) {
                     // don't care
                 }
-                oldDream.mService = null;
+                dream.mService = null;
             }
 
-            if (oldDream.mBound) {
-                mContext.unbindService(oldDream);
+            if (dream.mBound) {
+                mContext.unbindService(dream);
             }
-            oldDream.releaseWakeLockIfNeeded();
+            dream.releaseWakeLockIfNeeded();
 
-            mHandler.post(() -> mListener.onDreamStopped(oldDream.mToken));
+            // Current dream stopped, device no longer dreaming.
+            if (dream == mCurrentDream) {
+                mCurrentDream = null;
+
+                if (mSentStartBroadcast) {
+                    mContext.sendBroadcastAsUser(mDreamingStoppedIntent, UserHandle.ALL,
+                            null /* receiverPermission */, mDreamingStartedStoppedOptions);
+                    mSentStartBroadcast = false;
+                }
+
+                mActivityTaskManager.removeRootTasksWithActivityTypes(
+                        new int[] {ACTIVITY_TYPE_DREAM});
+
+                mListener.onDreamStopped(dream.mToken);
+            } else if (dream.mCanDoze && !mCurrentDream.mCanDoze) {
+                mListener.stopDozing(dream.mToken);
+            }
+
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_POWER);
+        }
+    }
+
+    /**
+     * Stops all previous dreams, if any.
+     */
+    private void stopPreviousDreams() {
+        if (mPreviousDreams.isEmpty()) {
+            return;
+        }
+
+        // Using an iterator because mPreviousDreams is modified while the iteration is in process.
+        for (final Iterator<DreamRecord> it = mPreviousDreams.iterator(); it.hasNext(); ) {
+            stopDreamInstance(true /*immediate*/, "stop previous dream", it.next());
+            it.remove();
         }
     }
 
@@ -248,9 +331,10 @@ final class DreamController {
 
         mCurrentDream.mService = service;
 
-        if (!mCurrentDream.mIsPreviewMode) {
-            mContext.sendBroadcastAsUser(mDreamingStartedIntent, UserHandle.ALL);
-            mCurrentDream.mSentStartBroadcast = true;
+        if (!mCurrentDream.mIsPreviewMode && !mSentStartBroadcast) {
+            mContext.sendBroadcastAsUser(mDreamingStartedIntent, UserHandle.ALL,
+                    null /* receiverPermission */, mDreamingStartedStoppedOptions);
+            mSentStartBroadcast = true;
         }
     }
 
@@ -259,6 +343,7 @@ final class DreamController {
      */
     public interface Listener {
         void onDreamStopped(Binder token);
+        void stopDozing(Binder token);
     }
 
     private final class DreamRecord implements DeathRecipient, ServiceConnection {
@@ -272,9 +357,34 @@ final class DreamController {
         public boolean mBound;
         public boolean mConnected;
         public IDreamService mService;
-        public boolean mSentStartBroadcast;
-
+        private String mStopReason;
+        private long mDreamStartTime;
         public boolean mWakingGently;
+
+        private final Runnable mStopPreviousDreamsIfNeeded = this::stopPreviousDreamsIfNeeded;
+        private final Runnable mReleaseWakeLockIfNeeded = this::releaseWakeLockIfNeeded;
+
+        private final Runnable mStopUnconnectedDreamRunnable = () -> {
+            if (mBound && !mConnected) {
+                Slog.w(TAG, "Bound dream did not connect in the time allotted");
+                stopDream(true /*immediate*/, "slow to connect" /*reason*/);
+            }
+        };
+
+        private final Runnable mStopStubbornDreamRunnable = () -> {
+            Slog.w(TAG, "Stubborn dream did not finish itself in the time allotted");
+            stopDream(true /*immediate*/, "slow to finish" /*reason*/);
+            mStopReason = null;
+        };
+
+        private final IRemoteCallback mDreamingStartedCallback = new IRemoteCallback.Stub() {
+            // May be called on any thread.
+            @Override
+            public void sendResult(Bundle data) {
+                mHandler.post(mStopPreviousDreamsIfNeeded);
+                mHandler.post(mReleaseWakeLockIfNeeded);
+            }
+        };
 
         DreamRecord(Binder token, ComponentName name, boolean isPreviewMode,
                 boolean canDoze, int userId, PowerManager.WakeLock wakeLock) {
@@ -286,7 +396,9 @@ final class DreamController {
             mWakeLock = wakeLock;
             // Hold the lock while we're waiting for the service to connect and start dreaming.
             // Released after the service has started dreaming, we stop dreaming, or it timed out.
-            mWakeLock.acquire();
+            if (mWakeLock != null) {
+                mWakeLock.acquire();
+            }
             mHandler.postDelayed(mReleaseWakeLockIfNeeded, 10000);
         }
 
@@ -326,6 +438,12 @@ final class DreamController {
             });
         }
 
+        void stopPreviousDreamsIfNeeded() {
+            if (mCurrentDream == DreamRecord.this) {
+                stopPreviousDreams();
+            }
+        }
+
         void releaseWakeLockIfNeeded() {
             if (mWakeLock != null) {
                 mWakeLock.release();
@@ -333,15 +451,5 @@ final class DreamController {
                 mHandler.removeCallbacks(mReleaseWakeLockIfNeeded);
             }
         }
-
-        final Runnable mReleaseWakeLockIfNeeded = this::releaseWakeLockIfNeeded;
-
-        final IRemoteCallback mDreamingStartedCallback = new IRemoteCallback.Stub() {
-            // May be called on any thread.
-            @Override
-            public void sendResult(Bundle data) throws RemoteException {
-                mHandler.post(mReleaseWakeLockIfNeeded);
-            }
-        };
     }
 }

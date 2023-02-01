@@ -45,6 +45,8 @@ import android.telephony.TelephonyManager;
 import android.util.Slog;
 
 import com.android.internal.telephony.IMms;
+import com.android.internal.telephony.TelephonyPermissions;
+import com.android.internal.telephony.util.TelephonyUtils;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriGrantsManagerInternal;
 
@@ -337,6 +339,17 @@ public class MmsServiceBroker extends SystemService {
                 throws RemoteException {
             Slog.d(TAG, "sendMessage() by " + callingPkg);
             mContext.enforceCallingPermission(Manifest.permission.SEND_SMS, "Send MMS message");
+
+            // Check if user is associated with the subscription
+            if (!TelephonyPermissions.checkSubscriptionAssociatedWithUser(mContext, subId,
+                    Binder.getCallingUserHandle())) {
+                if (TelephonyUtils.isUidForeground(mContext, Binder.getCallingUid())) {
+                    TelephonyUtils.showErrorIfSubscriptionAssociatedWithManagedProfile(mContext,
+                            subId);
+                }
+                return;
+            }
+
             if (getAppOpsManager().noteOp(AppOpsManager.OP_SEND_SMS, Binder.getCallingUid(),
                     callingPkg, attributionTag, null) != AppOpsManager.MODE_ALLOWED) {
                 Slog.e(TAG, callingPkg + " is not allowed to call sendMessage()");

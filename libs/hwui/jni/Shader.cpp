@@ -2,11 +2,21 @@
 #define LOG_TAG "ShaderJNI"
 
 #include "GraphicsJNI.h"
+#include "SkBitmap.h"
+#include "SkBlendMode.h"
+#include "SkColor.h"
 #include "SkColorFilter.h"
 #include "SkGradientShader.h"
+#include "SkImage.h"
 #include "SkImagePriv.h"
+#include "SkMatrix.h"
+#include "SkPoint.h"
+#include "SkRefCnt.h"
+#include "SkSamplingOptions.h"
+#include "SkScalar.h"
 #include "SkShader.h"
-#include "SkBlendMode.h"
+#include "SkString.h"
+#include "SkTileMode.h"
 #include "include/effects/SkRuntimeEffect.h"
 
 #include <vector>
@@ -16,7 +26,7 @@ using namespace android::uirenderer;
 /**
  * By default Skia gradients will interpolate their colors in unpremul space
  * and then premultiply each of the results. We must set this flag to preserve
- * backwards compatiblity by premultiplying the colors of the gradient first,
+ * backwards compatibility by premultiplying the colors of the gradient first,
  * and then interpolating between them.
  */
 static const uint32_t sGradientShaderFlags = SkGradientShader::kInterpolateColorsInPremul_Flag;

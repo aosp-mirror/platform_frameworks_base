@@ -33,8 +33,10 @@ import android.graphics.Rect;
 import android.os.Trace;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsSource;
+import android.view.InsetsSourceConsumer;
 import android.view.InsetsSourceControl;
 import android.view.WindowInsets;
+import android.view.inputmethod.ImeTracker;
 import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -48,11 +50,20 @@ import java.io.PrintWriter;
  */
 final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider {
 
+    /** The token tracking the current IME request or {@code null} otherwise. */
+    @Nullable
+    private ImeTracker.Token mImeRequesterStatsToken;
     private InsetsControlTarget mImeRequester;
     private Runnable mShowImeRunner;
     private boolean mIsImeLayoutDrawn;
     private boolean mImeShowing;
-    private final InsetsSource mLastSource = new InsetsSource(ITYPE_IME);
+    private final InsetsSource mLastSource = new InsetsSource(ITYPE_IME, WindowInsets.Type.ime());
+
+    /** @see #setFrozen(boolean) */
+    private boolean mFrozen;
+
+    /** @see #setServerVisible(boolean) */
+    private boolean mServerVisible;
 
     ImeInsetsSourceProvider(InsetsSource source,
             InsetsStateController stateController, DisplayContent displayContent) {
@@ -80,6 +91,32 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
     }
 
     @Override
+    void setServerVisible(boolean serverVisible) {
+        mServerVisible = serverVisible;
+        if (!mFrozen) {
+            super.setServerVisible(serverVisible);
+        }
+    }
+
+    /**
+     * Freeze IME insets source state when required.
+     *
+     * When setting {@param frozen} as {@code true}, the IME insets provider will freeze the
+     * current IME insets state and pending the IME insets state update until setting
+     * {@param frozen} as {@code false}.
+     */
+    void setFrozen(boolean frozen) {
+        if (mFrozen == frozen) {
+            return;
+        }
+        mFrozen = frozen;
+        if (!frozen) {
+            // Unfreeze and process the pending IME insets states.
+            super.setServerVisible(mServerVisible);
+        }
+    }
+
+    @Override
     void updateSourceFrame(Rect frame) {
         super.updateSourceFrame(frame);
         onSourceChanged();
@@ -103,10 +140,14 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
 
     @Override
     protected boolean updateClientVisibility(InsetsControlTarget caller) {
+        if (caller != getControlTarget()) {
+            return false;
+        }
         boolean changed = super.updateClientVisibility(caller);
-        if (changed && caller.getRequestedVisibility(mSource.getType())) {
+        if (changed && caller.isRequestedVisible(mSource.getType())) {
             reportImeDrawnForOrganizer(caller);
         }
+        changed |= mDisplayContent.onImeInsetsClientVisibilityUpdate();
         return changed;
     }
 
@@ -129,14 +170,20 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
     }
 
     /**
-     * Called from {@link WindowManagerInternal#showImePostLayout} when {@link InputMethodService}
-     * requests to show IME on {@param imeTarget}.
+     * Called from {@link WindowManagerInternal#showImePostLayout}
+     * when {@link android.inputmethodservice.InputMethodService} requests to show IME
+     * on {@param imeTarget}.
      *
-     * @param imeTarget imeTarget on which IME request is coming from.
+     * @param imeTarget imeTarget on which IME show request is coming from.
+     * @param statsToken the token tracking the current IME show request or {@code null} otherwise.
      */
-    void scheduleShowImePostLayout(InsetsControlTarget imeTarget) {
+    void scheduleShowImePostLayout(InsetsControlTarget imeTarget,
+            @Nullable ImeTracker.Token statsToken) {
         boolean targetChanged = isTargetChangedWithinActivity(imeTarget);
         mImeRequester = imeTarget;
+        // There was still a stats token, so that request presumably failed.
+        ImeTracker.get().onFailed(mImeRequesterStatsToken, ImeTracker.PHASE_WM_SHOW_IME_RUNNER);
+        mImeRequesterStatsToken = statsToken;
         if (targetChanged) {
             // target changed, check if new target can show IME.
             ProtoLog.d(WM_DEBUG_IME, "IME target changed within ActivityRecord");
@@ -150,15 +197,20 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
         ProtoLog.d(WM_DEBUG_IME, "Schedule IME show for %s", mImeRequester.getWindow() == null
                 ? mImeRequester : mImeRequester.getWindow().getName());
         mShowImeRunner = () -> {
+            ImeTracker.get().onProgress(mImeRequesterStatsToken,
+                    ImeTracker.PHASE_WM_SHOW_IME_RUNNER);
             ProtoLog.d(WM_DEBUG_IME, "Run showImeRunner");
             // Target should still be the same.
             if (isReadyToShowIme()) {
+                ImeTracker.get().onProgress(mImeRequesterStatsToken,
+                        ImeTracker.PHASE_WM_SHOW_IME_READY);
                 final InsetsControlTarget target = mDisplayContent.getImeTarget(IME_TARGET_CONTROL);
 
                 ProtoLog.i(WM_DEBUG_IME, "call showInsets(ime) on %s",
                         target.getWindow() != null ? target.getWindow().getName() : "");
                 setImeShowing(true);
-                target.showInsets(WindowInsets.Type.ime(), true /* fromIme */);
+                target.showInsets(WindowInsets.Type.ime(), true /* fromIme */,
+                        mImeRequesterStatsToken);
                 Trace.asyncTraceEnd(TRACE_TAG_WINDOW_MANAGER, "WMS.showImePostLayout", 0);
                 if (target != mImeRequester && mImeRequester != null) {
                     ProtoLog.w(WM_DEBUG_IME,
@@ -166,7 +218,12 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
                             (mImeRequester.getWindow() != null
                                     ? mImeRequester.getWindow().getName() : ""));
                 }
+            } else {
+                ImeTracker.get().onFailed(mImeRequesterStatsToken,
+                        ImeTracker.PHASE_WM_SHOW_IME_READY);
             }
+            // Clear token here so we don't report an error in abortShowImePostLayout().
+            mImeRequesterStatsToken = null;
             abortShowImePostLayout();
         };
         mDisplayContent.mWmService.requestTraversal();
@@ -201,6 +258,8 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
         mImeRequester = null;
         mIsImeLayoutDrawn = false;
         mShowImeRunner = null;
+        ImeTracker.get().onCancelled(mImeRequesterStatsToken, ImeTracker.PHASE_WM_SHOW_IME_RUNNER);
+        mImeRequesterStatsToken = null;
     }
 
     @VisibleForTesting
@@ -218,6 +277,12 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
         if (dcTarget == null || mImeRequester == null) {
             return false;
         }
+        // Not ready to show if there is no IME control target.
+        final InsetsControlTarget controlTarget = mDisplayContent.getImeTarget(IME_TARGET_CONTROL);
+        if (controlTarget == null) {
+            return false;
+        }
+
         ProtoLog.d(WM_DEBUG_IME, "dcTarget: %s mImeRequester: %s",
                 dcTarget.getWindow().getName(), mImeRequester.getWindow() == null
                         ? mImeRequester : mImeRequester.getWindow().getName());
@@ -234,7 +299,7 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
     //
     private static boolean isImeLayeringTarget(@NonNull InsetsControlTarget target,
             @NonNull InsetsControlTarget dcTarget) {
-        return !dcTarget.getWindow().isClosing() && target == dcTarget;
+        return !isImeTargetWindowClosing(dcTarget.getWindow()) && target == dcTarget;
     }
 
     private static boolean isAboveImeLayeringTarget(@NonNull InsetsControlTarget target,
@@ -256,7 +321,14 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
         final InsetsControlTarget target = mDisplayContent.getImeTarget(IME_TARGET_CONTROL);
         return target == mImeRequester
                 && (mImeRequester.getWindow() == null
-                || !mImeRequester.getWindow().isClosing());
+                || !isImeTargetWindowClosing(mImeRequester.getWindow()));
+    }
+
+    private static boolean isImeTargetWindowClosing(@NonNull WindowState win) {
+        return win.mAnimatingExit || win.mActivityRecord != null
+                && (win.mActivityRecord.isInTransition()
+                    && !win.mActivityRecord.isVisibleRequested()
+                    || win.mActivityRecord.willCloseOrEnterPip());
     }
 
     private boolean isTargetChangedWithinActivity(InsetsControlTarget target) {

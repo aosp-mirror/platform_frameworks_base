@@ -21,14 +21,17 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AppProtoEnums;
+import android.app.BackgroundStartPrivileges;
 import android.app.IActivityManager;
 import android.app.IApplicationThread;
+import android.app.ITaskStackListener;
 import android.app.ProfilerInfo;
 import android.content.ComponentName;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.LocaleList;
@@ -208,14 +211,14 @@ public abstract class ActivityTaskManagerInternal {
             String callingPackage, @Nullable String callingFeatureId, Intent[] intents,
             String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options, int userId,
             boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
-            boolean allowBackgroundActivityStart);
+            BackgroundStartPrivileges backgroundStartPrivileges);
 
     public abstract int startActivityInPackage(int uid, int realCallingPid, int realCallingUid,
             String callingPackage, @Nullable String callingFeaturId, Intent intent,
             String resolvedType, IBinder resultTo, String resultWho, int requestCode,
             int startFlags, SafeActivityOptions options, int userId, Task inTask, String reason,
             boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
-            boolean allowBackgroundActivityStart);
+            BackgroundStartPrivileges backgroundStartPrivileges);
 
     /**
      * Callback to be called on certain activity start scenarios.
@@ -287,8 +290,10 @@ public abstract class ActivityTaskManagerInternal {
 
     /**
      * Called when the device changes its dreaming state.
+     *
+     * @param activeDreamComponent The currently active dream. If null, the device is not dreaming.
      */
-    public abstract void notifyDreamStateChanged(boolean dreaming);
+    public abstract void notifyActiveDreamChanged(@Nullable ComponentName activeDreamComponent);
 
     /**
      * Set a uid that is allowed to bypass stopped app switches, launching an app
@@ -313,6 +318,7 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void onProcessRemoved(String name, int uid);
     public abstract void onCleanUpApplicationRecord(WindowProcessController proc);
     public abstract int getTopProcessState();
+    public abstract boolean useTopSchedGroupForTopProcess();
     public abstract void clearHeavyWeightProcessIfEquals(WindowProcessController proc);
     public abstract void finishHeavyWeightApp();
 
@@ -433,8 +439,6 @@ public abstract class ActivityTaskManagerInternal {
             boolean allowInstrumenting, boolean fromHomeKey);
     /** Start home activities on all displays that support system decorations. */
     public abstract boolean startHomeOnAllDisplays(int userId, String reason);
-    /** @return true if the given process is the factory test process. */
-    public abstract boolean isFactoryTestProcess(WindowProcessController wpc);
     public abstract void updateTopComponentForFactoryTest();
     public abstract void handleAppDied(WindowProcessController wpc, boolean restarting,
             Runnable finishInstrumentationCallback);
@@ -619,10 +623,19 @@ public abstract class ActivityTaskManagerInternal {
         @Nullable
         public final LocaleList mLocales;
 
+        /**
+         * Gender for the application, null if app-specific grammatical gender is not set.
+         */
+        @Nullable
+        public final @Configuration.GrammaticalGender
+        Integer mGrammaticalGender;
+
         @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-        public PackageConfig(Integer nightMode, LocaleList locales) {
+        public PackageConfig(Integer nightMode, LocaleList locales,
+                @Configuration.GrammaticalGender Integer grammaticalGender) {
             mNightMode = nightMode;
             mLocales = locales;
+            mGrammaticalGender = grammaticalGender;
         }
 
         /**
@@ -657,6 +670,13 @@ public abstract class ActivityTaskManagerInternal {
         PackageConfigurationUpdater setLocales(LocaleList locales);
 
         /**
+         * Sets the gender for the current application. This setting is persisted and will
+         * override the system configuration for this application.
+         */
+        PackageConfigurationUpdater setGrammaticalGender(
+                @Configuration.GrammaticalGender int gender);
+
+        /**
          * Commit changes.
          * @return true if the configuration changes were persisted,
          * false if there were no changes, or if erroneous inputs were provided, such as:
@@ -675,16 +695,24 @@ public abstract class ActivityTaskManagerInternal {
     public abstract boolean hasSystemAlertWindowPermission(int callingUid, int callingPid,
             String callingPackage);
 
-    /** Called when the device is waking up */
-    public abstract void notifyWakingUp();
-
     /**
      * Registers a callback which can intercept activity starts.
-     * @throws IllegalArgumentException if duplicate ids are provided
+     * @throws IllegalArgumentException if duplicate ids are provided or the provided {@code
+     * callback} is null
+     * @see ActivityInterceptorCallbackRegistry
+     * #registerActivityInterceptorCallback(int, ActivityInterceptorCallback)
      */
     public abstract void registerActivityStartInterceptor(
             @ActivityInterceptorCallback.OrderedId int id,
             ActivityInterceptorCallback callback);
+
+    /**
+     * Unregisters an {@link ActivityInterceptorCallback}.
+     * @throws IllegalArgumentException if id is not registered
+     * @see ActivityInterceptorCallbackRegistry#unregisterActivityInterceptorCallback(int)
+     */
+    public abstract void unregisterActivityStartInterceptor(
+            @ActivityInterceptorCallback.OrderedId int id);
 
     /** Get the most recent task excluding the first running task (the one on the front most). */
     public abstract ActivityManager.RecentTaskInfo getMostRecentTaskFromBackground();
@@ -713,4 +741,10 @@ public abstract class ActivityTaskManagerInternal {
      */
     public abstract void restartTaskActivityProcessIfVisible(
             int taskId, @NonNull String packageName);
+
+    /** Sets the task stack listener that gets callbacks when a task stack changes. */
+    public abstract void registerTaskStackListener(ITaskStackListener listener);
+
+    /** Unregister a task stack listener so that it stops receiving callbacks. */;
+    public abstract void unregisterTaskStackListener(ITaskStackListener listener);
 }

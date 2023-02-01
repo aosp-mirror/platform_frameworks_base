@@ -44,6 +44,7 @@ import static com.android.server.am.ActivityManagerService.appendMemInfo;
 import static com.android.server.am.ActivityManagerService.getKsmInfo;
 import static com.android.server.am.ActivityManagerService.stringifyKBSize;
 import static com.android.server.am.LowMemDetector.ADJ_MEM_FACTOR_NOTHING;
+import static com.android.server.am.OomAdjuster.OOM_ADJ_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerService.DUMP_ACTIVITIES_CMD;
 
@@ -87,13 +88,13 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.MemInfoReader;
 import com.android.server.am.LowMemDetector.MemFactor;
+import com.android.server.power.stats.BatteryStatsImpl;
 import com.android.server.utils.PriorityDump;
 
 import java.io.FileDescriptor;
@@ -505,10 +506,14 @@ public class AppProfiler {
             }
             if (profile != null) {
                 long startTime = SystemClock.currentThreadTimeMillis();
-                // skip background PSS calculation of apps that are capturing
-                // camera imagery
-                final boolean usingCamera = mService.isCameraActiveForUid(profile.mApp.uid);
-                long pss = usingCamera ? 0 : Debug.getPss(pid, tmp, null);
+                // skip background PSS calculation under the following situations:
+                //  - app is capturing camera imagery
+                //  - app is frozen and we have already collected PSS once.
+                final boolean skipPSSCollection =
+                        (profile.mApp.mOptRecord != null
+                         && profile.mApp.mOptRecord.skipPSSCollectionBecauseFrozen())
+                        || mService.isCameraActiveForUid(profile.mApp.uid);
+                long pss = skipPSSCollection ? 0 : Debug.getPss(pid, tmp, null);
                 long endTime = SystemClock.currentThreadTimeMillis();
                 synchronized (mProfilerLock) {
                     if (pss != 0 && profile.getThread() != null
@@ -523,7 +528,7 @@ public class AppProfiler {
                         if (DEBUG_PSS) {
                             Slog.d(TAG_PSS, "Skipped pss collection of " + pid
                                     + ": " + (profile.getThread() == null ? "NO_THREAD " : "")
-                                    + (usingCamera ? "CAMERA " : "")
+                                    + (skipPSSCollection ? "SKIP_PSS_COLLECTION " : "")
                                     + (profile.getPid() != pid ? "PID_CHANGED " : "")
                                     + " initState=" + procState + " curState="
                                     + profile.getSetProcState() + " "
@@ -1047,17 +1052,7 @@ public class AppProfiler {
                 }
                 trimMemoryUiHiddenIfNecessaryLSP(app);
                 if (curProcState >= ActivityManager.PROCESS_STATE_HOME && !app.isKilledByAm()) {
-                    if (trimMemoryLevel < curLevel[0] && (thread = app.getThread()) != null) {
-                        try {
-                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) {
-                                Slog.v(TAG_OOM_ADJ,
-                                        "Trimming memory of " + app.processName
-                                        + " to " + curLevel[0]);
-                            }
-                            thread.scheduleTrimMemory(curLevel[0]);
-                        } catch (RemoteException e) {
-                        }
-                    }
+                    scheduleTrimMemoryLSP(app, curLevel[0], "Trimming memory of ");
                     profile.setTrimMemoryLevel(curLevel[0]);
                     step[0]++;
                     if (step[0] >= actualFactor) {
@@ -1073,31 +1068,11 @@ public class AppProfiler {
                     }
                 } else if (curProcState == ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
                         && !app.isKilledByAm()) {
-                    if (trimMemoryLevel < ComponentCallbacks2.TRIM_MEMORY_BACKGROUND
-                            && (thread = app.getThread()) != null) {
-                        try {
-                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) {
-                                Slog.v(TAG_OOM_ADJ,
-                                        "Trimming memory of heavy-weight " + app.processName
-                                        + " to " + ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
-                            }
-                            thread.scheduleTrimMemory(
-                                    ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
-                        } catch (RemoteException e) {
-                        }
-                    }
+                    scheduleTrimMemoryLSP(app, ComponentCallbacks2.TRIM_MEMORY_BACKGROUND,
+                            "Trimming memory of heavy-weight ");
                     profile.setTrimMemoryLevel(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
                 } else {
-                    if (trimMemoryLevel < fgTrimLevel && (thread = app.getThread()) != null) {
-                        try {
-                            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) {
-                                Slog.v(TAG_OOM_ADJ, "Trimming memory of fg " + app.processName
-                                        + " to " + fgTrimLevel);
-                            }
-                            thread.scheduleTrimMemory(fgTrimLevel);
-                        } catch (RemoteException e) {
-                        }
-                    }
+                    scheduleTrimMemoryLSP(app, fgTrimLevel, "Trimming memory of fg ");
                     profile.setTrimMemoryLevel(fgTrimLevel);
                 }
             });
@@ -1128,19 +1103,25 @@ public class AppProfiler {
             // If this application is now in the background and it
             // had done UI, then give it the special trim level to
             // have it free UI resources.
-            final int level = ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN;
-            IApplicationThread thread;
-            if (app.mProfile.getTrimMemoryLevel() < level && (thread = app.getThread()) != null) {
-                try {
-                    if (DEBUG_SWITCH || DEBUG_OOM_ADJ) {
-                        Slog.v(TAG_OOM_ADJ, "Trimming memory of bg-ui "
-                                + app.processName + " to " + level);
-                    }
-                    thread.scheduleTrimMemory(level);
-                } catch (RemoteException e) {
-                }
-            }
+            scheduleTrimMemoryLSP(app, ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN,
+                    "Trimming memory of bg-ui ");
             app.mProfile.setPendingUiClean(false);
+        }
+    }
+
+    @GuardedBy({"mService", "mProcLock"})
+    private void scheduleTrimMemoryLSP(ProcessRecord app, int level, String msg) {
+        IApplicationThread thread;
+        if (app.mProfile.getTrimMemoryLevel() < level && (thread = app.getThread()) != null) {
+            try {
+                if (DEBUG_SWITCH || DEBUG_OOM_ADJ) {
+                    Slog.v(TAG_OOM_ADJ, msg + app.processName + " to " + level);
+                }
+                mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(app,
+                        OOM_ADJ_REASON_NONE);
+                thread.scheduleTrimMemory(level);
+            } catch (RemoteException e) {
+            }
         }
     }
 
@@ -1850,7 +1831,7 @@ public class AppProfiler {
             final BatteryStatsImpl bstats = mService.mBatteryStatsService.getActiveStatistics();
             synchronized (bstats) {
                 if (haveNewCpuStats) {
-                    if (bstats.startAddingCpuLocked()) {
+                    if (bstats.startAddingCpuStatsLocked()) {
                         int totalUTime = 0;
                         int totalSTime = 0;
                         final int statsCount = mProcessCpuTracker.countStats();
@@ -1879,7 +1860,8 @@ public class AppProfiler {
                                             st.rel_utime + st.rel_stime);
                                     profile.mLastCpuTime.compareAndSet(0, curCpuTime);
                                 } else {
-                                    BatteryStatsImpl.Uid.Proc ps = st.batteryStats;
+                                    BatteryStatsImpl.Uid.Proc ps =
+                                            (BatteryStatsImpl.Uid.Proc) st.batteryStats;
                                     if (ps == null || !ps.isActive()) {
                                         st.batteryStats = ps = bstats.getProcessStatsLocked(
                                                 st.uid, st.name, elapsedRealtime, uptime);
@@ -1895,9 +1877,10 @@ public class AppProfiler {
                         final int irqTime = mProcessCpuTracker.getLastIrqTime();
                         final int softIrqTime = mProcessCpuTracker.getLastSoftIrqTime();
                         final int idleTime = mProcessCpuTracker.getLastIdleTime();
-                        bstats.finishAddingCpuLocked(totalUTime, totalSTime, userTime,
+                        bstats.addCpuStatsLocked(totalUTime, totalSTime, userTime,
                                 systemTime, iowaitTime, irqTime, softIrqTime, idleTime);
                     }
+                    bstats.finishAddingCpuStatsLocked();
                 }
 
                 if (mLastWriteTime < (now - BATTERY_STATS_TIME)) {
@@ -1911,6 +1894,12 @@ public class AppProfiler {
     long getCpuTimeForPid(int pid) {
         synchronized (mProcessCpuTracker) {
             return mProcessCpuTracker.getCpuTimeForPid(pid);
+        }
+    }
+
+    long getCpuDelayTimeForPid(int pid) {
+        synchronized (mProcessCpuTracker) {
+            return mProcessCpuTracker.getCpuDelayTimeForPid(pid);
         }
     }
 
@@ -2326,7 +2315,8 @@ public class AppProfiler {
 
     void printCurrentCpuState(StringBuilder report, long time) {
         synchronized (mProcessCpuTracker) {
-            report.append(mProcessCpuTracker.printCurrentState(time));
+            // Only print the first 10 processes
+            report.append(mProcessCpuTracker.printCurrentState(time, /* maxProcesses= */10));
         }
     }
 

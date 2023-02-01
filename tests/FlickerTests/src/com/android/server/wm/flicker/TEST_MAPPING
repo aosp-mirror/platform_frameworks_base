@@ -1,0 +1,15 @@
+{
+  "ironwood-postsubmit": [
+    {
+      "name": "FlickerTests",
+      "options": [
+        {
+          "include-annotation": "android.platform.test.annotations.IwTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        }
+      ]
+    }
+  ]
+}

@@ -24,12 +24,11 @@ import android.view.WindowManager
 import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.annotation.Group4
-import com.android.server.wm.flicker.dsl.FlickerBuilder
-import org.junit.runner.RunWith
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 /**
@@ -38,30 +37,33 @@ import org.junit.runners.Parameterized
  * To run this test: `atest WMShellFlickerTests:DismissBubbleScreen`
  *
  * Actions:
+ * ```
  *     Dismiss a bubble notification
+ * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-@Group4
-open class DismissBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(testSpec) {
+open class DismissBubbleScreen(flicker: FlickerTest) : BaseBubbleScreen(flicker) {
 
     private val wm = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
     private val displaySize = DisplayMetrics()
 
+    /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition {
             setup {
-                eachRun {
-                    val addBubbleBtn = waitAndGetAddBubbleBtn()
-                    addBubbleBtn?.click() ?: error("Add Bubble not found")
-                }
+                val addBubbleBtn = waitAndGetAddBubbleBtn()
+                addBubbleBtn?.click() ?: error("Add Bubble not found")
             }
             transitions {
-                wm.run { wm.getDefaultDisplay().getMetrics(displaySize) }
+                wm.run { wm.defaultDisplay.getMetrics(displaySize) }
                 val dist = Point((displaySize.widthPixels / 2), displaySize.heightPixels)
-                val showBubble = device.wait(Until.findObject(
-                        By.res(SYSTEM_UI_PACKAGE, BUBBLE_RES_NAME)), FIND_OBJECT_TIMEOUT)
+                val showBubble =
+                    device.wait(
+                        Until.findObject(By.res(SYSTEM_UI_PACKAGE, BUBBLE_RES_NAME)),
+                        FIND_OBJECT_TIMEOUT
+                    )
                 showBubble?.run { drag(dist, 1000) } ?: error("Show bubble not found")
             }
         }
@@ -69,8 +71,6 @@ open class DismissBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScree
     @Presubmit
     @Test
     open fun testAppIsAlwaysVisible() {
-        testSpec.assertLayers {
-            this.isVisible(testApp.component)
-        }
+        flicker.assertLayers { this.isVisible(testApp) }
     }
 }

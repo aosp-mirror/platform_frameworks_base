@@ -92,6 +92,14 @@ class Alarm {
      * Caller had USE_EXACT_ALARM permission.
      */
     static final int EXACT_ALLOW_REASON_POLICY_PERMISSION = 3;
+    /**
+     * Caller used a listener alarm, which does not need permission to be exact.
+     */
+    static final int EXACT_ALLOW_REASON_LISTENER = 4;
+    /**
+     * Caller used a prioritized alarm, which does not need permission to be exact.
+     */
+    static final int EXACT_ALLOW_REASON_PRIORITIZED = 5;
 
     public final int type;
     /**

@@ -96,7 +96,7 @@ public class DisplayLayout {
 
     /**
      * Different from {@link #equals(Object)}, this method compares the basic geometry properties
-     * of two {@link DisplayLayout} objects including width, height, rotation, density and cutout.
+     * of two {@link DisplayLayout} objects including width, height, rotation, density, cutout.
      * @return {@code true} if the given {@link DisplayLayout} is identical geometry wise.
      */
     public boolean isSameGeometry(@NonNull DisplayLayout other) {

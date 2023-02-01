@@ -34,10 +34,18 @@
 #include <binder/IServiceManager.h>
 #endif
 
+#include <Gainmap.h>
 #include <SkCanvas.h>
-#include <SkImagePriv.h>
-#include <SkWebpEncoder.h>
+#include <SkColor.h>
+#include <SkEncodedImageFormat.h>
 #include <SkHighContrastFilter.h>
+#include <SkImageEncoder.h>
+#include <SkImagePriv.h>
+#include <SkPixmap.h>
+#include <SkRect.h>
+#include <SkStream.h>
+#include <SkWebpEncoder.h>
+
 #include <limits>
 
 namespace android {
@@ -488,4 +496,14 @@ bool Bitmap::compress(const SkBitmap& bitmap, JavaCompressFormat format,
 
     return SkEncodeImage(stream, bitmap, fm, quality);
 }
+
+sp<uirenderer::Gainmap> Bitmap::gainmap() const {
+    LOG_ALWAYS_FATAL_IF(!hasGainmap(), "Bitmap doesn't have a gainmap");
+    return mGainmap;
+}
+
+void Bitmap::setGainmap(sp<uirenderer::Gainmap>&& gainmap) {
+    mGainmap = std::move(gainmap);
+}
+
 }  // namespace android

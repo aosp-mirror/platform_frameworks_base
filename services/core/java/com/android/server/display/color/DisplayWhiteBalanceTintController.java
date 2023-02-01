@@ -16,6 +16,8 @@
 
 package com.android.server.display.color;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import static com.android.server.display.color.DisplayTransformManager.LEVEL_COLOR_MATRIX_DISPLAY_WHITE_BALANCE;
 
 import android.annotation.NonNull;
@@ -24,10 +26,9 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.ColorSpace;
 import android.hardware.display.ColorDisplayManager;
+import android.hardware.display.DisplayManagerInternal;
 import android.opengl.Matrix;
-import android.os.IBinder;
 import android.util.Slog;
-import android.view.SurfaceControl;
 import android.view.SurfaceControl.DisplayPrimaries;
 
 import com.android.internal.R;
@@ -59,13 +60,25 @@ final class DisplayWhiteBalanceTintController extends TintController {
     private float[] mCurrentColorTemperatureXYZ;
     @VisibleForTesting
     boolean mSetUp = false;
-    private float[] mMatrixDisplayWhiteBalance = new float[16];
+    private final float[] mMatrixDisplayWhiteBalance = new float[16];
+    private long mTransitionDuration;
     private Boolean mIsAvailable;
+    // This feature becomes disallowed if the device is in an unsupported strong/light state.
+    private boolean mIsAllowed = true;
+
+    private final DisplayManagerInternal mDisplayManagerInternal;
+
+    DisplayWhiteBalanceTintController(DisplayManagerInternal dm) {
+        mDisplayManagerInternal = dm;
+    }
 
     @Override
     public void setUp(Context context, boolean needsLinear) {
         mSetUp = false;
         final Resources res = context.getResources();
+
+        // Initialize with the config value for light mode, so it starts in the right state.
+        setAllowed(res.getBoolean(R.bool.config_displayWhiteBalanceLightModeAllowed));
 
         ColorSpace.Rgb displayColorSpaceRGB = getDisplayColorSpaceFromSurfaceControl();
         if (displayColorSpaceRGB == null) {
@@ -113,6 +126,9 @@ final class DisplayWhiteBalanceTintController extends TintController {
 
         final int colorTemperature = res.getInteger(
                 R.integer.config_displayWhiteBalanceColorTemperatureDefault);
+
+        mTransitionDuration = res.getInteger(
+                R.integer.config_displayWhiteBalanceTransitionTime);
 
         synchronized (mLock) {
             mDisplayColorSpaceRGB = displayColorSpaceRGB;
@@ -227,6 +243,11 @@ final class DisplayWhiteBalanceTintController extends TintController {
     }
 
     @Override
+    public long getTransitionDurationMilliseconds() {
+        return mTransitionDuration;
+    }
+
+    @Override
     public void dump(PrintWriter pw) {
         synchronized (mLock) {
             pw.println("    mSetUp = " + mSetUp);
@@ -248,6 +269,7 @@ final class DisplayWhiteBalanceTintController extends TintController {
                     + matrixToString(mDisplayColorSpaceRGB.getInverseTransform(), 3));
             pw.println("    mMatrixDisplayWhiteBalance = "
                     + matrixToString(mMatrixDisplayWhiteBalance, 4));
+            pw.println("    mIsAllowed = " + mIsAllowed);
         }
     }
 
@@ -263,6 +285,14 @@ final class DisplayWhiteBalanceTintController extends TintController {
         }
     }
 
+    public void setAllowed(boolean allowed) {
+        mIsAllowed = allowed;
+    }
+
+    public boolean isAllowed() {
+        return mIsAllowed;
+    }
+
     private ColorSpace.Rgb makeRgbColorSpaceFromXYZ(float[] redGreenBlueXYZ, float[] whiteXYZ) {
         return new ColorSpace.Rgb(
                 "Display Color Space",
@@ -273,12 +303,8 @@ final class DisplayWhiteBalanceTintController extends TintController {
     }
 
     private ColorSpace.Rgb getDisplayColorSpaceFromSurfaceControl() {
-        final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
-        if (displayToken == null) {
-            return null;
-        }
-
-        DisplayPrimaries primaries = SurfaceControl.getDisplayNativePrimaries(displayToken);
+        DisplayPrimaries primaries =
+                mDisplayManagerInternal.getDisplayNativePrimaries(DEFAULT_DISPLAY);
         if (primaries == null || primaries.red == null || primaries.green == null
                 || primaries.blue == null || primaries.white == null) {
             return null;

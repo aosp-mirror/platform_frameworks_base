@@ -27,13 +27,17 @@ import android.os.Process;
 import android.util.EventLog;
 import android.util.Log;
 
+import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
+import com.android.server.art.DexUseManagerLocal;
+import com.android.server.art.model.DexContainerFileUseInfo;
 import com.android.server.pm.dex.DynamicCodeLogger;
 
 import libcore.util.HexEncoding;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -137,6 +141,28 @@ public class DynamicCodeLoggingService extends JobService {
         return LocalServices.getService(PackageManagerInternal.class).getDynamicCodeLogger();
     }
 
+    private static void syncDataFromArtService(DynamicCodeLogger dynamicCodeLogger) {
+        DexUseManagerLocal dexUseManagerLocal = DexOptHelper.getDexUseManagerLocal();
+        if (dexUseManagerLocal == null) {
+            // ART Service is not enabled.
+            return;
+        }
+        PackageManagerLocal packageManagerLocal =
+                Objects.requireNonNull(LocalManagerRegistry.getManager(PackageManagerLocal.class));
+        try (PackageManagerLocal.UnfilteredSnapshot snapshot =
+                        packageManagerLocal.withUnfilteredSnapshot()) {
+            for (String owningPackageName : snapshot.getPackageStates().keySet()) {
+                for (DexContainerFileUseInfo info :
+                        dexUseManagerLocal.getSecondaryDexContainerFileUseInfo(owningPackageName)) {
+                    for (String loadingPackageName : info.getLoadingPackages()) {
+                        dynamicCodeLogger.recordDex(info.getUserHandle().getIdentifier(),
+                                info.getDexContainerFile(), owningPackageName, loadingPackageName);
+                    }
+                }
+            }
+        }
+    }
+
     private class IdleLoggingThread extends Thread {
         private final JobParameters mParams;
 
@@ -152,6 +178,7 @@ public class DynamicCodeLoggingService extends JobService {
             }
 
             DynamicCodeLogger dynamicCodeLogger = getDynamicCodeLogger();
+            syncDataFromArtService(dynamicCodeLogger);
             for (String packageName : dynamicCodeLogger.getAllPackagesWithDynamicCodeLoading()) {
                 if (mIdleLoggingStopRequested) {
                     Log.w(TAG, "Stopping IdleLoggingJob run at scheduler request");

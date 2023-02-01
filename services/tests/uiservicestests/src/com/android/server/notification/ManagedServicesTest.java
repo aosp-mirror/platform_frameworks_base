@@ -15,6 +15,11 @@
  */
 package com.android.server.notification;
 
+import static android.content.Context.DEVICE_POLICY_SERVICE;
+import static android.os.UserManager.USER_TYPE_FULL_SECONDARY;
+import static android.os.UserManager.USER_TYPE_PROFILE_CLONE;
+import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
+
 import static com.android.server.notification.ManagedServices.APPROVAL_BY_COMPONENT;
 import static com.android.server.notification.ManagedServices.APPROVAL_BY_PACKAGE;
 
@@ -34,6 +39,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -55,11 +62,11 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.SparseArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.UiServiceTestCase;
 
 import com.google.android.collect.Lists;
@@ -94,6 +101,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
     private UserManager mUm;
     @Mock
     private ManagedServices.UserProfiles mUserProfiles;
+    @Mock private DevicePolicyManager mDpm;
     Object mLock = new Object();
 
     UserInfo mZero = new UserInfo(0, "zero", 0);
@@ -122,6 +130,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
 
         getContext().setMockPackageManager(mPm);
         getContext().addMockSystemService(Context.USER_SERVICE, mUm);
+        getContext().addMockSystemService(DEVICE_POLICY_SERVICE, mDpm);
 
         List<UserInfo> users = new ArrayList<>();
         users.add(mZero);
@@ -840,6 +849,156 @@ public class ManagedServicesTest extends UiServiceTestCase {
     }
 
     @Test
+    public void reregisterService_checksAppIsApproved_pkg() throws Exception {
+        Context context = mock(Context.class);
+        PackageManager pm = mock(PackageManager.class);
+        ApplicationInfo ai = new ApplicationInfo();
+        ai.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
+
+        when(context.getPackageName()).thenReturn(mContext.getPackageName());
+        when(context.getUserId()).thenReturn(mContext.getUserId());
+        when(context.getPackageManager()).thenReturn(pm);
+        when(pm.getApplicationInfo(anyString(), anyInt())).thenReturn(ai);
+
+        ManagedServices service = new TestManagedServices(context, mLock, mUserProfiles, mIpm,
+                APPROVAL_BY_PACKAGE);
+        ComponentName cn = ComponentName.unflattenFromString("a/a");
+
+        when(context.bindServiceAsUser(any(), any(), anyInt(), any())).thenAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            ServiceConnection sc = (ServiceConnection) args[1];
+            sc.onServiceConnected(cn, mock(IBinder.class));
+            return true;
+        });
+
+        service.addApprovedList("a", 0, true);
+
+        service.reregisterService(cn, 0);
+
+        assertTrue(service.isBound(cn, 0));
+    }
+
+    @Test
+    public void reregisterService_checksAppIsApproved_pkg_secondary() throws Exception {
+        Context context = mock(Context.class);
+        PackageManager pm = mock(PackageManager.class);
+        ApplicationInfo ai = new ApplicationInfo();
+        ai.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
+
+        when(context.getPackageName()).thenReturn(mContext.getPackageName());
+        when(context.getUserId()).thenReturn(mContext.getUserId());
+        when(context.getPackageManager()).thenReturn(pm);
+        when(pm.getApplicationInfo(anyString(), anyInt())).thenReturn(ai);
+
+        ManagedServices service = new TestManagedServices(context, mLock, mUserProfiles, mIpm,
+                APPROVAL_BY_PACKAGE);
+        ComponentName cn = ComponentName.unflattenFromString("a/a");
+
+        when(context.bindServiceAsUser(any(), any(), anyInt(), any())).thenAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            ServiceConnection sc = (ServiceConnection) args[1];
+            sc.onServiceConnected(cn, mock(IBinder.class));
+            return true;
+        });
+
+        service.addApprovedList("a", 0, false);
+
+        service.reregisterService(cn, 0);
+
+        assertTrue(service.isBound(cn, 0));
+    }
+
+    @Test
+    public void reregisterService_checksAppIsApproved_cn() throws Exception {
+        Context context = mock(Context.class);
+        PackageManager pm = mock(PackageManager.class);
+        ApplicationInfo ai = new ApplicationInfo();
+        ai.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
+
+        when(context.getPackageName()).thenReturn(mContext.getPackageName());
+        when(context.getUserId()).thenReturn(mContext.getUserId());
+        when(context.getPackageManager()).thenReturn(pm);
+        when(pm.getApplicationInfo(anyString(), anyInt())).thenReturn(ai);
+
+        ManagedServices service = new TestManagedServices(context, mLock, mUserProfiles, mIpm,
+                APPROVAL_BY_COMPONENT);
+        ComponentName cn = ComponentName.unflattenFromString("a/a");
+
+        when(context.bindServiceAsUser(any(), any(), anyInt(), any())).thenAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            ServiceConnection sc = (ServiceConnection) args[1];
+            sc.onServiceConnected(cn, mock(IBinder.class));
+            return true;
+        });
+
+        service.addApprovedList("a/a", 0, true);
+
+        service.reregisterService(cn, 0);
+
+        assertTrue(service.isBound(cn, 0));
+    }
+
+    @Test
+    public void reregisterService_checksAppIsApproved_cn_secondary() throws Exception {
+        Context context = mock(Context.class);
+        PackageManager pm = mock(PackageManager.class);
+        ApplicationInfo ai = new ApplicationInfo();
+        ai.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
+
+        when(context.getPackageName()).thenReturn(mContext.getPackageName());
+        when(context.getUserId()).thenReturn(mContext.getUserId());
+        when(context.getPackageManager()).thenReturn(pm);
+        when(pm.getApplicationInfo(anyString(), anyInt())).thenReturn(ai);
+
+        ManagedServices service = new TestManagedServices(context, mLock, mUserProfiles, mIpm,
+                APPROVAL_BY_COMPONENT);
+        ComponentName cn = ComponentName.unflattenFromString("a/a");
+
+        when(context.bindServiceAsUser(any(), any(), anyInt(), any())).thenAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            ServiceConnection sc = (ServiceConnection) args[1];
+            sc.onServiceConnected(cn, mock(IBinder.class));
+            return true;
+        });
+
+        service.addApprovedList("a/a", 0, false);
+
+        service.reregisterService(cn, 0);
+
+        assertTrue(service.isBound(cn, 0));
+    }
+
+    @Test
+    public void reregisterService_checksAppIsNotApproved_cn_secondary() throws Exception {
+        Context context = mock(Context.class);
+        PackageManager pm = mock(PackageManager.class);
+        ApplicationInfo ai = new ApplicationInfo();
+        ai.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
+
+        when(context.getPackageName()).thenReturn(mContext.getPackageName());
+        when(context.getUserId()).thenReturn(mContext.getUserId());
+        when(context.getPackageManager()).thenReturn(pm);
+        when(pm.getApplicationInfo(anyString(), anyInt())).thenReturn(ai);
+
+        ManagedServices service = new TestManagedServices(context, mLock, mUserProfiles, mIpm,
+                APPROVAL_BY_COMPONENT);
+        ComponentName cn = ComponentName.unflattenFromString("a/a");
+
+        when(context.bindServiceAsUser(any(), any(), anyInt(), any())).thenAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            ServiceConnection sc = (ServiceConnection) args[1];
+            sc.onServiceConnected(cn, mock(IBinder.class));
+            return true;
+        });
+
+        service.addApprovedList("b/b", 0, false);
+
+        service.reregisterService(cn, 0);
+
+        assertFalse(service.isBound(cn, 0));
+    }
+
+    @Test
     public void unbindOtherUserServices() throws PackageManager.NameNotFoundException {
         Context context = mock(Context.class);
         PackageManager pm = mock(PackageManager.class);
@@ -1423,6 +1582,55 @@ public class ManagedServicesTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testSetComponentState_differentUsers() throws Exception {
+        Context context = mock(Context.class);
+        PackageManager pm = mock(PackageManager.class);
+        ApplicationInfo ai = new ApplicationInfo();
+        ai.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
+
+        when(context.getPackageName()).thenReturn(mContext.getPackageName());
+        when(context.getUserId()).thenReturn(mContext.getUserId());
+        when(context.getPackageManager()).thenReturn(pm);
+        when(pm.getApplicationInfo(anyString(), anyInt())).thenReturn(ai);
+
+        ManagedServices service = new TestManagedServices(context, mLock, mUserProfiles, mIpm,
+                APPROVAL_BY_COMPONENT);
+        ComponentName cn = ComponentName.unflattenFromString("a/a");
+
+        addExpectedServices(service, Arrays.asList("a"), mZero.id);
+        addExpectedServices(service, Arrays.asList("a"), mTen.id);
+        when(context.bindServiceAsUser(any(), any(), anyInt(), any())).thenAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            ServiceConnection sc = (ServiceConnection) args[1];
+            sc.onServiceConnected(cn, mock(IBinder.class));
+            return true;
+        });
+        service.addApprovedList("a/a", 0, true);
+        service.addApprovedList("a/a", 10, false);
+
+        service.registerService(cn, mZero.id);
+        assertTrue(service.isBound(cn, mZero.id));
+
+        service.onUserSwitched(mTen.id);
+        assertFalse(service.isBound(cn, mZero.id));
+        service.registerService(cn, mTen.id);
+        assertTrue(service.isBound(cn, mTen.id));
+
+        service.setComponentState(cn, mTen.id, false);
+        assertFalse(service.isBound(cn, mZero.id));
+        assertFalse(service.isBound(cn, mTen.id));
+
+        // Service should be rebound on user 0, since it was only disabled for user 10.
+        service.onUserSwitched(mZero.id);
+        assertTrue(service.isBound(cn, mZero.id));
+        assertFalse(service.isBound(cn, mTen.id));
+
+        // Service should stay unbound on going back to user 10.
+        service.onUserSwitched(mTen.id);
+        assertFalse(service.isBound(cn, mZero.id));
+        assertFalse(service.isBound(cn, mTen.id));
+    }
+    @Test
     public void testOnPackagesChanged_nullValuesPassed_noNullPointers() {
         for (int approvalLevel : new int[] {APPROVAL_BY_COMPONENT, APPROVAL_BY_PACKAGE}) {
             ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles,
@@ -1544,6 +1752,74 @@ public class ManagedServicesTest extends UiServiceTestCase {
         assertEquals(new ArrayMap(), mService.mIsUserChanged);
     }
 
+    @Test
+    public void testInfoIsPermittedForProfile_notProfile() {
+        when(mUserProfiles.isProfileUser(anyInt())).thenReturn(false);
+
+        IInterface service = mock(IInterface.class);
+        when(service.asBinder()).thenReturn(mock(IBinder.class));
+        ManagedServices services = new TestManagedServices(getContext(), mLock, mUserProfiles,
+                mIpm, APPROVAL_BY_PACKAGE);
+        services.registerSystemService(service, null, 10, 1000);
+        ManagedServices.ManagedServiceInfo info = services.checkServiceTokenLocked(service);
+
+        assertTrue(info.isPermittedForProfile(0));
+    }
+
+    @Test
+    public void testInfoIsPermittedForProfile_profileAndDpmAllows() {
+        when(mUserProfiles.isProfileUser(anyInt())).thenReturn(true);
+        when(mDpm.isNotificationListenerServicePermitted(anyString(), anyInt())).thenReturn(true);
+
+        IInterface service = mock(IInterface.class);
+        when(service.asBinder()).thenReturn(mock(IBinder.class));
+        ManagedServices services = new TestManagedServices(getContext(), mLock, mUserProfiles,
+                mIpm, APPROVAL_BY_PACKAGE);
+        services.registerSystemService(service, null, 10, 1000);
+        ManagedServices.ManagedServiceInfo info = services.checkServiceTokenLocked(service);
+        info.component = new ComponentName("a","b");
+
+        assertTrue(info.isPermittedForProfile(0));
+    }
+
+    @Test
+    public void testInfoIsPermittedForProfile_profileAndDpmDenies() {
+        when(mUserProfiles.isProfileUser(anyInt())).thenReturn(true);
+        when(mDpm.isNotificationListenerServicePermitted(anyString(), anyInt())).thenReturn(false);
+
+        IInterface service = mock(IInterface.class);
+        when(service.asBinder()).thenReturn(mock(IBinder.class));
+        ManagedServices services = new TestManagedServices(getContext(), mLock, mUserProfiles,
+                mIpm, APPROVAL_BY_PACKAGE);
+        services.registerSystemService(service, null, 10, 1000);
+        ManagedServices.ManagedServiceInfo info = services.checkServiceTokenLocked(service);
+        info.component = new ComponentName("a","b");
+
+        assertFalse(info.isPermittedForProfile(0));
+    }
+
+    @Test
+    public void testUserProfiles_canProfileUseBoundServices_managedProfile() {
+        List<UserInfo> users = new ArrayList<>();
+        UserInfo profile = new UserInfo(ActivityManager.getCurrentUser(), "current", 0);
+        profile.userType = USER_TYPE_FULL_SECONDARY;
+        users.add(profile);
+        UserInfo managed = new UserInfo(12, "12", 0);
+        managed.userType = USER_TYPE_PROFILE_MANAGED;
+        users.add(managed);
+        UserInfo clone = new UserInfo(13, "13", 0);
+        clone.userType = USER_TYPE_PROFILE_CLONE;
+        users.add(clone);
+        when(mUm.getProfiles(ActivityManager.getCurrentUser())).thenReturn(users);
+
+        ManagedServices.UserProfiles profiles = new ManagedServices.UserProfiles();
+        profiles.updateCache(mContext);
+
+        assertFalse(profiles.isProfileUser(ActivityManager.getCurrentUser()));
+        assertTrue(profiles.isProfileUser(12));
+        assertTrue(profiles.isProfileUser(13));
+    }
+
     private void resetComponentsAndPackages() {
         ArrayMap<Integer, ArrayMap<Integer, String>> empty = new ArrayMap(1);
         ArrayMap<Integer, String> emptyPkgs = new ArrayMap(0);
@@ -1620,7 +1896,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
     }
 
     private void addExpectedServices(final ManagedServices service, final List<String> packages,
-            int userId) {
+            int userId) throws Exception {
         ManagedServices.Config config = service.getConfig();
         when(mPm.queryIntentServicesAsUser(any(), anyInt(), eq(userId))).
                 thenAnswer(new Answer<List<ResolveInfo>>() {
@@ -1649,6 +1925,20 @@ public class ManagedServicesTest extends UiServiceTestCase {
                         return new ArrayList<>();
                     }
                 });
+
+        when(mIpm.getServiceInfo(any(), anyLong(), anyInt())).thenAnswer(
+                (Answer<ServiceInfo>) invocation -> {
+                    ComponentName invocationCn = invocation.getArgument(0);
+                    if (invocationCn != null && packages.contains(invocationCn.getPackageName())) {
+                        ServiceInfo serviceInfo = new ServiceInfo();
+                        serviceInfo.packageName = invocationCn.getPackageName();
+                        serviceInfo.name = invocationCn.getClassName();
+                        serviceInfo.permission = service.getConfig().bindPermission;
+                        return serviceInfo;
+                    }
+                    return null;
+                }
+        );
     }
 
     private List<String> stringToList(String list) {

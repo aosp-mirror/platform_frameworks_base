@@ -25,6 +25,7 @@ import com.android.systemui.people.PeopleSpaceActivity;
 import com.android.systemui.people.widget.LaunchConversationActivity;
 import com.android.systemui.screenshot.LongScreenshotActivity;
 import com.android.systemui.sensorprivacy.SensorUseStartedActivity;
+import com.android.systemui.sensorprivacy.television.TvSensorPrivacyChangedActivity;
 import com.android.systemui.sensorprivacy.television.TvUnblockSensorActivity;
 import com.android.systemui.settings.brightness.BrightnessDialog;
 import com.android.systemui.statusbar.tv.notifications.TvNotificationPanelActivity;
@@ -142,4 +143,11 @@ public abstract class DefaultActivityBinder {
     @ClassKey(HdmiCecSetMenuLanguageActivity.class)
     public abstract Activity bindHdmiCecSetMenuLanguageActivity(
             HdmiCecSetMenuLanguageActivity activity);
+
+    /** Inject into TvSensorPrivacyChangedActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(TvSensorPrivacyChangedActivity.class)
+    public abstract Activity bindTvSensorPrivacyChangedActivity(
+            TvSensorPrivacyChangedActivity activity);
 }

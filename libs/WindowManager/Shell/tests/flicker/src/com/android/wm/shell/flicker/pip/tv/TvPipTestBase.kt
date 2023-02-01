@@ -23,8 +23,8 @@ import android.os.SystemClock
 import android.view.Surface.ROTATION_0
 import android.view.Surface.rotationToString
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.SYSTEM_UI_PACKAGE_NAME
-import com.android.wm.shell.flicker.pip.PipTestBase
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assume.assumeTrue
@@ -33,6 +33,7 @@ import org.junit.Before
 abstract class TvPipTestBase : PipTestBase(rotationToString(ROTATION_0), ROTATION_0) {
 
     private val systemUiProcessObserver = SystemUiProcessObserver()
+    protected val wmHelper = WindowManagerStateHelper()
 
     @Before
     final override fun televisionSetUp() {
@@ -67,7 +68,8 @@ abstract class TvPipTestBase : PipTestBase(rotationToString(ROTATION_0), ROTATIO
         fun start() {
             hasDied = false
             uiAutomation.adoptShellPermissionIdentity(
-                    android.Manifest.permission.SET_ACTIVITY_WATCHER)
+                android.Manifest.permission.SET_ACTIVITY_WATCHER
+            )
             activityManager.registerProcessObserver(this)
         }
 

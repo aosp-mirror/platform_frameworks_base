@@ -21,11 +21,8 @@ import static android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import android.Manifest;
-import android.annotation.NonNull;
-import android.annotation.StringRes;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -36,21 +33,30 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageManager;
+import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
+import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Process;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
-import com.android.internal.app.AlertActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -83,12 +89,13 @@ public class PackageInstallerActivity extends AlertActivity {
     private Uri mPackageURI;
     private Uri mOriginatingURI;
     private Uri mReferrerURI;
-    private int mOriginatingUid = PackageInstaller.SessionParams.UID_UNKNOWN;
+    private int mOriginatingUid = Process.INVALID_UID;
     private String mOriginatingPackage; // The package name corresponding to #mOriginatingUid
+    private int mActivityResultCode = Activity.RESULT_CANCELED;
+    private int mPendingUserActionReason = -1;
 
     private final boolean mLocalLOGV = false;
     PackageManager mPm;
-    IPackageManager mIpm;
     AppOpsManager mAppOpsManager;
     UserManager mUserManager;
     PackageInstaller mInstaller;
@@ -120,9 +127,8 @@ public class PackageInstallerActivity extends AlertActivity {
     private static final int DLG_INSTALL_ERROR = DLG_BASE + 4;
     private static final int DLG_UNKNOWN_SOURCES_RESTRICTED_FOR_USER = DLG_BASE + 5;
     private static final int DLG_ANONYMOUS_SOURCE = DLG_BASE + 6;
-    private static final int DLG_NOT_SUPPORTED_ON_WEAR = DLG_BASE + 7;
-    private static final int DLG_EXTERNAL_SOURCE_BLOCKED = DLG_BASE + 8;
-    private static final int DLG_INSTALL_APPS_RESTRICTED_FOR_USER = DLG_BASE + 9;
+    private static final int DLG_EXTERNAL_SOURCE_BLOCKED = DLG_BASE + 7;
+    private static final int DLG_INSTALL_APPS_RESTRICTED_FOR_USER = DLG_BASE + 8;
 
     // If unknown sources are temporary allowed
     private boolean mAllowUnknownSources;
@@ -131,10 +137,27 @@ public class PackageInstallerActivity extends AlertActivity {
     private boolean mEnableOk = false;
 
     private void startInstallConfirm() {
-        View viewToEnable;
+        TextView viewToEnable;
 
         if (mAppInfo != null) {
             viewToEnable = requireViewById(R.id.install_confirm_question_update);
+
+            final CharSequence existingUpdateOwnerLabel = getExistingUpdateOwnerLabel();
+            final CharSequence requestedUpdateOwnerLabel = getApplicationLabel(mCallingPackage);
+            if (!TextUtils.isEmpty(existingUpdateOwnerLabel)) {
+                if (mPendingUserActionReason == PackageInstaller.REASON_OWNERSHIP_CHANGED) {
+                    viewToEnable.setText(
+                            getString(R.string.install_confirm_question_update_owner_changed,
+                                    existingUpdateOwnerLabel, requestedUpdateOwnerLabel));
+                } else if (mPendingUserActionReason == PackageInstaller.REASON_REMIND_OWNERSHIP
+                        || mPendingUserActionReason
+                        == PackageInstaller.REASON_CONFIRM_PACKAGE_CHANGE) {
+                    viewToEnable.setText(
+                            getString(R.string.install_confirm_question_update_owner_reminder,
+                                    existingUpdateOwnerLabel, requestedUpdateOwnerLabel));
+                }
+            }
+
             mOk.setText(R.string.update);
         } else {
             // This is a new application with no permissions.
@@ -148,8 +171,29 @@ public class PackageInstallerActivity extends AlertActivity {
         mOk.setFilterTouchesWhenObscured(true);
     }
 
+    private CharSequence getExistingUpdateOwnerLabel() {
+        try {
+            final String packageName = mPkgInfo.packageName;
+            final InstallSourceInfo sourceInfo = mPm.getInstallSourceInfo(packageName);
+            final String existingUpdateOwner = sourceInfo.getUpdateOwnerPackageName();
+            return getApplicationLabel(existingUpdateOwner);
+        } catch (NameNotFoundException e) {
+            return null;
+        }
+    }
+
+    private CharSequence getApplicationLabel(String packageName) {
+        try {
+            final ApplicationInfo appInfo = mPm.getApplicationInfo(packageName,
+                    ApplicationInfoFlags.of(0));
+            return mPm.getApplicationLabel(appInfo);
+        } catch (NameNotFoundException e) {
+            return null;
+        }
+    }
+
     /**
-     * Replace any dialog shown by the dialog with the one for the given {@link #createDialog id}.
+     * Replace any dialog shown by the dialog with the one for the given {@link #createDialog(int)}.
      *
      * @param id The dialog type to add
      */
@@ -163,7 +207,8 @@ public class PackageInstallerActivity extends AlertActivity {
 
         DialogFragment newDialog = createDialog(id);
         if (newDialog != null) {
-            newDialog.showAllowingStateLoss(getFragmentManager(), "dialog");
+            getFragmentManager().beginTransaction()
+                    .add(newDialog, "dialog").commitAllowingStateLoss();
         }
     }
 
@@ -185,8 +230,6 @@ public class PackageInstallerActivity extends AlertActivity {
             case DLG_INSTALL_ERROR:
                 return InstallErrorDialog.newInstance(
                         mPm.getApplicationLabel(mPkgInfo.applicationInfo));
-            case DLG_NOT_SUPPORTED_ON_WEAR:
-                return NotSupportedOnWearDialog.newInstance();
             case DLG_INSTALL_APPS_RESTRICTED_FOR_USER:
                 return SimpleErrorDialog.newInstance(
                         R.string.install_apps_user_restriction_dlg_text);
@@ -210,9 +253,9 @@ public class PackageInstallerActivity extends AlertActivity {
             // Log the fact that the app is requesting an install, and is now allowed to do it
             // (before this point we could only log that it's requesting an install, but isn't
             // allowed to do it yet).
-            int appOpCode =
-                    AppOpsManager.permissionToOpCode(Manifest.permission.REQUEST_INSTALL_PACKAGES);
-            mAppOpsManager.noteOpNoThrow(appOpCode, mOriginatingUid, mOriginatingPackage,
+            String appOpStr =
+                    AppOpsManager.permissionToOp(Manifest.permission.REQUEST_INSTALL_PACKAGES);
+            mAppOpsManager.noteOpNoThrow(appOpStr, mOriginatingUid, mOriginatingPackage,
                     mCallingAttributionTag,
                     "Successfully started package installation activity");
 
@@ -249,12 +292,9 @@ public class PackageInstallerActivity extends AlertActivity {
     private boolean isInstallRequestFromUnknownSource(Intent intent) {
         if (mCallingPackage != null && intent.getBooleanExtra(
                 Intent.EXTRA_NOT_UNKNOWN_SOURCE, false)) {
-            if (mSourceInfo != null) {
-                if ((mSourceInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED)
-                        != 0) {
-                    // Privileged apps can bypass unknown sources check if they want.
-                    return false;
-                }
+            if (mSourceInfo != null && mSourceInfo.isPrivilegedApp()) {
+                // Privileged apps can bypass unknown sources check if they want.
+                return false;
             }
         }
         return true;
@@ -294,9 +334,17 @@ public class PackageInstallerActivity extends AlertActivity {
                 ? RESULT_OK : RESULT_FIRST_USER, result);
     }
 
+    private static PackageInfo generateStubPackageInfo(String packageName) {
+        final PackageInfo info = new PackageInfo();
+        final ApplicationInfo aInfo = new ApplicationInfo();
+        info.applicationInfo = aInfo;
+        info.packageName = info.applicationInfo.packageName = packageName;
+        return info;
+    }
+
     @Override
     protected void onCreate(Bundle icicle) {
-        if (mLocalLOGV) Log.i(TAG, "creating for user " + getUserId());
+        if (mLocalLOGV) Log.i(TAG, "creating for user " + UserHandle.myUserId());
         getWindow().addSystemFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
 
         super.onCreate(null);
@@ -304,59 +352,75 @@ public class PackageInstallerActivity extends AlertActivity {
         if (icicle != null) {
             mAllowUnknownSources = icicle.getBoolean(ALLOW_UNKNOWN_SOURCES_KEY);
         }
+        setFinishOnTouchOutside(true);
 
         mPm = getPackageManager();
-        mIpm = AppGlobals.getPackageManager();
         mAppOpsManager = (AppOpsManager) getSystemService(Context.APP_OPS_SERVICE);
         mInstaller = mPm.getPackageInstaller();
         mUserManager = (UserManager) getSystemService(Context.USER_SERVICE);
 
         final Intent intent = getIntent();
+        final String action = intent.getAction();
 
         mCallingPackage = intent.getStringExtra(EXTRA_CALLING_PACKAGE);
         mCallingAttributionTag = intent.getStringExtra(EXTRA_CALLING_ATTRIBUTION_TAG);
         mSourceInfo = intent.getParcelableExtra(EXTRA_ORIGINAL_SOURCE_INFO);
         mOriginatingUid = intent.getIntExtra(Intent.EXTRA_ORIGINATING_UID,
-                PackageInstaller.SessionParams.UID_UNKNOWN);
-        mOriginatingPackage = (mOriginatingUid != PackageInstaller.SessionParams.UID_UNKNOWN)
+                Process.INVALID_UID);
+        mOriginatingPackage = (mOriginatingUid != Process.INVALID_UID)
                 ? getPackageNameForUid(mOriginatingUid) : null;
 
-        final Uri packageUri;
-
-        if (PackageInstaller.ACTION_CONFIRM_INSTALL.equals(intent.getAction())) {
-            final int sessionId = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, -1);
-            final PackageInstaller.SessionInfo info = mInstaller.getSessionInfo(sessionId);
-            if (info == null || !info.sealed || info.resolvedBaseCodePath == null) {
+        final Object packageSource;
+        if (PackageInstaller.ACTION_CONFIRM_INSTALL.equals(action)) {
+            final int sessionId = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID,
+                    -1 /* defaultValue */);
+            final SessionInfo info = mInstaller.getSessionInfo(sessionId);
+            final String resolvedBaseCodePath = intent.getStringExtra(
+                    PackageInstaller.EXTRA_RESOLVED_BASE_PATH);
+            if (info == null || !info.isSealed() || resolvedBaseCodePath == null) {
                 Log.w(TAG, "Session " + mSessionId + " in funky state; ignoring");
                 finish();
                 return;
             }
 
             mSessionId = sessionId;
-            packageUri = Uri.fromFile(new File(info.resolvedBaseCodePath));
+            packageSource = Uri.fromFile(new File(resolvedBaseCodePath));
             mOriginatingURI = null;
             mReferrerURI = null;
+            mPendingUserActionReason = info.getPendingUserActionReason();
+        } else if (PackageInstaller.ACTION_CONFIRM_PRE_APPROVAL.equals(action)) {
+            final int sessionId = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID,
+                    -1 /* defaultValue */);
+            final SessionInfo info = mInstaller.getSessionInfo(sessionId);
+            if (info == null || !info.getIsPreApprovalRequested()) {
+                Log.w(TAG, "Session " + mSessionId + " in funky state; ignoring");
+                finish();
+                return;
+            }
+
+            mSessionId = sessionId;
+            packageSource = info;
+            mOriginatingURI = null;
+            mReferrerURI = null;
+            mPendingUserActionReason = info.getPendingUserActionReason();
         } else {
             mSessionId = -1;
-            packageUri = intent.getData();
+            packageSource = intent.getData();
             mOriginatingURI = intent.getParcelableExtra(Intent.EXTRA_ORIGINATING_URI);
             mReferrerURI = intent.getParcelableExtra(Intent.EXTRA_REFERRER);
+            mPendingUserActionReason = PackageInstaller.REASON_CONFIRM_PACKAGE_CHANGE;
         }
 
         // if there's nothing to do, quietly slip into the ether
-        if (packageUri == null) {
+        if (packageSource == null) {
             Log.w(TAG, "Unspecified source");
             setPmResult(PackageManager.INSTALL_FAILED_INVALID_URI);
             finish();
             return;
         }
 
-        if (DeviceUtils.isWear(this)) {
-            showDialogInner(DLG_NOT_SUPPORTED_ON_WEAR);
-            return;
-        }
+        final boolean wasSetUp = processAppSnippet(packageSource);
 
-        boolean wasSetUp = processPackageUri(packageUri);
         if (mLocalLOGV) Log.i(TAG, "wasSetUp: " + wasSetUp);
 
         if (!wasSetUp) {
@@ -415,7 +479,7 @@ public class PackageInstallerActivity extends AlertActivity {
                 (ignored, ignored2) -> {
                     if (mOk.isEnabled()) {
                         if (mSessionId != -1) {
-                            mInstaller.setPermissionsResult(mSessionId, true);
+                            setActivityResult(RESULT_OK);
                             finish();
                         } else {
                             startInstall();
@@ -425,10 +489,7 @@ public class PackageInstallerActivity extends AlertActivity {
         mAlert.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel),
                 (ignored, ignored2) -> {
                     // Cancel and finish
-                    setResult(RESULT_CANCELED);
-                    if (mSessionId != -1) {
-                        mInstaller.setPermissionsResult(mSessionId, false);
-                    }
+                    setActivityResult(RESULT_CANCELED);
                     finish();
                 }, null);
         setupAlert();
@@ -439,6 +500,23 @@ public class PackageInstallerActivity extends AlertActivity {
         if (!mOk.isInTouchMode()) {
             mAlert.getButton(DialogInterface.BUTTON_NEGATIVE).requestFocus();
         }
+    }
+
+    private void setActivityResult(int resultCode) {
+        mActivityResultCode = resultCode;
+        super.setResult(resultCode);
+    }
+
+    @Override
+    public void finish() {
+        if (mSessionId != -1) {
+            if (mActivityResultCode == Activity.RESULT_OK) {
+                mInstaller.setPermissionsResult(mSessionId, true);
+            } else {
+                mInstaller.setPermissionsResult(mSessionId, false);
+            }
+        }
+        super.finish();
     }
 
     /**
@@ -512,15 +590,15 @@ public class PackageInstallerActivity extends AlertActivity {
             return;
         }
         // Shouldn't use static constant directly, see b/65534401.
-        final int appOpCode =
-                AppOpsManager.permissionToOpCode(Manifest.permission.REQUEST_INSTALL_PACKAGES);
-        final int appOpMode = mAppOpsManager.noteOpNoThrow(appOpCode, mOriginatingUid,
+        final String appOpStr =
+                AppOpsManager.permissionToOp(Manifest.permission.REQUEST_INSTALL_PACKAGES);
+        final int appOpMode = mAppOpsManager.noteOpNoThrow(appOpStr, mOriginatingUid,
                 mOriginatingPackage, mCallingAttributionTag,
                 "Started package installation activity");
         if (mLocalLOGV) Log.i(TAG, "handleUnknownSources(): appMode=" + appOpMode);
         switch (appOpMode) {
             case AppOpsManager.MODE_DEFAULT:
-                mAppOpsManager.setMode(appOpCode, mOriginatingUid,
+                mAppOpsManager.setMode(appOpStr, mOriginatingUid,
                         mOriginatingPackage, AppOpsManager.MODE_ERRORED);
                 // fall through
             case AppOpsManager.MODE_ERRORED:
@@ -546,20 +624,27 @@ public class PackageInstallerActivity extends AlertActivity {
      */
     private boolean processPackageUri(final Uri packageUri) {
         mPackageURI = packageUri;
-
         final String scheme = packageUri.getScheme();
+        final String packageName = packageUri.getSchemeSpecificPart();
+
         if (mLocalLOGV) Log.i(TAG, "processPackageUri(): uri=" + packageUri + ", scheme=" + scheme);
 
         switch (scheme) {
             case SCHEME_PACKAGE: {
-                try {
-                    mPkgInfo = mPm.getPackageInfo(packageUri.getSchemeSpecificPart(),
-                            PackageManager.GET_PERMISSIONS
-                                    | PackageManager.MATCH_UNINSTALLED_PACKAGES);
-                } catch (NameNotFoundException e) {
+                for (UserHandle handle : mUserManager.getUserHandles(true)) {
+                    PackageManager pmForUser = createContextAsUser(handle, 0)
+                                                .getPackageManager();
+                    try {
+                        if (pmForUser.canPackageQuery(mCallingPackage, packageName)) {
+                            mPkgInfo = pmForUser.getPackageInfo(packageName,
+                                    PackageManager.GET_PERMISSIONS
+                                            | PackageManager.MATCH_UNINSTALLED_PACKAGES);
+                        }
+                    } catch (NameNotFoundException e) {
+                    }
                 }
                 if (mPkgInfo == null) {
-                    Log.w(TAG, "Requested package " + packageUri.getScheme()
+                    Log.w(TAG, "Requested package " + packageUri.getSchemeSpecificPart()
                             + " not available. Discontinuing installation");
                     showDialogInner(DLG_PACKAGE_ERROR);
                     setPmResult(PackageManager.INSTALL_FAILED_INVALID_APK);
@@ -595,10 +680,43 @@ public class PackageInstallerActivity extends AlertActivity {
         return true;
     }
 
+    /**
+     * Use the SessionInfo and set up the installer for pre-commit install session.
+     *
+     * @param info The SessionInfo to compose
+     *
+     * @return {@code true} iff the installer could be set up
+     */
+    private boolean processSessionInfo(@NonNull SessionInfo info) {
+        mPkgInfo = generateStubPackageInfo(info.getAppPackageName());
+        mAppSnippet = new PackageUtil.AppSnippet(info.getAppLabel(),
+                info.getAppIcon() != null ? new BitmapDrawable(getResources(), info.getAppIcon())
+                        : getPackageManager().getDefaultActivityIcon());
+        return true;
+    }
+
+    /**
+     * Parse the Uri (post-commit install session) or use the SessionInfo (pre-commit install
+     * session) to set up the installer for this install.
+     *
+     * @param source The source of package URI or SessionInfo
+     *
+     * @return {@code true} iff the installer could be set up
+     */
+    private boolean processAppSnippet(@NonNull Object source) {
+        if (source instanceof Uri) {
+            return processPackageUri((Uri) source);
+        } else if (source instanceof SessionInfo) {
+            return processSessionInfo((SessionInfo) source);
+        }
+
+        return false;
+    }
+
     @Override
     public void onBackPressed() {
         if (mSessionId != -1) {
-            mInstaller.setPermissionsResult(mSessionId, false);
+            setActivityResult(RESULT_CANCELED);
         }
         super.onBackPressed();
     }
@@ -618,7 +736,7 @@ public class PackageInstallerActivity extends AlertActivity {
         if (mReferrerURI != null) {
             newIntent.putExtra(Intent.EXTRA_REFERRER, mReferrerURI);
         }
-        if (mOriginatingUid != PackageInstaller.SessionParams.UID_UNKNOWN) {
+        if (mOriginatingUid != Process.INVALID_UID) {
             newIntent.putExtra(Intent.EXTRA_ORIGINATING_UID, mOriginatingUid);
         }
         if (installerPackageName != null) {
@@ -697,21 +815,6 @@ public class PackageInstallerActivity extends AlertActivity {
     }
 
     /**
-     * An error dialog shown when the app is not supported on wear
-     */
-    public static class NotSupportedOnWearDialog extends SimpleErrorDialog {
-        static SimpleErrorDialog newInstance() {
-            return SimpleErrorDialog.newInstance(R.string.wear_not_allowed_dlg_text);
-        }
-
-        @Override
-        public void onCancel(DialogInterface dialog) {
-            getActivity().setResult(RESULT_OK);
-            getActivity().finish();
-        }
-    }
-
-    /**
      * An error dialog shown when the device is out of space
      */
     public static class OutOfSpaceDialog extends AppErrorDialog {
@@ -769,7 +872,7 @@ public class PackageInstallerActivity extends AlertActivity {
             if (isDestroyed()) {
                 return;
             }
-            getMainThreadHandler().postDelayed(() -> {
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 if (!isDestroyed()) {
                     startActivity(getIntent().addFlags(FLAG_ACTIVITY_REORDER_TO_FRONT));
                 }

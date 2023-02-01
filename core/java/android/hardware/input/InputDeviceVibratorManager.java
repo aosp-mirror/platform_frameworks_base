@@ -95,7 +95,7 @@ public class InputDeviceVibratorManager extends VibratorManager
         synchronized (mVibrators) {
             int[] vibratorIds = new int[mVibrators.size()];
             for (int idx = 0; idx < mVibrators.size(); idx++) {
-                vibratorIds[idx++] = mVibrators.keyAt(idx);
+                vibratorIds[idx] = mVibrators.keyAt(idx);
             }
             return vibratorIds;
         }

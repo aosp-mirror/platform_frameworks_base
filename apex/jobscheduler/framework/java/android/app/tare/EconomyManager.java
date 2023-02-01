@@ -16,10 +16,14 @@
 
 package android.app.tare;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.util.Log;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Provides access to the resource economy service.
@@ -91,6 +95,41 @@ public class EconomyManager {
         }
     }
 
+
+    public static final int ENABLED_MODE_OFF = 0;
+    public static final int ENABLED_MODE_ON = 1;
+    /**
+     * Go through the motions, tracking events, updating balances and other TARE state values,
+     * but don't use TARE to affect actual device behavior.
+     */
+    public static final int ENABLED_MODE_SHADOW = 2;
+
+    /** @hide */
+    @IntDef(prefix = {"ENABLED_MODE_"}, value = {
+            ENABLED_MODE_OFF,
+            ENABLED_MODE_ON,
+            ENABLED_MODE_SHADOW,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EnabledMode {
+    }
+
+    public static String enabledModeToString(@EnabledMode int mode) {
+        switch (mode) {
+            case ENABLED_MODE_OFF: return "ENABLED_MODE_OFF";
+            case ENABLED_MODE_ON: return "ENABLED_MODE_ON";
+            case ENABLED_MODE_SHADOW: return "ENABLED_MODE_SHADOW";
+            default: return "ENABLED_MODE_" + mode;
+        }
+    }
+
+    public static final String KEY_ENABLE_TARE_MODE = "enable_tare_mode";
+    public static final String KEY_ENABLE_POLICY_ALARM = "enable_policy_alarm";
+    public static final String KEY_ENABLE_POLICY_JOB_SCHEDULER = "enable_policy_job";
+    public static final int DEFAULT_ENABLE_TARE_MODE = ENABLED_MODE_OFF;
+    public static final boolean DEFAULT_ENABLE_POLICY_ALARM = true;
+    public static final boolean DEFAULT_ENABLE_POLICY_JOB_SCHEDULER = true;
+
     // Keys for AlarmManager TARE factors
     /** @hide */
     public static final String KEY_AM_MIN_SATIATED_BALANCE_EXEMPTED =
@@ -106,7 +145,9 @@ public class EconomyManager {
     /** @hide */
     public static final String KEY_AM_INITIAL_CONSUMPTION_LIMIT = "am_initial_consumption_limit";
     /** @hide */
-    public static final String KEY_AM_HARD_CONSUMPTION_LIMIT = "am_hard_consumption_limit";
+    public static final String KEY_AM_MIN_CONSUMPTION_LIMIT = "am_minimum_consumption_limit";
+    /** @hide */
+    public static final String KEY_AM_MAX_CONSUMPTION_LIMIT = "am_maximum_consumption_limit";
     // TODO: Add AlarmManager modifier keys
     /** @hide */
     public static final String KEY_AM_REWARD_TOP_ACTIVITY_INSTANT =
@@ -227,13 +268,27 @@ public class EconomyManager {
     public static final String KEY_JS_MIN_SATIATED_BALANCE_OTHER_APP =
             "js_min_satiated_balance_other_app";
     /** @hide */
+    public static final String KEY_JS_MIN_SATIATED_BALANCE_INCREMENT_APP_UPDATER =
+            "js_min_satiated_balance_increment_updater";
+    /** @hide */
     public static final String KEY_JS_MAX_SATIATED_BALANCE =
             "js_max_satiated_balance";
     /** @hide */
     public static final String KEY_JS_INITIAL_CONSUMPTION_LIMIT = "js_initial_consumption_limit";
     /** @hide */
-    public static final String KEY_JS_HARD_CONSUMPTION_LIMIT = "js_hard_consumption_limit";
+    public static final String KEY_JS_MIN_CONSUMPTION_LIMIT = "js_minimum_consumption_limit";
+    /** @hide */
+    public static final String KEY_JS_MAX_CONSUMPTION_LIMIT = "js_maximum_consumption_limit";
     // TODO: Add JobScheduler modifier keys
+    /** @hide */
+    public static final String KEY_JS_REWARD_APP_INSTALL_INSTANT =
+            "js_reward_app_install_instant";
+    /** @hide */
+    public static final String KEY_JS_REWARD_APP_INSTALL_ONGOING =
+            "js_reward_app_install_ongoing";
+    /** @hide */
+    public static final String KEY_JS_REWARD_APP_INSTALL_MAX =
+            "js_reward_app_install_max";
     /** @hide */
     public static final String KEY_JS_REWARD_TOP_ACTIVITY_INSTANT =
             "js_reward_top_activity_instant";
@@ -352,7 +407,9 @@ public class EconomyManager {
     /** @hide */
     public static final long DEFAULT_AM_INITIAL_CONSUMPTION_LIMIT_CAKES = arcToCake(2880);
     /** @hide */
-    public static final long DEFAULT_AM_HARD_CONSUMPTION_LIMIT_CAKES = arcToCake(15_000);
+    public static final long DEFAULT_AM_MIN_CONSUMPTION_LIMIT_CAKES = arcToCake(1440);
+    /** @hide */
+    public static final long DEFAULT_AM_MAX_CONSUMPTION_LIMIT_CAKES = arcToCake(15_000);
     // TODO: add AlarmManager modifier default values
     /** @hide */
     public static final long DEFAULT_AM_REWARD_TOP_ACTIVITY_INSTANT_CAKES = arcToCake(0);
@@ -459,9 +516,17 @@ public class EconomyManager {
     /** @hide */
     public static final long DEFAULT_JS_INITIAL_CONSUMPTION_LIMIT_CAKES = arcToCake(29_000);
     /** @hide */
-    // TODO: set hard limit based on device type (phone vs tablet vs etc) + battery size
-    public static final long DEFAULT_JS_HARD_CONSUMPTION_LIMIT_CAKES = arcToCake(250_000);
+    public static final long DEFAULT_JS_MIN_CONSUMPTION_LIMIT_CAKES = arcToCake(17_000);
+    /** @hide */
+    // TODO: set maximum limit based on device type (phone vs tablet vs etc) + battery size
+    public static final long DEFAULT_JS_MAX_CONSUMPTION_LIMIT_CAKES = arcToCake(250_000);
     // TODO: add JobScheduler modifier default values
+    /** @hide */
+    public static final long DEFAULT_JS_REWARD_APP_INSTALL_INSTANT_CAKES = arcToCake(408);
+    /** @hide */
+    public static final long DEFAULT_JS_REWARD_APP_INSTALL_ONGOING_CAKES = arcToCake(0);
+    /** @hide */
+    public static final long DEFAULT_JS_REWARD_APP_INSTALL_MAX_CAKES = arcToCake(4000);
     /** @hide */
     public static final long DEFAULT_JS_REWARD_TOP_ACTIVITY_INSTANT_CAKES = arcToCake(0);
     /** @hide */
@@ -494,6 +559,15 @@ public class EconomyManager {
     public static final long DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_ONGOING_CAKES = arcToCake(0);
     /** @hide */
     public static final long DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_MAX_CAKES = arcToCake(5000);
+    /**
+     * How many credits to increase the updating app's min satiated balance by for each app that it
+     * is responsible for updating.
+     * @hide
+     */
+    public static final long DEFAULT_JS_MIN_SATIATED_BALANCE_INCREMENT_APP_UPDATER_CAKES =
+            // Research indicates that the median time between popular app updates is 13-14 days,
+            // so adjust by 14 to amortize over that time.
+            DEFAULT_JS_REWARD_APP_INSTALL_INSTANT_CAKES / 14;
     /** @hide */
     public static final long DEFAULT_JS_ACTION_JOB_MAX_START_CTP_CAKES = arcToCake(3);
     /** @hide */

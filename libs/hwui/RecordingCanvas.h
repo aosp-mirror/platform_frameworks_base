@@ -16,11 +16,13 @@
 
 #pragma once
 
-#include "CanvasTransform.h"
-#include "hwui/Bitmap.h"
-#include "utils/Macros.h"
-#include "utils/TypeLogic.h"
+#include <SkRuntimeEffect.h>
+#include <log/log.h>
 
+#include <cstdlib>
+#include <vector>
+
+#include "CanvasTransform.h"
 #include "SkCanvas.h"
 #include "SkCanvasVirtualEnforcer.h"
 #include "SkDrawable.h"
@@ -28,11 +30,14 @@
 #include "SkPaint.h"
 #include "SkPath.h"
 #include "SkRect.h"
-
+#include "hwui/Bitmap.h"
 #include "pipeline/skia/AnimatedDrawables.h"
+#include "utils/AutoMalloc.h"
+#include "utils/Macros.h"
+#include "utils/TypeLogic.h"
 
-#include <SkRuntimeEffect.h>
-#include <vector>
+enum class SkBlendMode;
+class SkRRect;
 
 namespace android {
 namespace uirenderer {
@@ -109,6 +114,8 @@ private:
     void drawRRect(const SkRRect&, const SkPaint&);
     void drawDRRect(const SkRRect&, const SkRRect&, const SkPaint&);
 
+    void drawMesh(const SkMesh&, const sk_sp<SkBlender>&, const SkPaint&);
+
     void drawAnnotation(const SkRect&, const char*, SkData*);
     void drawDrawable(SkDrawable*, const SkMatrix*);
     void drawPicture(const SkPicture*, const SkMatrix*, const SkPaint*);
@@ -140,7 +147,7 @@ private:
     template <typename Fn, typename... Args>
     void map(const Fn[], Args...) const;
 
-    SkAutoTMalloc<uint8_t> fBytes;
+    AutoTMalloc<uint8_t> fBytes;
     size_t fUsed = 0;
     size_t fReserved = 0;
 
@@ -208,6 +215,7 @@ public:
                      const SkPaint&) override;
     void onDrawPoints(PointMode, size_t count, const SkPoint pts[], const SkPaint&) override;
     void onDrawVerticesObject(const SkVertices*, SkBlendMode, const SkPaint&) override;
+    void onDrawMesh(const SkMesh&, sk_sp<SkBlender>, const SkPaint&) override;
     void onDrawAtlas2(const SkImage*, const SkRSXform[], const SkRect[], const SkColor[], int,
                      SkBlendMode, const SkSamplingOptions&, const SkRect*, const SkPaint*) override;
     void onDrawShadowRec(const SkPath&, const SkDrawShadowRec&) override;

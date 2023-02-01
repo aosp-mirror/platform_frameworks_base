@@ -385,6 +385,42 @@ public final class DataSpace {
      */
     public static final int RANGE_EXTENDED = 3 << 27;
 
+    /**
+     * Depth.
+     *
+     * This value is valid with formats HAL_PIXEL_FORMAT_Y16 and HAL_PIXEL_FORMAT_BLOB.
+     */
+    public static final int DATASPACE_DEPTH = 4096;
+
+    /**
+     * ISO 16684-1:2011(E) Dynamic Depth.
+     *
+     * Embedded depth metadata following the dynamic depth specification.
+     */
+    public static final int DATASPACE_DYNAMIC_DEPTH = 4098;
+
+    /**
+     * High Efficiency Image File Format (HEIF).
+     *
+     * <p>This value is valid with {@link android.hardware.HardwareBuffer#BLOB HardwareBuffer.BLOB}
+     * format. The combination is an HEIC image encoded by HEIC or HEVC encoder according to
+     * ISO/IEC 23008-12.</p>
+     */
+    public static final int DATASPACE_HEIF = 4100;
+
+    /**
+     * ISO/IEC TBD
+     *
+     * JPEG image with embedded recovery map following the Jpeg/R specification.
+     *
+     * <p>This value must always remain aligned with the public ImageFormat Jpeg/R definition and is
+     * valid with formats:
+     *    HAL_PIXEL_FORMAT_BLOB: JPEG image encoded by Jpeg/R encoder according to ISO/IEC TBD.
+     * The image contains a standard SDR JPEG and a recovery map. Jpeg/R decoders can use the
+     * map to recover the input image.</p>
+     */
+     public static final int DATASPACE_JPEG_R = 4101;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, value = {
@@ -393,6 +429,7 @@ public final class DataSpace {
         DATASPACE_SRGB,
         DATASPACE_SCRGB,
         DATASPACE_DISPLAY_P3,
+        DATASPACE_BT2020_HLG,
         DATASPACE_BT2020_PQ,
         DATASPACE_ADOBE_RGB,
         DATASPACE_JFIF,
@@ -403,7 +440,7 @@ public final class DataSpace {
         DATASPACE_DCI_P3,
         DATASPACE_SRGB_LINEAR
     })
-    public @interface NamedDataSpace {};
+    public @interface ColorDataSpace {};
 
     /**
      * Default-assumption data space, when not explicitly specified.
@@ -471,10 +508,20 @@ public final class DataSpace {
      *   Range: RANGE_FULL</pre>
      */
     public static final int DATASPACE_DISPLAY_P3 = 143261696;
+
     /**
-     * ITU-R Recommendation 2020 (BT.2020)
+     * Hybrid Log Gamma encoding.
      *
-     * Ultra High-definition television.
+     * <p>Composed of the following -</p>
+     * <pre>
+     *   Primaries: STANDARD_BT2020
+     *   Transfer: TRANSFER_HLG
+     *   Range: RANGE_FULL</pre>
+     */
+    public static final int DATASPACE_BT2020_HLG = 168165376;
+
+    /**
+     * Perceptual Quantizer encoding.
      *
      * <p>Composed of the following -</p>
      * <pre>
@@ -584,6 +631,31 @@ public final class DataSpace {
      */
     public static final int DATASPACE_SRGB_LINEAR = 138477568;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, value = {
+        DATASPACE_DEPTH,
+        DATASPACE_DYNAMIC_DEPTH,
+        DATASPACE_HEIF,
+        DATASPACE_JPEG_R,
+        DATASPACE_UNKNOWN,
+        DATASPACE_SCRGB_LINEAR,
+        DATASPACE_SRGB,
+        DATASPACE_SCRGB,
+        DATASPACE_DISPLAY_P3,
+        DATASPACE_BT2020_HLG,
+        DATASPACE_BT2020_PQ,
+        DATASPACE_ADOBE_RGB,
+        DATASPACE_JFIF,
+        DATASPACE_BT601_625,
+        DATASPACE_BT601_525,
+        DATASPACE_BT2020,
+        DATASPACE_BT709,
+        DATASPACE_DCI_P3,
+        DATASPACE_SRGB_LINEAR
+    })
+    public @interface NamedDataSpace {};
+
     private DataSpace() {}
 
     /**
@@ -596,7 +668,7 @@ public final class DataSpace {
      *
      * @return The int dataspace packed by standard, transfer and range value
      */
-    public static @NamedDataSpace int pack(@DataSpaceStandard int standard,
+    public static @ColorDataSpace int pack(@DataSpaceStandard int standard,
                                         @DataSpaceTransfer int transfer,
                                         @DataSpaceRange int range) {
         if ((standard & STANDARD_MASK) != standard) {
@@ -618,7 +690,7 @@ public final class DataSpace {
      *
      * @return The standard aspect
      */
-    public static @DataSpaceStandard int getStandard(@NamedDataSpace int dataSpace) {
+    public static @DataSpaceStandard int getStandard(@ColorDataSpace int dataSpace) {
         @DataSpaceStandard int standard = dataSpace & STANDARD_MASK;
         return standard;
     }
@@ -630,7 +702,7 @@ public final class DataSpace {
      *
      * @return The transfer aspect
      */
-    public static @DataSpaceTransfer int getTransfer(@NamedDataSpace int dataSpace) {
+    public static @DataSpaceTransfer int getTransfer(@ColorDataSpace int dataSpace) {
         @DataSpaceTransfer int transfer = dataSpace & TRANSFER_MASK;
         return transfer;
     }
@@ -642,7 +714,7 @@ public final class DataSpace {
      *
      * @return The range aspect
      */
-    public static @DataSpaceRange int getRange(@NamedDataSpace int dataSpace) {
+    public static @DataSpaceRange int getRange(@ColorDataSpace int dataSpace) {
         @DataSpaceRange int range = dataSpace & RANGE_MASK;
         return range;
     }

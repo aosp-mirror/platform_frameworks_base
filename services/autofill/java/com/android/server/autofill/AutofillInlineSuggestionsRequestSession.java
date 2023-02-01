@@ -34,9 +34,9 @@ import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InlineSuggestionsResponse;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.view.IInlineSuggestionsRequestCallback;
-import com.android.internal.view.IInlineSuggestionsResponseCallback;
-import com.android.internal.view.InlineSuggestionsRequestInfo;
+import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
+import com.android.internal.inputmethod.IInlineSuggestionsResponseCallback;
+import com.android.internal.inputmethod.InlineSuggestionsRequestInfo;
 import com.android.server.autofill.ui.InlineFillUi;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 

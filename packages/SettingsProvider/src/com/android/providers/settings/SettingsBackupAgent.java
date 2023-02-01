@@ -37,6 +37,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.settings.backup.DeviceSpecificSettings;
 import android.provider.settings.backup.GlobalSettings;
+import android.provider.settings.backup.LargeScreenSettings;
 import android.provider.settings.backup.SecureSettings;
 import android.provider.settings.backup.SystemSettings;
 import android.provider.settings.validators.GlobalSettingsValidators;
@@ -812,6 +813,12 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 continue;
             }
 
+            if (LargeScreenSettings.doNotRestoreIfLargeScreenSetting(key, getBaseContext())) {
+                Log.i(TAG, "Skipping restore for setting " + key + " as the target device "
+                        + "is a large screen (i.e tablet or foldable in unfolded state)");
+                continue;
+            }
+
             String value = null;
             boolean hasValueToRestore = false;
             if (cachedEntries.indexOfKey(key) >= 0) {
@@ -875,16 +882,16 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         String[] whitelist;
         Map<String, Validator> validators = null;
         if (contentUri.equals(Settings.Secure.CONTENT_URI)) {
-            whitelist = ArrayUtils.concatElements(String.class, SecureSettings.SETTINGS_TO_BACKUP,
+            whitelist = ArrayUtils.concat(String.class, SecureSettings.SETTINGS_TO_BACKUP,
                     Settings.Secure.LEGACY_RESTORE_SETTINGS,
                     DeviceSpecificSettings.DEVICE_SPECIFIC_SETTINGS_TO_BACKUP);
             validators = SecureSettingsValidators.VALIDATORS;
         } else if (contentUri.equals(Settings.System.CONTENT_URI)) {
-            whitelist = ArrayUtils.concatElements(String.class, SystemSettings.SETTINGS_TO_BACKUP,
+            whitelist = ArrayUtils.concat(String.class, SystemSettings.SETTINGS_TO_BACKUP,
                     Settings.System.LEGACY_RESTORE_SETTINGS);
             validators = SystemSettingsValidators.VALIDATORS;
         } else if (contentUri.equals(Settings.Global.CONTENT_URI)) {
-            whitelist = ArrayUtils.concatElements(String.class, GlobalSettings.SETTINGS_TO_BACKUP,
+            whitelist = ArrayUtils.concat(String.class, GlobalSettings.SETTINGS_TO_BACKUP,
                     Settings.Global.LEGACY_RESTORE_SETTINGS);
             validators = GlobalSettingsValidators.VALIDATORS;
         } else {
@@ -1076,7 +1083,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             SoftApConfiguration storedConfig = mWifiManager.getSoftApConfiguration();
 
             if (isNeedToNotifyUserConfigurationHasChanged(configInCloud, storedConfig)) {
-                Log.d(TAG, "restored ap configuration requires a conversion, notify the user");
+                Log.d(TAG, "restored ap configuration requires a conversion, notify the user"
+                        + ", configInCloud is " + configInCloud + " but storedConfig is "
+                        + storedConfig);
                 WifiSoftApConfigChangedNotifier.notifyUserOfConfigConversion(this);
             }
         }
@@ -1115,9 +1124,6 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                         == storedConfig.getBridgedModeOpportunisticShutdownTimeoutMillis()
                 && Objects.equals(configInCloud.getVendorElements(),
                         storedConfig.getVendorElements())
-                && (configInCloud.getPersistentRandomizedMacAddress() != null
-                        ? Objects.equals(configInCloud.getPersistentRandomizedMacAddress(),
-                        storedConfig.getPersistentRandomizedMacAddress()) : true)
                 && Arrays.equals(configInCloud.getAllowedAcsChannels(
                         SoftApConfiguration.BAND_2GHZ),
                         storedConfig.getAllowedAcsChannels(SoftApConfiguration.BAND_2GHZ))

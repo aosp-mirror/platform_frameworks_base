@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.annotation.NonNull;
@@ -35,6 +37,7 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.permission.IPermissionManager;
 import android.util.Log;
+import android.util.Pair;
 import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.InputEvent;
@@ -45,6 +48,9 @@ import android.view.WindowAnimationFrameStats;
 import android.view.WindowContentFrameStats;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.IAccessibilityManager;
+import android.window.ScreenCapture;
+import android.window.ScreenCapture.CaptureArgs;
+import android.window.ScreenCapture.ScreenCaptureListener;
 
 import libcore.io.IoUtils;
 
@@ -172,6 +178,11 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
     }
 
     @Override
+    public void injectInputEventToInputFilter(InputEvent event) throws RemoteException {
+        mAccessibilityManager.injectInputEventToInputFilter(event);
+    }
+
+    @Override
     public void syncInputTransactions(boolean waitForAnimations) {
         synchronized (mLock) {
             throwIfCalledByNotTrustedUidLocked();
@@ -217,20 +228,22 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            int width = crop.width();
-            int height = crop.height();
-            final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
-            final SurfaceControl.DisplayCaptureArgs captureArgs =
-                    new SurfaceControl.DisplayCaptureArgs.Builder(displayToken)
-                            .setSourceCrop(crop)
-                            .setSize(width, height)
-                            .build();
-            final SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
-                    SurfaceControl.captureDisplay(captureArgs);
+            final CaptureArgs captureArgs = new CaptureArgs.Builder<>()
+                    .setSourceCrop(crop)
+                    .build();
+            Pair<ScreenCaptureListener, ScreenCapture.ScreenshotSync> syncScreenCapture =
+                    ScreenCapture.createSyncCaptureListener();
+            mWindowManager.captureDisplay(DEFAULT_DISPLAY, captureArgs,
+                    syncScreenCapture.first);
+            final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
+                    syncScreenCapture.second.get();
             return screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
+        } catch (RemoteException re) {
+            re.rethrowAsRuntimeException();
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+        return null;
     }
 
     @Nullable
@@ -242,11 +255,11 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
             throwIfNotConnectedLocked();
         }
 
-        SurfaceControl.ScreenshotHardwareBuffer captureBuffer;
+        ScreenCapture.ScreenshotHardwareBuffer captureBuffer;
         final long identity = Binder.clearCallingIdentity();
         try {
-            captureBuffer = SurfaceControl.captureLayers(
-                    new SurfaceControl.LayerCaptureArgs.Builder(surfaceControl)
+            captureBuffer = ScreenCapture.captureLayers(
+                    new ScreenCapture.LayerCaptureArgs.Builder(surfaceControl)
                             .setChildrenOnly(false)
                             .build());
         } finally {
@@ -431,8 +444,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
                     writeTo.write(buffer, 0, readByteCount);
                     writeTo.flush();
                 }
-            } catch (IOException ioe) {
-                Log.w(TAG, "Error while reading/writing to streams");
+            } catch (IOException ignored) {
             } finally {
                 IoUtils.closeQuietly(readFrom);
                 IoUtils.closeQuietly(writeTo);
@@ -550,8 +562,10 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
                 | AccessibilityServiceInfo.FLAG_FORCE_DIRECT_BOOT_AWARE;
         info.setCapabilities(AccessibilityServiceInfo.CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT
                 | AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION
-                | AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY
                 | AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS);
+        if ((flags & UiAutomation.FLAG_NOT_ACCESSIBILITY_TOOL) == 0) {
+            info.setAccessibilityTool(true);
+        }
         try {
             // Calling out with a lock held is fine since if the system
             // process is gone the client calling in will be killed.

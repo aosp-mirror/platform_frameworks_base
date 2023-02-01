@@ -28,7 +28,9 @@ import android.util.Log;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,6 +40,43 @@ public class LocalBluetoothLeBroadcastMetadata {
     private static final String METADATA_START = "<";
     private static final String METADATA_END = ">";
     private static final String PATTERN_REGEX = "<(.*?)>";
+    private static final String PATTERN_BT_BROADCAST_METADATA =
+            "T:<(.*?)>;+D:<(.*?)>;+AS:<(.*?)>;+B:<(.*?)>;+SI:<(.*?)>;+E:<(.*?)>;+C:<(.*?)>;"
+                + "+PD:<(.*?)>;+SG:(.*)";
+    private static final String PATTERN_BT_SUBGROUP =
+            "CID:<(.*?)>;+CC:<(.*?);>;+AC:<(.*?);>;+CP:<(.*?)>;+BC:<(.*)>;>;";
+    private static final String PATTERN_BT_CHANNEL = "CI:<(.*?)>;+BCCM:<(.*?);>;";
+
+    /* Index for BluetoothLeBroadcastMetadata */
+    private static int MATCH_INDEX_ADDRESS_TYPE = 1;
+    private static int MATCH_INDEX_DEVICE = 2;
+    private static int MATCH_INDEX_ADVERTISING_SID = 3;
+    private static int MATCH_INDEX_BROADCAST_ID = 4;
+    private static int MATCH_INDEX_SYNC_INTERVAL = 5;
+    private static int MATCH_INDEX_IS_ENCRYPTED = 6;
+    private static int MATCH_INDEX_BROADCAST_CODE = 7;
+    private static int MATCH_INDEX_PRESENTATION_DELAY = 8;
+    private static int MATCH_INDEX_SUBGROUPS = 9;
+
+    /* Index for BluetoothLeBroadcastSubgroup */
+    private static int MATCH_INDEX_CODEC_ID = 1;
+    private static int MATCH_INDEX_CODEC_CONFIG = 2;
+    private static int MATCH_INDEX_AUDIO_CONTENT = 3;
+    private static int MATCH_INDEX_CHANNEL_PREF = 4;
+    private static int MATCH_INDEX_BROADCAST_CHANNEL = 5;
+
+    /* Index for BluetoothLeAudioCodecConfigMetadata */
+    private static int LIST_INDEX_AUDIO_LOCATION = 0;
+    private static int LIST_INDEX_CODEC_CONFIG_RAW_METADATA = 1;
+
+    /* Index for BluetoothLeAudioContentMetadata */
+    private static int LIST_INDEX_PROGRAM_INFO = 0;
+    private static int LIST_INDEX_LANGUAGE = 1;
+    private static int LIST_INDEX_AUDIO_CONTENT_RAW_METADATA = 2;
+
+    /* Index for BluetoothLeBroadcastChannel */
+    private static int MATCH_INDEX_CHANNEL_INDEX = 1;
+    private static int MATCH_INDEX_CHANNEL_CODEC_CONFIG = 2;
 
     private BluetoothLeBroadcastSubgroup mSubgroup;
     private List<BluetoothLeBroadcastSubgroup> mSubgroupList;
@@ -55,17 +94,20 @@ public class LocalBluetoothLeBroadcastMetadata {
     private byte[] mBroadcastCode;
 
     // BluetoothLeBroadcastSubgroup
-    private long mCodecId;
+    private int mCodecId;
     private BluetoothLeAudioContentMetadata mContentMetadata;
     private BluetoothLeAudioCodecConfigMetadata mConfigMetadata;
-    private BluetoothLeBroadcastChannel mChannel;
+    private Boolean mNoChannelPreference;
+    private List<BluetoothLeBroadcastChannel> mChannel;
 
     // BluetoothLeAudioCodecConfigMetadata
     private long mAudioLocation;
+    private byte[] mCodecConfigMetadata;
 
     // BluetoothLeAudioContentMetadata
     private String mLanguage;
     private String mProgramInfo;
+    private byte[] mAudioContentMetadata;
 
     // BluetoothLeBroadcastChannel
     private boolean mIsSelected;
@@ -135,6 +177,7 @@ public class LocalBluetoothLeBroadcastMetadata {
         for (BluetoothLeBroadcastSubgroup subgroup: subgroupList) {
             String audioCodec = convertAudioCodecConfigToString(subgroup.getCodecSpecificConfig());
             String audioContent = convertAudioContentToString(subgroup.getContentMetadata());
+            boolean hasChannelPreference = subgroup.hasChannelPreference();
             String channels = convertChannelToString(subgroup.getChannels());
             subgroupString = new StringBuilder()
                     .append(BluetoothBroadcastUtils.PREFIX_BTSG_CODEC_ID)
@@ -145,6 +188,9 @@ public class LocalBluetoothLeBroadcastMetadata {
                     .append(BluetoothBroadcastUtils.DELIMITER_QR_CODE)
                     .append(BluetoothBroadcastUtils.PREFIX_BTSG_AUDIO_CONTENT)
                     .append(METADATA_START).append(audioContent).append(METADATA_END)
+                    .append(BluetoothBroadcastUtils.DELIMITER_QR_CODE)
+                    .append(BluetoothBroadcastUtils.PREFIX_BTSG_CHANNEL_PREF)
+                    .append(METADATA_START).append(hasChannelPreference).append(METADATA_END)
                     .append(BluetoothBroadcastUtils.DELIMITER_QR_CODE)
                     .append(BluetoothBroadcastUtils.PREFIX_BTSG_BROADCAST_CHANNEL)
                     .append(METADATA_START).append(channels).append(METADATA_END)
@@ -211,25 +257,34 @@ public class LocalBluetoothLeBroadcastMetadata {
         if (DEBUG) {
             Log.d(TAG, "Convert " + qrCodeString + "to BluetoothLeBroadcastMetadata");
         }
-        Pattern pattern = Pattern.compile(PATTERN_REGEX);
+
+        Pattern pattern = Pattern.compile(PATTERN_BT_BROADCAST_METADATA);
         Matcher match = pattern.matcher(qrCodeString);
         if (match.find()) {
-            ArrayList<String> resultList = new ArrayList<>();
-            resultList.add(match.group(1));
-            mSourceAddressType = Integer.parseInt(resultList.get(0));
+            mSourceAddressType = Integer.parseInt(match.group(MATCH_INDEX_ADDRESS_TYPE));
             mSourceDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(
-                    resultList.get(1));
-            mSourceAdvertisingSid = Integer.parseInt(resultList.get(2));
-            mBroadcastId = Integer.parseInt(resultList.get(3));
-            mPaSyncInterval = Integer.parseInt(resultList.get(4));
-            mIsEncrypted = Boolean.valueOf(resultList.get(5));
-            mBroadcastCode = resultList.get(6).getBytes();
-            mPresentationDelayMicros = Integer.parseInt(resultList.get(7));
-            mSubgroup = convertToSubgroup(resultList.get(8));
+                    match.group(MATCH_INDEX_DEVICE));
+            mSourceAdvertisingSid = Integer.parseInt(match.group(MATCH_INDEX_ADVERTISING_SID));
+            mBroadcastId = Integer.parseInt(match.group(MATCH_INDEX_BROADCAST_ID));
+            mPaSyncInterval = Integer.parseInt(match.group(MATCH_INDEX_SYNC_INTERVAL));
+            mIsEncrypted = Boolean.valueOf(match.group(MATCH_INDEX_IS_ENCRYPTED));
+            mBroadcastCode = match.group(MATCH_INDEX_BROADCAST_CODE).getBytes();
+            mPresentationDelayMicros =
+                  Integer.parseInt(match.group(MATCH_INDEX_PRESENTATION_DELAY));
 
             if (DEBUG) {
-                Log.d(TAG, "Converted qrCodeString result: " + match.group());
+                Log.d(TAG, "Converted qrCodeString result: "
+                        + " ,Type = " + mSourceAddressType
+                        + " ,Device = " + mSourceDevice
+                        + " ,AdSid = " + mSourceAdvertisingSid
+                        + " ,BroadcastId = " + mBroadcastId
+                        + " ,paSync = " + mPaSyncInterval
+                        + " ,encrypted = " + mIsEncrypted
+                        + " ,BroadcastCode = " + Arrays.toString(mBroadcastCode)
+                        + " ,delay = " + mPresentationDelayMicros);
             }
+
+            mSubgroup = convertToSubgroup(match.group(MATCH_INDEX_SUBGROUPS));
 
             return new BluetoothLeBroadcastMetadata.Builder()
                     .setSourceDevice(mSourceDevice, mSourceAddressType)
@@ -254,26 +309,26 @@ public class LocalBluetoothLeBroadcastMetadata {
         if (DEBUG) {
             Log.d(TAG, "Convert " + subgroupString + "to BluetoothLeBroadcastSubgroup");
         }
-        Pattern pattern = Pattern.compile(PATTERN_REGEX);
+        Pattern pattern = Pattern.compile(PATTERN_BT_SUBGROUP);
         Matcher match = pattern.matcher(subgroupString);
         if (match.find()) {
-            ArrayList<String> resultList = new ArrayList<>();
-            resultList.add(match.group(1));
-            mCodecId = Long.getLong(resultList.get(0));
-            mConfigMetadata = convertToConfigMetadata(resultList.get(1));
-            mContentMetadata = convertToContentMetadata(resultList.get(2));
-            mChannel = convertToChannel(resultList.get(3), mConfigMetadata);
+            mCodecId = Integer.parseInt(match.group(MATCH_INDEX_CODEC_ID));
+            mConfigMetadata = convertToConfigMetadata(match.group(MATCH_INDEX_CODEC_CONFIG));
+            mContentMetadata = convertToContentMetadata(match.group(MATCH_INDEX_AUDIO_CONTENT));
+            mNoChannelPreference = Boolean.valueOf(match.group(MATCH_INDEX_CHANNEL_PREF));
+            mChannel =
+                  convertToChannel(match.group(MATCH_INDEX_BROADCAST_CHANNEL), mConfigMetadata);
 
-            if (DEBUG) {
-                Log.d(TAG, "Converted subgroupString result: " + match.group());
+            BluetoothLeBroadcastSubgroup.Builder subgroupBuilder =
+                    new BluetoothLeBroadcastSubgroup.Builder();
+            subgroupBuilder.setCodecId(mCodecId);
+            subgroupBuilder.setCodecSpecificConfig(mConfigMetadata);
+            subgroupBuilder.setContentMetadata(mContentMetadata);
+
+            for (BluetoothLeBroadcastChannel channel : mChannel) {
+                subgroupBuilder.addChannel(channel);
             }
-
-            return new BluetoothLeBroadcastSubgroup.Builder()
-                    .setCodecId(mCodecId)
-                    .setCodecSpecificConfig(mConfigMetadata)
-                    .setContentMetadata(mContentMetadata)
-                    .addChannel(mChannel)
-                    .build();
+            return subgroupBuilder.build();
         } else {
             if (DEBUG) {
                 Log.d(TAG,
@@ -291,15 +346,17 @@ public class LocalBluetoothLeBroadcastMetadata {
         }
         Pattern pattern = Pattern.compile(PATTERN_REGEX);
         Matcher match = pattern.matcher(configMetadataString);
-        if (match.find()) {
-            ArrayList<String> resultList = new ArrayList<>();
+        ArrayList<String> resultList = new ArrayList<>();
+        while (match.find()) {
             resultList.add(match.group(1));
-            mAudioLocation = Long.getLong(resultList.get(0));
-
-            if (DEBUG) {
-                Log.d(TAG, "Converted configMetadataString result: " + match.group());
-            }
-
+            Log.d(TAG, "Codec Config match : " + match.group(1));
+        }
+        if (DEBUG) {
+            Log.d(TAG, "Converted configMetadataString result: " + resultList.size());
+        }
+        if (resultList.size() > 0) {
+            mAudioLocation = Long.parseLong(resultList.get(LIST_INDEX_AUDIO_LOCATION));
+            mCodecConfigMetadata = resultList.get(LIST_INDEX_CODEC_CONFIG_RAW_METADATA).getBytes();
             return new BluetoothLeAudioCodecConfigMetadata.Builder()
                     .setAudioLocation(mAudioLocation)
                     .build();
@@ -319,14 +376,25 @@ public class LocalBluetoothLeBroadcastMetadata {
         }
         Pattern pattern = Pattern.compile(PATTERN_REGEX);
         Matcher match = pattern.matcher(contentMetadataString);
-        if (match.find()) {
-            ArrayList<String> resultList = new ArrayList<>();
+        ArrayList<String> resultList = new ArrayList<>();
+        while (match.find()) {
+            Log.d(TAG, "Audio Content match : " + match.group(1));
             resultList.add(match.group(1));
-            mProgramInfo = resultList.get(0);
-            mLanguage = resultList.get(1);
+        }
+        if (DEBUG) {
+            Log.d(TAG, "Converted contentMetadataString result: " + resultList.size());
+        }
+        if (resultList.size() > 0) {
+            mProgramInfo = resultList.get(LIST_INDEX_PROGRAM_INFO);
+            mLanguage = resultList.get(LIST_INDEX_LANGUAGE);
+            mAudioContentMetadata =
+                  resultList.get(LIST_INDEX_AUDIO_CONTENT_RAW_METADATA).getBytes();
 
-            if (DEBUG) {
-                Log.d(TAG, "Converted contentMetadataString result: " + match.group());
+            /* TODO(b/265253566) : Need to set the default value for language when the user starts
+            *  the broadcast.
+            */
+            if (mLanguage.equals("null")) {
+                mLanguage = "eng";
             }
 
             return new BluetoothLeAudioContentMetadata.Builder()
@@ -342,28 +410,34 @@ public class LocalBluetoothLeBroadcastMetadata {
         }
     }
 
-    private BluetoothLeBroadcastChannel convertToChannel(String channelString,
+    private List<BluetoothLeBroadcastChannel> convertToChannel(String channelString,
             BluetoothLeAudioCodecConfigMetadata configMetadata) {
         if (DEBUG) {
             Log.d(TAG, "Convert " + channelString + "to BluetoothLeBroadcastChannel");
         }
-        Pattern pattern = Pattern.compile(PATTERN_REGEX);
+        Pattern pattern = Pattern.compile(PATTERN_BT_CHANNEL);
         Matcher match = pattern.matcher(channelString);
-        if (match.find()) {
-            ArrayList<String> resultList = new ArrayList<>();
-            resultList.add(match.group(1));
-            mIsSelected = Boolean.valueOf(resultList.get(0));
-            mChannelIndex = Integer.parseInt(resultList.get(1));
+        Map<Integer, BluetoothLeAudioCodecConfigMetadata> channel =
+                new HashMap<Integer, BluetoothLeAudioCodecConfigMetadata>();
+        while (match.find()) {
+            channel.put(Integer.parseInt(match.group(MATCH_INDEX_CHANNEL_INDEX)),
+                    convertToConfigMetadata(match.group(MATCH_INDEX_CHANNEL_CODEC_CONFIG)));
+        }
 
-            if (DEBUG) {
-                Log.d(TAG, "Converted channelString result: " + match.group());
+        if (channel.size() > 0) {
+            mIsSelected = false;
+            ArrayList<BluetoothLeBroadcastChannel> broadcastChannelList = new ArrayList<>();
+            for (Map.Entry<Integer, BluetoothLeAudioCodecConfigMetadata> entry :
+                    channel.entrySet()) {
+
+                broadcastChannelList.add(
+                        new BluetoothLeBroadcastChannel.Builder()
+                            .setSelected(mIsSelected)
+                            .setChannelIndex(entry.getKey())
+                            .setCodecMetadata(entry.getValue())
+                            .build());
             }
-
-            return new BluetoothLeBroadcastChannel.Builder()
-                    .setSelected(mIsSelected)
-                    .setChannelIndex(mChannelIndex)
-                    .setCodecMetadata(configMetadata)
-                    .build();
+            return broadcastChannelList;
         } else {
             if (DEBUG) {
                 Log.d(TAG,

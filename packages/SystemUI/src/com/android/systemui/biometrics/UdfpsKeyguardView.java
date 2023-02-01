@@ -26,6 +26,8 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.MathUtils;
 import android.view.View;
@@ -33,6 +35,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
 
@@ -64,6 +67,7 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
     private AnimatorSet mBackgroundInAnimator = new AnimatorSet();
     private int mAlpha; // 0-255
     private float mScaleFactor = 1;
+    private Rect mSensorBounds = new Rect();
 
     // AOD anti-burn-in offsets
     private final int mMaxBurnInOffsetX;
@@ -85,10 +89,7 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
             .getDimensionPixelSize(R.dimen.udfps_burn_in_offset_y);
     }
 
-    @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
-
+    public void startIconAsyncInflate() {
         // inflate Lottie views on a background thread in case it takes a while to inflate
         AsyncLayoutInflater inflater = new AsyncLayoutInflater(mContext);
         inflater.inflate(R.layout.udfps_keyguard_view_internal, this,
@@ -101,11 +102,11 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
     }
 
     @Override
-    void onIlluminationStarting() {
+    void onDisplayConfiguring() {
     }
 
     @Override
-    void onIlluminationStopped() {
+    void onDisplayUnconfigured() {
     }
 
     @Override
@@ -239,6 +240,10 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
         updateAlpha();
     }
 
+    void updateSensorLocation(@NonNull Rect sensorBounds) {
+        mSensorBounds.set(sensorBounds);
+    }
+
     /**
      * Animates in the bg protection circle behind the fp icon to highlight the icon.
      */
@@ -277,6 +282,7 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
         pw.println("    mUdfpsRequested=" + mUdfpsRequested);
         pw.println("    mInterpolatedDarkAmount=" + mInterpolatedDarkAmount);
         pw.println("    mAnimationType=" + mAnimationType);
+        pw.println("    mUseExpandedOverlay=" + mUseExpandedOverlay);
     }
 
     private final AsyncLayoutInflater.OnInflateFinishedListener mLayoutInflaterFinishListener =
@@ -291,7 +297,22 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
             updatePadding();
             updateColor();
             updateAlpha();
-            parent.addView(view);
+
+            if (mUseExpandedOverlay) {
+                final LayoutParams lp = (LayoutParams) view.getLayoutParams();
+                lp.width = mSensorBounds.width();
+                lp.height = mSensorBounds.height();
+                RectF relativeToView = getBoundsRelativeToView(new RectF(mSensorBounds));
+                lp.setMargins(
+                        (int) relativeToView.left,
+                        (int) relativeToView.top,
+                        (int) relativeToView.right,
+                        (int) relativeToView.bottom
+                );
+                parent.addView(view, lp);
+            } else {
+                parent.addView(view);
+            }
 
             // requires call to invalidate to update the color
             mLockScreenFp.addValueCallback(

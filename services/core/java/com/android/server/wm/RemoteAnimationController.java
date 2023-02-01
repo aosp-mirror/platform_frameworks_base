@@ -22,6 +22,7 @@ import static com.android.server.wm.RemoteAnimationAdapterWrapperProto.TARGET;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Point;
@@ -57,7 +58,7 @@ import java.util.function.Consumer;
  */
 class RemoteAnimationController implements DeathRecipient {
     private static final String TAG = TAG_WITH_CLASS_NAME
-                    ? "RemoteAnimationController" : TAG_WM;
+            ? "RemoteAnimationController" : TAG_WM;
     private static final long TIMEOUT_MS = 10000;
 
     private final WindowManagerService mService;
@@ -70,37 +71,62 @@ class RemoteAnimationController implements DeathRecipient {
     final ArrayList<NonAppWindowAnimationAdapter> mPendingNonAppAnimations = new ArrayList<>();
     private final Handler mHandler;
     private final Runnable mTimeoutRunnable = () -> cancelAnimation("timeoutRunnable");
+    private boolean mIsFinishing;
 
     private FinishedCallback mFinishedCallback;
+    private final boolean mIsActivityEmbedding;
     private boolean mCanceled;
     private boolean mLinkedToDeathOfRunner;
     @Nullable
     private Runnable mOnRemoteAnimationReady;
 
     RemoteAnimationController(WindowManagerService service, DisplayContent displayContent,
-            RemoteAnimationAdapter remoteAnimationAdapter, Handler handler) {
+            RemoteAnimationAdapter remoteAnimationAdapter, Handler handler,
+            boolean isActivityEmbedding) {
         mService = service;
         mDisplayContent = displayContent;
         mRemoteAnimationAdapter = remoteAnimationAdapter;
         mHandler = handler;
+        mIsActivityEmbedding = isActivityEmbedding;
     }
 
     /**
      * Creates an animation record for each individual {@link WindowContainer}.
      *
      * @param windowContainer The windows to animate.
-     * @param position The position app bounds relative to its parent.
-     * @param localBounds The bounds of the app relative to its parent.
-     * @param endBounds The end bounds after the transition, in screen coordinates.
-     * @param startBounds The start bounds before the transition, in screen coordinates.
+     * @param position        The position app bounds relative to its parent.
+     * @param localBounds     The bounds of the app relative to its parent.
+     * @param endBounds       The end bounds after the transition, in screen coordinates.
+     * @param startBounds     The start bounds before the transition, in screen coordinates.
+     * @param showBackdrop    To show background behind a window during animation.
      * @return The record representing animation(s) to run on the app.
      */
     RemoteAnimationRecord createRemoteAnimationRecord(WindowContainer windowContainer,
-            Point position, Rect localBounds, Rect endBounds, Rect startBounds) {
+            Point position, Rect localBounds, Rect endBounds, Rect startBounds,
+            boolean showBackdrop) {
+        return createRemoteAnimationRecord(windowContainer, position, localBounds, endBounds,
+                startBounds, showBackdrop, startBounds != null /* shouldCreateSnapshot */);
+    }
+
+    /**
+     * Creates an animation record for each individual {@link WindowContainer}.
+     *
+     * @param windowContainer The windows to animate.
+     * @param position        The position app bounds relative to its parent.
+     * @param localBounds     The bounds of the app relative to its parent.
+     * @param endBounds       The end bounds after the transition, in screen coordinates.
+     * @param startBounds     The start bounds before the transition, in screen coordinates.
+     * @param showBackdrop    To show background behind a window during animation.
+     * @param shouldCreateSnapshot   Whether this target should create a snapshot animation.
+     * @return The record representing animation(s) to run on the app.
+     */
+    RemoteAnimationRecord createRemoteAnimationRecord(WindowContainer windowContainer,
+            Point position, Rect localBounds, Rect endBounds, Rect startBounds,
+            boolean showBackdrop, boolean shouldCreateSnapshot) {
         ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "createAnimationAdapter(): container=%s",
                 windowContainer);
         final RemoteAnimationRecord adapters = new RemoteAnimationRecord(windowContainer, position,
-                localBounds, endBounds, startBounds);
+                localBounds, endBounds, startBounds, showBackdrop, shouldCreateSnapshot);
         mPendingAnimations.add(adapters);
         return adapters;
     }
@@ -108,6 +134,15 @@ class RemoteAnimationController implements DeathRecipient {
     /** Sets callback to run before starting remote animation. */
     void setOnRemoteAnimationReady(@Nullable Runnable onRemoteAnimationReady) {
         mOnRemoteAnimationReady = onRemoteAnimationReady;
+    }
+
+    /**
+     * We use isFromActivityEmbedding() in the server process to tell if we're running an
+     * Activity Embedding type remote animation, where animations are driven by the client.
+     * This is currently supporting features like showBackdrop where we need to load App XML.
+     */
+    public boolean isFromActivityEmbedding() {
+        return mIsActivityEmbedding;
     }
 
     /**
@@ -260,6 +295,7 @@ class RemoteAnimationController implements DeathRecipient {
                 mPendingAnimations.size());
         mHandler.removeCallbacks(mTimeoutRunnable);
         synchronized (mService.mGlobalLock) {
+            mIsFinishing = true;
             unlinkToDeathOfRunner();
             releaseFinishedCallback();
             mService.openSurfaceTransaction();
@@ -304,12 +340,13 @@ class RemoteAnimationController implements DeathRecipient {
                 throw e;
             } finally {
                 mService.closeSurfaceTransaction("RemoteAnimationController#finished");
+                mIsFinishing = false;
             }
+            // Reset input for all activities when the remote animation is finished.
+            final Consumer<ActivityRecord> updateActivities =
+                    activity -> activity.setDropInputForAnimation(false);
+            mDisplayContent.forAllActivities(updateActivities);
         }
-        // Reset input for all activities when the remote animation is finished.
-        final Consumer<ActivityRecord> updateActivities =
-                activity -> activity.setDropInputForAnimation(false);
-        mDisplayContent.forAllActivities(updateActivities);
         setRunningRemoteAnimation(false);
         ProtoLog.i(WM_DEBUG_REMOTE_ANIMATIONS, "Finishing remote animation");
     }
@@ -418,28 +455,36 @@ class RemoteAnimationController implements DeathRecipient {
         RemoteAnimationTarget mTarget;
         final WindowContainer mWindowContainer;
         final Rect mStartBounds;
+        final boolean mShowBackdrop;
+        @ColorInt int mBackdropColor = 0;
         private @RemoteAnimationTarget.Mode int mMode = RemoteAnimationTarget.MODE_CHANGING;
 
         RemoteAnimationRecord(WindowContainer windowContainer, Point endPos, Rect localBounds,
-                Rect endBounds, Rect startBounds) {
+                Rect endBounds, @Nullable Rect startBounds, boolean showBackdrop,
+                boolean shouldCreateSnapshot) {
             mWindowContainer = windowContainer;
+            mShowBackdrop = showBackdrop;
             if (startBounds != null) {
                 mStartBounds = new Rect(startBounds);
                 mAdapter = new RemoteAnimationAdapterWrapper(this, endPos, localBounds, endBounds,
-                        mStartBounds);
-                if (mRemoteAnimationAdapter.getChangeNeedsSnapshot()) {
+                        mStartBounds, mShowBackdrop);
+                if (shouldCreateSnapshot && mRemoteAnimationAdapter.getChangeNeedsSnapshot()) {
                     final Rect thumbnailLocalBounds = new Rect(startBounds);
                     thumbnailLocalBounds.offsetTo(0, 0);
                     // Snapshot is located at (0,0) of the animation leash. It doesn't have size
                     // change, so the startBounds is its end bounds, and no start bounds for it.
                     mThumbnailAdapter = new RemoteAnimationAdapterWrapper(this, new Point(0, 0),
-                            thumbnailLocalBounds, startBounds, new Rect());
+                            thumbnailLocalBounds, startBounds, new Rect(), mShowBackdrop);
                 }
             } else {
                 mAdapter = new RemoteAnimationAdapterWrapper(this, endPos, localBounds, endBounds,
-                        new Rect());
+                        new Rect(), mShowBackdrop);
                 mStartBounds = null;
             }
+        }
+
+        void setBackDropColor(@ColorInt int backdropColor) {
+            mBackdropColor = backdropColor;
         }
 
         RemoteAnimationTarget createRemoteAnimationTarget() {
@@ -483,14 +528,27 @@ class RemoteAnimationController implements DeathRecipient {
         final Rect mLocalBounds;
         final Rect mEndBounds = new Rect();
         final Rect mStartBounds = new Rect();
+        final boolean mShowBackdrop;
 
         RemoteAnimationAdapterWrapper(RemoteAnimationRecord record, Point position,
-                Rect localBounds, Rect endBounds, Rect startBounds) {
+                Rect localBounds, Rect endBounds, Rect startBounds, boolean showBackdrop) {
             mRecord = record;
             mPosition.set(position.x, position.y);
             mLocalBounds = localBounds;
             mEndBounds.set(endBounds);
             mStartBounds.set(startBounds);
+            mShowBackdrop = showBackdrop;
+        }
+
+        @Override
+        @ColorInt
+        public int getBackgroundColor() {
+            return mRecord.mBackdropColor;
+        }
+
+        @Override
+        public boolean getShowBackground() {
+            return mShowBackdrop;
         }
 
         @Override
@@ -523,6 +581,9 @@ class RemoteAnimationController implements DeathRecipient {
 
         @Override
         public void onAnimationCancelled(SurfaceControl animationLeash) {
+            if (mIsFinishing) {
+                return;
+            }
             if (mRecord.mAdapter == this) {
                 mRecord.mAdapter = null;
             } else {

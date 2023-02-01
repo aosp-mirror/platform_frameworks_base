@@ -38,23 +38,9 @@ bootstrap_go_package {
     pluginFor: ["soong_build"],
 }
 
-python_defaults {
-    name: "python3_version_defaults",
-    version: {
-        py2: {
-            enabled: false,
-        },
-        py3: {
-            enabled: true,
-            embedded_launcher: false,
-        },
-    },
-}
-
 python_binary_host {
     name: "api_versions_trimmer",
     srcs: ["api_versions_trimmer.py"],
-    defaults: ["python3_version_defaults"],
 }
 
 python_test_host {
@@ -64,7 +50,6 @@ python_test_host {
         "api_versions_trimmer_unittests.py",
         "api_versions_trimmer.py",
     ],
-    defaults: ["python3_version_defaults"],
     test_options: {
         unit_test: true,
     },
@@ -73,7 +58,6 @@ python_test_host {
 python_binary_host {
     name: "merge_annotation_zips",
     srcs: ["merge_annotation_zips.py"],
-    defaults: ["python3_version_defaults"],
 }
 
 python_test_host {
@@ -83,7 +67,6 @@ python_test_host {
         "merge_annotation_zips.py",
         "merge_annotation_zips_test.py",
     ],
-    defaults: ["python3_version_defaults"],
     test_options: {
         unit_test: true,
     },
@@ -112,9 +95,12 @@ combined_apis {
         "framework-adservices",
         "framework-appsearch",
         "framework-bluetooth",
+        "framework-configinfrastructure",
         "framework-connectivity",
         "framework-connectivity-t",
+        "framework-devicelock",
         "framework-graphics",
+        "framework-healthconnect",
         "framework-media",
         "framework-mediaprovider",
         "framework-ondevicepersonalization",
@@ -126,12 +112,17 @@ combined_apis {
         "framework-sdksandbox",
         "framework-tethering",
         "framework-uwb",
+        "framework-virtualization",
         "framework-wifi",
         "i18n.module.public.api",
     ],
     system_server_classpath: [
+        "service-art",
+        "service-configinfrastructure",
+        "service-healthconnect",
         "service-media-s",
         "service-permission",
+        "service-rkp",
         "service-sdksandbox",
     ],
 }
@@ -191,6 +182,55 @@ genrule {
         "--baseline:compatibility:released $(location :android-incompatibilities.api.module-lib.latest) " +
         "--update-baseline:compatibility:released $(genDir)/updated-baseline.txt " +
         "$(location :frameworks-base-api-module-lib-current.txt)",
+}
+
+// This produces the same annotations.zip as framework-doc-stubs, but by using
+// outputs from individual modules instead of all the source code.
+genrule_defaults {
+    name: "sdk-annotations-defaults",
+    out: ["annotations.zip"],
+    tools: [
+        "merge_annotation_zips",
+        "soong_zip",
+    ],
+    cmd: "$(location merge_annotation_zips) $(genDir)/out $(in) && " +
+        "$(location soong_zip) -o $(out) -C $(genDir)/out -D $(genDir)/out",
+}
+
+genrule {
+    name: "sdk-annotations.zip",
+    defaults: ["sdk-annotations-defaults"],
+    srcs: [
+        ":android-non-updatable-doc-stubs{.annotations.zip}",
+        ":all-modules-public-annotations",
+    ],
+}
+
+genrule {
+    name: "sdk-annotations-system.zip",
+    defaults: ["sdk-annotations-defaults"],
+    srcs: [
+        ":android-non-updatable-doc-stubs-system{.annotations.zip}",
+        ":all-modules-system-annotations",
+    ],
+}
+
+genrule {
+    name: "sdk-annotations-module-lib.zip",
+    defaults: ["sdk-annotations-defaults"],
+    srcs: [
+        ":android-non-updatable-doc-stubs-module-lib{.annotations.zip}",
+        ":all-modules-module-lib-annotations",
+    ],
+}
+
+genrule {
+    name: "sdk-annotations-system-server.zip",
+    defaults: ["sdk-annotations-defaults"],
+    srcs: [
+        ":android-non-updatable-doc-stubs-system-server{.annotations.zip}",
+        ":all-modules-system-server-annotations",
+    ],
 }
 
 genrule {

@@ -253,6 +253,7 @@ class UiAutomationManager {
                     securityPolicy, systemSupport, trace, windowManagerInternal,
                     systemActionPerformer, awm);
             mMainHandler = mainHandler;
+            setDisplayTypes(DISPLAY_TYPE_DEFAULT | DISPLAY_TYPE_PROXY);
         }
 
         void connectServiceUnknownThread() {

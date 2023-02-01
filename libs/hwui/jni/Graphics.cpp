@@ -8,12 +8,19 @@
 #include <nativehelper/JNIHelp.h>
 #include "GraphicsJNI.h"
 
+#include "SkBitmap.h"
 #include "SkCanvas.h"
+#include "SkColorSpace.h"
 #include "SkFontMetrics.h"
-#include "SkMath.h"
+#include "SkImageInfo.h"
+#include "SkPixelRef.h"
+#include "SkPoint.h"
+#include "SkRect.h"
 #include "SkRegion.h"
+#include "SkTypes.h"
 #include <cutils/ashmem.h>
 #include <hwui/Canvas.h>
+#include <log/log.h>
 
 using namespace android;
 
@@ -483,7 +490,7 @@ SkRegion* GraphicsJNI::getNativeRegion(JNIEnv* env, jobject region)
 
 void GraphicsJNI::set_metrics(JNIEnv* env, jobject metrics, const SkFontMetrics& skmetrics) {
     if (metrics == nullptr) return;
-    SkASSERT(env->IsInstanceOf(metrics, gFontMetrics_class));
+    LOG_FATAL_IF(!env->IsInstanceOf(metrics, gFontMetrics_class));
     env->SetFloatField(metrics, gFontMetrics_top, SkScalarToFloat(skmetrics.fTop));
     env->SetFloatField(metrics, gFontMetrics_ascent, SkScalarToFloat(skmetrics.fAscent));
     env->SetFloatField(metrics, gFontMetrics_descent, SkScalarToFloat(skmetrics.fDescent));
@@ -497,7 +504,7 @@ int GraphicsJNI::set_metrics_int(JNIEnv* env, jobject metrics, const SkFontMetri
     int leading = SkScalarRoundToInt(skmetrics.fLeading);
 
     if (metrics) {
-        SkASSERT(env->IsInstanceOf(metrics, gFontMetricsInt_class));
+        LOG_FATAL_IF(!env->IsInstanceOf(metrics, gFontMetricsInt_class));
         env->SetIntField(metrics, gFontMetricsInt_top, SkScalarFloorToInt(skmetrics.fTop));
         env->SetIntField(metrics, gFontMetricsInt_ascent, ascent);
         env->SetIntField(metrics, gFontMetricsInt_descent, descent);
@@ -509,8 +516,7 @@ int GraphicsJNI::set_metrics_int(JNIEnv* env, jobject metrics, const SkFontMetri
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-jobject GraphicsJNI::createBitmapRegionDecoder(JNIEnv* env, skia::BitmapRegionDecoder* bitmap)
-{
+jobject GraphicsJNI::createBitmapRegionDecoder(JNIEnv* env, BitmapRegionDecoderWrapper* bitmap) {
     ALOG_ASSERT(bitmap != NULL);
 
     jobject obj = env->NewObject(gBitmapRegionDecoder_class,
@@ -568,14 +574,22 @@ jobject GraphicsJNI::getColorSpace(JNIEnv* env, SkColorSpace* decodeColorSpace,
     LOG_ALWAYS_FATAL_IF(!decodeColorSpace->toXYZD50(&xyzMatrix));
 
     skcms_TransferFunction transferParams;
-    // We can only handle numerical transfer functions at the moment
-    LOG_ALWAYS_FATAL_IF(!decodeColorSpace->isNumericalTransferFn(&transferParams));
+    decodeColorSpace->transferFn(&transferParams);
+    auto res = skcms_TransferFunction_getType(&transferParams);
+    LOG_ALWAYS_FATAL_IF(res == skcms_TFType_HLGinvish || res == skcms_TFType_Invalid);
 
-    jobject params = env->NewObject(gTransferParameters_class,
-            gTransferParameters_constructorMethodID,
-            transferParams.a, transferParams.b, transferParams.c,
-            transferParams.d, transferParams.e, transferParams.f,
-            transferParams.g);
+    jobject params;
+    if (res == skcms_TFType_PQish || res == skcms_TFType_HLGish) {
+        params = env->NewObject(gTransferParameters_class, gTransferParameters_constructorMethodID,
+                                transferParams.a, transferParams.b, transferParams.c,
+                                transferParams.d, transferParams.e, transferParams.f,
+                                transferParams.g, true);
+    } else {
+        params = env->NewObject(gTransferParameters_class, gTransferParameters_constructorMethodID,
+                                transferParams.a, transferParams.b, transferParams.c,
+                                transferParams.d, transferParams.e, transferParams.f,
+                                transferParams.g, false);
+    }
 
     jfloatArray xyzArray = env->NewFloatArray(9);
     jfloat xyz[9] = {
@@ -698,7 +712,9 @@ void RecyclingClippingPixelAllocator::copyIfNecessary() {
                 mSkiaBitmap->info().height());
         for (int y = 0; y < rowsToCopy; y++) {
             memcpy(dst, mSkiaBitmap->getAddr(0, y), bytesToCopy);
-            dst = SkTAddOffset<void>(dst, dstRowBytes);
+            // Cast to bytes in order to apply the dstRowBytes offset correctly.
+            dst = reinterpret_cast<void*>(
+                    reinterpret_cast<uint8_t*>(dst) + dstRowBytes);
         }
         recycledPixels->notifyPixelsChanged();
         recycledPixels->unref();
@@ -800,8 +816,8 @@ int register_android_graphics_Graphics(JNIEnv* env)
 
     gTransferParameters_class = MakeGlobalRefOrDie(env, FindClassOrDie(env,
             "android/graphics/ColorSpace$Rgb$TransferParameters"));
-    gTransferParameters_constructorMethodID = GetMethodIDOrDie(env, gTransferParameters_class,
-            "<init>", "(DDDDDDD)V");
+    gTransferParameters_constructorMethodID =
+            GetMethodIDOrDie(env, gTransferParameters_class, "<init>", "(DDDDDDDZ)V");
 
     gFontMetrics_class = FindClassOrDie(env, "android/graphics/Paint$FontMetrics");
     gFontMetrics_class = MakeGlobalRefOrDie(env, gFontMetrics_class);

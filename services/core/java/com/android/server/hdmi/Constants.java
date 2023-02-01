@@ -19,6 +19,8 @@ package com.android.server.hdmi;
 import android.annotation.IntDef;
 import android.annotation.StringDef;
 import android.hardware.hdmi.HdmiDeviceInfo;
+import android.hardware.tv.hdmi.connection.HpdSignal;
+import android.hardware.tv.hdmi.earc.IEArcStatus;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -337,6 +339,8 @@ final class Constants {
     static final int AUDIO_CODEC_WMAPRO = 0xE; // Support WMA-Pro
     static final int AUDIO_CODEC_MAX = 0xF;
 
+    static final int AUDIO_FORMAT_MASK = 0b0111_1000;
+
     @StringDef({
         AUDIO_DEVICE_ARC_IN,
         AUDIO_DEVICE_SPDIF,
@@ -596,6 +600,40 @@ final class Constants {
             RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU
     })
     @interface RcProfileSource {}
+
+    static final int HDMI_EARC_STATUS_IDLE = IEArcStatus.STATUS_IDLE; // IDLE1
+    static final int HDMI_EARC_STATUS_EARC_PENDING =
+            IEArcStatus.STATUS_EARC_PENDING; // DISC1 and DISC2
+    static final int HDMI_EARC_STATUS_ARC_PENDING = IEArcStatus.STATUS_ARC_PENDING; // IDLE2 for ARC
+    static final int HDMI_EARC_STATUS_EARC_CONNECTED =
+            IEArcStatus.STATUS_EARC_CONNECTED; // eARC connected
+
+    @IntDef({
+            HDMI_EARC_STATUS_IDLE,
+            HDMI_EARC_STATUS_EARC_PENDING,
+            HDMI_EARC_STATUS_ARC_PENDING,
+            HDMI_EARC_STATUS_EARC_CONNECTED
+            })
+    @interface EarcStatus {}
+
+    static final int HDMI_HPD_TYPE_PHYSICAL =
+            HpdSignal.HDMI_HPD_PHYSICAL; // Default. Physical hotplug signal.
+    static final int HDMI_HPD_TYPE_STATUS_BIT =
+            HpdSignal.HDMI_HPD_STATUS_BIT; // HDMI_HPD status bit.
+
+    @IntDef({
+            HDMI_HPD_TYPE_PHYSICAL,
+            HDMI_HPD_TYPE_STATUS_BIT
+    })
+    @interface HpdSignalType {}
+
+    static final String DEVICE_CONFIG_FEATURE_FLAG_SOUNDBAR_MODE = "soundbar_mode";
+    static final String DEVICE_CONFIG_FEATURE_FLAG_ENABLE_EARC_TX = "enable_earc_tx";
+    @StringDef({
+            DEVICE_CONFIG_FEATURE_FLAG_SOUNDBAR_MODE,
+            DEVICE_CONFIG_FEATURE_FLAG_ENABLE_EARC_TX
+    })
+    @interface FeatureFlag {}
 
     private Constants() {
         /* cannot be instantiated */

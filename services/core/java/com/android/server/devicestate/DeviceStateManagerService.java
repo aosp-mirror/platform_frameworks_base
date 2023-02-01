@@ -17,17 +17,24 @@
 package com.android.server.devicestate;
 
 import static android.Manifest.permission.CONTROL_DEVICE_STATE;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
 import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE;
 import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE;
 
 import static com.android.server.devicestate.DeviceState.FLAG_CANCEL_OVERRIDE_REQUESTS;
+import static com.android.server.devicestate.OverrideRequest.OVERRIDE_REQUEST_TYPE_BASE_STATE;
+import static com.android.server.devicestate.OverrideRequest.OVERRIDE_REQUEST_TYPE_EMULATED_STATE;
+import static com.android.server.devicestate.OverrideRequestController.FLAG_THERMAL_CRITICAL;
 import static com.android.server.devicestate.OverrideRequestController.STATUS_ACTIVE;
 import static com.android.server.devicestate.OverrideRequestController.STATUS_CANCELED;
+import static com.android.server.devicestate.OverrideRequestController.STATUS_UNKNOWN;
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.TaskStackListener;
 import android.content.Context;
 import android.hardware.devicestate.DeviceStateInfo;
 import android.hardware.devicestate.DeviceStateManager;
@@ -40,6 +47,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
+import android.os.SystemProperties;
+import android.os.Trace;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -51,6 +60,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowProcessController;
 
@@ -104,6 +114,8 @@ public final class DeviceStateManagerService extends SystemService {
     private final BinderService mBinderService;
     @NonNull
     private final OverrideRequestController mOverrideRequestController;
+    @NonNull
+    private final DeviceStateProviderListener mDeviceStateProviderListener;
     @VisibleForTesting
     @NonNull
     public ActivityTaskManagerInternal mActivityTaskManagerInternal;
@@ -137,6 +149,12 @@ public final class DeviceStateManagerService extends SystemService {
     @NonNull
     private Optional<OverrideRequest> mActiveOverride = Optional.empty();
 
+    // The current active base state override request. When set the device state specified here will
+    // replace the value in mBaseState.
+    @GuardedBy("mLock")
+    @NonNull
+    private Optional<OverrideRequest> mActiveBaseStateOverride = Optional.empty();
+
     // List of processes registered to receive notifications about changes to device state and
     // request status indexed by process id.
     @GuardedBy("mLock")
@@ -144,15 +162,48 @@ public final class DeviceStateManagerService extends SystemService {
 
     private Set<Integer> mDeviceStatesAvailableForAppRequests;
 
+    private Set<Integer> mFoldedDeviceStates;
+
+    @Nullable
+    private DeviceState mRearDisplayState;
+
+    // TODO(259328837) Generalize for all pending feature requests in the future
+    @Nullable
+    private OverrideRequest mRearDisplayPendingOverrideRequest;
+
+    @VisibleForTesting
+    interface SystemPropertySetter {
+        void setDebugTracingDeviceStateProperty(String value);
+    }
+    @NonNull
+    private final SystemPropertySetter mSystemPropertySetter;
+
+    @VisibleForTesting
+    TaskStackListener mOverrideRequestTaskStackListener = new OverrideRequestTaskStackListener();
+    @VisibleForTesting
+    ActivityTaskManagerInternal.ScreenObserver mOverrideRequestScreenObserver =
+            new OverrideRequestScreenObserver();
+
+    @NonNull
+    private final DeviceStateNotificationController mDeviceStateNotificationController;
+
     public DeviceStateManagerService(@NonNull Context context) {
         this(context, DeviceStatePolicy.Provider
                 .fromResources(context.getResources())
                 .instantiate(context));
     }
 
+    private DeviceStateManagerService(@NonNull Context context, @NonNull DeviceStatePolicy policy) {
+        this(context, policy, (value) -> {
+            SystemProperties.set("debug.tracing.device_state", value);
+        });
+    }
+
     @VisibleForTesting
-    DeviceStateManagerService(@NonNull Context context, @NonNull DeviceStatePolicy policy) {
+    DeviceStateManagerService(@NonNull Context context, @NonNull DeviceStatePolicy policy,
+                @NonNull SystemPropertySetter systemPropertySetter) {
         super(context);
+        mSystemPropertySetter = systemPropertySetter;
         // We use the DisplayThread because this service indirectly drives
         // display (on/off) and window (position) events through its callbacks.
         DisplayThread displayThread = DisplayThread.get();
@@ -160,9 +211,17 @@ public final class DeviceStateManagerService extends SystemService {
         mOverrideRequestController = new OverrideRequestController(
                 this::onOverrideRequestStatusChangedLocked);
         mDeviceStatePolicy = policy;
-        mDeviceStatePolicy.getDeviceStateProvider().setListener(new DeviceStateProviderListener());
+        mDeviceStateProviderListener = new DeviceStateProviderListener();
+        mDeviceStatePolicy.getDeviceStateProvider().setListener(mDeviceStateProviderListener);
         mBinderService = new BinderService();
         mActivityTaskManagerInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
+        mDeviceStateNotificationController = new DeviceStateNotificationController(
+                context, mHandler,
+                () -> {
+                    synchronized (mLock) {
+                        mActiveOverride.ifPresent(mOverrideRequestController::cancelRequest);
+                    }
+                });
     }
 
     @Override
@@ -172,7 +231,11 @@ public final class DeviceStateManagerService extends SystemService {
 
         synchronized (mLock) {
             readStatesAvailableForRequestFromApps();
+            mFoldedDeviceStates = readFoldedStates();
         }
+
+        mActivityTaskManagerInternal.registerTaskStackListener(mOverrideRequestTaskStackListener);
+        mActivityTaskManagerInternal.registerScreenObserver(mOverrideRequestScreenObserver);
     }
 
     @VisibleForTesting
@@ -240,6 +303,21 @@ public final class DeviceStateManagerService extends SystemService {
         }
     }
 
+    /**
+     * Returns the current override base state, or {@link Optional#empty()} if no override state is
+     * requested. If an override base state is present, the returned state will be the same as
+     * the base state returned from {@link #getBaseState()}.
+     */
+    @NonNull
+    Optional<DeviceState> getOverrideBaseState() {
+        synchronized (mLock) {
+            if (mActiveBaseStateOverride.isPresent()) {
+                return getStateLocked(mActiveBaseStateOverride.get().getRequestedState());
+            }
+            return Optional.empty();
+        }
+    }
+
     /** Returns the list of currently supported device states. */
     DeviceState[] getSupportedStates() {
         synchronized (mLock) {
@@ -279,7 +357,8 @@ public final class DeviceStateManagerService extends SystemService {
         return mBinderService;
     }
 
-    private void updateSupportedStates(DeviceState[] supportedDeviceStates) {
+    private void updateSupportedStates(DeviceState[] supportedDeviceStates,
+            @DeviceStateProvider.SupportedStatesUpdatedReason int reason) {
         synchronized (mLock) {
             final int[] oldStateIdentifiers = getSupportedStateIdentifiersLocked();
 
@@ -303,8 +382,10 @@ public final class DeviceStateManagerService extends SystemService {
                 return;
             }
 
-            mOverrideRequestController.handleNewSupportedStates(newStateIdentifiers);
+            mOverrideRequestController.handleNewSupportedStates(newStateIdentifiers, reason);
             updatePendingStateLocked();
+
+            setRearDisplayStateLocked();
 
             if (!mPendingState.isPresent()) {
                 // If the change in the supported states didn't result in a change of the pending
@@ -314,6 +395,15 @@ public final class DeviceStateManagerService extends SystemService {
             }
 
             mHandler.post(this::notifyPolicyIfNeeded);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void setRearDisplayStateLocked() {
+        int rearDisplayIdentifier = getContext().getResources().getInteger(
+                R.integer.config_deviceStateRearDisplay);
+        if (rearDisplayIdentifier != INVALID_DEVICE_STATE) {
+            mRearDisplayState = mDeviceStates.get(rearDisplayIdentifier);
         }
     }
 
@@ -349,16 +439,21 @@ public final class DeviceStateManagerService extends SystemService {
             }
 
             final DeviceState baseState = baseStateOptional.get();
+
             if (mBaseState.isPresent() && mBaseState.get().equals(baseState)) {
                 // Base state hasn't changed. Nothing to do.
                 return;
+            }
+            // There is a pending rear display request, so we check if the overlay should be closed
+            if (mRearDisplayPendingOverrideRequest != null) {
+                handleRearDisplayBaseStateChangedLocked(identifier);
             }
             mBaseState = Optional.of(baseState);
 
             if (baseState.hasFlag(FLAG_CANCEL_OVERRIDE_REQUESTS)) {
                 mOverrideRequestController.cancelOverrideRequest();
             }
-            mOverrideRequestController.handleBaseStateChanged();
+            mOverrideRequestController.handleBaseStateChanged(identifier);
             updatePendingStateLocked();
 
             if (!mPendingState.isPresent()) {
@@ -462,6 +557,10 @@ public final class DeviceStateManagerService extends SystemService {
 
             FrameworkStatsLog.write(FrameworkStatsLog.DEVICE_STATE_CHANGED,
                     newState.getIdentifier(), !mCommittedState.isPresent());
+            String traceString = newState.getIdentifier() + ":" + newState.getName();
+            Trace.instantForTrack(
+                    Trace.TRACE_TAG_SYSTEM_SERVER, "DeviceStateChanged", traceString);
+            mSystemPropertySetter.setDebugTracingDeviceStateProperty(traceString);
 
             mCommittedState = Optional.of(newState);
             mPendingState = Optional.empty();
@@ -507,16 +606,50 @@ public final class DeviceStateManagerService extends SystemService {
         }
     }
 
+    @GuardedBy("mLock")
     private void onOverrideRequestStatusChangedLocked(@NonNull OverrideRequest request,
-            @OverrideRequestController.RequestStatus int status) {
-        if (status == STATUS_ACTIVE) {
-            mActiveOverride = Optional.of(request);
-        } else if (status == STATUS_CANCELED) {
-            if (mActiveOverride.isPresent() && mActiveOverride.get() == request) {
-                mActiveOverride = Optional.empty();
+            @OverrideRequestController.RequestStatus int status, int flags) {
+        if (request.getRequestType() == OVERRIDE_REQUEST_TYPE_BASE_STATE) {
+            switch (status) {
+                case STATUS_ACTIVE:
+                    enableBaseStateRequestLocked(request);
+                    return;
+                case STATUS_CANCELED:
+                    if (mActiveBaseStateOverride.isPresent()
+                            && mActiveBaseStateOverride.get() == request) {
+                        mActiveBaseStateOverride = Optional.empty();
+                    }
+                    break;
+                case STATUS_UNKNOWN: // same as default
+                default:
+                    throw new IllegalArgumentException("Unknown request status: " + status);
+            }
+        } else if (request.getRequestType() == OVERRIDE_REQUEST_TYPE_EMULATED_STATE) {
+            switch (status) {
+                case STATUS_ACTIVE:
+                    mActiveOverride = Optional.of(request);
+                    mDeviceStateNotificationController.showStateActiveNotificationIfNeeded(
+                            request.getRequestedState(), request.getUid());
+                    break;
+                case STATUS_CANCELED:
+                    if (mActiveOverride.isPresent() && mActiveOverride.get() == request) {
+                        mActiveOverride = Optional.empty();
+                        mDeviceStateNotificationController.cancelNotification(
+                                request.getRequestedState());
+                        if ((flags & FLAG_THERMAL_CRITICAL) == FLAG_THERMAL_CRITICAL) {
+                            mDeviceStateNotificationController
+                                    .showThermalCriticalNotificationIfNeeded(
+                                            request.getRequestedState());
+                        }
+                    }
+                    break;
+                case STATUS_UNKNOWN: // same as default
+                default:
+                    throw new IllegalArgumentException("Unknown request status: " + status);
             }
         } else {
-            throw new IllegalArgumentException("Unknown request status: " + status);
+            throw new IllegalArgumentException(
+                        "Unknown OverrideRest type: " + request.getRequestType());
         }
 
         boolean updatedPendingState = updatePendingStateLocked();
@@ -541,6 +674,18 @@ public final class DeviceStateManagerService extends SystemService {
         }
 
         mHandler.post(this::notifyPolicyIfNeeded);
+    }
+
+    /**
+     * Sets the new base state of the device and notifies the process that made the base state
+     * override request that the request is now active.
+     */
+    @GuardedBy("mLock")
+    private void enableBaseStateRequestLocked(OverrideRequest request) {
+        setBaseState(request.getRequestedState());
+        mActiveBaseStateOverride = Optional.of(request);
+        ProcessRecord processRecord = mProcessRecords.get(request.getPid());
+        processRecord.notifyRequestActiveAsync(request.getToken());
     }
 
     private void registerProcess(int pid, IDeviceStateManagerCallback callback) {
@@ -576,8 +721,8 @@ public final class DeviceStateManagerService extends SystemService {
         }
     }
 
-    private void requestStateInternal(int state, int flags, int callingPid,
-            @NonNull IBinder token) {
+    private void requestStateInternal(int state, int flags, int callingPid, int callingUid,
+            @NonNull IBinder token, boolean hasControlDeviceStatePermission) {
         synchronized (mLock) {
             final ProcessRecord processRecord = mProcessRecords.get(callingPid);
             if (processRecord == null) {
@@ -585,7 +730,8 @@ public final class DeviceStateManagerService extends SystemService {
                         + " has no registered callback.");
             }
 
-            if (mOverrideRequestController.hasRequest(token)) {
+            if (mOverrideRequestController.hasRequest(token,
+                    OVERRIDE_REQUEST_TYPE_EMULATED_STATE)) {
                 throw new IllegalStateException("Request has already been made for the supplied"
                         + " token: " + token);
             }
@@ -596,8 +742,32 @@ public final class DeviceStateManagerService extends SystemService {
                         + " is not supported.");
             }
 
-            OverrideRequest request = new OverrideRequest(token, callingPid, state, flags);
-            mOverrideRequestController.addRequest(request);
+            OverrideRequest request = new OverrideRequest(token, callingPid, callingUid,
+                    state, flags, OVERRIDE_REQUEST_TYPE_EMULATED_STATE);
+
+            // If we don't have the CONTROL_DEVICE_STATE permission, we want to show the overlay
+            if (!hasControlDeviceStatePermission && mRearDisplayState != null
+                    && state == mRearDisplayState.getIdentifier()) {
+                showRearDisplayEducationalOverlayLocked(request);
+            } else {
+                mOverrideRequestController.addRequest(request);
+            }
+        }
+    }
+
+    /**
+     * If we get a request to enter rear display  mode, we need to display an educational
+     * overlay to let the user know what will happen. This calls into the
+     * {@link StatusBarManagerInternal} to notify SystemUI to display the educational dialog.
+     */
+    @GuardedBy("mLock")
+    private void showRearDisplayEducationalOverlayLocked(OverrideRequest request) {
+        mRearDisplayPendingOverrideRequest = request;
+
+        StatusBarManagerInternal statusBar =
+                LocalServices.getService(StatusBarManagerInternal.class);
+        if (statusBar != null) {
+            statusBar.showRearDisplayDialog(mBaseState.get().getIdentifier());
         }
     }
 
@@ -609,6 +779,65 @@ public final class DeviceStateManagerService extends SystemService {
                         + " has no registered callback.");
             }
             mActiveOverride.ifPresent(mOverrideRequestController::cancelRequest);
+        }
+    }
+
+    private void requestBaseStateOverrideInternal(int state, int flags, int callingPid,
+            int callingUid, @NonNull IBinder token) {
+        synchronized (mLock) {
+            final Optional<DeviceState> deviceState = getStateLocked(state);
+            if (!deviceState.isPresent()) {
+                throw new IllegalArgumentException("Requested state: " + state
+                        + " is not supported.");
+            }
+
+            final ProcessRecord processRecord = mProcessRecords.get(callingPid);
+            if (processRecord == null) {
+                throw new IllegalStateException("Process " + callingPid
+                        + " has no registered callback.");
+            }
+
+            if (mOverrideRequestController.hasRequest(token,
+                    OVERRIDE_REQUEST_TYPE_BASE_STATE)) {
+                throw new IllegalStateException("Request has already been made for the supplied"
+                        + " token: " + token);
+            }
+
+            OverrideRequest request = new OverrideRequest(token, callingPid, callingUid,
+                    state, flags, OVERRIDE_REQUEST_TYPE_BASE_STATE);
+            mOverrideRequestController.addBaseStateRequest(request);
+        }
+    }
+
+    private void cancelBaseStateOverrideInternal(int callingPid) {
+        synchronized (mLock) {
+            final ProcessRecord processRecord = mProcessRecords.get(callingPid);
+            if (processRecord == null) {
+                throw new IllegalStateException("Process " + callingPid
+                        + " has no registered callback.");
+            }
+            setBaseState(mDeviceStateProviderListener.mCurrentBaseState);
+        }
+    }
+
+    /**
+     * Adds the rear display state request to the {@link OverrideRequestController} if the
+     * educational overlay was closed in a way that should enable the feature, and cancels the
+     * request if it was dismissed in a way that should cancel the feature.
+     */
+    private void onStateRequestOverlayDismissedInternal(boolean shouldCancelRequest) {
+        if (mRearDisplayPendingOverrideRequest != null) {
+            synchronized (mLock) {
+                if (shouldCancelRequest) {
+                    ProcessRecord processRecord = mProcessRecords.get(
+                            mRearDisplayPendingOverrideRequest.getPid());
+                    processRecord.notifyRequestCanceledAsync(
+                            mRearDisplayPendingOverrideRequest.getToken());
+                } else {
+                    mOverrideRequestController.addRequest(mRearDisplayPendingOverrideRequest);
+                }
+                mRearDisplayPendingOverrideRequest = null;
+            }
         }
     }
 
@@ -644,9 +873,7 @@ public final class DeviceStateManagerService extends SystemService {
      * @param state state that is being requested.
      */
     private void assertCanRequestDeviceState(int callingPid, int state) {
-        final WindowProcessController topApp = mActivityTaskManagerInternal.getTopApp();
-        if (topApp == null || topApp.getPid() != callingPid
-                || !isStateAvailableForAppRequests(state)) {
+        if (!isTopApp(callingPid) || !isStateAvailableForAppRequests(state)) {
             getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
                     "Permission required to request device state, "
                             + "or the call must come from the top app "
@@ -661,12 +888,16 @@ public final class DeviceStateManagerService extends SystemService {
      * @param callingPid Process ID that is requesting this state change
      */
     private void assertCanControlDeviceState(int callingPid) {
-        final WindowProcessController topApp = mActivityTaskManagerInternal.getTopApp();
-        if (topApp == null || topApp.getPid() != callingPid) {
+        if (!isTopApp(callingPid)) {
             getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
                     "Permission required to request device state, "
                             + "or the call must come from the top app.");
         }
+    }
+
+    private boolean isTopApp(int callingPid) {
+        final WindowProcessController topApp = mActivityTaskManagerInternal.getTopApp();
+        return topApp != null && topApp.getPid() == callingPid;
     }
 
     private boolean isStateAvailableForAppRequests(int state) {
@@ -697,6 +928,16 @@ public final class DeviceStateManagerService extends SystemService {
         }
     }
 
+    private Set<Integer> readFoldedStates() {
+        Set<Integer> foldedStates = new HashSet();
+        int[] mFoldedStatesArray = getContext().getResources().getIntArray(
+                com.android.internal.R.array.config_foldedDeviceStates);
+        for (int i = 0; i < mFoldedStatesArray.length; i++) {
+            foldedStates.add(mFoldedStatesArray[i]);
+        }
+        return foldedStates;
+    }
+
     @GuardedBy("mLock")
     private boolean isValidState(int state) {
         for (int i = 0; i < mDeviceStates.size(); i++) {
@@ -707,13 +948,38 @@ public final class DeviceStateManagerService extends SystemService {
         return false;
     }
 
+    /**
+     * If the device is being opened, in response to the rear display educational overlay, we should
+     * dismiss the overlay and enter the mode.
+     */
+    @GuardedBy("mLock")
+    private void handleRearDisplayBaseStateChangedLocked(int newBaseState) {
+        if (isDeviceOpeningLocked(newBaseState)) {
+            onStateRequestOverlayDismissedInternal(false);
+        }
+    }
+
+    /**
+     * Determines if the device is being opened and if we are going from a folded state to a
+     * non-folded state.
+     */
+    @GuardedBy("mLock")
+    private boolean isDeviceOpeningLocked(int newBaseState) {
+        return mBaseState.filter(
+                deviceState -> mFoldedDeviceStates.contains(deviceState.getIdentifier())
+                        && !mFoldedDeviceStates.contains(newBaseState)).isPresent();
+    }
+
     private final class DeviceStateProviderListener implements DeviceStateProvider.Listener {
+        @IntRange(from = MINIMUM_DEVICE_STATE, to = MAXIMUM_DEVICE_STATE) int mCurrentBaseState;
+
         @Override
-        public void onSupportedDeviceStatesChanged(DeviceState[] newDeviceStates) {
+        public void onSupportedDeviceStatesChanged(DeviceState[] newDeviceStates,
+                @DeviceStateProvider.SupportedStatesUpdatedReason int reason) {
             if (newDeviceStates.length == 0) {
                 throw new IllegalArgumentException("Supported device states must not be empty");
             }
-            updateSupportedStates(newDeviceStates);
+            updateSupportedStates(newDeviceStates, reason);
         }
 
         @Override
@@ -723,6 +989,7 @@ public final class DeviceStateManagerService extends SystemService {
                 throw new IllegalArgumentException("Invalid identifier: " + identifier);
             }
 
+            mCurrentBaseState = identifier;
             setBaseState(identifier);
         }
     }
@@ -840,6 +1107,7 @@ public final class DeviceStateManagerService extends SystemService {
         @Override // Binder call
         public void requestState(IBinder token, int state, int flags) {
             final int callingPid = Binder.getCallingPid();
+            final int callingUid = Binder.getCallingUid();
             // Allow top processes to request a device state change
             // If the calling process ID is not the top app, then we check if this process
             // holds a permission to CONTROL_DEVICE_STATE
@@ -849,9 +1117,13 @@ public final class DeviceStateManagerService extends SystemService {
                 throw new IllegalArgumentException("Request token must not be null.");
             }
 
+            boolean hasControlStatePermission = getContext().checkCallingOrSelfPermission(
+                    CONTROL_DEVICE_STATE) == PERMISSION_GRANTED;
+
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
-                requestStateInternal(state, flags, callingPid, token);
+                requestStateInternal(state, flags, callingPid, callingUid, token,
+                        hasControlStatePermission);
             } finally {
                 Binder.restoreCallingIdentity(callingIdentity);
             }
@@ -868,6 +1140,54 @@ public final class DeviceStateManagerService extends SystemService {
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 cancelStateRequestInternal(callingPid);
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
+        }
+
+        @Override // Binder call
+        public void requestBaseStateOverride(IBinder token, int state, int flags) {
+            final int callingPid = Binder.getCallingPid();
+            final int callingUid = Binder.getCallingUid();
+            getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
+                    "Permission required to control base state of device.");
+
+            if (token == null) {
+                throw new IllegalArgumentException("Request token must not be null.");
+            }
+
+            final long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                requestBaseStateOverrideInternal(state, flags, callingPid, callingUid, token);
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
+        }
+
+        @Override // Binder call
+        public void cancelBaseStateOverride() {
+            final int callingPid = Binder.getCallingPid();
+            getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
+                    "Permission required to control base state of device.");
+
+            final long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                cancelBaseStateOverrideInternal(callingPid);
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
+        }
+
+        @Override // Binder call
+        public void onStateRequestOverlayDismissed(boolean shouldCancelRequest) {
+
+            getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
+                    "CONTROL_DEVICE_STATE permission required to control the state request "
+                            + "overlay");
+
+            final long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                onStateRequestOverlayDismissedInternal(shouldCancelRequest);
             } finally {
                 Binder.restoreCallingIdentity(callingIdentity);
             }
@@ -899,6 +1219,54 @@ public final class DeviceStateManagerService extends SystemService {
         public int[] getSupportedStateIdentifiers() {
             synchronized (mLock) {
                 return getSupportedStateIdentifiersLocked();
+            }
+        }
+    }
+
+    @GuardedBy("mLock")
+    private boolean shouldCancelOverrideRequestWhenRequesterNotOnTop() {
+        if (mActiveOverride.isEmpty()) {
+            return false;
+        }
+        int identifier = mActiveOverride.get().getRequestedState();
+        DeviceState deviceState = mDeviceStates.get(identifier);
+        return deviceState.hasFlag(DeviceState.FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP);
+    }
+
+    private class OverrideRequestTaskStackListener extends TaskStackListener {
+        @Override
+        public void onTaskStackChanged() throws RemoteException {
+            synchronized (mLock) {
+                if (!shouldCancelOverrideRequestWhenRequesterNotOnTop()) {
+                    return;
+                }
+
+                OverrideRequest request = mActiveOverride.get();
+                if (!isTopApp(request.getPid())) {
+                    mOverrideRequestController.cancelRequest(request);
+                }
+            }
+        }
+    }
+
+    private class OverrideRequestScreenObserver implements
+            ActivityTaskManagerInternal.ScreenObserver {
+
+        @Override
+        public void onAwakeStateChanged(boolean isAwake) {
+            synchronized (mLock) {
+                if (!isAwake && shouldCancelOverrideRequestWhenRequesterNotOnTop()) {
+                    mOverrideRequestController.cancelRequest(mActiveOverride.get());
+                }
+            }
+        }
+
+        @Override
+        public void onKeyguardStateChanged(boolean isShowing) {
+            synchronized (mLock) {
+                if (isShowing && shouldCancelOverrideRequestWhenRequesterNotOnTop()) {
+                    mOverrideRequestController.cancelRequest(mActiveOverride.get());
+                }
             }
         }
     }

@@ -5,8 +5,8 @@ import android.util.IndentingPrintWriter
 import android.util.MathUtils
 import com.android.systemui.R
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.media.MediaHierarchyManager
-import com.android.systemui.statusbar.phone.NotificationPanelViewController
+import com.android.systemui.media.controls.ui.MediaHierarchyManager
+import com.android.systemui.shade.NotificationPanelViewController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory

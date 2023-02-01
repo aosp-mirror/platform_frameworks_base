@@ -172,12 +172,12 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         // executed.
         final ActivityRecord activity1 = createActivityRecord(task);
         activity1.setVisible(true);
-        activity1.mVisibleRequested = false;
+        activity1.setVisibleRequested(false);
         activity1.addWindow(createWindowState(new LayoutParams(TYPE_BASE_APPLICATION), activity1));
 
         final ActivityRecord activity2 = createActivityRecord(task);
         activity2.setVisible(false);
-        activity2.mVisibleRequested = true;
+        activity2.setVisibleRequested(true);
 
         mDefaultDisplay.getConfiguration().windowConfiguration.setRotation(
                 mDefaultDisplay.getRotation());
@@ -281,7 +281,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         verify(mMockRunner).onAnimationCanceled(null /* taskIds */, null /* taskSnapshots */);
 
         // Simulate the app transition finishing
-        mController.mAppTransitionListener.onAppTransitionStartingLocked(false, false, 0, 0, 0);
+        mController.mAppTransitionListener.onAppTransitionStartingLocked(0, 0);
         verify(mAnimationCallbacks).onAnimationFinished(REORDER_KEEP_IN_PLACE, false);
     }
 
@@ -468,7 +468,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         mWm.setRecentsAnimationController(mController);
         spyOn(mDisplayContent.mFixedRotationTransitionListener);
         final ActivityRecord recents = mock(ActivityRecord.class);
-        recents.mOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
+        recents.setOverrideOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
         doReturn(ORIENTATION_PORTRAIT).when(recents)
                 .getRequestedConfigurationOrientation(anyBoolean());
         mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(recents);

@@ -36,10 +36,10 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dreams.complication.ComplicationHostViewController;
+import com.android.systemui.dreams.touch.scrim.BouncerlessScrimController;
+import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor;
+import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
 import com.android.systemui.statusbar.BlurUtils;
-import com.android.systemui.statusbar.phone.KeyguardBouncer;
-import com.android.systemui.statusbar.phone.KeyguardBouncer.BouncerExpansionCallback;
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -80,13 +80,19 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     BlurUtils mBlurUtils;
 
     @Mock
-    StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-
-    @Mock
-    KeyguardBouncer mBouncer;
-
-    @Mock
     ViewRootImpl mViewRoot;
+
+    @Mock
+    PrimaryBouncerCallbackInteractor mPrimaryBouncerCallbackInteractor;
+
+    @Mock
+    DreamOverlayAnimationsController mAnimationsController;
+
+    @Mock
+    BouncerlessScrimController mBouncerlessScrimController;
+
+    @Mock
+    DreamOverlayStateController mStateController;
 
     DreamOverlayContainerViewController mController;
 
@@ -96,7 +102,6 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
 
         when(mDreamOverlayContainerView.getResources()).thenReturn(mResources);
         when(mDreamOverlayContainerView.getViewTreeObserver()).thenReturn(mViewTreeObserver);
-        when(mStatusBarKeyguardViewManager.getBouncer()).thenReturn(mBouncer);
         when(mDreamOverlayContainerView.getViewRootImpl()).thenReturn(mViewRoot);
 
         mController = new DreamOverlayContainerViewController(
@@ -104,13 +109,16 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
                 mComplicationHostViewController,
                 mDreamOverlayContentView,
                 mDreamOverlayStatusBarViewController,
-                mStatusBarKeyguardViewManager,
                 mBlurUtils,
                 mHandler,
                 mResources,
                 MAX_BURN_IN_OFFSET,
                 BURN_IN_PROTECTION_UPDATE_INTERVAL,
-                MILLIS_UNTIL_FULL_JITTER);
+                MILLIS_UNTIL_FULL_JITTER,
+                mPrimaryBouncerCallbackInteractor,
+                mAnimationsController,
+                mStateController,
+                mBouncerlessScrimController);
     }
 
     @Test
@@ -154,10 +162,11 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
 
     @Test
     public void testBouncerAnimation_doesNotApply() {
-        final ArgumentCaptor<BouncerExpansionCallback> bouncerExpansionCaptor =
-                ArgumentCaptor.forClass(BouncerExpansionCallback.class);
+        final ArgumentCaptor<PrimaryBouncerExpansionCallback> bouncerExpansionCaptor =
+                ArgumentCaptor.forClass(PrimaryBouncerExpansionCallback.class);
         mController.onViewAttached();
-        verify(mBouncer).addBouncerExpansionCallback(bouncerExpansionCaptor.capture());
+        verify(mPrimaryBouncerCallbackInteractor).addBouncerExpansionCallback(
+                bouncerExpansionCaptor.capture());
 
         bouncerExpansionCaptor.getValue().onExpansionChanged(0.5f);
         verify(mBlurUtils, never()).applyBlur(eq(mViewRoot), anyInt(), eq(false));
@@ -165,10 +174,11 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
 
     @Test
     public void testBouncerAnimation_updateBlur() {
-        final ArgumentCaptor<BouncerExpansionCallback> bouncerExpansionCaptor =
-                ArgumentCaptor.forClass(BouncerExpansionCallback.class);
+        final ArgumentCaptor<PrimaryBouncerExpansionCallback> bouncerExpansionCaptor =
+                ArgumentCaptor.forClass(PrimaryBouncerExpansionCallback.class);
         mController.onViewAttached();
-        verify(mBouncer).addBouncerExpansionCallback(bouncerExpansionCaptor.capture());
+        verify(mPrimaryBouncerCallbackInteractor).addBouncerExpansionCallback(
+                bouncerExpansionCaptor.capture());
 
         final float blurRadius = 1337f;
         when(mBlurUtils.blurRadiusOfRatio(anyFloat())).thenReturn(blurRadius);
@@ -182,5 +192,53 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
         bouncerExpansionCaptor.getValue().onExpansionChanged(bouncerHideAmount);
         verify(mBlurUtils).blurRadiusOfRatio(1 - scaledFraction);
         verify(mBlurUtils).applyBlur(mViewRoot, (int) blurRadius, false);
+    }
+
+    @Test
+    public void testStartDreamEntryAnimationsOnAttachedNonLowLight() {
+        when(mStateController.isLowLightActive()).thenReturn(false);
+
+        mController.onViewAttached();
+
+        verify(mAnimationsController).startEntryAnimations();
+        verify(mAnimationsController, never()).cancelAnimations();
+    }
+
+    @Test
+    public void testNeverStartDreamEntryAnimationsOnAttachedForLowLight() {
+        when(mStateController.isLowLightActive()).thenReturn(true);
+
+        mController.onViewAttached();
+
+        verify(mAnimationsController, never()).startEntryAnimations();
+    }
+
+    @Test
+    public void testSkipEntryAnimationsWhenExitingLowLight() {
+        ArgumentCaptor<DreamOverlayStateController.Callback> callbackCaptor =
+                ArgumentCaptor.forClass(DreamOverlayStateController.Callback.class);
+        when(mStateController.isLowLightActive()).thenReturn(false);
+
+        // Call onInit so that the callback is added.
+        mController.onInit();
+        verify(mStateController).addCallback(callbackCaptor.capture());
+
+        // Send the signal that low light is exiting
+        callbackCaptor.getValue().onExitLowLight();
+
+        // View is attached to trigger animations.
+        mController.onViewAttached();
+
+        // Entry animations should be started then immediately ended to skip to the end.
+        verify(mAnimationsController).startEntryAnimations();
+        verify(mAnimationsController).endAnimations();
+    }
+
+    @Test
+    public void testCancelDreamEntryAnimationsOnDetached() {
+        mController.onViewAttached();
+        mController.onViewDetached();
+
+        verify(mAnimationsController).cancelAnimations();
     }
 }

@@ -34,10 +34,7 @@ import kotlin.math.roundToInt
 private const val TAG = "LaunchAnimator"
 
 /** A base class to animate a window launch (activity or dialog) from a view . */
-class LaunchAnimator(
-    private val timings: Timings,
-    private val interpolators: Interpolators
-) {
+class LaunchAnimator(private val timings: Timings, private val interpolators: Interpolators) {
     companion object {
         internal const val DEBUG = false
         private val SRC_MODE = PorterDuffXfermode(PorterDuff.Mode.SRC)
@@ -75,10 +72,10 @@ class LaunchAnimator(
          * with the opening window.
          *
          * This will be used to:
-         *  - Get the associated [Context].
-         *  - Compute whether we are expanding fully above the launch container.
-         *  - Get to overlay to which we initially put the window background layer, until the
-         *    opening window is made visible (see [openingWindowSyncView]).
+         * - Get the associated [Context].
+         * - Compute whether we are expanding fully above the launch container.
+         * - Get to overlay to which we initially put the window background layer, until the opening
+         * window is made visible (see [openingWindowSyncView]).
          *
          * This container can be changed to force this [Controller] to animate the expanding view
          * inside a different location, for instance to ensure correct layering during the
@@ -132,7 +129,6 @@ class LaunchAnimator(
         var bottom: Int = 0,
         var left: Int = 0,
         var right: Int = 0,
-
         var topCornerRadius: Float = 0f,
         var bottomCornerRadius: Float = 0f
     ) {
@@ -202,18 +198,20 @@ class LaunchAnimator(
     )
 
     /**
-     * Start a launch animation controlled by [controller] towards [endState]. An intermediary
-     * layer with [windowBackgroundColor] will fade in then fade out above the expanding view, and
-     * should be the same background color as the opening (or closing) window. If [drawHole] is
-     * true, then this intermediary layer will be drawn with SRC blending mode while it fades out.
+     * Start a launch animation controlled by [controller] towards [endState]. An intermediary layer
+     * with [windowBackgroundColor] will fade in then (optionally) fade out above the expanding
+     * view, and should be the same background color as the opening (or closing) window.
      *
-     * TODO(b/184121838): Remove [drawHole] and instead make the StatusBar draw this hole instead.
+     * If [fadeOutWindowBackgroundLayer] is true, then this intermediary layer will fade out during
+     * the second half of the animation, and will have SRC blending mode (ultimately punching a hole
+     * in the [launch container][Controller.launchContainer]) iff [drawHole] is true.
      */
     fun startAnimation(
         controller: Controller,
         endState: State,
         windowBackgroundColor: Int,
-        drawHole: Boolean = false
+        fadeOutWindowBackgroundLayer: Boolean = true,
+        drawHole: Boolean = false,
     ): Animation {
         val state = controller.createAnimatorState()
 
@@ -238,8 +236,12 @@ class LaunchAnimator(
         val endBottomCornerRadius = endState.bottomCornerRadius
 
         fun maybeUpdateEndState() {
-            if (endTop != endState.top || endBottom != endState.bottom ||
-                endLeft != endState.left || endRight != endState.right) {
+            if (
+                endTop != endState.top ||
+                    endBottom != endState.bottom ||
+                    endLeft != endState.left ||
+                    endRight != endState.right
+            ) {
                 endTop = endState.top
                 endBottom = endState.bottom
                 endLeft = endState.left
@@ -256,10 +258,11 @@ class LaunchAnimator(
         // color, which is usually the same color of the app background. We first fade in this layer
         // to hide the expanding view, then we fade it out with SRC mode to draw a hole in the
         // launch container and reveal the opening window.
-        val windowBackgroundLayer = GradientDrawable().apply {
-            setColor(windowBackgroundColor)
-            alpha = 0
-        }
+        val windowBackgroundLayer =
+            GradientDrawable().apply {
+                setColor(windowBackgroundColor)
+                alpha = 0
+            }
 
         // Update state.
         val animator = ValueAnimator.ofFloat(0f, 1f)
@@ -270,38 +273,41 @@ class LaunchAnimator(
         // [Controller.openingWindowSyncView] once the opening app window starts to be visible.
         val openingWindowSyncView = controller.openingWindowSyncView
         val openingWindowSyncViewOverlay = openingWindowSyncView?.overlay
-        val moveBackgroundLayerWhenAppIsVisible = openingWindowSyncView != null &&
-            openingWindowSyncView.viewRootImpl != controller.launchContainer.viewRootImpl
+        val moveBackgroundLayerWhenAppIsVisible =
+            openingWindowSyncView != null &&
+                openingWindowSyncView.viewRootImpl != controller.launchContainer.viewRootImpl
 
         val launchContainerOverlay = launchContainer.overlay
         var cancelled = false
         var movedBackgroundLayer = false
 
-        animator.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationStart(animation: Animator?, isReverse: Boolean) {
-                if (DEBUG) {
-                    Log.d(TAG, "Animation started")
-                }
-                controller.onLaunchAnimationStart(isExpandingFullyAbove)
+        animator.addListener(
+            object : AnimatorListenerAdapter() {
+                override fun onAnimationStart(animation: Animator?, isReverse: Boolean) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Animation started")
+                    }
+                    controller.onLaunchAnimationStart(isExpandingFullyAbove)
 
-                // Add the drawable to the launch container overlay. Overlays always draw
-                // drawables after views, so we know that it will be drawn above any view added
-                // by the controller.
-                launchContainerOverlay.add(windowBackgroundLayer)
+                    // Add the drawable to the launch container overlay. Overlays always draw
+                    // drawables after views, so we know that it will be drawn above any view added
+                    // by the controller.
+                    launchContainerOverlay.add(windowBackgroundLayer)
+                }
+
+                override fun onAnimationEnd(animation: Animator?) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Animation ended")
+                    }
+                    controller.onLaunchAnimationEnd(isExpandingFullyAbove)
+                    launchContainerOverlay.remove(windowBackgroundLayer)
+
+                    if (moveBackgroundLayerWhenAppIsVisible) {
+                        openingWindowSyncViewOverlay?.remove(windowBackgroundLayer)
+                    }
+                }
             }
-
-            override fun onAnimationEnd(animation: Animator?) {
-                if (DEBUG) {
-                    Log.d(TAG, "Animation ended")
-                }
-                controller.onLaunchAnimationEnd(isExpandingFullyAbove)
-                launchContainerOverlay.remove(windowBackgroundLayer)
-
-                if (moveBackgroundLayerWhenAppIsVisible) {
-                    openingWindowSyncViewOverlay?.remove(windowBackgroundLayer)
-                }
-            }
-        })
+        )
 
         animator.addUpdateListener { animation ->
             if (cancelled) {
@@ -333,12 +339,13 @@ class LaunchAnimator(
 
             // The expanding view can/should be hidden once it is completely covered by the opening
             // window.
-            state.visible = getProgress(
-                timings,
-                linearProgress,
-                timings.contentBeforeFadeOutDelay,
-                timings.contentBeforeFadeOutDuration
-            ) < 1
+            state.visible =
+                getProgress(
+                    timings,
+                    linearProgress,
+                    timings.contentBeforeFadeOutDelay,
+                    timings.contentBeforeFadeOutDuration
+                ) < 1
 
             if (moveBackgroundLayerWhenAppIsVisible && !state.visible && !movedBackgroundLayer) {
                 // The expanding view is not visible, so the opening app is visible. If this is the
@@ -352,17 +359,19 @@ class LaunchAnimator(
                 ViewRootSync.synchronizeNextDraw(launchContainer, openingWindowSyncView, then = {})
             }
 
-            val container = if (movedBackgroundLayer) {
-                openingWindowSyncView!!
-            } else {
-                controller.launchContainer
-            }
+            val container =
+                if (movedBackgroundLayer) {
+                    openingWindowSyncView!!
+                } else {
+                    controller.launchContainer
+                }
 
             applyStateToWindowBackgroundLayer(
                 windowBackgroundLayer,
                 state,
                 linearProgress,
                 container,
+                fadeOutWindowBackgroundLayer,
                 drawHole
             )
             controller.onLaunchAnimationProgress(state, progress, linearProgress)
@@ -391,6 +400,7 @@ class LaunchAnimator(
         state: State,
         linearProgress: Float,
         launchContainer: View,
+        fadeOutWindowBackgroundLayer: Boolean,
         drawHole: Boolean
     ) {
         // Update position.
@@ -415,23 +425,25 @@ class LaunchAnimator(
 
         // We first fade in the background layer to hide the expanding view, then fade it out
         // with SRC mode to draw a hole punch in the status bar and reveal the opening window.
-        val fadeInProgress = getProgress(
-            timings,
-            linearProgress,
-            timings.contentBeforeFadeOutDelay,
-            timings.contentBeforeFadeOutDuration
-        )
+        val fadeInProgress =
+            getProgress(
+                timings,
+                linearProgress,
+                timings.contentBeforeFadeOutDelay,
+                timings.contentBeforeFadeOutDuration
+            )
         if (fadeInProgress < 1) {
             val alpha =
                 interpolators.contentBeforeFadeOutInterpolator.getInterpolation(fadeInProgress)
             drawable.alpha = (alpha * 0xFF).roundToInt()
-        } else {
-            val fadeOutProgress = getProgress(
-                timings,
-                linearProgress,
-                timings.contentAfterFadeInDelay,
-                timings.contentAfterFadeInDuration
-            )
+        } else if (fadeOutWindowBackgroundLayer) {
+            val fadeOutProgress =
+                getProgress(
+                    timings,
+                    linearProgress,
+                    timings.contentAfterFadeInDelay,
+                    timings.contentAfterFadeInDuration
+                )
             val alpha =
                 1 - interpolators.contentAfterFadeInInterpolator.getInterpolation(fadeOutProgress)
             drawable.alpha = (alpha * 0xFF).roundToInt()
@@ -439,6 +451,8 @@ class LaunchAnimator(
             if (drawHole) {
                 drawable.setXfermode(SRC_MODE)
             }
+        } else {
+            drawable.alpha = 0xFF
         }
     }
 }

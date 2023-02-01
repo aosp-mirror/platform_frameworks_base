@@ -37,6 +37,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.util.MathUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -45,6 +46,7 @@ import android.view.accessibility.IWindowMagnificationConnection;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
 import android.view.accessibility.MagnificationAnimationCallback;
 
+import com.android.internal.accessibility.util.AccessibilityStatsLogUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
@@ -54,6 +56,7 @@ import com.android.server.wm.WindowManagerInternal;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 
 /**
  * A class to manipulate window magnification through {@link WindowMagnificationConnectionWrapper}
@@ -136,6 +139,7 @@ public class WindowMagnificationManager implements
     private SparseArray<WindowMagnifier> mWindowMagnifiers = new SparseArray<>();
     // Whether the following typing focus feature for magnification is enabled.
     private boolean mMagnificationFollowTypingEnabled = true;
+    @GuardedBy("mLock")
     private final SparseBooleanArray mIsImeVisibleArray = new SparseBooleanArray();
 
     private boolean mReceiverRegistered = false;
@@ -465,16 +469,41 @@ public class WindowMagnificationManager implements
         }
     }
 
+    private void pauseTrackingTypingFocusRecord(int displayId) {
+        WindowMagnifier magnifier;
+        synchronized (mLock) {
+            magnifier = mWindowMagnifiers.get(displayId);
+            if (magnifier == null) {
+                return;
+            }
+        }
+        magnifier.pauseTrackingTypingFocusRecord();
+    }
+
     /**
      * Called when the IME window visibility changed.
      *
      * @param shown {@code true} means the IME window shows on the screen. Otherwise, it's hidden.
      */
     void onImeWindowVisibilityChanged(int displayId, boolean shown) {
-        mIsImeVisibleArray.put(displayId, shown);
+        synchronized (mLock) {
+            mIsImeVisibleArray.put(displayId, shown);
+        }
         if (shown) {
             enableAllTrackingTypingFocus();
+        } else {
+            pauseTrackingTypingFocusRecord(displayId);
         }
+    }
+
+    boolean isImeVisible(int displayId) {
+        synchronized (mLock) {
+            return mIsImeVisibleArray.get(displayId);
+        }
+    }
+
+    void logTrackingTypingFocus(long duration) {
+        AccessibilityStatsLogUtils.logMagnificationFollowTypingFocusSession(duration);
     }
 
     @Override
@@ -603,7 +632,7 @@ public class WindowMagnificationManager implements
      * @param clear {@true} Clears the state of window magnification.
      * @return {@code true} if the magnification is turned to be disabled successfully
      */
-    boolean disableWindowMagnification(int displayId, boolean clear) {
+    public boolean disableWindowMagnification(int displayId, boolean clear) {
         return disableWindowMagnification(displayId, clear, STUB_ANIMATION_CALLBACK);
     }
 
@@ -668,7 +697,6 @@ public class WindowMagnificationManager implements
      * @param displayId The logical display id.
      * @return {@code true} if the window magnification is enabled.
      */
-    @VisibleForTesting
     public boolean isWindowMagnifierEnabled(int displayId) {
         synchronized (mLock) {
             WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
@@ -687,18 +715,21 @@ public class WindowMagnificationManager implements
      *         scale if none is available
      */
     float getPersistedScale(int displayId) {
-        return mScaleProvider.getScale(displayId);
+        return MathUtils.constrain(mScaleProvider.getScale(displayId),
+                2.0f, MagnificationScaleProvider.MAX_SCALE);
     }
 
     /**
-     * Persists the default display magnification scale to the current user's settings. Only the
+     * Persists the default display magnification scale to the current user's settings
+     *     <strong>if scale is >= 2.0</strong>. Only the
      * value of the default display is persisted in user's settings.
      */
     void persistScale(int displayId) {
         float scale = getScale(displayId);
-        if (scale != 1.0f) {
-            mScaleProvider.putScale(scale, displayId);
+        if (scale < 2.0f) {
+            return;
         }
+        mScaleProvider.putScale(scale, displayId);
     }
 
     /**
@@ -969,6 +1000,12 @@ public class WindowMagnificationManager implements
 
         private boolean mTrackingTypingFocusEnabled = true;
 
+        private volatile long mTrackingTypingFocusStartTime = 0;
+        private static final AtomicLongFieldUpdater<WindowMagnifier> SUM_TIME_UPDATER =
+                AtomicLongFieldUpdater.newUpdater(WindowMagnifier.class,
+                        "mTrackingTypingFocusSumTime");
+        private volatile long mTrackingTypingFocusSumTime = 0;
+
         WindowMagnifier(int displayId, WindowMagnificationManager windowMagnificationManager) {
             mDisplayId = displayId;
             mWindowMagnificationManager = windowMagnificationManager;
@@ -1017,6 +1054,7 @@ public class WindowMagnificationManager implements
                 mEnabled = false;
                 mIdOfLastServiceToControl = INVALID_SERVICE_ID;
                 mTrackingTypingFocusEnabled = false;
+                pauseTrackingTypingFocusRecord();
                 return true;
             }
             return false;
@@ -1069,11 +1107,57 @@ public class WindowMagnificationManager implements
         }
 
         void setTrackingTypingFocusEnabled(boolean trackingTypingFocusEnabled) {
+            if (mWindowMagnificationManager.isWindowMagnifierEnabled(mDisplayId)
+                    && mWindowMagnificationManager.isImeVisible(mDisplayId)
+                    && trackingTypingFocusEnabled) {
+                startTrackingTypingFocusRecord();
+            }
+            if (mTrackingTypingFocusEnabled && !trackingTypingFocusEnabled) {
+                stopAndLogTrackingTypingFocusRecordIfNeeded();
+            }
             mTrackingTypingFocusEnabled = trackingTypingFocusEnabled;
         }
 
         boolean isTrackingTypingFocusEnabled() {
             return mTrackingTypingFocusEnabled;
+        }
+
+        void startTrackingTypingFocusRecord() {
+            if (mTrackingTypingFocusStartTime == 0) {
+                mTrackingTypingFocusStartTime = SystemClock.uptimeMillis();
+                if (DBG) {
+                    Slog.d(TAG, "start: mTrackingTypingFocusStartTime = "
+                            + mTrackingTypingFocusStartTime);
+                }
+            }
+        }
+
+        void pauseTrackingTypingFocusRecord() {
+            if (mTrackingTypingFocusStartTime != 0) {
+                final long elapsed = (SystemClock.uptimeMillis() - mTrackingTypingFocusStartTime);
+                // update mTrackingTypingFocusSumTime value in an atomic operation
+                SUM_TIME_UPDATER.addAndGet(this, elapsed);
+                mTrackingTypingFocusStartTime = 0;
+                if (DBG) {
+                    Slog.d(TAG, "pause: mTrackingTypingFocusSumTime = "
+                            + mTrackingTypingFocusSumTime + ", elapsed = " + elapsed);
+                }
+            }
+        }
+
+        void stopAndLogTrackingTypingFocusRecordIfNeeded() {
+            if (mTrackingTypingFocusStartTime != 0 || mTrackingTypingFocusSumTime != 0) {
+                final long elapsed = mTrackingTypingFocusStartTime != 0
+                        ? (SystemClock.uptimeMillis() - mTrackingTypingFocusStartTime) : 0;
+                final long duration = mTrackingTypingFocusSumTime + elapsed;
+                if (DBG) {
+                    Slog.d(TAG, "stop and log: session duration = " + duration
+                            + ", elapsed = " + elapsed);
+                }
+                mWindowMagnificationManager.logTrackingTypingFocus(duration);
+                mTrackingTypingFocusStartTime = 0;
+                mTrackingTypingFocusSumTime = 0;
+            }
         }
 
         boolean isEnabled() {

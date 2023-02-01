@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -30,6 +31,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
+import android.media.AudioPresentation;
 import android.media.PlaybackParams;
 import android.media.tv.TvInputManager.Session;
 import android.media.tv.TvInputManager.Session.FinishedInputEventCallback;
@@ -54,6 +56,8 @@ import android.view.ViewRootImpl;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 
@@ -111,6 +115,7 @@ public class TvView extends ViewGroup {
     private int mSurfaceViewTop;
     private int mSurfaceViewBottom;
     private TimeShiftPositionCallback mTimeShiftPositionCallback;
+    private AttributionSource mTvAppAttributionSource;
 
     private final SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
         @Override
@@ -185,6 +190,7 @@ public class TvView extends ViewGroup {
         mDefStyleAttr = defStyleAttr;
         resetSurfaceView();
         mTvInputManager = (TvInputManager) getContext().getSystemService(Context.TV_INPUT_SERVICE);
+        mTvAppAttributionSource = getContext().getAttributionSource();
     }
 
     /**
@@ -304,6 +310,22 @@ public class TvView extends ViewGroup {
     }
 
     /**
+     * Override default attribution source of TV App.
+     *
+     * <p>An attribution source of TV App is used to attribute work to TV Input Service.
+     * The default attribution source is created by {@link Context#getAttributionSource()}.
+     * Call this method before calling {@link #tune(String, Uri, Bundle)} or {@link
+     * #timeShiftPlay(String, Uri)} to override the default attribution source.
+     *
+     * @param tvAppAttributionSource The attribution source of the TV App.
+     */
+    public void overrideTvAppAttributionSource(@NonNull AttributionSource tvAppAttributionSource) {
+        if (tvAppAttributionSource != null) {
+            mTvAppAttributionSource = tvAppAttributionSource;
+        }
+    }
+
+    /**
      * Tunes to a given channel.
      *
      * @param inputId The ID of the TV input for the given channel.
@@ -355,7 +377,8 @@ public class TvView extends ViewGroup {
             // is obsolete and should ignore it.
             mSessionCallback = new MySessionCallback(inputId, channelUri, params);
             if (mTvInputManager != null) {
-                mTvInputManager.createSession(inputId, mSessionCallback, mHandler);
+                mTvInputManager.createSession(
+                        inputId, mTvAppAttributionSource, mSessionCallback, mHandler);
             }
         }
     }
@@ -431,6 +454,35 @@ public class TvView extends ViewGroup {
         if (mSession != null) {
             mSession.setCaptionEnabled(enabled);
         }
+    }
+
+    /**
+     * Selects an audio presentation.
+     *
+     * @param presentationId The ID of the audio presentation to select.
+     * @param programId The ID of the program providing the selected audio presentation.
+     * @see #getAudioPresentations
+     */
+    public void selectAudioPresentation(int presentationId, int programId) {
+        if (mSession != null) {
+            mSession.selectAudioPresentation(presentationId, programId);
+        }
+    }
+
+    /**
+     * Returns the list of audio presentations from the selected track of type
+     * {@link TvTrackInfo#TYPE_AUDIO}.
+     *
+     * @return the list of audio presentations from the selected audio track, or an empty list if no
+     * audio presentations are available.
+     * @see #selectAudioPresentation
+     */
+    @NonNull
+    public List<AudioPresentation> getAudioPresentations() {
+        if (mSession == null) {
+            return new ArrayList<AudioPresentation>();
+        }
+        return mSession.getAudioPresentations();
     }
 
     /**
@@ -526,7 +578,8 @@ public class TvView extends ViewGroup {
             resetInternal();
             mSessionCallback = new MySessionCallback(inputId, recordedProgramUri);
             if (mTvInputManager != null) {
-                mTvInputManager.createSession(inputId, mSessionCallback, mHandler);
+                mTvInputManager.createSession(
+                        inputId, mTvAppAttributionSource, mSessionCallback, mHandler);
             }
         }
     }
@@ -570,6 +623,21 @@ public class TvView extends ViewGroup {
     public void timeShiftSetPlaybackParams(@NonNull PlaybackParams params) {
         if (mSession != null) {
             mSession.timeShiftSetPlaybackParams(params);
+        }
+    }
+
+    /**
+     * Sets time shift mode.
+     *
+     * @param mode The time shift mode. The value is one of the following:
+     * {@link TvInputManager#TIME_SHIFT_MODE_OFF}, {@link TvInputManager#TIME_SHIFT_MODE_LOCAL},
+     * {@link TvInputManager#TIME_SHIFT_MODE_NETWORK},
+     * {@link TvInputManager#TIME_SHIFT_MODE_AUTO}.
+     * @hide
+     */
+    public void timeShiftSetMode(@android.media.tv.TvInputManager.TimeShiftMode int mode) {
+        if (mSession != null) {
+            mSession.timeShiftSetMode(mode);
         }
     }
 
@@ -651,6 +719,17 @@ public class TvView extends ViewGroup {
      */
     public void setOnUnhandledInputEventListener(OnUnhandledInputEventListener listener) {
         mOnUnhandledInputEventListener = listener;
+    }
+
+    /**
+     * Enables or disables TV message detecting in the streams of bound TV input.
+     *
+     * @param type The type of {@link android.media.tv.TvInputManager.TvMessageType}
+     * @param enabled {@code true} if you want to enable TV message detecting
+     *                {@code false} otherwise.
+     * @hide
+     */
+    public void setTvMessageEnabled(@TvInputManager.TvMessageType String type, boolean enabled) {
     }
 
     @Override
@@ -966,6 +1045,27 @@ public class TvView extends ViewGroup {
         }
 
         /**
+         * This is called when the audio presentation information has been changed.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param audioPresentations A list of updated audio presentation information.
+         */
+        public void onAudioPresentationsChanged(@NonNull String inputId,
+                @NonNull List<AudioPresentation> audioPresentations) {
+        }
+
+        /**
+         * This is called when audio presentation selection has changed.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param presentationId The ID of the audio presentation selected.
+         * @param programId The ID of the program providing the selected audio presentation.
+         */
+        public void onAudioPresentationSelected(@NonNull String inputId, int presentationId,
+                int programId) {
+        }
+
+        /**
          * This is called when the track information has been changed.
          *
          * @param inputId The ID of the TV input bound to this view.
@@ -1088,11 +1188,59 @@ public class TvView extends ViewGroup {
         }
 
         /**
+         * This is called when cueing message becomes available or unavailable.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param available The current availability of cueing message. {@code true} if cueing
+         *                  message is available; {@code false} if it becomes unavailable.
+         * @hide
+         */
+        public void onCueingMessageAvailability(@NonNull String inputId, boolean available) {
+        }
+
+        /**
+         * This is called when time shift mode is set or updated.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param mode The current time shift mode. The value is one of the following:
+         * {@link TvInputManager#TIME_SHIFT_MODE_OFF}, {@link TvInputManager#TIME_SHIFT_MODE_LOCAL},
+         * {@link TvInputManager#TIME_SHIFT_MODE_NETWORK},
+         * {@link TvInputManager#TIME_SHIFT_MODE_AUTO}.
+         * @hide
+         */
+        public void onTimeShiftMode(
+                @NonNull String inputId, @TvInputManager.TimeShiftMode int mode) {
+        }
+
+        /**
+         * This is called when time-shifting is enabled to inform the available speeds.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param speeds An ordered array of playback speeds, expressed as values relative to the
+         *               normal playback speed 1.0.
+         * @see PlaybackParams#getSpeed()
+         * @hide
+         */
+        public void onAvailableSpeeds(@NonNull String inputId, float[] speeds) {
+        }
+
+        /**
          * This is called when the session has been tuned to the given channel.
          *
          * @param channelUri The URI of a channel.
          */
         public void onTuned(@NonNull String inputId, @NonNull Uri channelUri) {
+        }
+
+        /**
+         * This is called when the session has been tuned to the given channel.
+         *
+         * @param type The type of {@link android.media.tv.TvInputManager.TvMessageType}
+         * @param data The raw data of the message
+         * @hide
+         */
+        public void onTvMessage(@NonNull String inputId, @TvInputManager.TvMessageType String type,
+                Bundle data) {
         }
     }
 
@@ -1216,6 +1364,37 @@ public class TvView extends ViewGroup {
             }
             if (mCallback != null) {
                 mCallback.onChannelRetuned(mInputId, channelUri);
+            }
+        }
+
+        @Override
+        public void onAudioPresentationsChanged(Session session,
+                List<AudioPresentation> audioPresentations) {
+            if (DEBUG) {
+                Log.d(TAG, "onAudioPresentationsChanged(" + audioPresentations + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onAudioPresentationsChanged - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onAudioPresentationsChanged(mInputId, audioPresentations);
+            }
+        }
+
+        @Override
+        public void onAudioPresentationSelected(Session session, int presentationId,
+                int programId) {
+            if (DEBUG) {
+                Log.d(TAG, "onAudioPresentationSelected(presentationId=" + presentationId
+                            + ", programId=" + programId + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onAudioPresentationSelected - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onAudioPresentationSelected(mInputId, presentationId, programId);
             }
         }
 
@@ -1420,6 +1599,48 @@ public class TvView extends ViewGroup {
         }
 
         @Override
+        public void onCueingMessageAvailability(Session session, boolean available) {
+            if (DEBUG) {
+                Log.d(TAG, "onCueingMessageAvailability(available=" + available + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onCueingMessageAvailability - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onCueingMessageAvailability(mInputId, available);
+            }
+        }
+
+        @Override
+        public void onTimeShiftMode(Session session, int mode) {
+            if (DEBUG) {
+                Log.d(TAG, "onTimeShiftMode(mode=" + mode + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onTimeShiftMode - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onTimeShiftMode(mInputId, mode);
+            }
+        }
+
+        @Override
+        public void onAvailableSpeeds(Session session, float[] speeds) {
+            if (DEBUG) {
+                Log.d(TAG, "onAvailableSpeeds(speeds=" + Arrays.toString(speeds) + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onAvailableSpeeds - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onAvailableSpeeds(mInputId, speeds);
+            }
+        }
+
+        @Override
         public void onTuned(Session session, Uri channelUri) {
             if (DEBUG) {
                 Log.d(TAG, "onTuned(channelUri=" + channelUri + ")");
@@ -1430,6 +1651,20 @@ public class TvView extends ViewGroup {
             }
             if (mCallback != null) {
                 mCallback.onTuned(mInputId, channelUri);
+            }
+        }
+
+        @Override
+        public void onTvMessage(Session session, String type, Bundle data) {
+            if (DEBUG) {
+                Log.d(TAG, "onTvMessage(type=" + type + ", data=" + data + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onTvMessage - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onTvMessage(mInputId, type, data);
             }
         }
     }

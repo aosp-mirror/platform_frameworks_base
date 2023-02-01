@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     Copyright (C) 2019 The Android Open Source Project
-
-     Licensed under the Apache License, Version 2.0 (the "License");
-     you may not use this file except in compliance with the License.
-     You may obtain a copy of the License at
-
-          http://www.apache.org/licenses/LICENSE-2.0
-
-     Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
-     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     See the License for the specific language governing permissions and
-     limitations under the License.
--->
+  ~ Copyright (C) 2022 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
         android:width="48dp"
         android:height="48dp"
@@ -25,13 +25,12 @@
         android:fillAlpha="0.8"
         android:pathData="M0,24 a24,24 0 1,0 48,0 a24,24 0 1,0 -48,0"/>
     <group
-        android:translateX="12"
-        android:translateY="12">
+        android:scaleX="0.8"
+        android:scaleY="0.8"
+        android:translateX="10"
+        android:translateY="10">
         <path
-            android:fillColor="@color/compat_controls_text"
-            android:pathData="M6,13c0,-1.65 0.67,-3.15 1.76,-4.24L6.34,7.34C4.9,8.79 4,10.79 4,13c0,4.08 3.05,7.44 7,7.93v-2.02C8.17,18.43 6,15.97 6,13z"/>
-        <path
-            android:fillColor="@color/compat_controls_text"
-            android:pathData="M20,13c0,-4.42 -3.58,-8 -8,-8c-0.06,0 -0.12,0.01 -0.18,0.01v0l1.09,-1.09L11.5,2.5L8,6l3.5,3.5l1.41,-1.41l-1.08,-1.08C11.89,7.01 11.95,7 12,7c3.31,0 6,2.69 6,6c0,2.97 -2.17,5.43 -5,5.91v2.02C16.95,20.44 20,17.08 20,13z"/>
+            android:pathData="M0,36V24.5H3V30.85L10.4,23.45L12.55,25.6L5.15,33H11.5V36H0ZM24.5,36V33H30.85L23.5,25.65L25.65,23.5L33,30.85V24.5H36V36H24.5ZM10.35,12.5L3,5.15V11.5H0V0H11.5V3H5.15L12.5,10.35L10.35,12.5ZM25.65,12.5L23.5,10.35L30.85,3H24.5V0H36V11.5H33V5.15L25.65,12.5Z"
+            android:fillColor="@color/compat_controls_text"/>
     </group>
 </vector>

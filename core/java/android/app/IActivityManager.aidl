@@ -304,7 +304,7 @@ interface IActivityManager {
     @UnsupportedAppUsage
     void resumeAppSwitches();
     boolean bindBackupAgent(in String packageName, int backupRestoreMode, int targetUserId,
-            int operationType);
+            int backupDestination);
     void backupAgentCreated(in String packageName, in IBinder agent, int userId);
     void unbindBackupAgent(in ApplicationInfo appInfo);
     int handleIncomingUser(int callingPid, int callingUid, int userId, boolean allowAll,
@@ -331,6 +331,7 @@ interface IActivityManager {
     @UnsupportedAppUsage
     void handleApplicationStrictModeViolation(in IBinder app, int penaltyMask,
             in StrictMode.ViolationInfo crashInfo);
+    void registerStrictModeCallback(in IBinder binder);
     boolean isTopActivityImmersive();
     void crashApplicationWithType(int uid, int initialPid, in String packageName, int userId,
             in String message, boolean force, int exceptionTypeId);
@@ -522,14 +523,32 @@ interface IActivityManager {
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean stopBinderTrackingAndDump(in ParcelFileDescriptor fd);
 
-    /** Enables server-side binder tracing for the calling uid. */
-    void enableBinderTracing();
-
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void suppressResizeConfigChanges(boolean suppress);
+
+    /**
+     * @deprecated Use {@link #unlockUser2(int, IProgressListener)} instead, since the token and
+     * secret arguments no longer do anything.  This method still exists only because it is marked
+     * with {@code @UnsupportedAppUsage}, so it might not be safe to remove it or change its
+     * signature.
+     */
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean unlockUser(int userid, in byte[] token, in byte[] secret,
             in IProgressListener listener);
+
+    /**
+     * Tries to unlock the given user.
+     * <p>
+     * This will succeed only if the user's CE storage key is already unlocked or if the user
+     * doesn't have a lockscreen credential set.
+     *
+     * @param userId The ID of the user to unlock.
+     * @param listener An optional progress listener.
+     *
+     * @return true if the user was successfully unlocked, otherwise false.
+     */
+    boolean unlockUser2(int userId, in IProgressListener listener);
+
     void killPackageDependents(in String packageName, int userId);
     void makePackageIdle(String packageName, int userId);
     int getMemoryTrimLevel();
@@ -538,7 +557,8 @@ interface IActivityManager {
     void startConfirmDeviceCredentialIntent(in Intent intent, in Bundle options);
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void sendIdleJobTrigger();
-    int sendIntentSender(in IIntentSender target, in IBinder whitelistToken, int code,
+    int sendIntentSender(in IApplicationThread caller, in IIntentSender target,
+            in IBinder whitelistToken, int code,
             in Intent intent, in String resolvedType, in IIntentReceiver finishedReceiver,
             in String requiredPermission, in Bundle options);
     boolean isBackgroundRestricted(in String packageName);
@@ -751,6 +771,18 @@ interface IActivityManager {
     /** Blocks until all broadcast queues become idle. */
     void waitForBroadcastIdle();
 
+    /** Delays delivering broadcasts to the specified package. */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.DUMP)")
+    void forceDelayBroadcastDelivery(in String targetPackage, long delayedDurationMs);
+
+    /** Checks if the modern broadcast queue is enabled. */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.DUMP)")
+    boolean isModernBroadcastQueueEnabled();
+
+    /** Checks if the process represented by the given pid is frozen. */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.DUMP)")
+    boolean isProcessFrozen(int pid);
+
     /**
      * @return The reason code of whether or not the given UID should be exempted from background
      * restrictions here.
@@ -760,4 +792,32 @@ interface IActivityManager {
      * </p>
      */
     int getBackgroundRestrictionExemptionReason(int uid);
+
+    // Start (?) of T transactions
+    /**
+     * Similar to {@link #startUserInBackgroundWithListener(int userId, IProgressListener unlockProgressListener)},
+     * but setting the user as the visible user of that display (i.e., allowing the user and its
+     * running profiles to launch activities on that display).
+     *
+     * <p>Typically used only by automotive builds when the vehicle has multiple displays.
+     */
+    @JavaPassthrough(annotation=
+            "@android.annotation.RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}, conditional = true)")
+    boolean startUserInBackgroundVisibleOnDisplay(int userid, int displayId);
+
+    /**
+     * Similar to {@link #startProfile(int userId)}, but with a listener to report user unlock
+     * progress.
+     */
+    boolean startProfileWithListener(int userid, IProgressListener unlockProgressListener);
+
+    /**
+     * Gets the ids of displays that can be used on {@link #startUserInBackgroundVisibleOnDisplay(int userId, int displayId)}.
+     *
+     * <p>Typically used only by automotive builds when the vehicle has multiple displays.
+     */
+    @nullable int[] getDisplayIdsForStartingVisibleBackgroundUsers();
+
+    /** Returns if the service is a short-service is still "alive" and past the timeout. */
+    boolean shouldServiceTimeOut(in ComponentName className, in IBinder token);
 }

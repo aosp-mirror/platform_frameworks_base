@@ -37,26 +37,71 @@ public class HdmiPortInfoTest {
         boolean isCec = true;
         boolean isMhl = false;
         boolean isArcSupported = false;
+        boolean isEarcSupported = false;
 
         new EqualsTester()
                 .addEqualityGroup(
-                        new HdmiPortInfo(portId, portType, address, isCec, isMhl, isArcSupported),
-                        new HdmiPortInfo(portId, portType, address, isCec, isMhl, isArcSupported))
+                        new HdmiPortInfo.Builder(portId, portType, address)
+                                .setCecSupported(isCec)
+                                .setMhlSupported(isMhl)
+                                .setArcSupported(isArcSupported)
+                                .setEarcSupported(isEarcSupported)
+                                .build(),
+                        new HdmiPortInfo.Builder(portId, portType, address)
+                                .setCecSupported(isCec)
+                                .setMhlSupported(isMhl)
+                                .setArcSupported(isArcSupported)
+                                .setEarcSupported(isEarcSupported)
+                                .build())
                 .addEqualityGroup(
-                        new HdmiPortInfo(
-                                portId + 1, portType, address, isCec, isMhl, isArcSupported))
+                        new HdmiPortInfo.Builder(portId + 1, portType, address)
+                                .setCecSupported(isCec)
+                                .setMhlSupported(isMhl)
+                                .setArcSupported(isArcSupported)
+                                .setEarcSupported(isEarcSupported)
+                                .build())
                 .addEqualityGroup(
-                        new HdmiPortInfo(
-                                portId, portType + 1, address, isCec, isMhl, isArcSupported))
+                        new HdmiPortInfo.Builder(portId, portType + 1, address)
+                                .setCecSupported(isCec)
+                                .setMhlSupported(isMhl)
+                                .setArcSupported(isArcSupported)
+                                .setEarcSupported(isEarcSupported)
+                                .build())
                 .addEqualityGroup(
-                        new HdmiPortInfo(
-                                portId, portType, address + 1, isCec, isMhl, isArcSupported))
+                        new HdmiPortInfo.Builder(portId, portType, address + 1)
+                                .setCecSupported(isCec)
+                                .setMhlSupported(isMhl)
+                                .setArcSupported(isArcSupported)
+                                .setEarcSupported(isEarcSupported)
+                                .build())
                 .addEqualityGroup(
-                        new HdmiPortInfo(portId, portType, address, !isCec, isMhl, isArcSupported))
+                        new HdmiPortInfo.Builder(portId, portType, address)
+                                .setCecSupported(!isCec)
+                                .setMhlSupported(isMhl)
+                                .setArcSupported(isArcSupported)
+                                .setEarcSupported(isEarcSupported)
+                                .build())
                 .addEqualityGroup(
-                        new HdmiPortInfo(portId, portType, address, isCec, !isMhl, isArcSupported))
+                        new HdmiPortInfo.Builder(portId, portType, address)
+                                .setCecSupported(isCec)
+                                .setMhlSupported(!isMhl)
+                                .setArcSupported(isArcSupported)
+                                .setEarcSupported(isEarcSupported)
+                                .build())
                 .addEqualityGroup(
-                        new HdmiPortInfo(portId, portType, address, isCec, isMhl, !isArcSupported))
+                        new HdmiPortInfo.Builder(portId, portType, address)
+                                .setCecSupported(isCec)
+                                .setMhlSupported(isMhl)
+                                .setArcSupported(!isArcSupported)
+                                .setEarcSupported(isEarcSupported)
+                                .build())
+                .addEqualityGroup(
+                        new HdmiPortInfo.Builder(portId, portType, address)
+                                .setCecSupported(isCec)
+                                .setMhlSupported(isMhl)
+                                .setArcSupported(isArcSupported)
+                                .setEarcSupported(!isEarcSupported)
+                                .build())
                 .testEquals();
     }
 }

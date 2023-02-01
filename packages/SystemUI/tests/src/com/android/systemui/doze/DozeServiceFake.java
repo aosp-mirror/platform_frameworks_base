@@ -48,7 +48,7 @@ public class DozeServiceFake implements DozeMachine.Service {
     }
 
     @Override
-    public void requestWakeUp() {
+    public void requestWakeUp(@DozeLog.Reason int reason) {
         requestedWakeup = true;
     }
 

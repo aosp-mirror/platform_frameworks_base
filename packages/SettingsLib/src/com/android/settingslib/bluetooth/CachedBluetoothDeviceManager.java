@@ -17,6 +17,7 @@
 package com.android.settingslib.bluetooth;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
@@ -187,7 +188,6 @@ public class CachedBluetoothDeviceManager {
     /**
      * Updates the Hearing Aid devices; specifically the HiSyncId's. This routine is called when the
      * Hearing Aid Service is connected and the HiSyncId's are now available.
-     * @param LocalBluetoothProfileManager profileManager
      */
     public synchronized void updateHearingAidsDevices() {
         mHearingAidDeviceManager.updateHearingAidsDevices();
@@ -223,8 +223,14 @@ public class CachedBluetoothDeviceManager {
 
     public synchronized void clearNonBondedDevices() {
         clearNonBondedSubDevices();
-        mCachedDevices.removeIf(cachedDevice
-            -> cachedDevice.getBondState() == BluetoothDevice.BOND_NONE);
+        final List<CachedBluetoothDevice> removedCachedDevice = new ArrayList<>();
+        mCachedDevices.stream()
+                .filter(cachedDevice -> cachedDevice.getBondState() == BluetoothDevice.BOND_NONE)
+                .forEach(cachedDevice -> {
+                    cachedDevice.release();
+                    removedCachedDevice.add(cachedDevice);
+                });
+        mCachedDevices.removeAll(removedCachedDevice);
     }
 
     private void clearNonBondedSubDevices() {
@@ -245,6 +251,7 @@ public class CachedBluetoothDeviceManager {
             if (subDevice != null
                     && subDevice.getDevice().getBondState() == BluetoothDevice.BOND_NONE) {
                 // Sub device exists and it is not bonded
+                subDevice.release();
                 cachedDevice.setSubDevice(null);
             }
         }
@@ -294,9 +301,13 @@ public class CachedBluetoothDeviceManager {
                 }
                 if (cachedDevice.getBondState() != BluetoothDevice.BOND_BONDED) {
                     cachedDevice.setJustDiscovered(false);
+                    cachedDevice.release();
                     mCachedDevices.remove(i);
                 }
             }
+
+            // To clear the SetMemberPair flag when the Bluetooth is turning off.
+            mOngoingSetMemberPair = null;
         }
     }
 
@@ -314,12 +325,14 @@ public class CachedBluetoothDeviceManager {
     }
 
     public synchronized void onDeviceUnpaired(CachedBluetoothDevice device) {
+        device.setGroupId(BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
         CachedBluetoothDevice mainDevice = mCsipDeviceManager.findMainDevice(device);
         final Set<CachedBluetoothDevice> memberDevices = device.getMemberDevice();
         if (!memberDevices.isEmpty()) {
             // Main device is unpaired, to unpair the member device
             for (CachedBluetoothDevice memberDevice : memberDevices) {
                 memberDevice.unpair();
+                memberDevice.setGroupId(BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
                 device.removeMemberDevice(memberDevice);
             }
         } else if (mainDevice != null) {
@@ -350,15 +363,56 @@ public class CachedBluetoothDeviceManager {
      * @return {@code true}, if the device should pair automatically; Otherwise, return
      * {@code false}.
      */
-    public synchronized boolean shouldPairByCsip(BluetoothDevice device, int groupId) {
-        if (mOngoingSetMemberPair != null || device.getBondState() != BluetoothDevice.BOND_NONE
+    private synchronized boolean shouldPairByCsip(BluetoothDevice device, int groupId) {
+        boolean isOngoingSetMemberPair = mOngoingSetMemberPair != null;
+        int bondState = device.getBondState();
+        if (isOngoingSetMemberPair || bondState != BluetoothDevice.BOND_NONE
                 || !mCsipDeviceManager.isExistedGroupId(groupId)) {
+            Log.d(TAG, "isOngoingSetMemberPair: " + isOngoingSetMemberPair
+                    + " , device.getBondState: " + bondState);
             return false;
         }
-
-        Log.d(TAG, "Bond " + device.getName() + " by CSIP");
-        mOngoingSetMemberPair = device;
         return true;
+    }
+
+    /**
+     * Called when we found a set member of a group. The function will check the {@code groupId} if
+     * it exists and the bond state of the device is BOND_NONE, and if there isn't any ongoing pair
+     * , and then pair the device automatically.
+     *
+     * @param device The found device
+     * @param groupId The group id of the found device
+     */
+    public synchronized void pairDeviceByCsip(BluetoothDevice device, int groupId) {
+        if (!shouldPairByCsip(device, groupId)) {
+            return;
+        }
+        Log.d(TAG, "Bond " + device.getAnonymizedAddress() + " by CSIP");
+        mOngoingSetMemberPair = device;
+        syncConfigFromMainDevice(device, groupId);
+        if (!device.createBond(BluetoothDevice.TRANSPORT_LE)) {
+            Log.d(TAG, "Bonding could not be started");
+            mOngoingSetMemberPair = null;
+        }
+    }
+
+    private void syncConfigFromMainDevice(BluetoothDevice device, int groupId) {
+        if (!isOngoingPairByCsip(device)) {
+            return;
+        }
+        CachedBluetoothDevice memberDevice = findDevice(device);
+        CachedBluetoothDevice mainDevice = mCsipDeviceManager.findMainDevice(memberDevice);
+        if (mainDevice == null) {
+            mainDevice = mCsipDeviceManager.getCachedDevice(groupId);
+        }
+
+        if (mainDevice == null || mainDevice.equals(memberDevice)) {
+            Log.d(TAG, "no mainDevice");
+            return;
+        }
+
+        // The memberDevice set PhonebookAccessPermission
+        device.setPhonebookAccessPermission(mainDevice.getDevice().getPhonebookAccessPermission());
     }
 
     /**

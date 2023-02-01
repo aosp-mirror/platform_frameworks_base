@@ -16,10 +16,17 @@
 
 package com.android.shell;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import android.graphics.Bitmap;
-import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Log;
-import android.view.SurfaceControl;
+import android.util.Pair;
+import android.view.WindowManagerGlobal;
+import android.window.ScreenCapture;
+import android.window.ScreenCapture.ScreenCaptureListener;
+import android.window.ScreenCapture.ScreenshotHardwareBuffer;
+import android.window.ScreenCapture.ScreenshotSync;
 
 /**
  * Helper class used to take screenshots.
@@ -39,12 +46,15 @@ final class Screenshooter {
     static Bitmap takeScreenshot() {
         Log.d(TAG, "Taking fullscreen screenshot");
         // Take the screenshot
-        final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
-        final SurfaceControl.DisplayCaptureArgs captureArgs =
-                new SurfaceControl.DisplayCaptureArgs.Builder(displayToken)
-                        .build();
-        final SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
-                SurfaceControl.captureDisplay(captureArgs);
+        final Pair<ScreenCaptureListener, ScreenshotSync> syncScreenCapture =
+                ScreenCapture.createSyncCaptureListener();
+        try {
+            WindowManagerGlobal.getWindowManagerService().captureDisplay(DEFAULT_DISPLAY, null,
+                    syncScreenCapture.first);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+        final ScreenshotHardwareBuffer screenshotBuffer = syncScreenCapture.second.get();
         final Bitmap screenShot = screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
         if (screenShot == null) {
             Log.e(TAG, "Failed to take fullscreen screenshot");

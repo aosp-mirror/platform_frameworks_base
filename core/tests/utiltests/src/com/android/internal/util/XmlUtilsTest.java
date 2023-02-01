@@ -18,9 +18,10 @@ package com.android.internal.util;
 
 import static org.junit.Assert.assertArrayEquals;
 
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
+
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import junit.framework.TestCase;
 

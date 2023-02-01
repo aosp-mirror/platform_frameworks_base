@@ -39,6 +39,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.utils.EventLogger;
 
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -262,20 +263,20 @@ public class BtHelper {
     /*package*/ synchronized void setAvrcpAbsoluteVolumeIndex(int index) {
         if (mA2dp == null) {
             if (AudioService.DEBUG_VOL) {
-                AudioService.sVolumeLogger.log(new AudioEventLogger.StringEvent(
+                AudioService.sVolumeLogger.enqueue(new EventLogger.StringEvent(
                         "setAvrcpAbsoluteVolumeIndex: bailing due to null mA2dp").printLog(TAG));
                 return;
             }
         }
         if (!mAvrcpAbsVolSupported) {
-            AudioService.sVolumeLogger.log(new AudioEventLogger.StringEvent(
+            AudioService.sVolumeLogger.enqueue(new EventLogger.StringEvent(
                     "setAvrcpAbsoluteVolumeIndex: abs vol not supported ").printLog(TAG));
             return;
         }
         if (AudioService.DEBUG_VOL) {
             Log.i(TAG, "setAvrcpAbsoluteVolumeIndex index=" + index);
         }
-        AudioService.sVolumeLogger.log(new AudioServiceEvents.VolumeEvent(
+        AudioService.sVolumeLogger.enqueue(new AudioServiceEvents.VolumeEvent(
                 AudioServiceEvents.VolumeEvent.VOL_SET_AVRCP_VOL, index));
         mA2dp.setAvrcpAbsoluteVolume(index);
     }
@@ -303,7 +304,7 @@ public class BtHelper {
 
         Log.i(TAG, "receiveBtEvent action: " + action + " mScoAudioState: " + mScoAudioState);
         if (action.equals(BluetoothHeadset.ACTION_ACTIVE_DEVICE_CHANGED)) {
-            BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, android.bluetooth.BluetoothDevice.class);
             setBtScoActiveDevice(btDevice);
         } else if (action.equals(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)) {
             int btState = intent.getIntExtra(BluetoothProfile.EXTRA_STATE, -1);
@@ -392,14 +393,14 @@ public class BtHelper {
     @GuardedBy("AudioDeviceBroker.mDeviceStateLock")
     /*package*/ synchronized boolean startBluetoothSco(int scoAudioMode,
                 @NonNull String eventSource) {
-        AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(eventSource));
+        AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(eventSource));
         return requestScoState(BluetoothHeadset.STATE_AUDIO_CONNECTED, scoAudioMode);
     }
 
     // @GuardedBy("AudioDeviceBroker.mSetModeLock")
     @GuardedBy("AudioDeviceBroker.mDeviceStateLock")
     /*package*/ synchronized boolean stopBluetoothSco(@NonNull String eventSource) {
-        AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(eventSource));
+        AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(eventSource));
         return requestScoState(BluetoothHeadset.STATE_AUDIO_DISCONNECTED, SCO_MODE_VIRTUAL_CALL);
     }
 
@@ -410,20 +411,20 @@ public class BtHelper {
             }
             return;
         }
-        /* leaudio expect volume value in range 0 to 255
-         */
-        int volume = (index * (BT_LE_AUDIO_MAX_VOL - BT_LE_AUDIO_MIN_VOL)) / maxIndex ;
+        /* leaudio expect volume value in range 0 to 255 */
+        int volume = (int) Math.round((double) index * BT_LE_AUDIO_MAX_VOL / maxIndex);
 
         if (AudioService.DEBUG_VOL) {
             Log.i(TAG, "setLeAudioVolume: calling mLeAudio.setVolume idx="
                     + index + " volume=" + volume);
         }
-        AudioService.sVolumeLogger.log(new AudioServiceEvents.VolumeEvent(
+        AudioService.sVolumeLogger.enqueue(new AudioServiceEvents.VolumeEvent(
                 AudioServiceEvents.VolumeEvent.VOL_SET_LE_AUDIO_VOL, index, maxIndex));
         mLeAudio.setVolume(volume);
     }
 
-    /*package*/ synchronized void setHearingAidVolume(int index, int streamType) {
+    /*package*/ synchronized void setHearingAidVolume(int index, int streamType,
+            boolean isHeadAidConnected) {
         if (mHearingAid == null) {
             if (AudioService.DEBUG_VOL) {
                 Log.i(TAG, "setHearingAidVolume: null mHearingAid");
@@ -440,8 +441,11 @@ public class BtHelper {
             Log.i(TAG, "setHearingAidVolume: calling mHearingAid.setVolume idx="
                     + index + " gain=" + gainDB);
         }
-        AudioService.sVolumeLogger.log(new AudioServiceEvents.VolumeEvent(
-                AudioServiceEvents.VolumeEvent.VOL_SET_HEARING_AID_VOL, index, gainDB));
+        // do not log when hearing aid is not connected to avoid confusion when reading dumpsys
+        if (isHeadAidConnected) {
+            AudioService.sVolumeLogger.enqueue(new AudioServiceEvents.VolumeEvent(
+                    AudioServiceEvents.VolumeEvent.VOL_SET_HEARING_AID_VOL, index, gainDB));
+        }
         mHearingAid.setVolume(gainDB);
     }
 
@@ -671,7 +675,7 @@ public class BtHelper {
                         case BluetoothProfile.HEADSET:
                         case BluetoothProfile.HEARING_AID:
                         case BluetoothProfile.LE_AUDIO:
-                            AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
+                            AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
                                     "BT profile service: connecting "
                                     + BluetoothProfile.getProfileName(profile) + " profile"));
                             mDeviceBroker.postBtProfileConnected(profile, proxy);
@@ -907,6 +911,8 @@ public class BtHelper {
                 return "ENCODING_APTX_HD";
             case BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC:
                 return "ENCODING_LDAC";
+            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_OPUS:
+                return "ENCODING_OPUS";
             default:
                 return "ENCODING_BT_CODEC_TYPE(" + btCodecType + ")";
         }

@@ -57,7 +57,7 @@ import java.util.Set;
 public class CompanionDevicePresenceMonitor implements AssociationStore.OnChangeListener,
         BluetoothCompanionDeviceConnectionListener.Callback, BleCompanionDeviceScanner.Callback {
     static final boolean DEBUG = false;
-    private static final String TAG = "CompanionDevice_PresenceMonitor";
+    private static final String TAG = "CDM_CompanionDevicePresenceMonitor";
 
     /** Callback for notifying about changes to status of companion devices. */
     public interface Callback {
@@ -164,6 +164,12 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
 
     @Override
     public void onBluetoothCompanionDeviceDisconnected(int associationId) {
+        // If disconnected device is also a BLE device, skip the 2-minute timer and mark it as gone.
+        boolean isConnectableBleDevice = mNearbyBleDevices.remove(associationId);
+        if (DEBUG && isConnectableBleDevice) {
+            Log.d(TAG, "Bluetooth device disconnect was detected."
+                    + " Pre-emptively marking the BLE device as lost.");
+        }
         onDeviceGone(mConnectedBtDevices, associationId, /* sourceLoggingTag */ "bt");
     }
 

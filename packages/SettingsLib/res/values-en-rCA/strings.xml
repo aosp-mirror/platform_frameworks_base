@@ -53,8 +53,6 @@
     <string name="wifi_disconnected" msgid="7054450256284661757">"Disconnected"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Disabled"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP Configuration Failure"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Not connected due to low quality network"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"WiFi Connection Failure"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Authentication problem"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Can\'t connect"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"Can\'t connect to \'<xliff:g id="AP_NAME">%1$s</xliff:g>\'"</string>
@@ -63,12 +61,9 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Won\'t automatically connect"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"No internet access"</string>
     <string name="saved_network" msgid="7143698034077223645">"Saved by <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"Connected to metered network"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Automatically connected via %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Automatically connected via network rating provider"</string>
-    <string name="connected_via_passpoint" msgid="7735442932429075684">"Connected via %1$s"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"Connected via <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="available_via_passpoint" msgid="1716000261192603682">"Available via %1$s"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"Tap to sign up"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"No internet"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"Private DNS server cannot be accessed"</string>
@@ -76,17 +71,13 @@
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"No internet"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"Sign in required"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"Access point temporarily full"</string>
-    <string name="connected_via_carrier" msgid="1968057009076191514">"Connected via %1$s"</string>
-    <string name="available_via_carrier" msgid="465598683092718294">"Available via %1$s"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"Opening <xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g>"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"Couldn’t connect"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"Completing sign-up…"</string>
     <string name="osu_sign_up_failed" msgid="5605453599586001793">"Couldn’t complete sign-up. Tap to try again."</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"Sign-up complete. Connecting…"</string>
-    <string name="speed_label_very_slow" msgid="8526005255731597666">"Very Slow"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"Slow"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"OK"</string>
-    <string name="speed_label_medium" msgid="9078405312828606976">"Medium"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Fast"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Very Fast"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Expired"</string>
@@ -98,7 +89,6 @@
     <string name="bluetooth_pairing" msgid="4269046942588193600">"Pairing…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Connected (no phone)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Connected (no media)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Connected (no message access)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"Connected (no phone or media)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"Connected, battery <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Connected (no phone), battery <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
@@ -117,17 +107,17 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"File transfer"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Input device"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Internet access"</string>
-    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Contact sharing"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Use for contact sharing"</string>
+    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Contacts and call history sharing"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Use for contacts and call history sharing"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Internet connection sharing"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Text Messages"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM Access"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD audio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Hearing Aids"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Connected to Hearing Aids"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Connected to LE_AUDIO"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Connected to LE audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Connected to media audio"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Connected to phone audio"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Connected to file transfer server"</string>
@@ -212,15 +202,15 @@
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"Reset speech pitch"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"Reset the pitch at which the text is spoken to default."</string>
   <string-array name="tts_rate_entries">
-    <item msgid="9004239613505400644">"Very slow"</item>
-    <item msgid="1815382991399815061">"Slow"</item>
-    <item msgid="3075292553049300105">"Normal"</item>
-    <item msgid="1158955023692670059">"Fast"</item>
-    <item msgid="5664310435707146591">"Faster"</item>
-    <item msgid="5491266922147715962">"Very fast"</item>
-    <item msgid="7659240015901486196">"Rapid"</item>
-    <item msgid="7147051179282410945">"Very rapid"</item>
-    <item msgid="581904787661470707">"Fastest"</item>
+    <item msgid="4563475121751694801">"60%"</item>
+    <item msgid="6323184326270638754">"80%"</item>
+    <item msgid="2569200872125313769">"100%"</item>
+    <item msgid="9010794089704942570">"150%"</item>
+    <item msgid="4634010129655810634">"200%"</item>
+    <item msgid="8929490998534497543">"250%"</item>
+    <item msgid="8442352376763286772">"300%"</item>
+    <item msgid="4446831566506165093">"350%"</item>
+    <item msgid="6946761421234586000">"400%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Choose profile"</string>
     <string name="category_personal" msgid="6236798763159385225">"Personal"</string>
@@ -408,6 +398,7 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Make all activities resizable for multi-window, regardless of manifest values."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Enable freeform windows"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Enable support for experimental freeform windows."</string>
+    <string name="desktop_mode" msgid="2389067840550544462">"Desktop mode"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Desktop backup password"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Desktop full backups aren’t currently protected"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Tap to change or remove the password for desktop full backups"</string>
@@ -476,12 +467,14 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> left until full"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> left until full"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Charging temporarily limited"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Charging optimized"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - Charging optimized"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Unknown"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Charging"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Charging rapidly"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Charging slowly"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Charging wirelessly"</string>
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Charging"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Not charging"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Connected, not charging"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Charged"</string>
@@ -571,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Add new user?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"You can share this device with other people by creating additional users. Each user has their own space, which they can customize with apps, wallpaper, and so on. Users can also adjust device settings like Wi‑Fi that affect everyone.\n\nWhen you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users. Accessibility settings and services may not transfer to the new user."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"When you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Give this user admin privileges?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"As an admin, they will be able to manage other users, modify device settings and factory reset the device."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Set up user now?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Make sure the person is available to take the device and set up their space"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Set up profile now?"</string>
@@ -598,6 +593,23 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Reset"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Remove"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Resetting guest…"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Reset guest session?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"This will start a new guest session and delete all apps and data from the current session"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Exit guest mode?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"This will delete apps and data from the current guest session"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Give this user admin privileges"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"Do not give user admin privileges"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Exit"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Save guest activity?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"You can save activity from the current session or delete all apps and data"</string>
+    <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Delete"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Save"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Exit guest mode"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Reset guest session"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Exit guest"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"All activity will be deleted on exit"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"You can save or delete your activity on exit"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Reset to delete session activity now, or you can save or delete activity on exit"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Take a photo"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Choose an image"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Select photo"</string>
@@ -639,11 +651,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet disconnected."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"No calling."</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"Time"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"Date"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"Weather"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Air Quality"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Cast Info"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Choose a profile picture"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Default user icon"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Physical keyboard"</string>

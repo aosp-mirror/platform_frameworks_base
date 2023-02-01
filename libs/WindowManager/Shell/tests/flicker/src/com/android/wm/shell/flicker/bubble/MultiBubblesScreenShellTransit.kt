@@ -16,12 +16,11 @@
 
 package com.android.wm.shell.flicker.bubble
 
-import androidx.test.filters.FlakyTest
+import android.platform.test.annotations.FlakyTest
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.annotation.Group4
+import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import org.junit.Assume
 import org.junit.Before
 import org.junit.runner.RunWith
@@ -30,11 +29,8 @@ import org.junit.runners.Parameterized
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-@Group4
 @FlakyTest(bugId = 217777115)
-class MultiBubblesScreenShellTransit(
-    testSpec: FlickerTestParameter
-) : MultiBubblesScreen(testSpec) {
+class MultiBubblesScreenShellTransit(flicker: FlickerTest) : MultiBubblesScreen(flicker) {
     @Before
     override fun before() {
         Assume.assumeTrue(isShellTransitionsEnabled)

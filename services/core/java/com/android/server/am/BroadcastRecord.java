@@ -24,20 +24,25 @@ import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROA
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_NONE;
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_TARGET_T_ONLY;
 
+import android.annotation.CurrentTimeMillisLong;
+import android.annotation.ElapsedRealtimeLong;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UptimeMillisLong;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
+import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
 import android.app.compat.CompatChanges;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.PrintWriterPrinter;
@@ -47,71 +52,102 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 
 /**
  * An active intent broadcast.
  */
 final class BroadcastRecord extends Binder {
-    final Intent intent;    // the original intent that generated us
-    final ComponentName targetComp; // original component name set on the intent
-    final ProcessRecord callerApp; // process that sent this
-    final String callerPackage; // who sent this
+    final @NonNull Intent intent;    // the original intent that generated us
+    final @Nullable ComponentName targetComp; // original component name set on the intent
+    final @Nullable ProcessRecord callerApp; // process that sent this
+    final @Nullable String callerPackage; // who sent this
     final @Nullable String callerFeatureId; // which feature in the package sent this
     final int callingPid;   // the pid of who sent this
     final int callingUid;   // the uid of who sent this
     final boolean callerInstantApp; // caller is an Instant App?
+    final boolean callerInstrumented; // caller is being instrumented?
     final boolean ordered;  // serialize the send to receivers?
     final boolean sticky;   // originated from existing sticky data?
+    final boolean alarm;    // originated from an alarm triggering?
+    final boolean pushMessage; // originated from a push message?
+    final boolean pushMessageOverQuota; // originated from a push message which was over quota?
+    final boolean interactive; // originated from user interaction?
     final boolean initialSticky; // initial broadcast from register to sticky?
+    final boolean prioritized; // contains more than one priority tranche
+    final boolean deferUntilActive; // infinitely deferrable broadcast
     final int userId;       // user id this broadcast was for
-    final String resolvedType; // the resolved data type
-    final String[] requiredPermissions; // permissions the caller has required
-    final String[] excludedPermissions; // permissions to exclude
-    final String[] excludedPackages; // packages to exclude
+    final @Nullable String resolvedType; // the resolved data type
+    final @Nullable String[] requiredPermissions; // permissions the caller has required
+    final @Nullable String[] excludedPermissions; // permissions to exclude
+    final @Nullable String[] excludedPackages; // packages to exclude
     final int appOp;        // an app op that is associated with this broadcast
-    final BroadcastOptions options; // BroadcastOptions supplied by caller
-    final List receivers;   // contains BroadcastFilter and ResolveInfo
-    final int[] delivery;   // delivery state of each receiver
-    final long[] duration;   // duration a receiver took to process broadcast
-    IIntentReceiver resultTo; // who receives final result if non-null
+    final @Nullable BroadcastOptions options; // BroadcastOptions supplied by caller
+    final @NonNull List<Object> receivers;   // contains BroadcastFilter and ResolveInfo
+    final @DeliveryState int[] delivery;   // delivery state of each receiver
+    final boolean[] deferredUntilActive; // whether each receiver is infinitely deferred
+    final int[] blockedUntilTerminalCount; // blocked until count of each receiver
+    @Nullable ProcessRecord resultToApp; // who receives final result if non-null
+    @Nullable IIntentReceiver resultTo; // who receives final result if non-null
     boolean deferred;
     int splitCount;         // refcount for result callback, when split
     int splitToken;         // identifier for cross-BroadcastRecord refcount
-    long enqueueTime;       // uptimeMillis when the broadcast was enqueued
-    long enqueueRealTime;   // elapsedRealtime when the broadcast was enqueued
-    long enqueueClockTime;  // the clock time the broadcast was enqueued
-    long dispatchTime;      // when dispatch started on this set of receivers
-    long dispatchRealTime;  // elapsedRealtime when the broadcast was dispatched
-    long dispatchClockTime; // the clock time the dispatch started
-    long receiverTime;      // when current receiver started for timeouts.
-    long finishTime;        // when we finished the current receiver.
-    boolean timeoutExempt;  // true if this broadcast is not subject to receiver timeouts
+    @UptimeMillisLong       long enqueueTime;        // when broadcast enqueued
+    @ElapsedRealtimeLong    long enqueueRealTime;    // when broadcast enqueued
+    @CurrentTimeMillisLong  long enqueueClockTime;   // when broadcast enqueued
+    // When broadcast is originally enqueued. Only used in case of replacing broadcasts
+    // with FLAG_RECEIVER_REPLACE_PENDING. If it is 0, then 'enqueueClockTime' is the original
+    // enqueue time.
+    @UptimeMillisLong       long originalEnqueueClockTime;
+    @UptimeMillisLong       long dispatchTime;       // when broadcast dispatch started
+    @ElapsedRealtimeLong    long dispatchRealTime;   // when broadcast dispatch started
+    @CurrentTimeMillisLong  long dispatchClockTime;  // when broadcast dispatch started
+    @UptimeMillisLong       long receiverTime;       // when receiver started for timeouts
+    @UptimeMillisLong       long finishTime;         // when broadcast finished
+    final @UptimeMillisLong long[] scheduledTime;    // when each receiver was scheduled
+    final @UptimeMillisLong long[] terminalTime;     // when each receiver was terminal
+    final                   int[] transmitGroup;     // the batch group for each receiver
+    final                   int[] transmitOrder;     // the position of the receiver in the group
+    final boolean timeoutExempt;  // true if this broadcast is not subject to receiver timeouts
     int resultCode;         // current result code value.
-    String resultData;      // current result data value.
-    Bundle resultExtras;    // current result extra data values.
+    @Nullable String resultData;      // current result data value.
+    @Nullable Bundle resultExtras;    // current result extra data values.
     boolean resultAbort;    // current result abortBroadcast value.
     int nextReceiver;       // next receiver to be executed.
-    IBinder receiver;       // who is currently running, null if none.
     int state;
     int anrCount;           // has this broadcast record hit any ANRs?
     int manifestCount;      // number of manifest receivers dispatched.
     int manifestSkipCount;  // number of manifest receivers skipped.
-    BroadcastQueue queue;   // the outbound queue handling this broadcast
+    int terminalCount;      // number of receivers in terminal state.
+    int deferredCount;      // number of receivers in deferred state.
+    @Nullable BroadcastQueue queue;   // the outbound queue handling this broadcast
 
-    // if set to true, app's process will be temporarily allowed to start activities from background
-    // for the duration of the broadcast dispatch
-    final boolean allowBackgroundActivityStarts;
-    // token used to trace back the grant for activity starts, optional
+    // Determines the privileges the app's process has in regard to background starts.
+    final BackgroundStartPrivileges mBackgroundStartPrivileges;
+
+    // Filter the intent extras by using the rules of the package visibility before broadcasting
+    // the intent to the receiver.
     @Nullable
-    final IBinder mBackgroundActivityStartsToken;
+    final BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver;
+
+    private @Nullable String mCachedToString;
+    private @Nullable String mCachedToShortString;
+
+    /** Empty immutable list of receivers */
+    static final List<Object> EMPTY_RECEIVERS = List.of();
 
     static final int IDLE = 0;
     static final int APP_RECEIVE = 1;
@@ -119,24 +155,74 @@ final class BroadcastRecord extends Binder {
     static final int CALL_DONE_RECEIVE = 3;
     static final int WAITING_SERVICES = 4;
 
+    /** Initial state: waiting to run in future */
     static final int DELIVERY_PENDING = 0;
+    /** Terminal state: finished successfully */
     static final int DELIVERY_DELIVERED = 1;
+    /** Terminal state: skipped due to internal policy */
     static final int DELIVERY_SKIPPED = 2;
+    /** Terminal state: timed out during attempted delivery */
     static final int DELIVERY_TIMEOUT = 3;
+    /** Intermediate state: currently executing */
+    static final int DELIVERY_SCHEDULED = 4;
+    /** Terminal state: failure to dispatch */
+    static final int DELIVERY_FAILURE = 5;
+    /** Intermediate state: currently deferred while app is cached */
+    static final int DELIVERY_DEFERRED = 6;
 
-    // The following are set when we are calling a receiver (one that
-    // was found in our list of registered receivers).
-    BroadcastFilter curFilter;
+    @IntDef(flag = false, prefix = { "DELIVERY_" }, value = {
+            DELIVERY_PENDING,
+            DELIVERY_DELIVERED,
+            DELIVERY_SKIPPED,
+            DELIVERY_TIMEOUT,
+            DELIVERY_SCHEDULED,
+            DELIVERY_FAILURE,
+            DELIVERY_DEFERRED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DeliveryState {}
 
-    // The following are set only when we are launching a receiver (one
-    // that was found by querying the package manager).
+    static @NonNull String deliveryStateToString(@DeliveryState int deliveryState) {
+        switch (deliveryState) {
+            case DELIVERY_PENDING: return "PENDING";
+            case DELIVERY_DELIVERED: return "DELIVERED";
+            case DELIVERY_SKIPPED: return "SKIPPED";
+            case DELIVERY_TIMEOUT: return "TIMEOUT";
+            case DELIVERY_SCHEDULED: return "SCHEDULED";
+            case DELIVERY_FAILURE: return "FAILURE";
+            case DELIVERY_DEFERRED: return "DEFERRED";
+            default: return Integer.toString(deliveryState);
+        }
+    }
+
+    /**
+     * Return if the given delivery state is "terminal", where no additional
+     * delivery state changes will be made.
+     */
+    static boolean isDeliveryStateTerminal(@DeliveryState int deliveryState) {
+        switch (deliveryState) {
+            case DELIVERY_DELIVERED:
+            case DELIVERY_SKIPPED:
+            case DELIVERY_TIMEOUT:
+            case DELIVERY_FAILURE:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     ProcessRecord curApp;       // hosting application of current receiver.
     ComponentName curComponent; // the receiver class that is currently running.
-    ActivityInfo curReceiver;   // info about the receiver that is currently running.
+    ActivityInfo curReceiver;   // the manifest receiver that is currently running.
+    BroadcastFilter curFilter;  // the registered receiver currently running.
+    Bundle curFilteredExtras;   // the bundle that has been filtered by the package visibility rules
+
+    boolean mIsReceiverAppRunning; // Was the receiver's app already running.
 
     // Private refcount-management bookkeeping; start > 0
     static AtomicInteger sNextToken = new AtomicInteger(1);
 
+    @NeverCompile
     void dump(PrintWriter pw, String prefix, SimpleDateFormat sdf) {
         final long now = SystemClock.uptimeMillis();
 
@@ -173,7 +259,12 @@ final class BroadcastRecord extends Binder {
         pw.print(prefix); pw.print("enqueueClockTime=");
                 pw.print(sdf.format(new Date(enqueueClockTime)));
                 pw.print(" dispatchClockTime=");
-                pw.println(sdf.format(new Date(dispatchClockTime)));
+                pw.print(sdf.format(new Date(dispatchClockTime)));
+        if (originalEnqueueClockTime > 0) {
+            pw.print(" originalEnqueueClockTime=");
+            pw.print(sdf.format(new Date(originalEnqueueClockTime)));
+        }
+        pw.println();
         pw.print(prefix); pw.print("dispatchTime=");
                 TimeUtils.formatDuration(dispatchTime, now, pw);
                 pw.print(" (");
@@ -205,9 +296,8 @@ final class BroadcastRecord extends Binder {
                     pw.print(" sticky="); pw.print(sticky);
                     pw.print(" initialSticky="); pw.println(initialSticky);
         }
-        if (nextReceiver != 0 || receiver != null) {
+        if (nextReceiver != 0) {
             pw.print(prefix); pw.print("nextReceiver="); pw.print(nextReceiver);
-                    pw.print(" receiver="); pw.println(receiver);
         }
         if (curFilter != null) {
             pw.print(prefix); pw.print("curFilter="); pw.println(curFilter);
@@ -223,6 +313,9 @@ final class BroadcastRecord extends Binder {
                 pw.print(prefix); pw.print("curSourceDir=");
                         pw.println(curReceiver.applicationInfo.sourceDir);
             }
+        }
+        if (curFilteredExtras != null) {
+            pw.print(" filtered extras: "); pw.println(curFilteredExtras);
         }
         if (state != IDLE) {
             String stateStr = " (?)";
@@ -240,15 +333,19 @@ final class BroadcastRecord extends Binder {
         for (int i = 0; i < N; i++) {
             Object o = receivers.get(i);
             pw.print(prefix);
-            switch (delivery[i]) {
-                case DELIVERY_PENDING:   pw.print("Pending"); break;
-                case DELIVERY_DELIVERED: pw.print("Deliver"); break;
-                case DELIVERY_SKIPPED:   pw.print("Skipped"); break;
-                case DELIVERY_TIMEOUT:   pw.print("Timeout"); break;
-                default:                 pw.print("???????"); break;
+            pw.print(deliveryStateToString(delivery[i]));
+            pw.print(' ');
+            if (scheduledTime[i] != 0) {
+                pw.print("scheduled ");
+                TimeUtils.formatDuration(scheduledTime[i] - enqueueTime, pw);
+                pw.print(' ');
             }
-            pw.print(" "); TimeUtils.formatDuration(duration[i], pw);
-            pw.print(" #"); pw.print(i); pw.print(": ");
+            if (terminalTime[i] != 0) {
+                pw.print("terminal ");
+                TimeUtils.formatDuration(terminalTime[i] - scheduledTime[i], pw);
+                pw.print(' ');
+            }
+            pw.print("#"); pw.print(i); pw.print(": ");
             if (o instanceof BroadcastFilter) {
                 pw.println(o);
                 ((BroadcastFilter) o).dumpBrief(pw, p2);
@@ -267,15 +364,18 @@ final class BroadcastRecord extends Binder {
             boolean _callerInstantApp, String _resolvedType,
             String[] _requiredPermissions, String[] _excludedPermissions,
             String[] _excludedPackages, int _appOp,
-            BroadcastOptions _options, List _receivers, IIntentReceiver _resultTo, int _resultCode,
+            BroadcastOptions _options, List _receivers,
+            ProcessRecord _resultToApp, IIntentReceiver _resultTo, int _resultCode,
             String _resultData, Bundle _resultExtras, boolean _serialized, boolean _sticky,
-            boolean _initialSticky, int _userId, boolean allowBackgroundActivityStarts,
-            @Nullable IBinder backgroundActivityStartsToken, boolean timeoutExempt) {
+            boolean _initialSticky, int _userId,
+            @NonNull BackgroundStartPrivileges backgroundStartPrivileges,
+            boolean timeoutExempt,
+            @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver) {
         if (_intent == null) {
             throw new NullPointerException("Can't construct with a null intent");
         }
         queue = _queue;
-        intent = _intent;
+        intent = Objects.requireNonNull(_intent);
         targetComp = _intent.getComponent();
         callerApp = _callerApp;
         callerPackage = _callerPackage;
@@ -283,15 +383,23 @@ final class BroadcastRecord extends Binder {
         callingPid = _callingPid;
         callingUid = _callingUid;
         callerInstantApp = _callerInstantApp;
+        callerInstrumented = isCallerInstrumented(_callerApp, _callingUid);
         resolvedType = _resolvedType;
         requiredPermissions = _requiredPermissions;
         excludedPermissions = _excludedPermissions;
         excludedPackages = _excludedPackages;
         appOp = _appOp;
         options = _options;
-        receivers = _receivers;
+        receivers = (_receivers != null) ? _receivers : EMPTY_RECEIVERS;
         delivery = new int[_receivers != null ? _receivers.size() : 0];
-        duration = new long[delivery.length];
+        deferUntilActive = options != null ? options.isDeferUntilActive() : false;
+        deferredUntilActive = new boolean[deferUntilActive ? delivery.length : 0];
+        blockedUntilTerminalCount = calculateBlockedUntilTerminalCount(receivers, _serialized);
+        scheduledTime = new long[delivery.length];
+        terminalTime = new long[delivery.length];
+        transmitGroup = new int[delivery.length];
+        transmitOrder = new int[delivery.length];
+        resultToApp = _resultToApp;
         resultTo = _resultTo;
         resultCode = _resultCode;
         resultData = _resultData;
@@ -299,12 +407,17 @@ final class BroadcastRecord extends Binder {
         ordered = _serialized;
         sticky = _sticky;
         initialSticky = _initialSticky;
+        prioritized = isPrioritized(blockedUntilTerminalCount, _serialized);
         userId = _userId;
         nextReceiver = 0;
         state = IDLE;
-        this.allowBackgroundActivityStarts = allowBackgroundActivityStarts;
-        mBackgroundActivityStartsToken = backgroundActivityStartsToken;
+        mBackgroundStartPrivileges = backgroundStartPrivileges;
         this.timeoutExempt = timeoutExempt;
+        alarm = options != null && options.isAlarmBroadcast();
+        pushMessage = options != null && options.isPushMessagingBroadcast();
+        pushMessageOverQuota = options != null && options.isPushMessagingOverQuotaBroadcast();
+        interactive = options != null && options.isInteractive();
+        this.filterExtrasForReceiver = filterExtrasForReceiver;
     }
 
     /**
@@ -312,7 +425,7 @@ final class BroadcastRecord extends Binder {
      * Only used by {@link #maybeStripForHistory}.
      */
     private BroadcastRecord(BroadcastRecord from, Intent newIntent) {
-        intent = newIntent;
+        intent = Objects.requireNonNull(newIntent);
         targetComp = newIntent.getComponent();
 
         callerApp = from.callerApp;
@@ -321,9 +434,11 @@ final class BroadcastRecord extends Binder {
         callingPid = from.callingPid;
         callingUid = from.callingUid;
         callerInstantApp = from.callerInstantApp;
+        callerInstrumented = from.callerInstrumented;
         ordered = from.ordered;
         sticky = from.sticky;
         initialSticky = from.initialSticky;
+        prioritized = from.prioritized;
         userId = from.userId;
         resolvedType = from.resolvedType;
         requiredPermissions = from.requiredPermissions;
@@ -333,7 +448,14 @@ final class BroadcastRecord extends Binder {
         options = from.options;
         receivers = from.receivers;
         delivery = from.delivery;
-        duration = from.duration;
+        deferUntilActive = from.deferUntilActive;
+        deferredUntilActive = from.deferredUntilActive;
+        blockedUntilTerminalCount = from.blockedUntilTerminalCount;
+        scheduledTime = from.scheduledTime;
+        terminalTime = from.terminalTime;
+        transmitGroup = from.transmitGroup;
+        transmitOrder = from.transmitOrder;
+        resultToApp = from.resultToApp;
         resultTo = from.resultTo;
         enqueueTime = from.enqueueTime;
         enqueueRealTime = from.enqueueRealTime;
@@ -348,15 +470,18 @@ final class BroadcastRecord extends Binder {
         resultExtras = from.resultExtras;
         resultAbort = from.resultAbort;
         nextReceiver = from.nextReceiver;
-        receiver = from.receiver;
         state = from.state;
         anrCount = from.anrCount;
         manifestCount = from.manifestCount;
         manifestSkipCount = from.manifestSkipCount;
         queue = from.queue;
-        allowBackgroundActivityStarts = from.allowBackgroundActivityStarts;
-        mBackgroundActivityStartsToken = from.mBackgroundActivityStartsToken;
+        mBackgroundStartPrivileges = from.mBackgroundStartPrivileges;
         timeoutExempt = from.timeoutExempt;
+        alarm = from.alarm;
+        pushMessage = from.pushMessage;
+        pushMessageOverQuota = from.pushMessageOverQuota;
+        interactive = from.interactive;
+        filterExtrasForReceiver = from.filterExtrasForReceiver;
     }
 
     /**
@@ -390,9 +515,9 @@ final class BroadcastRecord extends Binder {
         BroadcastRecord split = new BroadcastRecord(queue, intent, callerApp, callerPackage,
                 callerFeatureId, callingPid, callingUid, callerInstantApp, resolvedType,
                 requiredPermissions, excludedPermissions, excludedPackages, appOp, options,
-                splitReceivers, resultTo, resultCode, resultData, resultExtras, ordered, sticky,
-                initialSticky, userId, allowBackgroundActivityStarts,
-                mBackgroundActivityStartsToken, timeoutExempt);
+                splitReceivers, resultToApp, resultTo, resultCode, resultData, resultExtras,
+                ordered, sticky, initialSticky, userId,
+                mBackgroundStartPrivileges, timeoutExempt, filterExtrasForReceiver);
         split.enqueueTime = this.enqueueTime;
         split.enqueueRealTime = this.enqueueRealTime;
         split.enqueueClockTime = this.enqueueClockTime;
@@ -469,9 +594,10 @@ final class BroadcastRecord extends Binder {
             final BroadcastRecord br = new BroadcastRecord(queue, intent, callerApp, callerPackage,
                     callerFeatureId, callingPid, callingUid, callerInstantApp, resolvedType,
                     requiredPermissions, excludedPermissions, excludedPackages, appOp, options,
-                    uid2receiverList.valueAt(i), null /* _resultTo */,
+                    uid2receiverList.valueAt(i), null /* _resultToApp */, null /* _resultTo */,
                     resultCode, resultData, resultExtras, ordered, sticky, initialSticky, userId,
-                    allowBackgroundActivityStarts, mBackgroundActivityStartsToken, timeoutExempt);
+                    mBackgroundStartPrivileges, timeoutExempt,
+                    filterExtrasForReceiver);
             br.enqueueTime = this.enqueueTime;
             br.enqueueRealTime = this.enqueueRealTime;
             br.enqueueClockTime = this.enqueueClockTime;
@@ -480,11 +606,225 @@ final class BroadcastRecord extends Binder {
         return ret;
     }
 
-    int getReceiverUid(Object receiver) {
+    /**
+     * Update the delivery state of the given {@link #receivers} index.
+     * Automatically updates any time measurements related to state changes.
+     */
+    void setDeliveryState(int index, @DeliveryState int deliveryState) {
+        delivery[index] = deliveryState;
+        if (deferUntilActive) deferredUntilActive[index] = false;
+        switch (deliveryState) {
+            case DELIVERY_DELIVERED:
+            case DELIVERY_SKIPPED:
+            case DELIVERY_TIMEOUT:
+            case DELIVERY_FAILURE:
+                terminalTime[index] = SystemClock.uptimeMillis();
+                break;
+            case DELIVERY_SCHEDULED:
+                scheduledTime[index] = SystemClock.uptimeMillis();
+                break;
+            case DELIVERY_DEFERRED:
+                if (deferUntilActive) deferredUntilActive[index] = true;
+                break;
+        }
+    }
+
+    @DeliveryState int getDeliveryState(int index) {
+        return delivery[index];
+    }
+
+    void copyEnqueueTimeFrom(@NonNull BroadcastRecord replacedBroadcast) {
+        originalEnqueueClockTime = enqueueClockTime;
+        enqueueTime = replacedBroadcast.enqueueTime;
+        enqueueRealTime = replacedBroadcast.enqueueRealTime;
+        enqueueClockTime = replacedBroadcast.enqueueClockTime;
+    }
+
+    boolean isForeground() {
+        return (intent.getFlags() & Intent.FLAG_RECEIVER_FOREGROUND) != 0;
+    }
+
+    boolean isReplacePending() {
+        return (intent.getFlags() & Intent.FLAG_RECEIVER_REPLACE_PENDING) != 0;
+    }
+
+    boolean isNoAbort() {
+        return (intent.getFlags() & Intent.FLAG_RECEIVER_NO_ABORT) != 0;
+    }
+
+    boolean isOffload() {
+        return (intent.getFlags() & Intent.FLAG_RECEIVER_OFFLOAD) != 0;
+    }
+
+    boolean isDeferUntilActive() {
+        return deferUntilActive;
+    }
+
+    /**
+     * Core policy determination about this broadcast's delivery prioritization
+     */
+    boolean isUrgent() {
+        // TODO: flags for controlling policy
+        // TODO: migrate alarm-prioritization flag to BroadcastConstants
+        return (isForeground()
+                || interactive
+                || alarm);
+    }
+
+    @NonNull String getHostingRecordTriggerType() {
+        if (alarm) {
+            return HostingRecord.TRIGGER_TYPE_ALARM;
+        } else if (pushMessage) {
+            return HostingRecord.TRIGGER_TYPE_PUSH_MESSAGE;
+        } else if (pushMessageOverQuota) {
+            return HostingRecord.TRIGGER_TYPE_PUSH_MESSAGE_OVER_QUOTA;
+        }
+        return HostingRecord.TRIGGER_TYPE_UNKNOWN;
+    }
+
+    /**
+     * Return an instance of {@link #intent} specialized for the given receiver.
+     * For example, this returns a new specialized instance if the extras need
+     * to be filtered, or a {@link ResolveInfo} needs to be configured.
+     *
+     * @return a specialized intent, otherwise {@code null} to indicate that the
+     *         broadcast should not be delivered to this receiver, typically due
+     *         to it being filtered away by {@link #filterExtrasForReceiver}.
+     */
+    @Nullable Intent getReceiverIntent(@NonNull Object receiver) {
+        Intent newIntent = null;
+        if (filterExtrasForReceiver != null) {
+            final Bundle extras = intent.getExtras();
+            if (extras != null) {
+                final int receiverUid = getReceiverUid(receiver);
+                final Bundle filteredExtras = filterExtrasForReceiver.apply(receiverUid, extras);
+                if (filteredExtras == null) {
+                    // Completely filtered; skip the broadcast!
+                    return null;
+                } else {
+                    newIntent = new Intent(intent);
+                    newIntent.replaceExtras(filteredExtras);
+                }
+            }
+        }
+        if (receiver instanceof ResolveInfo) {
+            if (newIntent == null) {
+                newIntent = new Intent(intent);
+            }
+            newIntent.setComponent(((ResolveInfo) receiver).activityInfo.getComponentName());
+        }
+        return (newIntent != null) ? newIntent : intent;
+    }
+
+    static boolean isCallerInstrumented(@Nullable ProcessRecord callerApp, int callingUid) {
+        switch (UserHandle.getAppId(callingUid)) {
+            case android.os.Process.ROOT_UID:
+            case android.os.Process.SHELL_UID:
+                // Broadcasts sent via "shell" are typically invoked by test
+                // suites, so we treat them as if the caller was instrumented
+                return true;
+        }
+        return (callerApp != null) ? (callerApp.getActiveInstrumentation() != null) : false;
+    }
+
+    /**
+     * Determine if the result of {@link #calculateBlockedUntilTerminalCount}
+     * has prioritized tranches of receivers.
+     */
+    @VisibleForTesting
+    static boolean isPrioritized(@NonNull int[] blockedUntilTerminalCount,
+            boolean ordered) {
+        return !ordered && (blockedUntilTerminalCount.length > 0)
+                && (blockedUntilTerminalCount[0] != -1);
+    }
+
+    /**
+     * Calculate the {@link #terminalCount} that each receiver should be
+     * considered blocked until.
+     * <p>
+     * For example, in an ordered broadcast, receiver {@code N} is blocked until
+     * receiver {@code N-1} reaches a terminal state. Similarly, in a
+     * prioritized broadcast, receiver {@code N} is blocked until all receivers
+     * of a higher priority reach a terminal state.
+     * <p>
+     * When there are no terminal count constraints, the blocked value for each
+     * receiver is {@code -1}.
+     */
+    @VisibleForTesting
+    static @NonNull int[] calculateBlockedUntilTerminalCount(
+            @NonNull List<Object> receivers, boolean ordered) {
+        final int N = receivers.size();
+        final int[] blockedUntilTerminalCount = new int[N];
+        int lastPriority = 0;
+        int lastPriorityIndex = 0;
+        for (int i = 0; i < N; i++) {
+            if (ordered) {
+                // When sending an ordered broadcast, we need to block this
+                // receiver until all previous receivers have terminated
+                blockedUntilTerminalCount[i] = i;
+            } else {
+                // When sending a prioritized broadcast, we only need to wait
+                // for the previous tranche of receivers to be terminated
+                final int thisPriority = getReceiverPriority(receivers.get(i));
+                if ((i == 0) || (thisPriority != lastPriority)) {
+                    lastPriority = thisPriority;
+                    lastPriorityIndex = i;
+                    blockedUntilTerminalCount[i] = i;
+                } else {
+                    blockedUntilTerminalCount[i] = lastPriorityIndex;
+                }
+            }
+        }
+        // If the entire list is in the same priority tranche, mark as -1 to
+        // indicate that none of them need to wait
+        if (N > 0 && blockedUntilTerminalCount[N - 1] == 0) {
+            Arrays.fill(blockedUntilTerminalCount, -1);
+        }
+        return blockedUntilTerminalCount;
+    }
+
+    static int getReceiverUid(@NonNull Object receiver) {
         if (receiver instanceof BroadcastFilter) {
             return ((BroadcastFilter) receiver).owningUid;
         } else /* if (receiver instanceof ResolveInfo) */ {
             return ((ResolveInfo) receiver).activityInfo.applicationInfo.uid;
+        }
+    }
+
+    static @NonNull String getReceiverProcessName(@NonNull Object receiver) {
+        if (receiver instanceof BroadcastFilter) {
+            return ((BroadcastFilter) receiver).receiverList.app.processName;
+        } else /* if (receiver instanceof ResolveInfo) */ {
+            return ((ResolveInfo) receiver).activityInfo.processName;
+        }
+    }
+
+    static @NonNull String getReceiverPackageName(@NonNull Object receiver) {
+        if (receiver instanceof BroadcastFilter) {
+            return ((BroadcastFilter) receiver).receiverList.app.info.packageName;
+        } else /* if (receiver instanceof ResolveInfo) */ {
+            return ((ResolveInfo) receiver).activityInfo.packageName;
+        }
+    }
+
+    static int getReceiverPriority(@NonNull Object receiver) {
+        if (receiver instanceof BroadcastFilter) {
+            return ((BroadcastFilter) receiver).getPriority();
+        } else /* if (receiver instanceof ResolveInfo) */ {
+            return ((ResolveInfo) receiver).priority;
+        }
+    }
+
+    static boolean isReceiverEquals(@NonNull Object a, @NonNull Object b) {
+        if (a == b) {
+            return true;
+        } else if (a instanceof ResolveInfo && b instanceof ResolveInfo) {
+            final ResolveInfo infoA = (ResolveInfo) a;
+            final ResolveInfo infoB = (ResolveInfo) b;
+            return Objects.equals(infoA.activityInfo.packageName, infoB.activityInfo.packageName)
+                    && Objects.equals(infoA.activityInfo.name, infoB.activityInfo.name);
+        } else {
+            return false;
         }
     }
 
@@ -537,13 +877,101 @@ final class BroadcastRecord extends Binder {
         return didSomething;
     }
 
-    @Override
-    public String toString() {
-        return "BroadcastRecord{"
-            + Integer.toHexString(System.identityHashCode(this))
-            + " u" + userId + " " + intent.getAction() + "}";
+    /**
+     * Apply special treatment to manifest receivers hosted by a singleton
+     * process, by re-targeting them at {@link UserHandle#USER_SYSTEM}.
+     */
+    void applySingletonPolicy(@NonNull ActivityManagerService service) {
+        if (receivers == null) return;
+        for (int i = 0; i < receivers.size(); i++) {
+            final Object receiver = receivers.get(i);
+            if (receiver instanceof ResolveInfo) {
+                final ResolveInfo info = (ResolveInfo) receiver;
+                boolean isSingleton = false;
+                try {
+                    isSingleton = service.isSingleton(info.activityInfo.processName,
+                            info.activityInfo.applicationInfo,
+                            info.activityInfo.name, info.activityInfo.flags);
+                } catch (SecurityException e) {
+                    BroadcastQueue.logw(e.getMessage());
+                }
+                final int receiverUid = info.activityInfo.applicationInfo.uid;
+                if (callingUid != android.os.Process.SYSTEM_UID && isSingleton
+                        && service.isValidSingletonCall(callingUid, receiverUid)) {
+                    info.activityInfo = service.getActivityInfoForUser(info.activityInfo,
+                            UserHandle.USER_SYSTEM);
+                }
+            }
+        }
     }
 
+    boolean matchesDeliveryGroup(@NonNull BroadcastRecord other) {
+        return matchesDeliveryGroup(this, other);
+    }
+
+    private static boolean matchesDeliveryGroup(@NonNull BroadcastRecord newRecord,
+            @NonNull BroadcastRecord oldRecord) {
+        final String newMatchingKey = getDeliveryGroupMatchingKey(newRecord);
+        final String oldMatchingKey = getDeliveryGroupMatchingKey(oldRecord);
+        final IntentFilter newMatchingFilter = getDeliveryGroupMatchingFilter(newRecord);
+        // If neither delivery group key nor matching filter is specified, then use
+        // Intent.filterEquals() to identify the delivery group.
+        if (newMatchingKey == null && oldMatchingKey == null && newMatchingFilter == null) {
+            return newRecord.intent.filterEquals(oldRecord.intent);
+        }
+        if (newMatchingFilter != null && !newMatchingFilter.asPredicate().test(oldRecord.intent)) {
+            return false;
+        }
+        return Objects.equals(newMatchingKey, oldMatchingKey);
+    }
+
+    @Nullable
+    private static String getDeliveryGroupMatchingKey(@NonNull BroadcastRecord record) {
+        return record.options == null ? null : record.options.getDeliveryGroupMatchingKey();
+    }
+
+    @Nullable
+    private static IntentFilter getDeliveryGroupMatchingFilter(@NonNull BroadcastRecord record) {
+        return record.options == null ? null : record.options.getDeliveryGroupMatchingFilter();
+    }
+
+    /**
+     * Returns {@code true} if all the receivers are still waiting to receive the broadcast.
+     * Otherwise {@code false}.
+     */
+    boolean allReceiversPending() {
+        // We could also count the number of receivers with deliver state DELIVERY_PENDING, but
+        // checking how many receivers have finished (either skipped or cancelled) and whether or
+        // not the dispatch has been started should be sufficient.
+        return (terminalCount == 0 && dispatchTime <= 0);
+    }
+
+    @Override
+    public String toString() {
+        if (mCachedToString == null) {
+            String label = intent.getAction();
+            if (label == null) {
+                label = intent.toString();
+            }
+            mCachedToString = "BroadcastRecord{"
+                + Integer.toHexString(System.identityHashCode(this))
+                + " u" + userId + " " + label + "}";
+        }
+        return mCachedToString;
+    }
+
+    public String toShortString() {
+        if (mCachedToShortString == null) {
+            String label = intent.getAction();
+            if (label == null) {
+                label = intent.toString();
+            }
+            mCachedToShortString = label + "/u" + userId;
+        }
+        return mCachedToShortString;
+    }
+
+    @NeverCompile
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(BroadcastRecordProto.USER_ID, userId);

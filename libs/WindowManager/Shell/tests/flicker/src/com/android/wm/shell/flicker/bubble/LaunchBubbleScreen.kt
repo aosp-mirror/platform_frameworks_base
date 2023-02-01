@@ -17,11 +17,12 @@
 package com.android.wm.shell.flicker.bubble
 
 import android.platform.test.annotations.Presubmit
-import android.platform.test.annotations.RequiresDevice
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.annotation.Group4
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import androidx.test.filters.RequiresDevice
+import androidx.test.uiautomator.By
+import androidx.test.uiautomator.Until
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -32,28 +33,34 @@ import org.junit.runners.Parameterized
  * To run this test: `atest WMShellFlickerTests:LaunchBubbleScreen`
  *
  * Actions:
+ * ```
  *     Launch an app and enable app's bubble notification
  *     Send a bubble notification
+ * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-@Group4
-open class LaunchBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(testSpec) {
+open class LaunchBubbleScreen(flicker: FlickerTest) : BaseBubbleScreen(flicker) {
 
+    /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition {
             transitions {
                 val addBubbleBtn = waitAndGetAddBubbleBtn()
                 addBubbleBtn?.click() ?: error("Bubble widget not found")
+
+                device.wait(
+                    Until.findObjects(By.res(SYSTEM_UI_PACKAGE, BUBBLE_RES_NAME)),
+                    FIND_OBJECT_TIMEOUT
+                )
+                    ?: error("No bubbles found")
             }
         }
 
     @Presubmit
     @Test
     open fun testAppIsAlwaysVisible() {
-        testSpec.assertLayers {
-            this.isVisible(testApp.component)
-        }
+        flicker.assertLayers { this.isVisible(testApp) }
     }
 }

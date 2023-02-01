@@ -26,6 +26,8 @@
     <string name="install_done" msgid="5987363587661783896">"ایپ انسٹال ہو گئی۔"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"کیا آپ یہ ایپ انسٹال کرنا چاہتے ہیں؟"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"کیا آپ یہ ایپ اپ ڈیٹ کرنا چاہتے ہیں؟"</string>
+    <string name="install_confirm_question_update_owner_changed" msgid="4215696609006069124">"اس ایپس میں اپ ڈیٹس <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g> کے زیر انتظام ہیں۔\n\nاپ ڈیٹ کر کے، آپ اس کے بجائے <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g> سے مستقبل کی اپ ڈیٹس موصول کر سکتے ہیں۔"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="8778026710268011466">"اس ایپس میں اپ ڈیٹس <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g> کے زیر انتظام ہیں۔\n\nآپ یہ اپ ڈیٹ <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g> سے انسٹال کرنا چاہتے ہیں۔"</string>
     <string name="install_failed" msgid="5777824004474125469">"ایپ انسٹال نہیں ہوئی۔"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"پیکج کو انسٹال ہونے سے مسدود کر دیا گیا تھا۔"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ایپ انسٹال نہیں ہوئی کیونکہ پیکج ایک موجودہ پیکیج سے متصادم ہے۔"</string>
@@ -60,14 +62,19 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"اس ایپ کو فیکٹری ورژن سے تبدیل کریں؟ تمام ڈیٹا ہٹا دیا جائے گا۔"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"اس ایپ کو فیکٹری ورژن سے تبدیل کریں؟ تمام ڈیٹا ہٹا دیا جائے گا۔ اس سے دفتری پروفائلز کے حاملین سمیت اس آلہ کے تمام صارفین متاثر ہوں گے۔"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"ایپ ڈیٹا کا <xliff:g id="SIZE">%1$s</xliff:g> رکھیں۔"</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"کیا آپ یہ ایپ حذف کرنا چاہتے ہیں؟"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"کیا آپ یہ ایپ اَن انسٹال کرنا چاہتے ہیں؟ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> کلون کو بھی حذف کر دیا جائے گا۔"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"چل رہے اَن انسٹالز"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"ناکام اَن انسٹالز"</string>
     <string name="uninstalling" msgid="8709566347688966845">"اَن انسٹال ہو رہا ہے…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ان انسٹال ہو رہا ہے…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"اَن انسٹال مکمل ہو گیا۔"</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> اَن انسٹال ہو گیا"</string>
+    <!-- no translation found for uninstall_done_clone_app (5578308154544195413) -->
+    <skip />
     <string name="uninstall_failed" msgid="1847750968168364332">"اَن انسٹال ناکام ہو گیا۔"</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> کو ان انسٹال کرنا ناکام ہو گیا۔"</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> کلون کو حذف کیا جا رہا ہے…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"فعال آلہ کے منتظم کی ایپ کو اَن انسٹال نہیں کیا جا سکتا"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> کی فعال آلہ کے منتظم کی ایپ کو اَن انسٹال نہیں کیا جا سکتا"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"یہ ایپ کچھ صارفین یا پروفائلز کیلئے درکار ہے اور دیگر کیلئے اَن انسٹال کر دی گئی"</string>
@@ -83,10 +90,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"نامعلوم"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"آپ کی سیکیورٹی کی خاطر فی الحال آپ کے ٹیبلیٹ کو اس ماخذ سے نامعلوم ایپس انسٹال کرنے کی اجازت نہیں ہے۔ آپ ترتیبات میں اسے تبدیل کر سکتے ہیں۔"</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"‏آپ کی سیکیورٹی کی خاطر فی الحال آپ کے TV کو اس ماخذ سے نامعلوم ایپس انسٹال کرنے کی اجازت نہیں ہے۔ آپ ترتیبات میں اسے تبدیل کر سکتے ہیں۔"</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"آپ کی سیکیورٹی کی خاطر، فی الحال آپ کی گھڑی کو اس ماخذ سے نامعلوم ایپس کو انسٹال کرنے کی اجازت نہیں ہے۔ آپ ترتیبات میں اسے تبدیل کر سکتے ہیں۔"</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"آپ کی سیکیورٹی کی خاطر فی الحال آپ کے فون کو اس ماخذ سے نامعلوم ایپس انسٹال کرنے کی اجازت نہیں ہے۔ آپ ترتیبات میں اسے تبدیل کر سکتے ہیں۔"</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"آپ کے فون اور ذاتی ڈیٹا کو نامعلوم ایپس کی جانب سے حملے کا زیادہ خطرہ ہے۔ اس ایپ کو انسٹال کر کے، آپ اس بات سے اتفاق کرتے ہیں کہ آپ اس سے اپنے فون کو ہونے والے کسی بھی نقصان یا ڈیٹا کے نقصان کے لئے خود ذمہ دار ہیں۔"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"آپ کے ٹیبلیٹ اور ذاتی ڈیٹا کو نامعلوم ایپس کی جانب سے حملے کا زیادہ خطرہ ہے۔ اس ایپ کو انسٹال کر کے، آپ اس بات سے اتفاق کرتے ہیں کہ آپ اس سے اپنے ٹیبلیٹ کو ہونے والے کسی بھی نقصان یا ڈیٹا کے نقصان کے لئے خود ذمہ دار ہیں۔"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"‏آپ کے TV اور ذاتی ڈیٹا کو نامعلوم ایپس کی جانب سے حملے کا زیادہ خطرہ ہے۔ اس ایپ کو انسٹال کر کے، آپ اس بات سے اتفاق کرتے ہیں کہ آپ اس سے اپنے TV کو ہونے والے کسی بھی نقصان یا ڈیٹا کے نقصان کے لئے خود ذمہ دار ہیں۔"</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> کلون"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"جاری رکھیں"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"ترتیبات"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"‏wear ایپس کو انسٹال/اَن انسٹال کرنا"</string>

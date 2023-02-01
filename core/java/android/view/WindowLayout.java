@@ -16,8 +16,6 @@
 
 package android.view;
 
-import static android.view.Gravity.DISPLAY_CLIP_HORIZONTAL;
-import static android.view.Gravity.DISPLAY_CLIP_VERTICAL;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
@@ -42,6 +40,7 @@ import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Log;
+import android.view.WindowInsets.Type.InsetsType;
 import android.window.ClientWindowFrames;
 
 /**
@@ -65,15 +64,16 @@ public class WindowLayout {
 
     public void computeFrames(WindowManager.LayoutParams attrs, InsetsState state,
             Rect displayCutoutSafe, Rect windowBounds, @WindowingMode int windowingMode,
-            int requestedWidth, int requestedHeight, InsetsVisibilities requestedVisibilities,
-            Rect attachedWindowFrame, float compatScale, ClientWindowFrames outFrames) {
+            int requestedWidth, int requestedHeight, @InsetsType int requestedVisibleTypes,
+            float compatScale, ClientWindowFrames frames) {
         final int type = attrs.type;
         final int fl = attrs.flags;
         final int pfl = attrs.privateFlags;
         final boolean layoutInScreen = (fl & FLAG_LAYOUT_IN_SCREEN) == FLAG_LAYOUT_IN_SCREEN;
-        final Rect outDisplayFrame = outFrames.displayFrame;
-        final Rect outParentFrame = outFrames.parentFrame;
-        final Rect outFrame = outFrames.frame;
+        final Rect attachedWindowFrame = frames.attachedFrame;
+        final Rect outDisplayFrame = frames.displayFrame;
+        final Rect outParentFrame = frames.parentFrame;
+        final Rect outFrame = frames.frame;
 
         // Compute bounds restricted by insets
         final Insets insets = state.calculateInsets(windowBounds, attrs.getFitInsetsTypes(),
@@ -104,7 +104,7 @@ public class WindowLayout {
         final DisplayCutout cutout = state.getDisplayCutout();
         final Rect displayCutoutSafeExceptMaybeBars = mTempDisplayCutoutSafeExceptMaybeBarsRect;
         displayCutoutSafeExceptMaybeBars.set(displayCutoutSafe);
-        outFrames.isParentFrameClippedByDisplayCutout = false;
+        frames.isParentFrameClippedByDisplayCutout = false;
         if (cutoutMode != LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS && !cutout.isEmpty()) {
             // Ensure that windows with a non-ALWAYS display cutout mode are laid out in
             // the cutout safe zone.
@@ -119,11 +119,11 @@ public class WindowLayout {
             }
             if (cutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES) {
                 if (displayFrame.width() < displayFrame.height()) {
-                    displayCutoutSafeExceptMaybeBars.top = Integer.MIN_VALUE;
-                    displayCutoutSafeExceptMaybeBars.bottom = Integer.MAX_VALUE;
+                    displayCutoutSafeExceptMaybeBars.top = MIN_Y;
+                    displayCutoutSafeExceptMaybeBars.bottom = MAX_Y;
                 } else {
-                    displayCutoutSafeExceptMaybeBars.left = Integer.MIN_VALUE;
-                    displayCutoutSafeExceptMaybeBars.right = Integer.MAX_VALUE;
+                    displayCutoutSafeExceptMaybeBars.left = MIN_X;
+                    displayCutoutSafeExceptMaybeBars.right = MAX_X;
                 }
             }
             final boolean layoutInsetDecor = (attrs.flags & FLAG_LAYOUT_INSET_DECOR) != 0;
@@ -131,25 +131,25 @@ public class WindowLayout {
                     && (cutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
                     || cutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES)) {
                 final Insets systemBarsInsets = state.calculateInsets(
-                        displayFrame, WindowInsets.Type.systemBars(), requestedVisibilities);
+                        displayFrame, WindowInsets.Type.systemBars(), requestedVisibleTypes);
                 if (systemBarsInsets.left > 0) {
-                    displayCutoutSafeExceptMaybeBars.left = Integer.MIN_VALUE;
+                    displayCutoutSafeExceptMaybeBars.left = MIN_X;
                 }
                 if (systemBarsInsets.top > 0) {
-                    displayCutoutSafeExceptMaybeBars.top = Integer.MIN_VALUE;
+                    displayCutoutSafeExceptMaybeBars.top = MIN_Y;
                 }
                 if (systemBarsInsets.right > 0) {
-                    displayCutoutSafeExceptMaybeBars.right = Integer.MAX_VALUE;
+                    displayCutoutSafeExceptMaybeBars.right = MAX_X;
                 }
                 if (systemBarsInsets.bottom > 0) {
-                    displayCutoutSafeExceptMaybeBars.bottom = Integer.MAX_VALUE;
+                    displayCutoutSafeExceptMaybeBars.bottom = MAX_Y;
                 }
             }
             if (type == TYPE_INPUT_METHOD) {
                 final InsetsSource navSource = state.peekSource(ITYPE_NAVIGATION_BAR);
                 if (navSource != null && navSource.calculateInsets(displayFrame, true).bottom > 0) {
                     // The IME can always extend under the bottom cutout if the navbar is there.
-                    displayCutoutSafeExceptMaybeBars.bottom = Integer.MAX_VALUE;
+                    displayCutoutSafeExceptMaybeBars.bottom = MAX_Y;
                 }
             }
             final boolean attachedInParent = attachedWindowFrame != null && !layoutInScreen;
@@ -167,7 +167,7 @@ public class WindowLayout {
             if (!attachedInParent && !floatingInScreenWindow) {
                 mTempRect.set(outParentFrame);
                 outParentFrame.intersectUnchecked(displayCutoutSafeExceptMaybeBars);
-                outFrames.isParentFrameClippedByDisplayCutout = !mTempRect.equals(outParentFrame);
+                frames.isParentFrameClippedByDisplayCutout = !mTempRect.equals(outParentFrame);
             }
             outDisplayFrame.intersectUnchecked(displayCutoutSafeExceptMaybeBars);
         }
@@ -274,25 +274,14 @@ public class WindowLayout {
             Gravity.applyDisplay(attrs.gravity, outDisplayFrame, outFrame);
         }
 
-        if (extendedByCutout && !displayCutoutSafe.contains(outFrame)) {
-            mTempRect.set(outFrame);
-
-            // Move the frame into displayCutoutSafe.
-            final int clipFlags = DISPLAY_CLIP_VERTICAL | DISPLAY_CLIP_HORIZONTAL;
-            Gravity.applyDisplay(attrs.gravity & ~clipFlags, displayCutoutSafe,
+        if (extendedByCutout) {
+            extendFrameByCutout(displayCutoutSafe, outDisplayFrame, outFrame,
                     mTempRect);
-
-            if (mTempRect.intersect(outDisplayFrame)) {
-                outFrame.union(mTempRect);
-            }
         }
 
-        if (DEBUG) Log.d(TAG, "computeWindowFrames " + attrs.getTitle()
-                + " outFrames=" + outFrames
+        if (DEBUG) Log.d(TAG, "computeFrames " + attrs.getTitle()
+                + " frames=" + frames
                 + " windowBounds=" + windowBounds.toShortString()
-                + " attachedWindowFrame=" + (attachedWindowFrame != null
-                        ? attachedWindowFrame.toShortString()
-                        : "null")
                 + " requestedWidth=" + requestedWidth
                 + " requestedHeight=" + requestedHeight
                 + " compatScale=" + compatScale
@@ -300,7 +289,22 @@ public class WindowLayout {
                 + " displayCutoutSafe=" + displayCutoutSafe
                 + " attrs=" + attrs
                 + " state=" + state
-                + " requestedVisibilities=" + requestedVisibilities);
+                + " requestedInvisibleTypes=" + WindowInsets.Type.toString(~requestedVisibleTypes));
+    }
+
+    public static void extendFrameByCutout(Rect displayCutoutSafe,
+            Rect displayFrame, Rect inOutFrame, Rect tempRect) {
+        if (displayCutoutSafe.contains(inOutFrame)) {
+            return;
+        }
+        tempRect.set(inOutFrame);
+
+        // Move the frame into displayCutoutSafe.
+        Gravity.applyDisplay(0 /* gravity */, displayCutoutSafe, tempRect);
+
+        if (tempRect.intersect(displayFrame)) {
+            inOutFrame.union(tempRect);
+        }
     }
 
     public static void computeSurfaceSize(WindowManager.LayoutParams attrs, Rect maxBounds,

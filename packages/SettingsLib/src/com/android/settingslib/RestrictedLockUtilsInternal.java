@@ -17,6 +17,7 @@
 package com.android.settingslib;
 
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NONE;
+import static android.app.admin.DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY;
 import static android.app.admin.DevicePolicyManager.PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
 
 import android.annotation.NonNull;
@@ -26,7 +27,6 @@ import android.app.AppGlobals;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
@@ -36,7 +36,6 @@ import android.os.Build;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.Settings;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
@@ -733,23 +732,23 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
     }
 
     /**
-     * Show restricted setting dialog.
+     * Checks whether MTE (Advanced memory protection) controls are disabled by the enterprise
+     * policy.
      */
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    public static void sendShowRestrictedSettingDialogIntent(Context context,
-            String packageName, int uid) {
-        final Intent intent = getShowRestrictedSettingsIntent(packageName, uid);
-        context.startActivity(intent);
-    }
-
-    /**
-     * Get restricted settings dialog intent.
-     */
-    private static Intent getShowRestrictedSettingsIntent(String packageName, int uid) {
-        final Intent intent = new Intent(Settings.ACTION_SHOW_RESTRICTED_SETTING_DIALOG);
-        intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
-        intent.putExtra(Intent.EXTRA_UID, uid);
-        return intent;
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public static EnforcedAdmin checkIfMteIsDisabled(Context context) {
+        final DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
+        if (dpm.getMtePolicy() == MTE_NOT_CONTROLLED_BY_POLICY) {
+            return null;
+        }
+        EnforcedAdmin admin =
+                RestrictedLockUtils.getProfileOrDeviceOwner(
+                        context, UserHandle.of(UserHandle.USER_SYSTEM));
+        if (admin != null) {
+            return admin;
+        }
+        int profileId = getManagedProfileId(context, UserHandle.USER_SYSTEM);
+        return RestrictedLockUtils.getProfileOrDeviceOwner(context, UserHandle.of(profileId));
     }
 
     /**

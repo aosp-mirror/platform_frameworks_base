@@ -102,6 +102,7 @@ extern int register_android_view_KeyCharacterMap(JNIEnv* env);
 extern int register_android_view_KeyEvent(JNIEnv* env);
 extern int register_android_view_MotionEvent(JNIEnv* env);
 extern int register_android_view_ThreadedRenderer(JNIEnv* env);
+extern int register_android_graphics_HardwareBufferRenderer(JNIEnv* env);
 extern int register_android_view_VelocityTracker(JNIEnv* env);
 extern int register_com_android_internal_util_VirtualRefBasePtr(JNIEnv *env);
 

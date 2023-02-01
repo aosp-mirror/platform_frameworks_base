@@ -80,7 +80,7 @@ private:
                        VsyncEventData vsyncEventData) override;
     void dispatchHotplug(nsecs_t timestamp, PhysicalDisplayId displayId, bool connected) override;
     void dispatchModeChanged(nsecs_t timestamp, PhysicalDisplayId displayId, int32_t modeId,
-                             nsecs_t vsyncPeriod) override;
+                             nsecs_t renderPeriod) override;
     void dispatchFrameRateOverrides(nsecs_t timestamp, PhysicalDisplayId displayId,
                                     std::vector<FrameRateOverride> overrides) override;
     void dispatchNullEvent(nsecs_t timestamp, PhysicalDisplayId displayId) override {}
@@ -90,8 +90,9 @@ NativeDisplayEventReceiver::NativeDisplayEventReceiver(JNIEnv* env, jobject rece
                                                        const sp<MessageQueue>& messageQueue,
                                                        jint vsyncSource, jint eventRegistration)
       : DisplayEventDispatcher(messageQueue->getLooper(),
-                               static_cast<ISurfaceComposer::VsyncSource>(vsyncSource),
-                               static_cast<ISurfaceComposer::EventRegistration>(eventRegistration)),
+                               static_cast<gui::ISurfaceComposer::VsyncSource>(vsyncSource),
+                               static_cast<gui::ISurfaceComposer::EventRegistration>(
+                                       eventRegistration)),
         mReceiverWeakGlobal(env->NewGlobalRef(receiverWeak)),
         mMessageQueue(messageQueue) {
     ALOGV("receiver %p ~ Initializing display event receiver.", this);
@@ -138,7 +139,7 @@ void NativeDisplayEventReceiver::dispatchVsync(nsecs_t timestamp, PhysicalDispla
                                                uint32_t count, VsyncEventData vsyncEventData) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
 
-    ScopedLocalRef<jobject> receiverObj(env, jniGetReferent(env, mReceiverWeakGlobal));
+    ScopedLocalRef<jobject> receiverObj(env, GetReferent(env, mReceiverWeakGlobal));
     if (receiverObj.get()) {
         ALOGV("receiver %p ~ Invoking vsync handler.", this);
 
@@ -155,7 +156,7 @@ void NativeDisplayEventReceiver::dispatchHotplug(nsecs_t timestamp, PhysicalDisp
                                                  bool connected) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
 
-    ScopedLocalRef<jobject> receiverObj(env, jniGetReferent(env, mReceiverWeakGlobal));
+    ScopedLocalRef<jobject> receiverObj(env, GetReferent(env, mReceiverWeakGlobal));
     if (receiverObj.get()) {
         ALOGV("receiver %p ~ Invoking hotplug handler.", this);
         env->CallVoidMethod(receiverObj.get(), gDisplayEventReceiverClassInfo.dispatchHotplug,
@@ -167,14 +168,14 @@ void NativeDisplayEventReceiver::dispatchHotplug(nsecs_t timestamp, PhysicalDisp
 }
 
 void NativeDisplayEventReceiver::dispatchModeChanged(nsecs_t timestamp, PhysicalDisplayId displayId,
-                                                     int32_t modeId, nsecs_t) {
+                                                     int32_t modeId, nsecs_t renderPeriod) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
 
-    ScopedLocalRef<jobject> receiverObj(env, jniGetReferent(env, mReceiverWeakGlobal));
+    ScopedLocalRef<jobject> receiverObj(env, GetReferent(env, mReceiverWeakGlobal));
     if (receiverObj.get()) {
         ALOGV("receiver %p ~ Invoking mode changed handler.", this);
         env->CallVoidMethod(receiverObj.get(), gDisplayEventReceiverClassInfo.dispatchModeChanged,
-                            timestamp, displayId.value, modeId);
+                            timestamp, displayId.value, modeId, renderPeriod);
         ALOGV("receiver %p ~ Returned from mode changed handler.", this);
     }
 
@@ -185,7 +186,7 @@ void NativeDisplayEventReceiver::dispatchFrameRateOverrides(
         nsecs_t timestamp, PhysicalDisplayId displayId, std::vector<FrameRateOverride> overrides) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
 
-    ScopedLocalRef<jobject> receiverObj(env, jniGetReferent(env, mReceiverWeakGlobal));
+    ScopedLocalRef<jobject> receiverObj(env, GetReferent(env, mReceiverWeakGlobal));
     if (receiverObj.get()) {
         ALOGV("receiver %p ~ Invoking FrameRateOverride handler.", this);
         const auto frameRateOverrideClass =
@@ -289,7 +290,7 @@ int register_android_view_DisplayEventReceiver(JNIEnv* env) {
             gDisplayEventReceiverClassInfo.clazz, "dispatchHotplug", "(JJZ)V");
     gDisplayEventReceiverClassInfo.dispatchModeChanged =
             GetMethodIDOrDie(env, gDisplayEventReceiverClassInfo.clazz, "dispatchModeChanged",
-                             "(JJI)V");
+                             "(JJIJ)V");
     gDisplayEventReceiverClassInfo.dispatchFrameRateOverrides =
             GetMethodIDOrDie(env, gDisplayEventReceiverClassInfo.clazz,
                              "dispatchFrameRateOverrides",

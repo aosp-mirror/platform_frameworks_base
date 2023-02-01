@@ -26,6 +26,7 @@ import static android.window.DisplayAreaOrganizer.FEATURE_WINDOW_TOKENS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.util.Preconditions.checkState;
 import static com.android.server.wm.DisplayAreaProto.FEATURE_ID;
+import static com.android.server.wm.DisplayAreaProto.IS_IGNORING_ORIENTATION_REQUEST;
 import static com.android.server.wm.DisplayAreaProto.IS_ORGANIZED;
 import static com.android.server.wm.DisplayAreaProto.IS_ROOT_DISPLAY_AREA;
 import static com.android.server.wm.DisplayAreaProto.IS_TASK_DISPLAY_AREA;
@@ -34,6 +35,8 @@ import static com.android.server.wm.DisplayAreaProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowContainerChildProto.DISPLAY_AREA;
 
 import android.annotation.Nullable;
+import android.content.pm.ActivityInfo;
+import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
@@ -91,7 +94,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     DisplayArea(WindowManagerService wms, Type type, String name, int featureId) {
         super(wms);
         // TODO(display-area): move this up to ConfigurationContainer
-        mOrientation = SCREEN_ORIENTATION_UNSET;
+        setOverrideOrientation(SCREEN_ORIENTATION_UNSET);
         mType = type;
         mName = name;
         mFeatureId = featureId;
@@ -141,26 +144,31 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     }
 
     @Override
+    @ScreenOrientation
     int getOrientation(int candidate) {
-        mLastOrientationSource = null;
-        if (getIgnoreOrientationRequest()) {
+        final int orientation = super.getOrientation(candidate);
+        if (getIgnoreOrientationRequest(orientation)) {
+            // In all the other case, mLastOrientationSource will be reassigned to a new value
+            mLastOrientationSource = null;
             return SCREEN_ORIENTATION_UNSET;
         }
-
-        return super.getOrientation(candidate);
+        return orientation;
     }
 
     @Override
-    boolean handlesOrientationChangeFromDescendant() {
-        return !getIgnoreOrientationRequest()
-                && super.handlesOrientationChangeFromDescendant();
+    boolean handlesOrientationChangeFromDescendant(@ScreenOrientation int orientation) {
+        return !getIgnoreOrientationRequest(orientation)
+                && super.handlesOrientationChangeFromDescendant(orientation);
     }
 
     @Override
-    boolean onDescendantOrientationChanged(WindowContainer requestingContainer) {
+    boolean onDescendantOrientationChanged(@Nullable WindowContainer requestingContainer) {
         // If this is set to ignore the orientation request, we don't propagate descendant
         // orientation request.
-        return !getIgnoreOrientationRequest()
+        final int orientation = requestingContainer != null
+                ? requestingContainer.getOverrideOrientation()
+                : SCREEN_ORIENTATION_UNSET;
+        return !getIgnoreOrientationRequest(orientation)
                 && super.onDescendantOrientationChanged(requestingContainer);
     }
 
@@ -207,6 +215,40 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         return false;
     }
 
+    @Override
+    public void setAlwaysOnTop(boolean alwaysOnTop) {
+        if (isAlwaysOnTop() == alwaysOnTop) {
+            return;
+        }
+        super.setAlwaysOnTop(alwaysOnTop);
+        // positionChildAtTop() must be called even when always on top gets turned off because
+        // we need to make sure that the display area is moved from among always on top containers
+        // to below other always on top containers. Since the position the display area should be
+        // inserted into is calculated properly in {@link DisplayContent#getTopInsertPosition()}
+        // in both cases, we can just request that the root task is put at top here.
+        if (getParent().asDisplayArea() != null) {
+            getParent().asDisplayArea().positionChildAt(POSITION_TOP, this,
+                    false /* includingParents */);
+        }
+    }
+
+    /**
+     * @return {@value true} if we need to ignore the orientation in input.
+     */
+    // TODO(b/262366204): Rename getIgnoreOrientationRequest to shouldIgnoreOrientationRequest
+    boolean getIgnoreOrientationRequest(@ScreenOrientation int orientation) {
+        // We always respect orientation request for ActivityInfo.SCREEN_ORIENTATION_LOCKED
+        // ActivityInfo.SCREEN_ORIENTATION_NOSENSOR.
+        // Main use case why this is important is Camera apps that rely on those
+        // properties to ensure that they will be able to determine Camera preview
+        // orientation correctly
+        if (orientation == ActivityInfo.SCREEN_ORIENTATION_LOCKED
+                || orientation == ActivityInfo.SCREEN_ORIENTATION_NOSENSOR) {
+            return false;
+        }
+        return getIgnoreOrientationRequest();
+    }
+
     boolean getIgnoreOrientationRequest() {
         // Adding an exception for when ignoreOrientationRequest is overridden at runtime for all
         // DisplayArea-s. For example, this is needed for the Kids Mode since many Kids apps aren't
@@ -234,6 +276,18 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         // The min possible position we can insert the child at.
         int minPosition = findMinPositionForChildDisplayArea(child);
 
+        // Place all non-always-on-top containers below always-on-top ones.
+        int alwaysOnTopCount = 0;
+        for (int i = minPosition; i <= maxPosition; i++) {
+            if (mChildren.get(i).isAlwaysOnTop()) {
+                alwaysOnTopCount++;
+            }
+        }
+        if (child.isAlwaysOnTop()) {
+            minPosition = maxPosition - alwaysOnTopCount + 1;
+        } else {
+            maxPosition -= alwaysOnTopCount;
+        }
         return Math.max(Math.min(requestPosition, maxPosition), minPosition);
     }
 
@@ -291,6 +345,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         proto.write(IS_ROOT_DISPLAY_AREA, asRootDisplayArea() != null);
         proto.write(FEATURE_ID, mFeatureId);
         proto.write(IS_ORGANIZED, isOrganized());
+        proto.write(IS_IGNORING_ORIENTATION_REQUEST, getIgnoreOrientationRequest());
         proto.end(token);
     }
 
@@ -312,7 +367,11 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
             if (childArea == null) {
                 continue;
             }
-            pw.println(prefix + "* " + childArea.getName());
+            pw.print(prefix + "* " + childArea.getName());
+            if (childArea.isOrganized()) {
+                pw.print(" (organized)");
+            }
+            pw.println();
             if (childArea.isTaskDisplayArea()) {
                 // TaskDisplayArea can only contain task. And it is already printed by display.
                 continue;
@@ -335,6 +394,55 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     /** Cheap way of doing cast and instanceof. */
     DisplayArea.Tokens asTokens() {
         return null;
+    }
+
+    @Override
+    ActivityRecord getActivity(Predicate<ActivityRecord> callback, boolean traverseTopToBottom,
+            ActivityRecord boundary) {
+        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+            return null;
+        }
+        return super.getActivity(callback, traverseTopToBottom, boundary);
+    }
+
+    @Override
+    Task getTask(Predicate<Task> callback, boolean traverseTopToBottom) {
+        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+            return null;
+        }
+        return super.getTask(callback, traverseTopToBottom);
+    }
+
+    @Override
+    boolean forAllActivities(Predicate<ActivityRecord> callback, boolean traverseTopToBottom) {
+        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+            return false;
+        }
+        return super.forAllActivities(callback, traverseTopToBottom);
+    }
+
+    @Override
+    boolean forAllRootTasks(Predicate<Task> callback, boolean traverseTopToBottom) {
+        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+            return false;
+        }
+        return super.forAllRootTasks(callback, traverseTopToBottom);
+    }
+
+    @Override
+    boolean forAllTasks(Predicate<Task> callback) {
+        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+            return false;
+        }
+        return super.forAllTasks(callback);
+    }
+
+    @Override
+    boolean forAllLeafTasks(Predicate<Task> callback) {
+        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+            return false;
+        }
+        return super.forAllLeafTasks(callback);
     }
 
     @Override
@@ -475,6 +583,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
+        mTransitionController.collectForDisplayAreaChange(this);
         mTmpConfiguration.setTo(getConfiguration());
         super.onConfigurationChanged(newParentConfig);
 
@@ -606,11 +715,9 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         }
 
         @Override
+        @ScreenOrientation
         int getOrientation(int candidate) {
             mLastOrientationSource = null;
-            if (getIgnoreOrientationRequest()) {
-                return SCREEN_ORIENTATION_UNSET;
-            }
 
             // Find a window requesting orientation.
             final WindowState win = getWindow(mGetOrientingWindow);

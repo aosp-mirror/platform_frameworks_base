@@ -26,15 +26,13 @@ import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.face.IFaceServiceReceiver;
 import android.os.IBinder;
-import android.util.proto.ProtoOutputStream;
 import android.view.Surface;
 
+import com.android.server.biometrics.sensors.BiometricServiceProvider;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
-import com.android.server.biometrics.sensors.LockoutTracker;
 
 import java.io.FileDescriptor;
-import java.io.PrintWriter;
 import java.util.List;
 
 /**
@@ -56,23 +54,10 @@ import java.util.List;
  * to check (e.g. via {@link FaceManager#getSensorPropertiesInternal()}) that the code path isn't
  * taken. ServiceProviders will provide a no-op for unsupported operations to fail safely.
  */
-public interface ServiceProvider {
-    /**
-     * Checks if the specified sensor is owned by this provider.
-     */
-    boolean containsSensor(int sensorId);
-
-    @NonNull
-    List<FaceSensorPropertiesInternal> getSensorProperties();
-
-    @NonNull
-    FaceSensorPropertiesInternal getSensorProperties(int sensorId);
+public interface ServiceProvider extends BiometricServiceProvider<FaceSensorPropertiesInternal> {
 
     @NonNull
     List<Face> getEnrolledFaces(int sensorId, int userId);
-
-    @LockoutTracker.LockoutMode
-    int getLockoutModeForUser(int sensorId, int userId);
 
     /**
      * Requests for the authenticatorId (whose source of truth is in the TEE or equivalent) to be
@@ -83,10 +68,6 @@ public interface ServiceProvider {
         throw new IllegalStateException("Providers that support invalidation must override"
                 + " this method");
     }
-
-    long getAuthenticatorId(int sensorId, int userId);
-
-    boolean isHardwareDetected(int sensorId);
 
     void scheduleGenerateChallenge(int sensorId, int userId, @NonNull IBinder token,
             @NonNull IFaceServiceReceiver receiver, String opPackageName);
@@ -139,16 +120,18 @@ public interface ServiceProvider {
     void scheduleInternalCleanup(int sensorId, int userId,
             @Nullable ClientMonitorCallback callback);
 
-    void dumpProtoState(int sensorId, @NonNull ProtoOutputStream proto,
-            boolean clearSchedulerBuffer);
-
-    void dumpProtoMetrics(int sensorId, @NonNull FileDescriptor fd);
-
-    void dumpInternal(int sensorId, @NonNull PrintWriter pw);
+    void scheduleInternalCleanup(int sensorId, int userId,
+            @Nullable ClientMonitorCallback callback, boolean favorHalEnrollments);
 
     @NonNull
     ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
             @NonNull String opPackageName);
 
     void dumpHal(int sensorId, @NonNull FileDescriptor fd, @NonNull String[] args);
+
+    /**
+     * Schedules watchdog for canceling hung operations
+     * @param sensorId sensor ID of the associated operation
+     */
+    default void scheduleWatchdog(int sensorId) {}
 }

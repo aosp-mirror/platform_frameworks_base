@@ -200,8 +200,9 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     }
 
     private static boolean isHotwordDetectionServiceRequired(PackageManager pm) {
-        // Usage of the HotwordDetectionService won't be enforced until a later release.
-        return false;
+        // The HotwordDetectionService APIs aren't ready yet for Auto or TV.
+        return !(pm.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)
+                || pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK));
     }
 
     @Override
@@ -446,7 +447,8 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
         // package, so we don't need to modify it.
         if (Process.isIsolated(uid) // simple check which fails-fast for the common case
                 && (code == AppOpsManager.OP_RECORD_AUDIO
-                || code == AppOpsManager.OP_RECORD_AUDIO_HOTWORD)) {
+                || code == AppOpsManager.OP_RECORD_AUDIO_HOTWORD
+                || code == AppOpsManager.OP_CAMERA)) {
             final HotwordDetectionServiceIdentity hotwordDetectionServiceIdentity =
                     mVoiceInteractionManagerInternal.getHotwordDetectionServiceIdentity();
             if (hotwordDetectionServiceIdentity != null

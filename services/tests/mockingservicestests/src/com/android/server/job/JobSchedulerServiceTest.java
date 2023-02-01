@@ -30,10 +30,15 @@ import static com.android.server.job.JobSchedulerService.RARE_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
@@ -41,10 +46,12 @@ import android.app.ActivityManagerInternal;
 import android.app.IActivityManager;
 import android.app.UiModeManager;
 import android.app.job.JobInfo;
+import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.PermissionChecker;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.res.Resources;
@@ -62,7 +69,10 @@ import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
 import com.android.server.PowerAllowlistInternal;
 import com.android.server.SystemServiceManager;
+import com.android.server.job.controllers.ConnectivityController;
 import com.android.server.job.controllers.JobStatus;
+import com.android.server.job.controllers.QuotaController;
+import com.android.server.job.controllers.TareController;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.usage.AppStandbyInternal;
 
@@ -87,6 +97,8 @@ public class JobSchedulerServiceTest {
     private ActivityManagerInternal mActivityMangerInternal;
     @Mock
     private Context mContext;
+    @Mock
+    private PackageManagerInternal mPackageManagerInternal;
 
     private class TestJobSchedulerService extends JobSchedulerService {
         TestJobSchedulerService(Context context) {
@@ -101,6 +113,7 @@ public class JobSchedulerServiceTest {
                 .initMocks(this)
                 .strictness(Strictness.LENIENT)
                 .mockStatic(LocalServices.class)
+                .mockStatic(PermissionChecker.class)
                 .mockStatic(ServiceManager.class)
                 .startMocking();
 
@@ -112,6 +125,8 @@ public class JobSchedulerServiceTest {
                 .when(() -> LocalServices.getService(AppStandbyInternal.class));
         doReturn(mock(BatteryManagerInternal.class))
                 .when(() -> LocalServices.getService(BatteryManagerInternal.class));
+        doReturn(mPackageManagerInternal)
+                .when(() -> LocalServices.getService(PackageManagerInternal.class));
         doReturn(mock(UsageStatsManagerInternal.class))
                 .when(() -> LocalServices.getService(UsageStatsManagerInternal.class));
         when(mContext.getString(anyInt())).thenReturn("some_test_string");
@@ -129,9 +144,6 @@ public class JobSchedulerServiceTest {
         // Used in JobConcurrencyManager.
         doReturn(mock(UserManagerInternal.class))
                 .when(() -> LocalServices.getService(UserManagerInternal.class));
-        // Used in JobStatus.
-        doReturn(mock(PackageManagerInternal.class))
-                .when(() -> LocalServices.getService(PackageManagerInternal.class));
         // Called via IdleController constructor.
         when(mContext.getPackageManager()).thenReturn(mock(PackageManager.class));
         when(mContext.getResources()).thenReturn(mock(Resources.class));
@@ -188,8 +200,22 @@ public class JobSchedulerServiceTest {
 
     private JobStatus createJobStatus(String testTag, JobInfo.Builder jobInfoBuilder,
             int callingUid) {
+        return createJobStatus(testTag, jobInfoBuilder, callingUid, "com.android.test");
+    }
+
+    private JobStatus createJobStatus(String testTag, JobInfo.Builder jobInfoBuilder,
+            int callingUid, String sourcePkg) {
         return JobStatus.createFromJobInfo(
-                jobInfoBuilder.build(), callingUid, "com.android.test", 0, testTag);
+                jobInfoBuilder.build(), callingUid, sourcePkg, 0, "JSSTest", testTag);
+    }
+
+    private void grantRunLongJobsPermission(boolean grant) {
+        final int permissionStatus = grant
+                ? PermissionChecker.PERMISSION_GRANTED : PermissionChecker.PERMISSION_HARD_DENIED;
+        doReturn(permissionStatus)
+                .when(() -> PermissionChecker.checkPermissionForPreflight(
+                        any(), eq(android.Manifest.permission.RUN_LONG_JOBS),
+                        anyInt(), anyInt(), anyString()));
     }
 
     @Test
@@ -206,6 +232,15 @@ public class JobSchedulerServiceTest {
                 createJobInfo(5).setPriority(JobInfo.PRIORITY_HIGH));
         JobStatus jobDef = createJobStatus("testGetMinJobExecutionGuaranteeMs",
                 createJobInfo(6));
+        JobStatus jobDT = createJobStatus("testGetMinJobExecutionGuaranteeMs",
+                createJobInfo(7)
+                        .setDataTransfer(true).setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY));
+        JobStatus jobUI = createJobStatus("testGetMinJobExecutionGuaranteeMs",
+                createJobInfo(8)); // TODO(255371817): add setUserInitiated(true)
+        JobStatus jobUIDT = createJobStatus("testGetMinJobExecutionGuaranteeMs",
+                // TODO(255371817): add setUserInitiated(true)
+                createJobInfo(9)
+                        .setDataTransfer(true).setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY));
 
         spyOn(ejMax);
         spyOn(ejHigh);
@@ -213,6 +248,9 @@ public class JobSchedulerServiceTest {
         spyOn(ejHighDowngraded);
         spyOn(jobHigh);
         spyOn(jobDef);
+        spyOn(jobDT);
+        spyOn(jobUI);
+        spyOn(jobUIDT);
 
         when(ejMax.shouldTreatAsExpeditedJob()).thenReturn(true);
         when(ejHigh.shouldTreatAsExpeditedJob()).thenReturn(true);
@@ -220,6 +258,17 @@ public class JobSchedulerServiceTest {
         when(ejHighDowngraded.shouldTreatAsExpeditedJob()).thenReturn(false);
         when(jobHigh.shouldTreatAsExpeditedJob()).thenReturn(false);
         when(jobDef.shouldTreatAsExpeditedJob()).thenReturn(false);
+        when(jobUI.shouldTreatAsUserInitiatedJob()).thenReturn(true);
+        when(jobUIDT.shouldTreatAsUserInitiatedJob()).thenReturn(true);
+
+        ConnectivityController connectivityController = mService.getConnectivityController();
+        spyOn(connectivityController);
+        mService.mConstants.RUNTIME_MIN_GUARANTEE_MS = 10 * MINUTE_IN_MILLIS;
+        mService.mConstants.RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS = 15 * MINUTE_IN_MILLIS;
+        mService.mConstants.RUNTIME_DATA_TRANSFER_LIMIT_MS = 60 * MINUTE_IN_MILLIS;
+        mService.mConstants.RUNTIME_MIN_USER_INITIATED_DATA_TRANSFER_GUARANTEE_BUFFER_FACTOR = 1.5f;
+        mService.mConstants.RUNTIME_MIN_USER_INITIATED_DATA_TRANSFER_GUARANTEE_MS = HOUR_IN_MILLIS;
+        mService.mConstants.RUNTIME_USER_INITIATED_DATA_TRANSFER_LIMIT_MS = 6 * HOUR_IN_MILLIS;
 
         assertEquals(mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS,
                 mService.getMinJobExecutionGuaranteeMs(ejMax));
@@ -233,6 +282,191 @@ public class JobSchedulerServiceTest {
                 mService.getMinJobExecutionGuaranteeMs(jobHigh));
         assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
                 mService.getMinJobExecutionGuaranteeMs(jobDef));
+        grantRunLongJobsPermission(false); // Without permission
+        assertEquals(mService.mConstants.RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobDT));
+        grantRunLongJobsPermission(true); // With permission
+        doReturn(ConnectivityController.UNKNOWN_TIME)
+                .when(connectivityController).getEstimatedTransferTimeMs(any());
+        assertEquals(mService.mConstants.RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobDT));
+        doReturn(mService.mConstants.RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS / 2)
+                .when(connectivityController).getEstimatedTransferTimeMs(any());
+        assertEquals(mService.mConstants.RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobDT));
+        doReturn(mService.mConstants.RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS * 2)
+                .when(connectivityController).getEstimatedTransferTimeMs(any());
+        assertEquals(mService.mConstants.RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobDT));
+        doReturn(mService.mConstants.RUNTIME_DATA_TRANSFER_LIMIT_MS * 2)
+                .when(connectivityController).getEstimatedTransferTimeMs(any());
+        assertEquals(mService.mConstants.RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobDT));
+        // UserInitiated
+        grantRunLongJobsPermission(false);
+        // Permission isn't granted, so it should just be treated as a regular data transfer job.
+        assertEquals(mService.mConstants.RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUIDT));
+        // Permission isn't granted, so it should just be treated as a regular job.
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUI));
+        grantRunLongJobsPermission(true); // With permission
+        assertEquals(mService.mConstants.RUNTIME_MIN_USER_INITIATED_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUI));
+        doReturn(ConnectivityController.UNKNOWN_TIME)
+                .when(connectivityController).getEstimatedTransferTimeMs(any());
+        assertEquals(mService.mConstants.RUNTIME_MIN_USER_INITIATED_DATA_TRANSFER_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUIDT));
+        doReturn(mService.mConstants.RUNTIME_MIN_USER_INITIATED_DATA_TRANSFER_GUARANTEE_MS / 2)
+                .when(connectivityController).getEstimatedTransferTimeMs(any());
+        assertEquals(mService.mConstants.RUNTIME_MIN_USER_INITIATED_DATA_TRANSFER_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUIDT));
+        doReturn(mService.mConstants.RUNTIME_MIN_USER_INITIATED_DATA_TRANSFER_GUARANTEE_MS * 2)
+                .when(connectivityController).getEstimatedTransferTimeMs(any());
+        assertEquals(
+                (long) (mService.mConstants.RUNTIME_MIN_USER_INITIATED_DATA_TRANSFER_GUARANTEE_MS
+                        * 2 * mService.mConstants
+                                .RUNTIME_MIN_USER_INITIATED_DATA_TRANSFER_GUARANTEE_BUFFER_FACTOR),
+                mService.getMinJobExecutionGuaranteeMs(jobUIDT));
+        doReturn(mService.mConstants.RUNTIME_USER_INITIATED_DATA_TRANSFER_LIMIT_MS * 2)
+                .when(connectivityController).getEstimatedTransferTimeMs(any());
+        assertEquals(mService.mConstants.RUNTIME_USER_INITIATED_DATA_TRANSFER_LIMIT_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUIDT));
+    }
+
+    @Test
+    public void testGetMaxJobExecutionTimeMs() {
+        JobStatus jobDT = createJobStatus("testGetMaxJobExecutionTimeMs",
+                createJobInfo(7)
+                        .setDataTransfer(true).setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY));
+        JobStatus jobUI = createJobStatus("testGetMaxJobExecutionTimeMs",
+                createJobInfo(9)); // TODO(255371817): add setUserInitiated(true)
+        JobStatus jobUIDT = createJobStatus("testGetMaxJobExecutionTimeMs",
+                // TODO(255371817): add setUserInitiated(true)
+                createJobInfo(10)
+                        .setDataTransfer(true).setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY));
+
+        spyOn(jobDT);
+        spyOn(jobUI);
+        spyOn(jobUIDT);
+
+        when(jobUI.shouldTreatAsUserInitiatedJob()).thenReturn(true);
+        when(jobUIDT.shouldTreatAsUserInitiatedJob()).thenReturn(true);
+
+        QuotaController quotaController = mService.getQuotaController();
+        spyOn(quotaController);
+        TareController tareController = mService.getTareController();
+        spyOn(tareController);
+        doReturn(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS)
+                .when(quotaController).getMaxJobExecutionTimeMsLocked(any());
+        doReturn(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS)
+                .when(quotaController).getMaxJobExecutionTimeMsLocked(any());
+
+        grantRunLongJobsPermission(true);
+        assertEquals(mService.mConstants.RUNTIME_DATA_TRANSFER_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobDT));
+        assertEquals(mService.mConstants.RUNTIME_USER_INITIATED_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUI));
+        assertEquals(mService.mConstants.RUNTIME_USER_INITIATED_DATA_TRANSFER_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUIDT));
+        grantRunLongJobsPermission(false);
+        assertEquals(mService.mConstants.RUNTIME_DATA_TRANSFER_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobDT));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUI));
+        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                mService.getMaxJobExecutionTimeMs(jobUIDT));
+    }
+
+    /**
+     * Confirm that
+     * {@link JobSchedulerService#getRescheduleJobForFailureLocked(JobStatus, int, int)}
+     * returns a job with the correct delay and deadline constraints.
+     */
+    @Test
+    public void testGetRescheduleJobForFailure_timingCalculations() {
+        final long nowElapsed = sElapsedRealtimeClock.millis();
+        final long initialBackoffMs = MINUTE_IN_MILLIS;
+        mService.mConstants.SYSTEM_STOP_TO_FAILURE_RATIO = 3;
+
+        JobStatus originalJob = createJobStatus("testGetRescheduleJobForFailure",
+                createJobInfo()
+                        .setBackoffCriteria(initialBackoffMs, JobInfo.BACKOFF_POLICY_LINEAR));
+        assertEquals(JobStatus.NO_EARLIEST_RUNTIME, originalJob.getEarliestRunTime());
+        assertEquals(JobStatus.NO_LATEST_RUNTIME, originalJob.getLatestRunTimeElapsed());
+
+        // failure = 0, systemStop = 1
+        JobStatus rescheduledJob = mService.getRescheduleJobForFailureLocked(originalJob,
+                JobParameters.STOP_REASON_DEVICE_STATE,
+                JobParameters.INTERNAL_STOP_REASON_DEVICE_THERMAL);
+        assertEquals(nowElapsed + initialBackoffMs, rescheduledJob.getEarliestRunTime());
+        assertEquals(JobStatus.NO_LATEST_RUNTIME, rescheduledJob.getLatestRunTimeElapsed());
+
+        // failure = 0, systemStop = 2
+        rescheduledJob = mService.getRescheduleJobForFailureLocked(rescheduledJob,
+                JobParameters.STOP_REASON_DEVICE_STATE,
+                JobParameters.INTERNAL_STOP_REASON_PREEMPT);
+        // failure = 0, systemStop = 3
+        rescheduledJob = mService.getRescheduleJobForFailureLocked(rescheduledJob,
+                JobParameters.STOP_REASON_CONSTRAINT_CHARGING,
+                JobParameters.INTERNAL_STOP_REASON_CONSTRAINTS_NOT_SATISFIED);
+        assertEquals(nowElapsed + initialBackoffMs, rescheduledJob.getEarliestRunTime());
+        assertEquals(JobStatus.NO_LATEST_RUNTIME, rescheduledJob.getLatestRunTimeElapsed());
+
+        // failure = 0, systemStop = 2 * SYSTEM_STOP_TO_FAILURE_RATIO
+        for (int i = 0; i < mService.mConstants.SYSTEM_STOP_TO_FAILURE_RATIO; ++i) {
+            rescheduledJob = mService.getRescheduleJobForFailureLocked(rescheduledJob,
+                    JobParameters.STOP_REASON_SYSTEM_PROCESSING,
+                    JobParameters.INTERNAL_STOP_REASON_RTC_UPDATED);
+        }
+        assertEquals(nowElapsed + 2 * initialBackoffMs, rescheduledJob.getEarliestRunTime());
+        assertEquals(JobStatus.NO_LATEST_RUNTIME, rescheduledJob.getLatestRunTimeElapsed());
+
+        // failure = 1, systemStop = 2 * SYSTEM_STOP_TO_FAILURE_RATIO
+        rescheduledJob = mService.getRescheduleJobForFailureLocked(rescheduledJob,
+                JobParameters.STOP_REASON_TIMEOUT,
+                JobParameters.INTERNAL_STOP_REASON_TIMEOUT);
+        assertEquals(nowElapsed + 3 * initialBackoffMs, rescheduledJob.getEarliestRunTime());
+        assertEquals(JobStatus.NO_LATEST_RUNTIME, rescheduledJob.getLatestRunTimeElapsed());
+
+        // failure = 2, systemStop = 2 * SYSTEM_STOP_TO_FAILURE_RATIO
+        rescheduledJob = mService.getRescheduleJobForFailureLocked(rescheduledJob,
+                JobParameters.STOP_REASON_UNDEFINED,
+                JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH);
+        assertEquals(nowElapsed + 4 * initialBackoffMs, rescheduledJob.getEarliestRunTime());
+        assertEquals(JobStatus.NO_LATEST_RUNTIME, rescheduledJob.getLatestRunTimeElapsed());
+    }
+
+    /**
+     * Confirm that
+     * {@link JobSchedulerService#getRescheduleJobForFailureLocked(JobStatus, int, int)}
+     * returns a job that is correctly marked as demoted by the user.
+     */
+    @Test
+    public void testGetRescheduleJobForFailure_userDemotion() {
+        JobStatus originalJob = createJobStatus("testGetRescheduleJobForFailure", createJobInfo());
+        assertEquals(0, originalJob.getInternalFlags() & JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER);
+
+        // Reschedule for a non-user reason
+        JobStatus rescheduledJob = mService.getRescheduleJobForFailureLocked(originalJob,
+                JobParameters.STOP_REASON_DEVICE_STATE,
+                JobParameters.INTERNAL_STOP_REASON_DEVICE_THERMAL);
+        assertEquals(0,
+                rescheduledJob.getInternalFlags() & JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER);
+
+        // Reschedule for a user reason
+        rescheduledJob = mService.getRescheduleJobForFailureLocked(rescheduledJob,
+                JobParameters.STOP_REASON_USER,
+                JobParameters.INTERNAL_STOP_REASON_USER_UI_STOP);
+        assertNotEquals(0,
+                rescheduledJob.getInternalFlags() & JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER);
+
+        // Reschedule a previously demoted job for a non-user reason
+        rescheduledJob = mService.getRescheduleJobForFailureLocked(rescheduledJob,
+                JobParameters.STOP_REASON_CONSTRAINT_CHARGING,
+                JobParameters.INTERNAL_STOP_REASON_CONSTRAINTS_NOT_SATISFIED);
+        assertNotEquals(0,
+                rescheduledJob.getInternalFlags() & JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER);
     }
 
     /**
@@ -544,14 +778,18 @@ public class JobSchedulerServiceTest {
         final long nextWindowEndTime = now + 2 * HOUR_IN_MILLIS;
         JobStatus job = createJobStatus("testGetRescheduleJobForPeriodic_insideWindow_failedJob",
                 createJobInfo().setPeriodic(HOUR_IN_MILLIS));
-        JobStatus failedJob = mService.getRescheduleJobForFailureLocked(job);
+        JobStatus failedJob = mService.getRescheduleJobForFailureLocked(job,
+                JobParameters.STOP_REASON_UNDEFINED,
+                JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH);
 
         JobStatus rescheduledJob = mService.getRescheduleJobForPeriodic(failedJob);
         assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
         assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
 
         advanceElapsedClock(5 * MINUTE_IN_MILLIS); // now + 5 minutes
-        failedJob = mService.getRescheduleJobForFailureLocked(job);
+        failedJob = mService.getRescheduleJobForFailureLocked(job,
+                JobParameters.STOP_REASON_UNDEFINED,
+                JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH);
         advanceElapsedClock(5 * MINUTE_IN_MILLIS); // now + 10 minutes
 
         rescheduledJob = mService.getRescheduleJobForPeriodic(failedJob);
@@ -559,7 +797,9 @@ public class JobSchedulerServiceTest {
         assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
 
         advanceElapsedClock(35 * MINUTE_IN_MILLIS); // now + 45 minutes
-        failedJob = mService.getRescheduleJobForFailureLocked(job);
+        failedJob = mService.getRescheduleJobForFailureLocked(job,
+                JobParameters.STOP_REASON_UNDEFINED,
+                JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH);
         advanceElapsedClock(10 * MINUTE_IN_MILLIS); // now + 55 minutes
 
         rescheduledJob = mService.getRescheduleJobForPeriodic(failedJob);
@@ -569,7 +809,9 @@ public class JobSchedulerServiceTest {
         assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
 
         advanceElapsedClock(2 * MINUTE_IN_MILLIS); // now + 57 minutes
-        failedJob = mService.getRescheduleJobForFailureLocked(job);
+        failedJob = mService.getRescheduleJobForFailureLocked(job,
+                JobParameters.STOP_REASON_UNDEFINED,
+                JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH);
         advanceElapsedClock(2 * MINUTE_IN_MILLIS); // now + 59 minutes
 
         rescheduledJob = mService.getRescheduleJobForPeriodic(failedJob);
@@ -665,7 +907,9 @@ public class JobSchedulerServiceTest {
     public void testGetRescheduleJobForPeriodic_outsideWindow_failedJob() {
         JobStatus job = createJobStatus("testGetRescheduleJobForPeriodic_outsideWindow_failedJob",
                 createJobInfo().setPeriodic(HOUR_IN_MILLIS));
-        JobStatus failedJob = mService.getRescheduleJobForFailureLocked(job);
+        JobStatus failedJob = mService.getRescheduleJobForFailureLocked(job,
+                JobParameters.STOP_REASON_UNDEFINED,
+                JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH);
         long now = sElapsedRealtimeClock.millis();
         long nextWindowStartTime = now + HOUR_IN_MILLIS;
         long nextWindowEndTime = now + 2 * HOUR_IN_MILLIS;
@@ -701,7 +945,9 @@ public class JobSchedulerServiceTest {
         JobStatus job = createJobStatus(
                 "testGetRescheduleJobForPeriodic_outsideWindow_flex_failedJob",
                 createJobInfo().setPeriodic(HOUR_IN_MILLIS, 30 * MINUTE_IN_MILLIS));
-        JobStatus failedJob = mService.getRescheduleJobForFailureLocked(job);
+        JobStatus failedJob = mService.getRescheduleJobForFailureLocked(job,
+                JobParameters.STOP_REASON_UNDEFINED,
+                JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH);
         // First window starts 30 minutes from now.
         advanceElapsedClock(30 * MINUTE_IN_MILLIS);
         long now = sElapsedRealtimeClock.millis();
@@ -742,7 +988,9 @@ public class JobSchedulerServiceTest {
         JobStatus job = createJobStatus(
                 "testGetRescheduleJobForPeriodic_outsideWindow_flex_failedJob_longPeriod",
                 createJobInfo().setPeriodic(7 * DAY_IN_MILLIS, 9 * HOUR_IN_MILLIS));
-        JobStatus failedJob = mService.getRescheduleJobForFailureLocked(job);
+        JobStatus failedJob = mService.getRescheduleJobForFailureLocked(job,
+                JobParameters.STOP_REASON_UNDEFINED,
+                JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH);
         // First window starts 6.625 days from now.
         advanceElapsedClock(6 * DAY_IN_MILLIS + 15 * HOUR_IN_MILLIS);
         long now = sElapsedRealtimeClock.millis();
@@ -928,7 +1176,7 @@ public class JobSchedulerServiceTest {
                     i < 300 ? JobScheduler.RESULT_SUCCESS : JobScheduler.RESULT_FAILURE;
             assertEquals("Got unexpected result for schedule #" + (i + 1),
                     expected,
-                    mService.scheduleAsPackage(job, null, 10123, null, 0, ""));
+                    mService.scheduleAsPackage(job, null, 10123, null, 0, "JSSTest", ""));
         }
     }
 
@@ -949,7 +1197,7 @@ public class JobSchedulerServiceTest {
         for (int i = 0; i < 500; ++i) {
             assertEquals("Got unexpected result for schedule #" + (i + 1),
                     JobScheduler.RESULT_SUCCESS,
-                    mService.scheduleAsPackage(job, null, 10123, null, 0, ""));
+                    mService.scheduleAsPackage(job, null, 10123, null, 0, "JSSTest", ""));
         }
     }
 
@@ -970,7 +1218,8 @@ public class JobSchedulerServiceTest {
         for (int i = 0; i < 500; ++i) {
             assertEquals("Got unexpected result for schedule #" + (i + 1),
                     JobScheduler.RESULT_SUCCESS,
-                    mService.scheduleAsPackage(job, null, 10123, "proxied.package", 0, ""));
+                    mService.scheduleAsPackage(job, null, 10123, "proxied.package", 0, "JSSTest",
+                            ""));
         }
     }
 
@@ -994,7 +1243,60 @@ public class JobSchedulerServiceTest {
             assertEquals("Got unexpected result for schedule #" + (i + 1),
                     expected,
                     mService.scheduleAsPackage(job, null, 10123, job.getService().getPackageName(),
-                            0, ""));
+                            0, "JSSTest", ""));
         }
+    }
+
+    /** Tests that jobs are removed from the pending list if the user stops the app. */
+    @Test
+    public void testUserStopRemovesPending() {
+        spyOn(mService);
+
+        JobStatus job1a = createJobStatus("testUserStopRemovesPending",
+                createJobInfo(1), 1, "pkg1");
+        JobStatus job1b = createJobStatus("testUserStopRemovesPending",
+                createJobInfo(2), 1, "pkg1");
+        JobStatus job2a = createJobStatus("testUserStopRemovesPending",
+                createJobInfo(1), 2, "pkg2");
+        JobStatus job2b = createJobStatus("testUserStopRemovesPending",
+                createJobInfo(2), 2, "pkg2");
+        doReturn(1).when(mPackageManagerInternal).getPackageUid("pkg1", 0, 0);
+        doReturn(11).when(mPackageManagerInternal).getPackageUid("pkg1", 0, 1);
+        doReturn(2).when(mPackageManagerInternal).getPackageUid("pkg2", 0, 0);
+
+        mService.getPendingJobQueue().clear();
+        mService.getPendingJobQueue().add(job1a);
+        mService.getPendingJobQueue().add(job1b);
+        mService.getPendingJobQueue().add(job2a);
+        mService.getPendingJobQueue().add(job2b);
+        mService.getJobStore().add(job1a);
+        mService.getJobStore().add(job1b);
+        mService.getJobStore().add(job2a);
+        mService.getJobStore().add(job2b);
+
+        mService.stopUserVisibleJobsInternal("pkg1", 1);
+        assertEquals(4, mService.getPendingJobQueue().size());
+        assertTrue(mService.getPendingJobQueue().contains(job1a));
+        assertTrue(mService.getPendingJobQueue().contains(job1b));
+        assertTrue(mService.getPendingJobQueue().contains(job2a));
+        assertTrue(mService.getPendingJobQueue().contains(job2b));
+
+        mService.stopUserVisibleJobsInternal("pkg1", 0);
+        assertEquals(2, mService.getPendingJobQueue().size());
+        assertFalse(mService.getPendingJobQueue().contains(job1a));
+        assertEquals(JobScheduler.PENDING_JOB_REASON_USER, mService.getPendingJobReason(job1a));
+        assertFalse(mService.getPendingJobQueue().contains(job1b));
+        assertEquals(JobScheduler.PENDING_JOB_REASON_USER, mService.getPendingJobReason(job1b));
+        assertTrue(mService.getPendingJobQueue().contains(job2a));
+        assertTrue(mService.getPendingJobQueue().contains(job2b));
+
+        mService.stopUserVisibleJobsInternal("pkg2", 0);
+        assertEquals(0, mService.getPendingJobQueue().size());
+        assertFalse(mService.getPendingJobQueue().contains(job1a));
+        assertFalse(mService.getPendingJobQueue().contains(job1b));
+        assertFalse(mService.getPendingJobQueue().contains(job2a));
+        assertEquals(JobScheduler.PENDING_JOB_REASON_USER, mService.getPendingJobReason(job2a));
+        assertFalse(mService.getPendingJobQueue().contains(job2b));
+        assertEquals(JobScheduler.PENDING_JOB_REASON_USER, mService.getPendingJobReason(job2b));
     }
 }

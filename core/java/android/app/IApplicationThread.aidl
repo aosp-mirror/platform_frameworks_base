@@ -20,6 +20,7 @@ import android.app.ContentProviderHolder;
 import android.app.IInstrumentationWatcher;
 import android.app.IUiAutomationConnection;
 import android.app.ProfilerInfo;
+import android.app.ReceiverInfo;
 import android.app.ResultInfo;
 import android.app.servertransaction.ClientTransaction;
 import android.content.AutofillOptions;
@@ -64,8 +65,11 @@ import java.util.Map;
 oneway interface IApplicationThread {
     void scheduleReceiver(in Intent intent, in ActivityInfo info,
             in CompatibilityInfo compatInfo,
-            int resultCode, in String data, in Bundle extras, boolean sync,
-            int sendingUser, int processState);
+            int resultCode, in String data, in Bundle extras, boolean ordered,
+            boolean assumeDelivered, int sendingUser, int processState);
+
+    void scheduleReceiverList(in List<ReceiverInfo> info);
+
     @UnsupportedAppUsage
     void scheduleCreateService(IBinder token, in ServiceInfo info,
             in CompatibilityInfo compatInfo, int processState);
@@ -98,14 +102,13 @@ oneway interface IApplicationThread {
             in String[] args);
     void scheduleRegisteredReceiver(IIntentReceiver receiver, in Intent intent,
             int resultCode, in String data, in Bundle extras, boolean ordered,
-            boolean sticky, int sendingUser, int processState);
+            boolean sticky, boolean assumeDelivered, int sendingUser, int processState);
     void scheduleLowMemory();
     void profilerControl(boolean start, in ProfilerInfo profilerInfo, int profileType);
     void setSchedulingGroup(int group);
-    void scheduleCreateBackupAgent(in ApplicationInfo app, in CompatibilityInfo compatInfo,
+    void scheduleCreateBackupAgent(in ApplicationInfo app,
             int backupMode, int userId, int operationType);
-    void scheduleDestroyBackupAgent(in ApplicationInfo app,
-            in CompatibilityInfo compatInfo, int userId);
+    void scheduleDestroyBackupAgent(in ApplicationInfo app, int userId);
     void scheduleOnNewActivityOptions(IBinder token, in Bundle options);
     void scheduleSuicide();
     void dispatchPackageBroadcast(int cmd, in String[] packages);
@@ -166,4 +169,5 @@ oneway interface IApplicationThread {
     void updateUiTranslationState(IBinder activityToken, int state, in TranslationSpec sourceSpec,
             in TranslationSpec targetSpec, in List<AutofillId> viewIds,
             in UiTranslationSpec uiTranslationSpec);
+    void scheduleTimeoutService(IBinder token, int startId);
 }

@@ -52,6 +52,7 @@ import androidx.annotation.NonNull;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockSettingsInternal;
+import com.android.server.AlarmManagerInternal;
 import com.android.server.LocalServices;
 import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.net.NetworkPolicyManagerInternal;
@@ -225,6 +226,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
 
         @Override
         AlarmManager getAlarmManager() {return services.alarmManager;}
+
+        @Override
+        AlarmManagerInternal getAlarmManagerInternal() {
+            return services.alarmManagerInternal;
+        }
 
         @Override
         LockPatternUtils newLockPatternUtils() {

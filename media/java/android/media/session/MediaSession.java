@@ -244,12 +244,9 @@ public final class MediaSession {
                 mCallback = null;
                 return;
             }
-            if (handler == null) {
-                handler = new Handler();
-            }
+            Looper looper = handler != null ? handler.getLooper() : Looper.myLooper();
             callback.mSession = this;
-            CallbackMessageHandler msgHandler = new CallbackMessageHandler(handler.getLooper(),
-                    callback);
+            CallbackMessageHandler msgHandler = new CallbackMessageHandler(looper, callback);
             mCallback = msgHandler;
         }
     }
@@ -917,7 +914,7 @@ public final class MediaSession {
         public boolean onMediaButtonEvent(@NonNull Intent mediaButtonIntent) {
             if (mSession != null && mHandler != null
                     && Intent.ACTION_MEDIA_BUTTON.equals(mediaButtonIntent.getAction())) {
-                KeyEvent ke = mediaButtonIntent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+                KeyEvent ke = mediaButtonIntent.getParcelableExtra(Intent.EXTRA_KEY_EVENT, android.view.KeyEvent.class);
                 if (ke != null && ke.getAction() == KeyEvent.ACTION_DOWN) {
                     PlaybackState state = mSession.mPlaybackState;
                     long validActions = state == null ? 0 : state.getActions();

@@ -26,7 +26,9 @@ import static org.junit.Assert.assertEquals;
 
 import android.app.PropertyInvalidatedCache;
 import android.app.admin.DevicePolicyManager;
+import android.platform.test.annotations.Presubmit;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.widget.VerifyCredentialResponse;
@@ -38,18 +40,19 @@ import org.junit.runner.RunWith;
 
 
 /** Test setting a lockscreen credential and then verify it under USER_FRP */
+@SmallTest
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class LockscreenFrpTest extends BaseLockSettingsServiceTests {
 
     @Before
-    public void setDeviceNotProvisioned() throws Exception {
-        // FRP credential can only be verified prior to provisioning
-        mSettings.setDeviceProvisioned(false);
-    }
-
-    @Before
-    public void disableProcessCaches() {
+    public void setUp() throws Exception {
         PropertyInvalidatedCache.disableForTestMode();
+
+        // FRP credential can only be verified prior to provisioning
+        setDeviceProvisioned(false);
+
+        mService.initializeSyntheticPassword(PRIMARY_USER_ID);
     }
 
     @Test
@@ -98,6 +101,7 @@ public class LockscreenFrpTest extends BaseLockSettingsServiceTests {
         mService.setLockCredential(newPassword("1234"), nonePassword(), PRIMARY_USER_ID);
         assertEquals(CREDENTIAL_TYPE_PASSWORD, mService.getCredentialType(USER_FRP));
 
+        setDeviceProvisioned(true);
         mService.setLockCredential(nonePassword(), newPassword("1234"), PRIMARY_USER_ID);
         assertEquals(CREDENTIAL_TYPE_NONE, mService.getCredentialType(USER_FRP));
     }
@@ -106,7 +110,7 @@ public class LockscreenFrpTest extends BaseLockSettingsServiceTests {
     public void testFrpCredential_cannotVerifyAfterProvsioning() {
         mService.setLockCredential(newPin("1234"), nonePassword(), PRIMARY_USER_ID);
 
-        mSettings.setDeviceProvisioned(true);
+        setDeviceProvisioned(true);
         assertEquals(VerifyCredentialResponse.RESPONSE_ERROR,
                 mService.verifyCredential(newPin("1234"), USER_FRP, 0 /* flags */)
                         .getResponseCode());

@@ -17,6 +17,7 @@
 package com.android.wm.shell.bubbles.animation;
 
 import static com.android.wm.shell.bubbles.BubblePositioner.NUM_VISIBLE_WHEN_RESTING;
+import static com.android.wm.shell.bubbles.BubbleStackView.ENABLE_FLING_TO_DISMISS_BUBBLE;
 
 import android.content.ContentResolver;
 import android.content.res.Resources;
@@ -416,6 +417,17 @@ public class StackAnimationController extends
     }
 
     /**
+     * Snaps the stack back to the previous resting position.
+     */
+    public void snapStackBack() {
+        if (mLayout == null) {
+            return;
+        }
+        PointF p = getStackPositionAlongNearestHorizontalEdge();
+        springStackAfterFling(p.x, p.y);
+    }
+
+    /**
      * Where the stack would be if it were snapped to the nearest horizontal edge (left or right).
      */
     public PointF getStackPositionAlongNearestHorizontalEdge() {
@@ -431,7 +443,7 @@ public class StackAnimationController extends
     }
 
     /** Description of current animation controller state. */
-    public void dump(PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw) {
         pw.println("StackAnimationController state:");
         pw.print("  isActive:             "); pw.println(isActiveController());
         pw.print("  restingStackPos:      ");
@@ -1028,6 +1040,7 @@ public class StackAnimationController extends
             };
             mMagnetizedStack.setHapticsEnabled(true);
             mMagnetizedStack.setFlingToTargetMinVelocity(FLING_TO_DISMISS_MIN_VELOCITY);
+            mMagnetizedStack.setFlingToTargetEnabled(ENABLE_FLING_TO_DISMISS_BUBBLE);
         }
 
         final ContentResolver contentResolver = mLayout.getContext().getContentResolver();

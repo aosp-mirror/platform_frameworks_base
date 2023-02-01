@@ -99,4 +99,9 @@
         android:fromId="@id/unlocked"
         android:toId="@id/locked_aod"
         android:drawable="@drawable/unlocked_to_aod_lock" />
+
+    <transition
+        android:fromId="@id/unlocked"
+        android:toId="@id/locked"
+        android:drawable="@drawable/unlocked_to_locked" />
 </animated-selector>

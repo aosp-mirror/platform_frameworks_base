@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SharedMemory;
 
 /**
  * A response for Table from broadcast signal.
@@ -46,6 +47,8 @@ public final class TableResponse extends BroadcastInfoResponse implements Parcel
     private final Uri mTableUri;
     private final int mVersion;
     private final int mSize;
+    private final byte[] mTableByteArray;
+    private final SharedMemory mTableSharedMemory;
 
     static TableResponse createFromParcelBody(Parcel in) {
         return new TableResponse(in);
@@ -54,9 +57,33 @@ public final class TableResponse extends BroadcastInfoResponse implements Parcel
     public TableResponse(int requestId, int sequence, @ResponseResult int responseResult,
             @Nullable Uri tableUri, int version, int size) {
         super(RESPONSE_TYPE, requestId, sequence, responseResult);
-        mTableUri = tableUri;
         mVersion = version;
         mSize = size;
+        mTableUri = tableUri;
+        mTableByteArray = null;
+        mTableSharedMemory = null;
+    }
+
+    /** @hide */
+    public TableResponse(int requestId, int sequence, @ResponseResult int responseResult,
+            @NonNull byte[] tableByteArray, int version, int size) {
+        super(RESPONSE_TYPE, requestId, sequence, responseResult);
+        mVersion = version;
+        mSize = size;
+        mTableUri = null;
+        mTableByteArray = tableByteArray;
+        mTableSharedMemory = null;
+    }
+
+    /** @hide */
+    public TableResponse(int requestId, int sequence, @ResponseResult int responseResult,
+            @NonNull SharedMemory tableSharedMemory, int version, int size) {
+        super(RESPONSE_TYPE, requestId, sequence, responseResult);
+        mVersion = version;
+        mSize = size;
+        mTableUri = null;
+        mTableByteArray = null;
+        mTableSharedMemory = tableSharedMemory;
     }
 
     TableResponse(Parcel source) {
@@ -65,6 +92,14 @@ public final class TableResponse extends BroadcastInfoResponse implements Parcel
         mTableUri = uriString == null ? null : Uri.parse(uriString);
         mVersion = source.readInt();
         mSize = source.readInt();
+        int arrayLength = source.readInt();
+        if (arrayLength >= 0) {
+            mTableByteArray = new byte[arrayLength];
+            source.readByteArray(mTableByteArray);
+        } else {
+            mTableByteArray = null;
+        }
+        mTableSharedMemory = (SharedMemory) source.readTypedObject(SharedMemory.CREATOR);
     }
 
     /**
@@ -73,6 +108,30 @@ public final class TableResponse extends BroadcastInfoResponse implements Parcel
     @Nullable
     public Uri getTableUri() {
         return mTableUri;
+    }
+
+    /**
+     * Gets the data of the table as a byte array.
+     *
+     * @return the table data as a byte array, or {@code null} if the data is not stored as a byte
+     *         array.
+     * @hide
+     */
+    @Nullable
+    public byte[] getTableByteArray() {
+        return mTableByteArray;
+    }
+
+    /**
+     * Gets the data of the table as a {@link SharedMemory} object.
+     *
+     * @return the table data as a {@link SharedMemory} object, or {@code null} if the data is not
+     *         stored in shared memory.
+     * @hide
+     */
+    @Nullable
+    public SharedMemory getTableSharedMemory() {
+        return mTableSharedMemory;
     }
 
     /**
@@ -106,5 +165,12 @@ public final class TableResponse extends BroadcastInfoResponse implements Parcel
         dest.writeString(uriString);
         dest.writeInt(mVersion);
         dest.writeInt(mSize);
+        if (mTableByteArray != null) {
+            dest.writeInt(mTableByteArray.length);
+            dest.writeByteArray(mTableByteArray);
+        } else {
+            dest.writeInt(-1);
+        }
+        dest.writeTypedObject(mTableSharedMemory, flags);
     }
 }

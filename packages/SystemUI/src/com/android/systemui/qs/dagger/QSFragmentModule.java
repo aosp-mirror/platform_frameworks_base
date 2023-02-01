@@ -28,7 +28,6 @@ import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.dagger.qualifiers.RootView;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.privacy.OngoingPrivacyChip;
-import com.android.systemui.qs.FooterActionsView;
 import com.android.systemui.qs.QSContainerImpl;
 import com.android.systemui.qs.QSFooter;
 import com.android.systemui.qs.QSFooterView;
@@ -51,8 +50,6 @@ import dagger.Provides;
  */
 @Module
 public interface QSFragmentModule {
-    String QS_FGS_MANAGER_FOOTER_VIEW = "qs_fgs_manager_footer";
-    String QS_SECURITY_FOOTER_VIEW = "qs_security_footer";
     String QS_USING_MEDIA_PLAYER = "qs_using_media_player";
     String QS_USING_COLLAPSED_LANDSCAPE_MEDIA = "qs_using_collapsed_landscape_media";
 
@@ -119,16 +116,6 @@ public interface QSFragmentModule {
         return view.findViewById(R.id.qs_footer);
     }
 
-    /**
-     * Provides a {@link FooterActionsView}.
-     *
-     * This will replace a ViewStub either in {@link QSFooterView} or in {@link QSContainerImpl}.
-     */
-    @Provides
-    static FooterActionsView providesQSFooterActionsView(@RootView View view) {
-        return view.findViewById(R.id.qs_footer_actions);
-    }
-
     /** */
     @Provides
     @QSScope
@@ -142,18 +129,6 @@ public interface QSFragmentModule {
     @QSScope
     static QSCustomizer providesQSCutomizer(@RootView View view) {
         return view.findViewById(R.id.qs_customize);
-    }
-
-    /** */
-    @Provides
-    @QSScope
-    @Named(QS_SECURITY_FOOTER_VIEW)
-    static View providesQSSecurityFooterView(
-            @QSThemedContext LayoutInflater layoutInflater,
-            FooterActionsView footerActionsView
-    ) {
-        return layoutInflater.inflate(R.layout.quick_settings_security_footer, footerActionsView,
-                false);
     }
 
     /** */
@@ -182,16 +157,5 @@ public interface QSFragmentModule {
     @QSScope
     static StatusIconContainer providesStatusIconContainer(QuickStatusBarHeader qsHeader) {
         return qsHeader.findViewById(R.id.statusIcons);
-    }
-
-    /** */
-    @Provides
-    @QSScope
-    @Named(QS_FGS_MANAGER_FOOTER_VIEW)
-    static View providesQSFgsManagerFooterView(
-            @QSThemedContext LayoutInflater layoutInflater,
-            FooterActionsView footerActionsView
-    ) {
-        return layoutInflater.inflate(R.layout.fgs_footer, footerActionsView, false);
     }
 }

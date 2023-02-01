@@ -62,6 +62,16 @@ public class Utilities {
         return false; // Default
     }
 
+    /**
+     * Compares the ratio of two quantities and returns whether that ratio is greater than the
+     * provided bound. Order of quantities does not matter. Bound should be a decimal representation
+     * of a percentage.
+     */
+    public static boolean isRelativePercentDifferenceGreaterThan(float first, float second,
+            float bound) {
+        return (Math.abs(first - second) / Math.abs((first + second) / 2.0f)) > bound;
+    }
+
     /** Calculates the constrast between two colors, using the algorithm provided by the WCAG v2. */
     public static float computeContrastBetweenColors(int bg, int fg) {
         float bgR = Color.red(bg) / 255f;

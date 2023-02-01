@@ -25,6 +25,12 @@
 #include <hwui/ImageDecoder.h>
 #include <log/log.h>
 #include <SkAndroidCodec.h>
+#include <SkCodec.h>
+#include <SkColorSpace.h>
+#include <SkImageInfo.h>
+#include <SkRect.h>
+#include <SkSize.h>
+#include <SkStream.h>
 #include <utils/Color.h>
 
 #include <fcntl.h>

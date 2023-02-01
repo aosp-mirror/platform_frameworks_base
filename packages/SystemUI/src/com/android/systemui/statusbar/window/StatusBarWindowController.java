@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.window;
 
+import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.InsetsState.ITYPE_TOP_MANDATORY_GESTURES;
+import static android.view.InsetsState.ITYPE_TOP_TAPPABLE_ELEMENT;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
@@ -27,6 +30,7 @@ import static com.android.systemui.util.leak.RotationUtils.ROTATION_UPSIDE_DOWN;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -36,6 +40,7 @@ import android.util.Log;
 import android.view.DisplayCutout;
 import android.view.Gravity;
 import android.view.IWindowManager;
+import android.view.InsetsFrameProvider;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,6 +53,7 @@ import com.android.systemui.animation.DelegateLaunchAnimatorController;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.fragments.FragmentHostManager;
+import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider;
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
 import com.android.systemui.unfold.util.JankMonitorTransitionProgressListener;
@@ -73,6 +79,7 @@ public class StatusBarWindowController {
     private boolean mIsAttached;
 
     private final ViewGroup mStatusBarWindowView;
+    private final FragmentService mFragmentService;
     // The container in which we should run launch animations started from the status bar and
     //   expanding into the opening window.
     private final ViewGroup mLaunchAnimationContainer;
@@ -86,6 +93,7 @@ public class StatusBarWindowController {
             WindowManager windowManager,
             IWindowManager iWindowManager,
             StatusBarContentInsetsProvider contentInsetsProvider,
+            FragmentService fragmentService,
             @Main Resources resources,
             Optional<UnfoldTransitionProgressProvider> unfoldTransitionProgressProvider) {
         mContext = context;
@@ -93,6 +101,7 @@ public class StatusBarWindowController {
         mIWindowManager = iWindowManager;
         mContentInsetsProvider = contentInsetsProvider;
         mStatusBarWindowView = statusBarWindowView;
+        mFragmentService = fragmentService;
         mLaunchAnimationContainer = mStatusBarWindowView.findViewById(
                 R.id.status_bar_launch_animation_container);
         mLpChanged = new WindowManager.LayoutParams();
@@ -157,7 +166,7 @@ public class StatusBarWindowController {
 
     /** Returns a fragment host manager for the status bar window view. */
     public FragmentHostManager getFragmentHostManager() {
-        return FragmentHostManager.get(mStatusBarWindowView);
+        return mFragmentService.getFragmentHostManager(mStatusBarWindowView);
     }
 
     /**
@@ -221,6 +230,19 @@ public class StatusBarWindowController {
         lp.setTitle("StatusBar");
         lp.packageName = mContext.getPackageName();
         lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        final InsetsFrameProvider gestureInsetsProvider =
+                new InsetsFrameProvider(ITYPE_TOP_MANDATORY_GESTURES);
+        final int safeTouchRegionHeight = mContext.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.display_cutout_touchable_region_size);
+        if (safeTouchRegionHeight > 0) {
+            gestureInsetsProvider.minimalInsetsSizeInDisplayCutoutSafe =
+                    Insets.of(0, safeTouchRegionHeight, 0, 0);
+        }
+        lp.providedInsets = new InsetsFrameProvider[] {
+                new InsetsFrameProvider(ITYPE_STATUS_BAR),
+                new InsetsFrameProvider(ITYPE_TOP_TAPPABLE_ELEMENT),
+                gestureInsetsProvider
+        };
         return lp;
 
     }

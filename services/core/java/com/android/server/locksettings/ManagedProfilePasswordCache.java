@@ -26,6 +26,8 @@ import android.security.keystore.UserNotAuthenticatedException;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockscreenCredential;
 
 import java.security.GeneralSecurityException;
@@ -59,6 +61,7 @@ import javax.crypto.spec.GCMParameterSpec;
  * <p> The encrypted credential is stored in-memory only so the cache does not persist across
  * reboots.
  */
+@VisibleForTesting // public visibility is needed for Mockito
 public class ManagedProfilePasswordCache {
 
     private static final String TAG = "ManagedProfilePasswordCache";
@@ -117,8 +120,7 @@ public class ManagedProfilePasswordCache {
                 cipher.init(Cipher.ENCRYPT_MODE, key);
                 byte[] ciphertext = cipher.doFinal(password.getCredential());
                 byte[] iv = cipher.getIV();
-                byte[] block = Arrays.copyOf(iv, ciphertext.length + iv.length);
-                System.arraycopy(ciphertext, 0, block, iv.length, ciphertext.length);
+                byte[] block = ArrayUtils.concat(iv, ciphertext);
                 mEncryptedPasswords.put(userId, block);
             } catch (GeneralSecurityException e) {
                 Slog.d(TAG, "Cannot encrypt", e);

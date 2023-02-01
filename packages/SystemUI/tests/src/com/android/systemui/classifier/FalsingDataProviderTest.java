@@ -24,6 +24,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.hardware.devicestate.DeviceStateManager.FoldStateListener;
 import android.testing.AndroidTestingRunner;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
@@ -50,6 +51,8 @@ public class FalsingDataProviderTest extends ClassifierTest {
     private FalsingDataProvider mDataProvider;
     @Mock
     private BatteryController mBatteryController;
+    @Mock
+    private FoldStateListener mFoldStateListener;
     private final DockManagerFake mDockManager = new DockManagerFake();
 
     @Before
@@ -61,7 +64,8 @@ public class FalsingDataProviderTest extends ClassifierTest {
         displayMetrics.ydpi = 100;
         displayMetrics.widthPixels = 1000;
         displayMetrics.heightPixels = 1000;
-        mDataProvider = new FalsingDataProvider(displayMetrics, mBatteryController, mDockManager);
+        mDataProvider = new FalsingDataProvider(
+                displayMetrics, mBatteryController, mFoldStateListener, mDockManager);
     }
 
     @After
@@ -309,5 +313,23 @@ public class FalsingDataProviderTest extends ClassifierTest {
         // Ensure that if we ask for prior events before any events were added, we at least get
         // an empty array.
         assertThat(mDataProvider.getPriorMotionEvents()).isNotNull();
+    }
+
+    @Test
+    public void test_MotionEventComplete_A11yAction() {
+        mDataProvider.onA11yAction();
+        assertThat(mDataProvider.isA11yAction()).isTrue();
+    }
+
+    @Test
+    public void test_FoldedState_Folded() {
+        when(mFoldStateListener.getFolded()).thenReturn(true);
+        assertThat(mDataProvider.isFolded()).isTrue();
+    }
+
+    @Test
+    public void test_FoldedState_Unfolded() {
+        when(mFoldStateListener.getFolded()).thenReturn(false);
+        assertThat(mDataProvider.isFolded()).isFalse();
     }
 }

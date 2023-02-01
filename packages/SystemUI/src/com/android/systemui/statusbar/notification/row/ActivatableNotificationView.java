@@ -24,6 +24,7 @@ import android.graphics.Canvas;
 import android.graphics.Point;
 import android.util.AttributeSet;
 import android.util.MathUtils;
+import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
@@ -39,8 +40,12 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Base class for both {@link ExpandableNotificationRow} and {@link NotificationShelf}
@@ -91,6 +96,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             = new PathInterpolator(0.6f, 0, 0.5f, 1);
     private static final Interpolator ACTIVATE_INVERSE_ALPHA_INTERPOLATOR
             = new PathInterpolator(0, 0, 0.5f, 1);
+    private final Set<SourceType> mOnDetachResetRoundness = new HashSet<>();
     private int mTintedRippleColor;
     private int mNormalRippleColor;
     private Gefingerpoken mTouchHandler;
@@ -134,6 +140,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private boolean mDismissed;
     private boolean mRefocusOnDismiss;
     private AccessibilityManager mAccessibilityManager;
+    protected boolean mUseRoundnessSourceTypes;
 
     public ActivatableNotificationView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -151,6 +158,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 R.color.notification_ripple_tinted_color);
         mNormalRippleColor = mContext.getColor(
                 R.color.notification_ripple_untinted_color);
+        // Reset background color tint and override tint, as they are from an old theme
+        mBgTint = NO_COLOR;
+        mOverrideTint = NO_COLOR;
+        mOverrideAmount = 0.0f;
     }
 
     /**
@@ -482,12 +493,9 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         if (animationListener != null) {
             mAppearAnimator.addListener(animationListener);
         }
-        if (delay > 0) {
-            // we need to apply the initial state already to avoid drawn frames in the wrong state
-            updateAppearAnimationAlpha();
-            updateAppearRect();
-            mAppearAnimator.setStartDelay(delay);
-        }
+        // we need to apply the initial state already to avoid drawn frames in the wrong state
+        updateAppearAnimationAlpha();
+        updateAppearRect();
         mAppearAnimator.addListener(new AnimatorListenerAdapter() {
             private boolean mWasCancelled;
 
@@ -518,7 +526,20 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 mWasCancelled = true;
             }
         });
-        mAppearAnimator.start();
+
+        // Cache the original animator so we can check if the animation should be started in the
+        // Choreographer callback. It's possible that the original animator (mAppearAnimator) is
+        // replaced with a new value before the callback is called.
+        ValueAnimator cachedAnimator = mAppearAnimator;
+        // Even when delay=0, starting the animation on the next frame is necessary to avoid jank.
+        // Not doing so will increase the chances our Animator will be forced to skip a value of
+        // the animation's progression, causing stutter.
+        Choreographer.getInstance().postFrameCallbackDelayed(
+                frameTimeNanos -> {
+                    if (mAppearAnimator == cachedAnimator) {
+                        mAppearAnimator.start();
+                    }
+                }, delay);
     }
 
     private int getCujType(boolean isAppearing) {
@@ -609,22 +630,21 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     protected void resetAllContentAlphas() {}
 
     @Override
-    protected void applyRoundness() {
-        super.applyRoundness();
-        applyBackgroundRoundness(getCurrentBackgroundRadiusTop(),
-                getCurrentBackgroundRadiusBottom());
+    public void applyRoundnessAndInvalidate() {
+        applyBackgroundRoundness(getTopCornerRadius(), getBottomCornerRadius());
+        super.applyRoundnessAndInvalidate();
     }
 
     @Override
-    public float getCurrentBackgroundRadiusTop() {
+    public float getTopCornerRadius() {
         float fraction = getInterpolatedAppearAnimationFraction();
-        return MathUtils.lerp(0, super.getCurrentBackgroundRadiusTop(), fraction);
+        return MathUtils.lerp(0, super.getTopCornerRadius(), fraction);
     }
 
     @Override
-    public float getCurrentBackgroundRadiusBottom() {
+    public float getBottomCornerRadius() {
         float fraction = getInterpolatedAppearAnimationFraction();
-        return MathUtils.lerp(0, super.getCurrentBackgroundRadiusBottom(), fraction);
+        return MathUtils.lerp(0, super.getBottomCornerRadius(), fraction);
     }
 
     private void applyBackgroundRoundness(float topRadius, float bottomRadius) {
@@ -770,6 +790,33 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     public void setAccessibilityManager(AccessibilityManager accessibilityManager) {
         mAccessibilityManager = accessibilityManager;
+    }
+
+    /**
+     * Enable the support for rounded corner based on the SourceType
+     * @param enabled true if is supported
+     */
+    public void useRoundnessSourceTypes(boolean enabled) {
+        mUseRoundnessSourceTypes = enabled;
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (mUseRoundnessSourceTypes && !mOnDetachResetRoundness.isEmpty()) {
+            for (SourceType sourceType : mOnDetachResetRoundness) {
+                requestRoundnessReset(sourceType);
+            }
+            mOnDetachResetRoundness.clear();
+        }
+    }
+
+    /**
+     * SourceType which should be reset when this View is detached
+     * @param sourceType will be reset on View detached
+     */
+    public void addOnDetachResetRoundness(SourceType sourceType) {
+        mOnDetachResetRoundness.add(sourceType);
     }
 
     public interface OnActivatedListener {

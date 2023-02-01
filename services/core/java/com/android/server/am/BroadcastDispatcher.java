@@ -20,7 +20,9 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_DEFERRAL;
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_NONE;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UptimeMillisLong;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.os.Handler;
@@ -35,6 +37,8 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.LocalServices;
+
+import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -80,12 +84,14 @@ public class BroadcastDispatcher {
             return broadcasts.isEmpty();
         }
 
+        @NeverCompile
         void dumpDebug(ProtoOutputStream proto, long fieldId) {
             for (BroadcastRecord br : broadcasts) {
                 br.dumpDebug(proto, fieldId);
             }
         }
 
+        @NeverCompile
         void dumpLocked(Dumper d) {
             for (BroadcastRecord br : broadcasts) {
                 d.dump(br);
@@ -143,6 +149,7 @@ public class BroadcastDispatcher {
             return mPrinted;
         }
 
+        @NeverCompile
         void dump(BroadcastRecord br) {
             if (mDumpPackage == null || mDumpPackage.equals(br.callerPackage)) {
                 if (!mPrinted) {
@@ -162,7 +169,7 @@ public class BroadcastDispatcher {
     }
 
     private final Object mLock;
-    private final BroadcastQueue mQueue;
+    private final BroadcastQueueImpl mQueue;
     private final BroadcastConstants mConstants;
     private final Handler mHandler;
     private AlarmManagerInternal mAlarm;
@@ -181,7 +188,7 @@ public class BroadcastDispatcher {
                 for (int i = 0; i < numEntries; i++) {
                     if (recipientUid == mDeferredBroadcasts.get(i).uid) {
                         Deferrals d = mDeferredBroadcasts.remove(i);
-                        mAlarmBroadcasts.add(d);
+                        mAlarmDeferrals.add(d);
                         break;
                     }
                 }
@@ -201,10 +208,10 @@ public class BroadcastDispatcher {
 
                 // No longer an alarm target, so resume ordinary deferral policy
                 if (newCount <= 0) {
-                    final int numEntries = mAlarmBroadcasts.size();
+                    final int numEntries = mAlarmDeferrals.size();
                     for (int i = 0; i < numEntries; i++) {
-                        if (recipientUid == mAlarmBroadcasts.get(i).uid) {
-                            Deferrals d = mAlarmBroadcasts.remove(i);
+                        if (recipientUid == mAlarmDeferrals.get(i).uid) {
+                            Deferrals d = mAlarmDeferrals.remove(i);
                             insertLocked(mDeferredBroadcasts, d);
                             break;
                         }
@@ -234,7 +241,13 @@ public class BroadcastDispatcher {
     // General deferrals not holding up alarms
     private final ArrayList<Deferrals> mDeferredBroadcasts = new ArrayList<>();
     // Deferrals that *are* holding up alarms; ordered by alarm dispatch time
-    private final ArrayList<Deferrals> mAlarmBroadcasts = new ArrayList<>();
+    private final ArrayList<Deferrals> mAlarmDeferrals = new ArrayList<>();
+    // Under the "deliver alarm broadcasts immediately" policy, the queue of
+    // upcoming alarm broadcasts.  These are always delivered first - if the
+    // policy is changed on the fly from immediate-alarm-delivery to the previous
+    // in-order-queueing behavior, pending immediate alarm deliveries will drain
+    // and then the behavior settle into the pre-U semantics.
+    private final ArrayList<BroadcastRecord> mAlarmQueue = new ArrayList<>();
 
     // Next outbound broadcast, established by getNextBroadcastLocked()
     private BroadcastRecord mCurrentBroadcast;
@@ -416,6 +429,7 @@ public class BroadcastDispatcher {
             return size;
         }
 
+        @NeverCompile
         public void dump(Dumper dumper, String action) {
             SparseArray<BroadcastRecord> brs = getDeferredList(action);
             if (brs == null) {
@@ -426,6 +440,7 @@ public class BroadcastDispatcher {
             }
         }
 
+        @NeverCompile
         public void dumpDebug(ProtoOutputStream proto, long fieldId) {
             for (int i = 0, size = mDeferredLockedBootCompletedBroadcasts.size(); i < size; i++) {
                 mDeferredLockedBootCompletedBroadcasts.valueAt(i).dumpDebug(proto, fieldId);
@@ -435,6 +450,7 @@ public class BroadcastDispatcher {
             }
         }
 
+        @NeverCompile
         private void dumpBootCompletedBroadcastRecord(SparseArray<BroadcastRecord> brs) {
             for (int i = 0, size = brs.size(); i < size; i++) {
                 final Object receiver = brs.valueAt(i).receivers.get(0);
@@ -489,7 +505,7 @@ public class BroadcastDispatcher {
     /**
      * Constructed & sharing a lock with its associated BroadcastQueue instance
      */
-    public BroadcastDispatcher(BroadcastQueue queue, BroadcastConstants constants,
+    public BroadcastDispatcher(BroadcastQueueImpl queue, BroadcastConstants constants,
             Handler handler, Object lock) {
         mQueue = queue;
         mConstants = constants;
@@ -528,8 +544,41 @@ public class BroadcastDispatcher {
         synchronized (mLock) {
             return mCurrentBroadcast == null
                     && mOrderedBroadcasts.isEmpty()
+                    && mAlarmQueue.isEmpty()
                     && isDeferralsListEmpty(mDeferredBroadcasts)
-                    && isDeferralsListEmpty(mAlarmBroadcasts);
+                    && isDeferralsListEmpty(mAlarmDeferrals);
+        }
+    }
+
+    private static boolean isDeferralsBeyondBarrier(@NonNull ArrayList<Deferrals> list,
+            @UptimeMillisLong long barrierTime) {
+        for (int i = 0; i < list.size(); i++) {
+            if (!isBeyondBarrier(list.get(i).broadcasts, barrierTime)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean isBeyondBarrier(@NonNull ArrayList<BroadcastRecord> list,
+            @UptimeMillisLong long barrierTime) {
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).enqueueTime <= barrierTime) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean isBeyondBarrier(@UptimeMillisLong long barrierTime) {
+        synchronized (mLock) {
+            if ((mCurrentBroadcast != null) && mCurrentBroadcast.enqueueTime <= barrierTime) {
+                return false;
+            }
+            return isBeyondBarrier(mOrderedBroadcasts, barrierTime)
+                    && isBeyondBarrier(mAlarmQueue, barrierTime)
+                    && isDeferralsBeyondBarrier(mDeferredBroadcasts, barrierTime)
+                    && isDeferralsBeyondBarrier(mAlarmDeferrals, barrierTime);
         }
     }
 
@@ -557,7 +606,13 @@ public class BroadcastDispatcher {
         }
         sb.append(mOrderedBroadcasts.size());
         sb.append(" ordered");
-        int n = pendingInDeferralsList(mAlarmBroadcasts);
+        int n = mAlarmQueue.size();
+        if (n > 0) {
+            sb.append(", ");
+            sb.append(n);
+            sb.append(" alarms");
+        }
+        n = pendingInDeferralsList(mAlarmDeferrals);
         if (n > 0) {
             sb.append(", ");
             sb.append(n);
@@ -592,8 +647,16 @@ public class BroadcastDispatcher {
     // ----------------------------------
     // BroadcastQueue operation support
     void enqueueOrderedBroadcastLocked(BroadcastRecord r) {
+        final ArrayList<BroadcastRecord> queue =
+                (r.alarm && mQueue.mService.mConstants.mPrioritizeAlarmBroadcasts)
+                        ? mAlarmQueue
+                        : mOrderedBroadcasts;
+
         if (r.receivers == null || r.receivers.isEmpty()) {
-            mOrderedBroadcasts.add(r);
+            // Fast no-op path for broadcasts that won't actually be dispatched to
+            // receivers - we still need to handle completion callbacks and historical
+            // records, but we don't need to consider the fancy cases.
+            queue.add(r);
             return;
         }
 
@@ -622,7 +685,8 @@ public class BroadcastDispatcher {
                 return;
             }
         } else {
-            mOrderedBroadcasts.add(r);
+            // Ordinary broadcast, so put it on the appropriate queue and carry on
+            queue.add(r);
         }
     }
 
@@ -652,10 +716,13 @@ public class BroadcastDispatcher {
     BroadcastRecord replaceBroadcastLocked(BroadcastRecord r, String typeForLogging) {
         // Simple case, in the ordinary queue.
         BroadcastRecord old = replaceBroadcastLocked(mOrderedBroadcasts, r, typeForLogging);
-
+        // ... or possibly in the simple alarm queue
+        if (old == null) {
+            old = replaceBroadcastLocked(mAlarmQueue, r, typeForLogging);
+        }
         // If we didn't find it, less-simple:  in a deferral queue?
         if (old == null) {
-            old = replaceDeferredBroadcastLocked(mAlarmBroadcasts, r, typeForLogging);
+            old = replaceDeferredBroadcastLocked(mAlarmDeferrals, r, typeForLogging);
         }
         if (old == null) {
             old = replaceDeferredBroadcastLocked(mDeferredBroadcasts, r, typeForLogging);
@@ -706,6 +773,10 @@ public class BroadcastDispatcher {
         boolean didSomething = cleanupBroadcastListDisabledReceiversLocked(mOrderedBroadcasts,
                 packageName, filterByClasses, userId, doit);
         if (doit || !didSomething) {
+            didSomething = cleanupBroadcastListDisabledReceiversLocked(mAlarmQueue,
+                    packageName, filterByClasses, userId, doit);
+        }
+        if (doit || !didSomething) {
             ArrayList<BroadcastRecord> lockedBootCompletedBroadcasts = new ArrayList<>();
             for (int u = 0, usize = mUser2Deferred.size(); u < usize; u++) {
                 SparseArray<BroadcastRecord> brs =
@@ -731,7 +802,7 @@ public class BroadcastDispatcher {
                     packageName, filterByClasses, userId, doit);
         }
         if (doit || !didSomething) {
-            didSomething |= cleanupDeferralsListDisabledReceiversLocked(mAlarmBroadcasts,
+            didSomething |= cleanupDeferralsListDisabledReceiversLocked(mAlarmDeferrals,
                     packageName, filterByClasses, userId, doit);
         }
         if (doit || !didSomething) {
@@ -777,14 +848,18 @@ public class BroadcastDispatcher {
     /**
      * Standard proto dump entry point
      */
+    @NeverCompile
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         if (mCurrentBroadcast != null) {
             mCurrentBroadcast.dumpDebug(proto, fieldId);
         }
-        for (Deferrals d : mAlarmBroadcasts) {
+        for (Deferrals d : mAlarmDeferrals) {
             d.dumpDebug(proto, fieldId);
         }
         for (BroadcastRecord br : mOrderedBroadcasts) {
+            br.dumpDebug(proto, fieldId);
+        }
+        for (BroadcastRecord br : mAlarmQueue) {
             br.dumpDebug(proto, fieldId);
         }
         for (Deferrals d : mDeferredBroadcasts) {
@@ -816,23 +891,33 @@ public class BroadcastDispatcher {
             return mCurrentBroadcast;
         }
 
-        final boolean someQueued = !mOrderedBroadcasts.isEmpty();
-
         BroadcastRecord next = null;
 
+        // Alarms in flight take precedence over everything else.  This queue
+        // will be non-empty only when the relevant policy is in force, but if
+        // policy has changed on the fly we still need to drain this before we
+        // settle into the legacy behavior.
+        if (!mAlarmQueue.isEmpty()) {
+            next = mAlarmQueue.remove(0);
+        }
+
+        // Next in precedence are deferred BOOT_COMPLETED broadcasts
         if (next == null) {
             next = dequeueDeferredBootCompletedBroadcast();
         }
 
-        if (next == null && !mAlarmBroadcasts.isEmpty()) {
-            next = popLocked(mAlarmBroadcasts);
+        // Alarm-related deferrals are next in precedence...
+        if (next == null && !mAlarmDeferrals.isEmpty()) {
+            next = popLocked(mAlarmDeferrals);
             if (DEBUG_BROADCAST_DEFERRAL && next != null) {
                 Slog.i(TAG, "Next broadcast from alarm targets: " + next);
             }
         }
 
+        final boolean someQueued = !mOrderedBroadcasts.isEmpty();
+
         if (next == null && !mDeferredBroadcasts.isEmpty()) {
-            // We're going to deliver either:
+            // A this point we're going to deliver either:
             // 1. the next "overdue" deferral; or
             // 2. the next ordinary ordered broadcast; *or*
             // 3. the next not-yet-overdue deferral.
@@ -937,7 +1022,7 @@ public class BroadcastDispatcher {
                     scheduleDeferralCheckLocked(true);
                 } else {
                     // alarm-related: strict order-encountered
-                    mAlarmBroadcasts.add(d);
+                    mAlarmDeferrals.add(d);
                 }
             } else {
                 // We're already deferring, but something was slow again.  Reset the
@@ -999,7 +1084,7 @@ public class BroadcastDispatcher {
      * immediately deliverable.  Used by the wait-for-broadcast-idle mechanism.
      */
     public void cancelDeferralsLocked() {
-        zeroDeferralTimes(mAlarmBroadcasts);
+        zeroDeferralTimes(mAlarmDeferrals);
         zeroDeferralTimes(mDeferredBroadcasts);
     }
 
@@ -1023,7 +1108,7 @@ public class BroadcastDispatcher {
         Deferrals d = findUidLocked(uid, mDeferredBroadcasts);
         // ...but if not there, also check alarm-prioritized deferrals
         if (d == null) {
-            d = findUidLocked(uid, mAlarmBroadcasts);
+            d = findUidLocked(uid, mAlarmDeferrals);
         }
         return d;
     }
@@ -1035,7 +1120,7 @@ public class BroadcastDispatcher {
     private boolean removeDeferral(Deferrals d) {
         boolean didRemove = mDeferredBroadcasts.remove(d);
         if (!didRemove) {
-            didRemove = mAlarmBroadcasts.remove(d);
+            didRemove = mAlarmDeferrals.remove(d);
         }
         return didRemove;
     }
@@ -1091,6 +1176,7 @@ public class BroadcastDispatcher {
 
     // ----------------------------------
 
+    @NeverCompile
     boolean dumpLocked(PrintWriter pw, String dumpPackage, String queueName,
             SimpleDateFormat sdf) {
         final Dumper dumper = new Dumper(pw, queueName, dumpPackage, sdf);
@@ -1103,14 +1189,20 @@ public class BroadcastDispatcher {
         } else {
             pw.println("  (null)");
         }
+        printed |= dumper.didPrint();
 
-        dumper.setHeading("Active ordered broadcasts");
-        dumper.setLabel("Active Ordered Broadcast");
-        for (Deferrals d : mAlarmBroadcasts) {
-            d.dumpLocked(dumper);
+        dumper.setHeading("Active alarm broadcasts");
+        dumper.setLabel("Active Alarm Broadcast");
+        for (BroadcastRecord br : mAlarmQueue) {
+            dumper.dump(br);
         }
         printed |= dumper.didPrint();
 
+        dumper.setHeading("Active ordered broadcasts");
+        dumper.setLabel("Active Ordered Broadcast");
+        for (Deferrals d : mAlarmDeferrals) {
+            d.dumpLocked(dumper);
+        }
         for (BroadcastRecord br : mOrderedBroadcasts) {
             dumper.dump(br);
         }

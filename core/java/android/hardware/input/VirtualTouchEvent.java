@@ -33,6 +33,11 @@ import java.lang.annotation.RetentionPolicy;
  * The pointer id, tool type, action, and location are required; pressure and main axis size are
  * optional.
  *
+ * Note: A VirtualTouchEvent with ACTION_CANCEL can only be created with TOOL_TYPE_PALM (and vice
+ * versa). Events are injected into the uinput kernel module, which has no concept of cancelling
+ * an action. The only way to state the intention that a pointer should not be handled as a pointer
+ * is to change its tool type to TOOL_TYPE_PALM.
+ *
  * @hide
  */
 @SystemApi
@@ -186,6 +191,10 @@ public final class VirtualTouchEvent implements Parcelable {
 
         /**
          * Creates a {@link VirtualTouchEvent} object with the current builder configuration.
+         *
+         * @throws IllegalArgumentException if one of the required arguments is missing or if
+         * ACTION_CANCEL is not set in combination with TOOL_TYPE_PALM. See
+         * {@link VirtualTouchEvent} for a detailed explanation.
          */
         public @NonNull VirtualTouchEvent build() {
             if (mToolType == TOOL_TYPE_UNKNOWN || mPointerId == MotionEvent.INVALID_POINTER_ID
@@ -261,6 +270,16 @@ public final class VirtualTouchEvent implements Parcelable {
 
         /**
          * Sets the pressure of the event. This field is optional and can be omitted.
+         *
+         * @param pressure The pressure of the touch.
+         *                 Note: The VirtualTouchscreen, consuming VirtualTouchEvents, is
+         *                 configured with a pressure axis range from 0.0 to 255.0. Only the
+         *                 lower end of the range is enforced. You can pass values larger than
+         *                 255.0. With physical input devices this could happen if the
+         *                 calibration is off. Values larger than 255.0 will not be trimmed and
+         *                 passed on as is.
+         *
+         * @throws IllegalArgumentException if the pressure is smaller than 0.
          *
          * @return this builder, to allow for chaining of calls
          */

@@ -212,6 +212,26 @@ public class BiometricManager {
          * @see android.security.keystore.KeyGenParameterSpec.Builder
          */
         int DEVICE_CREDENTIAL = 1 << 15;
+
+    }
+
+    /**
+     * @hide
+     * returns a string representation of an authenticator type.
+     */
+    @NonNull public static String authenticatorToStr(@Authenticators.Types int authenticatorType) {
+        switch(authenticatorType) {
+            case Authenticators.BIOMETRIC_STRONG:
+                return "BIOMETRIC_STRONG";
+            case Authenticators.BIOMETRIC_WEAK:
+                return "BIOMETRIC_WEAK";
+            case Authenticators.BIOMETRIC_CONVENIENCE:
+                return "BIOMETRIC_CONVENIENCE";
+            case Authenticators.DEVICE_CREDENTIAL:
+                return "DEVICE_CREDENTIAL";
+            default:
+                return "Unknown authenticator type: " + authenticatorType;
+        }
     }
 
     /**
@@ -618,6 +638,25 @@ public class BiometricManager {
                 throw e.rethrowFromSystemServer();
             }
         }
+    }
+
+    /**
+     * Notifies AuthService that keyguard has been dismissed for the given userId.
+     *
+     * @param userId
+     * @param hardwareAuthToken
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void resetLockout(int userId, byte[] hardwareAuthToken) {
+        if (mService != null) {
+            try {
+                mService.resetLockout(userId, hardwareAuthToken);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
     }
 }
 

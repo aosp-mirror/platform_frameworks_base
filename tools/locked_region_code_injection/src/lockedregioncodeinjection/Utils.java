@@ -20,7 +20,7 @@ import java.util.List;
 
 public class Utils {
 
-    public static final int ASM_VERSION = Opcodes.ASM7;
+    public static final int ASM_VERSION = Opcodes.ASM9;
 
     /**
      * Reads a comma separated configuration similar to the Jack definition.

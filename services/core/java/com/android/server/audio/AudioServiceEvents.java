@@ -16,17 +16,19 @@
 
 package com.android.server.audio;
 
-import android.media.AudioAttributes;
+import android.annotation.NonNull;
+import android.media.AudioDeviceAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.MediaMetrics;
 
 import com.android.server.audio.AudioDeviceInventory.WiredDeviceConnectionState;
+import com.android.server.utils.EventLogger;
 
 
 public class AudioServiceEvents {
 
-    final static class PhoneStateEvent extends AudioEventLogger.Event {
+    final static class PhoneStateEvent extends EventLogger.Event {
         static final int MODE_SET = 0;
         static final int MODE_IN_COMMUNICATION_TIMEOUT = 1;
 
@@ -106,7 +108,7 @@ public class AudioServiceEvents {
         }
     }
 
-    final static class WiredDevConnectEvent extends AudioEventLogger.Event {
+    final static class WiredDevConnectEvent extends EventLogger.Event {
         final WiredDeviceConnectionState mState;
 
         WiredDevConnectEvent(WiredDeviceConnectionState state) {
@@ -125,7 +127,7 @@ public class AudioServiceEvents {
         }
     }
 
-    final static class ForceUseEvent extends AudioEventLogger.Event {
+    final static class ForceUseEvent extends EventLogger.Event {
         final int mUsage;
         final int mConfig;
         final String mReason;
@@ -145,7 +147,44 @@ public class AudioServiceEvents {
         }
     }
 
-    final static class VolumeEvent extends AudioEventLogger.Event {
+    static final class DeviceVolumeEvent extends EventLogger.Event {
+        final int mStream;
+        final int mVolIndex;
+        final String mDeviceNativeType;
+        final String mDeviceAddress;
+        final String mCaller;
+
+        DeviceVolumeEvent(int streamType, int index, @NonNull AudioDeviceAttributes device,
+                String callingPackage) {
+            mStream = streamType;
+            mVolIndex = index;
+            mDeviceNativeType = "0x" + Integer.toHexString(device.getInternalType());
+            mDeviceAddress = device.getAddress();
+            mCaller = callingPackage;
+            // log metrics
+            new MediaMetrics.Item(MediaMetrics.Name.AUDIO_VOLUME_EVENT)
+                    .set(MediaMetrics.Property.EVENT, "setDeviceVolume")
+                    .set(MediaMetrics.Property.STREAM_TYPE,
+                            AudioSystem.streamToString(mStream))
+                    .set(MediaMetrics.Property.INDEX, mVolIndex)
+                    .set(MediaMetrics.Property.DEVICE, mDeviceNativeType)
+                    .set(MediaMetrics.Property.ADDRESS, mDeviceAddress)
+                    .set(MediaMetrics.Property.CALLING_PACKAGE, mCaller)
+                    .record();
+        }
+
+        @Override
+        public String eventToString() {
+            return new StringBuilder("setDeviceVolume(stream:")
+                    .append(AudioSystem.streamToString(mStream))
+                    .append(" index:").append(mVolIndex)
+                    .append(" device:").append(mDeviceNativeType)
+                    .append(" addr:").append(mDeviceAddress)
+                    .append(") from ").append(mCaller).toString();
+        }
+    }
+
+    final static class VolumeEvent extends EventLogger.Event {
         static final int VOL_ADJUST_SUGG_VOL = 0;
         static final int VOL_ADJUST_STREAM_VOL = 1;
         static final int VOL_SET_STREAM_VOL = 2;
@@ -157,6 +196,7 @@ public class AudioServiceEvents {
         static final int VOL_SET_GROUP_VOL = 8;
         static final int VOL_MUTE_STREAM_INT = 9;
         static final int VOL_SET_LE_AUDIO_VOL = 10;
+        static final int VOL_ADJUST_GROUP_VOL = 11;
 
         final int mOp;
         final int mStream;
@@ -164,7 +204,6 @@ public class AudioServiceEvents {
         final int mVal2;
         final String mCaller;
         final String mGroupName;
-        final AudioAttributes mAudioAttributes;
 
         /** used for VOL_ADJUST_VOL_UID,
          *           VOL_ADJUST_SUGG_VOL,
@@ -177,7 +216,6 @@ public class AudioServiceEvents {
             mVal2 = val2;
             mCaller = caller;
             mGroupName = null;
-            mAudioAttributes = null;
             logMetricEvent();
         }
 
@@ -190,7 +228,6 @@ public class AudioServiceEvents {
             mStream = -1;
             mCaller = null;
             mGroupName = null;
-            mAudioAttributes = null;
             logMetricEvent();
         }
 
@@ -203,7 +240,6 @@ public class AudioServiceEvents {
             mStream = -1;
             mCaller = null;
             mGroupName = null;
-            mAudioAttributes = null;
             logMetricEvent();
         }
 
@@ -216,7 +252,6 @@ public class AudioServiceEvents {
             // unused
             mCaller = null;
             mGroupName = null;
-            mAudioAttributes = null;
             logMetricEvent();
         }
 
@@ -229,19 +264,18 @@ public class AudioServiceEvents {
             // unused
             mCaller = null;
             mGroupName = null;
-            mAudioAttributes = null;
             logMetricEvent();
         }
 
-        /** used for VOL_SET_GROUP_VOL */
-        VolumeEvent(int op, AudioAttributes aa, String group, int index, int flags, String caller) {
+        /** used for VOL_SET_GROUP_VOL,
+         *           VOL_ADJUST_GROUP_VOL */
+        VolumeEvent(int op, String group, int index, int flags, String caller) {
             mOp = op;
             mStream = -1;
             mVal1 = index;
             mVal2 = flags;
             mCaller = caller;
             mGroupName = group;
-            mAudioAttributes = aa;
             logMetricEvent();
         }
 
@@ -253,7 +287,6 @@ public class AudioServiceEvents {
             mVal2 = 0;
             mCaller = null;
             mGroupName = null;
-            mAudioAttributes = null;
             logMetricEvent();
         }
 
@@ -295,6 +328,15 @@ public class AudioServiceEvents {
                             .record();
                     return;
                 }
+                case VOL_ADJUST_GROUP_VOL:
+                    new MediaMetrics.Item(mMetricsId)
+                            .set(MediaMetrics.Property.CALLING_PACKAGE, mCaller)
+                            .set(MediaMetrics.Property.DIRECTION, mVal1 > 0 ? "up" : "down")
+                            .set(MediaMetrics.Property.EVENT, "adjustVolumeGroupVolume")
+                            .set(MediaMetrics.Property.FLAGS, mVal2)
+                            .set(MediaMetrics.Property.GROUP, mGroupName)
+                            .record();
+                    return;
                 case VOL_SET_STREAM_VOL:
                     new MediaMetrics.Item(mMetricsId)
                             .set(MediaMetrics.Property.CALLING_PACKAGE, mCaller)
@@ -346,7 +388,6 @@ public class AudioServiceEvents {
                     return;
                 case VOL_SET_GROUP_VOL:
                     new MediaMetrics.Item(mMetricsId)
-                            .set(MediaMetrics.Property.ATTRIBUTES, mAudioAttributes.toString())
                             .set(MediaMetrics.Property.CALLING_PACKAGE, mCaller)
                             .set(MediaMetrics.Property.EVENT, "setVolumeIndexForAttributes")
                             .set(MediaMetrics.Property.FLAGS, mVal2)
@@ -368,6 +409,13 @@ public class AudioServiceEvents {
                 case VOL_ADJUST_SUGG_VOL:
                     return new StringBuilder("adjustSuggestedStreamVolume(sugg:")
                             .append(AudioSystem.streamToString(mStream))
+                            .append(" dir:").append(AudioManager.adjustToString(mVal1))
+                            .append(" flags:0x").append(Integer.toHexString(mVal2))
+                            .append(") from ").append(mCaller)
+                            .toString();
+                case VOL_ADJUST_GROUP_VOL:
+                    return new StringBuilder("adjustVolumeGroupVolume(group:")
+                            .append(mGroupName)
                             .append(" dir:").append(AudioManager.adjustToString(mVal1))
                             .append(" flags:0x").append(Integer.toHexString(mVal2))
                             .append(") from ").append(mCaller)
@@ -394,7 +442,7 @@ public class AudioServiceEvents {
                 case VOL_SET_LE_AUDIO_VOL:
                     return new StringBuilder("setLeAudioVolume:")
                             .append(" index:").append(mVal1)
-                            .append(" gain dB:").append(mVal2)
+                            .append(" maxIndex:").append(mVal2)
                             .toString();
                 case VOL_SET_AVRCP_VOL:
                     return new StringBuilder("setAvrcpVolume:")
@@ -420,8 +468,7 @@ public class AudioServiceEvents {
                             .append(" stream:").append(AudioSystem.streamToString(mStream))
                             .toString();
                 case VOL_SET_GROUP_VOL:
-                    return new StringBuilder("setVolumeIndexForAttributes(attr:")
-                            .append(mAudioAttributes.toString())
+                    return new StringBuilder("setVolumeIndexForAttributes(group:")
                             .append(" group: ").append(mGroupName)
                             .append(" index:").append(mVal1)
                             .append(" flags:0x").append(Integer.toHexString(mVal2))
@@ -434,6 +481,55 @@ public class AudioServiceEvents {
                             .toString();
                 default: return new StringBuilder("FIXME invalid op:").append(mOp).toString();
             }
+        }
+    }
+
+    static final class SoundDoseEvent extends EventLogger.Event {
+        static final int MOMENTARY_EXPOSURE = 0;
+        static final int DOSE_UPDATE = 1;
+        static final int DOSE_REPEAT_5X = 2;
+        static final int DOSE_ACCUMULATION_START = 3;
+        final int mEventType;
+        final float mFloatValue;
+        final long mLongValue;
+
+        private SoundDoseEvent(int event, float f, long l) {
+            mEventType = event;
+            mFloatValue = f;
+            mLongValue = l;
+        }
+
+        static SoundDoseEvent getMomentaryExposureEvent(float mel) {
+            return new SoundDoseEvent(MOMENTARY_EXPOSURE, mel, 0 /*ignored*/);
+        }
+
+        static SoundDoseEvent getDoseUpdateEvent(float csd, long totalDuration) {
+            return new SoundDoseEvent(DOSE_UPDATE, csd, totalDuration);
+        }
+
+        static SoundDoseEvent getDoseRepeat5xEvent() {
+            return new SoundDoseEvent(DOSE_REPEAT_5X, 0 /*ignored*/, 0 /*ignored*/);
+        }
+
+        static SoundDoseEvent getDoseAccumulationStartEvent() {
+            return new SoundDoseEvent(DOSE_ACCUMULATION_START, 0 /*ignored*/, 0 /*ignored*/);
+        }
+
+        @Override
+        public String eventToString() {
+            switch (mEventType) {
+                case MOMENTARY_EXPOSURE:
+                    return String.format("momentary exposure MEL=%.2f", mFloatValue);
+                case DOSE_UPDATE:
+                    return String.format(java.util.Locale.US,
+                            "dose update CSD=%.1f%% total duration=%d",
+                            mFloatValue * 100.0f, mLongValue);
+                case DOSE_REPEAT_5X:
+                    return "CSD reached 500%";
+                case DOSE_ACCUMULATION_START:
+                    return "CSD accumulating: RS2 entered";
+            }
+            return new StringBuilder("FIXME invalid event type:").append(mEventType).toString();
         }
     }
 }

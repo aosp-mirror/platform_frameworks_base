@@ -20,6 +20,8 @@ import android.content.Context;
 import android.media.AudioManager;
 
 import com.android.internal.jank.InteractionJankMonitor;
+import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.VolumeDialog;
@@ -27,9 +29,13 @@ import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.volume.VolumeDialogComponent;
 import com.android.systemui.volume.VolumeDialogImpl;
+import com.android.systemui.volume.VolumePanelFactory;
+
+import java.util.concurrent.Executor;
 
 import dagger.Binds;
 import dagger.Module;
@@ -52,8 +58,12 @@ public interface VolumeModule {
             DeviceProvisionedController deviceProvisionedController,
             ConfigurationController configurationController,
             MediaOutputDialogFactory mediaOutputDialogFactory,
+            VolumePanelFactory volumePanelFactory,
             ActivityStarter activityStarter,
-            InteractionJankMonitor interactionJankMonitor) {
+            InteractionJankMonitor interactionJankMonitor,
+            DeviceConfigProxy deviceConfigProxy,
+            @Main Executor executor,
+            DumpManager dumpManager) {
         VolumeDialogImpl impl = new VolumeDialogImpl(
                 context,
                 volumeDialogController,
@@ -61,8 +71,12 @@ public interface VolumeModule {
                 deviceProvisionedController,
                 configurationController,
                 mediaOutputDialogFactory,
+                volumePanelFactory,
                 activityStarter,
-                interactionJankMonitor);
+                interactionJankMonitor,
+                deviceConfigProxy,
+                executor,
+                dumpManager);
         impl.setStreamImportant(AudioManager.STREAM_SYSTEM, false);
         impl.setAutomute(true);
         impl.setSilentMode(false);

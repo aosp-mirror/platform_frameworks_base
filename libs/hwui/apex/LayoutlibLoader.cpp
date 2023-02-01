@@ -53,6 +53,7 @@ extern int register_android_graphics_FontFamily(JNIEnv* env);
 extern int register_android_graphics_Matrix(JNIEnv* env);
 extern int register_android_graphics_Paint(JNIEnv* env);
 extern int register_android_graphics_Path(JNIEnv* env);
+extern int register_android_graphics_PathIterator(JNIEnv* env);
 extern int register_android_graphics_PathMeasure(JNIEnv* env);
 extern int register_android_graphics_Picture(JNIEnv* env);
 extern int register_android_graphics_Region(JNIEnv* env);
@@ -100,6 +101,7 @@ static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
         {"android.graphics.Paint", REG_JNI(register_android_graphics_Paint)},
         {"android.graphics.Path", REG_JNI(register_android_graphics_Path)},
         {"android.graphics.PathEffect", REG_JNI(register_android_graphics_PathEffect)},
+        {"android.graphics.PathIterator", REG_JNI(register_android_graphics_PathIterator)},
         {"android.graphics.PathMeasure", REG_JNI(register_android_graphics_PathMeasure)},
         {"android.graphics.Picture", REG_JNI(register_android_graphics_Picture)},
         {"android.graphics.RecordingCanvas", REG_JNI(register_android_view_DisplayListCanvas)},

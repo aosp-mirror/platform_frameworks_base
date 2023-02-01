@@ -826,7 +826,9 @@ public abstract class CameraDevice implements AutoCloseable {
      * <p> Here, SC Map, refers to the {@link StreamConfigurationMap}, the target stream sizes must
      * be chosen from. {@code DEFAULT} refers to the default sensor pixel mode {@link
      * StreamConfigurationMap} and {@code MAX_RES} refers to the maximum resolution {@link
-     * StreamConfigurationMap}. The same capture request must not mix targets from
+     * StreamConfigurationMap}. For {@code MAX_RES} streams, {@code MAX} in the {@code Max size} column refers to the maximum size from
+     * {@link StreamConfigurationMap#getOutputSizes} and {@link StreamConfigurationMap#getHighResolutionOutputSizes}.
+     * Note: The same capture request must not mix targets from
      * {@link StreamConfigurationMap}s corresponding to different sensor pixel modes. </p>
      *
      * <p> 10-bit output capable
@@ -857,6 +859,28 @@ public abstract class CameraDevice implements AutoCloseable {
      * format {@link android.graphics.ImageFormat#YUV_420_888} with a 10-bit profile
      * will cause a capture session initialization failure.
      * </p>
+     * <p>{@link android.graphics.ImageFormat#JPEG_R} may also be supported if advertised by
+     * {@link android.hardware.camera2.params.StreamConfigurationMap}. When initializing a capture
+     * session that includes a Jpeg/R camera output clients must consider the following items w.r.t.
+     * the 10-bit mandatory stream combination table:
+     *
+     * <ul>
+     *     <li>To generate the compressed Jpeg/R image a single
+     *     {@link android.graphics.ImageFormat#YCBCR_P010} output will be used internally by
+     *     the camera device.</li>
+     *     <li>On camera devices that are able to support concurrent 10 and 8-bit capture requests
+     *     see {@link android.hardware.camera2.params.DynamicRangeProfiles#getProfileCaptureRequestConstraints}
+     *     an extra {@link android.graphics.ImageFormat#JPEG} will also
+     *     be configured internally to help speed up the encoding process.</li>
+     * </ul>
+     *
+     * Jpeg/R camera outputs will typically be able to support the MAXIMUM device resolution.
+     * Clients can also call {@link StreamConfigurationMap#getOutputSizes(int)} for a complete list
+     * supported sizes.
+     * Camera clients that register a Jpeg/R output within a stream combination that doesn't fit
+     * in the mandatory stream table above can call
+     * {@link CameraDevice#isSessionConfigurationSupported} to ensure that this particular
+     * configuration is supported.</p>
      *
      * <p>Devices with the STREAM_USE_CASE capability ({@link
      * CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES} includes {@link
@@ -876,12 +900,26 @@ public abstract class CameraDevice implements AutoCloseable {
      * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV / PRIV}</td><td id="rb">{@code RECORD}</td><td id="rb">{@code VIDEO_RECORD}</td> <td colspan="3" id="rb"></td> <td>Preview with video recording or in-app video processing</td> </tr>
      * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td colspan="3" id="rb"></td> <td>Preview with in-application image processing</td> </tr>
      * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV / PRIV}</td><td id="rb">{@code s1440p}</td><td id="rb">{@code VIDEO_CALL}</td> <td colspan="3" id="rb"></td> <td>Preview with video call</td> </tr>
-     * <tr> <td>{@code YUV / PRIV}</td><td id="rb">{@code s1440p}</td><td id="rb">{@code PREVIEW_VIDEO_STILL}</td> <td>{@code YUV / JPEG}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code STILL_CAPTURE}</td> <td colspan="3" id="rb"></td> <td>Multi-purpose stream with JPEG or YUV still capture</td> </tr>
+     * <tr> <td>{@code YUV / PRIV}</td><td id="rb">{@code s1440p}</td><td id="rb">{@code PREVIEW_VIDEO_STILL}</td> <td>{@code YUV / JPEG}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code STILL_CAPTURE}</td> <td colspan="3" id="rb"></td> <td>MultI-purpose stream with JPEG or YUV still capture</td> </tr>
      * <tr> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code STILL_CAPTURE}</td> <td>{@code JPEG}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code STILL_CAPTURE}</td> <td colspan="3" id="rb"></td> <td>YUV and JPEG concurrent still image capture (for testing)</td> </tr>
-     * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV / PRIV}</td><td id="rb">{@code RECORD}</td><td id="rb">{@code VIDEO_RECORD}</td> <td>{@code YUV / JPEG}</td><td id="rb">{@code RECORD}</td><td id="rb">{@code STILL_CAPTURE}</td> <td>Preview, video record and JPEG or YUV video snapshot</td> </tr>
-     * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV / JPEG}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code STILL_CAPTURE}</td> <td>Preview, in-application image processing, and JPEG or YUV still image capture</td> </tr>
+     * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV / PRIV}</td><td id="rb">{@code RECORD}</td><td id="rb">{@code VIDEO_RECORD}</td> <td>{@code JPEG}</td><td id="rb">{@code RECORD}</td><td id="rb">{@code STILL_CAPTURE}</td> <td>Preview, video record and JPEG video snapshot</td> </tr>
+     * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code JPEG}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code STILL_CAPTURE}</td> <td>Preview, in-application image processing, and JPEG still image capture</td> </tr>
      * </table><br>
      * </p>
+     *
+     * <p>Devices that include the {@link CameraMetadata#SCALER_AVAILABLE_STREAM_USE_CASES_CROPPED_RAW}
+     * stream use-case in {@link CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES},
+     * support the additional stream combinations below:
+     *
+     * <table>
+     * <tr><th colspan="10">STREAM_USE_CASE_CROPPED_RAW capability additional guaranteed configurations</th></tr>
+     * <tr><th colspan="3" id="rb">Target 1</th><th colspan="3" id="rb">Target 2</th><th colspan="3" id="rb">Target 3</th> <th rowspan="2">Sample use case(s)</th> </tr>
+     * <tr><th>Type</th><th id="rb">Max size</th><th>Usecase</th><th>Type</th><th id="rb">Max size</th><th>Usecase</th><th>Type</th><th id="rb">Max size</th><th>Usecase</th> </tr>
+     * <tr> <td>{@code RAW}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code CROPPED_RAW}</td> <td colspan="3" id="rb"></td> <td colspan="3" id="rb"></td> <td>Cropped RAW still capture without preview</td> </tr>
+     * <tr> <td>{@code PRIV / YUV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code RAW}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code CROPPED_RAW}</td> <td colspan="3" id="rb"></td> <td>Preview with cropped RAW still capture</td> </tr>
+     * <tr> <td>{@code PRIV / YUV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV / JPEG}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code STILL_CAPTURE}</td> <td>{@code RAW}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code CROPPED_RAW}</td> <td>Preview with YUV / JPEG and cropped RAW still capture</td> </tr>
+     * <tr> <td>{@code PRIV / YUV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code PRIV / YUV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code VIDEO_RECORD / PREVIEW}</td> <td>{@code RAW}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code CROPPED_RAW}</td> <td>Video recording with preview and cropped RAW still capture</td> </tr>
+     *
      *
      *<p> For devices where {@link CameraCharacteristics#CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES}
      * includes {@link CameraMetadata#CONTROL_VIDEO_STABILIZATION_MODE_PREVIEW_STABILIZATION},
@@ -892,7 +930,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * <tr><th colspan="7">Preview stabilization guaranteed stream configurations</th></tr>
      * <tr><th colspan="2" id="rb">Target 1</th><th colspan="2" id="rb">Target 2</th><th rowspan="2">Sample use case(s)</th> </tr>
      * <tr><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th></tr>
-     * <tr> <td>{@code PRIV / YUV}</td><td id="rb">{@code s1440p}</td><td colspan="4" id="rb"></td> <td>Stabilized preview, GPU video processing, or no-preview stabilized video recording.</td> </tr>
+     * <tr> <td>{@code PRIV / YUV}</td><td id="rb">{@code s1440p}</td><td colspan="2" id="rb"></td> <td>Stabilized preview, GPU video processing, or no-preview stabilized video recording.</td> </tr>
      * <tr> <td>{@code PRIV / YUV}</td><td id="rb">{@code s1440p}</td> <td>{@code JPEG / YUV}</td><td id="rb">{@code MAXIMUM }</td><td>Standard still imaging with stabilized preview.</td> </tr>
      * <tr> <td>{@code PRIV / YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code PRIV / YUV}</td><td id="rb">{@code s1440p }</td><td>High-resolution recording with stabilized preview and recording stream.</td> </tr>
      * </table><br>

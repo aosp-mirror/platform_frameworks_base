@@ -17,6 +17,7 @@
 package com.android.internal.telephony;
 
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
@@ -34,6 +35,7 @@ import android.telephony.CallForwardingInfo;
 import android.telephony.CarrierRestrictionRules;
 import android.telephony.CellIdentity;
 import android.telephony.CellInfo;
+import android.telephony.CellBroadcastIdRange;
 import android.telephony.ClientRequestStats;
 import android.telephony.ThermalMitigationRequest;
 import android.telephony.gba.UaSecurityProtocolIdentifier;
@@ -64,6 +66,7 @@ import android.telephony.ims.aidl.IImsRcsFeature;
 import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.telephony.ims.aidl.IRcsConfigCallback;
+import android.telephony.satellite.ISatellitePositionUpdateCallback;
 import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.IBooleanConsumer;
@@ -242,6 +245,44 @@ interface ITelephony {
      * Set the radio to on or off unconditionally
      */
     boolean setRadioPower(boolean turnOn);
+
+    /**
+     * Vote on powering off the radio for a reason. The radio will be turned on only when there is
+     * no reason to power it off. When any of the voters want to power it off, it will be turned
+     * off. In case of emergency, the radio will be turned on even if there are some reasons for
+     * powering it off, and these radio off votes will be cleared.
+     * Multiple apps can vote for the same reason and the last vote will take effect. Each app is
+     * responsible for its vote. A powering-off vote of a reason will be maintained until it is
+     * cleared by calling {@link clearRadioPowerOffForReason} for that reason, or an emergency call
+     * is made, or the device is rebooted. When an app comes backup from a crash, it needs to make
+     * sure if its vote is as expected. An app can use the API {@link getRadioPowerOffReasons} to
+     * check its vote.
+     *
+     * @param subId The subscription ID.
+     * @param reason The reason for powering off radio.
+     * @return true on success and false on failure.
+     */
+    boolean requestRadioPowerOffForReason(int subId, int reason);
+
+    /**
+     * Remove the vote on powering off the radio for a reasonas, requested by
+     * {@link requestRadioPowerOffForReason}.
+     *
+     * @param subId The subscription ID.
+     * @param reason The reason for powering off radio.
+     * @return true on success and false on failure.
+     */
+    boolean clearRadioPowerOffForReason(int subId, int reason);
+
+    /**
+     * Get reasons for powering off radio, as requested by {@link requestRadioPowerOffForReason}.
+     *
+     * @param subId The subscription ID.
+     * @param callingPackage The package making the call.
+     * @param callingFeatureId The feature in the package.
+     * @return List of reasons for powering off radio.
+     */
+    List getRadioPowerOffReasons(int subId, String callingPackage, String callingFeatureId);
 
     /**
      * This method has been removed due to security and stability issues.
@@ -583,7 +624,7 @@ interface ITelephony {
     /**
      * Sets minimum time in milli-seconds between onCellInfoChanged
      */
-    void setCellInfoListRate(int rateInMillis);
+    void setCellInfoListRate(int rateInMillis, int subId);
 
     /**
      * Opens a logical channel to the ICC card.
@@ -1279,6 +1320,16 @@ interface ITelephony {
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      */
     String getImeiForSlot(int slotIndex, String callingPackage, String callingFeatureId);
+
+    /**
+     * Returns the primary IMEI of the device
+     *
+     * @param callingPackage The package name of the caller
+     * @param callingFeatureId The feature Id of the calling package
+     * @throws UnsupportedOperationException if the radio doesn't support this feature.
+     * @throws SecurityException if the caller does not have the required permission/privileges
+     */
+    String getPrimaryImei(String callingPackage, String callingFeatureId);
 
     /**
      * Returns the Type Allocation Code from the IMEI for the given slot.
@@ -2121,6 +2172,12 @@ interface ITelephony {
     int getRadioHalVersion();
 
     /**
+     * Get the HAL Version of a specific service
+     * encoded as 100 * MAJOR_VERSION + MINOR_VERSION or -1 if unknown
+     */
+    int getHalVersion(int service);
+
+    /**
      * Get the current calling package name.
      */
     String getCurrentPackageName();
@@ -2151,6 +2208,11 @@ interface ITelephony {
      */
     oneway void enqueueSmsPickResult(String callingPackage, String callingAttributeTag,
         IIntegerConsumer subIdResult);
+
+    /**
+     * Show error dialog to switch to managed profile.
+     */
+    oneway void showSwitchToManagedProfileDialog();
 
     /**
      * Returns the MMS user agent.
@@ -2491,6 +2553,16 @@ interface ITelephony {
     void getSlicingConfig(in ResultReceiver callback);
 
     /**
+     * Check whether the given premium capability is available for purchase from the carrier.
+     */
+    boolean isPremiumCapabilityAvailableForPurchase(int capability, int subId);
+
+    /**
+     * Purchase the given premium capability from the carrier.
+     */
+    void purchasePremiumCapability(int capability, IIntegerConsumer callback, int subId);
+
+    /**
      * Register an IMS connection state callback
      */
     void registerImsStateCallback(int subId, int feature, in IImsStateCallback cb,
@@ -2509,9 +2581,6 @@ interface ITelephony {
      */
     CellIdentity getLastKnownCellIdentity(int subId, String callingPackage,
             String callingFeatureId);
-
-    /** Check if telephony new data stack is enabled. */
-    boolean isUsingNewDataStack();
 
     /**
      *  @return true if the modem service is set successfully, false otherwise.
@@ -2567,4 +2636,82 @@ interface ITelephony {
      * @hide
      */
     boolean isRemovableEsimDefaultEuicc(String callingPackage);
+
+    /**
+     * Get the component name of the default app to direct respond-via-message intent for the
+     * user associated with this subscription, update the cache if there is no respond-via-message
+     * application currently configured for this user.
+     * @return component name of the app and class to direct Respond Via Message intent to, or
+     * {@code null} if the functionality is not supported.
+     * @hide
+     */
+    ComponentName getDefaultRespondViaMessageApplication(int subId, boolean updateIfNeeded);
+
+    /**
+     * Get the SIM state for the logical SIM slot index.
+     *
+     * @param slotIndex Logical SIM slot index.
+     */
+    int getSimStateForSlotIndex(int slotIndex);
+
+    /**
+     * Set whether the radio is able to connect with null ciphering or integrity
+     * algorithms. This is a global setting and will apply to all active subscriptions
+     * and all new subscriptions after this.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     *
+     * @param enabled when true, null  cipher and integrity algorithms are allowed.
+     * @hide
+     */
+    void setNullCipherAndIntegrityEnabled(boolean enabled);
+
+    /**
+     * Get whether the radio is able to connect with null ciphering or integrity
+     * algorithms. Note that this retrieves the phone-global preference and not
+     * the state of the radio.
+     *
+     * @hide
+     */
+    boolean isNullCipherAndIntegrityPreferenceEnabled();
+
+    /**
+     * Get current broadcast ranges.
+     */
+    List<CellBroadcastIdRange> getCellBroadcastIdRanges(int subId);
+
+    /**
+     * Set reception of cell broadcast messages with the list of the given ranges
+     */
+    void setCellBroadcastIdRanges(int subId, in List<CellBroadcastIdRange> ranges,
+            IIntegerConsumer callback);
+
+    /**
+     * Returns whether the domain selection service is supported.
+     *
+     * @return {@code true} if the domain selection service is supported.
+     */
+    boolean isDomainSelectionSupported();
+
+    /**
+     * Get the carrier restriction status of the device.
+     */
+    void getCarrierRestrictionStatus(IIntegerConsumer internalCallback, String packageName);
+
+    /**
+     * Start receiving satellite pointing updates.
+     */
+    int startSatellitePositionUpdates(int subId, int callbackId,
+            in ISatellitePositionUpdateCallback callback);
+
+    /**
+     * Stop receiving satellite pointing updates.
+     */
+    int stopSatellitePositionUpdates(int subId, int callbackId);
+
+    /**
+     * Get maximum number of characters per text message on satellite.
+     */
+    int getMaxCharactersPerSatelliteTextMessage(int subId, IIntegerConsumer internalCallback);
 }

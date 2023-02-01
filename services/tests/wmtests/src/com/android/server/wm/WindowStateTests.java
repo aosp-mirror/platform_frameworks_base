@@ -26,6 +26,9 @@ import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
+import static android.view.WindowInsets.Type.ime;
+import static android.view.WindowInsets.Type.navigationBars;
+import static android.view.WindowInsets.Type.statusBars;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
@@ -42,6 +45,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+import static android.view.WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
@@ -92,9 +96,10 @@ import android.view.Gravity;
 import android.view.InputWindowHandle;
 import android.view.InsetsSource;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.window.ITaskFragmentOrganizer;
+import android.window.TaskFragmentOrganizer;
 
 import androidx.test.filters.SmallTest;
 
@@ -261,7 +266,7 @@ public class WindowStateTests extends WindowTestsBase {
 
         // Verify that app window can still be IME target as long as it is visible (even if
         // it is going to become invisible).
-        appWindow.mActivityRecord.mVisibleRequested = false;
+        appWindow.mActivityRecord.setVisibleRequested(false);
         assertTrue(appWindow.canBeImeTarget());
 
         // Make windows invisible
@@ -273,12 +278,9 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(imeWindow.canBeImeTarget());
 
         // Simulate the window is in split screen root task.
-        final DockedTaskDividerController controller =
-                mDisplayContent.getDockedDividerController();
         final Task rootTask = createTask(mDisplayContent,
                 WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
         spyOn(appWindow);
-        spyOn(controller);
         spyOn(rootTask);
         rootTask.setFocusable(false);
         doReturn(rootTask).when(appWindow).getRootTask();
@@ -410,6 +412,16 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     @Test
+    public void testCanAffectSystemUiFlags_starting() {
+        final WindowState app = createWindow(null, TYPE_APPLICATION_STARTING, "app");
+        app.mActivityRecord.setVisible(true);
+        app.mStartingData = new SnapshotStartingData(mWm, null, 0);
+        assertFalse(app.canAffectSystemUiFlags());
+        app.mStartingData = new SplashScreenStartingData(mWm, 0, 0);
+        assertTrue(app.canAffectSystemUiFlags());
+    }
+
+    @Test
     public void testCanAffectSystemUiFlags_disallow() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         app.mActivityRecord.setVisible(true);
@@ -418,7 +430,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(app.canAffectSystemUiFlags());
     }
 
-    @UseTestDisplay(addWindows = {W_ACTIVITY, W_STATUS_BAR})
+    @SetupWindows(addWindows = { W_ACTIVITY, W_STATUS_BAR })
     @Test
     public void testVisibleWithInsetsProvider() {
         final WindowState statusBar = mStatusBarWindow;
@@ -430,9 +442,7 @@ public class WindowStateTests extends WindowTestsBase {
                         null /* imeFrameProvider */);
         mDisplayContent.getInsetsStateController().onBarControlTargetChanged(
                 app, null /* fakeTopControlling */, app, null /* fakeNavControlling */);
-        final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
-        requestedVisibilities.setVisibility(ITYPE_STATUS_BAR, false);
-        app.setRequestedVisibilities(requestedVisibilities);
+        app.setRequestedVisibleTypes(0, statusBars());
         mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_STATUS_BAR)
                 .updateClientVisibility(app);
         waitUntilHandlersIdle();
@@ -542,7 +552,12 @@ public class WindowStateTests extends WindowTestsBase {
         win.applyWithNextDraw(t -> handledT[0] = t);
         assertTrue(win.useBLASTSync());
         final SurfaceControl.Transaction drawT = new StubTransaction();
+        final SurfaceControl.Transaction currT = win.getSyncTransaction();
+        clearInvocations(currT);
+        win.mWinAnimator.mLastHidden = true;
         assertTrue(win.finishDrawing(drawT, Integer.MAX_VALUE));
+        // The draw transaction should be merged to current transaction even if the state is hidden.
+        verify(currT).merge(eq(drawT));
         assertEquals(drawT, handledT[0]);
         assertFalse(win.useBLASTSync());
 
@@ -664,19 +679,16 @@ public class WindowStateTests extends WindowTestsBase {
         assertEquals(expectedChildPos, childPos);
 
         // Surface should apply the scale.
+        final SurfaceControl.Transaction t = w.getPendingTransaction();
         w.prepareSurfaces();
-        verify(w.getPendingTransaction()).setMatrix(w.getSurfaceControl(),
-                overrideScale, 0, 0, overrideScale);
+        verify(t).setMatrix(w.mSurfaceControl, overrideScale, 0, 0, overrideScale);
         // Child surface inherits parent's scale, so it doesn't need to scale.
-        verify(child.getPendingTransaction(), never()).setMatrix(any(), anyInt(), anyInt(),
-                anyInt(), anyInt());
+        verify(t, never()).setMatrix(any(), anyInt(), anyInt(), anyInt(), anyInt());
 
         // According to "dp * density / 160 = px", density is scaled and the size in dp is the same.
-        final CompatibilityInfo compatInfo = cmp.compatibilityInfoForPackageLocked(
-                mContext.getApplicationInfo());
         final Configuration winConfig = w.getConfiguration();
         final Configuration clientConfig = new Configuration(w.getConfiguration());
-        compatInfo.applyToConfiguration(clientConfig.densityDpi, clientConfig);
+        CompatibilityInfo.scaleConfiguration(w.mInvGlobalScale, clientConfig);
 
         assertEquals(winConfig.screenWidthDp, clientConfig.screenWidthDp);
         assertEquals(winConfig.screenHeightDp, clientConfig.screenHeightDp);
@@ -686,9 +698,16 @@ public class WindowStateTests extends WindowTestsBase {
         final Rect unscaledClientBounds = new Rect(clientConfig.windowConfiguration.getBounds());
         unscaledClientBounds.scale(overrideScale);
         assertEquals(w.getWindowConfiguration().getBounds(), unscaledClientBounds);
+
+        // Child window without scale (e.g. different app) should apply inverse scale of parent.
+        doReturn(1f).when(cmp).getCompatScale(anyString(), anyInt());
+        final WindowState child2 = createWindow(w, TYPE_APPLICATION_SUB_PANEL, "child2");
+        clearInvocations(t);
+        child2.prepareSurfaces();
+        verify(t).setMatrix(child2.mSurfaceControl, w.mInvGlobalScale, 0, 0, w.mInvGlobalScale);
     }
 
-    @UseTestDisplay(addWindows = {W_ABOVE_ACTIVITY, W_NOTIFICATION_SHADE})
+    @SetupWindows(addWindows = { W_ABOVE_ACTIVITY, W_NOTIFICATION_SHADE })
     @Test
     public void testRequestDrawIfNeeded() {
         final WindowState startingApp = createWindow(null /* parent */,
@@ -712,9 +731,37 @@ public class WindowStateTests extends WindowTestsBase {
         // Keyguard host window should be always contained. The drawn app or app with starting
         // window are unnecessary to draw.
         assertEquals(Arrays.asList(keyguardHostWindow, startingWindow), outWaitingForDrawn);
+
+        // No need to wait for a window of invisible activity even if the window has surface.
+        final WindowState invisibleApp = mAppWindow;
+        invisibleApp.mActivityRecord.setVisibleRequested(false);
+        invisibleApp.mActivityRecord.allDrawn = false;
+        outWaitingForDrawn.clear();
+        invisibleApp.requestDrawIfNeeded(outWaitingForDrawn);
+        assertTrue(outWaitingForDrawn.isEmpty());
+
+        // Drawn state should not be changed for insets change when screen is off.
+        spyOn(mWm.mPolicy);
+        doReturn(false).when(mWm.mPolicy).isScreenOn();
+        makeWindowVisibleAndDrawn(startingApp);
+        startingApp.getConfiguration().orientation = 0; // Reset to be the same as last reported.
+        startingApp.getWindowFrames().setInsetsChanged(true);
+        startingApp.updateResizingWindowIfNeeded();
+        assertTrue(mWm.mResizingWindows.contains(startingApp));
+        assertTrue(startingApp.isDrawn());
+        assertFalse(startingApp.getOrientationChanging());
+
+        // Even if the display is frozen, invisible requested window should not be affected.
+        startingApp.mActivityRecord.setVisibleRequested(false);
+        mWm.startFreezingDisplay(0, 0, mDisplayContent);
+        doReturn(true).when(mWm.mPolicy).isScreenOn();
+        startingApp.getWindowFrames().setInsetsChanged(true);
+        startingApp.updateResizingWindowIfNeeded();
+        assertTrue(startingApp.isDrawn());
+        assertFalse(startingApp.getOrientationChanging());
     }
 
-    @UseTestDisplay(addWindows = W_ABOVE_ACTIVITY)
+    @SetupWindows(addWindows = W_ABOVE_ACTIVITY)
     @Test
     public void testReportResizedWithRemoteException() {
         final WindowState win = mChildAppWindowAbove;
@@ -732,7 +779,7 @@ public class WindowStateTests extends WindowTestsBase {
                     anyBoolean() /* reportDraw */, any() /* mergedConfig */,
                     any() /* insetsState */, anyBoolean() /* forceLayout */,
                     anyBoolean() /* alwaysConsumeSystemBars */, anyInt() /* displayId */,
-                    anyInt() /* seqId */, anyInt() /* resizeMode */);
+                    anyInt() /* seqId */, anyBoolean() /* dragResizing */);
         } catch (RemoteException ignored) {
         }
         win.reportResized();
@@ -744,7 +791,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(win.getOrientationChanging());
     }
 
-    @UseTestDisplay(addWindows = W_ABOVE_ACTIVITY)
+    @SetupWindows(addWindows = W_ABOVE_ACTIVITY)
     @Test
     public void testRequestResizeForBlastSync() {
         final WindowState win = mChildAppWindowAbove;
@@ -770,9 +817,42 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     @Test
+    public void testEmbeddedActivityResizing_clearAllDrawn() {
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        mAtm.mTaskFragmentOrganizerController.registerOrganizer(
+                ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder()));
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment embeddedTf = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final ActivityRecord embeddedActivity = embeddedTf.getTopMostActivity();
+        final WindowState win = createWindow(null /* parent */, TYPE_APPLICATION, embeddedActivity,
+                "App window");
+        doReturn(true).when(embeddedActivity).isVisible();
+        embeddedActivity.setVisibleRequested(true);
+        makeWindowVisible(win);
+        win.mLayoutSeq = win.getDisplayContent().mLayoutSeq;
+        // Set the bounds twice:
+        // 1. To make sure there is no orientation change after #reportResized, which can also cause
+        // #clearAllDrawn.
+        // 2. Make #isLastConfigReportedToClient to be false after #reportResized, so it can process
+        // to check if we need redraw.
+        embeddedTf.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        embeddedTf.setBounds(0, 0, 1000, 2000);
+        win.reportResized();
+        embeddedTf.setBounds(500, 0, 1000, 2000);
+
+        // Clear all drawn when the embedded TaskFragment is in mDisplayContent.mChangingContainers.
+        win.updateResizingWindowIfNeeded();
+        verify(embeddedActivity, never()).clearAllDrawn();
+
+        mDisplayContent.mChangingContainers.add(embeddedTf);
+        win.updateResizingWindowIfNeeded();
+        verify(embeddedActivity).clearAllDrawn();
+    }
+
+    @Test
     public void testCantReceiveTouchWhenAppTokenHiddenRequested() {
         final WindowState win0 = createWindow(null, TYPE_APPLICATION, "win0");
-        win0.mActivityRecord.mVisibleRequested = false;
+        win0.mActivityRecord.setVisibleRequested(false);
         assertFalse(win0.canReceiveTouchInput());
     }
 
@@ -882,7 +962,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertTrue(mAtm.mActiveUids.hasNonAppVisibleWindow(uid));
     }
 
-    @UseTestDisplay(addWindows = {W_ACTIVITY, W_INPUT_METHOD})
+    @SetupWindows(addWindows = { W_ACTIVITY, W_INPUT_METHOD })
     @Test
     public void testNeedsRelativeLayeringToIme_notAttached() {
         WindowState sameTokenWindow = createWindow(null, TYPE_BASE_APPLICATION, mAppWindow.mToken,
@@ -895,7 +975,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(sameTokenWindow.needsRelativeLayeringToIme());
     }
 
-    @UseTestDisplay(addWindows = {W_ACTIVITY, W_INPUT_METHOD})
+    @SetupWindows(addWindows = { W_ACTIVITY, W_INPUT_METHOD })
     @Test
     public void testNeedsRelativeLayeringToIme_startingWindow() {
         WindowState sameTokenWindow = createWindow(null, TYPE_APPLICATION_STARTING,
@@ -904,6 +984,19 @@ public class WindowStateTests extends WindowTestsBase {
         makeWindowVisible(mImeWindow);
         sameTokenWindow.mActivityRecord.getRootTask().setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         assertFalse(sameTokenWindow.needsRelativeLayeringToIme());
+    }
+
+    @UseTestDisplay(addWindows = {W_ACTIVITY, W_INPUT_METHOD})
+    @Test
+    public void testNeedsRelativeLayeringToIme_systemDialog() {
+        WindowState systemDialogWindow = createWindow(null, TYPE_SECURE_SYSTEM_OVERLAY,
+                mDisplayContent,
+                "SystemDialog", true);
+        mDisplayContent.setImeLayeringTarget(mAppWindow);
+        mAppWindow.getRootTask().setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        makeWindowVisible(mImeWindow);
+        systemDialogWindow.mAttrs.flags |= FLAG_ALT_FOCUSABLE_IM;
+        assertTrue(systemDialogWindow.needsRelativeLayeringToIme());
     }
 
     @Test
@@ -938,10 +1031,10 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(overlay.getWindowFrames().hasInsetsChanged());
     }
 
-    @UseTestDisplay(addWindows = {W_INPUT_METHOD, W_ACTIVITY})
+    @SetupWindows(addWindows = { W_INPUT_METHOD, W_ACTIVITY })
     @Test
     public void testImeAlwaysReceivesVisibleNavigationBarInsets() {
-        final InsetsSource navSource = new InsetsSource(ITYPE_NAVIGATION_BAR);
+        final InsetsSource navSource = new InsetsSource(ITYPE_NAVIGATION_BAR, navigationBars());
         mImeWindow.mAboveInsetsState.addSource(navSource);
         mAppWindow.mAboveInsetsState.addSource(navSource);
 
@@ -969,8 +1062,9 @@ public class WindowStateTests extends WindowTestsBase {
         // Simulate app requests IME with updating all windows Insets State when IME is above app.
         mDisplayContent.setImeLayeringTarget(app);
         mDisplayContent.setImeInputTarget(app);
+        app.setRequestedVisibleTypes(ime(), ime());
         assertTrue(mDisplayContent.shouldImeAttachedToApp());
-        controller.getImeSourceProvider().scheduleShowImePostLayout(app);
+        controller.getImeSourceProvider().scheduleShowImePostLayout(app, null /* statsToken */);
         controller.getImeSourceProvider().getSource().setVisible(true);
         controller.updateAboveInsetsState(false);
 
@@ -1006,8 +1100,9 @@ public class WindowStateTests extends WindowTestsBase {
         app2.mActivityRecord.mImeInsetsFrozenUntilStartInput = true;
         mDisplayContent.setImeLayeringTarget(app);
         mDisplayContent.setImeInputTarget(app);
+        app.setRequestedVisibleTypes(ime(), ime());
         assertTrue(mDisplayContent.shouldImeAttachedToApp());
-        controller.getImeSourceProvider().scheduleShowImePostLayout(app);
+        controller.getImeSourceProvider().scheduleShowImePostLayout(app, null /* statsToken */);
         controller.getImeSourceProvider().getSource().setVisible(true);
         controller.updateAboveInsetsState(false);
 
@@ -1028,7 +1123,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(app2.getInsetsState().getSource(ITYPE_IME).isVisible());
     }
 
-    @UseTestDisplay(addWindows = {W_ACTIVITY})
+    @SetupWindows(addWindows = W_ACTIVITY)
     @Test
     public void testUpdateImeControlTargetWhenLeavingMultiWindow() {
         WindowState app = createWindow(null, TYPE_BASE_APPLICATION,
@@ -1050,11 +1145,13 @@ public class WindowStateTests extends WindowTestsBase {
         spyOn(app.getDisplayContent());
         app.mActivityRecord.getRootTask().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
 
-        verify(app.getDisplayContent()).updateImeControlTarget();
+        // Expect updateImeParent will be invoked when the configuration of the IME control
+        // target has changed.
+        verify(app.getDisplayContent()).updateImeControlTarget(eq(true) /* updateImeParent */);
         assertEquals(mAppWindow, mDisplayContent.getImeTarget(IME_TARGET_CONTROL).getWindow());
     }
 
-    @UseTestDisplay(addWindows = {W_ACTIVITY, W_INPUT_METHOD, W_NOTIFICATION_SHADE})
+    @SetupWindows(addWindows = { W_ACTIVITY, W_INPUT_METHOD, W_NOTIFICATION_SHADE })
     @Test
     public void testNotificationShadeHasImeInsetsWhenMultiWindow() {
         WindowState app = createWindow(null, TYPE_BASE_APPLICATION,

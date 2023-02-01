@@ -31,6 +31,7 @@ import static org.mockito.Mockito.mock;
 
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.UserHandle;
 import android.util.ArraySet;
@@ -184,12 +185,35 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
                 /* voiceSession */null,
                 /* voiceInteractor */ null,
                 /* startFlags */ 0,
-                /* doResume */true,
                 /* options */null,
                 /* inTask */null,
                 /* inTaskFragment */ null,
-                /* restrictedBgActivity */false,
+                /* balCode */ BackgroundActivityStartController.BAL_ALLOW_DEFAULT,
                 /* intentGrants */null);
+
+        assertEquals(result, START_ABORTED);
+    }
+
+    @Test
+    public void testCanActivityBeLaunched_requiredDisplayCategory() {
+        ActivityStarter starter = new ActivityStarter(mock(ActivityStartController.class), mAtm,
+                mSupervisor, mock(ActivityStartInterceptor.class));
+        final Task task = new TaskBuilder(mSupervisor).setDisplay(mSecondaryDisplay).build();
+        final ActivityRecord sourceRecord = new ActivityBuilder(mAtm).setTask(task).build();
+        final ActivityRecord disallowedRecord =
+                new ActivityBuilder(mAtm).setRequiredDisplayCategory("auto").build();
+
+        int result = starter.startActivityInner(
+                disallowedRecord,
+                sourceRecord,
+                /* voiceSession= */null,
+                /* voiceInteractor= */ null,
+                /* startFlags= */ 0,
+                /* options= */null,
+                /* inTask= */null,
+                /* inTaskFragment= */ null,
+                /* balCode= */ BackgroundActivityStartController.BAL_ALLOW_DEFAULT,
+                /* intentGrants= */null);
 
         assertEquals(result, START_ABORTED);
     }
@@ -204,7 +228,7 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
         ArraySet<Integer> mRunningUids = new ArraySet<>();
 
         @Override
-        public boolean canActivityBeLaunched(@NonNull ActivityInfo activity,
+        public boolean canActivityBeLaunched(@NonNull ActivityInfo activity, Intent intent,
                 @WindowConfiguration.WindowingMode int windowingMode, int launchingFromDisplayId,
                 boolean isNewTask) {
             return false;
@@ -244,7 +268,12 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
         }
 
         @Override
-        public boolean canShowTasksInRecents() {
+        public boolean canShowTasksInHostDeviceRecents() {
+            return true;
+        }
+
+        @Override
+        public boolean isEnteringPipAllowed(int uid) {
             return true;
         }
     }

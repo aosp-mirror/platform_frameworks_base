@@ -18,6 +18,7 @@ package android.view;
 
 import static android.view.DisplayInfoProto.APP_HEIGHT;
 import static android.view.DisplayInfoProto.APP_WIDTH;
+import static android.view.DisplayInfoProto.CUTOUT;
 import static android.view.DisplayInfoProto.FLAGS;
 import static android.view.DisplayInfoProto.LOGICAL_HEIGHT;
 import static android.view.DisplayInfoProto.LOGICAL_WIDTH;
@@ -180,6 +181,16 @@ public final class DisplayInfo implements Parcelable {
     public int modeId;
 
     /**
+     * The render frame rate this display is scheduled at, which is a divisor of the active mode
+     * refresh rate. This is the rate SurfaceFlinger would consume frames and would be observable
+     * by applications via the cadence of {@link android.view.Choreographer} callbacks and
+     * by backpressure when submitting buffers as fast as possible.
+     * Apps can call {@link android.view.Display#getRefreshRate} to query this value.
+     *
+     */
+    public float renderFrameRate;
+
+    /**
      * The default display mode.
      */
     public int defaultModeId;
@@ -253,6 +264,12 @@ public final class DisplayInfo implements Parcelable {
     public int state;
 
     /**
+     * The current committed state of the display. For example, this becomes
+     * {@link android.view.Display#STATE_ON} only after the power state ON is fully committed.
+     */
+    public int committedState;
+
+    /**
      * The UID of the application that owns this display, or zero if it is owned by the system.
      * <p>
      * If the display is private, then only the owner can use it.
@@ -317,6 +334,9 @@ public final class DisplayInfo implements Parcelable {
     @Surface.Rotation
     public int installOrientation;
 
+    @Nullable
+    public DisplayShape displayShape;
+
     public static final @android.annotation.NonNull Creator<DisplayInfo> CREATOR = new Creator<DisplayInfo>() {
         @Override
         public DisplayInfo createFromParcel(Parcel source) {
@@ -367,6 +387,7 @@ public final class DisplayInfo implements Parcelable {
                 && Objects.equals(displayCutout, other.displayCutout)
                 && rotation == other.rotation
                 && modeId == other.modeId
+                && renderFrameRate == other.renderFrameRate
                 && defaultModeId == other.defaultModeId
                 && Arrays.equals(supportedModes, other.supportedModes)
                 && colorMode == other.colorMode
@@ -380,6 +401,7 @@ public final class DisplayInfo implements Parcelable {
                 && appVsyncOffsetNanos == other.appVsyncOffsetNanos
                 && presentationDeadlineNanos == other.presentationDeadlineNanos
                 && state == other.state
+                && committedState == other.committedState
                 && ownerUid == other.ownerUid
                 && Objects.equals(ownerPackageName, other.ownerPackageName)
                 && removeMode == other.removeMode
@@ -388,7 +410,8 @@ public final class DisplayInfo implements Parcelable {
                 && brightnessMaximum == other.brightnessMaximum
                 && brightnessDefault == other.brightnessDefault
                 && Objects.equals(roundedCorners, other.roundedCorners)
-                && installOrientation == other.installOrientation;
+                && installOrientation == other.installOrientation
+                && Objects.equals(displayShape, other.displayShape);
     }
 
     @Override
@@ -417,6 +440,7 @@ public final class DisplayInfo implements Parcelable {
         displayCutout = other.displayCutout;
         rotation = other.rotation;
         modeId = other.modeId;
+        renderFrameRate = other.renderFrameRate;
         defaultModeId = other.defaultModeId;
         supportedModes = Arrays.copyOf(other.supportedModes, other.supportedModes.length);
         colorMode = other.colorMode;
@@ -431,6 +455,7 @@ public final class DisplayInfo implements Parcelable {
         appVsyncOffsetNanos = other.appVsyncOffsetNanos;
         presentationDeadlineNanos = other.presentationDeadlineNanos;
         state = other.state;
+        committedState = other.committedState;
         ownerUid = other.ownerUid;
         ownerPackageName = other.ownerPackageName;
         removeMode = other.removeMode;
@@ -440,6 +465,7 @@ public final class DisplayInfo implements Parcelable {
         brightnessDefault = other.brightnessDefault;
         roundedCorners = other.roundedCorners;
         installOrientation = other.installOrientation;
+        displayShape = other.displayShape;
     }
 
     public void readFromParcel(Parcel source) {
@@ -462,6 +488,7 @@ public final class DisplayInfo implements Parcelable {
         displayCutout = DisplayCutout.ParcelableWrapper.readCutoutFromParcel(source);
         rotation = source.readInt();
         modeId = source.readInt();
+        renderFrameRate = source.readFloat();
         defaultModeId = source.readInt();
         int nModes = source.readInt();
         supportedModes = new Display.Mode[nModes];
@@ -482,6 +509,7 @@ public final class DisplayInfo implements Parcelable {
         appVsyncOffsetNanos = source.readLong();
         presentationDeadlineNanos = source.readLong();
         state = source.readInt();
+        committedState = source.readInt();
         ownerUid = source.readInt();
         ownerPackageName = source.readString8();
         uniqueId = source.readString8();
@@ -497,6 +525,7 @@ public final class DisplayInfo implements Parcelable {
             userDisabledHdrTypes[i] = source.readInt();
         }
         installOrientation = source.readInt();
+        displayShape = source.readTypedObject(DisplayShape.CREATOR);
     }
 
     @Override
@@ -520,6 +549,7 @@ public final class DisplayInfo implements Parcelable {
         DisplayCutout.ParcelableWrapper.writeCutoutToParcel(displayCutout, dest, flags);
         dest.writeInt(rotation);
         dest.writeInt(modeId);
+        dest.writeFloat(renderFrameRate);
         dest.writeInt(defaultModeId);
         dest.writeInt(supportedModes.length);
         for (int i = 0; i < supportedModes.length; i++) {
@@ -538,6 +568,7 @@ public final class DisplayInfo implements Parcelable {
         dest.writeLong(appVsyncOffsetNanos);
         dest.writeLong(presentationDeadlineNanos);
         dest.writeInt(state);
+        dest.writeInt(committedState);
         dest.writeInt(ownerUid);
         dest.writeString8(ownerPackageName);
         dest.writeString8(uniqueId);
@@ -552,6 +583,7 @@ public final class DisplayInfo implements Parcelable {
             dest.writeInt(userDisabledHdrTypes[i]);
         }
         dest.writeInt(installOrientation);
+        dest.writeTypedObject(displayShape, flags);
     }
 
     @Override
@@ -713,9 +745,9 @@ public final class DisplayInfo implements Parcelable {
         outMetrics.noncompatWidthPixels  = outMetrics.widthPixels = width;
         outMetrics.noncompatHeightPixels = outMetrics.heightPixels = height;
 
-        if (!compatInfo.equals(CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO)) {
-            compatInfo.applyToDisplayMetrics(outMetrics);
-        }
+        // Apply to size if the configuration is EMPTY because the size is from real display info.
+        final boolean applyToSize = configuration != null && appBounds == null;
+        compatInfo.applyDisplayMetricsIfNeeded(outMetrics, applyToSize);
     }
 
     // For debugging purposes
@@ -747,6 +779,7 @@ public final class DisplayInfo implements Parcelable {
         sb.append(presentationDeadlineNanos);
         sb.append(", mode ");
         sb.append(modeId);
+        sb.append(renderFrameRate);
         sb.append(", defaultMode ");
         sb.append(defaultModeId);
         sb.append(", modes ");
@@ -761,6 +794,8 @@ public final class DisplayInfo implements Parcelable {
         sb.append(rotation);
         sb.append(", state ");
         sb.append(Display.stateToString(state));
+        sb.append(", committedState ");
+        sb.append(Display.stateToString(committedState));
 
         if (Process.myUid() != Process.SYSTEM_UID) {
             sb.append("}");
@@ -827,6 +862,9 @@ public final class DisplayInfo implements Parcelable {
         protoOutputStream.write(APP_HEIGHT, appHeight);
         protoOutputStream.write(NAME, name);
         protoOutputStream.write(FLAGS, flags);
+        if (displayCutout != null) {
+            displayCutout.dumpDebug(protoOutputStream, CUTOUT);
+        }
         protoOutputStream.end(token);
     }
 

@@ -43,23 +43,8 @@ public class QuickStepContract {
     public static final String KEY_EXTRA_SYSUI_PROXY = "extra_sysui_proxy";
     public static final String KEY_EXTRA_WINDOW_CORNER_RADIUS = "extra_window_corner_radius";
     public static final String KEY_EXTRA_SUPPORTS_WINDOW_CORNERS = "extra_supports_window_corners";
-    // See IPip.aidl
-    public static final String KEY_EXTRA_SHELL_PIP = "extra_shell_pip";
-    // See ISplitScreen.aidl
-    public static final String KEY_EXTRA_SHELL_SPLIT_SCREEN = "extra_shell_split_screen";
-    // See IOneHanded.aidl
-    public static final String KEY_EXTRA_SHELL_ONE_HANDED = "extra_shell_one_handed";
-    // See IShellTransitions.aidl
-    public static final String KEY_EXTRA_SHELL_SHELL_TRANSITIONS =
-            "extra_shell_shell_transitions";
-    // See IStartingWindow.aidl
-    public static final String KEY_EXTRA_SHELL_STARTING_WINDOW =
-            "extra_shell_starting_window";
     // See ISysuiUnlockAnimationController.aidl
     public static final String KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER = "unlock_animation";
-    // See IRecentTasks.aidl
-    public static final String KEY_EXTRA_RECENT_TASKS = "recent_tasks";
-    public static final String KEY_EXTRA_SHELL_BACK_ANIMATION = "extra_shell_back_animation";
 
     public static final String NAV_BAR_MODE_3BUTTON_OVERLAY =
             WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY;
@@ -125,6 +110,10 @@ public class QuickStepContract {
     public static final int SYSUI_STATE_IMMERSIVE_MODE = 1 << 24;
     // The voice interaction session window is showing
     public static final int SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING = 1 << 25;
+    // Freeform windows are showing in desktop mode
+    public static final int SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE = 1 << 26;
+    // Device dreaming state
+    public static final int SYSUI_STATE_DEVICE_DREAMING = 1 << 27;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
@@ -152,7 +141,9 @@ public class QuickStepContract {
             SYSUI_STATE_BACK_DISABLED,
             SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED,
             SYSUI_STATE_IMMERSIVE_MODE,
-            SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING
+            SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING,
+            SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE,
+            SYSUI_STATE_DEVICE_DREAMING
     })
     public @interface SystemUiStateFlags {}
 
@@ -188,6 +179,10 @@ public class QuickStepContract {
                 ? "bubbles_mange_menu_expanded" : "");
         str.add((flags & SYSUI_STATE_IMMERSIVE_MODE) != 0 ? "immersive_mode" : "");
         str.add((flags & SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING) != 0 ? "vis_win_showing" : "");
+        str.add((flags & SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE) != 0
+                ? "freeform_active_in_desktop_mode" : "");
+        str.add((flags & SYSUI_STATE_DEVICE_DREAMING) != 0 ? "device_dreaming" : "");
+
         return str.toString();
     }
 
@@ -201,28 +196,6 @@ public class QuickStepContract {
      */
     public static final float getQuickStepTouchSlopPx(Context context) {
         return QUICKSTEP_TOUCH_SLOP_RATIO * ViewConfiguration.get(context).getScaledTouchSlop();
-    }
-
-    /**
-     * Touch slopes and thresholds for quick step operations. Drag slop is the point where the
-     * home button press/long press over are ignored and will start to drag when exceeded and the
-     * touch slop is when the respected operation will occur when exceeded. Touch slop must be
-     * larger than the drag slop.
-     */
-    public static int getQuickStepDragSlopPx() {
-        return convertDpToPixel(10);
-    }
-
-    public static int getQuickStepTouchSlopPx() {
-        return convertDpToPixel(24);
-    }
-
-    public static int getQuickScrubTouchSlopPx() {
-        return convertDpToPixel(24);
-    }
-
-    private static int convertDpToPixel(float dp) {
-        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
     }
 
     /**

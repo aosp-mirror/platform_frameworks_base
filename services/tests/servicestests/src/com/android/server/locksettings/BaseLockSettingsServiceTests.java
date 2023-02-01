@@ -16,6 +16,9 @@
 
 package com.android.server.locksettings;
 
+import static android.app.admin.DevicePolicyManager.DEPRECATE_USERMANAGERINTERNAL_DEVICEPOLICY_FLAG;
+import static android.provider.DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,22 +36,28 @@ import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.DeviceStateCache;
 import android.app.trust.TrustManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
-import android.hardware.authsecret.V1_0.IAuthSecret;
+import android.hardware.authsecret.IAuthSecret;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.FileUtils;
 import android.os.IProgressListener;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
+import android.provider.Settings;
+import android.provider.DeviceConfig;
 import android.security.KeyStore;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.test.FakeSettingsProvider;
+import com.android.internal.util.test.FakeSettingsProviderRule;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockSettingsInternal;
 import com.android.internal.widget.LockscreenCredential;
@@ -59,6 +68,7 @@ import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -75,7 +85,8 @@ public abstract class BaseLockSettingsServiceTests {
     protected static final int SECONDARY_USER_ID = 20;
 
     private static final UserInfo PRIMARY_USER_INFO = new UserInfo(PRIMARY_USER_ID, null, null,
-            UserInfo.FLAG_INITIALIZED | UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY);
+            UserInfo.FLAG_INITIALIZED | UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY
+                    | UserInfo.FLAG_MAIN);
     private static final UserInfo SECONDARY_USER_INFO = new UserInfo(SECONDARY_USER_ID, null, null,
             UserInfo.FLAG_INITIALIZED);
 
@@ -106,7 +117,8 @@ public abstract class BaseLockSettingsServiceTests {
     FingerprintManager mFingerprintManager;
     FaceManager mFaceManager;
     PackageManager mPackageManager;
-    FakeSettings mSettings;
+    @Rule
+    public FakeSettingsProviderRule mSettingsRule = FakeSettingsProvider.rule();
 
     @Before
     public void setUp_baseServices() throws Exception {
@@ -126,7 +138,6 @@ public abstract class BaseLockSettingsServiceTests {
         mFingerprintManager = mock(FingerprintManager.class);
         mFaceManager = mock(FaceManager.class);
         mPackageManager = mock(PackageManager.class);
-        mSettings = new FakeSettings();
 
         LocalServices.removeServiceForTest(LockSettingsInternal.class);
         LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
@@ -134,12 +145,13 @@ public abstract class BaseLockSettingsServiceTests {
         LocalServices.addService(DevicePolicyManagerInternal.class, mDevicePolicyManagerInternal);
         LocalServices.addService(WindowManagerInternal.class, mMockWindowManager);
 
-        mContext = new MockLockSettingsContext(InstrumentationRegistry.getContext(), mUserManager,
-                mNotificationManager, mDevicePolicyManager, mock(StorageManager.class),
-                mock(TrustManager.class), mock(KeyguardManager.class), mFingerprintManager,
-                mFaceManager, mPackageManager);
+        final Context origContext = InstrumentationRegistry.getContext();
+        mContext = new MockLockSettingsContext(origContext,
+                mSettingsRule.mockContentResolver(origContext), mUserManager, mNotificationManager,
+                mDevicePolicyManager, mock(StorageManager.class), mock(TrustManager.class),
+                mock(KeyguardManager.class), mFingerprintManager, mFaceManager, mPackageManager);
         mStorage = new LockSettingsStorageTestable(mContext,
-                new File(InstrumentationRegistry.getContext().getFilesDir(), "locksettings"));
+                new File(origContext.getFilesDir(), "locksettings"));
         File storageDir = mStorage.mStorageDir;
         if (storageDir.exists()) {
             FileUtils.deleteContents(storageDir);
@@ -153,7 +165,7 @@ public abstract class BaseLockSettingsServiceTests {
         mService = new LockSettingsServiceTestable(mContext, mStorage,
                 mGateKeeperService, mKeyStore, setUpStorageManagerMock(), mActivityManager,
                 mSpManager, mAuthSecretService, mGsiService, mRecoverableKeyStoreManager,
-                mUserManagerInternal, mDeviceStateCache, mSettings);
+                mUserManagerInternal, mDeviceStateCache);
         mService.mHasSecureLockScreen = true;
         when(mUserManager.getUserInfo(eq(PRIMARY_USER_ID))).thenReturn(PRIMARY_USER_INFO);
         mPrimaryUserProfiles.add(PRIMARY_USER_INFO);
@@ -168,27 +180,45 @@ public abstract class BaseLockSettingsServiceTests {
         allUsers.add(SECONDARY_USER_INFO);
         when(mUserManager.getUsers()).thenReturn(allUsers);
 
-        when(mActivityManager.unlockUser(anyInt(), any(), any(), any())).thenAnswer(
-                new Answer<Boolean>() {
-            @Override
-            public Boolean answer(InvocationOnMock invocation) throws Throwable {
+        when(mActivityManager.unlockUser2(anyInt(), any())).thenAnswer(
+            invocation -> {
                 Object[] args = invocation.getArguments();
-                mStorageManager.unlockUser((int)args[0], (byte[])args[2],
-                        (IProgressListener) args[3]);
+                int userId = (int) args[0];
+                IProgressListener listener = (IProgressListener) args[1];
+                listener.onStarted(userId, null);
+                listener.onFinished(userId, null);
                 return true;
-            }
-        });
+            });
 
         // Adding a fake Device Owner app which will enable escrow token support in LSS.
         when(mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser()).thenReturn(
                 new ComponentName("com.dummy.package", ".FakeDeviceOwner"));
+        // TODO(b/258213147): Remove
+        DeviceConfig.setProperty(NAMESPACE_DEVICE_POLICY_MANAGER,
+                DEPRECATE_USERMANAGERINTERNAL_DEVICEPOLICY_FLAG, "true", /* makeDefault= */ false);
         when(mUserManagerInternal.isDeviceManaged()).thenReturn(true);
+        when(mDeviceStateCache.isUserOrganizationManaged(anyInt())).thenReturn(true);
         when(mDeviceStateCache.isDeviceProvisioned()).thenReturn(true);
         mockBiometricsHardwareFingerprintsAndTemplates(PRIMARY_USER_ID);
         mockBiometricsHardwareFingerprintsAndTemplates(MANAGED_PROFILE_USER_ID);
 
-        mSettings.setDeviceProvisioned(true);
+        setDeviceProvisioned(true);
         mLocalService = LocalServices.getService(LockSettingsInternal.class);
+    }
+
+    protected void setDeviceProvisioned(boolean provisioned) {
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.DEVICE_PROVISIONED, provisioned ? 1 : 0);
+    }
+
+    protected void setUserSetupComplete(boolean complete) {
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.USER_SETUP_COMPLETE, complete ? 1 : 0, UserHandle.USER_SYSTEM);
+    }
+
+    protected void setSecureFrpMode(boolean secure) {
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.SECURE_FRP_MODE, secure ? 1 : 0, UserHandle.USER_SYSTEM);
     }
 
     private UserInfo installChildProfile(int profileId) {
@@ -200,7 +230,10 @@ public abstract class BaseLockSettingsServiceTests {
         when(mUserManager.getProfileParent(eq(profileId))).thenReturn(PRIMARY_USER_INFO);
         when(mUserManager.isUserRunning(eq(profileId))).thenReturn(true);
         when(mUserManager.isUserUnlocked(eq(profileId))).thenReturn(true);
+        // TODO(b/258213147): Remove
         when(mUserManagerInternal.isUserManaged(eq(profileId))).thenReturn(true);
+        when(mDeviceStateCache.isUserOrganizationManaged(eq(profileId)))
+                .thenReturn(true);
         return userInfo;
     }
 
@@ -215,37 +248,20 @@ public abstract class BaseLockSettingsServiceTests {
     private IStorageManager setUpStorageManagerMock() throws RemoteException {
         final IStorageManager sm = mock(IStorageManager.class);
 
-        doAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                Object[] args = invocation.getArguments();
-                mStorageManager.addUserKeyAuth((int) args[0] /* userId */,
-                        (int) args[1] /* serialNumber */,
-                        (byte[]) args[2] /* secret */);
-                return null;
-            }
-        }).when(sm).addUserKeyAuth(anyInt(), anyInt(), any());
+        doAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            mStorageManager.unlockUserKey(/* userId= */ (int) args[0],
+                    /* secret= */ (byte[]) args[2]);
+            return null;
+        }).when(sm).unlockUserKey(anyInt(), anyInt(), any());
 
-        doAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                Object[] args = invocation.getArguments();
-                mStorageManager.clearUserKeyAuth((int) args[0] /* userId */,
-                        (int) args[1] /* serialNumber */,
-                        (byte[]) args[2] /* secret */);
-                return null;
-            }
-        }).when(sm).clearUserKeyAuth(anyInt(), anyInt(), any());
+        doAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            mStorageManager.setUserKeyProtection(/* userId= */ (int) args[0],
+                    /* secret= */ (byte[]) args[1]);
+            return null;
+        }).when(sm).setUserKeyProtection(anyInt(), any());
 
-        doAnswer(
-                new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                Object[] args = invocation.getArguments();
-                mStorageManager.fixateNewestUserKeyAuth((int) args[0] /* userId */);
-                return null;
-            }
-        }).when(sm).fixateNewestUserKeyAuth(anyInt());
         return sm;
     }
 

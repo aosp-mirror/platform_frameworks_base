@@ -19,6 +19,7 @@ package android.telecom;
 import static android.Manifest.permission.MODIFY_PHONE_STATE;
 
 import android.Manifest;
+import android.annotation.CallbackExecutor;
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -32,6 +33,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.hardware.camera2.CameraManager;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -39,6 +41,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.OutcomeReceiver;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
@@ -66,8 +69,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 
 /**
  * Represents a phone call or connection to a remote endpoint that carries voice and/or video
@@ -1046,6 +1051,13 @@ public abstract class Connection extends Conferenceable {
     public static final String EXTRA_CALL_QUALITY_REPORT =
             "android.telecom.extra.CALL_QUALITY_REPORT";
 
+    /**
+     * Key to obtain location as a result of ({@code queryLocationForEmergency} from Bundle
+     * @hide
+     */
+    public static final String EXTRA_KEY_QUERY_LOCATION =
+            "android.telecom.extra.KEY_QUERY_LOCATION";
+
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
 
@@ -1279,6 +1291,11 @@ public abstract class Connection extends Conferenceable {
         /** @hide */
         public void onPhoneAccountChanged(Connection c, PhoneAccountHandle pHandle) {}
         public void onConnectionTimeReset(Connection c) {}
+        public void onEndpointChanged(Connection c, CallEndpoint endpoint, Executor executor,
+                OutcomeReceiver<Void, CallEndpointException> callback) {}
+        public void onQueryLocation(Connection c, long timeoutMillis, @NonNull String provider,
+                @NonNull @CallbackExecutor Executor executor,
+                @NonNull OutcomeReceiver<Location, QueryLocationException> callback) {}
     }
 
     /**
@@ -2161,6 +2178,7 @@ public abstract class Connection extends Conferenceable {
     private PhoneAccountHandle mPhoneAccountHandle;
     private int mState = STATE_NEW;
     private CallAudioState mCallAudioState;
+    private CallEndpoint mCallEndpoint;
     private Uri mAddress;
     private int mAddressPresentation;
     private String mCallerDisplayName;
@@ -2289,7 +2307,11 @@ public abstract class Connection extends Conferenceable {
      * @return The audio state of the connection, describing how its audio is currently
      *         being routed by the system. This is {@code null} if this Connection
      *         does not directly know about its audio state.
+     * @deprecated Use {@link #getCurrentCallEndpoint()},
+     * {@link #onAvailableCallEndpointsChanged(List)} and
+     * {@link #onMuteStateChanged(boolean)} instead.
      */
+    @Deprecated
     public final CallAudioState getCallAudioState() {
         return mCallAudioState;
     }
@@ -2456,6 +2478,43 @@ public abstract class Connection extends Conferenceable {
     }
 
     /**
+     * Inform this Connection that the audio endpoint has been changed.
+     *
+     * @param endpoint The new call endpoint.
+     * @hide
+     */
+    final void setCallEndpoint(CallEndpoint endpoint) {
+        checkImmutable();
+        Log.d(this, "setCallEndpoint %s", endpoint);
+        mCallEndpoint = endpoint;
+        onCallEndpointChanged(endpoint);
+    }
+
+    /**
+     * Inform this Connection that the available call endpoints have been changed.
+     *
+     * @param availableEndpoints The available call endpoints.
+     * @hide
+     */
+    final void setAvailableCallEndpoints(List<CallEndpoint> availableEndpoints) {
+        checkImmutable();
+        Log.d(this, "setAvailableCallEndpoints");
+        onAvailableCallEndpointsChanged(availableEndpoints);
+    }
+
+    /**
+     * Inform this Connection that its audio mute state has been changed.
+     *
+     * @param isMuted The new mute state.
+     * @hide
+     */
+    final void setMuteState(boolean isMuted) {
+        checkImmutable();
+        Log.d(this, "setMuteState %s", isMuted);
+        onMuteStateChanged(isMuted);
+    }
+
+    /**
      * @param state An integer value of a {@code STATE_*} constant.
      * @return A string representation of the value.
      */
@@ -2531,11 +2590,21 @@ public abstract class Connection extends Conferenceable {
      */
     public final void setCallerDisplayName(String callerDisplayName, int presentation) {
         checkImmutable();
-        Log.d(this, "setCallerDisplayName %s", callerDisplayName);
-        mCallerDisplayName = callerDisplayName;
-        mCallerDisplayNamePresentation = presentation;
-        for (Listener l : mListeners) {
-            l.onCallerDisplayNameChanged(this, callerDisplayName, presentation);
+        boolean nameChanged = !Objects.equals(mCallerDisplayName, callerDisplayName);
+        boolean presentationChanged = mCallerDisplayNamePresentation != presentation;
+        if (nameChanged) {
+            // Ensure the new name is not clobbering the old one with a null value due to the caller
+            // wanting to only set the presentation and not knowing the display name.
+            mCallerDisplayName = callerDisplayName;
+        }
+        if (presentationChanged) {
+            mCallerDisplayNamePresentation = presentation;
+        }
+        if (nameChanged || presentationChanged) {
+            for (Listener l : mListeners) {
+                l.onCallerDisplayNameChanged(this, mCallerDisplayName,
+                        mCallerDisplayNamePresentation);
+            }
         }
     }
 
@@ -2763,6 +2832,12 @@ public abstract class Connection extends Conferenceable {
      * @param isVoip True if the audio mode is VOIP.
      */
     public final void setAudioModeIsVoip(boolean isVoip) {
+        if (!isVoip && (mConnectionProperties & PROPERTY_SELF_MANAGED) == PROPERTY_SELF_MANAGED) {
+            Log.i(this,
+                    "setAudioModeIsVoip: Ignored request to set a self-managed connection's"
+                            + " audioModeIsVoip to false. Doing so can cause unwanted behavior.");
+            return;
+        }
         checkImmutable();
         mAudioModeIsVoip = isVoip;
         for (Listener l : mListeners) {
@@ -3064,7 +3139,10 @@ public abstract class Connection extends Conferenceable {
      * @param route The audio route to use (one of {@link CallAudioState#ROUTE_BLUETOOTH},
      *              {@link CallAudioState#ROUTE_EARPIECE}, {@link CallAudioState#ROUTE_SPEAKER}, or
      *              {@link CallAudioState#ROUTE_WIRED_HEADSET}).
+     * @deprecated Use {@link #requestCallEndpointChange(CallEndpoint, Executor, OutcomeReceiver)}
+     * instead.
      */
+    @Deprecated
     public final void setAudioRoute(int route) {
         for (Listener l : mListeners) {
             l.onAudioRouteChanged(this, route, null);
@@ -3084,12 +3162,49 @@ public abstract class Connection extends Conferenceable {
      * <p>
      * See also {@link InCallService#requestBluetoothAudio(BluetoothDevice)}
      * @param bluetoothDevice The bluetooth device to connect to.
+     * @deprecated Use {@link #requestCallEndpointChange(CallEndpoint, Executor, OutcomeReceiver)}
+     * instead.
      */
+    @Deprecated
     public void requestBluetoothAudio(@NonNull BluetoothDevice bluetoothDevice) {
         for (Listener l : mListeners) {
             l.onAudioRouteChanged(this, CallAudioState.ROUTE_BLUETOOTH,
                     bluetoothDevice.getAddress());
         }
+    }
+
+    /**
+     * Request audio routing to a specific CallEndpoint. Clients should not define their own
+     * CallEndpoint when requesting a change. Instead, the new endpoint should be one of the valid
+     * endpoints provided by {@link #onAvailableCallEndpointsChanged(List)}.
+     * When this request is honored, there will be change to the {@link #getCurrentCallEndpoint()}.
+     * <p>
+     * Used by self-managed {@link ConnectionService}s which wish to change the CallEndpoint for a
+     * self-managed {@link Connection} (see {@link PhoneAccount#CAPABILITY_SELF_MANAGED}.)
+     * <p>
+     * See also
+     * {@link InCallService#requestCallEndpointChange(CallEndpoint, Executor, OutcomeReceiver)}.
+     *
+     * @param endpoint The call endpoint to use.
+     * @param executor The executor of where the callback will execute.
+     * @param callback The callback to notify the result of the endpoint change.
+     */
+    public final void requestCallEndpointChange(@NonNull CallEndpoint endpoint,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<Void, CallEndpointException> callback) {
+        for (Listener l : mListeners) {
+            l.onEndpointChanged(this, endpoint, executor, callback);
+        }
+    }
+
+    /**
+     * Obtains the current CallEndpoint.
+     *
+     * @return An object encapsulating the CallEndpoint.
+     */
+    @NonNull
+    public final CallEndpoint getCurrentCallEndpoint() {
+        return mCallEndpoint;
     }
 
     /**
@@ -3129,6 +3244,36 @@ public abstract class Connection extends Conferenceable {
     }
 
     /**
+     * Query the device's location in order to place an Emergency Call.
+     * Only SIM call managers can call this method for Connections representing Emergency calls.
+     * If a previous location query request is not completed, the new location query request will
+     * be rejected and return a QueryLocationException with
+     * {@code QueryLocationException#ERROR_PREVIOUS_REQUEST_EXISTS}
+     *
+     * @param timeoutMillis long: Timeout in millis waiting for query response (MAX:5000, MIN:100).
+     * @param provider String: the location provider name, This value cannot be null.
+     *                 It is the caller's responsibility to select an enabled provider. The caller
+     *                 can use {@link android.location.LocationManager#getProviders(boolean)}
+     *                 to choose one of the enabled providers and pass it in.
+     * @param executor The executor of where the callback will execute.
+     * @param callback The callback to notify the result of queryLocation.
+     */
+    public final void queryLocationForEmergency(
+            @IntRange(from = 100, to = 5000) long timeoutMillis,
+            @NonNull String provider,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<Location, QueryLocationException> callback) {
+        if (provider == null || executor == null || callback == null) {
+            throw new IllegalArgumentException("There are arguments that must not be null");
+        }
+        if (timeoutMillis < 100 || timeoutMillis > 5000) {
+            throw new IllegalArgumentException("The timeoutMillis should be min 100, max 5000");
+        }
+        mListeners.forEach((l) ->
+                l.onQueryLocation(this, timeoutMillis, provider, executor, callback));
+    }
+
+    /**
      * Notifies this Connection that the {@link #getAudioState()} property has a new value.
      *
      * @param state The new connection audio state.
@@ -3143,8 +3288,33 @@ public abstract class Connection extends Conferenceable {
      * Notifies this Connection that the {@link #getCallAudioState()} property has a new value.
      *
      * @param state The new connection audio state.
+     * @deprecated Use {@link #onCallEndpointChanged(CallEndpoint)},
+     * {@link #onAvailableCallEndpointsChanged(List)} and
+     * {@link #onMuteStateChanged(boolean)} instead.
      */
+    @Deprecated
     public void onCallAudioStateChanged(CallAudioState state) {}
+
+    /**
+     * Notifies this Connection that the audio endpoint has been changed.
+     *
+     * @param callEndpoint The current CallEndpoint.
+     */
+    public void onCallEndpointChanged(@NonNull CallEndpoint callEndpoint) {}
+
+    /**
+     * Notifies this Connection that the available call endpoints have been changed.
+     *
+     * @param availableEndpoints The set of available CallEndpoint.
+     */
+    public void onAvailableCallEndpointsChanged(@NonNull List<CallEndpoint> availableEndpoints) {}
+
+    /**
+     * Notifies this Connection that its audio mute state has been changed.
+     *
+     * @param isMuted The current mute state.
+     */
+    public void onMuteStateChanged(boolean isMuted) {}
 
     /**
      * Inform this Connection when it will or will not be tracked by an {@link InCallService} which

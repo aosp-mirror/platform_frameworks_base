@@ -18,6 +18,8 @@ package com.android.systemui.statusbar;
 
 import android.view.View;
 
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationViewController;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowScope;
@@ -42,14 +44,17 @@ public class NotificationShelfController {
     private AmbientState mAmbientState;
 
     @Inject
-    public NotificationShelfController(NotificationShelf notificationShelf,
+    public NotificationShelfController(
+            NotificationShelf notificationShelf,
             ActivatableNotificationViewController activatableNotificationViewController,
             KeyguardBypassController keyguardBypassController,
-            SysuiStatusBarStateController statusBarStateController) {
+            SysuiStatusBarStateController statusBarStateController,
+            FeatureFlags featureFlags) {
         mView = notificationShelf;
         mActivatableNotificationViewController = activatableNotificationViewController;
         mKeyguardBypassController = keyguardBypassController;
         mStatusBarStateController = statusBarStateController;
+        mView.useRoundnessSourceTypes(featureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES));
         mOnAttachStateChangeListener = new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View v) {
@@ -88,7 +93,7 @@ public class NotificationShelfController {
 
     public @View.Visibility int getVisibility() {
         return mView.getVisibility();
-    };
+    }
 
     public void setCollapsedIcons(NotificationIconContainer notificationIcons) {
         mView.setCollapsedIcons(notificationIcons);

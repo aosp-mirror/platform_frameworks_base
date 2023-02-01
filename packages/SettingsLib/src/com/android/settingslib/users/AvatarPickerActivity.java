@@ -43,6 +43,7 @@ import com.google.android.setupcompat.template.FooterBarMixin;
 import com.google.android.setupcompat.template.FooterButton;
 import com.google.android.setupdesign.GlifLayout;
 import com.google.android.setupdesign.util.ThemeHelper;
+import com.google.android.setupdesign.util.ThemeResolver;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -81,7 +82,14 @@ public class AvatarPickerActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTheme(R.style.SudThemeGlifV3_DayNight);
+        boolean dayNightEnabled = ThemeHelper.isSetupWizardDayNightEnabled(this);
+        ThemeResolver themeResolver =
+                new ThemeResolver.Builder(ThemeResolver.getDefault())
+                        .setDefaultTheme(ThemeHelper.getSuwDefaultTheme(this))
+                        .setUseDayNight(true)
+                        .build();
+        int themeResId = themeResolver.resolve("", /* suppressDayNight= */ !dayNightEnabled);
+        setTheme(themeResId);
         ThemeHelper.trySetDynamicColor(this);
         setContentView(R.layout.avatar_picker);
         setUpButtons();

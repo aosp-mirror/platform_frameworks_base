@@ -26,9 +26,11 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricFaceConstants;
+import android.hardware.biometrics.BiometricStateListener;
 import android.hardware.biometrics.CryptoObject;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.os.Binder;
@@ -86,6 +88,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     private CryptoObject mCryptoObject;
     private Face mRemovalFace;
     private Handler mHandler;
+    private List<FaceSensorPropertiesInternal> mProps = new ArrayList<>();
 
     private final IFaceServiceReceiver mServiceReceiver = new IFaceServiceReceiver.Stub() {
 
@@ -167,6 +170,16 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             Slog.v(TAG, "FaceAuthenticationManagerService was null");
         }
         mHandler = new MyHandler(context);
+        if (context.checkCallingOrSelfPermission(USE_BIOMETRIC_INTERNAL)
+                == PackageManager.PERMISSION_GRANTED) {
+            addAuthenticatorsRegisteredCallback(new IFaceAuthenticatorsRegisteredCallback.Stub() {
+                @Override
+                public void onAllAuthenticatorsRegistered(
+                        @NonNull List<FaceSensorPropertiesInternal> sensors) {
+                    mProps = sensors;
+                }
+            });
+        }
     }
 
     /**
@@ -663,14 +676,53 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     @NonNull
     public List<FaceSensorPropertiesInternal> getSensorPropertiesInternal() {
         try {
-            if (mService == null) {
-                return new ArrayList<>();
+            if (!mProps.isEmpty() || mService == null) {
+                return mProps;
             }
             return mService.getSensorPropertiesInternal(mContext.getOpPackageName());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
-        return new ArrayList<>();
+        return mProps;
+    }
+
+    /**
+     * Forwards BiometricStateListener to FaceService.
+     *
+     * @param listener new BiometricStateListener being added
+     * @hide
+     */
+    public void registerBiometricStateListener(@NonNull BiometricStateListener listener) {
+        try {
+            mService.registerBiometricStateListener(listener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Adds a callback that gets called when the service registers all of the face
+     * authenticators (HALs).
+     *
+     * If the face authenticators are already registered when the callback is added, the
+     * callback is invoked immediately.
+     *
+     * The callback is automatically removed after it's invoked.
+     *
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void addAuthenticatorsRegisteredCallback(
+            IFaceAuthenticatorsRegisteredCallback callback) {
+        if (mService != null) {
+            try {
+                mService.addAuthenticatorsRegisteredCallback(callback);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } else {
+            Slog.w(TAG, "addAuthenticatorsRegisteredCallback(): Service not connected!");
+        }
     }
 
     /**
@@ -725,6 +777,20 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             }
         } else {
             Slog.w(TAG, "addLockoutResetCallback(): Service not connected!");
+        }
+    }
+
+    /**
+     * Schedules a watchdog.
+     *
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void scheduleWatchdog() {
+        try {
+            mService.scheduleWatchdog();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1363,19 +1429,31 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
 
             // Consolidate positional feedback to reduce noise during authentication.
             case FACE_ACQUIRED_NOT_DETECTED:
+                return context.getString(R.string.face_acquired_not_detected);
             case FACE_ACQUIRED_TOO_CLOSE:
+                return context.getString(R.string.face_acquired_too_close);
             case FACE_ACQUIRED_TOO_FAR:
+                return context.getString(R.string.face_acquired_too_far);
             case FACE_ACQUIRED_TOO_HIGH:
+                // TODO(b/181269243) Change back once error codes are fixed.
+                return context.getString(R.string.face_acquired_too_low);
             case FACE_ACQUIRED_TOO_LOW:
+                // TODO(b/181269243) Change back once error codes are fixed.
+                return context.getString(R.string.face_acquired_too_high);
             case FACE_ACQUIRED_TOO_RIGHT:
+                // TODO(b/181269243) Change back once error codes are fixed.
+                return context.getString(R.string.face_acquired_too_left);
             case FACE_ACQUIRED_TOO_LEFT:
+                // TODO(b/181269243) Change back once error codes are fixed.
+                return context.getString(R.string.face_acquired_too_right);
             case FACE_ACQUIRED_POOR_GAZE:
-            case FACE_ACQUIRED_PAN_TOO_EXTREME:
-            case FACE_ACQUIRED_TILT_TOO_EXTREME:
-            case FACE_ACQUIRED_ROLL_TOO_EXTREME:
                 return context.getString(R.string.face_acquired_poor_gaze);
-
-            // Provide more detailed feedback for other soft errors.
+            case FACE_ACQUIRED_PAN_TOO_EXTREME:
+                return context.getString(R.string.face_acquired_pan_too_extreme);
+            case FACE_ACQUIRED_TILT_TOO_EXTREME:
+                return context.getString(R.string.face_acquired_tilt_too_extreme);
+            case FACE_ACQUIRED_ROLL_TOO_EXTREME:
+                return context.getString(R.string.face_acquired_roll_too_extreme);
             case FACE_ACQUIRED_INSUFFICIENT:
                 return context.getString(R.string.face_acquired_insufficient);
             case FACE_ACQUIRED_TOO_BRIGHT:
@@ -1394,6 +1472,10 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                 return context.getString(R.string.face_acquired_obscured);
             case FACE_ACQUIRED_SENSOR_DIRTY:
                 return context.getString(R.string.face_acquired_sensor_dirty);
+            case FACE_ACQUIRED_DARK_GLASSES_DETECTED:
+                return context.getString(R.string.face_acquired_dark_glasses_detected);
+            case FACE_ACQUIRED_MOUTH_COVERING_DETECTED:
+                return context.getString(R.string.face_acquired_mouth_covering_detected);
 
             // Find and return the appropriate vendor-specific message.
             case FACE_ACQUIRED_VENDOR: {
@@ -1459,11 +1541,13 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             case FACE_ACQUIRED_ROLL_TOO_EXTREME:
                 return context.getString(R.string.face_acquired_roll_too_extreme);
             case FACE_ACQUIRED_FACE_OBSCURED:
-            case FACE_ACQUIRED_DARK_GLASSES_DETECTED:
-            case FACE_ACQUIRED_MOUTH_COVERING_DETECTED:
                 return context.getString(R.string.face_acquired_obscured);
             case FACE_ACQUIRED_SENSOR_DIRTY:
                 return context.getString(R.string.face_acquired_sensor_dirty);
+            case FACE_ACQUIRED_DARK_GLASSES_DETECTED:
+                return context.getString(R.string.face_acquired_dark_glasses_detected);
+            case FACE_ACQUIRED_MOUTH_COVERING_DETECTED:
+                return context.getString(R.string.face_acquired_mouth_covering_detected);
             case FACE_ACQUIRED_VENDOR: {
                 String[] msgArray = context.getResources().getStringArray(
                         R.array.face_acquired_vendor);

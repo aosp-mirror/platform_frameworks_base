@@ -26,6 +26,7 @@ import android.annotation.TestApi;
 import android.annotation.UptimeMillisLong;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build.VERSION_CODES;
+import android.sysprop.MemoryProperties;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -211,12 +212,6 @@ public class Process {
      * @hide
      */
     public static final int SE_UID = 1068;
-
-    /**
-     * Defines the UID/GID for the iorapd.
-     * @hide
-     */
-    public static final int IORAPD_UID = 1071;
 
     /**
      * Defines the UID/GID for the NetworkStack app.
@@ -900,9 +895,21 @@ public class Process {
         return isIsolated(myUid());
     }
 
-    /** {@hide} */
-    @UnsupportedAppUsage
+    /**
+     * @deprecated Use {@link #isIsolatedUid(int)} instead.
+     * {@hide}
+     */
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.TIRAMISU,
+            publicAlternatives = "Use {@link #isIsolatedUid(int)} instead.")
     public static final boolean isIsolated(int uid) {
+        return isIsolatedUid(uid);
+    }
+
+    /**
+     * Returns whether the process with the given {@code uid} is an isolated sandbox.
+     */
+    public static final boolean isIsolatedUid(int uid) {
         uid = UserHandle.getAppId(uid);
         return (uid >= FIRST_ISOLATED_UID && uid <= LAST_ISOLATED_UID)
                 || (uid >= FIRST_APP_ZYGOTE_ISOLATED_UID && uid <= LAST_APP_ZYGOTE_ISOLATED_UID);
@@ -1336,6 +1343,24 @@ public class Process {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static final native void sendSignalQuiet(int pid, int signal);
 
+    /**
+     * @return The advertised memory of the system, as the end user would encounter in a retail
+     * display environment. If the advertised memory is not defined, it returns
+     * {@code getTotalMemory()} rounded.
+     *
+     * @hide
+     */
+    public static final long getAdvertisedMem() {
+        String formatSize = MemoryProperties.memory_ddr_size().orElse("0KB");
+        long memSize = FileUtils.parseSize(formatSize);
+
+        if (memSize == Long.MIN_VALUE) {
+            return FileUtils.roundStorageSize(getTotalMemory());
+        }
+
+        return memSize;
+    }
+
     /** @hide */
     @UnsupportedAppUsage
     public static final native long getFreeMemory();
@@ -1467,6 +1492,18 @@ public class Process {
      * @hide
      */
     public static final native int killProcessGroup(int uid, int pid);
+
+    /**
+      * Freeze the cgroup for the given UID.
+      * This cgroup may contain child cgroups which will also be frozen. If this cgroup or its
+      * children contain processes with Binder interfaces, those interfaces should be frozen before
+      * the cgroup to avoid blocking synchronous callers indefinitely.
+      *
+      * @param uid The UID to be frozen
+      * @param freeze true = freeze; false = unfreeze
+      * @hide
+      */
+    public static final native void freezeCgroupUid(int uid, boolean freeze);
 
     /**
      * Remove all process groups.  Expected to be called when ActivityManager

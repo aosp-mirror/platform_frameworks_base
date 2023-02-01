@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2022 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+  android:height="24dp"
+  android:width="24dp"
+  android:viewportHeight="160"
+  android:viewportWidth="160" >
+  <path android:fillAlpha="0" android:fillColor="#000000"
+        android:pathData="M69.48,83.33A26.97,24.46 0,0 1,42.92 107.8,26.97 24.46,0 0,1 15.56,84.07 26.97,24.46 0,0 1,41.29 58.9,26.97 24.46,0 0,1 69.43,81.86"
+        android:strokeColor="#000000" android:strokeWidth="2.265"/>
+    <path android:fillAlpha="0" android:fillColor="#000000"
+        android:pathData="m143.73,83.58a26.97,24.46 0,0 1,-26.56 24.46,26.97 24.46,0 0,1 -27.36,-23.72 26.97,24.46 0,0 1,25.73 -25.18,26.97 24.46,0 0,1 28.14,22.96"
+        android:strokeColor="#000000" android:strokeWidth="2.265"/>
+    <path android:fillAlpha="0" android:fillColor="#000000"
+        android:pathData="m69.42,82.98c20.37,-0.25 20.37,-0.25 20.37,-0.25"
+        android:strokeColor="#000000" android:strokeWidth="2.265"/>
+    <path android:fillAlpha="0" android:fillColor="#000000"
+        android:pathData="M15.37,83.78 L1.9,56.83"
+        android:strokeColor="#000000" android:strokeWidth="2.265"/>
+    <path android:fillAlpha="0" android:fillColor="#000000"
+        android:pathData="M143.67,82.75C154.48,57.9 154.48,58.04 154.48,58.04"
+        android:strokeColor="#000000" android:strokeWidth="2.265"/>
+</vector>

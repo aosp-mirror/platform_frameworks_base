@@ -23,8 +23,10 @@ import static android.app.StatusBarManager.SESSION_KEYGUARD;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 
+import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -82,7 +84,6 @@ public class SessionTrackerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         mSessionTracker = new SessionTracker(
-                mContext,
                 mStatusBarService,
                 mAuthController,
                 mKeyguardUpdateMonitor,
@@ -168,6 +169,34 @@ public class SessionTrackerTest extends SysuiTestCase {
 
         // THEN session start event gets sent to status bar service
         verify(mStatusBarService).onSessionStarted(
+                eq(SESSION_KEYGUARD), any(InstanceId.class));
+    }
+
+    @Test
+    public void testKeyguardSessionOnDeviceStartsSleepingTwiceInARow_startsNewKeyguardSession()
+            throws RemoteException {
+        // GIVEN session tracker started w/o any sessions
+        mSessionTracker.start();
+        captureKeyguardUpdateMonitorCallback();
+
+        // WHEN device starts going to sleep
+        mKeyguardUpdateMonitorCallback.onStartedGoingToSleep(0);
+
+        // THEN the keyguard session has a session id
+        final InstanceId firstSessionId = mSessionTracker.getSessionId(SESSION_KEYGUARD);
+        assertNotNull(firstSessionId);
+
+        // WHEN device starts going to sleep a second time
+        mKeyguardUpdateMonitorCallback.onStartedGoingToSleep(0);
+
+        // THEN there's a new keyguard session with a unique session id
+        final InstanceId secondSessionId = mSessionTracker.getSessionId(SESSION_KEYGUARD);
+        assertNotNull(secondSessionId);
+        assertNotEquals(firstSessionId, secondSessionId);
+
+        // THEN session start event gets sent to status bar service twice (once per going to
+        // sleep signal)
+        verify(mStatusBarService, times(2)).onSessionStarted(
                 eq(SESSION_KEYGUARD), any(InstanceId.class));
     }
 

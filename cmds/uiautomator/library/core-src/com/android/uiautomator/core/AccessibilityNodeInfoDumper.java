@@ -139,7 +139,7 @@ public class AccessibilityNodeInfoDumper {
                 serializer.attribute("", "id", Integer.toString(displayId));
                 int rotation = display.getRotation();
                 Point size = new Point();
-                display.getSize(size);
+                display.getRealSize(size);
                 for (int i = 0, n = windows.size(); i < n; ++i) {
                     dumpWindowRec(windows.get(i), serializer, i, size.x, size.y, rotation);
                 }

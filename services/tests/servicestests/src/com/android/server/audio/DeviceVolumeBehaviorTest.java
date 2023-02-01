@@ -18,6 +18,7 @@ package com.android.server.audio;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
+import static org.mockito.Mockito.mock;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -47,6 +48,7 @@ public class DeviceVolumeBehaviorTest {
     private SystemServerAdapter mSystemServer;
     private SettingsAdapter mSettingsAdapter;
     private TestLooper mTestLooper;
+    private AudioPolicyFacade mAudioPolicyMock = mock(AudioPolicyFacade.class);
 
     private AudioService mAudioService;
 
@@ -67,7 +69,7 @@ public class DeviceVolumeBehaviorTest {
         mSystemServer = new NoOpSystemServerAdapter();
         mSettingsAdapter = new NoOpSettingsAdapter();
         mAudioService = new AudioService(mContext, mAudioSystem, mSystemServer,
-                mSettingsAdapter, mTestLooper.getLooper());
+                mSettingsAdapter, mAudioPolicyMock, mTestLooper.getLooper());
         mTestLooper.dispatchAll();
     }
 

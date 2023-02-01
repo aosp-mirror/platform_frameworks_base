@@ -17,11 +17,11 @@
 #ifndef RENDERTHREAD_H_
 #define RENDERTHREAD_H_
 
-#include <surface_control_private.h>
 #include <GrDirectContext.h>
 #include <SkBitmap.h>
 #include <cutils/compiler.h>
 #include <private/android/choreographer.h>
+#include <surface_control_private.h>
 #include <thread/ThreadBase.h>
 #include <utils/Looper.h>
 #include <utils/Thread.h>
@@ -31,6 +31,7 @@
 #include <set>
 
 #include "CacheManager.h"
+#include "MemoryPolicy.h"
 #include "ProfileDataContainer.h"
 #include "RenderTask.h"
 #include "TimeLord.h"
@@ -171,6 +172,8 @@ public:
     const ASurfaceControlFunctions& getASurfaceControlFunctions() {
         return mASurfaceControlFunctions;
     }
+
+    void trimMemory(TrimLevel level);
 
     /**
      * isCurrent provides a way to query, if the caller is running on

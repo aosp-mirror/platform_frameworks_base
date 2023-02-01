@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
+import static android.view.Surface.ROTATION_0;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_BOTTOM;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
@@ -27,10 +28,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.doReturn;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -82,6 +79,12 @@ class TestDisplayContent extends DisplayContent {
         final InputMonitor inputMonitor = getInputMonitor();
         spyOn(inputMonitor);
         doNothing().when(inputMonitor).resumeDispatchingLw(any());
+
+        // For devices that set the sysprop ro.bootanim.set_orientation_<display_id>
+        // See DisplayRotation#readDefaultDisplayRotation for context.
+        // Without that, meaning of height and width in context of the tests can be swapped if
+        // the default rotation is 90 or 270.
+        displayRotation.setRotation(ROTATION_0);
     }
 
     public static class Builder {
@@ -147,10 +150,23 @@ class TestDisplayContent extends DisplayContent {
             mInfo.ownerUid = ownerUid;
             return this;
         }
-        Builder setNotch(int height) {
+        Builder setCutout(int left, int top, int right, int bottom) {
+            final int cutoutFillerSize = 80;
+            Rect boundLeft = left != 0 ? new Rect(0, 0, left, cutoutFillerSize) : null;
+            Rect boundTop = top != 0 ? new Rect(0, 0, cutoutFillerSize, top) : null;
+            Rect boundRight = right != 0 ? new Rect(mInfo.logicalWidth - right, 0,
+                    mInfo.logicalWidth, cutoutFillerSize) : null;
+            Rect boundBottom = bottom != 0
+                    ? new Rect(0, mInfo.logicalHeight - bottom, cutoutFillerSize,
+                    mInfo.logicalHeight) : null;
+
             mInfo.displayCutout = new DisplayCutout(
-                    Insets.of(0, height, 0, 0), null, new Rect(20, 0, 80, height), null, null);
+                    Insets.of(left, top, right, bottom),
+                    boundLeft, boundTop, boundRight, boundBottom);
             return this;
+        }
+        Builder setNotch(int height) {
+            return setCutout(0, height, 0, 0);
         }
         Builder setStatusBarHeight(int height) {
             mStatusBarHeight = height;
@@ -194,6 +210,7 @@ class TestDisplayContent extends DisplayContent {
             }
 
             final int displayId = SystemServicesTestRule.sNextDisplayId++;
+            mInfo.displayId = displayId;
             final Display display = new Display(DisplayManagerGlobal.getInstance(), displayId,
                     mInfo, DEFAULT_DISPLAY_ADJUSTMENTS);
             final TestDisplayContent newDisplay = createInternal(display);
@@ -204,7 +221,6 @@ class TestDisplayContent extends DisplayContent {
                 doReturn(true).when(newDisplay).supportsSystemDecorations();
                 doReturn(true).when(displayPolicy).hasNavigationBar();
                 doReturn(NAV_BAR_BOTTOM).when(displayPolicy).navigationBarPosition(anyInt());
-                doReturn(20).when(displayPolicy).getNavigationBarHeight(anyInt());
             } else {
                 doReturn(false).when(displayPolicy).hasNavigationBar();
                 doReturn(false).when(displayPolicy).hasStatusBar();
@@ -217,11 +233,6 @@ class TestDisplayContent extends DisplayContent {
             displayPolicy.finishScreenTurningOn();
             if (mStatusBarHeight > 0) {
                 doReturn(true).when(displayPolicy).hasStatusBar();
-                doAnswer(invocation -> {
-                    Rect inOutInsets = (Rect) invocation.getArgument(0);
-                    inOutInsets.top = mStatusBarHeight;
-                    return null;
-                }).when(displayPolicy).convertNonDecorInsetsToStableInsets(any(), anyInt());
             }
             Configuration c = new Configuration();
             newDisplay.computeScreenConfiguration(c);

@@ -93,7 +93,7 @@ public final class SplitWindowManager extends WindowlessWindowManager {
     }
 
     @Override
-    protected void attachToParentSurface(IWindow window, SurfaceControl.Builder b) {
+    protected SurfaceControl getParentSurface(IWindow window, WindowManager.LayoutParams attrs) {
         // Can't set position for the ViewRootImpl SC directly. Create a leash to manipulate later.
         final SurfaceControl.Builder builder = new SurfaceControl.Builder(new SurfaceSession())
                 .setContainerLayer()
@@ -103,7 +103,7 @@ public final class SplitWindowManager extends WindowlessWindowManager {
         mParentContainerCallbacks.attachToParentSurface(builder);
         mLeash = builder.build();
         mParentContainerCallbacks.onLeashReady(mLeash);
-        b.setParent(mLeash);
+        return mLeash;
     }
 
     /** Inflates {@link DividerView} on to the root surface. */
@@ -126,6 +126,7 @@ public final class SplitWindowManager extends WindowlessWindowManager {
         lp.token = new Binder();
         lp.setTitle(mWindowName);
         lp.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION | PRIVATE_FLAG_TRUSTED_OVERLAY;
+        lp.accessibilityTitle = mContext.getResources().getString(R.string.accessibility_divider);
         mViewHost.setView(mDividerView, lp);
         mDividerView.setup(splitLayout, this, mViewHost, insetsState);
     }
@@ -166,9 +167,9 @@ public final class SplitWindowManager extends WindowlessWindowManager {
         }
     }
 
-    void setInteractive(boolean interactive) {
+    void setInteractive(boolean interactive, String from) {
         if (mDividerView == null) return;
-        mDividerView.setInteractive(interactive);
+        mDividerView.setInteractive(interactive, from);
     }
 
     View getDividerView() {

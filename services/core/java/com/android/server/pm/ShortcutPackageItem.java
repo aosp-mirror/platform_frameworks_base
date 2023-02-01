@@ -22,11 +22,11 @@ import android.content.pm.ShortcutInfo;
 import android.graphics.Bitmap;
 import android.util.AtomicFile;
 import android.util.Slog;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import org.json.JSONException;
 import org.json.JSONObject;

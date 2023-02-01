@@ -21,6 +21,7 @@ import static android.os.AsyncTask.Status.FINISHED;
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
 
 import android.annotation.DimenRes;
+import android.annotation.Hide;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
@@ -58,6 +59,8 @@ import java.util.concurrent.Executor;
 @VisibleForTesting
 public class Bubble implements BubbleViewProvider {
     private static final String TAG = "Bubble";
+
+    public static final String KEY_APP_BUBBLE = "key_app_bubble";
 
     private final String mKey;
     @Nullable
@@ -123,7 +126,7 @@ public class Bubble implements BubbleViewProvider {
     private Icon mIcon;
     private boolean mIsBubble;
     private boolean mIsTextChanged;
-    private boolean mIsClearable;
+    private boolean mIsDismissable;
     private boolean mShouldSuppressNotificationDot;
     private boolean mShouldSuppressNotificationList;
     private boolean mShouldSuppressPeek;
@@ -164,13 +167,22 @@ public class Bubble implements BubbleViewProvider {
     private PendingIntent mDeleteIntent;
 
     /**
+     * Used only for a special bubble in the stack that has the key {@link #KEY_APP_BUBBLE}.
+     * There can only be one of these bubbles in the stack and this intent will be populated for
+     * that bubble.
+     */
+    @Nullable
+    private Intent mAppIntent;
+
+    /**
      * Create a bubble with limited information based on given {@link ShortcutInfo}.
      * Note: Currently this is only being used when the bubble is persisted to disk.
      */
     @VisibleForTesting(visibility = PRIVATE)
     public Bubble(@NonNull final String key, @NonNull final ShortcutInfo shortcutInfo,
             final int desiredHeight, final int desiredHeightResId, @Nullable final String title,
-            int taskId, @Nullable final String locus, Executor mainExecutor) {
+            int taskId, @Nullable final String locus, boolean isDismissable, Executor mainExecutor,
+            final Bubbles.BubbleMetadataFlagListener listener) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(shortcutInfo);
         mMetadataShortcutId = shortcutInfo.getId();
@@ -178,6 +190,7 @@ public class Bubble implements BubbleViewProvider {
         mKey = key;
         mGroupKey = null;
         mLocusId = locus != null ? new LocusId(locus) : null;
+        mIsDismissable = isDismissable;
         mFlags = 0;
         mUser = shortcutInfo.getUserHandle();
         mPackageName = shortcutInfo.getPackage();
@@ -188,11 +201,28 @@ public class Bubble implements BubbleViewProvider {
         mShowBubbleUpdateDot = false;
         mMainExecutor = mainExecutor;
         mTaskId = taskId;
+        mBubbleMetadataFlagListener = listener;
+    }
+
+    public Bubble(Intent intent,
+            UserHandle user,
+            Executor mainExecutor) {
+        mKey = KEY_APP_BUBBLE;
+        mGroupKey = null;
+        mLocusId = null;
+        mFlags = 0;
+        mUser = user;
+        mShowBubbleUpdateDot = false;
+        mMainExecutor = mainExecutor;
+        mTaskId = INVALID_TASK_ID;
+        mAppIntent = intent;
+        mDesiredHeight = Integer.MAX_VALUE;
+        mPackageName = intent.getPackage();
     }
 
     @VisibleForTesting(visibility = PRIVATE)
     public Bubble(@NonNull final BubbleEntry entry,
-            @Nullable final Bubbles.BubbleMetadataFlagListener listener,
+            final Bubbles.BubbleMetadataFlagListener listener,
             final Bubbles.PendingIntentCanceledListener intentCancelListener,
             Executor mainExecutor) {
         mKey = entry.getKey();
@@ -215,6 +245,11 @@ public class Bubble implements BubbleViewProvider {
     @Override
     public String getKey() {
         return mKey;
+    }
+
+    @Hide
+    public boolean isDismissable() {
+        return mIsDismissable;
     }
 
     /**
@@ -415,6 +450,9 @@ public class Bubble implements BubbleViewProvider {
 
         mShortcutInfo = info.shortcutInfo;
         mAppName = info.appName;
+        if (mTitle == null) {
+            mTitle = mAppName;
+        }
         mFlyoutMessage = info.flyoutMessage;
 
         mBadgeBitmap = info.badgeBitmap;
@@ -452,6 +490,7 @@ public class Bubble implements BubbleViewProvider {
      */
     void setEntry(@NonNull final BubbleEntry entry) {
         Objects.requireNonNull(entry);
+        boolean showingDotPreviously = showDot();
         mLastUpdated = entry.getStatusBarNotification().getPostTime();
         mIsBubble = entry.getStatusBarNotification().getNotification().isBubbleNotification();
         mPackageName = entry.getStatusBarNotification().getPackageName();
@@ -494,10 +533,14 @@ public class Bubble implements BubbleViewProvider {
             mDeleteIntent = entry.getBubbleMetadata().getDeleteIntent();
         }
 
-        mIsClearable = entry.isClearable();
+        mIsDismissable = entry.isDismissable();
         mShouldSuppressNotificationDot = entry.shouldSuppressNotificationDot();
         mShouldSuppressNotificationList = entry.shouldSuppressNotificationList();
         mShouldSuppressPeek = entry.shouldSuppressPeek();
+        if (showingDotPreviously != showDot()) {
+            // This will update the UI if needed
+            setShowDot(showDot());
+        }
     }
 
     @Nullable
@@ -513,7 +556,7 @@ public class Bubble implements BubbleViewProvider {
      * @return the last time this bubble was updated or accessed, whichever is most recent.
      */
     long getLastActivity() {
-        return Math.max(mLastUpdated, mLastAccessed);
+        return isAppBubble() ? Long.MAX_VALUE : Math.max(mLastUpdated, mLastAccessed);
     }
 
     /**
@@ -569,7 +612,7 @@ public class Bubble implements BubbleViewProvider {
      * Whether this notification should be shown in the shade.
      */
     boolean showInShade() {
-        return !shouldSuppressNotification() || !mIsClearable;
+        return !shouldSuppressNotification() || !mIsDismissable;
     }
 
     /**
@@ -712,6 +755,15 @@ public class Bubble implements BubbleViewProvider {
         return mDeleteIntent;
     }
 
+    @Nullable
+    Intent getAppBubbleIntent() {
+        return mAppIntent;
+    }
+
+    boolean isAppBubble() {
+        return KEY_APP_BUBBLE.equals(mKey);
+    }
+
     Intent getSettingsIntent(final Context context) {
         final Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_BUBBLE_SETTINGS);
         intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
@@ -816,7 +868,7 @@ public class Bubble implements BubbleViewProvider {
     /**
      * Description of current bubble state.
      */
-    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw) {
         pw.print("key: "); pw.println(mKey);
         pw.print("  showInShade:   "); pw.println(showInShade());
         pw.print("  showDot:       "); pw.println(showDot());
@@ -825,8 +877,10 @@ public class Bubble implements BubbleViewProvider {
         pw.print("  desiredHeight: "); pw.println(getDesiredHeightString());
         pw.print("  suppressNotif: "); pw.println(shouldSuppressNotification());
         pw.print("  autoExpand:    "); pw.println(shouldAutoExpand());
+        pw.print("  isDismissable: "); pw.println(mIsDismissable);
+        pw.println("  bubbleMetadataFlagListener null: " + (mBubbleMetadataFlagListener == null));
         if (mExpandedView != null) {
-            mExpandedView.dump(pw, args);
+            mExpandedView.dump(pw);
         }
     }
 

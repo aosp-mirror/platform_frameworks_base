@@ -51,7 +51,8 @@ typedef void(VKAPI_PTR* PFN_vkFrameBoundaryANDROID)(VkDevice device, VkSemaphore
 #include "VulkanSurface.h"
 #include "private/hwui/DrawVkInfo.h"
 
-class GrVkExtensions;
+#include <SkColorSpace.h>
+#include <SkRefCnt.h>
 
 namespace android {
 namespace uirenderer {

@@ -34,14 +34,20 @@ import java.util.function.Consumer;
 public class SparseArrayMap<K, V> {
     private final SparseArray<ArrayMap<K, V>> mData = new SparseArray<>();
 
-    /** Add an entry associating obj with the int-K pair. */
-    public void add(int key, @NonNull K mapKey, @Nullable V obj) {
+    /**
+     * Add an entry associating obj with the int-K pair.
+     *
+     * @return the previous value associated with key, or null if there was no mapping for key.
+     * (A null return can also indicate that the map previously associated null with key, if the
+     * implementation supports null values.)
+     */
+    public V add(int key, @NonNull K mapKey, @Nullable V obj) {
         ArrayMap<K, V> data = mData.get(key);
         if (data == null) {
             data = new ArrayMap<>();
             mData.put(key, data);
         }
-        data.put(mapKey, obj);
+        return data.put(mapKey, obj);
     }
 
     /** Remove all entries from the map. */

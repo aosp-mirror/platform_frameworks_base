@@ -63,6 +63,7 @@ import android.os.UserManager;
 import android.permission.IPermissionManager;
 import android.provider.Settings;
 import android.security.KeyChain;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.test.mock.MockContentProvider;
 import android.test.mock.MockContentResolver;
@@ -73,6 +74,7 @@ import android.view.IWindowManager;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockSettingsInternal;
+import com.android.server.AlarmManagerInternal;
 import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.UserManagerInternal;
@@ -124,6 +126,7 @@ public class MockSystemServices {
     public final ConnectivityManager connectivityManager;
     public final AccountManager accountManager;
     public final AlarmManager alarmManager;
+    public final AlarmManagerInternal alarmManagerInternal;
     public final KeyChain.KeyChainConnection keyChainConnection;
     public final CrossProfileApps crossProfileApps;
     public final PersistentDataBlockManagerInternal persistentDataBlockManagerInternal;
@@ -133,6 +136,7 @@ public class MockSystemServices {
     public final DevicePolicyManager devicePolicyManager;
     public final LocationManager locationManager;
     public final RoleManager roleManager;
+    public final SubscriptionManager subscriptionManager;
     /** Note this is a partial mock, not a real mock. */
     public final PackageManager packageManager;
     public final BuildMock buildMock = new BuildMock();
@@ -176,6 +180,7 @@ public class MockSystemServices {
         connectivityManager = mock(ConnectivityManager.class);
         accountManager = mock(AccountManager.class);
         alarmManager = mock(AlarmManager.class);
+        alarmManagerInternal = mock(AlarmManagerInternal.class);
         keyChainConnection = mock(KeyChain.KeyChainConnection.class, RETURNS_DEEP_STUBS);
         crossProfileApps = mock(CrossProfileApps.class);
         persistentDataBlockManagerInternal = mock(PersistentDataBlockManagerInternal.class);
@@ -185,6 +190,7 @@ public class MockSystemServices {
         devicePolicyManager = mock(DevicePolicyManager.class);
         locationManager = mock(LocationManager.class);
         roleManager = realContext.getSystemService(RoleManager.class);
+        subscriptionManager = mock(SubscriptionManager.class);
 
         // Package manager is huge, so we use a partial mock instead.
         packageManager = spy(realContext.getPackageManager());
@@ -213,8 +219,10 @@ public class MockSystemServices {
 
         // Add the system user with a fake profile group already set up (this can happen in the real
         // world if a managed profile is added and then removed).
-        systemUserDataDir = addUser(UserHandle.USER_SYSTEM, UserInfo.FLAG_PRIMARY,
+        systemUserDataDir = addUser(UserHandle.USER_SYSTEM,
+                UserInfo.FLAG_PRIMARY | UserInfo.FLAG_MAIN,
                 UserManager.USER_TYPE_FULL_SYSTEM, UserHandle.USER_SYSTEM);
+        when(userManager.getMainUser()).thenReturn(UserHandle.SYSTEM);
 
         // System user is always running.
         setUserRunning(UserHandle.USER_SYSTEM, true);

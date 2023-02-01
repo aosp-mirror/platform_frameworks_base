@@ -19,8 +19,11 @@ package com.android.server.pm.dex;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assume.assumeFalse;
+
 import android.app.UiAutomation;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
@@ -96,7 +99,12 @@ public final class DynamicCodeLoggerIntegrationTests {
     }
 
     @Before
-    public void primeEventLog() {
+    public void setup() {
+        assumeFalse(sContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH));
+        primeEventLog();
+    }
+
+    private void primeEventLog() {
         // Force a round trip to logd to make sure everything is up to date.
         // Without this the first test passes and others don't - we don't see new events in the
         // log. The exact reason is unclear.

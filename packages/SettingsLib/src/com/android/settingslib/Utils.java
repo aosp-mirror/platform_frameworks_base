@@ -23,6 +23,9 @@ import android.graphics.ColorFilter;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.drawable.Drawable;
+import android.hardware.usb.UsbManager;
+import android.hardware.usb.UsbPort;
+import android.hardware.usb.UsbPortStatus;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.net.NetworkCapabilities;
@@ -40,6 +43,7 @@ import android.telephony.AccessNetworkConstants;
 import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -55,6 +59,7 @@ import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.settingslib.utils.BuildCompatUtils;
 
 import java.text.NumberFormat;
+import java.util.List;
 
 public class Utils {
 
@@ -239,6 +244,8 @@ public class Utils {
                             statusString = res.getString(R.string.battery_info_status_charging);
                             break;
                     }
+                } else if (batteryStatus.isPluggedInDock()) {
+                    statusString = res.getString(R.string.battery_info_status_charging_dock);
                 } else {
                     statusString = res.getString(R.string.battery_info_status_charging_wireless);
                 }
@@ -306,8 +313,16 @@ public class Utils {
 
     @ColorInt
     public static int getColorAttrDefaultColor(Context context, int attr) {
+        return getColorAttrDefaultColor(context, attr, 0);
+    }
+
+    /**
+     * Get color styled attribute {@code attr}, default to {@code defValue} if not found.
+     */
+    @ColorInt
+    public static int getColorAttrDefaultColor(Context context, int attr, @ColorInt int defValue) {
         TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
-        @ColorInt int colorAccent = ta.getColor(0, 0);
+        @ColorInt int colorAccent = ta.getColor(0, defValue);
         ta.recycle();
         return colorAccent;
     }
@@ -374,27 +389,19 @@ public class Utils {
     /**
      * Determine whether a package is a "system package", in which case certain things (like
      * disabling notifications or disabling the package altogether) should be disallowed.
+     * <p>
+     * Note: This function is just for UI treatment, and should not be used for security purposes.
+     *
+     * @deprecated Use {@link ApplicationInfo#isSignedWithPlatformKey()} and
+     * {@link #isEssentialPackage} instead.
      */
+    @Deprecated
     public static boolean isSystemPackage(Resources resources, PackageManager pm, PackageInfo pkg) {
         if (sSystemSignature == null) {
             sSystemSignature = new Signature[]{getSystemSignature(pm)};
         }
-        if (sPermissionControllerPackageName == null) {
-            sPermissionControllerPackageName = pm.getPermissionControllerPackageName();
-        }
-        if (sServicesSystemSharedLibPackageName == null) {
-            sServicesSystemSharedLibPackageName = pm.getServicesSystemSharedLibraryPackageName();
-        }
-        if (sSharedSystemSharedLibPackageName == null) {
-            sSharedSystemSharedLibPackageName = pm.getSharedSystemSharedLibraryPackageName();
-        }
-        return (sSystemSignature[0] != null
-                && sSystemSignature[0].equals(getFirstSignature(pkg)))
-                || pkg.packageName.equals(sPermissionControllerPackageName)
-                || pkg.packageName.equals(sServicesSystemSharedLibPackageName)
-                || pkg.packageName.equals(sSharedSystemSharedLibPackageName)
-                || pkg.packageName.equals(PrintManager.PRINT_SPOOLER_PACKAGE_NAME)
-                || isDeviceProvisioningPackage(resources, pkg.packageName);
+        return (sSystemSignature[0] != null && sSystemSignature[0].equals(getFirstSignature(pkg)))
+                || isEssentialPackage(resources, pm, pkg.packageName);
     }
 
     private static Signature getFirstSignature(PackageInfo pkg) {
@@ -411,6 +418,29 @@ public class Utils {
         } catch (NameNotFoundException e) {
         }
         return null;
+    }
+
+    /**
+     * Determine whether a package is a "essential package".
+     * <p>
+     * In which case certain things (like disabling the package) should be disallowed.
+     */
+    public static boolean isEssentialPackage(
+            Resources resources, PackageManager pm, String packageName) {
+        if (sPermissionControllerPackageName == null) {
+            sPermissionControllerPackageName = pm.getPermissionControllerPackageName();
+        }
+        if (sServicesSystemSharedLibPackageName == null) {
+            sServicesSystemSharedLibPackageName = pm.getServicesSystemSharedLibraryPackageName();
+        }
+        if (sSharedSystemSharedLibPackageName == null) {
+            sSharedSystemSharedLibPackageName = pm.getSharedSystemSharedLibraryPackageName();
+        }
+        return packageName.equals(sPermissionControllerPackageName)
+                || packageName.equals(sServicesSystemSharedLibPackageName)
+                || packageName.equals(sSharedSystemSharedLibPackageName)
+                || packageName.equals(PrintManager.PRINT_SPOOLER_PACKAGE_NAME)
+                || isDeviceProvisioningPackage(resources, packageName);
     }
 
     /**
@@ -598,6 +628,9 @@ public class Utils {
      * Returns the WifiInfo for the underlying WiFi network of the VCN network, returns null if the
      * input NetworkCapabilities is not for a VCN network with underlying WiFi network.
      *
+     * TODO(b/238425913): Move this method to be inside systemui not settingslib once we've migrated
+     *   off of {@link WifiStatusTracker} and {@link NetworkControllerImpl}.
+     *
      * @param networkCapabilities NetworkCapabilities of the network.
      */
     @Nullable
@@ -610,4 +643,34 @@ public class Utils {
                 (VcnTransportInfo) networkCapabilities.getTransportInfo();
         return vcnTransportInfo.getWifiInfo();
     }
+
+    /** Whether there is any incompatible chargers in the current UsbPort? */
+    public static boolean containsIncompatibleChargers(Context context, String tag) {
+        final List<UsbPort> usbPortList =
+                context.getSystemService(UsbManager.class).getPorts();
+        if (usbPortList == null || usbPortList.isEmpty()) {
+            return false;
+        }
+        for (UsbPort usbPort : usbPortList) {
+            Log.d(tag, "usbPort: " + usbPort);
+            if (!usbPort.supportsComplianceWarnings()) {
+                continue;
+            }
+            final UsbPortStatus usbStatus = usbPort.getStatus();
+            if (usbStatus == null || !usbStatus.isConnected()) {
+                continue;
+            }
+            final int[] complianceWarnings = usbStatus.getComplianceWarnings();
+            if (complianceWarnings == null || complianceWarnings.length == 0) {
+                continue;
+            }
+            for (int complianceWarningType : complianceWarnings) {
+                if (complianceWarningType != 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 }

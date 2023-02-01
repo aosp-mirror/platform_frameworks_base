@@ -74,6 +74,7 @@ import android.view.Surface;
 import android.view.WindowManagerGlobal;
 
 import com.android.framework.protobuf.nano.MessageNano;
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
@@ -355,7 +356,7 @@ public class CameraServiceProxy extends SystemService
                 case UsbManager.ACTION_USB_DEVICE_ATTACHED:
                 case UsbManager.ACTION_USB_DEVICE_DETACHED:
                     synchronized (mLock) {
-                        UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+                        UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE, android.hardware.usb.UsbDevice.class);
                         if (device != null) {
                             notifyUsbDeviceHotplugLocked(device,
                                     action.equals(UsbManager.ACTION_USB_DEVICE_ATTACHED));
@@ -386,6 +387,16 @@ public class CameraServiceProxy extends SystemService
             @Nullable TaskInfo taskInfo, int displayRotation, int lensFacing,
             boolean ignoreResizableAndSdkCheck) {
         if (taskInfo == null) {
+            return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
+        }
+
+        // When config_isWindowManagerCameraCompatTreatmentEnabled is true,
+        // DisplayRotationCompatPolicy in WindowManager force rotates fullscreen activities with
+        // fixed orientation to align them with the natural orientation of the device.
+        if (ctx.getResources().getBoolean(
+                R.bool.config_isWindowManagerCameraCompatTreatmentEnabled)) {
+            Slog.v(TAG, "Disable Rotate and Crop to avoid conflicts with"
+                    + " WM force rotation treatment.");
             return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
         }
 
@@ -551,6 +562,15 @@ public class CameraServiceProxy extends SystemService
                     lensFacing, ignoreResizableAndSdkCheck);
         }
 
+        /**
+         * Placeholder method to fetch the system state for autoframing.
+         * TODO: b/260617354
+         */
+        @Override
+        public int getAutoframingOverride(String packageName) {
+            return CaptureRequest.CONTROL_AUTOFRAMING_OFF;
+        }
+
         @Override
         public void pingForUserUpdate() {
             if (Binder.getCallingUid() != Process.CAMERASERVER_UID) {
@@ -582,13 +602,18 @@ public class CameraServiceProxy extends SystemService
         }
 
         @Override
-        public boolean isCameraDisabled() {
+        public boolean isCameraDisabled(int userId) {
             DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
             if (dpm == null) {
                 Slog.e(TAG, "Failed to get the device policy manager service");
                 return false;
             }
-            return dpm.getCameraDisabled(null);
+            try {
+                return dpm.getCameraDisabled(null, userId);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
         }
     };
 
@@ -836,6 +861,7 @@ public class CameraServiceProxy extends SystemService
                     streamProtos[i].histogramCounts = streamStats.getHistogramCounts();
                     streamProtos[i].dynamicRangeProfile = streamStats.getDynamicRangeProfile();
                     streamProtos[i].streamUseCase = streamStats.getStreamUseCase();
+                    streamProtos[i].colorSpace = streamStats.getColorSpace();
 
                     if (CameraServiceProxy.DEBUG) {
                         String histogramTypeName =
@@ -858,7 +884,8 @@ public class CameraServiceProxy extends SystemService
                                 + ", histogramCounts "
                                 + Arrays.toString(streamProtos[i].histogramCounts)
                                 + ", dynamicRangeProfile " + streamProtos[i].dynamicRangeProfile
-                                + ", streamUseCase " + streamProtos[i].streamUseCase);
+                                + ", streamUseCase " + streamProtos[i].streamUseCase
+                                + ", colorSpace " + streamProtos[i].colorSpace);
                     }
                 }
             }

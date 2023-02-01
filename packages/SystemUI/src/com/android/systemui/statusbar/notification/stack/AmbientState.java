@@ -23,6 +23,8 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.util.MathUtils;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
@@ -42,7 +44,8 @@ import java.io.PrintWriter;
 import javax.inject.Inject;
 
 /**
- * A global state to track all input states for the algorithm.
+ * Global state to track all input states for
+ * {@link com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm}.
  */
 @SysUISingleton
 public class AmbientState implements Dumpable {
@@ -137,7 +140,22 @@ public class AmbientState implements Dumpable {
      * True right after we swipe up on lockscreen and have not finished the fling down that follows.
      * False when we stop flinging or leave lockscreen.
      */
-    private boolean mNeedFlingAfterLockscreenSwipeUp = false;
+    private boolean mIsFlingRequiredAfterLockScreenSwipeUp = false;
+
+    /**
+     * Whether the shade is currently closing.
+     */
+    private boolean mIsClosing;
+
+    @VisibleForTesting
+    public boolean isFlingRequiredAfterLockScreenSwipeUp() {
+        return mIsFlingRequiredAfterLockScreenSwipeUp;
+    }
+
+    @VisibleForTesting
+    public void setFlingRequiredAfterLockScreenSwipeUp(boolean value) {
+        mIsFlingRequiredAfterLockScreenSwipeUp = value;
+    }
 
     /**
      * @return Height of the notifications panel without top padding when expansion completes.
@@ -181,7 +199,7 @@ public class AmbientState implements Dumpable {
     public void setSwipingUp(boolean isSwipingUp) {
         if (!isSwipingUp && mIsSwipingUp) {
             // Just stopped swiping up.
-            mNeedFlingAfterLockscreenSwipeUp = true;
+            mIsFlingRequiredAfterLockScreenSwipeUp = true;
         }
         mIsSwipingUp = isSwipingUp;
     }
@@ -196,10 +214,10 @@ public class AmbientState implements Dumpable {
     /**
      * @param isFlinging Whether we are flinging the shade open or closed.
      */
-    public void setIsFlinging(boolean isFlinging) {
+    public void setFlinging(boolean isFlinging) {
         if (isOnKeyguard() && !isFlinging && mIsFlinging) {
             // Just stopped flinging.
-            mNeedFlingAfterLockscreenSwipeUp = false;
+            mIsFlingRequiredAfterLockScreenSwipeUp = false;
         }
         mIsFlinging = isFlinging;
     }
@@ -508,7 +526,7 @@ public class AmbientState implements Dumpable {
 
     public void setStatusBarState(int statusBarState) {
         if (mStatusBarState != StatusBarState.KEYGUARD) {
-            mNeedFlingAfterLockscreenSwipeUp = false;
+            mIsFlingRequiredAfterLockScreenSwipeUp = false;
         }
         mStatusBarState = statusBarState;
     }
@@ -576,7 +594,7 @@ public class AmbientState implements Dumpable {
      * @return Whether we need to do a fling down after swiping up on lockscreen.
      */
     public boolean isFlingingAfterSwipeUpOnLockscreen() {
-        return mIsFlinging && mNeedFlingAfterLockscreenSwipeUp;
+        return mIsFlinging && mIsFlingRequiredAfterLockScreenSwipeUp;
     }
 
     /**
@@ -701,7 +719,21 @@ public class AmbientState implements Dumpable {
      */
     public boolean isBouncerInTransit() {
         return mStatusBarKeyguardViewManager != null
-                && mStatusBarKeyguardViewManager.isBouncerInTransit();
+                && mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit();
+    }
+
+    /**
+     * @param isClosing Whether the shade is currently closing.
+     */
+    public void setIsClosing(boolean isClosing) {
+        mIsClosing = isClosing;
+    }
+
+    /**
+     * @return Whether the shade is currently closing.
+     */
+    public boolean isClosing() {
+        return mIsClosing;
     }
 
     @Override
@@ -744,8 +776,10 @@ public class AmbientState implements Dumpable {
         pw.println("mIsSwipingUp=" + mIsSwipingUp);
         pw.println("mPanelTracking=" + mPanelTracking);
         pw.println("mIsFlinging=" + mIsFlinging);
-        pw.println("mNeedFlingAfterLockscreenSwipeUp=" + mNeedFlingAfterLockscreenSwipeUp);
+        pw.println("mIsFlingRequiredAfterLockScreenSwipeUp="
+                + mIsFlingRequiredAfterLockScreenSwipeUp);
         pw.println("mZDistanceBetweenElements=" + mZDistanceBetweenElements);
         pw.println("mBaseZHeight=" + mBaseZHeight);
+        pw.println("mIsClosing=" + mIsClosing);
     }
 }

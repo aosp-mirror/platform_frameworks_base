@@ -271,22 +271,22 @@ public class DataManager {
     private ConversationChannel getConversationChannel(String packageName, int userId,
             String shortcutId, ConversationInfo conversationInfo) {
         ShortcutInfo shortcutInfo = getShortcut(packageName, userId, shortcutId);
-        return getConversationChannel(shortcutInfo, conversationInfo);
+        return getConversationChannel(
+                shortcutInfo, conversationInfo, packageName, userId, shortcutId);
     }
 
     @Nullable
     private ConversationChannel getConversationChannel(ShortcutInfo shortcutInfo,
-            ConversationInfo conversationInfo) {
+            ConversationInfo conversationInfo, String packageName, int userId, String shortcutId) {
         if (conversationInfo == null || conversationInfo.isDemoted()) {
             return null;
         }
         if (shortcutInfo == null) {
-            Slog.e(TAG, " Shortcut no longer found");
+            Slog.e(TAG, "Shortcut no longer found");
+            mInjector.getBackgroundExecutor().execute(
+                    () -> removeConversations(packageName, userId, Set.of(shortcutId)));
             return null;
         }
-        String packageName = shortcutInfo.getPackage();
-        String shortcutId = shortcutInfo.getId();
-        int userId = shortcutInfo.getUserId();
         int uid = mPackageManagerInternal.getPackageUid(packageName, 0, userId);
         NotificationChannel parentChannel =
                 mNotificationManagerInternal.getNotificationChannel(packageName, uid,
@@ -788,7 +788,7 @@ public class DataManager {
 
     private void updateDefaultSmsApp(@NonNull UserData userData) {
         ComponentName component = SmsApplication.getDefaultSmsApplicationAsUser(
-                mContext, /* updateIfNeeded= */ false, userData.getUserId());
+                mContext, /* updateIfNeeded= */ false, UserHandle.of(userData.getUserId()));
         String defaultSmsApp = component != null ? component.getPackageName() : null;
         userData.setDefaultSmsApp(defaultSmsApp);
     }
@@ -816,10 +816,18 @@ public class DataManager {
     }
 
     private boolean isCachedRecentConversation(ConversationInfo conversationInfo) {
+        return isEligibleForCleanUp(conversationInfo)
+                && conversationInfo.getLastEventTimestamp() > 0L;
+    }
+
+    /**
+     * Conversations that are cached and not customized are eligible for clean-up, even if they
+     * don't have an associated notification event with them.
+     */
+    private boolean isEligibleForCleanUp(ConversationInfo conversationInfo) {
         return conversationInfo.isShortcutCachedForNotification()
                 && Objects.equals(conversationInfo.getNotificationChannelId(),
-                conversationInfo.getParentNotificationChannelId())
-                && conversationInfo.getLastEventTimestamp() > 0L;
+                conversationInfo.getParentNotificationChannelId());
     }
 
     private boolean hasActiveNotifications(String packageName, @UserIdInt int userId,
@@ -842,14 +850,14 @@ public class DataManager {
         }
         // pair of <package name, conversation info>
         List<Pair<String, ConversationInfo>> cachedConvos = new ArrayList<>();
-        userData.forAllPackages(packageData ->
+        userData.forAllPackages(packageData -> {
                 packageData.forAllConversations(conversationInfo -> {
-                    if (isCachedRecentConversation(conversationInfo)) {
+                    if (isEligibleForCleanUp(conversationInfo)) {
                         cachedConvos.add(
                                 Pair.create(packageData.getPackageName(), conversationInfo));
                     }
-                })
-        );
+                });
+        });
         if (cachedConvos.size() <= targetCachedCount) {
             return;
         }
@@ -858,7 +866,9 @@ public class DataManager {
         PriorityQueue<Pair<String, ConversationInfo>> maxHeap = new PriorityQueue<>(
                 numToUncache + 1,
                 Comparator.comparingLong((Pair<String, ConversationInfo> pair) ->
-                        pair.second.getLastEventTimestamp()).reversed());
+                        Math.max(
+                            pair.second.getLastEventTimestamp(),
+                            pair.second.getCreationTimestamp())).reversed());
         for (Pair<String, ConversationInfo> cached : cachedConvos) {
             if (hasActiveNotifications(cached.first, userId, cached.second.getShortcutId())) {
                 continue;
@@ -893,7 +903,7 @@ public class DataManager {
         }
         ConversationInfo.Builder builder = oldConversationInfo != null
                 ? new ConversationInfo.Builder(oldConversationInfo)
-                : new ConversationInfo.Builder();
+                : new ConversationInfo.Builder().setCreationTimestamp(System.currentTimeMillis());
 
         builder.setShortcutId(shortcutInfo.getId());
         builder.setLocusId(shortcutInfo.getLocusId());
@@ -1120,27 +1130,30 @@ public class DataManager {
         public void onShortcutsRemoved(@NonNull String packageName,
                 @NonNull List<ShortcutInfo> shortcuts, @NonNull UserHandle user) {
             mInjector.getBackgroundExecutor().execute(() -> {
-                int uid = Process.INVALID_UID;
-                try {
-                    uid = mContext.getPackageManager().getPackageUidAsUser(
-                            packageName, user.getIdentifier());
-                } catch (PackageManager.NameNotFoundException e) {
-                    Slog.e(TAG, "Package not found: " + packageName, e);
-                }
-                PackageData packageData = getPackage(packageName, user.getIdentifier());
-                Set<String> shortcutIds = new HashSet<>();
+                HashSet<String> shortcutIds = new HashSet<>();
                 for (ShortcutInfo shortcutInfo : shortcuts) {
-                    if (packageData != null) {
-                        if (DEBUG) Log.d(TAG, "Deleting shortcut: " + shortcutInfo.getId());
-                        packageData.deleteDataForConversation(shortcutInfo.getId());
-                    }
                     shortcutIds.add(shortcutInfo.getId());
                 }
-                if (uid != Process.INVALID_UID) {
-                    mNotificationManagerInternal.onConversationRemoved(
-                            packageName, uid, shortcutIds);
-                }
+                removeConversations(packageName, user.getIdentifier(), shortcutIds);
             });
+        }
+    }
+
+    private void removeConversations(
+            @NonNull String packageName, @NonNull int userId, @NonNull Set<String> shortcutIds) {
+        PackageData packageData = getPackage(packageName, userId);
+        if (packageData != null) {
+            for (String shortcutId : shortcutIds) {
+                if (DEBUG) Log.d(TAG, "Deleting shortcut: " + shortcutId);
+                packageData.deleteDataForConversation(shortcutId);
+            }
+        }
+        try {
+            int uid = mContext.getPackageManager().getPackageUidAsUser(
+                    packageName, userId);
+            mNotificationManagerInternal.onConversationRemoved(packageName, uid, shortcutIds);
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.e(TAG, "Package not found when removing conversation: " + packageName, e);
         }
     }
 
@@ -1149,9 +1162,9 @@ public class DataManager {
 
         private final int mUserId;
 
-        // Conversation package name + shortcut ID -> Number of active notifications
+        // Conversation package name + shortcut ID -> Keys of active notifications
         @GuardedBy("this")
-        private final Map<Pair<String, String>, Integer> mActiveNotifCounts = new ArrayMap<>();
+        private final Map<Pair<String, String>, Set<String>> mActiveNotifKeys = new ArrayMap<>();
 
         private NotificationListener(int userId) {
             mUserId = userId;
@@ -1165,8 +1178,10 @@ public class DataManager {
             String shortcutId = sbn.getNotification().getShortcutId();
             PackageData packageData = getPackageIfConversationExists(sbn, conversationInfo -> {
                 synchronized (this) {
-                    mActiveNotifCounts.merge(
-                            Pair.create(sbn.getPackageName(), shortcutId), 1, Integer::sum);
+                    Set<String> notificationKeys = mActiveNotifKeys.computeIfAbsent(
+                            Pair.create(sbn.getPackageName(), shortcutId),
+                            (unusedKey) -> new HashSet<>());
+                    notificationKeys.add(sbn.getKey());
                 }
             });
 
@@ -1205,12 +1220,12 @@ public class DataManager {
                 Pair<String, String> conversationKey =
                         Pair.create(sbn.getPackageName(), shortcutId);
                 synchronized (this) {
-                    int count = mActiveNotifCounts.getOrDefault(conversationKey, 0) - 1;
-                    if (count <= 0) {
-                        mActiveNotifCounts.remove(conversationKey);
+                    Set<String> notificationKeys = mActiveNotifKeys.computeIfAbsent(
+                            conversationKey, (unusedKey) -> new HashSet<>());
+                    notificationKeys.remove(sbn.getKey());
+                    if (notificationKeys.isEmpty()) {
+                        mActiveNotifKeys.remove(conversationKey);
                         cleanupCachedShortcuts(mUserId, MAX_CACHED_RECENT_SHORTCUTS);
-                    } else {
-                        mActiveNotifCounts.put(conversationKey, count);
                     }
                 }
             });
@@ -1276,7 +1291,7 @@ public class DataManager {
         }
 
         synchronized boolean hasActiveNotifications(String packageName, String shortcutId) {
-            return mActiveNotifCounts.containsKey(Pair.create(packageName, shortcutId));
+            return mActiveNotifKeys.containsKey(Pair.create(packageName, shortcutId));
         }
     }
 
@@ -1326,7 +1341,8 @@ public class DataManager {
         }
     }
 
-    private void updateConversationStoreThenNotifyListeners(ConversationStore cs,
+    @VisibleForTesting
+    void updateConversationStoreThenNotifyListeners(ConversationStore cs,
             ConversationInfo modifiedConv,
             String packageName, int userId) {
         cs.addOrUpdate(modifiedConv);
@@ -1338,9 +1354,11 @@ public class DataManager {
     }
 
     private void updateConversationStoreThenNotifyListeners(ConversationStore cs,
-            ConversationInfo modifiedConv, ShortcutInfo shortcutInfo) {
+            ConversationInfo modifiedConv, @NonNull ShortcutInfo shortcutInfo) {
         cs.addOrUpdate(modifiedConv);
-        ConversationChannel channel = getConversationChannel(shortcutInfo, modifiedConv);
+        ConversationChannel channel = getConversationChannel(
+                shortcutInfo, modifiedConv, shortcutInfo.getPackage(), shortcutInfo.getUserId(),
+                shortcutInfo.getId());
         if (channel != null) {
             notifyConversationsListeners(Arrays.asList(channel));
         }

@@ -16,223 +16,223 @@
 
 package com.android.server.wm.flicker.ime
 
-import android.app.Instrumentation
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
-import android.platform.test.annotations.RequiresDevice
-import android.view.Surface
-import android.view.WindowManagerPolicyConstants
-import androidx.test.filters.FlakyTest
-import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.FlickerBuilderProvider
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.annotation.Group4
-import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import androidx.test.filters.RequiresDevice
+import com.android.server.wm.flicker.BaseTest
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
-import com.android.server.wm.flicker.navBarLayerIsVisible
-import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.statusBarLayerIsVisible
-import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
+import com.android.server.wm.flicker.navBarLayerIsVisibleAtStartAndEnd
+import com.android.server.wm.flicker.statusBarLayerIsVisibleAtStartAndEnd
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.WindowManagerConditionsFactory
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
-import org.junit.Assume.assumeTrue
-import org.junit.Assume.assumeFalse
+import org.junit.Assume
 import org.junit.FixMethodOrder
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test IME window layer will be associated with the app task when going to the overview screen.
- * To run this test: `atest FlickerTests:OpenImeWindowToOverViewTest`
+ * Test IME window layer will be associated with the app task when going to the overview screen. To
+ * run this test: `atest FlickerTests:OpenImeWindowToOverViewTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group4
-class OpenImeWindowToOverViewTest(private val testSpec: FlickerTestParameter) {
-    private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
-    private val imeTestApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
-    private val statusBarInvisible = WindowManagerConditionsFactory.isStatusBarVisible().negate()
-    private val navBarInvisible = WindowManagerConditionsFactory.isNavBarVisible().negate()
+open class OpenImeWindowToOverViewTest(flicker: FlickerTest) : BaseTest(flicker) {
+    private val imeTestApp = ImeAppAutoFocusHelper(instrumentation, flicker.scenario.startRotation)
 
-    @FlickerBuilderProvider
-    fun buildFlicker(): FlickerBuilder {
-        return FlickerBuilder(instrumentation).apply {
-            setup {
-                eachRun {
-                    imeTestApp.launchViaIntent(wmHelper)
-                }
-            }
-            transitions {
-                device.pressRecentApps()
-                waitForRecentsActivityVisible(wmHelper)
-                waitNavStatusBarVisibility(wmHelper)
-            }
-            teardown {
-                test {
-                    device.pressHome()
-                    imeTestApp.exit(wmHelper)
-                }
-            }
+    /** {@inheritDoc} */
+    override val transition: FlickerBuilder.() -> Unit = {
+        setup { imeTestApp.launchViaIntent(wmHelper) }
+        transitions {
+            device.pressRecentApps()
+            val builder = wmHelper.StateSyncBuilder().withRecentsActivityVisible()
+            waitNavStatusBarVisibility(builder)
+            builder.waitForAndVerify()
+        }
+        teardown {
+            device.pressHome()
+            wmHelper.StateSyncBuilder().withHomeActivityVisible().waitForAndVerify()
+            imeTestApp.exit(wmHelper)
         }
     }
 
     /**
-     * The bars (including status bar and navigation bar) are expected to be hidden while
-     * entering overview in landscape if launcher is set to portrait only. Because
-     * "showing portrait overview (launcher) in landscape display" is an intermediate state
-     * depending on the touch-up to decide the intention of gesture, the display may keep in
+     * The bars (including [ComponentNameMatcher.STATUS_BAR] and [ComponentNameMatcher.NAV_BAR]) are
+     * expected to be hidden while entering overview in landscape if launcher is set to portrait
+     * only. Because "showing portrait overview (launcher) in landscape display" is an intermediate
+     * state depending on the touch-up to decide the intention of gesture, the display may keep in
      * landscape if return to app, or change to portrait if the gesture is to swipe-to-home.
      *
-     * So instead of showing landscape bars with portrait launcher at the same time
-     * (especially return-to-home that launcher workspace becomes visible), hide the bars until
-     * leave overview to have cleaner appearance.
+     * So instead of showing landscape bars with portrait launcher at the same time (especially
+     * return-to-home that launcher workspace becomes visible), hide the bars until leave overview
+     * to have cleaner appearance.
      *
      * b/227189877
      */
-    private fun waitNavStatusBarVisibility(wmHelper: WindowManagerStateHelper) {
+    private fun waitNavStatusBarVisibility(stateSync: WindowManagerStateHelper.StateSyncBuilder) {
         when {
-            testSpec.isLandscapeOrSeascapeAtStart && !testSpec.isGesturalNavigation ->
-                wmHelper.waitFor(statusBarInvisible)
-            testSpec.isLandscapeOrSeascapeAtStart ->
-                wmHelper.waitFor(statusBarInvisible, navBarInvisible)
+            flicker.scenario.isLandscapeOrSeascapeAtStart && !flicker.scenario.isTablet ->
+                stateSync.add(WindowManagerConditionsFactory.isStatusBarVisible().negate())
+            else -> stateSync.withNavOrTaskBarVisible().withStatusBarVisible()
         }
     }
-
-    @Presubmit
-    @Test
-    fun navBarWindowIsVisible() = testSpec.navBarWindowIsVisible()
-
-    @Presubmit
-    @Test
-    fun statusBarWindowIsVisible() = testSpec.statusBarWindowIsVisible()
 
     @Presubmit
     @Test
     fun imeWindowIsAlwaysVisible() {
-        testSpec.imeWindowIsAlwaysVisible()
+        flicker.imeWindowIsAlwaysVisible()
     }
 
     @Presubmit
     @Test
-    fun navBarLayerIsVisible3Button() {
-        assumeFalse(testSpec.isGesturalNavigation)
-        testSpec.navBarLayerIsVisible()
+    fun navBarLayerIsVisibleAtStartAndEnd3Button() {
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeFalse(flicker.scenario.isGesturalNavigation)
+        flicker.navBarLayerIsVisibleAtStartAndEnd()
     }
 
-    /**
-     * Bars are expected to be hidden while entering overview in landscape (b/227189877)
-     */
+    /** Bars are expected to be hidden while entering overview in landscape (b/227189877) */
     @Presubmit
     @Test
-    fun navBarLayerIsVisibleInPortraitGestural() {
-        assumeFalse(testSpec.isLandscapeOrSeascapeAtStart)
-        assumeTrue(testSpec.isGesturalNavigation)
-        testSpec.navBarLayerIsVisible()
+    fun navBarLayerIsVisibleAtStartAndEndGestural() {
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeTrue(flicker.scenario.isGesturalNavigation)
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        flicker.navBarLayerIsVisibleAtStartAndEnd()
     }
 
     /**
-     * In the legacy transitions, the nav bar is not marked as invisible.
-     * In the new transitions this is fixed and the nav bar shows as invisible
+     * In the legacy transitions, the nav bar is not marked as invisible. In the new transitions
+     * this is fixed and the nav bar shows as invisible
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun navBarLayerIsInvisibleInLandscapeGestural() {
-        assumeTrue(testSpec.isLandscapeOrSeascapeAtStart)
-        assumeTrue(testSpec.isGesturalNavigation)
-        assumeTrue(isShellTransitionsEnabled)
-        testSpec.assertLayersStart {
-            this.isVisible(FlickerComponentName.NAV_BAR)
-        }
-        testSpec.assertLayersEnd {
-            this.isInvisible(FlickerComponentName.NAV_BAR)
-        }
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeTrue(flicker.scenario.isLandscapeOrSeascapeAtStart)
+        Assume.assumeTrue(flicker.scenario.isGesturalNavigation)
+        Assume.assumeTrue(isShellTransitionsEnabled)
+        flicker.assertLayersStart { this.isVisible(ComponentNameMatcher.NAV_BAR) }
+        flicker.assertLayersEnd { this.isInvisible(ComponentNameMatcher.NAV_BAR) }
     }
 
-    @Postsubmit
+    /**
+     * In the legacy transitions, the nav bar is not marked as invisible. In the new transitions
+     * this is fixed and the nav bar shows as invisible
+     */
+    @Presubmit
+    @Test
+    fun statusBarLayerIsInvisibleInLandscapePhone() {
+        Assume.assumeTrue(flicker.scenario.isLandscapeOrSeascapeAtStart)
+        Assume.assumeTrue(flicker.scenario.isGesturalNavigation)
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        flicker.assertLayersStart { this.isVisible(ComponentNameMatcher.STATUS_BAR) }
+        flicker.assertLayersEnd { this.isInvisible(ComponentNameMatcher.STATUS_BAR) }
+    }
+
+    /**
+     * In the legacy transitions, the nav bar is not marked as invisible. In the new transitions
+     * this is fixed and the nav bar shows as invisible
+     */
+    @Presubmit
+    @Test
+    fun statusBarLayerIsInvisibleInLandscapeTablet() {
+        Assume.assumeTrue(flicker.scenario.isLandscapeOrSeascapeAtStart)
+        Assume.assumeTrue(flicker.scenario.isGesturalNavigation)
+        Assume.assumeTrue(flicker.scenario.isTablet)
+        flicker.statusBarLayerIsVisibleAtStartAndEnd()
+    }
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Visibility changes depending on orientation and navigation mode")
+    override fun navBarLayerIsVisibleAtStartAndEnd() {}
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Visibility changes depending on orientation and navigation mode")
+    override fun navBarLayerPositionAtStartAndEnd() {}
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Visibility changes depending on orientation and navigation mode")
+    override fun statusBarLayerPositionAtStartAndEnd() {}
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Visibility changes depending on orientation and navigation mode")
+    override fun statusBarLayerIsVisibleAtStartAndEnd() {}
+
+    @Presubmit
+    @Test
+    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
+
+    @Presubmit
     @Test
     fun statusBarLayerIsVisibleInPortrait() {
-        assumeFalse(testSpec.isLandscapeOrSeascapeAtStart)
-        testSpec.statusBarLayerIsVisible()
+        Assume.assumeFalse(flicker.scenario.isLandscapeOrSeascapeAtStart)
+        flicker.statusBarLayerIsVisibleAtStartAndEnd()
     }
 
     @Presubmit
     @Test
-    fun statusBarLayerIsInvisibleInLandscape() {
-        assumeTrue(testSpec.isLandscapeOrSeascapeAtStart)
-        testSpec.assertLayersStart {
-            this.isVisible(FlickerComponentName.STATUS_BAR)
-        }
-        testSpec.assertLayersEnd {
-            this.isInvisible(FlickerComponentName.STATUS_BAR)
-        }
+    fun statusBarLayerIsInvisibleInLandscapeShell() {
+        Assume.assumeTrue(flicker.scenario.isLandscapeOrSeascapeAtStart)
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeTrue(isShellTransitionsEnabled)
+        flicker.assertLayersStart { this.isVisible(ComponentNameMatcher.STATUS_BAR) }
+        flicker.assertLayersEnd { this.isInvisible(ComponentNameMatcher.STATUS_BAR) }
     }
 
-    @FlakyTest(bugId = 228011606)
+    @Presubmit
+    @Test
+    fun statusBarLayerIsVisibleInLandscapeLegacy() {
+        Assume.assumeTrue(flicker.scenario.isLandscapeOrSeascapeAtStart)
+        Assume.assumeTrue(flicker.scenario.isTablet)
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        flicker.statusBarLayerIsVisibleAtStartAndEnd()
+    }
+
+    @Presubmit
     @Test
     fun imeLayerIsVisibleAndAssociatedWithAppWidow() {
-        testSpec.assertLayersStart {
-            isVisible(FlickerComponentName.IME).visibleRegion(FlickerComponentName.IME)
-                    .coversAtMost(isVisible(imeTestApp.component)
-                            .visibleRegion(imeTestApp.component).region)
+        flicker.assertLayersStart {
+            isVisible(ComponentNameMatcher.IME)
+                .visibleRegion(ComponentNameMatcher.IME)
+                .coversAtMost(isVisible(imeTestApp).visibleRegion(imeTestApp).region)
         }
-        testSpec.assertLayers {
+        flicker.assertLayers {
             this.invoke("imeLayerIsVisibleAndAlignAppWidow") {
-                val imeVisibleRegion = it.visibleRegion(FlickerComponentName.IME)
-                val appVisibleRegion = it.visibleRegion(imeTestApp.component)
+                val imeVisibleRegion = it.visibleRegion(ComponentNameMatcher.IME)
+                val appVisibleRegion = it.visibleRegion(imeTestApp)
                 if (imeVisibleRegion.region.isNotEmpty) {
-                    it.isVisible(FlickerComponentName.IME)
+                    it.isVisible(ComponentNameMatcher.IME)
                     imeVisibleRegion.coversAtMost(appVisibleRegion.region)
                 }
             }
         }
     }
 
-    private fun waitForRecentsActivityVisible(
-        wmHelper: WindowManagerStateHelper
-    ) {
-        val waitMsg = "state of Recents activity to be visible"
-        require(
-                wmHelper.waitFor(waitMsg) {
-                    it.wmState.homeActivity?.let { act ->
-                        it.wmState.isActivityVisible(act.name)
-                    } == true ||
-                            it.wmState.recentsActivity?.let { act ->
-                                it.wmState.isActivityVisible(act.name)
-                            } == true
-                }
-        ) { "Recents activity should be visible" }
-        wmHelper.waitForAppTransitionIdle()
-        // Ensure WindowManagerService wait until all animations have completed
-        instrumentation.uiAutomation.syncInputTransactions()
-    }
-
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                    .getConfigNonRotationTests(
-                            repetitions = 1,
-                            supportedRotations = listOf(Surface.ROTATION_0, Surface.ROTATION_90),
-                            supportedNavigationModes = listOf(
-                                    WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
-                                    WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                            )
-                    )
+        fun getParams(): Collection<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests()
         }
     }
 }

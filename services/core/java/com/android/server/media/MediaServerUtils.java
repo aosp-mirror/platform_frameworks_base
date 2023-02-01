@@ -18,7 +18,13 @@ package com.android.server.media;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
+import android.os.Process;
+import android.os.UserHandle;
+import android.text.TextUtils;
+
+import com.android.server.LocalServices;
 
 import java.io.PrintWriter;
 
@@ -26,6 +32,39 @@ import java.io.PrintWriter;
  * Util class for media server.
  */
 class MediaServerUtils {
+
+    /**
+     * Throws if the given {@code packageName} does not correspond to the given {@code uid}.
+     *
+     * <p>This method trusts calls from {@link Process#ROOT_UID} and {@link Process#SHELL_UID}.
+     *
+     * @param packageName A package name to verify (usually sent over binder by an app).
+     * @param uid The calling uid, obtained via {@link Binder#getCallingUid()}.
+     * @throws IllegalArgumentException If the given {@code packageName} does not correspond to the
+     *     given {@code uid}, and {@code uid} is not the root uid, or the shell uid.
+     */
+    public static void enforcePackageName(String packageName, int uid) {
+        if (uid == Process.ROOT_UID || uid == Process.SHELL_UID) {
+            return;
+        }
+        if (TextUtils.isEmpty(packageName)) {
+            throw new IllegalArgumentException("packageName may not be empty");
+        }
+        final PackageManagerInternal packageManagerInternal =
+                LocalServices.getService(PackageManagerInternal.class);
+        final int actualUid =
+                packageManagerInternal.getPackageUid(
+                        packageName, 0 /* flags */, UserHandle.getUserId(uid));
+        if (!UserHandle.isSameApp(uid, actualUid)) {
+            throw new IllegalArgumentException(
+                    "packageName does not belong to the calling uid; "
+                            + "pkg="
+                            + packageName
+                            + ", uid="
+                            + uid);
+        }
+    }
+
     /**
      * Verify that caller holds {@link android.Manifest.permission#DUMP}.
      */

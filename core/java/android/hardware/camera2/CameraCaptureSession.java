@@ -306,9 +306,9 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * requests are processed in first-in, first-out order and reprocess requests are processed in
      * first-in, first-out order, respectively. However, the processing order of a regular request
      * and a reprocess request in progress is not specified. In other words, a regular request
-     * will always be processed before regular requets that are submitted later. A reprocess request
-     * will always be processed before reprocess requests that are submitted later. However, a
-     * regular request may not be processed before reprocess requests that are submitted later.<p>
+     * will always be processed before regular requests that are submitted later. A reprocess
+     * request will always be processed before reprocess requests that are submitted later. However,
+     * a regular request may not be processed before reprocess requests that are submitted later.<p>
      *
      * <p>Requests submitted through this method have higher priority than
      * those submitted through {@link #setRepeatingRequest} or
@@ -1229,6 +1229,58 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * @see android.media.MediaActionSound
          */
         public void onCaptureStarted(@NonNull CameraCaptureSession session,
+                @NonNull CaptureRequest request, long timestamp, long frameNumber) {
+            // default empty implementation
+        }
+
+        /**
+         * This method is called when the camera device has started reading out the output
+         * image for the request, at the beginning of the sensor image readout.
+         *
+         * <p>For a capture request, this callback is invoked right after
+         * {@link #onCaptureStarted}. Unlike {@link #onCaptureStarted}, instead of passing
+         * a timestamp of start of exposure, this callback passes a timestamp of start of
+         * camera data readout. This is useful because for a camera running at fixed frame
+         * rate, the start of readout is at fixed interval, which is not necessarily true for
+         * the start of exposure, particularly when autoexposure is changing exposure duration
+         * between frames.</p>
+         *
+         * <p>The timestamps match the timestamps of the output surfaces with readout timestamp
+         * enabled (via {@link OutputConfiguration#setReadoutTimestampEnabled}) if:</p>
+         * <ul>
+         * <li> Timestamp base is {@link OutputConfiguration#TIMESTAMP_BASE_DEFAULT} and the
+         * output
+         *   <ul>
+         *   <li> is not a SurfaceView surface, and </li>
+         *   <li> is not a MediaRecoder, MediaCodec, or ImageReader surface with {@link
+         *   android.hardware.HardwareBuffer#USAGE_VIDEO_ENCODE} usage flag or the device's {@link
+         *   CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE} is {@code UNKNOWN}</li>
+         *   </ul>
+         * </li>
+         * <li> Timestamp base is {@link OutputConfiguration#TIMESTAMP_BASE_SENSOR},</li>
+         * <li> Timestamp base is {@link OutputConfiguration#TIMESTAMP_BASE_MONOTONIC} and the
+         *  device's {@link CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE} is {@code
+         *  UNKNOWN},</li>
+         * <li> Timestamp base is {@link OutputConfiguration#TIMESTAMP_BASE_REALTIME} and the
+         *  device's {@link CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE} is {@code REALTIME}
+         * </li>
+         * </ul>
+         * <p>Otherwise, the timestamps won't match the timestamp of the output surfaces. See
+         * the possible parameters for {@link OutputConfiguration#setTimestampBase} for details.</p>
+         *
+         * <p>This callback will be called only if {@link
+         * CameraCharacteristics#SENSOR_READOUT_TIMESTAMP} is
+         * {@link CameraMetadata#SENSOR_READOUT_TIMESTAMP_HARDWARE}, and it's called
+         * right after {@link #onCaptureStarted}.</p>
+         *
+         * @param session the session returned by {@link CameraDevice#createCaptureSession}
+         * @param request the request for the readout that just began
+         * @param timestamp the timestamp at start of readout for a regular request, or
+         *                  the timestamp at the input image's start of readout for a
+         *                  reprocess request, in nanoseconds.
+         * @param frameNumber the frame number for this capture
+         */
+        public void onReadoutStarted(@NonNull CameraCaptureSession session,
                 @NonNull CaptureRequest request, long timestamp, long frameNumber) {
             // default empty implementation
         }

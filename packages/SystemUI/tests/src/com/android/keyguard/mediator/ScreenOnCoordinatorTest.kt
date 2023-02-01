@@ -16,29 +16,25 @@
 
 package com.android.keyguard.mediator
 
+import android.os.Handler
+import android.os.Looper
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.keyguard.ScreenLifecycle
 import com.android.systemui.unfold.FoldAodAnimationController
 import com.android.systemui.unfold.SysUIUnfoldComponent
 import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation
-import com.android.systemui.util.concurrency.FakeExecution
 import com.android.systemui.util.mockito.capture
-
-import java.util.Optional
-
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import java.util.Optional
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -52,10 +48,10 @@ class ScreenOnCoordinatorTest : SysuiTestCase() {
     private lateinit var foldAodAnimationController: FoldAodAnimationController
     @Mock
     private lateinit var unfoldAnimation: UnfoldLightRevealOverlayAnimation
-    @Mock
-    private lateinit var screenLifecycle: ScreenLifecycle
     @Captor
     private lateinit var readyCaptor: ArgumentCaptor<Runnable>
+
+    private val testHandler = Handler(Looper.getMainLooper())
 
     private lateinit var screenOnCoordinator: ScreenOnCoordinator
 
@@ -69,13 +65,9 @@ class ScreenOnCoordinatorTest : SysuiTestCase() {
                 .thenReturn(foldAodAnimationController)
 
         screenOnCoordinator = ScreenOnCoordinator(
-            screenLifecycle,
             Optional.of(unfoldComponent),
-            FakeExecution()
+            testHandler
         )
-
-        // Make sure screen events are registered to observe
-        verify(screenLifecycle).addObserver(screenOnCoordinator)
     }
 
     @Test
@@ -84,6 +76,7 @@ class ScreenOnCoordinatorTest : SysuiTestCase() {
 
         onUnfoldOverlayReady()
         onFoldAodReady()
+        waitHandlerIdle(testHandler)
 
         // Should be called when both unfold overlay and keyguard drawn ready
         verify(runnable).run()
@@ -93,11 +86,11 @@ class ScreenOnCoordinatorTest : SysuiTestCase() {
     fun testUnfoldTransitionDisabledDrawnTasksReady_onScreenTurningOn_callsDrawnCallback() {
         // Recreate with empty unfoldComponent
         screenOnCoordinator = ScreenOnCoordinator(
-            screenLifecycle,
             Optional.empty(),
-            FakeExecution()
+            testHandler
         )
         screenOnCoordinator.onScreenTurningOn(runnable)
+        waitHandlerIdle(testHandler)
 
         // Should be called when only keyguard drawn
         verify(runnable).run()
@@ -105,11 +98,15 @@ class ScreenOnCoordinatorTest : SysuiTestCase() {
 
     private fun onUnfoldOverlayReady() {
         verify(unfoldAnimation).onScreenTurningOn(capture(readyCaptor))
-        readyCaptor.getValue().run()
+        readyCaptor.value.run()
     }
 
     private fun onFoldAodReady() {
         verify(foldAodAnimationController).onScreenTurningOn(capture(readyCaptor))
-        readyCaptor.getValue().run()
+        readyCaptor.value.run()
+    }
+
+    private fun waitHandlerIdle(handler: Handler) {
+        handler.runWithScissors({},  /* timeout= */ 0)
     }
 }

@@ -405,6 +405,12 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             BackupTransportClient transport =
                     mTransportConnection.connectOrThrow("PerformUnifiedRestoreTask.startRestore()");
 
+            // If the requester of the restore has not passed in a monitor, we ask the transport
+            // for one.
+            if (mMonitor == null) {
+                mMonitor = transport.getBackupManagerMonitor();
+            }
+
             mStatus = transport.startRestore(mToken, packages);
             if (mStatus != BackupTransport.TRANSPORT_OK) {
                 Slog.e(TAG, "Transport error " + mStatus + "; no restore possible");
@@ -669,7 +675,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         mAgent = backupManagerService.bindToAgentSynchronous(
                 mCurrentPackage.applicationInfo,
                 ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL,
-                mBackupEligibilityRules.getOperationType());
+                mBackupEligibilityRules.getBackupDestination());
         if (mAgent == null) {
             Slog.w(TAG, "Can't find backup agent for " + packageName);
             mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
@@ -885,6 +891,10 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                             OpType.RESTORE_WAIT);
             mAgent.doRestoreFinished(mEphemeralOpToken,
                     backupManagerService.getBackupManagerBinder());
+
+            // Ask the agent for logs after doRestoreFinished() to allow it to finalize its logs.
+            BackupManagerMonitorUtils.monitorAgentLoggingResults(mMonitor, mCurrentPackage, mAgent);
+
             // If we get this far, the callback or timeout will schedule the
             // next restore state, so we're done
         } catch (Exception e) {
@@ -1150,8 +1160,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         if (mIsSystemRestore && mPmAgent != null) {
             backupManagerService.setAncestralPackages(mPmAgent.getRestoredPackages());
             backupManagerService.setAncestralToken(mToken);
-            backupManagerService.setAncestralOperationType(
-                    mBackupEligibilityRules.getOperationType());
+            backupManagerService.setAncestralBackupDestination(
+                    mBackupEligibilityRules.getBackupDestination());
             backupManagerService.writeRestoreTokens();
         }
 

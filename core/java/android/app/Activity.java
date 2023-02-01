@@ -17,6 +17,7 @@
 package android.app;
 
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
+import static android.Manifest.permission.DETECT_SCREEN_CAPTURE;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
@@ -26,6 +27,7 @@ import static android.os.Process.myUid;
 import static java.lang.Character.MIN_VALUE;
 
 import android.annotation.CallSuper;
+import android.annotation.CallbackExecutor;
 import android.annotation.DrawableRes;
 import android.annotation.IdRes;
 import android.annotation.IntDef;
@@ -83,14 +85,18 @@ import android.os.GraphicsEnvironment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.OutcomeReceiver;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.StrictMode;
+import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.service.voice.VoiceInteractionSession;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -154,6 +160,7 @@ import android.window.WindowOnBackInvokedDispatcher;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ToolbarActionBar;
 import com.android.internal.app.WindowDecorActionBar;
@@ -980,7 +987,24 @@ public class Activity extends ContextThemeWrapper
     boolean mEnterAnimationComplete;
 
     private boolean mIsInMultiWindowMode;
-    private boolean mIsInPictureInPictureMode;
+    /** @hide */
+    boolean mIsInPictureInPictureMode;
+
+    /** @hide */
+    @IntDef(prefix = { "FULLSCREEN_REQUEST_" }, value = {
+            FULLSCREEN_MODE_REQUEST_EXIT,
+            FULLSCREEN_MODE_REQUEST_ENTER
+    })
+    public @interface FullscreenModeRequest {}
+
+    /** Request type of {@link #requestFullscreenMode(int, OutcomeReceiver)}, to request exiting the
+     *  requested fullscreen mode and restore to the previous multi-window mode.
+     */
+    public static final int FULLSCREEN_MODE_REQUEST_EXIT = 0;
+    /** Request type of {@link #requestFullscreenMode(int, OutcomeReceiver)}, to request enter
+     *  fullscreen mode from multi-window mode.
+     */
+    public static final int FULLSCREEN_MODE_REQUEST_ENTER = 1;
 
     private boolean mShouldDockBigOverlays;
 
@@ -992,6 +1016,9 @@ public class Activity extends ContextThemeWrapper
     private DumpableContainerImpl mDumpableContainer;
 
     private ComponentCallbacksController mCallbacksController;
+
+    @Nullable private IVoiceInteractionManagerService mVoiceInteractionManagerService;
+    private ScreenCaptureCallbackHandler mScreenCaptureCallbackHandler;
 
     private final WindowControllerCallback mWindowControllerCallback =
             new WindowControllerCallback() {
@@ -1600,6 +1627,24 @@ public class Activity extends ContextThemeWrapper
         return callbacks;
     }
 
+    private void notifyVoiceInteractionManagerServiceActivityEvent(
+            @VoiceInteractionSession.VoiceInteractionActivityEventType int type) {
+        if (mVoiceInteractionManagerService == null) {
+            mVoiceInteractionManagerService = IVoiceInteractionManagerService.Stub.asInterface(
+                    ServiceManager.getService(Context.VOICE_INTERACTION_MANAGER_SERVICE));
+            if (mVoiceInteractionManagerService == null) {
+                Log.w(TAG, "notifyVoiceInteractionManagerServiceActivityEvent: Can not get "
+                        + "VoiceInteractionManagerService");
+                return;
+            }
+        }
+        try {
+            mVoiceInteractionManagerService.notifyActivityEventChanged(mToken, type);
+        } catch (RemoteException e) {
+            // Empty
+        }
+    }
+
     /**
      * Called when the activity is starting.  This is where most initialization
      * should go: calling {@link #setContentView(int)} to inflate the
@@ -1661,7 +1706,7 @@ public class Activity extends ContextThemeWrapper
                 .isOnBackInvokedCallbackEnabled(this);
         if (aheadOfTimeBack) {
             // Add onBackPressed as default back behavior.
-            mDefaultBackCallback = this::navigateBack;
+            mDefaultBackCallback = this::onBackInvoked;
             getOnBackInvokedDispatcher().registerSystemOnBackInvokedCallback(mDefaultBackCallback);
         }
     }
@@ -1875,6 +1920,9 @@ public class Activity extends ContextThemeWrapper
         mCalled = true;
 
         notifyContentCaptureManagerIfNeeded(CONTENT_CAPTURE_START);
+
+        notifyVoiceInteractionManagerServiceActivityEvent(
+                VoiceInteractionSession.VOICE_INTERACTION_ACTIVITY_EVENT_START);
     }
 
     /**
@@ -2018,6 +2066,12 @@ public class Activity extends ContextThemeWrapper
         final Window win = getWindow();
         if (win != null) win.makeActive();
         if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(true);
+
+        // Because the test case "com.android.launcher3.jank.BinderTests#testPressHome" doesn't
+        // allow any binder call in onResume, we call this method in onPostResume.
+        notifyVoiceInteractionManagerServiceActivityEvent(
+                VoiceInteractionSession.VOICE_INTERACTION_ACTIVITY_EVENT_RESUME);
+
         mCalled = true;
     }
 
@@ -2393,6 +2447,10 @@ public class Activity extends ContextThemeWrapper
         getAutofillClientController().onActivityPaused();
 
         notifyContentCaptureManagerIfNeeded(CONTENT_CAPTURE_PAUSE);
+
+        notifyVoiceInteractionManagerServiceActivityEvent(
+                VoiceInteractionSession.VOICE_INTERACTION_ACTIVITY_EVENT_PAUSE);
+
         mCalled = true;
     }
 
@@ -2622,6 +2680,9 @@ public class Activity extends ContextThemeWrapper
 
         getAutofillClientController().onActivityStopped(mIntent, mChangingConfigurations);
         mEnterAnimationComplete = false;
+
+        notifyVoiceInteractionManagerServiceActivityEvent(
+                VoiceInteractionSession.VOICE_INTERACTION_ACTIVITY_EVENT_STOP);
     }
 
     /**
@@ -2703,6 +2764,7 @@ public class Activity extends ContextThemeWrapper
             getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(mDefaultBackCallback);
             mDefaultBackCallback = null;
         }
+
         if (mCallbacksController != null) {
             mCallbacksController.clearCallbacks();
         }
@@ -2958,6 +3020,39 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean onPictureInPictureRequested() {
         return false;
+    }
+
+    /**
+     * Request to put the a freeform activity into fullscreen. This will only be allowed if the
+     * activity is on a freeform display, such as a desktop device. The requester has to be the
+     * top-most activity of the focused display, and the request should be a response to a user
+     * input. When getting fullscreen and receiving corresponding
+     * {@link #onConfigurationChanged(Configuration)} and
+     * {@link #onMultiWindowModeChanged(boolean, Configuration)}, the activity should relayout
+     * itself and the system bars' visibilities can be controlled as usual fullscreen apps.
+     *
+     * Calling it again with the exit request can restore the activity to the previous status.
+     * This will only happen when it got into fullscreen through this API.
+     *
+     * If an app wants to be in fullscreen always, it should claim as not being resizable
+     * by setting
+     * <a href="https://developer.android.com/guide/topics/large-screens/multi-window-support#resizeableActivity">
+     * {@code android:resizableActivity="false"}</a> instead of calling this API.
+     *
+     * @param request Can be {@link #FULLSCREEN_MODE_REQUEST_ENTER} or
+     *                {@link #FULLSCREEN_MODE_REQUEST_EXIT} to indicate this request is to get
+     *                fullscreen or get restored.
+     * @param approvalCallback Optional callback, use {@code null} when not necessary. When the
+     *                         request is approved or rejected, the callback will be triggered. This
+     *                         will happen before any configuration change. The callback will be
+     *                         dispatched on the main thread. If the request is rejected, the
+     *                         Throwable provided will be an {@link IllegalStateException} with a
+     *                         detailed message can be retrieved by {@link Throwable#getMessage()}.
+     */
+    public void requestFullscreenMode(@FullscreenModeRequest int request,
+            @Nullable OutcomeReceiver<Void, Throwable> approvalCallback) {
+        FullscreenRequestHandler.requestFullscreenMode(
+                request, approvalCallback, mCurrentConfig, getActivityToken());
     }
 
     /**
@@ -3963,22 +4058,19 @@ public class Activity extends ContextThemeWrapper
         if (!fragmentManager.isStateSaved() && fragmentManager.popBackStackImmediate()) {
             return;
         }
-        navigateBack();
+        onBackInvoked();
     }
 
-    private void navigateBack() {
-        if (!isTaskRoot()) {
-            // If the activity is not the root of the task, allow finish to proceed normally.
-            finishAfterTransition();
-            return;
-        }
-        // Inform activity task manager that the activity received a back press while at the
-        // root of the task. This call allows ActivityTaskManager to intercept or move the task
-        // to the back.
-        ActivityClient.getInstance().onBackPressedOnTaskRoot(mToken,
+    private void onBackInvoked() {
+        // Inform activity task manager that the activity received a back press.
+        // This call allows ActivityTaskManager to intercept or move the task
+        // to the back when needed.
+        ActivityClient.getInstance().onBackPressed(mToken,
                 new RequestFinishCallback(new WeakReference<>(this)));
 
-        getAutofillClientController().onActivityBackPressed(mIntent);
+        if (isTaskRoot()) {
+            getAutofillClientController().onActivityBackPressed(mIntent);
+        }
     }
 
     /**
@@ -3999,13 +4091,12 @@ public class Activity extends ContextThemeWrapper
 
     /**
      * Called when a touch screen event was not handled by any of the views
-     * under it.  This is most useful to process touch events that happen
+     * inside of the activity.  This is most useful to process touch events that happen
      * outside of your window bounds, where there is no view to receive it.
      *
      * @param event The touch screen event being processed.
      *
      * @return Return true if you have consumed the event, false if you haven't.
-     * The default implementation always returns false.
      */
     public boolean onTouchEvent(MotionEvent event) {
         if (mWindow.shouldCloseOnTouch(this, event)) {
@@ -4038,12 +4129,12 @@ public class Activity extends ContextThemeWrapper
      * Called when a generic motion event was not handled by any of the
      * views inside of the activity.
      * <p>
-     * Generic motion events describe joystick movements, mouse hovers, track pad
-     * touches, scroll wheel movements and other input events.  The
-     * {@link MotionEvent#getSource() source} of the motion event specifies
+     * Generic motion events describe joystick movements, hover events from mouse or stylus
+     * devices, trackpad touches, scroll wheel movements and other motion events not handled
+     * by {@link #onTouchEvent(MotionEvent)} or {@link #onTrackballEvent(MotionEvent)}.
+     * The {@link MotionEvent#getSource() source} of the motion event specifies
      * the class of input that was received.  Implementations of this method
      * must examine the bits in the source before processing the event.
-     * The following code example shows how this is done.
      * </p><p>
      * Generic motion events with source class
      * {@link android.view.InputDevice#SOURCE_CLASS_POINTER}
@@ -4254,6 +4345,8 @@ public class Activity extends ContextThemeWrapper
      * @param ev The touch screen event.
      *
      * @return boolean Return true if this event was consumed.
+     *
+     * @see #onTouchEvent(MotionEvent)
      */
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
@@ -4274,6 +4367,8 @@ public class Activity extends ContextThemeWrapper
      * @param ev The trackball event.
      *
      * @return boolean Return true if this event was consumed.
+     *
+     * @see #onTrackballEvent(MotionEvent)
      */
     public boolean dispatchTrackballEvent(MotionEvent ev) {
         onUserInteraction();
@@ -4292,6 +4387,8 @@ public class Activity extends ContextThemeWrapper
      * @param ev The generic motion event.
      *
      * @return boolean Return true if this event was consumed.
+     *
+     * @see #onGenericMotionEvent(MotionEvent)
      */
     public boolean dispatchGenericMotionEvent(MotionEvent ev) {
         onUserInteraction();
@@ -6433,6 +6530,20 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Ensures the activity's result is immediately returned to the caller when {@link #finish()}
+     * is invoked
+     *
+     * <p>Should be invoked alongside {@link #setResult(int, Intent)}, so the provided results are
+     * in place before finishing. Must only be invoked during MediaProjection setup.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)
+    public final void setForceSendResultForMediaProjection() {
+        ActivityClient.getInstance().setForceSendResultForMediaProjection(mToken);
+    }
+
+    /**
      * Call this to set the result that your activity will return to its
      * caller.
      *
@@ -6482,7 +6593,7 @@ public class Activity extends ContextThemeWrapper
         Intent intent = getIntent();
         if (intent != null) {
             try {
-                Uri referrer = intent.getParcelableExtra(Intent.EXTRA_REFERRER);
+                Uri referrer = intent.getParcelableExtra(Intent.EXTRA_REFERRER, android.net.Uri.class);
                 if (referrer != null) {
                     return referrer;
                 }
@@ -6556,16 +6667,64 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Returns the uid who started this activity.
-     * @hide
+     * Returns the uid of the app that initially launched this activity.
+     *
+     * <p>In order to receive the launching app's uid, at least one of the following has to
+     * be met:
+     * <ul>
+     *     <li>The app must call {@link ActivityOptions#setShareIdentityEnabled(boolean)} with a
+     *     value of {@code true} and launch this activity with the resulting {@code
+     *     ActivityOptions}.
+     *     <li>The launched activity has the same uid as the launching app.
+     *     <li>The launched activity is running in a package that is signed with the same key
+     *     used to sign the platform (typically only system packages such as Settings will
+     *     meet this requirement).
+     * </ul>.
+     * These are the same requirements for {@link #getLaunchedFromPackage()}; if any of these are
+     * met, then these methods can be used to obtain the uid and package name of the launching
+     * app. If none are met, then {@link Process#INVALID_UID} is returned.
+     *
+     * <p>Note, even if the above conditions are not met, the launching app's identity may
+     * still be available from {@link #getCallingPackage()} if this activity was started with
+     * {@code Activity#startActivityForResult} to allow validation of the result's recipient.
+     *
+     * @return the uid of the launching app or {@link Process#INVALID_UID} if the current
+     * activity cannot access the identity of the launching app
+     *
+     * @see ActivityOptions#setShareIdentityEnabled(boolean)
+     * @see #getLaunchedFromPackage()
      */
     public int getLaunchedFromUid() {
         return ActivityClient.getInstance().getLaunchedFromUid(getActivityToken());
     }
 
     /**
-     * Returns the package who started this activity.
-     * @hide
+     * Returns the package name of the app that initially launched this activity.
+     *
+     * <p>In order to receive the launching app's package name, at least one of the following has
+     * to be met:
+     * <ul>
+     *     <li>The app must call {@link ActivityOptions#setShareIdentityEnabled(boolean)} with a
+     *     value of {@code true} and launch this activity with the resulting
+     *     {@code ActivityOptions}.
+     *     <li>The launched activity has the same uid as the launching app.
+     *     <li>The launched activity is running in a package that is signed with the same key
+     *     used to sign the platform (typically only system packages such as Settings will
+     *     meet this requirement).
+     * </ul>.
+     * These are the same requirements for {@link #getLaunchedFromUid()}; if any of these are
+     * met, then these methods can be used to obtain the uid and package name of the launching
+     * app. If none are met, then {@code null} is returned.
+     *
+     * <p>Note, even if the above conditions are not met, the launching app's identity may
+     * still be available from {@link #getCallingPackage()} if this activity was started with
+     * {@code Activity#startActivityForResult} to allow validation of the result's recipient.
+     *
+     * @return the package name of the launching app or null if the current activity
+     * cannot access the identity of the launching app
+     *
+     * @see ActivityOptions#setShareIdentityEnabled(boolean)
+     * @see #getLaunchedFromUid()
      */
     @Nullable
     public String getLaunchedFromPackage() {
@@ -8030,8 +8189,9 @@ public class Activity extends ContextThemeWrapper
                 resultData.prepareToLeaveProcess(this);
             }
             upIntent.prepareToLeaveProcess(this);
-            return ActivityClient.getInstance().navigateUpTo(mToken, upIntent, resultCode,
-                    resultData);
+            String resolvedType = upIntent.resolveTypeIfNeeded(getContentResolver());
+            return ActivityClient.getInstance().navigateUpTo(mToken, upIntent, resolvedType,
+                    resultCode, resultData);
         } else {
             return mParent.navigateUpToFromChild(this, upIntent);
         }
@@ -8182,6 +8342,7 @@ public class Activity extends ContextThemeWrapper
         attachBaseContext(context);
 
         mFragments.attachHost(null /*parent*/);
+        mActivityInfo = info;
 
         mWindow = new PhoneWindow(this, window, activityConfigCallback);
         mWindow.setWindowControllerCallback(mWindowControllerCallback);
@@ -8206,7 +8367,6 @@ public class Activity extends ContextThemeWrapper
         mIntent = intent;
         mReferrer = referrer;
         mComponent = intent.getComponent();
-        mActivityInfo = info;
         mTitle = title;
         mParent = parent;
         mEmbeddedID = id;
@@ -8284,13 +8444,15 @@ public class Activity extends ContextThemeWrapper
         mIsInPictureInPictureMode = windowingMode == WINDOWING_MODE_PINNED;
         mShouldDockBigOverlays = getResources().getBoolean(R.bool.config_dockBigOverlayWindows);
         restoreHasCurrentPermissionRequest(icicle);
+        final long startTime = SystemClock.uptimeMillis();
         if (persistentState != null) {
             onCreate(icicle, persistentState);
         } else {
             onCreate(icicle);
         }
+        final long duration = SystemClock.uptimeMillis() - startTime;
         EventLogTags.writeWmOnCreateCalled(mIdent, getComponentName().getClassName(),
-                "performCreate");
+                "performCreate", duration);
         mActivityTransitionState.readState(icicle);
 
         mVisibleFromClient = !mWindow.getWindowStyle().getBoolean(
@@ -8302,18 +8464,27 @@ public class Activity extends ContextThemeWrapper
     }
 
     final void performNewIntent(@NonNull Intent intent) {
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "performNewIntent");
         mCanEnterPictureInPicture = true;
         onNewIntent(intent);
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
 
     final void performStart(String reason) {
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+            Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "performStart:"
+                    + mComponent.getClassName());
+        }
         dispatchActivityPreStarted();
         mActivityTransitionState.setEnterActivityOptions(this, getActivityOptions());
         mFragments.noteStateNotSaved();
         mCalled = false;
         mFragments.execPendingActions();
+        final long startTime = SystemClock.uptimeMillis();
         mInstrumentation.callActivityOnStart(this);
-        EventLogTags.writeWmOnStartCalled(mIdent, getComponentName().getClassName(), reason);
+        final long duration = SystemClock.uptimeMillis() - startTime;
+        EventLogTags.writeWmOnStartCalled(mIdent, getComponentName().getClassName(), reason,
+                duration);
 
         if (!mCalled) {
             throw new SuperNotCalledException(
@@ -8350,6 +8521,7 @@ public class Activity extends ContextThemeWrapper
 
         mActivityTransitionState.enterReady(this);
         dispatchActivityPostStarted();
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
 
     /**
@@ -8358,7 +8530,8 @@ public class Activity extends ContextThemeWrapper
      *              The option to not start immediately is needed in case a transaction with
      *              multiple lifecycle transitions is in progress.
      */
-    final void performRestart(boolean start, String reason) {
+    final void performRestart(boolean start) {
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "performRestart");
         mCanEnterPictureInPicture = true;
         mFragments.noteStateNotSaved();
 
@@ -8390,17 +8563,21 @@ public class Activity extends ContextThemeWrapper
             }
 
             mCalled = false;
+            final long startTime = SystemClock.uptimeMillis();
             mInstrumentation.callActivityOnRestart(this);
-            EventLogTags.writeWmOnRestartCalled(mIdent, getComponentName().getClassName(), reason);
+            final long duration = SystemClock.uptimeMillis() - startTime;
+            EventLogTags.writeWmOnRestartCalled(mIdent, getComponentName().getClassName(),
+                    "performRestart", duration);
             if (!mCalled) {
                 throw new SuperNotCalledException(
                     "Activity " + mComponent.toShortString() +
                     " did not call through to super.onRestart()");
             }
             if (start) {
-                performStart(reason);
+                performStart("performRestart");
             }
         }
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
 
     final void performResume(boolean followedByPause, String reason) {
@@ -8409,7 +8586,6 @@ public class Activity extends ContextThemeWrapper
                     + mComponent.getClassName());
         }
         dispatchActivityPreResumed();
-        performRestart(true /* start */, reason);
 
         mFragments.execPendingActions();
 
@@ -8418,9 +8594,12 @@ public class Activity extends ContextThemeWrapper
         getAutofillClientController().onActivityPerformResume(followedByPause);
 
         mCalled = false;
+        final long startTime = SystemClock.uptimeMillis();
         // mResumed is set by the instrumentation
         mInstrumentation.callActivityOnResume(this);
-        EventLogTags.writeWmOnResumeCalled(mIdent, getComponentName().getClassName(), reason);
+        final long duration = SystemClock.uptimeMillis() - startTime;
+        EventLogTags.writeWmOnResumeCalled(mIdent, getComponentName().getClassName(), reason,
+                duration);
         if (!mCalled) {
             throw new SuperNotCalledException(
                 "Activity " + mComponent.toShortString() +
@@ -8463,9 +8642,11 @@ public class Activity extends ContextThemeWrapper
         mDoReportFullyDrawn = false;
         mFragments.dispatchPause();
         mCalled = false;
+        final long startTime = SystemClock.uptimeMillis();
         onPause();
+        final long duration = SystemClock.uptimeMillis() - startTime;
         EventLogTags.writeWmOnPausedCalled(mIdent, getComponentName().getClassName(),
-                "performPause");
+                "performPause", duration);
         mResumed = false;
         if (!mCalled && getApplicationInfo().targetSdkVersion
                 >= android.os.Build.VERSION_CODES.GINGERBREAD) {
@@ -8509,8 +8690,11 @@ public class Activity extends ContextThemeWrapper
             mFragments.dispatchStop();
 
             mCalled = false;
+            final long startTime = SystemClock.uptimeMillis();
             mInstrumentation.callActivityOnStop(this);
-            EventLogTags.writeWmOnStopCalled(mIdent, getComponentName().getClassName(), reason);
+            final long duration = SystemClock.uptimeMillis() - startTime;
+            EventLogTags.writeWmOnStopCalled(mIdent, getComponentName().getClassName(), reason,
+                    duration);
             if (!mCalled) {
                 throw new SuperNotCalledException(
                     "Activity " + mComponent.toShortString() +
@@ -8544,9 +8728,11 @@ public class Activity extends ContextThemeWrapper
         mDestroyed = true;
         mWindow.destroy();
         mFragments.dispatchDestroy();
+        final long startTime = SystemClock.uptimeMillis();
         onDestroy();
+        final long duration = SystemClock.uptimeMillis() - startTime;
         EventLogTags.writeWmOnDestroyCalled(mIdent, getComponentName().getClassName(),
-                "performDestroy");
+                "performDestroy", duration);
         mFragments.doLoaderDestroy();
         if (mVoiceInteractor != null) {
             mVoiceInteractor.detachActivity();
@@ -8902,6 +9088,25 @@ public class Activity extends ContextThemeWrapper
                 state, sourceSpec, targetSpec, viewIds, uiTranslationSpec);
     }
 
+    /**
+     * If set, any activity launch in the same task will be overridden to the locale of activity
+     * that started the task.
+     *
+     * <p>Currently, Android supports per app languages, and system apps are able to start
+     * activities of another package on the same task, which may cause users to set different
+     * languages in different apps and display two different languages in one app.</p>
+     *
+     * <p>The <a href="https://developer.android.com/guide/topics/large-screens/activity-embedding">
+     * activity embedding feature</a> will align the locale with root activity automatically, but
+     * it doesn't land on the phone yet. If activity embedding land on the phone in the future,
+     * please consider adapting activity embedding directly.</p>
+     *
+     * @hide
+     */
+    public void enableTaskLocaleOverride() {
+        ActivityClient.getInstance().enableTaskLocaleOverride(mToken);
+    }
+
     class HostCallbacks extends FragmentHostCallback<Activity> {
         public HostCallbacks() {
             super(Activity.this /*activity*/);
@@ -9019,5 +9224,44 @@ public class Activity extends ContextThemeWrapper
                     + "non-visual activities");
         }
         return mWindow.getOnBackInvokedDispatcher();
+    }
+
+    /**
+     * Interface for observing screen captures of an {@link Activity}.
+     */
+    public interface ScreenCaptureCallback {
+        /**
+         * Called when one of the monitored activities is captured.
+         * This is not invoked if the activity window
+         * has {@link WindowManager.LayoutParams#FLAG_SECURE} set.
+         */
+        void onScreenCaptured();
+    }
+
+    /**
+     * Registers a screen capture callback for this activity.
+     * The callback will be triggered when a screen capture of this activity is attempted.
+     * This callback will be executed on the thread of the passed {@code executor}.
+     * For details, see {@link ScreenCaptureCallback#onScreenCaptured}.
+     */
+    @RequiresPermission(DETECT_SCREEN_CAPTURE)
+    public void registerScreenCaptureCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull ScreenCaptureCallback callback) {
+        if (mScreenCaptureCallbackHandler == null) {
+            mScreenCaptureCallbackHandler = new ScreenCaptureCallbackHandler(mToken);
+        }
+        mScreenCaptureCallbackHandler.registerScreenCaptureCallback(executor, callback);
+    }
+
+
+    /**
+     * Unregisters a screen capture callback for this surface.
+     */
+    @RequiresPermission(DETECT_SCREEN_CAPTURE)
+    public void unregisterScreenCaptureCallback(@NonNull ScreenCaptureCallback callback) {
+        if (mScreenCaptureCallbackHandler != null) {
+            mScreenCaptureCallbackHandler.unregisterScreenCaptureCallback(callback);
+        }
     }
 }

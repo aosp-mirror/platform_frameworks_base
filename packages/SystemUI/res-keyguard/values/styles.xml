@@ -25,11 +25,11 @@
     </style>
     <style name="Keyguard.TextView.EmergencyButton" parent="Theme.SystemUI">
         <item name="android:textColor">?androidprv:attr/textColorOnAccent</item>
-        <item name="android:textSize">14dp</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:background">@drawable/kg_emergency_button_background</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-        <item name="android:paddingLeft">12dp</item>
-        <item name="android:paddingRight">12dp</item>
+        <item name="android:paddingLeft">26dp</item>
+        <item name="android:paddingRight">26dp</item>
         <item name="android:stateListAnimator">@null</item>
     </style>
     <style name="NumPadKey" parent="Theme.SystemUI">
@@ -50,7 +50,7 @@
         <item name="android:background">@null</item>
         <item name="android:textSize">32sp</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:paddingBottom">-16dp</item>
     </style>
     <style name="Widget.TextView.Password" parent="@android:style/Widget.TextView">

@@ -26,6 +26,8 @@
     <string name="install_done" msgid="5987363587661783896">"Lietotne ir instalēta."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Vai vēlaties instalēt šo lietotni?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Vai vēlaties atjaunināt šo lietotni?"</string>
+    <string name="install_confirm_question_update_owner_changed" msgid="4215696609006069124">"Šīs lietotnes atjauninājumus pašlaik pārvalda <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g>.\n\nJa veiksiet atjaunināšanu, turpmākos atjauninājumus nodrošinās <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g>."</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="8778026710268011466">"Šīs lietotnes atjauninājumus pašlaik pārvalda <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g>.\n\nVai vēlaties instalēt atjauninājumu, ko nodrošina <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g>?"</string>
     <string name="install_failed" msgid="5777824004474125469">"Lietotne nav instalēta."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Pakotnes instalēšana tika bloķēta."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Lietotne netika instalēta, jo pastāv pakotnes konflikts ar esošu pakotni."</string>
@@ -60,14 +62,19 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Vai aizstāt šo lietotni ar rūpnīcas versiju? Visi dati tiks noņemti."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Vai aizstāt šo lietotni ar rūpnīcas versiju? Visi dati tiks noņemti. Tas ietekmēs visu šīs ierīces lietotāju datus, pat ja viņiem ir darba profili."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Iegūstiet <xliff:g id="SIZE">%1$s</xliff:g> (lietotnes dati)."</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Vai vēlaties izdzēst šo lietotni?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Vai vēlaties atinstalēt šo lietotni? Tiks izdzēsts arī lietotnes <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> klons."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Pašreizējās atinstalēšanas operācijas"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Nesekmīgi atinstalēšanas mēģinājumi"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Notiek atinstalēšana…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"Notiek lietotnes <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> atinstalēšana…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Atinstalēšana ir pabeigta."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"Lietotne <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ir atinstalēta"</string>
+    <!-- no translation found for uninstall_done_clone_app (5578308154544195413) -->
+    <skip />
     <string name="uninstall_failed" msgid="1847750968168364332">"Atinstalēšana neizdevās."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Lietotnes <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> atinstalēšana nebija sekmīga."</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Notiek lietotnes <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> klona dzēšana…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Nevar atinstalēt aktīvas ierīces administratora lietotnes."</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Neizdevās atinstalēt aktīvo ierīces administratora lietotni lietotājam <xliff:g id="USERNAME">%1$s</xliff:g>."</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Šī lietotne ir nepieciešama dažiem lietotājiem vai profiliem, un pārējiem tā tika atinstalēta"</string>
@@ -83,10 +90,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"Nezināma"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Drošības apsvērumu dēļ jūsu planšetdatorā pašlaik nav atļauts instalēt nezināmas lietotnes no šī avota. Jūs varat to mainīt iestatījumos."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Drošības apsvērumu dēļ jūsu televizorā pašlaik nav atļauts instalēt nezināmas lietotnes no šī avota. Jūs varat to mainīt iestatījumos."</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"Drošības apsvērumu dēļ jūsu pulkstenī pašlaik nav atļauts instalēt nezināmas lietotnes no šī avota. Šo atļauju varat mainīt iestatījumos."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Drošības apsvērumu dēļ jūsu tālrunī pašlaik nav atļauts instalēt nezināmas lietotnes no šī avota. Jūs varat to mainīt iestatījumos."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Jūsu tālrunis un personas dati ir neaizsargātāki pret uzbrukumiem no nezināmām lietotnēm. Instalējot šo lietotni, jūs piekrītat, ka esat atbildīgs par tālruņa bojājumiem vai datu zudumu, kas var rasties lietotnes dēļ."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Jūsu planšetdators un personas dati ir neaizsargātāki pret uzbrukumiem no nezināmām lietotnēm. Instalējot šo lietotni, jūs piekrītat, ka esat atbildīgs par planšetdatora bojājumiem vai datu zudumu, kas var rasties lietotnes dēļ."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Jūsu televizors un personas dati ir neaizsargātāki pret uzbrukumiem no nezināmām lietotnēm. Instalējot šo lietotni, jūs piekrītat, ka esat atbildīgs par televizora bojājumiem vai datu zudumu, kas var rasties lietotnes dēļ."</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"Lietotnes <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> klons"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Tālāk"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Iestatījumi"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear lietotņu instalēšana/atinstalēšana"</string>

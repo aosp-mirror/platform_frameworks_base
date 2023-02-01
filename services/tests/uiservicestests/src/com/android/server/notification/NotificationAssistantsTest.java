@@ -46,10 +46,10 @@ import android.testing.TestableContext;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
-import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
 import com.android.internal.util.function.TriPredicate;
+import com.android.modules.utils.TypedXmlPullParser;
 import com.android.server.UiServiceTestCase;
 import com.android.server.notification.NotificationManagerService.NotificationAssistants;
 

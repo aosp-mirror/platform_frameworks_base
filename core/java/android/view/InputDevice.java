@@ -16,17 +16,21 @@
 
 package android.view;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.hardware.BatteryState;
 import android.hardware.SensorManager;
+import android.hardware.input.HostUsiVersion;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
 import android.hardware.lights.LightsManager;
+import android.icu.util.ULocale;
 import android.os.Build;
 import android.os.NullVibrator;
 import android.os.Parcel;
@@ -71,11 +75,17 @@ public final class InputDevice implements Parcelable {
     private final int mSources;
     private final int mKeyboardType;
     private final KeyCharacterMap mKeyCharacterMap;
+    @Nullable
+    private final String mKeyboardLanguageTag;
+    @Nullable
+    private final String mKeyboardLayoutType;
     private final boolean mHasVibrator;
     private final boolean mHasMicrophone;
     private final boolean mHasButtonUnderPad;
     private final boolean mHasSensor;
     private final boolean mHasBattery;
+    private final HostUsiVersion mHostUsiVersion;
+    private final int mAssociatedDisplayId;
     private final ArrayList<MotionRange> mMotionRanges = new ArrayList<MotionRange>();
 
     @GuardedBy("mMotionRanges")
@@ -86,9 +96,6 @@ public final class InputDevice implements Parcelable {
 
     @GuardedBy("mMotionRanges")
     private SensorManager mSensorManager;
-
-    @GuardedBy("mMotionRanges")
-    private BatteryState mBatteryState;
 
     @GuardedBy("mMotionRanges")
     private LightsManager mLightsManager;
@@ -216,8 +223,9 @@ public final class InputDevice implements Parcelable {
 
     /**
      * The input source is a mouse pointing device.
-     * This code is also used for other mouse-like pointing devices such as trackpads
-     * and trackpoints.
+     * This value is also used for other mouse-like pointing devices such as touchpads and pointing
+     * sticks. When used in combination with {@link #SOURCE_STYLUS}, it denotes an external drawing
+     * tablet.
      *
      * @see #SOURCE_CLASS_POINTER
      */
@@ -288,8 +296,8 @@ public final class InputDevice implements Parcelable {
     public static final int SOURCE_MOUSE_RELATIVE = 0x00020000 | SOURCE_CLASS_TRACKBALL;
 
     /**
-     * The input source is a touch pad or digitizer tablet that is not
-     * associated with a display (unlike {@link #SOURCE_TOUCHSCREEN}).
+     * The input source is a touchpad (also known as a trackpad). Touchpads that are used to move
+     * the mouse cursor will also have {@link #SOURCE_MOUSE}.
      *
      * @see #SOURCE_CLASS_POSITION
      */
@@ -440,6 +448,7 @@ public final class InputDevice implements Parcelable {
      */
     public static final int KEYBOARD_TYPE_ALPHABETIC = 2;
 
+    // Cap motion ranges to prevent attacks (b/25637534)
     private static final int MAX_RANGES = 1000;
 
     private static final int VIBRATOR_ID_ALL = -1;
@@ -456,13 +465,13 @@ public final class InputDevice implements Parcelable {
 
     /**
      * Called by native code
-     * @hide
      */
-    @VisibleForTesting
-    public InputDevice(int id, int generation, int controllerNumber, String name, int vendorId,
+    private InputDevice(int id, int generation, int controllerNumber, String name, int vendorId,
             int productId, String descriptor, boolean isExternal, int sources, int keyboardType,
-            KeyCharacterMap keyCharacterMap, boolean hasVibrator, boolean hasMicrophone,
-            boolean hasButtonUnderPad, boolean hasSensor, boolean hasBattery) {
+            KeyCharacterMap keyCharacterMap, @Nullable String keyboardLanguageTag,
+            @Nullable String keyboardLayoutType, boolean hasVibrator, boolean hasMicrophone,
+            boolean hasButtonUnderPad, boolean hasSensor, boolean hasBattery, int usiVersionMajor,
+            int usiVersionMinor, int associatedDisplayId) {
         mId = id;
         mGeneration = generation;
         mControllerNumber = controllerNumber;
@@ -474,12 +483,22 @@ public final class InputDevice implements Parcelable {
         mSources = sources;
         mKeyboardType = keyboardType;
         mKeyCharacterMap = keyCharacterMap;
+        if (keyboardLanguageTag != null) {
+            mKeyboardLanguageTag = ULocale
+                    .createCanonical(ULocale.forLanguageTag(keyboardLanguageTag))
+                    .toLanguageTag();
+        } else {
+            mKeyboardLanguageTag = null;
+        }
+        mKeyboardLayoutType = keyboardLayoutType;
         mHasVibrator = hasVibrator;
         mHasMicrophone = hasMicrophone;
         mHasButtonUnderPad = hasButtonUnderPad;
         mHasSensor = hasSensor;
         mHasBattery = hasBattery;
         mIdentifier = new InputDeviceIdentifier(descriptor, vendorId, productId);
+        mHostUsiVersion = new HostUsiVersion(usiVersionMajor, usiVersionMinor);
+        mAssociatedDisplayId = associatedDisplayId;
     }
 
     private InputDevice(Parcel in) {
@@ -494,11 +513,15 @@ public final class InputDevice implements Parcelable {
         mIsExternal = in.readInt() != 0;
         mSources = in.readInt();
         mKeyboardType = in.readInt();
+        mKeyboardLanguageTag = in.readString8();
+        mKeyboardLayoutType = in.readString8();
         mHasVibrator = in.readInt() != 0;
         mHasMicrophone = in.readInt() != 0;
         mHasButtonUnderPad = in.readInt() != 0;
         mHasSensor = in.readInt() != 0;
         mHasBattery = in.readInt() != 0;
+        mHostUsiVersion = HostUsiVersion.CREATOR.createFromParcel(in);
+        mAssociatedDisplayId = in.readInt();
         mIdentifier = new InputDeviceIdentifier(mDescriptor, mVendorId, mProductId);
 
         int numRanges = in.readInt();
@@ -513,10 +536,211 @@ public final class InputDevice implements Parcelable {
     }
 
     /**
+     * InputDevice builder used to create an InputDevice for tests in Java.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static class Builder {
+        private int mId = 0;
+        private int mGeneration = 0;
+        private int mControllerNumber = 0;
+        private String mName = "";
+        private int mVendorId = 0;
+        private int mProductId = 0;
+        private String mDescriptor = "";
+        private boolean mIsExternal = false;
+        private int mSources = 0;
+        private int mKeyboardType = 0;
+        private KeyCharacterMap mKeyCharacterMap = null;
+        private boolean mHasVibrator = false;
+        private boolean mHasMicrophone = false;
+        private boolean mHasButtonUnderPad = false;
+        private boolean mHasSensor = false;
+        private boolean mHasBattery = false;
+        private String mKeyboardLanguageTag = null;
+        private String mKeyboardLayoutType = null;
+        private int mUsiVersionMajor = -1;
+        private int mUsiVersionMinor = -1;
+        private int mAssociatedDisplayId = Display.INVALID_DISPLAY;
+        private List<MotionRange> mMotionRanges = new ArrayList<>();
+
+        /** @see InputDevice#getId() */
+        public Builder setId(int id) {
+            mId = id;
+            return this;
+        }
+
+        /** @see InputDevice#getGeneration() */
+        public Builder setGeneration(int generation) {
+            mGeneration = generation;
+            return this;
+        }
+
+        /** @see InputDevice#getControllerNumber() */
+        public Builder setControllerNumber(int controllerNumber) {
+            mControllerNumber = controllerNumber;
+            return this;
+        }
+
+        /** @see InputDevice#getName() */
+        public Builder setName(String name) {
+            mName = name;
+            return this;
+        }
+
+        /** @see InputDevice#getVendorId() */
+        public Builder setVendorId(int vendorId) {
+            mVendorId = vendorId;
+            return this;
+        }
+
+        /** @see InputDevice#getProductId() */
+        public Builder setProductId(int productId) {
+            mProductId = productId;
+            return this;
+        }
+
+        /** @see InputDevice#getDescriptor() */
+        public Builder setDescriptor(String descriptor) {
+            mDescriptor = descriptor;
+            return this;
+        }
+
+        /** @see InputDevice#isExternal() */
+        public Builder setExternal(boolean external) {
+            mIsExternal = external;
+            return this;
+        }
+
+        /** @see InputDevice#getSources() */
+        public Builder setSources(int sources) {
+            mSources = sources;
+            return this;
+        }
+
+        /** @see InputDevice#getKeyboardType() */
+        public Builder setKeyboardType(int keyboardType) {
+            mKeyboardType = keyboardType;
+            return this;
+        }
+
+        /** @see InputDevice#getKeyCharacterMap() */
+        public Builder setKeyCharacterMap(KeyCharacterMap keyCharacterMap) {
+            mKeyCharacterMap = keyCharacterMap;
+            return this;
+        }
+
+        /** @see InputDevice#getVibrator() */
+        public Builder setHasVibrator(boolean hasVibrator) {
+            mHasVibrator = hasVibrator;
+            return this;
+        }
+
+        /** @see InputDevice#hasMicrophone() */
+        public Builder setHasMicrophone(boolean hasMicrophone) {
+            mHasMicrophone = hasMicrophone;
+            return this;
+        }
+
+        /** @see InputDevice#hasButtonUnderPad() */
+        public Builder setHasButtonUnderPad(boolean hasButtonUnderPad) {
+            mHasButtonUnderPad = hasButtonUnderPad;
+            return this;
+        }
+
+        /** @see InputDevice#hasSensor() */
+        public Builder setHasSensor(boolean hasSensor) {
+            mHasSensor = hasSensor;
+            return this;
+        }
+
+        /** @see InputDevice#hasBattery() */
+        public Builder setHasBattery(boolean hasBattery) {
+            mHasBattery = hasBattery;
+            return this;
+        }
+
+        /** @see InputDevice#getKeyboardLanguageTag() */
+        public Builder setKeyboardLanguageTag(String keyboardLanguageTag) {
+            mKeyboardLanguageTag = keyboardLanguageTag;
+            return this;
+        }
+
+        /** @see InputDevice#getKeyboardLayoutType() */
+        public Builder setKeyboardLayoutType(String keyboardLayoutType) {
+            mKeyboardLayoutType = keyboardLayoutType;
+            return this;
+        }
+
+        /** @see InputDevice#getHostUsiVersion() */
+        public Builder setUsiVersion(@Nullable HostUsiVersion usiVersion) {
+            mUsiVersionMajor = usiVersion != null ? usiVersion.getMajorVersion() : -1;
+            mUsiVersionMinor = usiVersion != null ? usiVersion.getMinorVersion() : -1;
+            return this;
+        }
+
+        /** @see InputDevice#getAssociatedDisplayId() */
+        public Builder setAssociatedDisplayId(int displayId) {
+            mAssociatedDisplayId = displayId;
+            return this;
+        }
+
+        /** @see InputDevice#getMotionRanges() */
+        public Builder addMotionRange(int axis, int source,
+                float min, float max, float flat, float fuzz, float resolution) {
+            mMotionRanges.add(new MotionRange(axis, source, min, max, flat, fuzz, resolution));
+            return this;
+        }
+
+        /** Build {@link InputDevice}. */
+        public InputDevice build() {
+            InputDevice device = new InputDevice(
+                    mId,
+                    mGeneration,
+                    mControllerNumber,
+                    mName,
+                    mVendorId,
+                    mProductId,
+                    mDescriptor,
+                    mIsExternal,
+                    mSources,
+                    mKeyboardType,
+                    mKeyCharacterMap,
+                    mKeyboardLanguageTag,
+                    mKeyboardLayoutType,
+                    mHasVibrator,
+                    mHasMicrophone,
+                    mHasButtonUnderPad,
+                    mHasSensor,
+                    mHasBattery,
+                    mUsiVersionMajor,
+                    mUsiVersionMinor,
+                    mAssociatedDisplayId);
+
+            final int numRanges = mMotionRanges.size();
+            for (int i = 0; i < numRanges; i++) {
+                final MotionRange range = mMotionRanges.get(i);
+                device.addMotionRange(
+                        range.getAxis(),
+                        range.getSource(),
+                        range.getMin(),
+                        range.getMax(),
+                        range.getFlat(),
+                        range.getFuzz(),
+                        range.getResolution());
+            }
+
+            return device;
+        }
+    }
+
+    /**
      * Gets information about the input device with the specified id.
      * @param id The device id.
      * @return The input device or null if not found.
      */
+    @Nullable
     public static InputDevice getDevice(int id) {
         return InputManager.getInstance().getInputDevice(id);
     }
@@ -629,7 +853,7 @@ public final class InputDevice implements Parcelable {
      * same input device descriptor.  This might happen in situations where a single
      * human input device registers multiple {@link InputDevice} instances (HID collections)
      * that describe separate features of the device, such as a keyboard that also
-     * has a trackpad.  Alternately, it may be that the input devices are simply
+     * has a touchpad.  Alternately, it may be that the input devices are simply
      * indistinguishable, such as two keyboards made by the same manufacturer.
      * </p><p>
      * The input device descriptor returned by {@link #getDescriptor} should only be
@@ -727,7 +951,30 @@ public final class InputDevice implements Parcelable {
     }
 
     /**
+     * Returns the keyboard language as an IETF
+     * <a href="https://tools.ietf.org/html/bcp47">BCP-47</a>
+     * conformant tag if available.
+     *
+     * @hide
+     */
+    @Nullable
+    public String getKeyboardLanguageTag() {
+        return mKeyboardLanguageTag;
+    }
+
+    /**
+     * Returns the keyboard layout type if available.
+     *
+     * @hide
+     */
+    @Nullable
+    public String getKeyboardLayoutType() {
+        return mKeyboardLayoutType;
+    }
+
+    /**
      * Gets whether the device is capable of producing the list of keycodes.
+     *
      * @param keys The list of android keycodes to check for.
      * @return An array of booleans where each member specifies whether the device is capable of
      * generating the keycode given by the corresponding value at the same index in the keys array.
@@ -851,6 +1098,22 @@ public final class InputDevice implements Parcelable {
     }
 
     /**
+     * Returns the Bluetooth address of this input device, if known.
+     *
+     * The returned string is always null if this input device is not connected
+     * via Bluetooth, or if the Bluetooth address of the device cannot be
+     * determined. The returned address will look like: "11:22:33:44:55:66".
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @Nullable
+    public String getBluetoothAddress() {
+        // We query the address via a separate InputManager API instead of pre-populating it in
+        // this class to avoid leaking it to apps that do not have sufficient permissions.
+        return InputManager.getInstance().getInputDeviceBluetoothAddress(mId);
+    }
+
+    /**
      * Gets the vibrator service associated with the device, if there is one.
      * Even if the device does not have a vibrator, the result is never null.
      * Use {@link Vibrator#hasVibrator} to determine whether a vibrator is
@@ -906,10 +1169,7 @@ public final class InputDevice implements Parcelable {
      */
     @NonNull
     public BatteryState getBatteryState() {
-        if (mBatteryState == null) {
-            mBatteryState = InputManager.getInstance().getInputDeviceBatteryState(mId, mHasBattery);
-        }
-        return mBatteryState;
+        return InputManager.getInstance().getInputDeviceBatteryState(mId, mHasBattery);
     }
 
     /**
@@ -920,7 +1180,8 @@ public final class InputDevice implements Parcelable {
      *
      * @return The lights manager associated with the device, never null.
      */
-    public @NonNull LightsManager getLightsManager() {
+    @NonNull
+    public LightsManager getLightsManager() {
         if (mLightsManager == null) {
             mLightsManager = InputManager.getInstance().getInputDeviceLightsManager(mId);
         }
@@ -938,7 +1199,8 @@ public final class InputDevice implements Parcelable {
      *
      * @return The sensor manager service associated with the device, never null.
      */
-    public @NonNull SensorManager getSensorManager() {
+    @NonNull
+    public SensorManager getSensorManager() {
         synchronized (mMotionRanges) {
             if (mSensorManager == null) {
                 mSensorManager = InputManager.getInstance().getInputDeviceSensorManager(mId);
@@ -1019,6 +1281,34 @@ public final class InputDevice implements Parcelable {
      */
     public void setCustomPointerIcon(PointerIcon icon) {
         InputManager.getInstance().setCustomPointerIcon(icon);
+    }
+
+    /**
+     * Reports whether the device has a battery.
+     * @return true if the device has a battery, false otherwise.
+     * @hide
+     */
+    public boolean hasBattery() {
+        return mHasBattery;
+    }
+
+    /**
+     * Reports the version of the Universal Stylus Initiative (USI) protocol supported by this
+     * input device.
+     *
+     * @return the supported USI version, or null if the device does not support USI
+     * @see <a href="https://universalstylus.org">Universal Stylus Initiative</a>
+     * @see InputManager#getHostUsiVersion(int)
+     * @hide
+     */
+    @Nullable
+    public HostUsiVersion getHostUsiVersion() {
+        return mHostUsiVersion.isValid() ? mHostUsiVersion : null;
+    }
+
+    /** @hide */
+    public int getAssociatedDisplayId() {
+        return mAssociatedDisplayId;
     }
 
     /**
@@ -1145,13 +1435,18 @@ public final class InputDevice implements Parcelable {
         out.writeInt(mIsExternal ? 1 : 0);
         out.writeInt(mSources);
         out.writeInt(mKeyboardType);
+        out.writeString8(mKeyboardLanguageTag);
+        out.writeString8(mKeyboardLayoutType);
         out.writeInt(mHasVibrator ? 1 : 0);
         out.writeInt(mHasMicrophone ? 1 : 0);
         out.writeInt(mHasButtonUnderPad ? 1 : 0);
         out.writeInt(mHasSensor ? 1 : 0);
         out.writeInt(mHasBattery ? 1 : 0);
+        mHostUsiVersion.writeToParcel(out, flags);
+        out.writeInt(mAssociatedDisplayId);
 
-        final int numRanges = mMotionRanges.size();
+        int numRanges = mMotionRanges.size();
+        numRanges = numRanges > MAX_RANGES ? MAX_RANGES : numRanges;
         out.writeInt(numRanges);
         for (int i = 0; i < numRanges; i++) {
             MotionRange range = mMotionRanges.get(i);
@@ -1176,7 +1471,8 @@ public final class InputDevice implements Parcelable {
         description.append("Input Device ").append(mId).append(": ").append(mName).append("\n");
         description.append("  Descriptor: ").append(mDescriptor).append("\n");
         description.append("  Generation: ").append(mGeneration).append("\n");
-        description.append("  Location: ").append(mIsExternal ? "external" : "built-in").append("\n");
+        description.append("  Location: ").append(mIsExternal ? "external" : "built-in").append(
+                "\n");
 
         description.append("  Keyboard Type: ");
         switch (mKeyboardType) {
@@ -1199,6 +1495,17 @@ public final class InputDevice implements Parcelable {
         description.append("  Has battery: ").append(mHasBattery).append("\n");
 
         description.append("  Has mic: ").append(mHasMicrophone).append("\n");
+
+        description.append("  USI Version: ").append(getHostUsiVersion()).append("\n");
+
+        if (mKeyboardLanguageTag != null) {
+            description.append(" Keyboard language tag: ").append(mKeyboardLanguageTag).append(
+                    "\n");
+        }
+
+        if (mKeyboardLayoutType != null) {
+            description.append(" Keyboard layout type: ").append(mKeyboardLayoutType).append("\n");
+        }
 
         description.append("  Sources: 0x").append(Integer.toHexString(mSources)).append(" (");
         appendSourceDescriptionIfApplicable(description, SOURCE_KEYBOARD, "keyboard");

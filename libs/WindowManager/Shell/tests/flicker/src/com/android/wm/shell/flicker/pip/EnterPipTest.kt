@@ -17,15 +17,13 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.LAUNCHER_COMPONENT
-import com.android.server.wm.flicker.annotation.Group3
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
+import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -38,70 +36,46 @@ import org.junit.runners.Parameterized
  * To run this test: `atest WMShellFlickerTests:EnterPipTest`
  *
  * Actions:
+ * ```
  *     Launch an app in full screen
  *     Press an "enter pip" button to put [pipApp] in pip mode
- *
+ * ```
  * Notes:
+ * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
- *        are inherited [PipTransition]
+ *        are inherited from [PipTransition]
  *     2. Part of the test setup occurs automatically via
  *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
  *        including configuring navigation mode, initial orientation and ensuring no
  *        apps are running before setup
+ * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group3
-class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
+open class EnterPipTest(flicker: FlickerTest) : PipTransition(flicker) {
 
-    /**
-     * Defines the transition used to run the test
-     */
+    /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
-            setupAndTeardown(this)
-            setup {
-                eachRun {
-                    pipApp.launchViaIntent(wmHelper)
-                }
-            }
-            teardown {
-                eachRun {
-                    pipApp.exit(wmHelper)
-                }
-            }
-            transitions {
-                pipApp.clickEnterPipButton(wmHelper)
-            }
+            setup { pipApp.launchViaIntent(wmHelper) }
+            teardown { pipApp.exit(wmHelper) }
+            transitions { pipApp.clickEnterPipButton(wmHelper) }
         }
 
-    /** {@inheritDoc}  */
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
-
-    /**
-     * Checks [pipApp] window remains visible throughout the animation
-     */
+    /** Checks [pipApp] window remains visible throughout the animation */
     @Presubmit
     @Test
-    fun pipAppWindowAlwaysVisible() {
-        testSpec.assertWm {
-            this.isAppWindowVisible(pipApp.component)
-        }
+    open fun pipAppWindowAlwaysVisible() {
+        flicker.assertWm { this.isAppWindowVisible(pipApp) }
     }
 
-    /**
-     * Checks [pipApp] layer remains visible throughout the animation
-     */
+    /** Checks [pipApp] layer remains visible throughout the animation */
     @Presubmit
     @Test
-    fun pipAppLayerAlwaysVisible() {
-        testSpec.assertLayers {
-            this.isVisible(pipApp.component)
-        }
+    open fun pipAppLayerAlwaysVisible() {
+        flicker.assertLayers { this.isVisible(pipApp) }
     }
 
     /**
@@ -111,9 +85,7 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     @Presubmit
     @Test
     fun pipWindowRemainInsideVisibleBounds() {
-        testSpec.assertWmVisibleRegion(pipApp.component) {
-            coversAtMost(displayBounds)
-        }
+        flicker.assertWmVisibleRegion(pipApp) { coversAtMost(displayBounds) }
     }
 
     /**
@@ -122,78 +94,67 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
      */
     @Presubmit
     @Test
-    fun pipLayerRemainInsideVisibleBounds() {
-        testSpec.assertLayersVisibleRegion(pipApp.component) {
-            coversAtMost(displayBounds)
-        }
+    open fun pipLayerRemainInsideVisibleBounds() {
+        flicker.assertLayersVisibleRegion(pipApp) { coversAtMost(displayBounds) }
     }
 
-    /**
-     * Checks that the visible region of [pipApp] always reduces during the animation
-     */
+    /** Checks that the visible region of [pipApp] always reduces during the animation */
     @Presubmit
     @Test
-    fun pipLayerReduces() {
-        val layerName = pipApp.component.toLayerName()
-        testSpec.assertLayers {
-            val pipLayerList = this.layers { it.name.contains(layerName) && it.isVisible }
+    open fun pipLayerReduces() {
+        flicker.assertLayers {
+            val pipLayerList = this.layers { pipApp.layerMatchesAnyOf(it) && it.isVisible }
             pipLayerList.zipWithNext { previous, current ->
-                current.visibleRegion.coversAtMost(previous.visibleRegion.region)
+                current.visibleRegion.notBiggerThan(previous.visibleRegion.region)
             }
         }
     }
 
-    /**
-     * Checks that [pipApp] window becomes pinned
-     */
+    /** Checks that [pipApp] window becomes pinned */
     @Presubmit
     @Test
     fun pipWindowBecomesPinned() {
-        testSpec.assertWm {
-            invoke("pipWindowIsNotPinned") { it.isNotPinned(pipApp.component) }
+        flicker.assertWm {
+            invoke("pipWindowIsNotPinned") { it.isNotPinned(pipApp) }
                 .then()
-                .invoke("pipWindowIsPinned") { it.isPinned(pipApp.component) }
+                .invoke("pipWindowIsPinned") { it.isPinned(pipApp) }
         }
     }
 
-    /**
-     * Checks [LAUNCHER_COMPONENT] layer remains visible throughout the animation
-     */
+    /** Checks [ComponentMatcher.LAUNCHER] layer remains visible throughout the animation */
     @Presubmit
     @Test
     fun launcherLayerBecomesVisible() {
-        testSpec.assertLayers {
-            isInvisible(LAUNCHER_COMPONENT)
+        flicker.assertLayers {
+            isInvisible(ComponentNameMatcher.LAUNCHER)
                 .then()
-                .isVisible(LAUNCHER_COMPONENT)
+                .isVisible(ComponentNameMatcher.LAUNCHER)
         }
     }
 
     /**
-     * Checks that the focus changes between the [pipApp] window and the launcher when
-     * closing the pip window
+     * Checks that the focus changes between the [pipApp] window and the launcher when closing the
+     * pip window
      */
     @Presubmit
     @Test
-    fun focusChanges() {
-        testSpec.assertEventLog {
-            this.focusChanges(pipApp.`package`, "NexusLauncherActivity")
-        }
+    open fun focusChanges() {
+        flicker.assertEventLog { this.focusChanges(pipApp.`package`, "NexusLauncherActivity") }
     }
 
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestFactory.nonRotationTests] for configuring repetitions, screen orientation
+         * and navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0),
-                    repetitions = 3)
+        fun getParams(): List<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+            )
         }
     }
 }

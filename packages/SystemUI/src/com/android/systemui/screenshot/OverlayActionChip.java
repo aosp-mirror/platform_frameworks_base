@@ -18,6 +18,7 @@ package com.android.systemui.screenshot;
 
 import static java.util.Objects.requireNonNull;
 
+import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.graphics.drawable.Icon;
@@ -96,7 +97,9 @@ public class OverlayActionChip extends FrameLayout {
     public void setPendingIntent(PendingIntent intent, Runnable finisher) {
         setOnClickListener(v -> {
             try {
-                intent.send();
+                BroadcastOptions options = BroadcastOptions.makeBasic();
+                options.setInteractive(true);
+                intent.send(options.toBundle());
                 finisher.run();
             } catch (PendingIntent.CanceledException e) {
                 Log.e(TAG, "Intent cancelled", e);

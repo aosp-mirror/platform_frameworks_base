@@ -20,9 +20,11 @@ package android.hardware.display;
 import static android.hardware.display.DisplayManager.EventsMask;
 import static android.view.Display.HdrCapabilities.HdrType;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -30,6 +32,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.graphics.ColorSpace;
 import android.graphics.Point;
+import android.hardware.OverlayProperties;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.hardware.graphics.common.DisplayDecorationSupport;
 import android.media.projection.IMediaProjection;
@@ -40,6 +43,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.Trace;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -109,6 +113,7 @@ public final class DisplayManagerGlobal {
 
     private final SparseArray<DisplayInfo> mDisplayInfoCache = new SparseArray<>();
     private final ColorSpace mWideColorSpace;
+    private final OverlayProperties mOverlayProperties;
     private int[] mDisplayIdCache;
 
     private int mWifiDisplayScanNestCount;
@@ -120,6 +125,7 @@ public final class DisplayManagerGlobal {
             mWideColorSpace =
                     ColorSpace.get(
                             ColorSpace.Named.values()[mDm.getPreferredWideGamutColorSpaceId()]);
+            mOverlayProperties = mDm.getOverlaySupport();
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -206,16 +212,16 @@ public final class DisplayManagerGlobal {
      */
     @UnsupportedAppUsage
     public int[] getDisplayIds() {
-        return getDisplayIds(/* includeDisabledDisplays= */ false);
+        return getDisplayIds(/* includeDisabled= */ false);
     }
 
     /**
-     * Gets all valid logical display ids and invalid ones if specified.
+     * Gets all currently valid logical display ids.
      *
+     * @param includeDisabled True if the returned list of displays includes disabled displays.
      * @return An array containing all display ids.
      */
-    @UnsupportedAppUsage
-    public int[] getDisplayIds(boolean includeDisabledDisplays) {
+    public int[] getDisplayIds(boolean includeDisabled) {
         try {
             synchronized (mLock) {
                 if (USE_CACHE) {
@@ -224,8 +230,7 @@ public final class DisplayManagerGlobal {
                     }
                 }
 
-                int[] displayIds =
-                        mDm.getDisplayIds(includeDisabledDisplays);
+                int[] displayIds = mDm.getDisplayIds(includeDisabled);
                 if (USE_CACHE) {
                     mDisplayIdCache = displayIds;
                 }
@@ -587,6 +592,20 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    /**
+     * Overrides HDR modes for a display device.
+     *
+     */
+    @RequiresPermission(Manifest.permission.ACCESS_SURFACE_FLINGER)
+    public void overrideHdrTypes(int displayId, int[] modes) {
+        try {
+            mDm.overrideHdrTypes(displayId, modes);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+
     public void requestColorMode(int displayId, int colorMode) {
         try {
             mDm.requestColorMode(displayId, colorMode);
@@ -718,6 +737,15 @@ public final class DisplayManagerGlobal {
      */
     public ColorSpace getPreferredWideGamutColorSpace() {
         return mWideColorSpace;
+    }
+
+    /**
+     * Gets the overlay properties for all displays.
+     *
+     * @hide
+     */
+    public OverlayProperties getOverlaySupport() {
+        return mOverlayProperties;
     }
 
     /**
@@ -951,6 +979,39 @@ public final class DisplayManagerGlobal {
     }
 
     /**
+     * Sets the {@link HdrConversionMode} for the device.
+     */
+    public void setHdrConversionMode(@NonNull HdrConversionMode hdrConversionMode) {
+        try {
+            mDm.setHdrConversionMode(hdrConversionMode);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the {@link HdrConversionMode} of the device.
+     */
+    public HdrConversionMode getHdrConversionMode() {
+        try {
+            return mDm.getHdrConversionMode();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the HDR output types supported by the device.
+     */
+    public @HdrType int[] getSupportedHdrOutputTypes() {
+        try {
+            return mDm.getSupportedHdrOutputTypes();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * When enabled the app requested display resolution and refresh rate is always selected
      * in DisplayModeDirector regardless of user settings and policies for low brightness, low
      * battery etc.
@@ -1007,7 +1068,8 @@ public final class DisplayManagerGlobal {
         @Override
         public void onDisplayEvent(int displayId, @DisplayEvent int event) {
             if (DEBUG) {
-                Log.d(TAG, "onDisplayEvent: displayId=" + displayId + ", event=" + event);
+                Log.d(TAG, "onDisplayEvent: displayId=" + displayId + ", event=" + eventToString(
+                        event));
             }
             handleDisplayEvent(displayId, event);
         }
@@ -1041,6 +1103,12 @@ public final class DisplayManagerGlobal {
 
         @Override
         public void handleMessage(Message msg) {
+            if (DEBUG) {
+                Trace.beginSection(
+                        "DisplayListenerDelegate(" + eventToString(msg.what)
+                                + ", display=" + msg.arg1
+                                + ", listener=" + mListener.getClass() + ")");
+            }
             switch (msg.what) {
                 case EVENT_DISPLAY_ADDED:
                     if ((mEventsMask & DisplayManager.EVENT_FLAG_DISPLAY_ADDED) != 0) {
@@ -1066,6 +1134,9 @@ public final class DisplayManagerGlobal {
                         mListener.onDisplayRemoved(msg.arg1);
                     }
                     break;
+            }
+            if (DEBUG) {
+                Trace.endSection();
             }
         }
     }
@@ -1172,5 +1243,19 @@ public final class DisplayManagerGlobal {
             mDispatchNativeCallbacks = false;
             updateCallbackIfNeededLocked();
         }
+    }
+
+    private static String eventToString(@DisplayEvent int event) {
+        switch (event) {
+            case EVENT_DISPLAY_ADDED:
+                return "ADDED";
+            case EVENT_DISPLAY_CHANGED:
+                return "CHANGED";
+            case EVENT_DISPLAY_REMOVED:
+                return "REMOVED";
+            case EVENT_DISPLAY_BRIGHTNESS_CHANGED:
+                return "BRIGHTNESS_CHANGED";
+        }
+        return "UNKNOWN";
     }
 }

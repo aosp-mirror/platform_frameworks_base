@@ -36,10 +36,10 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
-import android.util.TypedXmlSerializer;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.notification.NotificationManagerService.DumpFilter;
 
 import java.io.IOException;

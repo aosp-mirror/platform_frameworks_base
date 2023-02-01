@@ -25,8 +25,8 @@ import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.server.timezonedetector.ConfigurationChangeListener;
 import com.android.server.timezonedetector.ServiceConfigAccessor;
+import com.android.server.timezonedetector.StateChangeListener;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -35,7 +35,9 @@ import java.lang.annotation.Target;
 import java.time.DateTimeException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -185,8 +187,7 @@ public final class ServerFlags {
      * ensure O(1) lookup performance when working out whether a listener should trigger.
      */
     @GuardedBy("mListeners")
-    private final ArrayMap<ConfigurationChangeListener, HashSet<String>> mListeners =
-            new ArrayMap<>();
+    private final ArrayMap<StateChangeListener, HashSet<String>> mListeners = new ArrayMap<>();
 
     private static final Object SLOCK = new Object();
 
@@ -212,8 +213,12 @@ public final class ServerFlags {
     }
 
     private void handlePropertiesChanged(@NonNull DeviceConfig.Properties properties) {
+        // Copy the listeners to notify under the "mListeners" lock but don't hold the lock while
+        // delivering the notifications to avoid deadlocks.
+        List<StateChangeListener> listenersToNotify;
         synchronized (mListeners) {
-            for (Map.Entry<ConfigurationChangeListener, HashSet<String>> listenerEntry
+            listenersToNotify = new ArrayList<>(mListeners.size());
+            for (Map.Entry<StateChangeListener, HashSet<String>> listenerEntry
                     : mListeners.entrySet()) {
                 // It's unclear which set of the following two Sets is going to be larger in the
                 // average case: monitoredKeys will be a subset of the set of possible keys, but
@@ -226,9 +231,13 @@ public final class ServerFlags {
                 HashSet<String> monitoredKeys = listenerEntry.getValue();
                 Iterable<String> modifiedKeys = properties.getKeyset();
                 if (containsAny(monitoredKeys, modifiedKeys)) {
-                    listenerEntry.getKey().onChange();
+                    listenersToNotify.add(listenerEntry.getKey());
                 }
             }
+        }
+
+        for (StateChangeListener listener : listenersToNotify) {
+            listener.onChange();
         }
     }
 
@@ -249,7 +258,7 @@ public final class ServerFlags {
      * <p>Note: Only for use by long-lived objects like other singletons. There is deliberately no
      * associated remove method.
      */
-    public void addListener(@NonNull ConfigurationChangeListener listener,
+    public void addListener(@NonNull StateChangeListener listener,
             @NonNull Set<String> keys) {
         Objects.requireNonNull(listener);
         Objects.requireNonNull(keys);
@@ -278,11 +287,19 @@ public final class ServerFlags {
      */
     @NonNull
     public Optional<String[]> getOptionalStringArray(@DeviceConfigKey String key) {
-        Optional<String> string = getOptionalString(key);
-        if (!string.isPresent()) {
+        Optional<String> optionalString = getOptionalString(key);
+        if (!optionalString.isPresent()) {
             return Optional.empty();
         }
-        return Optional.of(string.get().split(","));
+
+        // DeviceConfig appears to have no way to specify an empty string, so we use "_[]_" as a
+        // special value to mean a zero-length array.
+        String value = optionalString.get();
+        if ("_[]_".equals(value)) {
+            return Optional.of(new String[0]);
+        }
+
+        return Optional.of(value.split(","));
     }
 
     /**

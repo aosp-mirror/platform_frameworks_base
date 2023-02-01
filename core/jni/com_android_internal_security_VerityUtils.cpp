@@ -23,7 +23,6 @@
 #include <linux/fsverity.h>
 #include <linux/stat.h>
 #include <nativehelper/JNIHelp.h>
-#include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -39,7 +38,7 @@ namespace android {
 
 namespace {
 
-int enableFsverity(JNIEnv *env, jobject /* clazz */, jstring filePath, jbyteArray signature) {
+int enableFsverity(JNIEnv *env, jobject /* clazz */, jstring filePath) {
     ScopedUtfChars path(env, filePath);
     if (path.c_str() == nullptr) {
         return EINVAL;
@@ -48,10 +47,6 @@ int enableFsverity(JNIEnv *env, jobject /* clazz */, jstring filePath, jbyteArra
     if (rfd.get() < 0) {
         return errno;
     }
-    ScopedByteArrayRO signature_bytes(env, signature);
-    if (signature_bytes.get() == nullptr) {
-        return EINVAL;
-    }
 
     fsverity_enable_arg arg = {};
     arg.version = 1;
@@ -59,8 +54,6 @@ int enableFsverity(JNIEnv *env, jobject /* clazz */, jstring filePath, jbyteArra
     arg.block_size = 4096;
     arg.salt_size = 0;
     arg.salt_ptr = reinterpret_cast<uintptr_t>(nullptr);
-    arg.sig_size = signature_bytes.size();
-    arg.sig_ptr = reinterpret_cast<uintptr_t>(signature_bytes.get());
 
     if (ioctl(rfd.get(), FS_IOC_ENABLE_VERITY, &arg) < 0) {
         return errno;
@@ -111,10 +104,10 @@ int measureFsverity(JNIEnv *env, jobject /* clazz */, jstring filePath, jbyteArr
     ScopedUtfChars path(env, filePath);
     ::android::base::unique_fd rfd(open(path.c_str(), O_RDONLY | O_CLOEXEC));
     if (rfd.get() < 0) {
-        return rfd.get();
+        return -errno;
     }
-    if (auto err = ioctl(rfd.get(), FS_IOC_MEASURE_VERITY, data); err < 0) {
-        return err;
+    if (::ioctl(rfd.get(), FS_IOC_MEASURE_VERITY, data) < 0) {
+        return -errno;
     }
 
     if (data->digest_algorithm != FS_VERITY_HASH_ALG_SHA256) {
@@ -132,7 +125,7 @@ int measureFsverity(JNIEnv *env, jobject /* clazz */, jstring filePath, jbyteArr
     return 0;
 }
 const JNINativeMethod sMethods[] = {
-        {"enableFsverityNative", "(Ljava/lang/String;[B)I", (void *)enableFsverity},
+        {"enableFsverityNative", "(Ljava/lang/String;)I", (void *)enableFsverity},
         {"statxForFsverityNative", "(Ljava/lang/String;)I", (void *)statxForFsverity},
         {"measureFsverityNative", "(Ljava/lang/String;[B)I", (void *)measureFsverity},
 };

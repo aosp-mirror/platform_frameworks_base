@@ -47,13 +47,6 @@ public interface BackAnimation {
     void setTriggerBack(boolean triggerBack);
 
     /**
-     * Returns a binder that can be passed to an external process to update back animations.
-     */
-    default IBackAnimation createExternalInterface() {
-        return null;
-    }
-
-    /**
      * Sets the threshold values that defining edge swipe behavior.
      * @param triggerThreshold the min threshold to trigger back.
      * @param progressThreshold the max threshold to keep progressing back animation.

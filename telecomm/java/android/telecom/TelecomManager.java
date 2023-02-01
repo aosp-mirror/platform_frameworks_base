@@ -15,8 +15,10 @@
 package android.telecom;
 
 import static android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE;
+import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
 
 import android.Manifest;
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -37,6 +39,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.OutcomeReceiver;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -48,6 +51,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.telecom.ClientTransactionalServiceRepository;
+import com.android.internal.telecom.ClientTransactionalServiceWrapper;
 import com.android.internal.telecom.ITelecomService;
 
 import java.lang.annotation.Retention;
@@ -1055,6 +1060,14 @@ public class TelecomManager {
 
     private final ITelecomService mTelecomServiceOverride;
 
+    /** @hide **/
+    private final ClientTransactionalServiceRepository mTransactionalServiceRepository =
+            new ClientTransactionalServiceRepository();
+    /** @hide **/
+    public static final int TELECOM_TRANSACTION_SUCCESS = 0;
+    /** @hide **/
+    public static final String TRANSACTION_CALL_ID_KEY = "TelecomCallId";
+
     /**
      * @hide
      */
@@ -1179,7 +1192,7 @@ public class TelecomManager {
         if (service != null) {
             try {
                 return service.getSimCallManager(
-                        SubscriptionManager.getDefaultSubscriptionId());
+                        SubscriptionManager.getDefaultSubscriptionId(), mContext.getPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling ITelecomService#getSimCallManager");
             }
@@ -1201,7 +1214,7 @@ public class TelecomManager {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                return service.getSimCallManager(subscriptionId);
+                return service.getSimCallManager(subscriptionId, mContext.getPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling ITelecomService#getSimCallManager");
             }
@@ -1225,7 +1238,7 @@ public class TelecomManager {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                return service.getSimCallManagerForUser(userId);
+                return service.getSimCallManagerForUser(userId, mContext.getPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling ITelecomService#getSimCallManagerForUser");
             }
@@ -1500,7 +1513,7 @@ public class TelecomManager {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                service.registerPhoneAccount(account);
+                service.registerPhoneAccount(account, mContext.getPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling ITelecomService#registerPhoneAccount", e);
             }
@@ -1516,7 +1529,7 @@ public class TelecomManager {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                service.unregisterPhoneAccount(accountHandle);
+                service.unregisterPhoneAccount(accountHandle, mContext.getPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling ITelecomService#unregisterPhoneAccount", e);
             }
@@ -1597,7 +1610,7 @@ public class TelecomManager {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                return service.getDefaultDialerPackage();
+                return service.getDefaultDialerPackage(mContext.getPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException attempting to get the default dialer package name.", e);
             }
@@ -1671,7 +1684,7 @@ public class TelecomManager {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                return service.getSystemDialerPackage();
+                return service.getSystemDialerPackage(mContext.getPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException attempting to get the system dialer package name.", e);
             }
@@ -1850,7 +1863,7 @@ public class TelecomManager {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                return service.getCallStateUsingPackage(mContext.getPackageName(),
+                return service.getCallStateUsingPackage(mContext.getOpPackageName(),
                         mContext.getAttributionTag());
             } catch (RemoteException e) {
                 Log.d(TAG, "RemoteException calling getCallState().", e);
@@ -2076,7 +2089,8 @@ public class TelecomManager {
                             "acceptHandover for API > O-MR1");
                     return;
                 }
-                service.addNewIncomingCall(phoneAccount, extras == null ? new Bundle() : extras);
+                service.addNewIncomingCall(phoneAccount, extras == null ? new Bundle() : extras,
+                        mContext.getPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException adding a new incoming call: " + phoneAccount, e);
             }
@@ -2118,7 +2132,8 @@ public class TelecomManager {
         if (service != null) {
             try {
                 service.addNewIncomingConference(
-                        phoneAccount, extras == null ? new Bundle() : extras);
+                        phoneAccount, extras == null ? new Bundle() : extras,
+                        mContext.getPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException adding a new incoming conference: " + phoneAccount, e);
             }
@@ -2414,7 +2429,11 @@ public class TelecomManager {
         Intent result = null;
         if (service != null) {
             try {
-                result = service.createManageBlockedNumbersIntent();
+                result = service.createManageBlockedNumbersIntent(mContext.getPackageName());
+                if (result != null) {
+                    result.prepareToEnterProcess(LOCAL_FLAG_FROM_SYSTEM,
+                            mContext.getAttributionSource());
+                }
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling ITelecomService#createManageBlockedNumbersIntent", e);
             }
@@ -2436,7 +2455,12 @@ public class TelecomManager {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                return service.createLaunchEmergencyDialerIntent(number);
+                Intent result = service.createLaunchEmergencyDialerIntent(number);
+                if (result != null) {
+                    result.prepareToEnterProcess(LOCAL_FLAG_FROM_SYSTEM,
+                            mContext.getAttributionSource());
+                }
+                return result;
             } catch (RemoteException e) {
                 Log.e(TAG, "Error createLaunchEmergencyDialerIntent", e);
             }
@@ -2571,7 +2595,7 @@ public class TelecomManager {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                service.acceptHandover(srcAddr, videoState, destAcct);
+                service.acceptHandover(srcAddr, videoState, destAcct, mContext.getPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException acceptHandover: " + e);
             }
@@ -2621,6 +2645,92 @@ public class TelecomManager {
                 Log.e(TAG, "RemoteException isInSelfManagedCall: " + e);
                 e.rethrowFromSystemServer();
                 return false;
+            }
+        } else {
+            throw new IllegalStateException("Telecom service is not present");
+        }
+    }
+
+    /**
+     * Adds a new call with the specified {@link CallAttributes} to the telecom service. This method
+     * can be used to add both incoming and outgoing calls.
+     *
+     * <p>
+     * The difference between this API call and {@link TelecomManager#placeCall(Uri, Bundle)} or
+     * {@link TelecomManager#addNewIncomingCall(PhoneAccountHandle, Bundle)} is that this API
+     * will asynchronously provide an update on whether the new call was added successfully via
+     * an {@link OutcomeReceiver}.  Additionally, callbacks will run on the executor thread that was
+     * passed in.
+     *
+     * <p>
+     * Note: Only packages that register with
+     * {@link PhoneAccount#CAPABILITY_SUPPORTS_TRANSACTIONAL_OPERATIONS}
+     * can utilize this API. {@link PhoneAccount}s that set the capabilities
+     * {@link PhoneAccount#CAPABILITY_SIM_SUBSCRIPTION},
+     * {@link PhoneAccount#CAPABILITY_CALL_PROVIDER},
+     * {@link PhoneAccount#CAPABILITY_CONNECTION_MANAGER}
+     * are not supported and will cause an exception to be thrown.
+     *
+     * <p>
+     * Usage example:
+     * <pre>
+     *
+     *  // An app should first define their own construct of a Call that overrides all the
+     *  // {@link CallEventCallback}s
+     *  private class MyVoipCall implements CallEventCallback {
+     *    // override all the {@link CallEventCallback}s
+     *  }
+     *
+     * PhoneAccountHandle handle = new PhoneAccountHandle(
+     *                          new ComponentName("com.example.voip.app",
+     *                                            "com.example.voip.app.NewCallActivity"), "123");
+     *
+     * CallAttributes callAttributes = new CallAttributes.Builder(handle,
+     *                                             CallAttributes.DIRECTION_OUTGOING,
+     *                                            "John Smith", Uri.fromParts("tel", "123", null))
+     *                                            .build();
+     *
+     * telecomManager.addCall(callAttributes, Runnable::run, new OutcomeReceiver() {
+     *                              public void onResult(CallControl callControl) {
+     *                                 // The call has been added successfully
+     *                              }
+     *                           }, new MyVoipCall());
+     * </pre>
+     *
+     * @param callAttributes    attributes of the new call (incoming or outgoing, address, etc. )
+     * @param executor          thread to run background CallEventCallback updates on
+     * @param pendingControl    OutcomeReceiver that receives the result of addCall transaction
+     * @param callEventCallback object that overrides CallEventCallback
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_OWN_CALLS)
+    @SuppressLint("SamShouldBeLast")
+    public void addCall(@NonNull CallAttributes callAttributes,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<CallControl, CallException> pendingControl,
+            @NonNull CallEventCallback callEventCallback) {
+        Objects.requireNonNull(callAttributes);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(pendingControl);
+        Objects.requireNonNull(callEventCallback);
+
+        ITelecomService service = getTelecomService();
+        if (service != null) {
+            try {
+                // create or add the new call to a service wrapper w/ the same phoneAccountHandle
+                ClientTransactionalServiceWrapper transactionalServiceWrapper =
+                        mTransactionalServiceRepository.addNewCallForTransactionalServiceWrapper(
+                                callAttributes.getPhoneAccountHandle());
+
+                // couple all the args passed by the client
+                String newCallId = transactionalServiceWrapper.trackCall(callAttributes, executor,
+                        pendingControl, callEventCallback);
+
+                // send args to server to process new call
+                service.addCall(callAttributes, transactionalServiceWrapper.getCallEventCallback(),
+                        newCallId, mContext.getOpPackageName());
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException addCall: " + e);
+                e.rethrowFromSystemServer();
             }
         } else {
             throw new IllegalStateException("Telecom service is not present");

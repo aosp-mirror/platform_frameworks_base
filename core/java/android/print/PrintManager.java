@@ -529,8 +529,8 @@ public final class PrintManager {
             Bundle result = mService.print(printJobName, delegate,
                     attributes, mContext.getPackageName(), mAppId, mUserId);
             if (result != null) {
-                PrintJobInfo printJob = result.getParcelable(EXTRA_PRINT_JOB);
-                IntentSender intent = result.getParcelable(EXTRA_PRINT_DIALOG_INTENT);
+                PrintJobInfo printJob = result.getParcelable(EXTRA_PRINT_JOB, android.print.PrintJobInfo.class);
+                IntentSender intent = result.getParcelable(EXTRA_PRINT_DIALOG_INTENT, android.content.IntentSender.class);
                 if (printJob == null || intent == null) {
                     return null;
                 }

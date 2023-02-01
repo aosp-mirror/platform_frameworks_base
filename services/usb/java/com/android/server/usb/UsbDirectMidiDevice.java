@@ -19,6 +19,7 @@ package com.android.server.usb;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.usb.UsbConfiguration;
+import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
@@ -76,10 +77,10 @@ public final class UsbDirectMidiDevice implements Closeable {
     // event schedulers for each input port of the physical device
     private MidiEventScheduler[] mEventSchedulers;
 
-    // Arbitrary number for timeout to not continue sending to
-    // an inactive device. This number tries to balances the number
-    // of cycles and not being permanently stuck.
-    private static final int BULK_TRANSFER_TIMEOUT_MILLISECONDS = 10;
+    // Timeout for sending a packet to a device.
+    // If bulkTransfer times out, retry sending the packet up to 20 times.
+    private static final int BULK_TRANSFER_TIMEOUT_MILLISECONDS = 50;
+    private static final int BULK_TRANSFER_NUMBER_OF_RETRIES = 20;
 
     // Arbitrary number for timeout when closing a thread
     private static final int THREAD_JOIN_TIMEOUT_MILLISECONDS = 200;
@@ -97,6 +98,11 @@ public final class UsbDirectMidiDevice implements Closeable {
     private boolean mServerAvailable;
 
     private UsbMidiPacketConverter mUsbMidiPacketConverter;
+
+    private PowerBoostSetter mPowerBoostSetter = null;
+
+    private static final byte MESSAGE_TYPE_MIDI_1_CHANNEL_VOICE = 0x02;
+    private static final byte MESSAGE_TYPE_MIDI_2_CHANNEL_VOICE = 0x04;
 
     private final MidiDeviceServer.Callback mCallback = new MidiDeviceServer.Callback() {
         @Override
@@ -251,6 +257,8 @@ public final class UsbDirectMidiDevice implements Closeable {
         for (int port = 0; port < numOutputs; port++) {
             mMidiInputPortReceivers[port] = new InputReceiverProxy();
         }
+
+        mPowerBoostSetter = new PowerBoostSetter();
     }
 
     private int calculateDefaultMidiProtocol() {
@@ -379,10 +387,15 @@ public final class UsbDirectMidiDevice implements Closeable {
                                     break;
                                 }
                                 final UsbRequest response = connectionFinal.requestWait();
-                                if (response != request) {
-                                    Log.w(TAG, "Unexpected response");
+                                if (response == null) {
+                                    Log.w(TAG, "Response is null");
                                     break;
                                 }
+                                if (request != response) {
+                                    Log.w(TAG, "Skipping response");
+                                    continue;
+                                }
+
                                 int bytesRead = byteBuffer.position();
 
                                 if (bytesRead > 0) {
@@ -418,6 +431,15 @@ public final class UsbDirectMidiDevice implements Closeable {
                                     }
                                     outputReceivers[portFinal].send(convertedArray, 0,
                                             convertedArray.length, timestamp);
+
+                                    // Boost power if there seems to be a voice message.
+                                    // For legacy devices, boost when message is more than size 1.
+                                    // For UMP devices, boost for channel voice messages.
+                                    if ((mPowerBoostSetter != null && convertedArray.length > 1)
+                                            && (!mIsUniversalMidiDevice
+                                            || isChannelVoiceMessage(convertedArray))) {
+                                        mPowerBoostSetter.boostPower();
+                                    }
                                 }
                             }
                         } catch (IOException e) {
@@ -497,9 +519,47 @@ public final class UsbDirectMidiDevice implements Closeable {
                                             convertedArray.length);
                                 }
 
-                                connectionFinal.bulkTransfer(endpointFinal, convertedArray,
-                                        convertedArray.length,
-                                        BULK_TRANSFER_TIMEOUT_MILLISECONDS);
+                                boolean isInterrupted = false;
+                                // Split the packet into multiple if they are greater than the
+                                // endpoint's max packet size.
+                                for (int curPacketStart = 0;
+                                        curPacketStart < convertedArray.length &&
+                                        isInterrupted == false;
+                                        curPacketStart += endpointFinal.getMaxPacketSize()) {
+                                    int transferResult = -1;
+                                    int retryCount = 0;
+                                    int curPacketSize = Math.min(endpointFinal.getMaxPacketSize(),
+                                            convertedArray.length - curPacketStart);
+
+                                    // Keep trying to send the packet until the result is
+                                    // successful or until the retry limit is reached.
+                                    while (transferResult < 0 && retryCount <=
+                                            BULK_TRANSFER_NUMBER_OF_RETRIES) {
+                                        transferResult = connectionFinal.bulkTransfer(
+                                                endpointFinal,
+                                                convertedArray,
+                                                curPacketStart,
+                                                curPacketSize,
+                                                BULK_TRANSFER_TIMEOUT_MILLISECONDS);
+                                        retryCount++;
+
+                                        if (Thread.currentThread().interrupted()) {
+                                            Log.w(TAG, "output thread interrupted after send");
+                                            isInterrupted = true;
+                                            break;
+                                        }
+                                        if (transferResult < 0) {
+                                            Log.d(TAG, "retrying packet. retryCount = "
+                                                    + retryCount + " result = " + transferResult);
+                                            if (retryCount > BULK_TRANSFER_NUMBER_OF_RETRIES) {
+                                                Log.w(TAG, "Skipping packet because timeout");
+                                            }
+                                        }
+                                    }
+                                }
+                                if (isInterrupted == true) {
+                                    break;
+                                }
                                 eventSchedulerFinal.addEventToPool(event);
                             }
                         } catch (NullPointerException e) {
@@ -720,5 +780,11 @@ public final class UsbDirectMidiDevice implements Closeable {
         }
 
         dump.end(token);
+    }
+
+    private boolean isChannelVoiceMessage(byte[] umpMessage) {
+        byte messageType = (byte) ((umpMessage[0] >> 4) & 0x0f);
+        return messageType == MESSAGE_TYPE_MIDI_1_CHANNEL_VOICE
+                || messageType == MESSAGE_TYPE_MIDI_2_CHANNEL_VOICE;
     }
 }

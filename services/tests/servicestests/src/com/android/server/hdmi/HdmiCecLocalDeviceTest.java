@@ -141,7 +141,7 @@ public class HdmiCecLocalDeviceTest {
                 new HdmiControlService(context, Collections.emptyList(),
                         new FakeAudioDeviceVolumeManagerWrapper()) {
                     @Override
-                    boolean isControlEnabled() {
+                    boolean isCecControlEnabled() {
                         return isControlEnabled;
                     }
 
@@ -179,6 +179,7 @@ public class HdmiCecLocalDeviceTest {
                 };
         mHdmiControlService.setIoLooper(mTestLooper.getLooper());
         mHdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(context));
+        mHdmiControlService.setDeviceConfig(new FakeDeviceConfigWrapper());
         mNativeWrapper = new FakeNativeWrapper();
         mHdmiCecController = HdmiCecController.createWithNativeWrapper(
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
@@ -188,7 +189,11 @@ public class HdmiCecLocalDeviceTest {
         mLocalDevices.add(mHdmiLocalDevice);
         HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[1];
         hdmiPortInfos[0] =
-                new HdmiPortInfo(1, HdmiPortInfo.PORT_OUTPUT, 0x0000, true, false, false);
+                new HdmiPortInfo.Builder(1, HdmiPortInfo.PORT_OUTPUT, 0x0000)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(false)
+                        .build();
         mNativeWrapper.setPortInfo(hdmiPortInfos);
         mNativeWrapper.setPortConnectionStatus(1, true);
         mHdmiControlService.initService();

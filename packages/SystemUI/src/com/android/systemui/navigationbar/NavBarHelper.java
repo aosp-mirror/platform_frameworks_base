@@ -16,12 +16,22 @@
 
 package com.android.systemui.navigationbar;
 
+import static android.app.StatusBarManager.WINDOW_NAVIGATION_BAR;
+import static android.app.StatusBarManager.WindowVisibleState;
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
+import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS;
 
 import static com.android.systemui.accessibility.SystemActions.SYSTEM_ACTION_ID_ACCESSIBILITY_BUTTON;
 import static com.android.systemui.accessibility.SystemActions.SYSTEM_ACTION_ID_ACCESSIBILITY_BUTTON_CHOOSER;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -50,7 +60,10 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.QuickStepContract;
+import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -76,22 +89,28 @@ public final class NavBarHelper implements
         AccessibilityButtonModeObserver.ModeChangedListener,
         AccessibilityButtonTargetsObserver.TargetsChangedListener,
         OverviewProxyService.OverviewProxyListener, NavigationModeController.ModeChangedListener,
-        Dumpable {
+        Dumpable, CommandQueue.Callbacks {
     private final AccessibilityManager mAccessibilityManager;
     private final Lazy<AssistManager> mAssistManagerLazy;
     private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
+    private final KeyguardStateController mKeyguardStateController;
     private final UserTracker mUserTracker;
     private final SystemActions mSystemActions;
     private final AccessibilityButtonModeObserver mAccessibilityButtonModeObserver;
     private final AccessibilityButtonTargetsObserver mAccessibilityButtonTargetsObserver;
     private final List<NavbarTaskbarStateUpdater> mA11yEventListeners = new ArrayList<>();
     private final Context mContext;
-    private ContentResolver mContentResolver;
+    private final CommandQueue mCommandQueue;
+    private final ContentResolver mContentResolver;
     private boolean mAssistantAvailable;
     private boolean mLongPressHomeEnabled;
     private boolean mAssistantTouchGestureEnabled;
     private int mNavBarMode;
     private int mA11yButtonState;
+
+    // Attributes used in NavBarHelper.CurrentSysuiState
+    private int mWindowStateDisplayId;
+    private @WindowVisibleState int mWindowState;
 
     private final ContentObserver mAssistContentObserver = new ContentObserver(
             new Handler(Looper.getMainLooper())) {
@@ -114,14 +133,18 @@ public final class NavBarHelper implements
             OverviewProxyService overviewProxyService,
             Lazy<AssistManager> assistManagerLazy,
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
+            KeyguardStateController keyguardStateController,
             NavigationModeController navigationModeController,
             UserTracker userTracker,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            CommandQueue commandQueue) {
         mContext = context;
+        mCommandQueue = commandQueue;
         mContentResolver = mContext.getContentResolver();
         mAccessibilityManager = accessibilityManager;
         mAssistManagerLazy = assistManagerLazy;
         mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
+        mKeyguardStateController = keyguardStateController;
         mUserTracker = userTracker;
         mSystemActions = systemActions;
         accessibilityManager.addAccessibilityServicesStateChangeListener(this);
@@ -147,10 +170,13 @@ public final class NavBarHelper implements
                 false, mAssistContentObserver, UserHandle.USER_ALL);
         updateAssistantAvailability();
         updateA11yState();
+        mCommandQueue.addCallback(this);
+
     }
 
     public void destroy() {
         mContentResolver.unregisterContentObserver(mAssistContentObserver);
+        mCommandQueue.removeCallback(this);
     }
 
     /**
@@ -159,7 +185,7 @@ public final class NavBarHelper implements
     public void registerNavTaskStateUpdater(NavbarTaskbarStateUpdater listener) {
         mA11yEventListeners.add(listener);
         listener.updateAccessibilityServicesState();
-        listener.updateAssistantAvailable(mAssistantAvailable);
+        listener.updateAssistantAvailable(mAssistantAvailable, mLongPressHomeEnabled);
     }
 
     public void removeNavTaskStateUpdater(NavbarTaskbarStateUpdater listener) {
@@ -172,9 +198,10 @@ public final class NavBarHelper implements
         }
     }
 
-    private void dispatchAssistantEventUpdate(boolean assistantAvailable) {
+    private void dispatchAssistantEventUpdate(boolean assistantAvailable,
+            boolean longPressHomeEnabled) {
         for (NavbarTaskbarStateUpdater listener : mA11yEventListeners) {
-            listener.updateAssistantAvailable(assistantAvailable);
+            listener.updateAssistantAvailable(assistantAvailable, longPressHomeEnabled);
         }
     }
 
@@ -270,7 +297,7 @@ public final class NavBarHelper implements
 
     private void updateAssistantAvailability() {
         boolean assistantAvailableForUser = mAssistManagerLazy.get()
-                .getAssistInfoForUser(UserHandle.USER_CURRENT) != null;
+                .getAssistInfoForUser(mUserTracker.getUserId()) != null;
         boolean longPressDefault = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_assistLongPressHomeEnabledDefault);
         mLongPressHomeEnabled = Settings.Secure.getIntForUser(mContentResolver,
@@ -285,7 +312,7 @@ public final class NavBarHelper implements
         mAssistantAvailable = assistantAvailableForUser
                 && mAssistantTouchGestureEnabled
                 && QuickStepContract.isGesturalMode(mNavBarMode);
-        dispatchAssistantEventUpdate(mAssistantAvailable);
+        dispatchAssistantEventUpdate(mAssistantAvailable, mLongPressHomeEnabled);
     }
 
     public boolean getLongPressHomeEnabled() {
@@ -308,12 +335,30 @@ public final class NavBarHelper implements
      * {@link InputMethodService} and the keyguard states.
      */
     public boolean isImeShown(int vis) {
-        View shadeWindowView = mCentralSurfacesOptionalLazy.get().get().getNotificationShadeWindowView();
-        boolean isKeyguardShowing = mCentralSurfacesOptionalLazy.get().get().isKeyguardShowing();
+        View shadeWindowView = null;
+        if (mCentralSurfacesOptionalLazy.get().isPresent()) {
+            shadeWindowView =
+                    mCentralSurfacesOptionalLazy.get().get().getNotificationShadeWindowView();
+        }
+        boolean isKeyguardShowing = mKeyguardStateController.isShowing();
         boolean imeVisibleOnShade = shadeWindowView != null && shadeWindowView.isAttachedToWindow()
                 && shadeWindowView.getRootWindowInsets().isVisible(WindowInsets.Type.ime());
         return imeVisibleOnShade
                 || (!isKeyguardShowing && (vis & InputMethodService.IME_VISIBLE) != 0);
+    }
+
+    @Override
+    public void setWindowState(int displayId, int window, int state) {
+        CommandQueue.Callbacks.super.setWindowState(displayId, window, state);
+        if (window != WINDOW_NAVIGATION_BAR) {
+            return;
+        }
+        mWindowStateDisplayId = displayId;
+        mWindowState = state;
+    }
+
+    public CurrentSysuiState getCurrentSysuiState() {
+        return new CurrentSysuiState();
     }
 
     /**
@@ -322,7 +367,35 @@ public final class NavBarHelper implements
      */
     public interface NavbarTaskbarStateUpdater {
         void updateAccessibilityServicesState();
-        void updateAssistantAvailable(boolean available);
+        void updateAssistantAvailable(boolean available, boolean longPressHomeEnabled);
+    }
+
+    /** Data class to help Taskbar/Navbar initiate state correctly when switching between the two.*/
+    public class CurrentSysuiState {
+        public final int mWindowStateDisplayId;
+        public final @WindowVisibleState int mWindowState;
+
+        public CurrentSysuiState() {
+            mWindowStateDisplayId = NavBarHelper.this.mWindowStateDisplayId;
+            mWindowState = NavBarHelper.this.mWindowState;
+        }
+    }
+
+    static @TransitionMode int transitionMode(boolean isTransient, int appearance) {
+        final int lightsOutOpaque = APPEARANCE_LOW_PROFILE_BARS | APPEARANCE_OPAQUE_NAVIGATION_BARS;
+        if (isTransient) {
+            return MODE_SEMI_TRANSPARENT;
+        } else if ((appearance & lightsOutOpaque) == lightsOutOpaque) {
+            return MODE_LIGHTS_OUT;
+        } else if ((appearance & APPEARANCE_LOW_PROFILE_BARS) != 0) {
+            return MODE_LIGHTS_OUT_TRANSPARENT;
+        } else if ((appearance & APPEARANCE_OPAQUE_NAVIGATION_BARS) != 0) {
+            return MODE_OPAQUE;
+        } else if ((appearance & APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS) != 0) {
+            return MODE_SEMI_TRANSPARENT;
+        } else {
+            return MODE_TRANSPARENT;
+        }
     }
 
     @Override

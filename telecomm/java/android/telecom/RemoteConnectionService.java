@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.telecom.Logging.Session;
 
 import com.android.internal.telecom.IConnectionService;
@@ -508,6 +509,18 @@ final class RemoteConnectionService {
 
         @Override
         public void setCallDirection(String callId, int direction, Session.Info sessionInfo) {
+            // Do nothing
+        }
+
+        @Override
+        public void requestCallEndpointChange(String callId, CallEndpoint endpoint,
+                ResultReceiver callback, Session.Info sessionInfo) {
+            // Do nothing
+        }
+
+        @Override
+        public void queryLocation(String callId, long timeoutMillis, String provider,
+                ResultReceiver callback, Session.Info sessionInfo) {
             // Do nothing
         }
     };

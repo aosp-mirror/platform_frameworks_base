@@ -57,6 +57,7 @@ import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.permission.PermissionManager;
+import android.util.Log;
 
 import com.android.internal.R;
 import com.android.internal.content.InstallLocationUtils;
@@ -148,10 +149,10 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
 
     @Override
     @Deprecated
-    public final boolean activitySupportsIntent(ComponentName component, Intent intent,
-            String resolvedType) {
-        return snapshot().activitySupportsIntent(mResolveComponentName, component, intent,
-                resolvedType);
+    public final boolean activitySupportsIntentAsUser(ComponentName component, Intent intent,
+            String resolvedType, int userId) {
+        return snapshot().activitySupportsIntentAsUser(mResolveComponentName, component, intent,
+                resolvedType, userId);
     }
 
     @Override
@@ -230,8 +231,8 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
 
     @Override
     @Deprecated
-    public final int checkSignatures(@NonNull String pkg1, @NonNull String pkg2) {
-        return snapshot().checkSignatures(pkg1, pkg2);
+    public final int checkSignatures(@NonNull String pkg1, @NonNull String pkg2, int userId) {
+        return snapshot().checkSignatures(pkg1, pkg2, userId);
     }
 
     @Override
@@ -250,6 +251,12 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
     @Deprecated
     public final void clearPackagePersistentPreferredActivities(String packageName, int userId) {
         mPreferredActivityHelper.clearPackagePersistentPreferredActivities(packageName, userId);
+    }
+
+    @Override
+    @Deprecated
+    public final void clearPersistentPreferredActivity(IntentFilter filter, int userId) {
+        mPreferredActivityHelper.clearPersistentPreferredActivity(filter, userId);
     }
 
     @Override
@@ -324,8 +331,8 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
     @NonNull
     @Override
     @Deprecated
-    public final String[] getAppOpPermissionPackages(@NonNull String permissionName) {
-        return snapshot().getAppOpPermissionPackages(permissionName);
+    public final String[] getAppOpPermissionPackages(@NonNull String permissionName, int userId) {
+        return snapshot().getAppOpPermissionPackages(permissionName, userId);
     }
 
     @Override
@@ -385,14 +392,6 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
     @Deprecated
     public final int getComponentEnabledSetting(@NonNull ComponentName component, int userId) {
         return snapshot().getComponentEnabledSetting(component, Binder.getCallingUid(), userId);
-    }
-
-    @Override
-    @Deprecated
-    public final String getContentCaptureServicePackageName() {
-        return mService.ensureSystemPackageName(snapshot(),
-                mService.getPackageFromComponentString(
-                        R.string.config_defaultContentCaptureService));
     }
 
     @Nullable
@@ -500,7 +499,7 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
     @Override
     @Deprecated
     public final String getInstallerPackageName(@NonNull String packageName) {
-        return snapshot().getInstallerPackageName(packageName);
+        return snapshot().getInstallerPackageName(packageName, UserHandle.getCallingUserId());
     }
 
     @Override
@@ -533,9 +532,9 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
     @Nullable
     @Override
     @Deprecated
-    public final InstrumentationInfo getInstrumentationInfo(@NonNull ComponentName component,
-            int flags) {
-        return snapshot().getInstrumentationInfo(component, flags);
+    public final InstrumentationInfo getInstrumentationInfoAsUser(@NonNull ComponentName component,
+            int flags, int userId) {
+        return snapshot().getInstrumentationInfoAsUser(component, flags, userId);
     }
 
     @Override
@@ -711,12 +710,17 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
 
     @Override
     @Deprecated
-    public final PackageManager.Property getProperty(String propertyName, String packageName,
-            String className) {
+    public final PackageManager.Property getPropertyAsUser(String propertyName, String packageName,
+            String className, int userId) {
         Objects.requireNonNull(propertyName);
         Objects.requireNonNull(packageName);
-        PackageStateInternal packageState = snapshot().getPackageStateFiltered(packageName,
-                Binder.getCallingUid(), UserHandle.getCallingUserId());
+        final int callingUid = Binder.getCallingUid();
+        final Computer snapshot = snapshot();
+        snapshot.enforceCrossUserOrProfilePermission(callingUid, userId,
+                /* requireFullPermission */ false,
+                /* checkShell */ false, "getPropertyAsUser");
+        PackageStateInternal packageState = snapshot.getPackageStateForInstalledAndFiltered(
+                packageName, callingUid, userId);
         if (packageState == null) {
             return null;
         }
@@ -905,12 +909,6 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
 
     @Override
     @Deprecated
-    public final boolean isOnlyCoreApps() {
-        return mService.isOnlyCoreApps();
-    }
-
-    @Override
-    @Deprecated
     public final boolean isPackageAvailable(String packageName, int userId) {
         return snapshot().isPackageAvailable(packageName, userId);
     }
@@ -973,8 +971,12 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
             boolean checkProfiles, String targetCompilerFilter, boolean force,
             boolean bootComplete, String splitName) {
         final Computer snapshot = snapshot();
-        return mDexOptHelper.performDexOptMode(snapshot, packageName, checkProfiles,
-                targetCompilerFilter, force, bootComplete, splitName);
+        if (!checkProfiles) {
+            // There is no longer a flag to skip profile checking.
+            Log.w(PackageManagerService.TAG, "Ignored checkProfiles=false flag");
+        }
+        return mDexOptHelper.performDexOptMode(
+                snapshot, packageName, targetCompilerFilter, force, bootComplete, splitName);
     }
 
     /**
@@ -1018,9 +1020,9 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
     @NonNull
     @Override
     @Deprecated
-    public final ParceledListSlice<InstrumentationInfo> queryInstrumentation(
-            @NonNull String targetPackage, int flags) {
-        return snapshot().queryInstrumentation(targetPackage, flags);
+    public final ParceledListSlice<InstrumentationInfo> queryInstrumentationAsUser(
+            @NonNull String targetPackage, int flags, int userId) {
+        return snapshot().queryInstrumentationAsUser(targetPackage, flags, userId);
     }
 
     @Override
@@ -1157,9 +1159,10 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
 
     @Override
     @Deprecated
-    public final boolean canPackageQuery(@NonNull String sourcePackageName,
-            @NonNull String targetPackageName, @UserIdInt int userId) {
-        return snapshot().canPackageQuery(sourcePackageName, targetPackageName, userId);
+    @NonNull
+    public final boolean[] canPackageQuery(@NonNull String sourcePackageName,
+            @NonNull String[] targetPackageNames, @UserIdInt int userId) {
+        return snapshot().canPackageQuery(sourcePackageName, targetPackageNames, userId);
     }
 
     @Override

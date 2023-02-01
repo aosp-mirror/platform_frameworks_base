@@ -16,6 +16,10 @@
 
 package com.android.server.locales;
 
+import static android.content.res.Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED;
+
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.fail;
@@ -35,13 +39,16 @@ import static org.mockito.Mockito.verify;
 
 import android.Manifest;
 import android.app.ActivityManagerInternal;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.LocaleList;
+import android.provider.Settings;
 
+import androidx.test.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.internal.content.PackageMonitor;
@@ -70,6 +77,7 @@ public class LocaleManagerServiceTest {
             /* initiatingPackageName = */ null, /* initiatingPackageSigningInfo = */ null,
             /* originatingPackageName = */ null,
             /* installingPackageName = */ DEFAULT_INSTALLER_PACKAGE_NAME,
+            /* updateOwnerPackageName = */ null,
             /* packageSource = */ PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED);
 
     private LocaleManagerService mLocaleManagerService;
@@ -111,6 +119,8 @@ public class LocaleManagerServiceTest {
         doReturn(DEFAULT_USER_ID).when(mMockActivityManager)
                 .handleIncomingUser(anyInt(), anyInt(), eq(DEFAULT_USER_ID), anyBoolean(), anyInt(),
                         anyString(), anyString());
+        doReturn(InstrumentationRegistry.getContext().getContentResolver())
+                .when(mMockContext).getContentResolver();
 
         mMockBackupHelper = mock(ShadowLocaleManagerBackupHelper.class);
         mLocaleManagerService = new LocaleManagerService(mMockContext, mMockActivityTaskManager,
@@ -126,7 +136,7 @@ public class LocaleManagerServiceTest {
 
         try {
             mLocaleManagerService.setApplicationLocales(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID,
-                    LocaleList.getEmptyLocaleList());
+                    LocaleList.getEmptyLocaleList(), false);
             fail("Expected SecurityException");
         } finally {
             verify(mMockContext).enforceCallingOrSelfPermission(
@@ -141,7 +151,7 @@ public class LocaleManagerServiceTest {
     public void testSetApplicationLocales_nullPackageName_fails() throws Exception {
         try {
             mLocaleManagerService.setApplicationLocales(/* appPackageName = */ null,
-                    DEFAULT_USER_ID, LocaleList.getEmptyLocaleList());
+                    DEFAULT_USER_ID, LocaleList.getEmptyLocaleList(), false);
             fail("Expected NullPointerException");
         } finally {
             verify(mMockBackupHelper, times(0)).notifyBackupManager();
@@ -155,7 +165,7 @@ public class LocaleManagerServiceTest {
 
         try {
             mLocaleManagerService.setApplicationLocales(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID,
-                    /* locales = */ null);
+                    /* locales = */ null, false);
             fail("Expected NullPointerException");
         } finally {
             verify(mMockBackupHelper, times(0)).notifyBackupManager();
@@ -173,7 +183,7 @@ public class LocaleManagerServiceTest {
         setUpPassingPermissionCheckFor(Manifest.permission.CHANGE_CONFIGURATION);
 
         mLocaleManagerService.setApplicationLocales(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID,
-                DEFAULT_LOCALES);
+                DEFAULT_LOCALES, true);
 
         assertEquals(DEFAULT_LOCALES, mFakePackageConfigurationUpdater.getStoredLocales());
         verify(mMockBackupHelper, times(1)).notifyBackupManager();
@@ -186,7 +196,7 @@ public class LocaleManagerServiceTest {
                 .when(mMockPackageManager).getPackageUidAsUser(anyString(), any(), anyInt());
 
         mLocaleManagerService.setApplicationLocales(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID,
-                DEFAULT_LOCALES);
+                DEFAULT_LOCALES, false);
 
         assertEquals(DEFAULT_LOCALES, mFakePackageConfigurationUpdater.getStoredLocales());
         verify(mMockBackupHelper, times(1)).notifyBackupManager();
@@ -198,7 +208,7 @@ public class LocaleManagerServiceTest {
                 .when(mMockPackageManager).getPackageUidAsUser(anyString(), any(), anyInt());
         try {
             mLocaleManagerService.setApplicationLocales(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID,
-                    LocaleList.getEmptyLocaleList());
+                    LocaleList.getEmptyLocaleList(), false);
             fail("Expected IllegalArgumentException");
         } finally {
             assertNoLocalesStored(mFakePackageConfigurationUpdater.getStoredLocales());
@@ -210,6 +220,30 @@ public class LocaleManagerServiceTest {
     public void testGetApplicationLocales_arbitraryAppWithoutPermission_fails() throws Exception {
         doReturn(DEFAULT_UID).when(mMockPackageManager)
                 .getPackageUidAsUser(anyString(), any(), anyInt());
+        setUpFailingPermissionCheckFor(Manifest.permission.READ_APP_SPECIFIC_LOCALES);
+
+        try {
+            mLocaleManagerService.getApplicationLocales(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+            fail("Expected SecurityException");
+        } finally {
+            verify(mMockContext).enforceCallingOrSelfPermission(
+                    eq(android.Manifest.permission.READ_APP_SPECIFIC_LOCALES),
+                    anyString());
+        }
+    }
+
+    @Test(expected = SecurityException.class)
+    public void testGetApplicationLocales_currentImeQueryNonForegroundAppLocales_fails()
+            throws Exception {
+        doReturn(DEFAULT_UID).when(mMockPackageManager)
+                .getPackageUidAsUser(anyString(), any(), anyInt());
+        doReturn(new PackageConfig(/* nightMode = */ 0, DEFAULT_LOCALES,
+                GRAMMATICAL_GENDER_NOT_SPECIFIED))
+                .when(mMockActivityTaskManager).getApplicationConfig(anyString(), anyInt());
+        String imPkgName = getCurrentInputMethodPackageName();
+        doReturn(Binder.getCallingUid()).when(mMockPackageManager)
+                .getPackageUidAsUser(eq(imPkgName), any(), anyInt());
+        doReturn(false).when(mMockActivityManager).isAppForeground(anyInt());
         setUpFailingPermissionCheckFor(Manifest.permission.READ_APP_SPECIFIC_LOCALES);
 
         try {
@@ -244,7 +278,8 @@ public class LocaleManagerServiceTest {
         doReturn(DEFAULT_UID).when(mMockPackageManager)
                 .getPackageUidAsUser(anyString(), any(), anyInt());
         setUpPassingPermissionCheckFor(Manifest.permission.READ_APP_SPECIFIC_LOCALES);
-        doReturn(new PackageConfig(/* nightMode = */ 0, /* locales = */ null))
+        doReturn(new PackageConfig(/* nightMode = */ 0, /* locales = */ null,
+                GRAMMATICAL_GENDER_NOT_SPECIFIED))
                 .when(mMockActivityTaskManager).getApplicationConfig(any(), anyInt());
 
         LocaleList locales = mLocaleManagerService.getApplicationLocales(
@@ -258,7 +293,8 @@ public class LocaleManagerServiceTest {
             throws Exception {
         doReturn(Binder.getCallingUid()).when(mMockPackageManager)
                 .getPackageUidAsUser(anyString(), any(), anyInt());
-        doReturn(new PackageConfig(/* nightMode = */ 0, DEFAULT_LOCALES))
+        doReturn(new PackageConfig(/* nightMode = */ 0, DEFAULT_LOCALES,
+                GRAMMATICAL_GENDER_NOT_SPECIFIED))
                 .when(mMockActivityTaskManager).getApplicationConfig(anyString(), anyInt());
 
         LocaleList locales =
@@ -273,7 +309,8 @@ public class LocaleManagerServiceTest {
         doReturn(DEFAULT_UID).when(mMockPackageManager)
                 .getPackageUidAsUser(anyString(), any(), anyInt());
         setUpPassingPermissionCheckFor(Manifest.permission.READ_APP_SPECIFIC_LOCALES);
-        doReturn(new PackageConfig(/* nightMode = */ 0, DEFAULT_LOCALES))
+        doReturn(new PackageConfig(/* nightMode = */ 0, DEFAULT_LOCALES,
+                GRAMMATICAL_GENDER_NOT_SPECIFIED))
                 .when(mMockActivityTaskManager).getApplicationConfig(anyString(), anyInt());
 
         LocaleList locales =
@@ -289,11 +326,33 @@ public class LocaleManagerServiceTest {
                 .getPackageUidAsUser(eq(DEFAULT_PACKAGE_NAME), any(), anyInt());
         doReturn(Binder.getCallingUid()).when(mMockPackageManager)
                 .getPackageUidAsUser(eq(DEFAULT_INSTALLER_PACKAGE_NAME), any(), anyInt());
-        doReturn(new PackageConfig(/* nightMode = */ 0, DEFAULT_LOCALES))
+        doReturn(new PackageConfig(/* nightMode = */ 0, DEFAULT_LOCALES,
+                GRAMMATICAL_GENDER_NOT_SPECIFIED))
                 .when(mMockActivityTaskManager).getApplicationConfig(anyString(), anyInt());
 
         LocaleList locales =
                 mLocaleManagerService.getApplicationLocales(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+
+        verify(mMockContext, never()).enforceCallingOrSelfPermission(any(), any());
+        assertEquals(DEFAULT_LOCALES, locales);
+    }
+
+    @Test
+    public void testGetApplicationLocales_currentImeQueryForegroundAppLocales_returnsLocales()
+            throws Exception {
+        doReturn(DEFAULT_UID).when(mMockPackageManager)
+                .getPackageUidAsUser(anyString(), any(), anyInt());
+        doReturn(new PackageConfig(/* nightMode = */ 0, DEFAULT_LOCALES,
+                GRAMMATICAL_GENDER_NOT_SPECIFIED))
+                .when(mMockActivityTaskManager).getApplicationConfig(anyString(), anyInt());
+        String imPkgName = getCurrentInputMethodPackageName();
+        doReturn(Binder.getCallingUid()).when(mMockPackageManager)
+                .getPackageUidAsUser(eq(imPkgName), any(), anyInt());
+        doReturn(true).when(mMockActivityManager).isAppForeground(anyInt());
+
+        LocaleList locales =
+                mLocaleManagerService.getApplicationLocales(
+                        DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
 
         verify(mMockContext, never()).enforceCallingOrSelfPermission(any(), any());
         assertEquals(DEFAULT_LOCALES, locales);
@@ -310,5 +369,14 @@ public class LocaleManagerServiceTest {
 
     private void setUpPassingPermissionCheckFor(String permission) {
         doNothing().when(mMockContext).enforceCallingOrSelfPermission(eq(permission), any());
+    }
+
+    private String getCurrentInputMethodPackageName() {
+        String im = Settings.Secure.getString(
+                InstrumentationRegistry.getContext().getContentResolver(),
+                Settings.Secure.DEFAULT_INPUT_METHOD);
+        ComponentName cn = ComponentName.unflattenFromString(im);
+        assertThat(cn).isNotNull();
+        return cn.getPackageName();
     }
 }

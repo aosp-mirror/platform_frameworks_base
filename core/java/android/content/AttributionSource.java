@@ -29,6 +29,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
+import android.os.UserHandle;
 import android.permission.PermissionManager;
 import android.util.ArraySet;
 
@@ -297,7 +298,7 @@ public final class AttributionSource implements Parcelable {
     public boolean checkCallingUid() {
         final int callingUid = Binder.getCallingUid();
         if (callingUid != Process.ROOT_UID
-                && callingUid != Process.SYSTEM_UID
+                && UserHandle.getAppId(callingUid) != Process.SYSTEM_UID
                 && callingUid != mAttributionSourceState.uid) {
             return false;
         }
@@ -495,14 +496,9 @@ public final class AttributionSource implements Parcelable {
 
     @Override
     public int hashCode() {
-        int _hash = 1;
-        _hash = 31 * _hash + mAttributionSourceState.uid;
-        _hash = 31 * _hash + Objects.hashCode(mAttributionSourceState.packageName);
-        _hash = 31 * _hash + Objects.hashCode(mAttributionSourceState.attributionTag);
-        _hash = 31 * _hash + Objects.hashCode(mAttributionSourceState.token);
-        _hash = 31 * _hash + Objects.hashCode(mAttributionSourceState.renouncedPermissions);
-        _hash = 31 * _hash + Objects.hashCode(getNext());
-        return _hash;
+        return Objects.hash(mAttributionSourceState.uid, mAttributionSourceState.packageName,
+                mAttributionSourceState.attributionTag, mAttributionSourceState.token,
+                Arrays.hashCode(mAttributionSourceState.renouncedPermissions), getNext());
     }
 
     @Override

@@ -26,6 +26,7 @@ import android.widget.SeekBar;
  */
 public class MediaOutputSeekbar extends SeekBar {
     private static final int SCALE_SIZE = 1000;
+    public static final int VOLUME_PERCENTAGE_SCALE_SIZE = 100000;
 
     public MediaOutputSeekbar(Context context, AttributeSet attrs) {
         super(context, attrs);

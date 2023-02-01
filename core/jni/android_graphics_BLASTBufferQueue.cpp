@@ -41,7 +41,12 @@ struct {
 
 static JNIEnv* getenv(JavaVM* vm) {
     JNIEnv* env;
-    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+    auto result = vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
+    if (result == JNI_EDETACHED) {
+        if (vm->AttachCurrentThreadAsDaemon(&env, nullptr) != JNI_OK) {
+            LOG_ALWAYS_FATAL("Failed to AttachCurrentThread!");
+        }
+    } else if (result != JNI_OK) {
         LOG_ALWAYS_FATAL("Failed to get JNIEnv for JavaVM: %p", vm);
     }
     return env;
@@ -60,28 +65,24 @@ public:
     }
 
     ~TransactionHangCallbackWrapper() {
-        if (mTransactionHangObject) {
-            getenv()->DeleteGlobalRef(mTransactionHangObject);
+        if (mTransactionHangObject != nullptr) {
+            getenv(mVm)->DeleteGlobalRef(mTransactionHangObject);
             mTransactionHangObject = nullptr;
         }
     }
 
-    void onTransactionHang(bool isGpuHang) {
+    void onTransactionHang(const std::string& reason) {
         if (mTransactionHangObject) {
-            getenv()->CallVoidMethod(mTransactionHangObject,
-                                     gTransactionHangCallback.onTransactionHang, isGpuHang);
+            JNIEnv* env = getenv(mVm);
+            ScopedLocalRef<jstring> jReason(env, env->NewStringUTF(reason.c_str()));
+            getenv(mVm)->CallVoidMethod(mTransactionHangObject,
+                                        gTransactionHangCallback.onTransactionHang, jReason.get());
         }
     }
 
 private:
     JavaVM* mVm;
     jobject mTransactionHangObject;
-
-    JNIEnv* getenv() {
-        JNIEnv* env;
-        mVm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6);
-        return env;
-    }
 };
 
 static jlong nativeCreate(JNIEnv* env, jclass clazz, jstring jName,
@@ -178,7 +179,7 @@ static bool nativeIsSameSurfaceControl(JNIEnv* env, jclass clazz, jlong ptr, jlo
     sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
     return queue->isSameSurfaceControl(reinterpret_cast<SurfaceControl*>(surfaceControl));
 }
-  
+
 static void nativeSetTransactionHangCallback(JNIEnv* env, jclass clazz, jlong ptr,
                                              jobject transactionHangCallback) {
     sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
@@ -187,9 +188,8 @@ static void nativeSetTransactionHangCallback(JNIEnv* env, jclass clazz, jlong pt
     } else {
         sp<TransactionHangCallbackWrapper> wrapper =
                 new TransactionHangCallbackWrapper{env, transactionHangCallback};
-        queue->setTransactionHangCallback([wrapper](bool isGpuHang) {
-            wrapper->onTransactionHang(isGpuHang);
-        });
+        queue->setTransactionHangCallback(
+                [wrapper](const std::string& reason) { wrapper->onTransactionHang(reason); });
     }
 }
 
@@ -237,7 +237,8 @@ int register_android_graphics_BLASTBufferQueue(JNIEnv* env) {
     jclass transactionHangClass =
             FindClassOrDie(env, "android/graphics/BLASTBufferQueue$TransactionHangCallback");
     gTransactionHangCallback.onTransactionHang =
-            GetMethodIDOrDie(env, transactionHangClass, "onTransactionHang", "(Z)V");
+            GetMethodIDOrDie(env, transactionHangClass, "onTransactionHang",
+                             "(Ljava/lang/String;)V");
 
     return 0;
 }

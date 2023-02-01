@@ -44,6 +44,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.HexDump;
+import com.android.security.SecureBox;
 import com.android.server.locksettings.recoverablekeystore.certificate.CertParsingException;
 import com.android.server.locksettings.recoverablekeystore.certificate.CertUtils;
 import com.android.server.locksettings.recoverablekeystore.certificate.CertValidationException;
@@ -900,14 +901,13 @@ public class RecoverableKeyStoreManager {
     /**
      * This function can only be used inside LockSettingsService.
      *
-     * @param storedHashType from {@code CredentialHash}
-     * @param credential - unencrypted byte array. Password length should be at most 16 symbols
-     *     {@code mPasswordMaxLength}
-     * @param userId for user who just unlocked the device.
+     * @param credentialType the type of credential, as defined in {@code LockPatternUtils}
+     * @param credential the credential, encoded as a byte array
+     * @param userId the ID of the user to whom the credential belongs
      * @hide
      */
     public void lockScreenSecretAvailable(
-            int storedHashType, @NonNull byte[] credential, int userId) {
+            int credentialType, @NonNull byte[] credential, int userId) {
         // So as not to block the critical path unlocking the phone, defer to another thread.
         try {
             mExecutorService.schedule(KeySyncTask.newInstance(
@@ -916,7 +916,7 @@ public class RecoverableKeyStoreManager {
                     mSnapshotStorage,
                     mListenersStorage,
                     userId,
-                    storedHashType,
+                    credentialType,
                     credential,
                     /*credentialUpdated=*/ false),
                     SYNC_DELAY_MILLIS,
@@ -934,13 +934,13 @@ public class RecoverableKeyStoreManager {
     /**
      * This function can only be used inside LockSettingsService.
      *
-     * @param storedHashType from {@code CredentialHash}
-     * @param credential - unencrypted byte array
-     * @param userId for the user whose lock screen credentials were changed.
+     * @param credentialType the type of the new credential, as defined in {@code LockPatternUtils}
+     * @param credential the new credential, encoded as a byte array
+     * @param userId the ID of the user whose credential was changed
      * @hide
      */
     public void lockScreenSecretChanged(
-            int storedHashType,
+            int credentialType,
             @Nullable byte[] credential,
             int userId) {
         // So as not to block the critical path unlocking the phone, defer to another thread.
@@ -951,7 +951,7 @@ public class RecoverableKeyStoreManager {
                     mSnapshotStorage,
                     mListenersStorage,
                     userId,
-                    storedHashType,
+                    credentialType,
                     credential,
                     /*credentialUpdated=*/ true),
                     SYNC_DELAY_MILLIS,
@@ -964,6 +964,35 @@ public class RecoverableKeyStoreManager {
         } catch (InsecureUserException e) {
             Log.e(TAG, "InsecureUserException during lock screen secret update", e);
         }
+    }
+
+    /**
+     * Starts a session to verify lock screen credentials provided by a remote device.
+     */
+    public void startRemoteLockscreenValidation() {
+        checkVerifyRemoteLockscreenPermission();
+        // TODO(b/254335492): Create session in memory
+        return;
+    }
+
+    /**
+     * Verifies encrypted credentials guess from a remote device.
+     */
+    public void validateRemoteLockscreen(@NonNull byte[] encryptedCredential) {
+        checkVerifyRemoteLockscreenPermission();
+        // TODO(b/254335492): Decrypt and verify credentials
+        return;
+    }
+
+    private void checkVerifyRemoteLockscreenPermission() {
+        // TODO(b/254335492): Check new system permission
+        mContext.enforceCallingOrSelfPermission(
+                Manifest.permission.RECOVER_KEYSTORE,
+                "Caller " + Binder.getCallingUid()
+                        + " doesn't have verifyRemoteLockscreen permission.");
+        int userId = UserHandle.getCallingUserId();
+        int uid = Binder.getCallingUid();
+        mCleanupManager.registerRecoveryAgent(userId, uid);
     }
 
     private void checkRecoverKeyStorePermission() {

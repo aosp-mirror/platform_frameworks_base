@@ -25,7 +25,6 @@ import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.face.Face;
 import android.os.IBinder;
@@ -38,6 +37,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
+import com.android.server.biometrics.log.OperationContextExt;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
@@ -80,7 +80,7 @@ public class FaceEnrollClientTest {
     @Mock
     private Sensor.HalSessionCallback mHalSessionCallback;
     @Captor
-    private ArgumentCaptor<OperationContext> mOperationContextCaptor;
+    private ArgumentCaptor<OperationContextExt> mOperationContextCaptor;
 
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
@@ -109,7 +109,7 @@ public class FaceEnrollClientTest {
         order.verify(mBiometricContext).updateContext(
                 mOperationContextCaptor.capture(), anyBoolean());
         order.verify(mHal).enrollWithContext(any(), anyByte(), any(), any(),
-                same(mOperationContextCaptor.getValue()));
+                same(mOperationContextCaptor.getValue().toAidlContext()));
         verify(mHal, never()).enroll(any(), anyByte(), any(), any());
     }
 

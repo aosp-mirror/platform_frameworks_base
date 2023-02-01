@@ -226,6 +226,15 @@ public class DreamOverlayTouchMonitor {
             return;
         }
 
+        // When we stop monitoring touches, we must ensure that all active touch sessions and
+        // descendants informed of the removal so any cleanup for active tracking can proceed.
+        mExecutor.execute(() -> mActiveTouchSessions.forEach(touchSession -> {
+            while (touchSession != null) {
+                touchSession.onRemoved();
+                touchSession = touchSession.getPredecessor();
+            }
+        }));
+
         mCurrentInputSession.dispose();
         mCurrentInputSession = null;
     }

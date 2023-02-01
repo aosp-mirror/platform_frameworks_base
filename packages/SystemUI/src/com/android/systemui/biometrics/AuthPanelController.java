@@ -177,11 +177,11 @@ public class AuthPanelController extends ViewOutlineProvider {
         }
     }
 
-    int getContainerWidth() {
+    public int getContainerWidth() {
         return mContainerWidth;
     }
 
-    int getContainerHeight() {
+    public int getContainerHeight() {
         return mContainerHeight;
     }
 

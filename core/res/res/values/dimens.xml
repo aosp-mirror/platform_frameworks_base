@@ -684,7 +684,7 @@
 
     <!-- Lighting and shadow properties -->
     <dimen name="light_y">0dp</dimen>
-    <dimen name="light_z">600dp</dimen>
+    <dimen name="light_z">500dp</dimen>
     <dimen name="light_radius">800dp</dimen>
     <item type="dimen" format="float" name="ambient_shadow_alpha">0.039</item>
     <item type="dimen" format="float" name="spot_shadow_alpha">0.19</item>
@@ -720,8 +720,6 @@
     <item type="dimen" name="aerr_padding_list_bottom">8dp</item>
 
     <item type="fraction" name="docked_stack_divider_fixed_ratio">34.15%</item>
-
-    <dimen name="resize_shadow_size">5dp</dimen>
 
     <!-- The default minimal size of a resizable task, in both dimensions. -->
     <dimen name="default_minimal_size_resizable_task">220dp</dimen>
@@ -979,9 +977,9 @@
     <dimen name="controls_thumbnail_image_max_width">280dp</dimen>
 
     <!-- System-provided radius for the background view of app widgets. The resolved value of this resource may change at runtime. -->
-    <dimen name="system_app_widget_background_radius">16dp</dimen>
+    <dimen name="system_app_widget_background_radius">28dp</dimen>
     <!-- System-provided radius for inner views on app widgets. The resolved value of this resource may change at runtime. -->
-    <dimen name="system_app_widget_inner_radius">8dp</dimen>
+    <dimen name="system_app_widget_inner_radius">20dp</dimen>
     <!-- System-provided padding for inner views on app widgets. The resolved value of this resource may change at runtime. @removed -->
     <dimen name="__removed_system_app_widget_internal_padding">16dp</dimen>
 
@@ -1010,4 +1008,10 @@
     <!-- Dimensions for the translations of the default dialog animation. -->
     <dimen name="popup_enter_animation_from_y_delta">20dp</dimen>
     <dimen name="popup_exit_animation_to_y_delta">-10dp</dimen>
+
+    <!-- Default handwriting bounds offsets for editors. -->
+    <dimen name="handwriting_bounds_offset_left">10dp</dimen>
+    <dimen name="handwriting_bounds_offset_top">40dp</dimen>
+    <dimen name="handwriting_bounds_offset_right">10dp</dimen>
+    <dimen name="handwriting_bounds_offset_bottom">40dp</dimen>
 </resources>

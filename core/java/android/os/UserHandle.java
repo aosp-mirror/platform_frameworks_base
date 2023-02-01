@@ -123,6 +123,9 @@ public final class UserHandle implements Parcelable {
     @TestApi
     public static final int MIN_SECONDARY_USER_ID = 10;
 
+    /** @hide */
+    public static final int MAX_SECONDARY_USER_ID = Integer.MAX_VALUE / UserHandle.PER_USER_RANGE;
+
     /**
      * (Arbitrary) user handle cache size.
      * {@link #CACHED_USER_HANDLES} caches user handles in the range of
@@ -368,7 +371,7 @@ public final class UserHandle implements Parcelable {
     @UnsupportedAppUsage
     @TestApi
     public static int getUid(@UserIdInt int userId, @AppIdInt int appId) {
-        if (MU_ENABLED) {
+        if (MU_ENABLED && appId >= 0) {
             return userId * PER_USER_RANGE + (appId % PER_USER_RANGE);
         } else {
             return appId;
@@ -404,7 +407,12 @@ public final class UserHandle implements Parcelable {
         return getUid(userId, Process.SHARED_USER_GID);
     }
 
-    /** @hide */
+    /**
+     * Returns the gid shared between all users with the app that this uid represents, or -1 if the
+     * uid is invalid.
+     * @hide
+     */
+    @SystemApi
     public static int getSharedAppGid(int uid) {
         return getSharedAppGid(getUserId(uid), getAppId(uid));
     }

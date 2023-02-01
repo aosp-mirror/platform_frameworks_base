@@ -183,6 +183,9 @@ public final class PowerManager {
     /**
      * Wake lock flag: Turn the screen on when the wake lock is acquired.
      * <p>
+     * This flag requires {@link android.Manifest.permission#TURN_SCREEN_ON} for apps targeting
+     * Android version {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and higher.
+     * </p><p>
      * Normally wake locks don't actually wake the device, they just cause the screen to remain on
      * once it's already on. This flag will cause the device to wake up when the wake lock is
      * acquired.
@@ -195,10 +198,10 @@ public final class PowerManager {
      *
      * @deprecated Most applications should use {@link android.R.attr#turnScreenOn} or
      * {@link android.app.Activity#setTurnScreenOn(boolean)} instead, as this prevents the previous
-     * foreground app from being resumed first when the screen turns on. Note that this flag may
-     * require a permission in the future.
+     * foreground app from being resumed first when the screen turns on.
      */
     @Deprecated
+    @RequiresPermission(value = android.Manifest.permission.TURN_SCREEN_ON, conditional = true)
     public static final int ACQUIRE_CAUSES_WAKEUP = 0x10000000;
 
     /**
@@ -343,6 +346,39 @@ public final class PowerManager {
      * @hide
      */
     public static final int USER_ACTIVITY_EVENT_DEVICE_STATE = 6;
+
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "USER_ACTIVITY_EVENT_" }, value = {
+            USER_ACTIVITY_EVENT_OTHER,
+            USER_ACTIVITY_EVENT_BUTTON,
+            USER_ACTIVITY_EVENT_TOUCH,
+            USER_ACTIVITY_EVENT_ACCESSIBILITY,
+            USER_ACTIVITY_EVENT_ATTENTION,
+            USER_ACTIVITY_EVENT_FACE_DOWN,
+            USER_ACTIVITY_EVENT_DEVICE_STATE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface UserActivityEvent{}
+
+    /**
+     *
+     * Convert the user activity event to a string for debugging purposes.
+     * @hide
+     */
+    public static String userActivityEventToString(@UserActivityEvent int userActivityEvent) {
+        switch (userActivityEvent) {
+            case USER_ACTIVITY_EVENT_OTHER: return "other";
+            case USER_ACTIVITY_EVENT_BUTTON: return "button";
+            case USER_ACTIVITY_EVENT_TOUCH: return "touch";
+            case USER_ACTIVITY_EVENT_ACCESSIBILITY: return "accessibility";
+            case USER_ACTIVITY_EVENT_ATTENTION: return "attention";
+            case USER_ACTIVITY_EVENT_FACE_DOWN: return "faceDown";
+            case USER_ACTIVITY_EVENT_DEVICE_STATE: return "deviceState";
+            default: return Integer.toString(userActivityEvent);
+        }
+    }
 
     /**
      * User activity flag: If already dimmed, extend the dim timeout
@@ -490,6 +526,13 @@ public final class PowerManager {
     public static final int GO_TO_SLEEP_FLAG_NO_DOZE = 1 << 0;
 
     /**
+     * Go to sleep flag: Sleep softly, go to sleep only if there's no wakelock explicitly keeping
+     * the device awake.
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_FLAG_SOFT_SLEEP = 1 << 1;
+
+    /**
      * @hide
      */
     @IntDef(prefix = { "BRIGHTNESS_CONSTRAINT_TYPE" }, value = {
@@ -497,10 +540,7 @@ public final class PowerManager {
             BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM,
             BRIGHTNESS_CONSTRAINT_TYPE_DEFAULT,
             BRIGHTNESS_CONSTRAINT_TYPE_DIM,
-            BRIGHTNESS_CONSTRAINT_TYPE_DOZE,
-            BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM_VR,
-            BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM_VR,
-            BRIGHTNESS_CONSTRAINT_TYPE_DEFAULT_VR
+            BRIGHTNESS_CONSTRAINT_TYPE_DOZE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BrightnessConstraint{}
@@ -535,24 +575,6 @@ public final class PowerManager {
     public static final int BRIGHTNESS_CONSTRAINT_TYPE_DOZE = 4;
 
     /**
-     * Brightness constraint type: minimum allowed value.
-     * @hide
-     */
-    public static final int BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM_VR = 5;
-
-    /**
-     * Brightness constraint type: minimum allowed value.
-     * @hide
-     */
-    public static final int BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM_VR = 6;
-
-    /**
-     * Brightness constraint type: minimum allowed value.
-     * @hide
-     */
-    public static final int BRIGHTNESS_CONSTRAINT_TYPE_DEFAULT_VR = 7;
-
-    /**
      * @hide
      */
     @IntDef(prefix = { "WAKE_REASON_" }, value = {
@@ -568,7 +590,11 @@ public final class PowerManager {
             WAKE_REASON_DISPLAY_GROUP_ADDED,
             WAKE_REASON_DISPLAY_GROUP_TURNED_ON,
             WAKE_REASON_UNFOLD_DEVICE,
-            WAKE_REASON_DREAM_FINISHED
+            WAKE_REASON_DREAM_FINISHED,
+            WAKE_REASON_TILT,
+            WAKE_REASON_TAP,
+            WAKE_REASON_LIFT,
+            WAKE_REASON_BIOMETRIC,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface WakeReason{}
@@ -620,8 +646,9 @@ public final class PowerManager {
     public static final int WAKE_REASON_PLUGGED_IN = 3;
 
     /**
-     * Wake up reason code: Waking up due to a user performed gesture (e.g. double tapping on the
-     * screen).
+     * Wake up reason code: Waking up due to a user performed gesture. This includes user
+     * interactions with UI on the screen such as the notification shade. This does not include
+     * {@link WAKE_REASON_TAP} or {@link WAKE_REASON_LIFT}.
      * @hide
      */
     public static final int WAKE_REASON_GESTURE = 4;
@@ -683,6 +710,31 @@ public final class PowerManager {
     public static final int WAKE_REASON_DREAM_FINISHED = 13;
 
     /**
+     * Wake up reason code: Waking due to tilt.
+     * @hide
+     */
+    public static final int WAKE_REASON_TILT = 14;
+    /**
+     * Wake up reason code: Waking up due to the user single or double tapping on the screen. This
+     * wake reason is used when the user is not tapping on a specific UI element; rather, the device
+     * wakes up due to a generic tap on the screen.
+     * @hide
+     */
+    public static final int WAKE_REASON_TAP = 15;
+
+    /**
+     * Wake up reason code: Waking up due to a user performed lift gesture.
+     * @hide
+     */
+    public static final int WAKE_REASON_LIFT = 16;
+
+    /**
+     * Wake up reason code: Waking up due to a user interacting with a biometric.
+     * @hide
+     */
+    public static final int WAKE_REASON_BIOMETRIC = 17;
+
+    /**
      * Convert the wake reason to a string for debugging purposes.
      * @hide
      */
@@ -702,6 +754,10 @@ public final class PowerManager {
             case WAKE_REASON_DISPLAY_GROUP_TURNED_ON: return "WAKE_REASON_DISPLAY_GROUP_TURNED_ON";
             case WAKE_REASON_UNFOLD_DEVICE: return "WAKE_REASON_UNFOLD_DEVICE";
             case WAKE_REASON_DREAM_FINISHED: return "WAKE_REASON_DREAM_FINISHED";
+            case WAKE_REASON_TILT: return "WAKE_REASON_TILT";
+            case WAKE_REASON_TAP: return "WAKE_REASON_TAP";
+            case WAKE_REASON_LIFT: return "WAKE_REASON_LIFT";
+            case WAKE_REASON_BIOMETRIC: return "WAKE_REASON_BIOMETRIC";
             default: return Integer.toString(wakeReason);
         }
     }
@@ -712,28 +768,28 @@ public final class PowerManager {
      * @hide
      */
     public static class WakeData {
-        public WakeData(long wakeTime, @WakeReason int wakeReason, long sleepDuration) {
+        public WakeData(long wakeTime, @WakeReason int wakeReason, long sleepDurationRealtime) {
             this.wakeTime = wakeTime;
             this.wakeReason = wakeReason;
-            this.sleepDuration = sleepDuration;
+            this.sleepDurationRealtime = sleepDurationRealtime;
         }
         public final long wakeTime;
         public final @WakeReason int wakeReason;
-        public final long sleepDuration;
+        public final long sleepDurationRealtime;
 
         @Override
         public boolean equals(@Nullable Object o) {
             if (o instanceof WakeData) {
                 final WakeData other = (WakeData) o;
                 return wakeTime == other.wakeTime && wakeReason == other.wakeReason
-                        && sleepDuration == other.sleepDuration;
+                        && sleepDurationRealtime == other.sleepDurationRealtime;
             }
             return false;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(wakeTime, wakeReason, sleepDuration);
+            return Objects.hash(wakeTime, wakeReason, sleepDurationRealtime);
         }
     }
 
@@ -1164,35 +1220,6 @@ public final class PowerManager {
     public int getDefaultScreenBrightnessSetting() {
         return mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_screenBrightnessSettingDefault);
-    }
-
-    /**
-     * Gets the minimum supported screen brightness setting for VR Mode.
-     * @hide
-     */
-    public int getMinimumScreenBrightnessForVrSetting() {
-        return mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_screenBrightnessForVrSettingMinimum);
-    }
-
-    /**
-     * Gets the maximum supported screen brightness setting for VR Mode.
-     * The screen may be allowed to become dimmer than this value but
-     * this is the maximum value that can be set by the user.
-     * @hide
-     */
-    public int getMaximumScreenBrightnessForVrSetting() {
-        return mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_screenBrightnessForVrSettingMaximum);
-    }
-
-    /**
-     * Gets the default screen brightness for VR setting.
-     * @hide
-     */
-    public int getDefaultScreenBrightnessForVrSetting() {
-        return mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_screenBrightnessForVrSettingDefault);
     }
 
     /**
@@ -1793,6 +1820,21 @@ public final class PowerManager {
     public void rebootSafeMode() {
         try {
             mService.rebootSafeMode(false, true);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns true if the platform has auto power save modes (eg. Doze & app standby) enabled.
+     * This doesn't necessarily mean that the individual features are enabled. For example, if this
+     * returns true, Doze might be enabled while app standby buckets remain disabled.
+     * @hide
+     */
+    @TestApi
+    public boolean areAutoPowerSaveModesEnabled() {
+        try {
+            return mService.areAutoPowerSaveModesEnabled();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2854,6 +2896,7 @@ public final class PowerManager {
         private int mFlags;
         @UnsupportedAppUsage
         private String mTag;
+        private int mTagHash;
         private final String mPackageName;
         private final IBinder mToken;
         private int mInternalCount;
@@ -2862,7 +2905,6 @@ public final class PowerManager {
         private boolean mHeld;
         private WorkSource mWorkSource;
         private String mHistoryTag;
-        private final String mTraceName;
         private final int mDisplayId;
         private WakeLockStateListener mListener;
         private IWakeLockCallback mCallback;
@@ -2872,9 +2914,9 @@ public final class PowerManager {
         WakeLock(int flags, String tag, String packageName, int displayId) {
             mFlags = flags;
             mTag = tag;
+            mTagHash = mTag.hashCode();
             mPackageName = packageName;
             mToken = new Binder();
-            mTraceName = "WakeLock (" + mTag + ")";
             mDisplayId = displayId;
         }
 
@@ -2883,7 +2925,8 @@ public final class PowerManager {
             synchronized (mToken) {
                 if (mHeld) {
                     Log.wtf(TAG, "WakeLock finalized while still held: " + mTag);
-                    Trace.asyncTraceEnd(Trace.TRACE_TAG_POWER, mTraceName, 0);
+                    Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_POWER,
+                            "WakeLocks", mTagHash);
                     try {
                         mService.releaseWakeLock(mToken, 0);
                     } catch (RemoteException e) {
@@ -2953,7 +2996,8 @@ public final class PowerManager {
                 // should immediately acquire the wake lock once again despite never having
                 // been explicitly released by the keyguard.
                 mHandler.removeCallbacks(mReleaser);
-                Trace.asyncTraceBegin(Trace.TRACE_TAG_POWER, mTraceName, 0);
+                Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_POWER,
+                        "WakeLocks", mTag, mTagHash);
                 try {
                     mService.acquireWakeLock(mToken, mFlags, mTag, mPackageName, mWorkSource,
                             mHistoryTag, mDisplayId, mCallback);
@@ -3001,7 +3045,8 @@ public final class PowerManager {
                 if (!mRefCounted || mInternalCount == 0) {
                     mHandler.removeCallbacks(mReleaser);
                     if (mHeld) {
-                        Trace.asyncTraceEnd(Trace.TRACE_TAG_POWER, mTraceName, 0);
+                        Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_POWER,
+                                "WakeLocks", mTagHash);
                         try {
                             mService.releaseWakeLock(mToken, flags);
                         } catch (RemoteException e) {
@@ -3078,6 +3123,7 @@ public final class PowerManager {
         /** @hide */
         public void setTag(String tag) {
             mTag = tag;
+            mTagHash = mTag.hashCode();
         }
 
         /** @hide */

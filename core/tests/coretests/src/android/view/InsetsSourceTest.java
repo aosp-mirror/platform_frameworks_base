@@ -16,9 +16,9 @@
 
 package android.view;
 
-import static android.view.InsetsState.ITYPE_CAPTION_BAR;
-import static android.view.InsetsState.ITYPE_IME;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.WindowInsets.Type.captionBar;
+import static android.view.WindowInsets.Type.ime;
+import static android.view.WindowInsets.Type.navigationBars;
 
 import static org.junit.Assert.assertEquals;
 
@@ -45,9 +45,9 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class InsetsSourceTest {
 
-    private InsetsSource mSource = new InsetsSource(ITYPE_NAVIGATION_BAR);
-    private InsetsSource mImeSource = new InsetsSource(ITYPE_IME);
-    private InsetsSource mCaptionSource = new InsetsSource(ITYPE_CAPTION_BAR);
+    private final InsetsSource mSource = new InsetsSource(0 /* id */, navigationBars());
+    private final InsetsSource mImeSource = new InsetsSource(1 /* id */, ime());
+    private final InsetsSource mCaptionSource = new InsetsSource(2 /* id */, captionBar());
 
     @Before
     public void setUp() {

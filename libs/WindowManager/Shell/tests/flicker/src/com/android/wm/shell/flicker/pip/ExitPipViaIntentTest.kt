@@ -16,16 +16,15 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
-import android.view.Surface
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.annotation.Group3
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -39,50 +38,61 @@ import org.junit.runners.Parameterized
  * To run this test: `atest WMShellFlickerTests:ExitPipViaIntentTest`
  *
  * Actions:
+ * ```
  *     Launch an app in pip mode [pipApp],
  *     Launch another full screen mode [testApp]
  *     Expand [pipApp] app to full screen via an intent
- *
+ * ```
  * Notes:
+ * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
  *        are inherited from [PipTransition]
  *     2. Part of the test setup occurs automatically via
  *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
  *        including configuring navigation mode, initial orientation and ensuring no
  *        apps are running before setup
+ * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group3
-class ExitPipViaIntentTest(testSpec: FlickerTestParameter) : ExitPipToAppTransition(testSpec) {
+open class ExitPipViaIntentTest(flicker: FlickerTest) : ExitPipToAppTransition(flicker) {
 
-    /**
-     * Defines the transition used to run the test
-     */
+    /** Defines the transition used to run the test */
     override val transition: FlickerBuilder.() -> Unit
-        get() = buildTransition(eachRun = true) {
+        get() = buildTransition {
             setup {
-                eachRun {
-                    // launch an app behind the pip one
-                    testApp.launchViaIntent(wmHelper)
-                }
+                // launch an app behind the pip one
+                testApp.launchViaIntent(wmHelper)
             }
             transitions {
                 // This will bring PipApp to fullscreen
                 pipApp.exitPipToFullScreenViaIntent(wmHelper)
                 // Wait until the other app is no longer visible
-                wmHelper.waitForWindowSurfaceDisappeared(testApp.component)
+                wmHelper.StateSyncBuilder().withWindowSurfaceDisappeared(testApp).waitForAndVerify()
             }
         }
 
-    /** {@inheritDoc}  */
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
+    /** {@inheritDoc} */
+    @Presubmit @Test override fun entireScreenCovered() = super.entireScreenCovered()
 
-    /** {@inheritDoc}  */
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun statusBarLayerPositionAtStartAndEnd() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        super.statusBarLayerPositionAtStartAndEnd()
+    }
+
+    @Presubmit
+    @Test
+    fun statusBarLayerRotatesScales_ShellTransit() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
+        super.statusBarLayerPositionAtStartAndEnd()
+    }
+
+    /** {@inheritDoc} */
     @FlakyTest(bugId = 197726610)
     @Test
     override fun pipLayerExpands() {
@@ -101,14 +111,15 @@ class ExitPipViaIntentTest(testSpec: FlickerTestParameter) : ExitPipToAppTransit
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestFactory.nonRotationTests] for configuring repetitions, screen orientation
+         * and navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
-                supportedRotations = listOf(Surface.ROTATION_0), repetitions = 3)
+        fun getParams(): List<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+            )
         }
     }
 }

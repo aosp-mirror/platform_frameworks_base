@@ -327,9 +327,11 @@ public class InputDeviceDelegateTest {
     }
 
     private InputDevice createInputDevice(int id, boolean hasVibrator) {
-        return new InputDevice(id, 0, 0, "name", 0, 0, "description", false, 0, 0,
-                null, hasVibrator, false, false, false /* hasSensor */, false /* hasBattery */);
-
-
+        return new InputDevice.Builder()
+                .setId(id)
+                .setName("name")
+                .setDescriptor("descriptor")
+                .setHasVibrator(hasVibrator)
+                .build();
     }
 }

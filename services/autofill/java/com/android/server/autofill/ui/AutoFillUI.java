@@ -84,7 +84,7 @@ public final class AutoFillUI {
 
     public interface AutoFillUiCallback {
         void authenticate(int requestId, int datasetIndex, @NonNull IntentSender intent,
-                @Nullable Bundle extras, boolean authenticateInline);
+                @Nullable Bundle extras, int uiType);
         void fill(int requestId, int datasetIndex, @NonNull Dataset dataset,
                 @FillEventHistory.Event.UiType int uiType);
         void save();
@@ -232,7 +232,7 @@ public final class AutoFillUI {
                         mCallback.authenticate(response.getRequestId(),
                                 AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED,
                                 response.getAuthentication(), response.getClientState(),
-                                /* authenticateInline= */ false);
+                                UI_TYPE_MENU);
                     }
                 }
 
@@ -315,7 +315,7 @@ public final class AutoFillUI {
             @Nullable String servicePackageName, @NonNull SaveInfo info,
             @NonNull ValueFinder valueFinder, @NonNull ComponentName componentName,
             @NonNull AutoFillUiCallback callback, @NonNull PendingUi pendingSaveUi,
-            boolean isUpdate, boolean compatMode) {
+            boolean isUpdate, boolean compatMode, boolean showServiceIcon) {
         if (sVerbose) {
             Slog.v(TAG, "showSaveUi(update=" + isUpdate + ") for " + componentName.toShortString()
                     + ": " + info);
@@ -379,7 +379,7 @@ public final class AutoFillUI {
                 public void startIntentSender(IntentSender intentSender, Intent intent) {
                     callback.startIntentSender(intentSender, intent);
                 }
-            }, mUiModeMgr.isNightMode(), isUpdate, compatMode);
+            }, mUiModeMgr.isNightMode(), isUpdate, compatMode, showServiceIcon);
         });
     }
 
@@ -419,7 +419,7 @@ public final class AutoFillUI {
                                 mCallback.authenticate(response.getRequestId(),
                                         AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED,
                                         response.getAuthentication(), response.getClientState(),
-                                        /* authenticateInline= */ false);
+                                        UI_TYPE_DIALOG);
                             }
                         }
 
@@ -439,6 +439,7 @@ public final class AutoFillUI {
                             log(MetricsEvent.TYPE_DISMISS);
                             hideFillDialogUiThread(callback);
                             callback.requestShowSoftInput(focusedId);
+                            callback.requestFallbackFromFillDialog();
                         }
 
                         @Override

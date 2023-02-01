@@ -23,7 +23,6 @@ import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFES
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_ONLY_COREAPP_ALLOWED;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_RESOURCES_ARSC_COMPRESSED;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION;
 import static android.os.Build.VERSION_CODES.DONUT;
@@ -92,9 +91,12 @@ import com.android.internal.os.ClassLoaderFactory;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.server.pm.SharedUidMigration;
+import com.android.server.pm.parsing.pkg.PackageImpl;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.permission.CompatibilityPermissionInfo;
 import com.android.server.pm.pkg.component.ComponentMutateUtils;
 import com.android.server.pm.pkg.component.ComponentParseUtils;
+import com.android.server.pm.pkg.component.InstallConstraintsTagParser;
 import com.android.server.pm.pkg.component.ParsedActivity;
 import com.android.server.pm.pkg.component.ParsedActivityUtils;
 import com.android.server.pm.pkg.component.ParsedApexSystemService;
@@ -169,9 +171,11 @@ public class ParsingPackageUtils {
 
     public static final String TAG_ADOPT_PERMISSIONS = "adopt-permissions";
     public static final String TAG_APPLICATION = "application";
+    public static final String TAG_ATTRIBUTION = "attribution";
     public static final String TAG_COMPATIBLE_SCREENS = "compatible-screens";
     public static final String TAG_EAT_COMMENT = "eat-comment";
     public static final String TAG_FEATURE_GROUP = "feature-group";
+    public static final String TAG_INSTALL_CONSTRAINTS = "install-constraints";
     public static final String TAG_INSTRUMENTATION = "instrumentation";
     public static final String TAG_KEY_SETS = "key-sets";
     public static final String TAG_MANIFEST = "manifest";
@@ -179,15 +183,16 @@ public class ParsingPackageUtils {
     public static final String TAG_OVERLAY = "overlay";
     public static final String TAG_PACKAGE = "package";
     public static final String TAG_PACKAGE_VERIFIER = "package-verifier";
-    public static final String TAG_ATTRIBUTION = "attribution";
     public static final String TAG_PERMISSION = "permission";
     public static final String TAG_PERMISSION_GROUP = "permission-group";
     public static final String TAG_PERMISSION_TREE = "permission-tree";
+    public static final String TAG_PROFILEABLE = "profileable";
     public static final String TAG_PROTECTED_BROADCAST = "protected-broadcast";
     public static final String TAG_QUERIES = "queries";
+    public static final String TAG_RECEIVER = "receiver";
     public static final String TAG_RESTRICT_UPDATE = "restrict-update";
-    public static final String TAG_SUPPORT_SCREENS = "supports-screens";
     public static final String TAG_SUPPORTS_INPUT = "supports-input";
+    public static final String TAG_SUPPORT_SCREENS = "supports-screens";
     public static final String TAG_USES_CONFIGURATION = "uses-configuration";
     public static final String TAG_USES_FEATURE = "uses-feature";
     public static final String TAG_USES_GL_TEXTURE = "uses-gl-texture";
@@ -196,8 +201,6 @@ public class ParsingPackageUtils {
     public static final String TAG_USES_PERMISSION_SDK_M = "uses-permission-sdk-m";
     public static final String TAG_USES_SDK = "uses-sdk";
     public static final String TAG_USES_SPLIT = "uses-split";
-    public static final String TAG_PROFILEABLE = "profileable";
-    public static final String TAG_RECEIVER = "receiver";
 
     public static final String METADATA_MAX_ASPECT_RATIO = "android.max_aspect";
     public static final String METADATA_SUPPORTS_SIZE_CHANGES = "android.supports_size_changes";
@@ -216,6 +219,7 @@ public class ParsingPackageUtils {
     public static final int PARSE_DEFAULT_INSTALL_LOCATION =
             PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
     public static final int PARSE_DEFAULT_TARGET_SANDBOX = 1;
+    public static final boolean PARSE_DEFAULT_ALLOW_UPDATE_OWNERSHIP = true;
 
     /**
      * If set to true, we will only allow package files that exactly match the DTD. Otherwise, we
@@ -235,7 +239,6 @@ public class ParsingPackageUtils {
      * of required system property within the overlay tag.
      */
     public static final int PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY = 1 << 7;
-    public static final int PARSE_FRAMEWORK_RES_SPLITS = 1 << 8;
     public static final int PARSE_APK_IN_APEX = 1 << 9;
 
     public static final int PARSE_CHATTY = 1 << 31;
@@ -244,6 +247,9 @@ public class ParsingPackageUtils {
     private static final int MAX_NUM_COMPONENTS = 30000;
     private static final String MAX_NUM_COMPONENTS_ERR_MSG =
             "Total number of components has exceeded the maximum number: " + MAX_NUM_COMPONENTS;
+
+    /** The maximum permission name length. */
+    private static final int MAX_PERMISSION_NAME_LENGTH = 512;
 
     @IntDef(flag = true, prefix = { "PARSE_" }, value = {
             PARSE_CHATTY,
@@ -254,7 +260,6 @@ public class ParsingPackageUtils {
             PARSE_IS_SYSTEM_DIR,
             PARSE_MUST_BE_APK,
             PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY,
-            PARSE_FRAMEWORK_RES_SPLITS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ParseFlags {}
@@ -263,7 +268,7 @@ public class ParsingPackageUtils {
      * @see #parseDefault(ParseInput, File, int, List, boolean)
      */
     @NonNull
-    public static ParseResult<ParsingPackage> parseDefaultOneTime(File file,
+    public static ParseResult<ParsedPackage> parseDefaultOneTime(File file,
             @ParseFlags int parseFlags,
             @NonNull List<PermissionManager.SplitPermissionInfo> splitPermissions,
             boolean collectCertificates) {
@@ -277,13 +282,13 @@ public class ParsingPackageUtils {
      * feature support.
      */
     @NonNull
-    public static ParseResult<ParsingPackage> parseDefault(ParseInput input, File file,
+    public static ParseResult<ParsedPackage> parseDefault(ParseInput input, File file,
             @ParseFlags int parseFlags,
             @NonNull List<PermissionManager.SplitPermissionInfo> splitPermissions,
             boolean collectCertificates) {
-        ParseResult<ParsingPackage> result;
+        ParseResult<ParsedPackage> result;
 
-        ParsingPackageUtils parser = new ParsingPackageUtils(false, null /*separateProcesses*/,
+        ParsingPackageUtils parser = new ParsingPackageUtils(null /*separateProcesses*/,
                 null /*displayMetrics*/, splitPermissions, new Callback() {
             @Override
             public boolean hasFeature(String feature) {
@@ -300,15 +305,17 @@ public class ParsingPackageUtils {
                     @NonNull String baseApkPath,
                     @NonNull String path,
                     @NonNull TypedArray manifestArray, boolean isCoreApp) {
-                return new ParsingPackageImpl(packageName, baseApkPath, path, manifestArray);
+                return PackageImpl.forParsing(packageName, baseApkPath, path, manifestArray,
+                        isCoreApp);
             }
         });
-        result = parser.parsePackage(input, file, parseFlags, /* frameworkSplits= */ null);
-        if (result.isError()) {
-            return input.error(result);
+        var parseResult = parser.parsePackage(input, file, parseFlags);
+        if (parseResult.isError()) {
+            return input.error(parseResult);
         }
 
-        final ParsingPackage pkg = result.getResult();
+        var pkg = parseResult.getResult().hideAsParsed();
+
         if (collectCertificates) {
             final ParseResult<SigningDetails> ret =
                     ParsingPackageUtils.getSigningDetails(input, pkg, false /*skipVerify*/);
@@ -318,24 +325,18 @@ public class ParsingPackageUtils {
             pkg.setSigningDetails(ret.getResult());
         }
 
-        // Need to call this to finish the parsing stage
-        pkg.hideAsParsed();
-
         return input.success(pkg);
     }
 
-    private boolean mOnlyCoreApps;
     private String[] mSeparateProcesses;
     private DisplayMetrics mDisplayMetrics;
     @NonNull
     private List<PermissionManager.SplitPermissionInfo> mSplitPermissionInfos;
     private Callback mCallback;
 
-    public ParsingPackageUtils(boolean onlyCoreApps, String[] separateProcesses,
-            DisplayMetrics displayMetrics,
+    public ParsingPackageUtils(String[] separateProcesses, DisplayMetrics displayMetrics,
             @NonNull List<PermissionManager.SplitPermissionInfo> splitPermissions,
             @NonNull Callback callback) {
-        mOnlyCoreApps = onlyCoreApps;
         mSeparateProcesses = separateProcesses;
         mDisplayMetrics = displayMetrics;
         mSplitPermissionInfos = splitPermissions;
@@ -350,21 +351,16 @@ public class ParsingPackageUtils {
      * package name and version codes, a single base APK, and unique split names.
      * <p>
      * Note that this <em>does not</em> perform signature verification; that must be done separately
-     * in {@link #getSigningDetails(ParseInput, ParsingPackageRead, boolean)}.
+     * in {@link #getSigningDetails(ParseInput, ParsedPackage, boolean)}.
      * <p>
      * If {@code useCaches} is true, the package parser might return a cached result from a previous
      * parse of the same {@code packageFile} with the same {@code flags}. Note that this method does
      * not check whether {@code packageFile} has changed since the last parse, it's up to callers to
      * do so.
      */
-    public ParseResult<ParsingPackage> parsePackage(ParseInput input, File packageFile, int flags,
-            List<File> frameworkSplits) {
-        if (((flags & PARSE_FRAMEWORK_RES_SPLITS) != 0)
-                && frameworkSplits.size() > 0
-                && packageFile.getAbsolutePath().endsWith("/framework-res.apk")) {
-            return parseClusterPackage(input, packageFile, frameworkSplits, flags);
-        } else if (packageFile.isDirectory()) {
-            return parseClusterPackage(input, packageFile, /* frameworkSplits= */null, flags);
+    public ParseResult<ParsingPackage> parsePackage(ParseInput input, File packageFile, int flags) {
+        if (packageFile.isDirectory()) {
+            return parseClusterPackage(input, packageFile,  flags);
         } else {
             return parseMonolithicPackage(input, packageFile, flags);
         }
@@ -376,38 +372,22 @@ public class ParsingPackageUtils {
      * identical package name and version codes, a single base APK, and unique
      * split names.
      * <p>
-     * Can also be passed the framework-res.apk file and a list of split apks coming from apexes
-     * (via {@code frameworkSplits}) in which case they will be parsed similar to cluster packages
-     * even if they are in different folders. Note that this code path may have other behaviour
-     * differences.
-     * <p>
      * Note that this <em>does not</em> perform signature verification; that must be done separately
-     * in {@link #getSigningDetails(ParseInput, ParsingPackageRead, boolean)}.
+     * in {@link #getSigningDetails(ParseInput, ParsedPackage, boolean)}.
      */
     private ParseResult<ParsingPackage> parseClusterPackage(ParseInput input, File packageDir,
-            List<File> frameworkSplits, int flags) {
-        // parseClusterPackageLite should receive no flags (0) for regular splits but we want to
-        // pass the flags for framework splits
+            int flags) {
         int liteParseFlags = 0;
-        if ((flags & PARSE_FRAMEWORK_RES_SPLITS) != 0) {
-            liteParseFlags = flags;
-        }
         if ((flags & PARSE_APK_IN_APEX) != 0) {
             liteParseFlags |= PARSE_APK_IN_APEX;
         }
         final ParseResult<PackageLite> liteResult =
-                ApkLiteParseUtils.parseClusterPackageLite(input, packageDir, frameworkSplits,
-                        liteParseFlags);
+                ApkLiteParseUtils.parseClusterPackageLite(input, packageDir, liteParseFlags);
         if (liteResult.isError()) {
             return input.error(liteResult);
         }
 
         final PackageLite lite = liteResult.getResult();
-        if (mOnlyCoreApps && !lite.isCoreApp()) {
-            return input.error(INSTALL_PARSE_FAILED_ONLY_COREAPP_ALLOWED,
-                    "Not a coreApp: " + packageDir);
-        }
-
         // Build the split dependency tree.
         SparseArray<int[]> splitDependencies = null;
         final SplitAssetLoader assetLoader;
@@ -464,7 +444,7 @@ public class ParsingPackageUtils {
      * Parse the given APK file, treating it as as a single monolithic package.
      * <p>
      * Note that this <em>does not</em> perform signature verification; that must be done separately
-     * in {@link #getSigningDetails(ParseInput, ParsingPackageRead, boolean)}.
+     * in {@link #getSigningDetails(ParseInput, ParsedPackage, boolean)}.
      */
     private ParseResult<ParsingPackage> parseMonolithicPackage(ParseInput input, File apkFile,
             int flags) {
@@ -475,11 +455,6 @@ public class ParsingPackageUtils {
         }
 
         final PackageLite lite = liteResult.getResult();
-        if (mOnlyCoreApps && !lite.isCoreApp()) {
-            return input.error(INSTALL_PARSE_FAILED_ONLY_COREAPP_ALLOWED,
-                    "Not a coreApp: " + apkFile);
-        }
-
         final SplitAssetLoader assetLoader = new DefaultSplitAssetLoader(lite, flags);
         try {
             final ParseResult<ParsingPackage> result = parseBaseApk(input,
@@ -658,7 +633,7 @@ public class ParsingPackageUtils {
         final TypedArray manifestArray = res.obtainAttributes(parser, R.styleable.AndroidManifest);
         try {
             final boolean isCoreApp = parser.getAttributeBooleanValue(null /*namespace*/,
-                    "coreApp",false);
+                    "coreApp", false);
             final ParsingPackage pkg = mCallback.startParsingPackage(
                     pkgName, apkPath, codePath, manifestArray, isCoreApp);
             final ParseResult<ParsingPackage> result =
@@ -853,8 +828,8 @@ public class ParsingPackageUtils {
     }
 
     private static boolean hasTooManyComponents(ParsingPackage pkg) {
-        return pkg.getActivities().size() + pkg.getServices().size() + pkg.getProviders().size()
-                > MAX_NUM_COMPONENTS;
+        return (pkg.getActivities().size() + pkg.getServices().size() + pkg.getProviders().size()
+                + pkg.getReceivers().size()) > MAX_NUM_COMPONENTS;
     }
 
     /**
@@ -912,7 +887,9 @@ public class ParsingPackageUtils {
                 .setTargetSandboxVersion(anInteger(PARSE_DEFAULT_TARGET_SANDBOX,
                         R.styleable.AndroidManifest_targetSandboxVersion, sa))
                 /* Set the global "on SD card" flag */
-                .setExternalStorage((flags & PARSE_EXTERNAL_STORAGE) != 0);
+                .setExternalStorage((flags & PARSE_EXTERNAL_STORAGE) != 0)
+                .setAllowUpdateOwnership(bool(PARSE_DEFAULT_ALLOW_UPDATE_OWNERSHIP,
+                        R.styleable.AndroidManifest_allowUpdateOwnership, sa));
 
         boolean foundApp = false;
         final int depth = parser.getDepth();
@@ -1040,6 +1017,8 @@ public class ParsingPackageUtils {
                 return input.success(pkg);
             case TAG_RESTRICT_UPDATE:
                 return parseRestrictUpdateHash(flags, input, pkg, res, parser);
+            case TAG_INSTALL_CONSTRAINTS:
+                return parseInstallConstraints(input, pkg, res, parser);
             case TAG_QUERIES:
                 return parseQueries(input, pkg, res, parser);
             default:
@@ -1071,9 +1050,9 @@ public class ParsingPackageUtils {
         }
 
         return input.success(pkg
-                .setLeavingSharedUid(leaving)
+                .setLeavingSharedUser(leaving)
                 .setSharedUserId(str.intern())
-                .setSharedUserLabel(resId(R.styleable.AndroidManifest_sharedUserLabel, sa)));
+                .setSharedUserLabelRes(resId(R.styleable.AndroidManifest_sharedUserLabel, sa)));
     }
 
     private static ParseResult<ParsingPackage> parseKeySets(ParseInput input,
@@ -1248,7 +1227,11 @@ public class ParsingPackageUtils {
         if (result.isError()) {
             return input.error(result);
         }
-        return input.success(pkg.addPermission(result.getResult()));
+        ParsedPermission permission = result.getResult();
+        if (permission != null) {
+            pkg.addPermission(permission);
+        }
+        return input.success(pkg);
     }
 
     private static ParseResult<ParsingPackage> parsePermissionTree(ParseInput input,
@@ -1262,6 +1245,18 @@ public class ParsingPackageUtils {
         return input.success(pkg.addPermission(result.getResult()));
     }
 
+    private int parseMinOrMaxSdkVersion(TypedArray sa, int attr, int defaultValue) {
+        int val = defaultValue;
+        TypedValue peekVal = sa.peekValue(attr);
+        if (peekVal != null) {
+            if (peekVal.type >= TypedValue.TYPE_FIRST_INT
+                    && peekVal.type <= TypedValue.TYPE_LAST_INT) {
+                val = peekVal.data;
+            }
+        }
+        return val;
+    }
+
     private ParseResult<ParsingPackage> parseUsesPermission(ParseInput input,
             ParsingPackage pkg, Resources res, XmlResourceParser parser)
             throws IOException, XmlPullParserException {
@@ -1271,15 +1266,19 @@ public class ParsingPackageUtils {
             // that may change.
             String name = sa.getNonResourceString(
                     R.styleable.AndroidManifestUsesPermission_name);
-
-            int maxSdkVersion = 0;
-            TypedValue val = sa.peekValue(
-                    R.styleable.AndroidManifestUsesPermission_maxSdkVersion);
-            if (val != null) {
-                if (val.type >= TypedValue.TYPE_FIRST_INT && val.type <= TypedValue.TYPE_LAST_INT) {
-                    maxSdkVersion = val.data;
-                }
+            if (TextUtils.length(name) > MAX_PERMISSION_NAME_LENGTH) {
+                return input.error(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
+                        "The name in the <uses-permission> is greater than "
+                                + MAX_PERMISSION_NAME_LENGTH);
             }
+
+            int minSdkVersion =  parseMinOrMaxSdkVersion(sa,
+                    R.styleable.AndroidManifestUsesPermission_minSdkVersion,
+                    Integer.MIN_VALUE);
+
+            int maxSdkVersion =  parseMinOrMaxSdkVersion(sa,
+                    R.styleable.AndroidManifestUsesPermission_maxSdkVersion,
+                    Integer.MAX_VALUE);
 
             final ArraySet<String> requiredFeatures = new ArraySet<>();
             String feature = sa.getNonConfigurationString(
@@ -1344,7 +1343,8 @@ public class ParsingPackageUtils {
                 return success;
             }
 
-            if ((maxSdkVersion != 0) && (maxSdkVersion < Build.VERSION.RESOURCES_SDK_INT)) {
+            if (Build.VERSION.RESOURCES_SDK_INT < minSdkVersion
+                    || Build.VERSION.RESOURCES_SDK_INT > maxSdkVersion) {
                 return success;
             }
 
@@ -1729,6 +1729,12 @@ public class ParsingPackageUtils {
         return input.success(pkg);
     }
 
+    private static ParseResult<ParsingPackage> parseInstallConstraints(
+            ParseInput input, ParsingPackage pkg, Resources res, XmlResourceParser parser)
+            throws IOException, XmlPullParserException {
+        return InstallConstraintsTagParser.parseInstallConstraints(input, pkg, res, parser);
+    }
+
     private static ParseResult<ParsingPackage> parseQueries(ParseInput input, ParsingPackage pkg,
             Resources res, XmlResourceParser parser) throws IOException, XmlPullParserException {
         final int depth = parser.getDepth();
@@ -1874,7 +1880,7 @@ public class ParsingPackageUtils {
                     return input.error("Empty class name in package " + packageName);
                 }
 
-                pkg.setClassName(outInfoName);
+                pkg.setApplicationClassName(outInfoName);
             }
 
             TypedValue labelValue = sa.peekValue(R.styleable.AndroidManifestApplication_label);
@@ -1944,7 +1950,7 @@ public class ParsingPackageUtils {
                         fullBackupContent = v.data == 0 ? -1 : 0;
                     }
 
-                    pkg.setFullBackupContent(fullBackupContent);
+                    pkg.setFullBackupContentRes(fullBackupContent);
                 }
                 if (DEBUG_BACKUP) {
                     Slog.v(TAG, "fullBackupContent=" + fullBackupContent + " for " + pkgName);
@@ -2169,8 +2175,8 @@ public class ParsingPackageUtils {
             }
         }
 
-        if (TextUtils.isEmpty(pkg.getStaticSharedLibName()) && TextUtils.isEmpty(
-                pkg.getSdkLibName())) {
+        if (TextUtils.isEmpty(pkg.getStaticSharedLibraryName()) && TextUtils.isEmpty(
+                pkg.getSdkLibraryName())) {
             // Add a hidden app detail activity to normal apps which forwards user to App Details
             // page.
             ParseResult<ParsedActivity> a = generateAppDetailsHiddenActivity(input, pkg);
@@ -2252,7 +2258,7 @@ public class ParsingPackageUtils {
                 .setOnBackInvokedCallbackEnabled(bool(false, R.styleable.AndroidManifestApplication_enableOnBackInvokedCallback, sa))
                 // targetSdkVersion gated
                 .setAllowAudioPlaybackCapture(bool(targetSdk >= Build.VERSION_CODES.Q, R.styleable.AndroidManifestApplication_allowAudioPlaybackCapture, sa))
-                .setBaseHardwareAccelerated(bool(targetSdk >= Build.VERSION_CODES.ICE_CREAM_SANDWICH, R.styleable.AndroidManifestApplication_hardwareAccelerated, sa))
+                .setHardwareAccelerated(bool(targetSdk >= Build.VERSION_CODES.ICE_CREAM_SANDWICH, R.styleable.AndroidManifestApplication_hardwareAccelerated, sa))
                 .setRequestLegacyExternalStorage(bool(targetSdk < Build.VERSION_CODES.Q, R.styleable.AndroidManifestApplication_requestLegacyExternalStorage, sa))
                 .setUsesCleartextTraffic(bool(targetSdk < Build.VERSION_CODES.P, R.styleable.AndroidManifestApplication_usesCleartextTraffic, sa))
                 // Ints Default 0
@@ -2263,14 +2269,14 @@ public class ParsingPackageUtils {
                 .setMaxAspectRatio(aFloat(R.styleable.AndroidManifestApplication_maxAspectRatio, sa))
                 .setMinAspectRatio(aFloat(R.styleable.AndroidManifestApplication_minAspectRatio, sa))
                 // Resource ID
-                .setBanner(resId(R.styleable.AndroidManifestApplication_banner, sa))
+                .setBannerRes(resId(R.styleable.AndroidManifestApplication_banner, sa))
                 .setDescriptionRes(resId(R.styleable.AndroidManifestApplication_description, sa))
                 .setIconRes(resId(R.styleable.AndroidManifestApplication_icon, sa))
-                .setLogo(resId(R.styleable.AndroidManifestApplication_logo, sa))
+                .setLogoRes(resId(R.styleable.AndroidManifestApplication_logo, sa))
                 .setNetworkSecurityConfigRes(resId(R.styleable.AndroidManifestApplication_networkSecurityConfig, sa))
                 .setRoundIconRes(resId(R.styleable.AndroidManifestApplication_roundIcon, sa))
-                .setTheme(resId(R.styleable.AndroidManifestApplication_theme, sa))
-                .setDataExtractionRules(
+                .setThemeRes(resId(R.styleable.AndroidManifestApplication_theme, sa))
+                .setDataExtractionRulesRes(
                         resId(R.styleable.AndroidManifestApplication_dataExtractionRules, sa))
                 .setLocaleConfigRes(resId(R.styleable.AndroidManifestApplication_localeConfig, sa))
                 // Strings
@@ -2360,12 +2366,12 @@ public class ParsingPackageUtils {
                         PackageManager.INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID,
                         "sharedUserId not allowed in SDK library"
                 );
-            } else if (pkg.getSdkLibName() != null) {
+            } else if (pkg.getSdkLibraryName() != null) {
                 return input.error("Multiple SDKs for package "
                         + pkg.getPackageName());
             }
 
-            return input.success(pkg.setSdkLibName(lname.intern())
+            return input.success(pkg.setSdkLibraryName(lname.intern())
                     .setSdkLibVersionMajor(versionMajor)
                     .setSdkLibrary(true));
         } finally {
@@ -2398,13 +2404,13 @@ public class ParsingPackageUtils {
                         PackageManager.INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID,
                         "sharedUserId not allowed in static shared library"
                 );
-            } else if (pkg.getStaticSharedLibName() != null) {
+            } else if (pkg.getStaticSharedLibraryName() != null) {
                 return input.error("Multiple static-shared libs for package "
                         + pkg.getPackageName());
             }
 
-            return input.success(pkg.setStaticSharedLibName(lname.intern())
-                    .setStaticSharedLibVersion(
+            return input.success(pkg.setStaticSharedLibraryName(lname.intern())
+                    .setStaticSharedLibraryVersion(
                             PackageInfo.composeLongVersionCode(versionMajor, version))
                     .setStaticSharedLibrary(true));
         } finally {
@@ -2699,7 +2705,7 @@ public class ParsingPackageUtils {
         // Build custom App Details activity info instead of parsing it from xml
         return input.success(ParsedActivity.makeAppDetailsActivity(packageName,
                 pkg.getProcessName(), pkg.getUiOptions(), taskAffinity,
-                pkg.isBaseHardwareAccelerated()));
+                pkg.isHardwareAccelerated()));
     }
 
     /**
@@ -2833,7 +2839,7 @@ public class ParsingPackageUtils {
                 return input.skip(message);
             }
 
-            return input.success(pkg.setOverlay(true)
+            return input.success(pkg.setResourceOverlay(true)
                     .setOverlayTarget(target)
                     .setOverlayPriority(priority)
                     .setOverlayTargetOverlayableName(
@@ -3055,18 +3061,41 @@ public class ParsingPackageUtils {
      */
     @CheckResult
     public static ParseResult<SigningDetails> getSigningDetails(ParseInput input,
-            ParsingPackageRead pkg, boolean skipVerify) {
+            ParsedPackage pkg, boolean skipVerify) {
+        return getSigningDetails(input, pkg.getBaseApkPath(), pkg.isStaticSharedLibrary(),
+                pkg.getTargetSdkVersion(), pkg.getSplitCodePaths(), skipVerify);
+    }
+
+    @CheckResult
+    private static ParseResult<SigningDetails> getSigningDetails(ParseInput input,
+            ParsingPackage pkg, boolean skipVerify) {
+        return getSigningDetails(input, pkg.getBaseApkPath(), pkg.isStaticSharedLibrary(),
+                pkg.getTargetSdkVersion(), pkg.getSplitCodePaths(), skipVerify);
+    }
+
+    /**
+     * Collect certificates from all the APKs described in the given package. Also asserts that
+     * all APK contents are signed correctly and consistently.
+     *
+     * TODO(b/155513789): Remove this in favor of collecting certificates during the original parse
+     *  call if requested. Leaving this as an optional method for the caller means we have to
+     *  construct a dummy ParseInput.
+     */
+    @CheckResult
+    public static ParseResult<SigningDetails> getSigningDetails(ParseInput input,
+            String baseApkPath, boolean isStaticSharedLibrary, int targetSdkVersion,
+            String[] splitCodePaths, boolean skipVerify) {
         SigningDetails signingDetails = SigningDetails.UNKNOWN;
 
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectCertificates");
         try {
             ParseResult<SigningDetails> result = getSigningDetails(
                     input,
-                    pkg.getBaseApkPath(),
+                    baseApkPath,
                     skipVerify,
-                    pkg.isStaticSharedLibrary(),
+                    isStaticSharedLibrary,
                     signingDetails,
-                    pkg.getTargetSdkVersion()
+                    targetSdkVersion
             );
             if (result.isError()) {
                 return input.error(result);
@@ -3076,17 +3105,16 @@ public class ParsingPackageUtils {
             final File frameworkRes = new File(Environment.getRootDirectory(),
                     "framework/framework-res.apk");
             boolean isFrameworkResSplit = frameworkRes.getAbsolutePath()
-                    .equals(pkg.getBaseApkPath());
-            String[] splitCodePaths = pkg.getSplitCodePaths();
+                    .equals(baseApkPath);
             if (!ArrayUtils.isEmpty(splitCodePaths) && !isFrameworkResSplit) {
                 for (int i = 0; i < splitCodePaths.length; i++) {
                     result = getSigningDetails(
                             input,
                             splitCodePaths[i],
                             skipVerify,
-                            pkg.isStaticSharedLibrary(),
+                            isStaticSharedLibrary,
                             signingDetails,
-                            pkg.getTargetSdkVersion()
+                            targetSdkVersion
                     );
                     if (result.isError()) {
                         return input.error(result);
@@ -3290,7 +3318,7 @@ public class ParsingPackageUtils {
 
             ArraySet<PublicKey> keys = new ArraySet<>(M);
             for (int j = 0; j < M; ++j) {
-                PublicKey pk = (PublicKey) in.readSerializable();
+                PublicKey pk = (PublicKey) in.readSerializable(java.security.PublicKey.class.getClassLoader(), java.security.PublicKey.class);
                 keys.add(pk);
             }
 
@@ -3299,7 +3327,6 @@ public class ParsingPackageUtils {
 
         return keySetMapping;
     }
-
 
     /**
      * Callback interface for retrieving information that may be needed while parsing

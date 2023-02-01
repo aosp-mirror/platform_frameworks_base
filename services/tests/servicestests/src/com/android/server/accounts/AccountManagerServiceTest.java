@@ -37,7 +37,6 @@ import android.accounts.AccountManagerInternal;
 import android.accounts.CantAddAccountActivity;
 import android.accounts.IAccountManagerResponse;
 import android.app.AppOpsManager;
-import android.app.PropertyInvalidatedCache;
 import android.app.INotificationManager;
 import android.app.PropertyInvalidatedCache;
 import android.app.admin.DevicePolicyManager;
@@ -1293,10 +1292,11 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         unlockSystemUser();
         try {
             mAms.hasFeatures(
-                null, // response
-                AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS,
-                new String[] {"feature1", "feature2"}, // features
-                "testPackage"); // opPackageName
+                    null, // response
+                    AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS,
+                    new String[] {"feature1", "feature2"}, // features
+                    0, // userId
+                    "testPackage"); // opPackageName
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
             // IllegalArgumentException is expected.
@@ -1308,10 +1308,11 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         unlockSystemUser();
         try {
             mAms.hasFeatures(
-                mMockAccountManagerResponse, // response
-                null, // account
-                new String[] {"feature1", "feature2"}, // features
-                "testPackage"); // opPackageName
+                    mMockAccountManagerResponse, // response
+                    null, // account
+                    new String[] {"feature1", "feature2"}, // features
+                    0, // userId
+                    "testPackage"); // opPackageName
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
             // IllegalArgumentException is expected.
@@ -1326,6 +1327,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                     mMockAccountManagerResponse, // response
                     AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, // account
                     null, // features
+                    0, // userId
                     "testPackage"); // opPackageName
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
@@ -1342,6 +1344,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 response, // response
                 AccountManagerServiceTestFixtures.ACCOUNT_ERROR, // account
                 AccountManagerServiceTestFixtures.ACCOUNT_FEATURES, // features
+                0, // userId
                 "testPackage"); // opPackageName
         waitForLatch(latch);
         verify(mMockAccountManagerResponse).onError(
@@ -1358,6 +1361,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 response, // response
                 AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, // account
                 AccountManagerServiceTestFixtures.ACCOUNT_FEATURES, // features
+                0, // userId
                 "testPackage"); // opPackageName
         waitForLatch(latch);
         verify(mMockAccountManagerResponse).onResult(mBundleCaptor.capture());
@@ -3471,7 +3475,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
 
         @Override
         public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
-            return mMockContext.registerReceiver(receiver, filter);
+            return mMockContext.registerReceiver(receiver, filter,
+                    Context.RECEIVER_EXPORTED_UNAUDITED);
         }
 
         @Override

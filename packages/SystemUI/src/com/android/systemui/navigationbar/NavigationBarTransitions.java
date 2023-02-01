@@ -24,7 +24,6 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.SparseArray;
-import android.view.Display;
 import android.view.IWallpaperVisibilityListener;
 import android.view.IWindowManager;
 import android.view.View;
@@ -32,10 +31,12 @@ import android.view.View;
 import com.android.systemui.R;
 import com.android.systemui.navigationbar.NavigationBarComponent.NavigationBarScope;
 import com.android.systemui.navigationbar.buttons.ButtonDispatcher;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
 
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,6 +66,7 @@ public final class NavigationBarTransitions extends BarTransitions implements
     @org.jetbrains.annotations.NotNull
     private final IWindowManager mWindowManagerService;
     private final LightBarTransitionsController mLightTransitionsController;
+    private final DisplayTracker mDisplayTracker;
     private final boolean mAllowAutoDimWallpaperNotVisible;
     private boolean mWallpaperVisible;
 
@@ -75,32 +77,48 @@ public final class NavigationBarTransitions extends BarTransitions implements
     private List<DarkIntensityListener> mDarkIntensityListeners;
 
     private final Handler mHandler = Handler.getMain();
-    private final IWallpaperVisibilityListener mWallpaperVisibilityListener =
-            new IWallpaperVisibilityListener.Stub() {
+
+    static final class WallpaperVisibilityListener extends IWallpaperVisibilityListener.Stub {
+        private final WeakReference<NavigationBarTransitions> mSelf;
+
+        WallpaperVisibilityListener(NavigationBarTransitions self) {
+            mSelf = new WeakReference<>(self);
+        }
+
         @Override
         public void onWallpaperVisibilityChanged(boolean newVisibility,
-        int displayId) throws RemoteException {
-            mWallpaperVisible = newVisibility;
-            mHandler.post(() -> applyLightsOut(true, false));
+                int displayId) throws RemoteException {
+            NavigationBarTransitions self = mSelf.get();
+            if (self == null) {
+                return;
+            }
+            self.mWallpaperVisible = newVisibility;
+            self.mHandler.post(() -> self.applyLightsOut(true, false));
         }
-    };
+    }
+
+    private final IWallpaperVisibilityListener mWallpaperVisibilityListener;
 
     @Inject
     public NavigationBarTransitions(
             NavigationBarView view,
             IWindowManager windowManagerService,
-            LightBarTransitionsController.Factory lightBarTransitionsControllerFactory) {
+            LightBarTransitionsController.Factory lightBarTransitionsControllerFactory,
+            DisplayTracker displayTracker) {
         super(view, R.drawable.nav_background);
+
         mView = view;
         mWindowManagerService = windowManagerService;
         mLightTransitionsController = lightBarTransitionsControllerFactory.create(this);
+        mDisplayTracker = displayTracker;
         mAllowAutoDimWallpaperNotVisible = view.getContext().getResources()
                 .getBoolean(R.bool.config_navigation_bar_enable_auto_dim_no_visible_wallpaper);
         mDarkIntensityListeners = new ArrayList();
 
+        mWallpaperVisibilityListener = new WallpaperVisibilityListener(this);
         try {
             mWallpaperVisible = mWindowManagerService.registerWallpaperVisibilityListener(
-                    mWallpaperVisibilityListener, Display.DEFAULT_DISPLAY);
+                    mWallpaperVisibilityListener, mDisplayTracker.getDefaultDisplayId());
         } catch (RemoteException e) {
         }
         mView.addOnLayoutChangeListener(
@@ -126,7 +144,7 @@ public final class NavigationBarTransitions extends BarTransitions implements
     public void destroy() {
         try {
             mWindowManagerService.unregisterWallpaperVisibilityListener(mWallpaperVisibilityListener,
-                    Display.DEFAULT_DISPLAY);
+                    mDisplayTracker.getDefaultDisplayId());
         } catch (RemoteException e) {
         }
         mLightTransitionsController.destroy();
@@ -135,7 +153,10 @@ public final class NavigationBarTransitions extends BarTransitions implements
     @Override
     public void setAutoDim(boolean autoDim) {
         // Ensure we aren't in gestural nav if we are triggering auto dim
-        if (autoDim && isGesturalModeOnDefaultDisplay(mView.getContext(), mNavBarMode)) return;
+        if (autoDim && isGesturalModeOnDefaultDisplay(mView.getContext(), mDisplayTracker,
+                mNavBarMode)) {
+            return;
+        }
         if (mAutoDim == autoDim) return;
         mAutoDim = autoDim;
         applyLightsOut(true, false);
@@ -219,7 +240,7 @@ public final class NavigationBarTransitions extends BarTransitions implements
 
     @Override
     public int getTintAnimationDuration() {
-        if (isGesturalModeOnDefaultDisplay(mView.getContext(), mNavBarMode)) {
+        if (isGesturalModeOnDefaultDisplay(mView.getContext(), mDisplayTracker, mNavBarMode)) {
             return Math.max(DEFAULT_COLOR_ADAPT_TRANSITION_TIME, MIN_COLOR_ADAPT_TRANSITION_TIME);
         }
         return LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION;

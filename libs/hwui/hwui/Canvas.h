@@ -30,7 +30,9 @@
 #include <SkMatrix.h>
 
 class SkAnimatedImage;
+enum class SkBlendMode;
 class SkCanvasState;
+class SkRRect;
 class SkRuntimeShaderBuilder;
 class SkVertices;
 
@@ -151,7 +153,7 @@ public:
         LOG_ALWAYS_FATAL("Not supported");
     }
 
-    virtual void punchHole(const SkRRect& rect) = 0;
+    virtual void punchHole(const SkRRect& rect, float alpha) = 0;
 
     // ----------------------------------------------------------------------------
     // Canvas state operations
@@ -225,6 +227,7 @@ public:
                          float sweepAngle, bool useCenter, const Paint& paint) = 0;
     virtual void drawPath(const SkPath& path, const Paint& paint) = 0;
     virtual void drawVertices(const SkVertices*, SkBlendMode, const Paint& paint) = 0;
+    virtual void drawMesh(const SkMesh& mesh, sk_sp<SkBlender>, const SkPaint& paint) = 0;
 
     // Bitmap-based
     virtual void drawBitmap(Bitmap& bitmap, float left, float top, const Paint* paint) = 0;

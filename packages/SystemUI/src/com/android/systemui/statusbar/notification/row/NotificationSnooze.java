@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static com.android.systemui.util.PluralMessageFormaterKt.icuMessageFormat;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -243,11 +245,11 @@ public class NotificationSnooze extends LinearLayout
     private SnoozeOption createOption(int minutes, int accessibilityActionId) {
         Resources res = getResources();
         boolean showInHours = minutes >= 60;
-        int pluralResId = showInHours
-                ? R.plurals.snoozeHourOptions
-                : R.plurals.snoozeMinuteOptions;
+        int stringResId = showInHours
+                ? R.string.snoozeHourOptions
+                : R.string.snoozeMinuteOptions;
         int count = showInHours ? (minutes / 60) : minutes;
-        String description = res.getQuantityString(pluralResId, count, count);
+        String description = icuMessageFormat(res, stringResId, count);
         String resultText = String.format(res.getString(R.string.snoozed_for_time), description);
         AccessibilityAction action = new AccessibilityAction(accessibilityActionId, description);
         final int index = resultText.indexOf(description);
@@ -382,7 +384,7 @@ public class NotificationSnooze extends LinearLayout
     private void undoSnooze(View v) {
         mSelectedOption = null;
         showSnoozeOptions(false);
-        mGutsContainer.closeControls(v, false);
+        mGutsContainer.closeControls(v, /* save= */ false);
     }
 
     @Override
@@ -431,7 +433,7 @@ public class NotificationSnooze extends LinearLayout
     }
 
     @Override
-    public boolean shouldBeSaved() {
+    public boolean shouldBeSavedOnClose() {
         return true;
     }
 

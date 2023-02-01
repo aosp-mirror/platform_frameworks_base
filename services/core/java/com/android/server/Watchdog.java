@@ -49,7 +49,7 @@ import android.util.Dumpable;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
-import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.ProcessCpuTracker;
@@ -75,6 +75,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -160,6 +161,8 @@ public class Watchdog implements Dumpable {
     public static final String[] AIDL_INTERFACE_PREFIXES_OF_INTEREST = new String[] {
             "android.hardware.biometrics.face.IFace/",
             "android.hardware.biometrics.fingerprint.IFingerprint/",
+            "android.hardware.graphics.composer3.IComposer/",
+            "android.hardware.input.processor.IInputProcessor/",
             "android.hardware.light.ILights/",
             "android.hardware.power.IPower/",
             "android.hardware.power.stats.IPowerStats/",
@@ -230,10 +233,10 @@ public class Watchdog implements Dumpable {
         private final String mName;
         private final ArrayList<Monitor> mMonitors = new ArrayList<Monitor>();
         private final ArrayList<Monitor> mMonitorQueue = new ArrayList<Monitor>();
-        private long mWaitMax;
+        private long mWaitMaxMillis;
         private boolean mCompleted;
         private Monitor mCurrentMonitor;
-        private long mStartTime;
+        private long mStartTimeMillis;
         private int mPauseCount;
 
         HandlerChecker(Handler handler, String name) {
@@ -254,7 +257,7 @@ public class Watchdog implements Dumpable {
          * @param handlerCheckerTimeoutMillis the timeout to use for this run
          */
         public void scheduleCheckLocked(long handlerCheckerTimeoutMillis) {
-            mWaitMax = handlerCheckerTimeoutMillis;
+            mWaitMaxMillis = handlerCheckerTimeoutMillis;
             if (mCompleted) {
                 // Safe to update monitors in queue, Handler is not in the middle of work
                 mMonitors.addAll(mMonitorQueue);
@@ -279,7 +282,7 @@ public class Watchdog implements Dumpable {
 
             mCompleted = false;
             mCurrentMonitor = null;
-            mStartTime = SystemClock.uptimeMillis();
+            mStartTimeMillis = SystemClock.uptimeMillis();
             mHandler.postAtFrontOfQueue(this);
         }
 
@@ -287,10 +290,10 @@ public class Watchdog implements Dumpable {
             if (mCompleted) {
                 return COMPLETED;
             } else {
-                long latency = SystemClock.uptimeMillis() - mStartTime;
-                if (latency < mWaitMax/2) {
+                long latency = SystemClock.uptimeMillis() - mStartTimeMillis;
+                if (latency < mWaitMaxMillis / 2) {
                     return WAITING;
-                } else if (latency < mWaitMax) {
+                } else if (latency < mWaitMaxMillis) {
                     return WAITED_HALF;
                 }
             }
@@ -306,12 +309,15 @@ public class Watchdog implements Dumpable {
         }
 
         String describeBlockedStateLocked() {
+            final String prefix;
             if (mCurrentMonitor == null) {
-                return "Blocked in handler on " + mName + " (" + getThread().getName() + ")";
+                prefix = "Blocked in handler on ";
             } else {
-                return "Blocked in monitor " + mCurrentMonitor.getClass().getName()
-                        + " on " + mName + " (" + getThread().getName() + ")";
+                prefix =  "Blocked in monitor " + mCurrentMonitor.getClass().getName();
             }
+            long latencySeconds = (SystemClock.uptimeMillis() - mStartTimeMillis) / 1000;
+            return prefix + " on " + mName + " (" + getThread().getName() + ")"
+                + " for " + latencySeconds + "s";
         }
 
         @Override
@@ -399,11 +405,16 @@ public class Watchdog implements Dumpable {
         // potentially hold longer running operations with no guarantees about the timeliness
         // of operations there.
         //
-        // The shared foreground thread is the main checker.  It is where we
-        // will also dispatch monitor checks and do other work.
-        mMonitorChecker = new HandlerChecker(FgThread.getHandler(),
-                "foreground thread");
+        // Use a custom thread to check monitors to avoid lock contention from impacted other
+        // threads.
+        ServiceThread t = new ServiceThread("watchdog.monitor",
+                android.os.Process.THREAD_PRIORITY_DEFAULT, true /*allowIo*/);
+        t.start();
+        mMonitorChecker = new HandlerChecker(new Handler(t.getLooper()), "monitor thread");
         mHandlerCheckers.add(withDefaultTimeout(mMonitorChecker));
+
+        mHandlerCheckers.add(withDefaultTimeout(
+                new HandlerChecker(FgThread.getHandler(), "foreground thread")));
         // Add checker for main thread.  We only do a quick check since there
         // can be UI running on the thread.
         mHandlerCheckers.add(withDefaultTimeout(
@@ -867,6 +878,7 @@ public class Watchdog implements Dumpable {
         if (halfWatchdog) {
             dropboxTag = "pre_watchdog";
             CriticalEventLog.getInstance().logHalfWatchdog(subject);
+            FrameworkStatsLog.write(FrameworkStatsLog.SYSTEM_SERVER_PRE_WATCHDOG_OCCURRED);
         } else {
             dropboxTag = "watchdog";
             CriticalEventLog.getInstance().logWatchdog(subject, errorId);
@@ -879,12 +891,13 @@ public class Watchdog implements Dumpable {
 
         long anrTime = SystemClock.uptimeMillis();
         StringBuilder report = new StringBuilder();
-        report.append(MemoryPressureUtil.currentPsiState());
+        report.append(ResourcePressureUtil.currentPsiState());
         ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(false);
         StringWriter tracesFileException = new StringWriter();
         final File stack = ActivityManagerService.dumpStackTraces(
-                pids, processCpuTracker, new SparseArray<>(), getInterestingNativePids(),
-                tracesFileException, subject, criticalEvents);
+                pids, processCpuTracker, new SparseBooleanArray(),
+                CompletableFuture.completedFuture(getInterestingNativePids()), tracesFileException,
+                subject, criticalEvents, Runnable::run, /* latencyTracker= */null);
         // Give some extra time to make sure the stack traces get written.
         // The system's been hanging for a whlie, another second or two won't hurt much.
         SystemClock.sleep(5000);

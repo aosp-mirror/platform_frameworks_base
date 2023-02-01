@@ -154,6 +154,7 @@ public abstract class BaseAbsoluteVolumeControlTest {
                 HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE,
                 HdmiControlManager.VOLUME_CONTROL_DISABLED);
         mHdmiControlService.setHdmiCecConfig(mHdmiCecConfig);
+        mHdmiControlService.setDeviceConfig(new FakeDeviceConfigWrapper());
 
         mNativeWrapper = new FakeNativeWrapper();
         mNativeWrapper.setPhysicalAddress(getPhysicalAddress());
@@ -174,7 +175,11 @@ public abstract class BaseAbsoluteVolumeControlTest {
 
         HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[1];
         hdmiPortInfos[0] =
-                new HdmiPortInfo(1, HdmiPortInfo.PORT_OUTPUT, 0x0000, true, false, false);
+                new HdmiPortInfo.Builder(1, HdmiPortInfo.PORT_OUTPUT, 0x0000)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(false)
+                        .build();
         mNativeWrapper.setPortInfo(hdmiPortInfos);
         mNativeWrapper.setPortConnectionStatus(1, true);
 
@@ -212,9 +217,7 @@ public abstract class BaseAbsoluteVolumeControlTest {
     }
 
     protected int getLogicalAddress() {
-        synchronized (mHdmiCecLocalDevice.mLock) {
-            return mHdmiCecLocalDevice.getDeviceInfo().getLogicalAddress();
-        }
+        return mHdmiCecLocalDevice.getDeviceInfo().getLogicalAddress();
     }
 
     /**

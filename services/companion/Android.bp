@@ -11,7 +11,6 @@ filegroup {
     name: "services.companion-sources",
     srcs: [
         "java/**/*.java",
-        "java/**/*.proto",
     ],
     path: "java",
     visibility: ["//frameworks/base/services"],
@@ -20,9 +19,6 @@ filegroup {
 java_library_static {
     name: "services.companion",
     defaults: ["platform_service_defaults"],
-    proto: {
-        type: "stream",
-    },
     srcs: [":services.companion-sources"],
     libs: [
         "app-compat-annotations",

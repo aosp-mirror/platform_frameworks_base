@@ -45,7 +45,9 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -70,10 +72,14 @@ public class WindowMagnificationTest extends SysuiTestCase {
     private IWindowMagnificationConnectionCallback mConnectionCallback;
     @Mock
     private OverviewProxyService mOverviewProxyService;
+    @Mock
+    private SecureSettings mSecureSettings;
 
     private CommandQueue mCommandQueue;
     private WindowMagnification mWindowMagnification;
     private OverviewProxyListener mOverviewProxyListener;
+    private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -87,10 +93,10 @@ public class WindowMagnificationTest extends SysuiTestCase {
 
         when(mSysUiState.setFlag(anyInt(), anyBoolean())).thenReturn(mSysUiState);
 
-        mCommandQueue = new CommandQueue(getContext());
+        mCommandQueue = new CommandQueue(getContext(), mDisplayTracker);
         mWindowMagnification = new WindowMagnification(getContext(),
                 getContext().getMainThreadHandler(), mCommandQueue, mModeSwitchesController,
-                mSysUiState, mOverviewProxyService);
+                mSysUiState, mOverviewProxyService, mSecureSettings, mDisplayTracker);
         mWindowMagnification.start();
 
         final ArgumentCaptor<OverviewProxyListener> listenerArgumentCaptor =
@@ -155,6 +161,18 @@ public class WindowMagnificationTest extends SysuiTestCase {
         mWindowMagnification.onMove(TEST_DISPLAY);
 
         verify(mConnectionCallback).onMove(TEST_DISPLAY);
+    }
+
+    @Test
+    public void onModeSwitch_enabled_notifyCallback() throws RemoteException {
+        final int magnificationModeFullScreen = 1;
+        mCommandQueue.requestWindowMagnificationConnection(true);
+        waitForIdleSync();
+
+        mWindowMagnification.onModeSwitch(TEST_DISPLAY, magnificationModeFullScreen);
+
+        verify(mConnectionCallback).onChangeMagnificationMode(TEST_DISPLAY,
+                magnificationModeFullScreen);
     }
 
     @Test

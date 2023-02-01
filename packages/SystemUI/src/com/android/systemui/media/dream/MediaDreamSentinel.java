@@ -16,16 +16,20 @@
 
 package com.android.systemui.media.dream;
 
-import android.content.Context;
+import static com.android.systemui.flags.Flags.DREAM_MEDIA_COMPLICATION;
+
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dreams.DreamOverlayStateController;
-import com.android.systemui.media.MediaData;
-import com.android.systemui.media.MediaDataManager;
-import com.android.systemui.media.SmartspaceMediaData;
+import com.android.systemui.dreams.complication.DreamMediaEntryComplication;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.media.controls.models.player.MediaData;
+import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaData;
+import com.android.systemui.media.controls.pipeline.MediaDataManager;
 
 import javax.inject.Inject;
 
@@ -33,8 +37,11 @@ import javax.inject.Inject;
  * {@link MediaDreamSentinel} is responsible for tracking media state and registering/unregistering
  * the media complication as appropriate
  */
-public class MediaDreamSentinel extends CoreStartable {
-    private MediaDataManager.Listener mListener = new MediaDataManager.Listener() {
+public class MediaDreamSentinel implements CoreStartable {
+    private static final String TAG = "MediaDreamSentinel";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+
+    private final MediaDataManager.Listener mListener = new MediaDataManager.Listener() {
         private boolean mAdded;
         @Override
         public void onSmartspaceMediaDataRemoved(@NonNull String key, boolean immediately) {
@@ -42,16 +49,22 @@ public class MediaDreamSentinel extends CoreStartable {
 
         @Override
         public void onMediaDataRemoved(@NonNull String key) {
+            final boolean hasActiveMedia = mMediaDataManager.hasActiveMedia();
+            if (DEBUG) {
+                Log.d(TAG, "onMediaDataRemoved(" + key + "), mAdded=" + mAdded + ", hasActiveMedia="
+                        + hasActiveMedia);
+            }
+
             if (!mAdded) {
                 return;
             }
 
-            if (mMediaDataManager.hasActiveMedia()) {
+            if (hasActiveMedia) {
                 return;
             }
 
             mAdded = false;
-            mDreamOverlayStateController.removeComplication(mComplication);
+            mDreamOverlayStateController.removeComplication(mMediaEntryComplication);
         }
 
         @Override
@@ -63,31 +76,50 @@ public class MediaDreamSentinel extends CoreStartable {
         public void onMediaDataLoaded(@NonNull String key, @Nullable String oldKey,
                 @NonNull MediaData data, boolean immediately, int receivedSmartspaceCardLatency,
                 boolean isSsReactivated) {
+            if (!mFeatureFlags.isEnabled(DREAM_MEDIA_COMPLICATION)) {
+                return;
+            }
+
+            final boolean hasActiveMedia = mMediaDataManager.hasActiveMedia();
+            if (DEBUG) {
+                Log.d(TAG, "onMediaDataLoaded(" + key + "), mAdded=" + mAdded + ", hasActiveMedia="
+                        + hasActiveMedia);
+            }
+
+            // Media data can become inactive without triggering onMediaDataRemoved.
+            if (mAdded && !hasActiveMedia) {
+                mAdded = false;
+                mDreamOverlayStateController.removeComplication(mMediaEntryComplication);
+                return;
+            }
+
             if (mAdded) {
                 return;
             }
 
-            if (!mMediaDataManager.hasActiveMedia()) {
+            if (!hasActiveMedia) {
                 return;
             }
 
             mAdded = true;
-            mDreamOverlayStateController.addComplication(mComplication);
+            mDreamOverlayStateController.addComplication(mMediaEntryComplication);
         }
     };
 
     private final MediaDataManager mMediaDataManager;
     private final DreamOverlayStateController mDreamOverlayStateController;
-    private final MediaDreamComplication mComplication;
+    private final DreamMediaEntryComplication mMediaEntryComplication;
+    private final FeatureFlags mFeatureFlags;
 
     @Inject
-    public MediaDreamSentinel(Context context, MediaDataManager mediaDataManager,
+    public MediaDreamSentinel(MediaDataManager mediaDataManager,
             DreamOverlayStateController dreamOverlayStateController,
-            MediaDreamComplication complication) {
-        super(context);
+            DreamMediaEntryComplication mediaEntryComplication,
+            FeatureFlags featureFlags) {
         mMediaDataManager = mediaDataManager;
         mDreamOverlayStateController = dreamOverlayStateController;
-        mComplication = complication;
+        mMediaEntryComplication = mediaEntryComplication;
+        mFeatureFlags = featureFlags;
     }
 
     @Override

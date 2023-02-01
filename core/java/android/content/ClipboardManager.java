@@ -70,6 +70,23 @@ public class ClipboardManager extends android.text.ClipboardManager {
      */
     public static final boolean DEVICE_CONFIG_DEFAULT_SHOW_ACCESS_NOTIFICATIONS = true;
 
+    /**
+     * DeviceConfig property, within the clipboard namespace, that determines whether VirtualDevices
+     * are allowed to have siloed Clipboards for the apps running on them. If false, then clipboard
+     * access is blocked entirely for apps running on VirtualDevices.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_ALLOW_VIRTUALDEVICE_SILOS =
+            "allow_virtualdevice_silos";
+
+    /**
+     * Default value for the DEVICE_CONFIG_ALLOW_VIRTUALDEVICE_SILOS property.
+     *
+     * @hide
+     */
+    public static final boolean DEVICE_CONFIG_DEFAULT_ALLOW_VIRTUALDEVICE_SILOS = false;
+
     private final Context mContext;
     private final Handler mHandler;
     private final IClipboard mService;
@@ -129,7 +146,12 @@ public class ClipboardManager extends android.text.ClipboardManager {
         try {
             Objects.requireNonNull(clip);
             clip.prepareToLeaveProcess(true);
-            mService.setPrimaryClip(clip, mContext.getOpPackageName(), mContext.getUserId());
+            mService.setPrimaryClip(
+                    clip,
+                    mContext.getOpPackageName(),
+                    mContext.getAttributionTag(),
+                    mContext.getUserId(),
+                    mContext.getDeviceId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -154,7 +176,12 @@ public class ClipboardManager extends android.text.ClipboardManager {
             Objects.requireNonNull(sourcePackage);
             clip.prepareToLeaveProcess(true);
             mService.setPrimaryClipAsPackage(
-                    clip, mContext.getOpPackageName(), mContext.getUserId(), sourcePackage);
+                    clip,
+                    mContext.getOpPackageName(),
+                    mContext.getAttributionTag(),
+                    mContext.getUserId(),
+                    mContext.getDeviceId(),
+                    sourcePackage);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -167,7 +194,11 @@ public class ClipboardManager extends android.text.ClipboardManager {
      */
     public void clearPrimaryClip() {
         try {
-            mService.clearPrimaryClip(mContext.getOpPackageName(), mContext.getUserId());
+            mService.clearPrimaryClip(
+                    mContext.getOpPackageName(),
+                    mContext.getAttributionTag(),
+                    mContext.getUserId(),
+                    mContext.getDeviceId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -183,25 +214,32 @@ public class ClipboardManager extends android.text.ClipboardManager {
      */
     public @Nullable ClipData getPrimaryClip() {
         try {
-            return mService.getPrimaryClip(mContext.getOpPackageName(), mContext.getUserId());
+            return mService.getPrimaryClip(
+                    mContext.getOpPackageName(),
+                    mContext.getAttributionTag(),
+                    mContext.getUserId(),
+                    mContext.getDeviceId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Returns a description of the current primary clip on the clipboard
-     * but not a copy of its data.
+     * Returns a description of the current primary clip on the clipboard but not a copy of its
+     * data.
      *
-     * <em>If the application is not the default IME or does not have input focus this return
+     * <p><em>If the application is not the default IME or does not have input focus this return
      * {@code null}.</em>
      *
      * @see #setPrimaryClip(ClipData)
      */
     public @Nullable ClipDescription getPrimaryClipDescription() {
         try {
-            return mService.getPrimaryClipDescription(mContext.getOpPackageName(),
-                    mContext.getUserId());
+            return mService.getPrimaryClipDescription(
+                    mContext.getOpPackageName(),
+                    mContext.getAttributionTag(),
+                    mContext.getUserId(),
+                    mContext.getDeviceId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -215,7 +253,11 @@ public class ClipboardManager extends android.text.ClipboardManager {
      */
     public boolean hasPrimaryClip() {
         try {
-            return mService.hasPrimaryClip(mContext.getOpPackageName(), mContext.getUserId());
+            return mService.hasPrimaryClip(
+                    mContext.getOpPackageName(),
+                    mContext.getAttributionTag(),
+                    mContext.getUserId(),
+                    mContext.getDeviceId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -226,8 +268,11 @@ public class ClipboardManager extends android.text.ClipboardManager {
             if (mPrimaryClipChangedListeners.isEmpty()) {
                 try {
                     mService.addPrimaryClipChangedListener(
-                            mPrimaryClipChangedServiceListener, mContext.getOpPackageName(),
-                            mContext.getUserId());
+                            mPrimaryClipChangedServiceListener,
+                            mContext.getOpPackageName(),
+                            mContext.getAttributionTag(),
+                            mContext.getUserId(),
+                            mContext.getDeviceId());
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }
@@ -242,8 +287,11 @@ public class ClipboardManager extends android.text.ClipboardManager {
             if (mPrimaryClipChangedListeners.isEmpty()) {
                 try {
                     mService.removePrimaryClipChangedListener(
-                            mPrimaryClipChangedServiceListener, mContext.getOpPackageName(),
-                            mContext.getUserId());
+                            mPrimaryClipChangedServiceListener,
+                            mContext.getOpPackageName(),
+                            mContext.getAttributionTag(),
+                            mContext.getUserId(),
+                            mContext.getDeviceId());
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }
@@ -280,7 +328,11 @@ public class ClipboardManager extends android.text.ClipboardManager {
     @Deprecated
     public boolean hasText() {
         try {
-            return mService.hasClipboardText(mContext.getOpPackageName(), mContext.getUserId());
+            return mService.hasClipboardText(
+                    mContext.getOpPackageName(),
+                    mContext.getAttributionTag(),
+                    mContext.getUserId(),
+                    mContext.getDeviceId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -297,7 +349,11 @@ public class ClipboardManager extends android.text.ClipboardManager {
     @RequiresPermission(Manifest.permission.SET_CLIP_SOURCE)
     public String getPrimaryClipSource() {
         try {
-            return mService.getPrimaryClipSource(mContext.getOpPackageName(), mContext.getUserId());
+            return mService.getPrimaryClipSource(
+                    mContext.getOpPackageName(),
+                    mContext.getAttributionTag(),
+                    mContext.getUserId(),
+                    mContext.getDeviceId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

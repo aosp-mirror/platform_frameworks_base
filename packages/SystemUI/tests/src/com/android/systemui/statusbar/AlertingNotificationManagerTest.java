@@ -25,7 +25,6 @@ import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
 import android.app.Notification;
@@ -83,12 +82,10 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
     private final class TestableAlertingNotificationManager extends AlertingNotificationManager {
         private AlertEntry mLastCreatedEntry;
 
-        private TestableAlertingNotificationManager() {
-            super(mock(HeadsUpManagerLogger.class));
+        private TestableAlertingNotificationManager(Handler handler) {
+            super(mock(HeadsUpManagerLogger.class), handler);
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
             mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
-            mHandler.removeCallbacksAndMessages(null);
-            mHandler = mTestHandler;
         }
 
         @Override
@@ -109,8 +106,8 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
         }
     }
 
-    protected AlertingNotificationManager createAlertingNotificationManager() {
-        return new TestableAlertingNotificationManager();
+    protected AlertingNotificationManager createAlertingNotificationManager(Handler handler) {
+        return new TestableAlertingNotificationManager(handler);
     }
 
     protected StatusBarNotification createNewSbn(int id, Notification.Builder n) {
@@ -144,7 +141,7 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
                 .build();
         mEntry.setRow(mRow);
 
-        mAlertingNotificationManager = createAlertingNotificationManager();
+        mAlertingNotificationManager = createAlertingNotificationManager(mTestHandler);
     }
 
     @After
@@ -217,42 +214,5 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
 
         // The entry has just been added so we should not remove immediately.
         assertFalse(mAlertingNotificationManager.canRemoveImmediately(mEntry.getKey()));
-    }
-
-    @Test
-    public void testShouldExtendLifetime() {
-        mAlertingNotificationManager.showNotification(mEntry);
-
-        // While the entry is alerting, it should not be removable.
-        assertTrue(mAlertingNotificationManager.shouldExtendLifetime(mEntry));
-    }
-
-    @Test
-    public void testSetShouldManageLifetime_setShouldManage() {
-        mAlertingNotificationManager.showNotification(mEntry);
-
-        mAlertingNotificationManager.setShouldManageLifetime(mEntry, true /* shouldManage */);
-
-        assertTrue(mAlertingNotificationManager.mExtendedLifetimeAlertEntries.contains(mEntry));
-    }
-
-    @Test
-    public void testSetShouldManageLifetime_setShouldManageCallsRemoval() {
-        mAlertingNotificationManager.showNotification(mEntry);
-        mAlertingNotificationManager.setShouldManageLifetime(mEntry, true /* shouldManage */);
-        if (mAlertingNotificationManager instanceof TestableAlertingNotificationManager) {
-            TestableAlertingNotificationManager testableManager =
-                    (TestableAlertingNotificationManager) mAlertingNotificationManager;
-            verify(testableManager.mLastCreatedEntry).removeAsSoonAsPossible();
-        }
-    }
-
-    @Test
-    public void testSetShouldManageLifetime_setShouldNotManage() {
-        mAlertingNotificationManager.mExtendedLifetimeAlertEntries.add(mEntry);
-
-        mAlertingNotificationManager.setShouldManageLifetime(mEntry, false /* shouldManage */);
-
-        assertFalse(mAlertingNotificationManager.mExtendedLifetimeAlertEntries.contains(mEntry));
     }
 }

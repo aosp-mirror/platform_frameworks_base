@@ -16,21 +16,21 @@
 
 package com.android.wm.shell.flicker.bubble
 
-import android.platform.test.annotations.Presubmit
+import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.Postsubmit
 import android.view.WindowInsets
 import android.view.WindowManager
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.annotation.Group4
-import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
+import com.android.server.wm.flicker.navBarLayerIsVisibleAtEnd
+import com.android.server.wm.flicker.navBarLayerPositionAtEnd
 import org.junit.Assume
-import org.junit.runner.RunWith
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 /**
@@ -39,44 +39,48 @@ import org.junit.runners.Parameterized
  * To run this test: `atest WMShellFlickerTests:LaunchBubbleFromLockScreen`
  *
  * Actions:
+ * ```
  *     Launch an bubble from notification on lock screen
+ * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-@Group4
-class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(testSpec) {
+class LaunchBubbleFromLockScreen(flicker: FlickerTest) : BaseBubbleScreen(flicker) {
 
+    /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition {
             setup {
-                eachRun {
-                    val addBubbleBtn = waitAndGetAddBubbleBtn()
-                    addBubbleBtn?.click() ?: error("Bubble widget not found")
-                    device.sleep()
-                    wmHelper.waitFor("noAppWindowsOnTop") {
-                        it.wmState.topVisibleAppWindow.isEmpty()
-                    }
-                    device.wakeUp()
-                }
+                val addBubbleBtn = waitAndGetAddBubbleBtn()
+                addBubbleBtn?.click() ?: error("Bubble widget not found")
+                device.sleep()
+                wmHelper.StateSyncBuilder().withoutTopVisibleAppWindows().waitForAndVerify()
+                device.wakeUp()
             }
             transitions {
                 // Swipe & wait for the notification shade to expand so all can be seen
-                val wm = context.getSystemService(WindowManager::class.java)
-                val metricInsets = wm.getCurrentWindowMetrics().windowInsets
-                val insets = metricInsets.getInsetsIgnoringVisibility(
-                        WindowInsets.Type.statusBars()
-                        or WindowInsets.Type.displayCutout())
-                device.swipe(100, insets.top + 100, 100, device.getDisplayHeight() / 2, 4)
+                val wm =
+                    context.getSystemService(WindowManager::class.java)
+                        ?: error("Unable to obtain WM service")
+                val metricInsets = wm.currentWindowMetrics.windowInsets
+                val insets =
+                    metricInsets.getInsetsIgnoringVisibility(
+                        WindowInsets.Type.statusBars() or WindowInsets.Type.displayCutout()
+                    )
+                device.swipe(100, insets.top + 100, 100, device.displayHeight / 2, 4)
                 device.waitForIdle(2000)
                 instrumentation.uiAutomation.syncInputTransactions()
 
-                val notification = device.wait(Until.findObject(
-                    By.text("BubbleChat")), FIND_OBJECT_TIMEOUT)
+                val notification =
+                    device.wait(Until.findObject(By.text("BubbleChat")), FIND_OBJECT_TIMEOUT)
                 notification?.click() ?: error("Notification not found")
                 instrumentation.uiAutomation.syncInputTransactions()
-                val showBubble = device.wait(Until.findObject(
-                        By.res("com.android.systemui", "bubble_view")), FIND_OBJECT_TIMEOUT)
+                val showBubble =
+                    device.wait(
+                        Until.findObject(By.res("com.android.systemui", "bubble_view")),
+                        FIND_OBJECT_TIMEOUT
+                    )
                 showBubble?.click() ?: error("Bubble notify not found")
                 instrumentation.uiAutomation.syncInputTransactions()
                 val cancelAllBtn = waitAndGetCancelAllBtn()
@@ -84,21 +88,53 @@ class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScr
             }
         }
 
-    @Presubmit
+    @FlakyTest(bugId = 242088970)
     @Test
     fun testAppIsVisibleAtEnd() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        testSpec.assertLayersEnd {
-            this.isVisible(testApp.component)
-        }
+        flicker.assertLayersEnd { this.isVisible(testApp) }
     }
 
+    @Postsubmit
+    @Test
+    fun navBarLayerIsVisibleAtEnd() {
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        flicker.navBarLayerIsVisibleAtEnd()
+    }
+
+    @Postsubmit
+    @Test
+    fun navBarLayerPositionAtEnd() {
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        flicker.navBarLayerPositionAtEnd()
+    }
+
+    /** {@inheritDoc} */
     @FlakyTest
     @Test
-    fun testAppIsVisibleAtEnd_ShellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
-        testSpec.assertLayersEnd {
-            this.isVisible(testApp.component)
-        }
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun navBarLayerIsVisibleAtStartAndEnd() {
+        Assume.assumeTrue(flicker.scenario.isGesturalNavigation)
+        super.navBarLayerIsVisibleAtStartAndEnd()
+    }
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun navBarLayerPositionAtStartAndEnd() {
+        Assume.assumeTrue(flicker.scenario.isGesturalNavigation)
+        super.navBarLayerPositionAtStartAndEnd()
+    }
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun navBarWindowIsAlwaysVisible() {
+        Assume.assumeTrue(flicker.scenario.isGesturalNavigation)
+        super.navBarWindowIsAlwaysVisible()
     }
 }

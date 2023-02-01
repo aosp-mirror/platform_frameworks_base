@@ -28,6 +28,7 @@ import android.app.IAppTask;
 import android.app.IAssistDataReceiver;
 import android.app.IInstrumentationWatcher;
 import android.app.IProcessObserver;
+import android.app.IScreenCaptureObserver;
 import android.app.IServiceConnection;
 import android.app.IStopUserCallback;
 import android.app.ITaskStackListener;
@@ -69,9 +70,11 @@ import android.os.WorkSource;
 import android.service.voice.IVoiceInteractionSession;
 import android.view.IRecentsAnimationRunner;
 import android.view.IRemoteAnimationRunner;
+import android.view.IWindowFocusObserver;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationAdapter;
 import android.window.IWindowOrganizerController;
+import android.window.BackAnimationAdapter;
 import android.window.BackNavigationInfo;
 import android.window.SplashScreenView;
 import com.android.internal.app.IVoiceInteractor;
@@ -157,7 +160,7 @@ interface IActivityTaskManager {
     boolean removeTask(int taskId);
     void removeAllVisibleRecentTasks();
     List<ActivityManager.RunningTaskInfo> getTasks(int maxNum, boolean filterOnlyVisibleRecents,
-            boolean keepIntentExtra);
+            boolean keepIntentExtra, int displayId);
     void moveTaskToFront(in IApplicationThread app, in String callingPackage, int task,
             int flags, in Bundle options);
     ParceledListSlice<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum, int flags,
@@ -172,6 +175,7 @@ interface IActivityTaskManager {
     Rect getTaskBounds(int taskId);
 
     void cancelRecentsAnimation(boolean restoreHomeRootTaskPosition);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.UPDATE_LOCK_TASK_PACKAGES)")
     void updateLockTaskPackages(int userId, in String[] packages);
     boolean isInLockTaskMode();
     int getLockTaskModeState();
@@ -195,9 +199,8 @@ interface IActivityTaskManager {
      * @param taskId The id of the task to set the bounds for.
      * @param bounds The new bounds.
      * @param resizeMode Resize mode defined as {@code ActivityTaskManager#RESIZE_MODE_*} constants.
-     * @return Return true on success. Otherwise false.
      */
-    boolean resizeTask(int taskId, in Rect bounds, int resizeMode);
+    void resizeTask(int taskId, in Rect bounds, int resizeMode);
     void moveRootTaskToDisplay(int taskId, int displayId);
 
     void moveTaskToRootTask(int taskId, int rootTaskId, boolean toTop);
@@ -230,7 +233,7 @@ interface IActivityTaskManager {
             in IBinder activityToken, int flags);
     boolean isAssistDataAllowedOnCurrentActivity();
     boolean requestAssistDataForTask(in IAssistDataReceiver receiver, int taskId,
-            in String callingPackageName);
+            in String callingPackageName, String callingAttributionTag);
 
     /**
      * Notify the system that the keyguard is going away.
@@ -246,11 +249,6 @@ interface IActivityTaskManager {
     /** Returns an interface enabling the management of window organizers. */
     IWindowOrganizerController getWindowOrganizerController();
 
-    /**
-     * Sets whether we are currently in an interactive split screen resize operation where we
-     * are changing the docked stack size.
-     */
-    void setSplitScreenResizing(boolean resizing);
     boolean supportsLocalVoiceInteraction();
 
     // Get device configuration
@@ -263,9 +261,12 @@ interface IActivityTaskManager {
      * @param taskId the id of the task to retrieve the sAutoapshots for
      * @param isLowResolution if set, if the snapshot needs to be loaded from disk, this will load
      *                          a reduced resolution of it, which is much faster
+     * @param takeSnapshotIfNeeded if set, call {@link #takeTaskSnapshot} to trigger the snapshot
+                                   if no cache exists.
      * @return a graphic buffer representing a screenshot of a task
      */
-    android.window.TaskSnapshot getTaskSnapshot(int taskId, boolean isLowResolution);
+    android.window.TaskSnapshot getTaskSnapshot(
+            int taskId, boolean isLowResolution, boolean takeSnapshotIfNeeded);
 
     /**
      * @param taskId the id of the task to take a snapshot of
@@ -348,7 +349,29 @@ interface IActivityTaskManager {
     /**
      * Prepare the back navigation in the server. This setups the leashed for sysui to animate
      * the back gesture and returns the data needed for the animation.
-     * @param requestAnimation true if the caller wishes to animate the back navigation
+     * @param focusObserver a remote callback to nofify shell when the focused window lost focus.
+     * @param adaptor a remote animation to be run for the back navigation plays the animation.
+     * @return Returns the back navigation info.
      */
-    android.window.BackNavigationInfo startBackNavigation(in boolean requestAnimation);
+    android.window.BackNavigationInfo startBackNavigation(
+            in IWindowFocusObserver focusObserver, in BackAnimationAdapter adaptor);
+
+    /**
+     * registers a callback to be invoked when the screen is captured.
+     *
+     * @param observer callback to be registered.
+     * @param activityToken The token for the activity to set the callback to.
+     * @hide
+     */
+    void registerScreenCaptureObserver(IBinder activityToken, IScreenCaptureObserver observer);
+
+    /**
+     * unregisters the screen capture callback which was registered with
+     * {@link #registerScreenCaptureObserver(ScreenCaptureObserver)}.
+     *
+     * @param observer callback to be unregistered.
+     * @param activityToken The token for the activity to unset the callback from.
+     * @hide
+     */
+    void unregisterScreenCaptureObserver(IBinder activityToken, IScreenCaptureObserver observer);
 }

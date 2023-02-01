@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <AutoBackendTextureRelease.h>
 #include <DisplayList.h>
 #include <Matrix.h>
 #include <Properties.h>
@@ -27,9 +28,19 @@
 #include <renderstate/RenderState.h>
 #include <renderthread/RenderThread.h>
 
+#include <SkBitmap.h>
+#include <SkColor.h>
+#include <SkImageInfo.h>
+#include <SkRefCnt.h>
+
 #include <gtest/gtest.h>
 #include <memory>
 #include <unordered_map>
+
+class SkCanvas;
+class SkMatrix;
+class SkPath;
+struct SkRect;
 
 namespace android {
 namespace uirenderer {
@@ -282,6 +293,11 @@ public:
 
     static SkRect getClipBounds(const SkCanvas* canvas);
     static SkRect getLocalClipBounds(const SkCanvas* canvas);
+
+    static int getUsageCount(const AutoBackendTextureRelease* textureRelease) {
+        EXPECT_NE(nullptr, textureRelease);
+        return textureRelease->mUsageCount;
+    }
 
     struct CallCounts {
         int sync = 0;

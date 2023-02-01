@@ -37,18 +37,22 @@ class KeyguardStatusViewTest : SysuiTestCase() {
     fun setChildrenTranslationYExcludingMediaView_mediaViewIsNotTranslated() {
         val translationY = 1234f
 
-        keyguardStatusView.setChildrenTranslationYExcludingMediaView(translationY)
+        keyguardStatusView.setChildrenTranslationY(translationY, /* excludeMedia= */true)
 
         assertThat(mediaView.translationY).isEqualTo(0)
+
+        childrenExcludingMedia.forEach {
+            assertThat(it.translationY).isEqualTo(translationY)
+        }
     }
 
     @Test
-    fun setChildrenTranslationYExcludingMediaView_childrenAreTranslated() {
+    fun setChildrenTranslationYIncludeMediaView() {
         val translationY = 1234f
 
-        keyguardStatusView.setChildrenTranslationYExcludingMediaView(translationY)
+        keyguardStatusView.setChildrenTranslationY(translationY, /* excludeMedia= */false)
 
-        childrenExcludingMedia.forEach {
+        statusViewContainer.children.forEach {
             assertThat(it.translationY).isEqualTo(translationY)
         }
     }

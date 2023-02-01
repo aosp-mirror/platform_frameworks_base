@@ -159,6 +159,7 @@ interface INotificationManager
     void clearRequestedListenerHints(in INotificationListener token);
     void requestHintsFromListener(in INotificationListener token, int hints);
     int getHintsFromListener(in INotificationListener token);
+    int getHintsFromListenerNoToken();
     void requestInterruptionFilterFromListener(in INotificationListener token, int interruptionFilter);
     int getInterruptionFilterFromListener(in INotificationListener token);
     void setOnNotificationPostedTrimFromListener(in INotificationListener token, int trim);
@@ -235,5 +236,6 @@ interface INotificationManager
     void setListenerFilter(in ComponentName cn, int userId, in NotificationListenerFilter nlf);
     void migrateNotificationFilter(in INotificationListener token, int defaultTypes, in List<String> disallowedPkgs);
 
+    @EnforcePermission("MANAGE_TOAST_RATE_LIMITING")
     void setToastRateLimitingEnabled(boolean enable);
 }

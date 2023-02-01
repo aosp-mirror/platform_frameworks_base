@@ -15,13 +15,18 @@
  */
 package android.service.quicksettings;
 
+import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.app.StatusBarManager;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -39,6 +44,8 @@ import android.view.View.OnAttachStateChangeListener;
 import android.view.WindowManager;
 
 import com.android.internal.R;
+
+import java.util.Objects;
 
 /**
  * A TileService provides the user a tile that can be added to Quick Settings.
@@ -162,6 +169,17 @@ public class TileService extends Service {
      */
     public static final String EXTRA_STATE = "state";
 
+    /**
+     * The method {@link TileService#startActivityAndCollapse(Intent)} will verify that only
+     * apps targeting {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or higher will
+     * not be allowed to use it.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public static final long START_ACTIVITY_NEEDS_PENDING_INTENT = 241766793L;
+
     private final H mHandler = new H(Looper.getMainLooper());
 
     private boolean mListening = false;
@@ -247,7 +265,6 @@ public class TileService extends Service {
      * This will collapse the Quick Settings panel and show the dialog.
      *
      * @param dialog Dialog to show.
-     *
      * @see #isLocked()
      */
     public final void showDialog(Dialog dialog) {
@@ -326,11 +343,36 @@ public class TileService extends Service {
 
     /**
      * Start an activity while collapsing the panel.
+     *
+     * @deprecated for versions {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and up,
+     * use {@link TileService#startActivityAndCollapse(PendingIntent)} instead.
+     * @throws UnsupportedOperationException if called in versions
+     * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and up
      */
+    @Deprecated
     public final void startActivityAndCollapse(Intent intent) {
+        if (CompatChanges.isChangeEnabled(START_ACTIVITY_NEEDS_PENDING_INTENT)) {
+            throw new UnsupportedOperationException(
+                    "startActivityAndCollapse: Starting activity from TileService using an Intent"
+                            + " is not allowed.");
+        }
         startActivity(intent);
         try {
             mService.onStartActivity(mTileToken);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Starts an {@link android.app.Activity}.
+     * Will collapse Quick Settings after launching.
+     *
+     * @param pendingIntent A PendingIntent for an Activity to be launched immediately.
+     */
+    public final void startActivityAndCollapse(@NonNull PendingIntent pendingIntent) {
+        Objects.requireNonNull(pendingIntent);
+        try {
+            mService.startActivity(mTileToken, pendingIntent);
         } catch (RemoteException e) {
         }
     }
@@ -392,7 +434,7 @@ public class TileService extends Service {
             }
 
             @Override
-            public void onUnlockComplete() throws RemoteException{
+            public void onUnlockComplete() throws RemoteException {
                 mHandler.sendEmptyMessage(H.MSG_UNLOCK_COMPLETE);
             }
         };

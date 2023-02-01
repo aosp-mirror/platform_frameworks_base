@@ -23,9 +23,12 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricFingerprintConstants;
+import android.hardware.biometrics.BiometricManager.Authenticators;
+import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.ISidefpsController;
+import android.hardware.fingerprint.IUdfpsOverlay;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -41,6 +44,7 @@ import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.ClientMonitorCompositeCallback;
 import com.android.server.biometrics.sensors.LockoutTracker;
+import com.android.server.biometrics.sensors.PerformanceTracker;
 import com.android.server.biometrics.sensors.SensorOverlays;
 import com.android.server.biometrics.sensors.fingerprint.Udfps;
 import com.android.server.biometrics.sensors.fingerprint.UdfpsHelper;
@@ -76,17 +80,21 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
             @NonNull LockoutFrameworkImpl lockoutTracker,
             @Nullable IUdfpsOverlayController udfpsOverlayController,
             @Nullable ISidefpsController sidefpsController,
+            @Nullable IUdfpsOverlay udfpsOverlay,
             boolean allowBackgroundAuthentication,
-            @NonNull FingerprintSensorPropertiesInternal sensorProps) {
+            @NonNull FingerprintSensorPropertiesInternal sensorProps,
+            @Authenticators.Types int sensorStrength) {
         super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted,
                 owner, cookie, requireConfirmation, sensorId, logger, biometricContext,
                 isStrongBiometric, taskStackListener, lockoutTracker, allowBackgroundAuthentication,
-                true /* shouldVibrate */, false /* isKeyguardBypassEnabled */);
+                false /* shouldVibrate */, false /* isKeyguardBypassEnabled */,
+                sensorStrength);
         setRequestId(requestId);
         mLockoutFrameworkImpl = lockoutTracker;
-        mSensorOverlays = new SensorOverlays(udfpsOverlayController, sidefpsController);
+        mSensorOverlays = new SensorOverlays(udfpsOverlayController,
+                sidefpsController, udfpsOverlay);
         mSensorProps = sensorProps;
-        mALSProbeCallback = getLogger().createALSCallback(false /* startWithClient */);
+        mALSProbeCallback = getLogger().getAmbientLightProbe(false /* startWithClient */);
     }
 
     @Override
@@ -163,6 +171,18 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
     }
 
     @Override
+    public void onAcquired(int acquiredInfo, int vendorCode) {
+        super.onAcquired(acquiredInfo, vendorCode);
+
+        @LockoutTracker.LockoutMode final int lockoutMode =
+                getLockoutTracker().getLockoutModeForUser(getTargetUserId());
+        if (lockoutMode == LockoutTracker.LOCKOUT_NONE) {
+            PerformanceTracker pt = PerformanceTracker.getInstanceForSensorId(getSensorId());
+            pt.incrementAcquireForUser(getTargetUserId(), isCryptoOperation());
+        }
+    }
+
+    @Override
     public boolean wasUserDetected() {
         // TODO: Update if it needs to be used for fingerprint, i.e. success/reject, error_timeout
         return false;
@@ -171,7 +191,17 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
     @Override
     public @LockoutTracker.LockoutMode int handleFailedAttempt(int userId) {
         mLockoutFrameworkImpl.addFailedAttemptForUser(userId);
-        return super.handleFailedAttempt(userId);
+        @LockoutTracker.LockoutMode final int lockoutMode =
+                getLockoutTracker().getLockoutModeForUser(userId);
+        final PerformanceTracker performanceTracker =
+                PerformanceTracker.getInstanceForSensorId(getSensorId());
+        if (lockoutMode == LockoutTracker.LOCKOUT_PERMANENT) {
+            performanceTracker.incrementPermanentLockoutForUser(userId);
+        } else if (lockoutMode == LockoutTracker.LOCKOUT_TIMED) {
+            performanceTracker.incrementTimedLockoutForUser(userId);
+        }
+
+        return lockoutMode;
     }
 
     @Override
@@ -205,11 +235,11 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
     }
 
     @Override
-    public void onPointerDown(int x, int y, float minor, float major) {
+    public void onPointerDown(PointerContext pc) {
         mIsPointerDown = true;
         mState = STATE_STARTED;
         mALSProbeCallback.getProbe().enable();
-        UdfpsHelper.onFingerDown(getFreshDaemon(), x, y, minor, major);
+        UdfpsHelper.onFingerDown(getFreshDaemon(), (int) pc.x, (int) pc.y, pc.minor, pc.major);
 
         if (getListener() != null) {
             try {
@@ -221,7 +251,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
     }
 
     @Override
-    public void onPointerUp() {
+    public void onPointerUp(PointerContext pc) {
         mIsPointerDown = false;
         mState = STATE_STARTED_PAUSED_ATTEMPTED;
         mALSProbeCallback.getProbe().disable();

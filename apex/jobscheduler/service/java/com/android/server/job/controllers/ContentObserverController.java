@@ -159,8 +159,7 @@ public final class ContentObserverController extends StateController {
     }
 
     @Override
-    public void maybeStopTrackingJobLocked(JobStatus taskStatus, JobStatus incomingJob,
-            boolean forUpdate) {
+    public void maybeStopTrackingJobLocked(JobStatus taskStatus, JobStatus incomingJob) {
         if (taskStatus.clearTrackingController(JobStatus.TRACKING_CONTENT)) {
             mTrackedTasks.remove(taskStatus);
             if (taskStatus.contentObserverJobInstance != null) {

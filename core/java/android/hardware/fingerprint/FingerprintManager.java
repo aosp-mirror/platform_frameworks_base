@@ -49,6 +49,7 @@ import android.hardware.biometrics.BiometricStateListener;
 import android.hardware.biometrics.BiometricTestSession;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.SensorProperties;
+import android.hardware.biometrics.fingerprint.PointerContext;
 import android.os.Binder;
 import android.os.Build;
 import android.os.CancellationSignal;
@@ -101,6 +102,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     private static final int MSG_FINGERPRINT_DETECTED = 107;
     private static final int MSG_UDFPS_POINTER_DOWN = 108;
     private static final int MSG_UDFPS_POINTER_UP = 109;
+    private static final int MSG_POWER_BUTTON_PRESSED = 110;
 
     /**
      * @hide
@@ -151,6 +153,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     @Nullable private RemoveTracker mRemoveTracker;
     private Handler mHandler;
     @Nullable private float[] mEnrollStageThresholds;
+    private List<FingerprintSensorPropertiesInternal> mProps = new ArrayList<>();
 
     /**
      * Retrieves a list of properties for all fingerprint sensors on the device.
@@ -462,6 +465,22 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
          * @param remaining The number of remaining steps
          */
         public void onEnrollmentProgress(int remaining) { }
+
+        /**
+         * Called when a fingerprint image has been acquired.
+         * @param isAcquiredGood whether the fingerprint image was good.
+         */
+        public void onAcquired(boolean isAcquiredGood){ }
+
+        /**
+         * Called when a pointer down event has occurred.
+         */
+        public void onPointerDown(int sensorId){ }
+
+        /**
+         * Called when a pointer up event has occurred.
+         */
+        public void onPointerUp(int sensorId){ }
     }
 
     /**
@@ -917,6 +936,22 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         }
     }
 
+    /**
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void setUdfpsOverlay(@NonNull IUdfpsOverlay controller) {
+        if (mService == null) {
+            Slog.w(TAG, "setUdfpsOverlay: no fingerprint service");
+            return;
+        }
+
+        try {
+            mService.setUdfpsOverlay(controller);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 
     /**
      * Forwards BiometricStateListener to FingerprintService
@@ -938,12 +973,18 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     public void onPointerDown(long requestId, int sensorId, int x, int y,
             float minor, float major) {
         if (mService == null) {
-            Slog.w(TAG, "onFingerDown: no fingerprint service");
+            Slog.w(TAG, "onPointerDown: no fingerprint service");
             return;
         }
 
+        final PointerContext pc = new PointerContext();
+        pc.x = (int) x;
+        pc.y = (int) y;
+        pc.minor = minor;
+        pc.major = major;
+
         try {
-            mService.onPointerDown(requestId, sensorId, x, y, minor, major);
+            mService.onPointerDown(requestId, sensorId, pc);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -955,12 +996,94 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
     public void onPointerUp(long requestId, int sensorId) {
         if (mService == null) {
-            Slog.w(TAG, "onFingerDown: no fingerprint service");
+            Slog.w(TAG, "onPointerUp: no fingerprint service");
             return;
         }
 
+        final PointerContext pc = new PointerContext();
+
         try {
-            mService.onPointerUp(requestId, sensorId);
+            mService.onPointerUp(requestId, sensorId, pc);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * TODO(b/218388821): The parameter list should be replaced with PointerContext.
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void onPointerDown(
+            long requestId,
+            int sensorId,
+            int pointerId,
+            float x,
+            float y,
+            float minor,
+            float major,
+            float orientation,
+            long time,
+            long gestureStart,
+            boolean isAod) {
+        if (mService == null) {
+            Slog.w(TAG, "onPointerDown: no fingerprint service");
+            return;
+        }
+
+        final PointerContext pc = new PointerContext();
+        pc.pointerId = pointerId;
+        pc.x = x;
+        pc.y = y;
+        pc.minor = minor;
+        pc.major = major;
+        pc.orientation = orientation;
+        pc.time = time;
+        pc.gestureStart = gestureStart;
+        pc.isAod = isAod;
+
+        try {
+            mService.onPointerDown(requestId, sensorId, pc);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * TODO(b/218388821): The parameter list should be replaced with PointerContext.
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void onPointerUp(
+            long requestId,
+            int sensorId,
+            int pointerId,
+            float x,
+            float y,
+            float minor,
+            float major,
+            float orientation,
+            long time,
+            long gestureStart,
+            boolean isAod) {
+        if (mService == null) {
+            Slog.w(TAG, "onPointerUp: no fingerprint service");
+            return;
+        }
+
+        final PointerContext pc = new PointerContext();
+        pc.pointerId = pointerId;
+        pc.x = x;
+        pc.y = y;
+        pc.minor = minor;
+        pc.major = major;
+        pc.orientation = orientation;
+        pc.time = time;
+        pc.gestureStart = gestureStart;
+        pc.isAod = isAod;
+
+        try {
+            mService.onPointerUp(requestId, sensorId, pc);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -981,6 +1104,16 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * This is triggered by SideFpsEventHandler
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void onPowerPressed() {
+        Slog.i(TAG, "onPowerPressed");
+        mHandler.obtainMessage(MSG_POWER_BUTTON_PRESSED).sendToTarget();
     }
 
     /**
@@ -1053,8 +1186,8 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     @NonNull
     public List<FingerprintSensorPropertiesInternal> getSensorPropertiesInternal() {
         try {
-            if (mService == null) {
-                return new ArrayList<>();
+            if (!mProps.isEmpty() || mService == null) {
+                return mProps;
             }
             return mService.getSensorPropertiesInternal(mContext.getOpPackageName());
         } catch (RemoteException e) {
@@ -1069,7 +1202,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      */
     public boolean isPowerbuttonFps() {
         final FingerprintSensorPropertiesInternal sensorProps = getFirstFingerprintSensor();
-        return sensorProps.sensorType == TYPE_POWER_BUTTON;
+        return sensorProps == null ? false : sensorProps.sensorType == TYPE_POWER_BUTTON;
     }
 
     /**
@@ -1111,6 +1244,20 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             }
         }
         return BIOMETRIC_LOCKOUT_NONE;
+    }
+
+    /**
+     * Schedules a watchdog.
+     *
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void scheduleWatchdog() {
+        try {
+            mService.scheduleWatchdog();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -1196,6 +1343,9 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                 case MSG_UDFPS_POINTER_UP:
                     sendUdfpsPointerUp(msg.arg1 /* sensorId */);
                     break;
+                case MSG_POWER_BUTTON_PRESSED:
+                    sendPowerPressed();
+                    break;
                 default:
                     Slog.w(TAG, "Unknown message: " + msg.what);
 
@@ -1259,6 +1409,9 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         if (mAuthenticationCallback != null) {
             mAuthenticationCallback.onAuthenticationAcquired(acquireInfo);
         }
+        if (mEnrollmentCallback != null && acquireInfo != FINGERPRINT_ACQUIRED_START) {
+            mEnrollmentCallback.onAcquired(acquireInfo == FINGERPRINT_ACQUIRED_GOOD);
+        }
         final String msg = getAcquiredString(mContext, acquireInfo, vendorCode);
         if (msg == null) {
             return;
@@ -1312,17 +1465,32 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     private void sendUdfpsPointerDown(int sensorId) {
         if (mAuthenticationCallback == null) {
             Slog.e(TAG, "sendUdfpsPointerDown, callback null");
-            return;
+        } else {
+            mAuthenticationCallback.onUdfpsPointerDown(sensorId);
         }
-        mAuthenticationCallback.onUdfpsPointerDown(sensorId);
+
+        if (mEnrollmentCallback != null) {
+            mEnrollmentCallback.onPointerDown(sensorId);
+        }
     }
 
     private void sendUdfpsPointerUp(int sensorId) {
         if (mAuthenticationCallback == null) {
             Slog.e(TAG, "sendUdfpsPointerUp, callback null");
-            return;
+        } else {
+            mAuthenticationCallback.onUdfpsPointerUp(sensorId);
         }
-        mAuthenticationCallback.onUdfpsPointerUp(sensorId);
+        if (mEnrollmentCallback != null) {
+            mEnrollmentCallback.onPointerUp(sensorId);
+        }
+    }
+
+    private void sendPowerPressed() {
+        try {
+            mService.onPowerPressed();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Error sending power press", e);
+        }
     }
 
     /**
@@ -1335,6 +1503,17 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             Slog.v(TAG, "FingerprintService was null");
         }
         mHandler = new MyHandler(context);
+        if (context.checkCallingOrSelfPermission(USE_BIOMETRIC_INTERNAL)
+                == PackageManager.PERMISSION_GRANTED) {
+            addAuthenticatorsRegisteredCallback(
+                    new IFingerprintAuthenticatorsRegisteredCallback.Stub() {
+                        @Override
+                        public void onAllAuthenticatorsRegistered(
+                                @NonNull List<FingerprintSensorPropertiesInternal> sensors) {
+                            mProps = sensors;
+                        }
+                    });
+        }
     }
 
     private int getCurrentUserId() {
@@ -1411,10 +1590,17 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     }
 
     @NonNull
-    private static float[] createEnrollStageThresholds(@NonNull Context context) {
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    private float[] createEnrollStageThresholds(@NonNull Context context) {
         // TODO(b/200604947): Fetch this value from FingerprintService, rather than internal config
-        final String[] enrollStageThresholdStrings = context.getResources().getStringArray(
-                com.android.internal.R.array.config_udfps_enroll_stage_thresholds);
+        final String[] enrollStageThresholdStrings;
+        if (isPowerbuttonFps()) {
+            enrollStageThresholdStrings = context.getResources().getStringArray(
+                    com.android.internal.R.array.config_sfps_enroll_stage_thresholds);
+        } else {
+            enrollStageThresholdStrings = context.getResources().getStringArray(
+                    com.android.internal.R.array.config_udfps_enroll_stage_thresholds);
+        }
 
         final float[] enrollStageThresholds = new float[enrollStageThresholdStrings.length];
         for (int i = 0; i < enrollStageThresholds.length; i++) {
@@ -1461,6 +1647,9 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             case FINGERPRINT_ERROR_BAD_CALIBRATION:
                 return context.getString(
                             com.android.internal.R.string.fingerprint_error_bad_calibration);
+            case BIOMETRIC_ERROR_POWER_PRESSED:
+                return context.getString(
+                    com.android.internal.R.string.fingerprint_error_power_pressed);
             case FINGERPRINT_ERROR_VENDOR: {
                 String[] msgArray = context.getResources().getStringArray(
                         com.android.internal.R.array.fingerprint_error_vendor);
@@ -1506,6 +1695,9 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             case FINGERPRINT_ACQUIRED_TOO_BRIGHT:
                 return context.getString(
                    com.android.internal.R.string.fingerprint_acquired_too_bright);
+            case FINGERPRINT_ACQUIRED_POWER_PRESSED:
+                return context.getString(
+                        com.android.internal.R.string.fingerprint_acquired_power_press);
             case FINGERPRINT_ACQUIRED_VENDOR: {
                 String[] msgArray = context.getResources().getStringArray(
                         com.android.internal.R.array.fingerprint_acquired_vendor);

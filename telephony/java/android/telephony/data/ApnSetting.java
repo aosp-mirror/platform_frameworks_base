@@ -24,7 +24,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.hardware.radio.V1_5.ApnTypes;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.Telephony;
@@ -44,6 +43,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -964,7 +964,7 @@ public class ApnSetting implements Parcelable {
                 ServiceState.convertBearerBitmaskToNetworkTypeBitmask(bearerBitmask);
         }
         int mtuV4 = cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers.MTU_V4));
-        if (mtuV4 == -1) {
+        if (mtuV4 == UNSET_MTU) {
             mtuV4 = cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers.MTU));
         }
 
@@ -1110,6 +1110,7 @@ public class ApnSetting implements Parcelable {
         sb.append(", ").append(mCarrierId);
         sb.append(", ").append(mSkip464Xlat);
         sb.append(", ").append(mAlwaysOn);
+        sb.append(", ").append(Objects.hash(mUser, mPassword));
         return sb.toString();
     }
 
@@ -1137,10 +1138,7 @@ public class ApnSetting implements Parcelable {
             return false;
         }
         // DEFAULT can handle HIPRI.
-        if (hasApnType(type)) {
-            return true;
-        }
-        return false;
+        return hasApnType(type);
     }
 
     // Check whether the types of two APN same (even only one type of each APN is same).
@@ -1288,7 +1286,7 @@ public class ApnSetting implements Parcelable {
                 && xorEqualsInt(this.mMmsProxyPort, other.mMmsProxyPort))
                 && xorEqualsString(this.mUser, other.mUser)
                 && xorEqualsString(this.mPassword, other.mPassword)
-                && xorEqualsInt(this.mAuthType, other.mAuthType)
+                && Objects.equals(this.mAuthType, other.mAuthType)
                 && !typeSameAny(this, other)
                 && Objects.equals(this.mOperatorNumeric, other.mOperatorNumeric)
                 && Objects.equals(this.mProtocol, other.mProtocol)
@@ -1301,8 +1299,6 @@ public class ApnSetting implements Parcelable {
                 other.mLingeringNetworkTypeBitmask)
                 && Objects.equals(this.mProfileId, other.mProfileId)
                 && Objects.equals(this.mPersistent, other.mPersistent)
-                && Objects.equals(this.mMvnoType, other.mMvnoType)
-                && Objects.equals(this.mMvnoMatchData, other.mMvnoMatchData)
                 && Objects.equals(this.mApnSetId, other.mApnSetId)
                 && Objects.equals(this.mCarrierId, other.mCarrierId)
                 && Objects.equals(this.mSkip464Xlat, other.mSkip464Xlat)
@@ -1447,7 +1443,7 @@ public class ApnSetting implements Parcelable {
      */
     @SystemApi
     public static @ApnType int getApnTypeInt(@NonNull @ApnTypeString String apnType) {
-        return APN_TYPE_STRING_MAP.getOrDefault(apnType.toLowerCase(), 0);
+        return APN_TYPE_STRING_MAP.getOrDefault(apnType.toLowerCase(Locale.ROOT), 0);
     }
 
     /**
@@ -1462,7 +1458,7 @@ public class ApnSetting implements Parcelable {
         } else {
             int result = 0;
             for (String str : types.split(",")) {
-                Integer type = APN_TYPE_STRING_MAP.get(str.toLowerCase());
+                Integer type = APN_TYPE_STRING_MAP.get(str.toLowerCase(Locale.ROOT));
                 if (type != null) {
                     result |= type;
                 }
@@ -1473,7 +1469,8 @@ public class ApnSetting implements Parcelable {
 
     /** @hide */
     public static int getMvnoTypeIntFromString(String mvnoType) {
-        String mvnoTypeString = TextUtils.isEmpty(mvnoType) ? mvnoType : mvnoType.toLowerCase();
+        String mvnoTypeString = TextUtils.isEmpty(mvnoType)
+                ? mvnoType : mvnoType.toLowerCase(Locale.ROOT);
         Integer mvnoTypeInt = MVNO_TYPE_STRING_MAP.get(mvnoTypeString);
         return  mvnoTypeInt == null ? UNSPECIFIED_INT : mvnoTypeInt;
     }
@@ -2193,11 +2190,10 @@ public class ApnSetting implements Parcelable {
             }
             if ((mApnTypeBitmask & TYPE_MMS) != 0 && !TextUtils.isEmpty(mMmsProxyAddress)
                     && mMmsProxyAddress.startsWith("http")) {
-                if (Build.IS_DEBUGGABLE) {
-                    throw new IllegalArgumentException("mms proxy(" +  mMmsProxyAddress
-                            + ") should be a hostname, not a url");
-                }
-                return null;
+                Log.wtf(LOG_TAG,"mms proxy(" + mMmsProxyAddress
+                        + ") should be a hostname, not a url");
+                Uri mMmsProxyAddressUri = Uri.parse(mMmsProxyAddress);
+                mMmsProxyAddress = mMmsProxyAddressUri.getHost();
             }
             return new ApnSetting(this);
         }

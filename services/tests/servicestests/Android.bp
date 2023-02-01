@@ -48,7 +48,6 @@ android_test {
         "ShortcutManagerTestUtils",
         "truth-prebuilt",
         "testables",
-        "testng",
         "ub-uiautomator",
         "platformprotosnano",
         "framework-protos",
@@ -58,9 +57,12 @@ android_test {
         // TODO: remove once Android migrates to JUnit 4.12,
         // which provides assertThrows
         "testng",
+        "truth-prebuilt",
         "junit",
-        "platform-compat-test-rules",
+        "junit-params",
         "ActivityContext",
+        "coretests-aidl",
+        "securebox",
     ],
 
     libs: [
@@ -74,7 +76,11 @@ android_test {
     ],
 
     platform_apis: true,
-    test_suites: ["device-tests"],
+
+    test_suites: [
+        "device-tests",
+        "automotive-tests",
+    ],
 
     certificate: "platform",
 
@@ -101,17 +107,20 @@ android_test {
     },
 
     data: [
+        ":BstatsTestApp",
         ":JobTestApp",
+        ":SimpleServiceTestApp1",
+        ":SimpleServiceTestApp2",
+        ":SimpleServiceTestApp3",
         ":StubTestApp",
+        ":SuspendTestApp",
+        ":MediaButtonReceiverHolderTestHelperApp",
     ],
 
     java_resources: [
         ":com.android.apex.cts.shim.v1_prebuilt",
         ":com.android.apex.cts.shim.v2_different_certificate_prebuilt",
         ":com.android.apex.cts.shim.v2_unsigned_apk_container_prebuilt",
-        ":apex.test",
-        ":test.rebootless_apex_v1",
-        ":test.rebootless_apex_v2",
     ],
     resource_zips: [":FrameworksServicesTests_apks_as_resources"],
 }
@@ -119,8 +128,9 @@ android_test {
 java_library {
     name: "servicestests-core-utils",
     srcs: [
-        "src/com/android/server/pm/PackageSettingBuilder.java",
         "src/com/android/server/am/DeviceConfigSession.java",
+        "src/com/android/server/display/TestUtils.java",
+        "src/com/android/server/pm/PackageSettingBuilder.java",
         "src/com/android/server/pm/parsing/TestPackageParser2.kt",
     ],
     static_libs: [

@@ -16,11 +16,11 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.inputmethod.stresstest">
+          package="com.android.inputmethod.stresstest">
 
     <application>
-        <activity android:name=".AutoShowTest$TestActivity"/>
-        <activity android:name=".ImeOpenCloseStressTest$TestActivity"/>
+        <activity android:name=".ImeStressTestUtil$TestActivity"
+                  android:configChanges="orientation|screenSize"/>
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"

@@ -143,6 +143,44 @@ public class UserInfo implements Parcelable {
     public static final int FLAG_PROFILE = 0x00001000;
 
     /**
+     * Indicates that this user is created in ephemeral mode via
+     * {@link IUserManager} create user.
+     *
+     * When a user is created with {@link #FLAG_EPHEMERAL}, {@link #FLAG_EPHEMERAL_ON_CREATE}
+     * is set internally within the user manager.
+     *
+     * When {@link #FLAG_EPHEMERAL_ON_CREATE} is set {@link IUserManager.setUserEphemeral}
+     * has no effect because a user that was created ephemeral can never be made non-ephemeral.
+     *
+     * {@link #FLAG_EPHEMERAL_ON_CREATE} should NOT be set by client's of user manager
+     *
+     * @hide
+     */
+    public static final int FLAG_EPHEMERAL_ON_CREATE = 0x00002000;
+
+    /**
+     * Indicates that this user is the designated main user on the device. This user may have access
+     * to certain features which are limited to at most one user.
+     *
+     * <p>Currently, this will be the first user to go through setup on the device, but in future
+     * releases this status may be transferable or may even not be given to any users.
+     *
+     * <p>This is not necessarily the system user. For example, it will not be the system user on
+     * devices for which {@link UserManager#isHeadlessSystemUserMode()} returns true.
+     */
+    public static final int FLAG_MAIN = 0x00004000;
+
+    /**
+     * Indicates that this user was created for the purposes of testing.
+     *
+     * <p>These users are subject to removal during tests and should not be used on actual devices
+     * used by humans.
+     *
+     * @hide
+     */
+    public static final int FLAG_FOR_TESTING = 0x00008000;
+
+    /**
      * @hide
      */
     @IntDef(flag = true, prefix = "FLAG_", value = {
@@ -158,7 +196,10 @@ public class UserInfo implements Parcelable {
             FLAG_DEMO,
             FLAG_FULL,
             FLAG_SYSTEM,
-            FLAG_PROFILE
+            FLAG_PROFILE,
+            FLAG_EPHEMERAL_ON_CREATE,
+            FLAG_MAIN,
+            FLAG_FOR_TESTING
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserInfoFlag {
@@ -339,6 +380,12 @@ public class UserInfo implements Parcelable {
         return (flags & FLAG_EPHEMERAL) == FLAG_EPHEMERAL;
     }
 
+    /** @hide */
+    @TestApi
+    public boolean isForTesting() {
+        return (flags & FLAG_FOR_TESTING) == FLAG_FOR_TESTING;
+    }
+
     public boolean isInitialized() {
         return (flags & FLAG_INITIALIZED) == FLAG_INITIALIZED;
     }
@@ -352,21 +399,10 @@ public class UserInfo implements Parcelable {
     }
 
     /**
-     * Returns true if the user is a split system user.
-     * <p>If {@link UserManager#isSplitSystemUser split system user mode} is not enabled,
-     * the method always returns false.
+     * @see #FLAG_MAIN
      */
-    public boolean isSystemOnly() {
-        return isSystemOnly(id);
-    }
-
-    /**
-     * Returns true if the given user is a split system user.
-     * <p>If {@link UserManager#isSplitSystemUser split system user mode} is not enabled,
-     * the method always returns false.
-     */
-    public static boolean isSystemOnly(int userId) {
-        return userId == UserHandle.USER_SYSTEM && UserManager.isSplitSystemUser();
+    public boolean isMain() {
+        return (flags & FLAG_MAIN) == FLAG_MAIN;
     }
 
     /**
@@ -400,7 +436,7 @@ public class UserInfo implements Parcelable {
         if (isProfile() || isGuest() || isRestricted()) {
             return false;
         }
-        if (UserManager.isSplitSystemUser() || UserManager.isHeadlessSystemUserMode()) {
+        if (UserManager.isHeadlessSystemUserMode()) {
             return id != UserHandle.USER_SYSTEM;
         } else {
             return id == UserHandle.USER_SYSTEM;

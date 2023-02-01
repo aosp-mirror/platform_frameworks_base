@@ -213,18 +213,18 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
         if (!mIsVisible) {
             return false;
         }
-        return mGestureDetector.onTouch(event);
+        return mGestureDetector.onTouch(v, event);
     }
 
     @Override
-    public boolean onSingleTap() {
+    public boolean onSingleTap(View v) {
         mSingleTapDetected = true;
         handleSingleTap();
         return true;
     }
 
     @Override
-    public boolean onDrag(float offsetX, float offsetY) {
+    public boolean onDrag(View v, float offsetX, float offsetY) {
         moveButton(offsetX, offsetY);
         return true;
     }
@@ -292,9 +292,12 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
      * @param resetPosition if the button position needs be reset
      */
     private void showButton(int mode, boolean resetPosition) {
+        if (mode != Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN) {
+            return;
+        }
         if (mMagnificationMode != mode) {
             mMagnificationMode = mode;
-            mImageView.setImageResource(getIconResId(mode));
+            mImageView.setImageResource(getIconResId(mMagnificationMode));
         }
         if (!mIsVisible) {
             onConfigurationChanged(mContext.getResources().getConfiguration());
@@ -408,6 +411,7 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
 
     private static ImageView createView(Context context) {
         ImageView imageView = new ImageView(context);
+        imageView.setScaleType(ImageView.ScaleType.CENTER);
         imageView.setClickable(true);
         imageView.setFocusable(true);
         imageView.setAlpha(0f);
@@ -415,10 +419,8 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
     }
 
     @VisibleForTesting
-    static int getIconResId(int mode) {
-        return (mode == Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN)
-                ? R.drawable.ic_open_in_new_window
-                : R.drawable.ic_open_in_new_fullscreen;
+    static int getIconResId(int mode) { // TODO(b/242233514): delete non used param
+        return R.drawable.ic_open_in_new_window;
     }
 
     private static LayoutParams createLayoutParams(Context context) {

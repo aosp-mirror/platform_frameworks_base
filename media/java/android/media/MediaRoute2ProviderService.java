@@ -150,7 +150,7 @@ public abstract class MediaRoute2ProviderService extends Service {
     private final Deque<Long> mRequestIds = new ArrayDeque<>(MAX_REQUEST_IDS_SIZE);
 
     @GuardedBy("mSessionLock")
-    private final ArrayMap<String, RoutingSessionInfo> mSessionInfo = new ArrayMap<>();
+    private final ArrayMap<String, RoutingSessionInfo> mSessionInfos = new ArrayMap<>();
 
     public MediaRoute2ProviderService() {
         mHandler = new Handler(Looper.getMainLooper());
@@ -208,7 +208,7 @@ public abstract class MediaRoute2ProviderService extends Service {
             throw new IllegalArgumentException("sessionId must not be empty");
         }
         synchronized (mSessionLock) {
-            return mSessionInfo.get(sessionId);
+            return mSessionInfos.get(sessionId);
         }
     }
 
@@ -218,7 +218,7 @@ public abstract class MediaRoute2ProviderService extends Service {
     @NonNull
     public final List<RoutingSessionInfo> getAllSessionInfo() {
         synchronized (mSessionLock) {
-            return new ArrayList<>(mSessionInfo.values());
+            return new ArrayList<>(mSessionInfos.values());
         }
     }
 
@@ -252,11 +252,11 @@ public abstract class MediaRoute2ProviderService extends Service {
 
         String sessionId = sessionInfo.getId();
         synchronized (mSessionLock) {
-            if (mSessionInfo.containsKey(sessionId)) {
+            if (mSessionInfos.containsKey(sessionId)) {
                 Log.w(TAG, "notifySessionCreated: Ignoring duplicate session id.");
                 return;
             }
-            mSessionInfo.put(sessionInfo.getId(), sessionInfo);
+            mSessionInfos.put(sessionInfo.getId(), sessionInfo);
 
             if (mRemoteCallback == null) {
                 return;
@@ -282,8 +282,8 @@ public abstract class MediaRoute2ProviderService extends Service {
 
         String sessionId = sessionInfo.getId();
         synchronized (mSessionLock) {
-            if (mSessionInfo.containsKey(sessionId)) {
-                mSessionInfo.put(sessionId, sessionInfo);
+            if (mSessionInfos.containsKey(sessionId)) {
+                mSessionInfos.put(sessionId, sessionInfo);
             } else {
                 Log.w(TAG, "notifySessionUpdated: Ignoring unknown session info.");
                 return;
@@ -308,7 +308,7 @@ public abstract class MediaRoute2ProviderService extends Service {
 
         RoutingSessionInfo sessionInfo;
         synchronized (mSessionLock) {
-            sessionInfo = mSessionInfo.remove(sessionId);
+            sessionInfo = mSessionInfos.remove(sessionId);
 
             if (sessionInfo == null) {
                 Log.w(TAG, "notifySessionReleased: Ignoring unknown session info.");
@@ -514,7 +514,7 @@ public abstract class MediaRoute2ProviderService extends Service {
 
         List<RoutingSessionInfo> sessions;
         synchronized (mSessionLock) {
-            sessions = new ArrayList<>(mSessionInfo.values());
+            sessions = new ArrayList<>(mSessionInfos.values());
         }
 
         try {

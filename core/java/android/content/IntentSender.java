@@ -18,6 +18,8 @@ package android.content;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityThread;
+import android.app.IApplicationThread;
 import android.app.ActivityManager.PendingIntentInfo;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
@@ -194,7 +196,9 @@ public class IntentSender implements Parcelable {
             String resolvedType = intent != null ?
                     intent.resolveTypeIfNeeded(context.getContentResolver())
                     : null;
-            int res = ActivityManager.getService().sendIntentSender(mTarget, mWhitelistToken,
+            final IApplicationThread app = ActivityThread.currentActivityThread()
+                    .getApplicationThread();
+            int res = ActivityManager.getService().sendIntentSender(app, mTarget, mWhitelistToken,
                     code, intent, resolvedType,
                     onFinished != null
                             ? new FinishedDispatcher(this, onFinished, handler)

@@ -210,6 +210,7 @@ public final class NotificationRecord {
     // Whether this notification record should have an update logged the next time notifications
     // are sorted.
     private boolean mPendingLogUpdate = false;
+    private int mProposedImportance = IMPORTANCE_UNSPECIFIED;
 
     public NotificationRecord(Context context, StatusBarNotification sbn,
             NotificationChannel channel) {
@@ -499,6 +500,8 @@ public final class NotificationRecord {
         pw.println(prefix + "mImportance="
                 + NotificationListenerService.Ranking.importanceToString(mImportance));
         pw.println(prefix + "mImportanceExplanation=" + getImportanceExplanation());
+        pw.println(prefix + "mProposedImportance="
+                + NotificationListenerService.Ranking.importanceToString(mProposedImportance));
         pw.println(prefix + "mIsAppImportanceLocked=" + mIsAppImportanceLocked);
         pw.println(prefix + "mIntercept=" + mIntercept);
         pw.println(prefix + "mHidden==" + mHidden);
@@ -682,7 +685,7 @@ public final class NotificationRecord {
                 if (signals.containsKey(Adjustment.KEY_SNOOZE_CRITERIA)) {
                     final ArrayList<SnoozeCriterion> snoozeCriterionList =
                             adjustment.getSignals().getParcelableArrayList(
-                                    Adjustment.KEY_SNOOZE_CRITERIA);
+                                    Adjustment.KEY_SNOOZE_CRITERIA, android.service.notification.SnoozeCriterion.class);
                     setSnoozeCriteria(snoozeCriterionList);
                     EventLogTags.writeNotificationAdjusted(getKey(), Adjustment.KEY_SNOOZE_CRITERIA,
                             snoozeCriterionList.toString());
@@ -708,7 +711,7 @@ public final class NotificationRecord {
                 }
                 if (signals.containsKey(Adjustment.KEY_CONTEXTUAL_ACTIONS)) {
                     setSystemGeneratedSmartActions(
-                            signals.getParcelableArrayList(Adjustment.KEY_CONTEXTUAL_ACTIONS));
+                            signals.getParcelableArrayList(Adjustment.KEY_CONTEXTUAL_ACTIONS, android.app.Notification.Action.class));
                     EventLogTags.writeNotificationAdjusted(getKey(),
                             Adjustment.KEY_CONTEXTUAL_ACTIONS,
                             getSystemGeneratedSmartActions().toString());
@@ -737,6 +740,12 @@ public final class NotificationRecord {
                     EventLogTags.writeNotificationAdjusted(getKey(),
                             Adjustment.KEY_NOT_CONVERSATION,
                             Boolean.toString(mIsNotConversationOverride));
+                }
+                if (signals.containsKey(Adjustment.KEY_IMPORTANCE_PROPOSAL)) {
+                    mProposedImportance = signals.getInt(Adjustment.KEY_IMPORTANCE_PROPOSAL);
+                    EventLogTags.writeNotificationAdjusted(getKey(),
+                            Adjustment.KEY_IMPORTANCE_PROPOSAL,
+                            Integer.toString(mProposedImportance));
                 }
                 if (!signals.isEmpty() && adjustment.getIssuer() != null) {
                     mAdjustmentIssuer = adjustment.getIssuer();
@@ -868,6 +877,10 @@ public final class NotificationRecord {
 
     int getInitialImportance() {
         return stats.naturalImportance;
+    }
+
+    public int getProposedImportance() {
+        return mProposedImportance;
     }
 
     public float getRankingScore() {

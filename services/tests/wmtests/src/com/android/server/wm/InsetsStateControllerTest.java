@@ -24,9 +24,11 @@ import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -37,6 +39,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.spy;
@@ -44,11 +47,13 @@ import static org.mockito.Mockito.verify;
 
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
+import android.util.SparseArray;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
 
 import androidx.test.filters.SmallTest;
+
+import com.android.internal.util.function.TriConsumer;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -127,7 +132,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertNull(app.getInsetsState().peekSource(ITYPE_NAVIGATION_BAR));
     }
 
-    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @SetupWindows(addWindows = W_INPUT_METHOD)
     @Test
     public void testStripForDispatch_independentSources() {
         getController().getSourceProvider(ITYPE_IME).setWindowContainer(mImeWindow, null, null);
@@ -144,7 +149,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
                 .isVisible());
     }
 
-    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @SetupWindows(addWindows = W_INPUT_METHOD)
     @Test
     public void testStripForDispatch_belowIme() {
         getController().getSourceProvider(ITYPE_IME).setWindowContainer(mImeWindow, null, null);
@@ -157,7 +162,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertTrue(app.getInsetsState().getSource(ITYPE_IME).isVisible());
     }
 
-    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @SetupWindows(addWindows = W_INPUT_METHOD)
     @Test
     public void testStripForDispatch_aboveIme() {
         getController().getSourceProvider(ITYPE_IME).setWindowContainer(mImeWindow, null, null);
@@ -169,7 +174,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
                 .isVisible());
     }
 
-    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @SetupWindows(addWindows = W_INPUT_METHOD)
     @Test
     public void testStripForDispatch_imeOrderChanged() {
         // This can be the IME z-order target while app cannot be the IME z-order target.
@@ -183,10 +188,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         getController().getSourceProvider(ITYPE_IME).setWindowContainer(mImeWindow, null, null);
         getController().onImeControlTargetChanged(
                 mDisplayContent.getImeInputTarget().getWindowState());
-        final InsetsVisibilities requestedVisibilities = new InsetsVisibilities();
-        requestedVisibilities.setVisibility(ITYPE_IME, true);
-        mDisplayContent.getImeInputTarget().getWindowState()
-                .setRequestedVisibilities(requestedVisibilities);
+        mDisplayContent.getImeInputTarget().getWindowState().setRequestedVisibleTypes(ime(), ime());
         getController().onInsetsModified(mDisplayContent.getImeInputTarget().getWindowState());
 
         // Send our spy window (app) into the system so that we can detect the invocation.
@@ -224,7 +226,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertTrue(app.getInsetsState().getSource(ITYPE_IME).isVisible());
     }
 
-    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @SetupWindows(addWindows = W_INPUT_METHOD)
     @Test
     public void testStripForDispatch_childWindow_altFocusable() {
         getController().getSourceProvider(ITYPE_IME).setWindowContainer(mImeWindow, null, null);
@@ -245,7 +247,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
                 .isVisible());
     }
 
-    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @SetupWindows(addWindows = W_INPUT_METHOD)
     @Test
     public void testStripForDispatch_childWindow_splitScreen() {
         getController().getSourceProvider(ITYPE_IME).setWindowContainer(mImeWindow, null, null);
@@ -269,15 +271,18 @@ public class InsetsStateControllerTest extends WindowTestsBase {
     @Test
     public void testImeForDispatch() {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
-        final WindowState ime = createWindow(null, TYPE_APPLICATION, "ime");
+        final WindowState ime = createWindow(null, TYPE_INPUT_METHOD, "ime");
 
         // IME cannot be the IME target.
         ime.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
 
         WindowContainerInsetsSourceProvider statusBarProvider =
                 getController().getSourceProvider(ITYPE_STATUS_BAR);
-        statusBarProvider.setWindowContainer(statusBar, null, ((displayFrames, windowState, rect) ->
+        final SparseArray<TriConsumer<DisplayFrames, WindowContainer, Rect>> imeOverrideProviders =
+                new SparseArray<>();
+        imeOverrideProviders.put(TYPE_INPUT_METHOD, ((displayFrames, windowState, rect) ->
                 rect.set(0, 1, 2, 3)));
+        statusBarProvider.setWindowContainer(statusBar, null, imeOverrideProviders);
         getController().getSourceProvider(ITYPE_IME).setWindowContainer(ime, null, null);
         statusBar.setControllableInsetProvider(statusBarProvider);
         statusBar.updateSourceFrame(statusBar.getFrame());
@@ -407,7 +412,14 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         final WindowState navBar = createTestWindow("navBar");
 
         getController().getSourceProvider(ITYPE_IME).setWindowContainer(ime, null, null);
+
+        waitUntilHandlersIdle();
+        clearInvocations(mDisplayContent);
         getController().getSourceProvider(ITYPE_IME).setClientVisible(true);
+        waitUntilHandlersIdle();
+        // The visibility change should trigger a traversal to notify the change.
+        verify(mDisplayContent).notifyInsetsChanged(any());
+
         getController().getSourceProvider(ITYPE_STATUS_BAR).setWindowContainer(statusBar, null,
                 null);
         getController().getSourceProvider(ITYPE_NAVIGATION_BAR).setWindowContainer(navBar, null,
@@ -439,6 +451,44 @@ public class InsetsStateControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testUpdateAboveInsetsState_imeTargetOnScreenBehavior() {
+        final WindowToken imeToken = createTestWindowToken(TYPE_INPUT_METHOD, mDisplayContent);
+        final WindowState ime = createWindow(null,  TYPE_INPUT_METHOD, imeToken, "ime");
+        final WindowState app = createTestWindow("app");
+
+        getController().getSourceProvider(ITYPE_IME).setWindowContainer(ime, null, null);
+        ime.getControllableInsetProvider().setServerVisible(true);
+
+        app.mActivityRecord.setVisibility(true);
+        mDisplayContent.setImeLayeringTarget(app);
+        mDisplayContent.updateImeInputAndControlTarget(app);
+
+        app.setRequestedVisibleTypes(ime(), ime());
+        getController().onInsetsModified(app);
+        assertTrue(ime.getControllableInsetProvider().getSource().isVisible());
+
+        getController().updateAboveInsetsState(true /* notifyInsetsChange */);
+        assertNotNull(app.getInsetsState().peekSource(ITYPE_IME));
+        verify(app, atLeastOnce()).notifyInsetsChanged();
+
+        // Expect the app will still get IME insets even when the app was invisible.
+        // (i.e. app invisible after locking the device)
+        app.mActivityRecord.setVisible(false);
+        app.setHasSurface(false);
+        getController().updateAboveInsetsState(true /* notifyInsetsChange */);
+        assertNotNull(app.getInsetsState().peekSource(ITYPE_IME));
+        verify(app, atLeastOnce()).notifyInsetsChanged();
+
+        // Expect the app will get IME insets when the app is requesting visible.
+        // (i.e. app is going to visible when unlocking the device)
+        app.mActivityRecord.setVisibility(true);
+        assertTrue(app.isVisibleRequested());
+        getController().updateAboveInsetsState(true /* notifyInsetsChange */);
+        assertNotNull(app.getInsetsState().peekSource(ITYPE_IME));
+        verify(app, atLeastOnce()).notifyInsetsChanged();
+    }
+
+    @Test
     public void testDispatchGlobalInsets() {
         final WindowState navBar = createWindow(null, TYPE_APPLICATION, "navBar");
         getController().getSourceProvider(ITYPE_NAVIGATION_BAR).setWindowContainer(navBar, null,
@@ -449,7 +499,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertNotNull(app.getInsetsState().peekSource(ITYPE_NAVIGATION_BAR));
     }
 
-    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @SetupWindows(addWindows = W_INPUT_METHOD)
     @Test
     public void testGetInsetsHintForNewControl() {
         final WindowState app1 = createTestWindow("app1");

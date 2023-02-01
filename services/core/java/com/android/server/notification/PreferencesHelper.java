@@ -63,8 +63,6 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.StatsEvent;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
@@ -73,6 +71,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.notification.PermissionHelper.PackagePermission;
 
 import org.json.JSONArray;
@@ -108,7 +108,7 @@ public class PreferencesHelper implements RankingConfig {
     @VisibleForTesting
     static final int NOTIFICATION_CHANNEL_COUNT_LIMIT = 5000;
     @VisibleForTesting
-    static final int NOTIFICATION_CHANNEL_GROUP_COUNT_LIMIT = 50000;
+    static final int NOTIFICATION_CHANNEL_GROUP_COUNT_LIMIT = 6000;
 
     private static final int NOTIFICATION_PREFERENCES_PULL_LIMIT = 1000;
     private static final int NOTIFICATION_CHANNEL_PULL_LIMIT = 2000;
@@ -852,7 +852,9 @@ public class PreferencesHelper implements RankingConfig {
         Objects.requireNonNull(pkg);
         Objects.requireNonNull(group);
         Objects.requireNonNull(group.getId());
-        Objects.requireNonNull(!TextUtils.isEmpty(group.getName()));
+        if (TextUtils.isEmpty(group.getName())) {
+            throw new IllegalArgumentException("group.getName() can't be empty");
+        }
         boolean needsDndChange = false;
         synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
@@ -1005,6 +1007,7 @@ public class PreferencesHelper implements RankingConfig {
                     channel.setAllowBubbles(existing != null
                             ? existing.getAllowBubbles()
                             : NotificationChannel.DEFAULT_ALLOW_BUBBLE);
+                    channel.setImportantConversation(false);
                 }
                 clearLockedFieldsLocked(channel);
 

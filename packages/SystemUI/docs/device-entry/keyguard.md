@@ -30,6 +30,10 @@ An indication to power off the device most likely comes from one of two signals:
 
 ### How the device locks
 
+### Quick Affordances
+
+These are interactive UI elements that appear on the lockscreen when the device is locked. They allow the user to perform quick actions without unlocking their device. To learn more about them, please see [this dedicated document](quickaffordance.md)
+
 ## Debugging Tips
 Enable verbose keyguard logs that will print to logcat. Should only be used temporarily for debugging. See [KeyguardConstants][5].
 ```

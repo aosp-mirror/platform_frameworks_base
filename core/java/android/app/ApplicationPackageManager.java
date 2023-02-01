@@ -126,6 +126,11 @@ import dalvik.system.VMRuntime;
 
 import libcore.util.EmptyArray;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
@@ -960,7 +965,7 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public int checkSignatures(String pkg1, String pkg2) {
         try {
-            return mPM.checkSignatures(pkg1, pkg2);
+            return mPM.checkSignatures(pkg1, pkg2, getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1221,6 +1226,33 @@ public class ApplicationPackageManager extends PackageManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    @Override
+    @NonNull
+    public PersistableBundle getAppMetadata(@NonNull String packageName)
+            throws NameNotFoundException {
+        PersistableBundle appMetadata = null;
+        String path = null;
+        try {
+            path = mPM.getAppMetadataPath(packageName, getUserId());
+        } catch (ParcelableException e) {
+            e.maybeRethrow(NameNotFoundException.class);
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        if (path != null) {
+            File file = new File(path);
+            try (InputStream inputStream = new FileInputStream(file)) {
+                appMetadata = PersistableBundle.readFromStream(inputStream);
+            } catch (FileNotFoundException e) {
+                // ignore and return empty bundle if app metadata does not exist
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return appMetadata != null ? appMetadata : new PersistableBundle();
     }
 
     @SuppressWarnings("unchecked")
@@ -1695,8 +1727,8 @@ public class ApplicationPackageManager extends PackageManager {
         ComponentName className, int flags)
             throws NameNotFoundException {
         try {
-            InstrumentationInfo ii = mPM.getInstrumentationInfo(
-                className, flags);
+            InstrumentationInfo ii = mPM.getInstrumentationInfoAsUser(
+                    className, flags, getUserId());
             if (ii != null) {
                 return ii;
             }
@@ -1713,7 +1745,7 @@ public class ApplicationPackageManager extends PackageManager {
         String targetPackage, int flags) {
         try {
             ParceledListSlice<InstrumentationInfo> parceledList =
-                    mPM.queryInstrumentation(targetPackage, flags);
+                    mPM.queryInstrumentationAsUser(targetPackage, flags, getUserId());
             if (parceledList == null) {
                 return Collections.emptyList();
             }
@@ -3257,6 +3289,20 @@ public class ApplicationPackageManager extends PackageManager {
      * @hide
      */
     @Override
+    public boolean removeCrossProfileIntentFilter(IntentFilter filter, int sourceUserId,
+            int targetUserId, int flags) {
+        try {
+            return mPM.removeCrossProfileIntentFilter(filter, mContext.getOpPackageName(),
+                    sourceUserId, targetUserId, flags);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
     public void clearCrossProfileIntentFilters(int sourceUserId) {
         try {
             mPM.clearCrossProfileIntentFilters(sourceUserId, mContext.getOpPackageName());
@@ -3657,15 +3703,6 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public String getContentCaptureServicePackageName() {
-        try {
-            return mPM.getContentCaptureServicePackageName();
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
-        }
-    }
-
-    @Override
     public boolean isPackageStateProtected(String packageName, int userId) {
         try {
             return mPM.isPackageStateProtected(packageName, userId);
@@ -3716,15 +3753,7 @@ public class ApplicationPackageManager extends PackageManager {
             throws NameNotFoundException {
         Objects.requireNonNull(packageName);
         Objects.requireNonNull(propertyName);
-        try {
-            final Property property = mPM.getProperty(propertyName, packageName, null);
-            if (property == null) {
-                throw new NameNotFoundException();
-            }
-            return property;
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
-        }
+        return getPropertyAsUser(propertyName, packageName, null /* className */, getUserId());
     }
 
     @Override
@@ -3732,9 +3761,18 @@ public class ApplicationPackageManager extends PackageManager {
             throws NameNotFoundException {
         Objects.requireNonNull(component);
         Objects.requireNonNull(propertyName);
+        return getPropertyAsUser(propertyName,
+                component.getPackageName(), component.getClassName(), getUserId());
+    }
+
+    @Override
+    public Property getPropertyAsUser(@NonNull String propertyName, @NonNull String packageName,
+            @Nullable String className, int userId) throws NameNotFoundException {
+        Objects.requireNonNull(packageName);
+        Objects.requireNonNull(propertyName);
         try {
-            final Property property = mPM.getProperty(
-                    propertyName, component.getPackageName(), component.getClassName());
+            final Property property = mPM.getPropertyAsUser(propertyName,
+                    packageName, className, userId);
             if (property == null) {
                 throw new NameNotFoundException();
             }
@@ -3824,8 +3862,17 @@ public class ApplicationPackageManager extends PackageManager {
             @NonNull String targetPackageName) throws NameNotFoundException {
         Objects.requireNonNull(sourcePackageName);
         Objects.requireNonNull(targetPackageName);
+        return canPackageQuery(sourcePackageName, new String[]{targetPackageName})[0];
+    }
+
+    @Override
+    @NonNull
+    public boolean[] canPackageQuery(@NonNull String sourcePackageName,
+            @NonNull String[] targetPackageNames) throws NameNotFoundException {
+        Objects.requireNonNull(sourcePackageName);
+        Objects.requireNonNull(targetPackageNames);
         try {
-            return mPM.canPackageQuery(sourcePackageName, targetPackageName, getUserId());
+            return mPM.canPackageQuery(sourcePackageName, targetPackageNames, getUserId());
         } catch (ParcelableException e) {
             e.maybeRethrow(PackageManager.NameNotFoundException.class);
             throw new RuntimeException(e);
@@ -3840,6 +3887,31 @@ public class ApplicationPackageManager extends PackageManager {
             mPM.makeUidVisible(recipientUid, visibleUid);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
+    public boolean canUserUninstall(String packageName, UserHandle user) {
+        try {
+            return mPM.getBlockUninstallForUser(packageName, user.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
+    public boolean shouldShowNewAppInstalledNotification() {
+        return Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.SHOW_NEW_APP_INSTALLED_NOTIFICATION_ENABLED, 0) == 1;
+    }
+
+    @Override
+    public void relinquishUpdateOwnership(String targetPackage) {
+        Objects.requireNonNull(targetPackage);
+        try {
+            mPM.relinquishUpdateOwnership(targetPackage);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 }

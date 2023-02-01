@@ -16,7 +16,7 @@
 
 package com.android.server.display;
 
-import static com.android.server.wm.utils.RotationAnimationUtils.hasProtectedContent;
+import static com.android.internal.policy.TransitionAnimation.hasProtectedContent;
 
 import android.content.Context;
 import android.graphics.BLASTBufferQueue;
@@ -31,7 +31,6 @@ import android.opengl.EGLDisplay;
 import android.opengl.EGLSurface;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
-import android.os.IBinder;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -39,6 +38,7 @@ import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
+import android.window.ScreenCapture;
 
 import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
@@ -169,19 +169,11 @@ final class ColorFade {
         mDisplayWidth = displayInfo.getNaturalWidth();
         mDisplayHeight = displayInfo.getNaturalHeight();
 
-        final IBinder token = SurfaceControl.getInternalDisplayToken();
-        if (token == null) {
-            Slog.e(TAG,
-                    "Failed to take screenshot because internal display is disconnected");
-            return false;
-        }
-        final boolean isWideColor = SurfaceControl.getDynamicDisplayInfo(token).activeColorMode
-                == Display.COLOR_MODE_DISPLAY_P3;
-
+        final boolean isWideColor = displayInfo.colorMode == Display.COLOR_MODE_DISPLAY_P3;
         // Set mPrepared here so if initialization fails, resources can be cleaned up.
         mPrepared = true;
 
-        final SurfaceControl.ScreenshotHardwareBuffer hardwareBuffer = captureScreen();
+        final ScreenCapture.ScreenshotHardwareBuffer hardwareBuffer = captureScreen();
         if (hardwareBuffer == null) {
             dismiss();
             return false;
@@ -508,7 +500,7 @@ final class ColorFade {
     }
 
     private boolean setScreenshotTextureAndSetViewport(
-            SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer) {
+            ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer) {
         if (!attachEglContext()) {
             return false;
         }
@@ -559,8 +551,8 @@ final class ColorFade {
         }
     }
 
-    private SurfaceControl.ScreenshotHardwareBuffer captureScreen() {
-        SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
+    private ScreenCapture.ScreenshotHardwareBuffer captureScreen() {
+        ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
                 mDisplayManagerInternal.systemScreenshot(mDisplayId);
         if (screenshotBuffer == null) {
             Slog.e(TAG, "Failed to take screenshot. Buffer is null");

@@ -20,8 +20,11 @@ import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothUuid;
+import android.os.Build;
 import android.os.ParcelUuid;
 import android.util.Log;
+
+import androidx.annotation.ChecksSdkIntAtLeast;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -29,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * CsipDeviceManager manages the set of remote CSIP Bluetooth devices.
@@ -97,10 +101,20 @@ public class CsipDeviceManager {
         return groupId != BluetoothCsipSetCoordinator.GROUP_ID_INVALID;
     }
 
-    private CachedBluetoothDevice getCachedDevice(int groupId) {
+    /**
+     * To find the device with {@code groupId}.
+     *
+     * @param groupId The group id
+     * @return if we could find a device with this {@code groupId} return this device. Otherwise,
+     * return null.
+     */
+    public CachedBluetoothDevice getCachedDevice(int groupId) {
+        log("getCachedDevice: groupId: " + groupId);
         for (int i = mCachedDevices.size() - 1; i >= 0; i--) {
             CachedBluetoothDevice cachedDevice = mCachedDevices.get(i);
             if (cachedDevice.getGroupId() == groupId) {
+                log("getCachedDevice: found cachedDevice with the groupId: "
+                        + cachedDevice.getDevice().getAnonymizedAddress());
                 return cachedDevice;
             }
         }
@@ -126,32 +140,84 @@ public class CsipDeviceManager {
         }
     }
 
+    @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.TIRAMISU)
+    private static boolean isAtLeastT() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU;
+    }
+
     // Group devices by groupId
     @VisibleForTesting
     void onGroupIdChanged(int groupId) {
-        int firstMatchedIndex = -1;
-        CachedBluetoothDevice mainDevice = null;
+        if (!isValidGroupId(groupId)) {
+            log("onGroupIdChanged: groupId is invalid");
+            return;
+        }
+        log("onGroupIdChanged: mCachedDevices list =" + mCachedDevices.toString());
+        final LocalBluetoothProfileManager profileManager = mBtManager.getProfileManager();
+        final CachedBluetoothDeviceManager deviceManager = mBtManager.getCachedDeviceManager();
+        final LeAudioProfile leAudioProfile = profileManager.getLeAudioProfile();
+        final BluetoothDevice mainBluetoothDevice = (leAudioProfile != null && isAtLeastT()) ?
+                leAudioProfile.getConnectedGroupLeadDevice(groupId) : null;
+        CachedBluetoothDevice newMainDevice =
+                mainBluetoothDevice != null ? deviceManager.findDevice(mainBluetoothDevice) : null;
+        if (newMainDevice != null) {
+            final CachedBluetoothDevice finalNewMainDevice = newMainDevice;
+            final List<CachedBluetoothDevice> memberDevices = mCachedDevices.stream()
+                    .filter(cachedDevice -> !cachedDevice.equals(finalNewMainDevice)
+                            && cachedDevice.getGroupId() == groupId)
+                    .collect(Collectors.toList());
+            if (memberDevices == null || memberDevices.isEmpty()) {
+                log("onGroupIdChanged: There is no member device in list.");
+                return;
+            }
+            log("onGroupIdChanged: removed from UI device =" + memberDevices
+                    + ", with groupId=" + groupId + " mainDevice= " + newMainDevice);
+            for (CachedBluetoothDevice memberDeviceItem : memberDevices) {
+                Set<CachedBluetoothDevice> memberSet = memberDeviceItem.getMemberDevice();
+                if (!memberSet.isEmpty()) {
+                    log("onGroupIdChanged: Transfer the member list into new main device.");
+                    for (CachedBluetoothDevice memberListItem : memberSet) {
+                        if (!memberListItem.equals(newMainDevice)) {
+                            newMainDevice.addMemberDevice(memberListItem);
+                        }
+                    }
+                    memberSet.clear();
+                }
 
-        for (int i = mCachedDevices.size() - 1; i >= 0; i--) {
-            final CachedBluetoothDevice cachedDevice = mCachedDevices.get(i);
-            if (cachedDevice.getGroupId() != groupId) {
-                continue;
+                newMainDevice.addMemberDevice(memberDeviceItem);
+                mCachedDevices.remove(memberDeviceItem);
+                mBtManager.getEventManager().dispatchDeviceRemoved(memberDeviceItem);
             }
 
-            if (firstMatchedIndex == -1) {
-                // Found the first one
-                firstMatchedIndex = i;
-                mainDevice = cachedDevice;
-                continue;
+            if (!mCachedDevices.contains(newMainDevice)) {
+                mCachedDevices.add(newMainDevice);
+                mBtManager.getEventManager().dispatchDeviceAdded(newMainDevice);
             }
+        } else {
+            log("onGroupIdChanged: There is no main device from the LE profile.");
+            int firstMatchedIndex = -1;
 
-            log("onGroupIdChanged: removed from UI device =" + cachedDevice
-                    + ", with groupId=" + groupId + " firstMatchedIndex=" + firstMatchedIndex);
+            for (int i = mCachedDevices.size() - 1; i >= 0; i--) {
+                final CachedBluetoothDevice cachedDevice = mCachedDevices.get(i);
+                if (cachedDevice.getGroupId() != groupId) {
+                    continue;
+                }
 
-            mainDevice.addMemberDevice(cachedDevice);
-            mCachedDevices.remove(i);
-            mBtManager.getEventManager().dispatchDeviceRemoved(cachedDevice);
-            break;
+                if (firstMatchedIndex == -1) {
+                    // Found the first one
+                    firstMatchedIndex = i;
+                    newMainDevice = cachedDevice;
+                    continue;
+                }
+
+                log("onGroupIdChanged: removed from UI device =" + cachedDevice
+                        + ", with groupId=" + groupId + " firstMatchedIndex=" + firstMatchedIndex);
+
+                newMainDevice.addMemberDevice(cachedDevice);
+                mCachedDevices.remove(i);
+                mBtManager.getEventManager().dispatchDeviceRemoved(cachedDevice);
+                break;
+            }
         }
     }
 
@@ -175,7 +241,7 @@ public class CsipDeviceManager {
                         // When both LE Audio devices are disconnected, receiving member device
                         // connection. To switch content and dispatch to notify UI change
                         mBtManager.getEventManager().dispatchDeviceRemoved(mainDevice);
-                        mainDevice.switchMemberDeviceContent(mainDevice, cachedDevice);
+                        mainDevice.switchMemberDeviceContent(cachedDevice);
                         mainDevice.refresh();
                         // It is necessary to do remove and add for updating the mapping on
                         // preference and device
@@ -199,10 +265,11 @@ public class CsipDeviceManager {
 
                 for (CachedBluetoothDevice device: memberSet) {
                     if (device.isConnected()) {
+                        log("set device: " + device + " as the main device");
                         // Main device is disconnected and sub device is connected
                         // To copy data from sub device to main device
                         mBtManager.getEventManager().dispatchDeviceRemoved(cachedDevice);
-                        cachedDevice.switchMemberDeviceContent(device, cachedDevice);
+                        cachedDevice.switchMemberDeviceContent(device);
                         cachedDevice.refresh();
                         // It is necessary to do remove and add for updating the mapping on
                         // preference and device

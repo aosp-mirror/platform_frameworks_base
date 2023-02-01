@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -25,12 +26,14 @@ import android.annotation.TestApi;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.OutcomeReceiver;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.telecom.Logging.Session;
@@ -48,6 +51,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 
 /**
  * An abstract service that should be implemented by any apps which either:
@@ -164,6 +168,9 @@ public abstract class ConnectionService extends Service {
     private static final String SESSION_CREATE_CONF = "CS.crConf";
     private static final String SESSION_CREATE_CONF_COMPLETE = "CS.crConfC";
     private static final String SESSION_CREATE_CONF_FAILED = "CS.crConfF";
+    private static final String SESSION_CALL_ENDPOINT_CHANGED = "CS.oCEC";
+    private static final String SESSION_AVAILABLE_CALL_ENDPOINTS_CHANGED = "CS.oACEC";
+    private static final String SESSION_MUTE_STATE_CHANGED = "CS.oMSC";
 
     private static final int MSG_ADD_CONNECTION_SERVICE_ADAPTER = 1;
     private static final int MSG_CREATE_CONNECTION = 2;
@@ -208,6 +215,9 @@ public abstract class ConnectionService extends Service {
     private static final int MSG_ON_CALL_FILTERING_COMPLETED = 42;
     private static final int MSG_ON_USING_ALTERNATIVE_UI = 43;
     private static final int MSG_ON_TRACKED_BY_NON_UI_SERVICE = 44;
+    private static final int MSG_ON_CALL_ENDPOINT_CHANGED = 45;
+    private static final int MSG_ON_AVAILABLE_CALL_ENDPOINTS_CHANGED = 46;
+    private static final int MSG_ON_MUTE_STATE_CHANGED = 47;
 
     private static Connection sNullConnection;
 
@@ -586,6 +596,51 @@ public abstract class ConnectionService extends Service {
                 args.arg2 = callAudioState;
                 args.arg3 = Log.createSubsession();
                 mHandler.obtainMessage(MSG_ON_CALL_AUDIO_STATE_CHANGED, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
+        }
+
+        @Override
+        public void onCallEndpointChanged(String callId, CallEndpoint callEndpoint,
+                Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_CALL_ENDPOINT_CHANGED);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = callEndpoint;
+                args.arg3 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_ON_CALL_ENDPOINT_CHANGED, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
+        }
+
+        @Override
+        public void onAvailableCallEndpointsChanged(String callId,
+                List<CallEndpoint> availableCallEndpoints, Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_AVAILABLE_CALL_ENDPOINTS_CHANGED);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = availableCallEndpoints;
+                args.arg3 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_ON_AVAILABLE_CALL_ENDPOINTS_CHANGED, args)
+                       .sendToTarget();
+            } finally {
+                Log.endSession();
+            }
+        }
+
+        @Override
+        public void onMuteStateChanged(String callId, boolean isMuted, Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_MUTE_STATE_CHANGED);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = isMuted;
+                args.arg3 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_ON_MUTE_STATE_CHANGED, args).sendToTarget();
             } finally {
                 Log.endSession();
             }
@@ -1527,6 +1582,48 @@ public abstract class ConnectionService extends Service {
                 case MSG_CONNECTION_SERVICE_FOCUS_LOST:
                     onConnectionServiceFocusLost();
                     break;
+                case MSG_ON_CALL_ENDPOINT_CHANGED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    Log.continueSession((Session) args.arg3,
+                            SESSION_HANDLER + SESSION_CALL_AUDIO_SC);
+                    try {
+                        String callId = (String) args.arg1;
+                        CallEndpoint callEndpoint = (CallEndpoint) args.arg2;
+                        onCallEndpointChanged(callId, callEndpoint);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
+                    break;
+                }
+                case MSG_ON_AVAILABLE_CALL_ENDPOINTS_CHANGED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    Log.continueSession((Session) args.arg3,
+                            SESSION_HANDLER + SESSION_CALL_AUDIO_SC);
+                    try {
+                        String callId = (String) args.arg1;
+                        List<CallEndpoint>  availableCallEndpoints = (List<CallEndpoint>) args.arg2;
+                        onAvailableCallEndpointsChanged(callId, availableCallEndpoints);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
+                    break;
+                }
+                case MSG_ON_MUTE_STATE_CHANGED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    Log.continueSession((Session) args.arg3,
+                            SESSION_HANDLER + SESSION_CALL_AUDIO_SC);
+                    try {
+                        String callId = (String) args.arg1;
+                        boolean isMuted = (boolean) args.arg2;
+                        onMuteStateChanged(callId, isMuted);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
+                    break;
+                }
                 default:
                     break;
             }
@@ -1916,6 +2013,25 @@ public abstract class ConnectionService extends Service {
                 mAdapter.resetConnectionTime(id);
             }
         }
+
+        @Override
+        public void onEndpointChanged(Connection c, CallEndpoint endpoint, Executor executor,
+                OutcomeReceiver<Void, CallEndpointException> callback) {
+            String id = mIdByConnection.get(c);
+            if (id != null) {
+                mAdapter.requestCallEndpointChange(id, endpoint, executor, callback);
+            }
+        }
+
+        @Override
+        public void onQueryLocation(Connection c, long timeoutMillis, @NonNull String provider,
+                @NonNull @CallbackExecutor Executor executor,
+                @NonNull OutcomeReceiver<Location, QueryLocationException> callback) {
+            String id = mIdByConnection.get(c);
+            if (id != null) {
+                mAdapter.queryLocation(id, timeoutMillis, provider, executor, callback);
+            }
+        }
     };
 
     /** {@inheritDoc} */
@@ -2044,7 +2160,7 @@ public abstract class ConnectionService extends Service {
         if (isHandover) {
             PhoneAccountHandle fromPhoneAccountHandle = request.getExtras() != null
                     ? (PhoneAccountHandle) request.getExtras().getParcelable(
-                    TelecomManager.EXTRA_HANDOVER_FROM_PHONE_ACCOUNT) : null;
+                    TelecomManager.EXTRA_HANDOVER_FROM_PHONE_ACCOUNT, android.telecom.PhoneAccountHandle.class) : null;
             if (!isIncoming) {
                 connection = onCreateOutgoingHandoverConnection(fromPhoneAccountHandle, request);
             } else {
@@ -2310,6 +2426,36 @@ public abstract class ConnectionService extends Service {
         } else {
             findConferenceForAction(callId, "onCallAudioStateChanged").setCallAudioState(
                     callAudioState);
+        }
+    }
+
+    private void onCallEndpointChanged(String callId, CallEndpoint callEndpoint) {
+        Log.i(this, "onCallEndpointChanged %s %s", callId, callEndpoint);
+        if (mConnectionById.containsKey(callId)) {
+            findConnectionForAction(callId, "onCallEndpointChanged").setCallEndpoint(callEndpoint);
+        } else {
+            findConferenceForAction(callId, "onCallEndpointChanged").setCallEndpoint(callEndpoint);
+        }
+    }
+
+    private void onAvailableCallEndpointsChanged(String callId,
+            List<CallEndpoint> availableCallEndpoints) {
+        Log.i(this, "onAvailableCallEndpointsChanged %s", callId);
+        if (mConnectionById.containsKey(callId)) {
+            findConnectionForAction(callId, "onAvailableCallEndpointsChanged")
+                    .setAvailableCallEndpoints(availableCallEndpoints);
+        } else {
+            findConferenceForAction(callId, "onAvailableCallEndpointsChanged")
+                    .setAvailableCallEndpoints(availableCallEndpoints);
+        }
+    }
+
+    private void onMuteStateChanged(String callId, boolean isMuted) {
+        Log.i(this, "onMuteStateChanged %s %s", callId, isMuted);
+        if (mConnectionById.containsKey(callId)) {
+            findConnectionForAction(callId, "onMuteStateChanged").setMuteState(isMuted);
+        } else {
+            findConferenceForAction(callId, "onMuteStateChanged").setMuteState(isMuted);
         }
     }
 

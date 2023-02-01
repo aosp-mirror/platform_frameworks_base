@@ -41,6 +41,8 @@ import java.util.Collections;
 final class MediaRoute2ProviderWatcher {
     private static final String TAG = "MR2ProviderWatcher";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final PackageManager.ResolveInfoFlags RESOLVE_INFO_FLAGS_NONE =
+            PackageManager.ResolveInfoFlags.of(0);
 
     private final Context mContext;
     private final Callback mCallback;
@@ -61,10 +63,15 @@ final class MediaRoute2ProviderWatcher {
     }
 
     public void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + "Watcher");
-        pw.println(prefix + "  mUserId=" + mUserId);
-        pw.println(prefix + "  mRunning=" + mRunning);
-        pw.println(prefix + "  mProxies.size()=" + mProxies.size());
+        pw.println(prefix + "MediaRoute2ProviderWatcher");
+        prefix += "  ";
+        if (mProxies.isEmpty()) {
+            pw.println(prefix + "<no provider service proxies>");
+        } else {
+            for (MediaRoute2ProviderServiceProxy proxy : mProxies) {
+                proxy.dump(pw, prefix);
+            }
+        }
     }
 
     public void start() {
@@ -110,8 +117,9 @@ final class MediaRoute2ProviderWatcher {
         // Reorder the list so that providers left at the end will be the ones to remove.
         int targetIndex = 0;
         Intent intent = new Intent(MediaRoute2ProviderService.SERVICE_INTERFACE);
-        for (ResolveInfo resolveInfo : mPackageManager.queryIntentServicesAsUser(
-                intent, 0, mUserId)) {
+        for (ResolveInfo resolveInfo :
+                mPackageManager.queryIntentServicesAsUser(
+                        intent, RESOLVE_INFO_FLAGS_NONE, mUserId)) {
             ServiceInfo serviceInfo = resolveInfo.serviceInfo;
             if (serviceInfo != null) {
                 int sourceIndex = findProvider(serviceInfo.packageName, serviceInfo.name);

@@ -24,6 +24,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.IRemoteCallback;
 import android.os.PersistableBundle;
 import android.view.RemoteAnimationDefinition;
 import android.window.SizeConfigurationBuckets;
@@ -38,6 +39,7 @@ import com.android.internal.policy.IKeyguardDismissCallback;
 interface IActivityClientController {
     oneway void activityIdle(in IBinder token, in Configuration config, in boolean stopProfiling);
     oneway void activityResumed(in IBinder token, in boolean handleSplashScreenExit);
+    oneway void activityRefreshed(in IBinder token);
     /**
      * This call is not one-way because {@link #activityPaused()) is not one-way, or
      * the top-resumed-lost could be reported after activity paused.
@@ -60,18 +62,29 @@ interface IActivityClientController {
             in SizeConfigurationBuckets sizeConfigurations);
     boolean moveActivityTaskToBack(in IBinder token, boolean nonRoot);
     boolean shouldUpRecreateTask(in IBinder token, in String destAffinity);
-    boolean navigateUpTo(in IBinder token, in Intent target, int resultCode,
-            in Intent resultData);
+    boolean navigateUpTo(in IBinder token, in Intent target, in String resolvedType,
+            int resultCode, in Intent resultData);
     boolean releaseActivityInstance(in IBinder token);
     boolean finishActivity(in IBinder token, int code, in Intent data, int finishTask);
     boolean finishActivityAffinity(in IBinder token);
     /** Finish all activities that were started for result from the specified activity. */
     void finishSubActivity(in IBinder token, in String resultWho, int requestCode);
+    /**
+     * Indicates that when the activity finsihes, the result should be immediately sent to the
+     * originating activity. Must only be invoked during MediaProjection setup.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)")
+    void setForceSendResultForMediaProjection(in IBinder token);
 
     boolean isTopOfTask(in IBinder token);
     boolean willActivityBeVisible(in IBinder token);
     int getDisplayId(in IBinder activityToken);
     int getTaskForActivity(in IBinder token, in boolean onlyRoot);
+    /**
+     * Returns the {@link Configuration} of the task which hosts the Activity, or {@code null} if
+     * the task {@link Configuration} cannot be obtained.
+     */
+    Configuration getTaskConfiguration(in IBinder activityToken);
     IBinder getActivityTokenBelow(IBinder token);
     ComponentName getCallingActivity(in IBinder token);
     String getCallingPackage(in IBinder token);
@@ -91,6 +104,8 @@ interface IActivityClientController {
     void setPictureInPictureParams(in IBinder token, in PictureInPictureParams params);
     oneway void setShouldDockBigOverlays(in IBinder token, in boolean shouldDockBigOverlays);
     void toggleFreeformWindowingMode(in IBinder token);
+    oneway void requestMultiwindowFullscreen(in IBinder token, in int request,
+            in IRemoteCallback callback);
 
     oneway void startLockTaskModeByToken(in IBinder token);
     oneway void stopLockTaskModeByToken(in IBinder token);
@@ -138,10 +153,9 @@ interface IActivityClientController {
     void unregisterRemoteAnimations(in IBinder token);
 
     /**
-     * Reports that an Activity received a back key press when there were no additional activities
-     * on the back stack.
+     * Reports that an Activity received a back key press.
      */
-    oneway void onBackPressedOnTaskRoot(in IBinder activityToken,
+    oneway void onBackPressed(in IBinder activityToken,
             in IRequestFinishCallback callback);
 
     /** Reports that the splash screen view has attached to activity.  */
@@ -157,4 +171,10 @@ interface IActivityClientController {
      */
     oneway void requestCompatCameraControl(in IBinder token, boolean showControl,
             boolean transformationApplied, in ICompatCameraControlCallback callback);
+
+    /**
+     * If set, any activity launch in the same task will be overridden to the locale of activity
+     * that started the task.
+     */
+    void enableTaskLocaleOverride(in IBinder token);
 }

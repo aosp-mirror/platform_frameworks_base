@@ -19,9 +19,9 @@ package com.android.systemui.statusbar.phone
 import android.util.DisplayMetrics
 import android.view.View
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
 import com.android.systemui.log.dagger.LSShadeTransitionLog
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import javax.inject.Inject

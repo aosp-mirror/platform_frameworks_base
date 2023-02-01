@@ -16,39 +16,48 @@
 
 package com.android.systemui;
 
-import android.content.Context;
 import android.content.res.Configuration;
 
 import androidx.annotation.NonNull;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 import java.io.PrintWriter;
 
 /**
- * A top-level module of system UI code (sometimes called "system UI services" elsewhere in code).
- * Which CoreStartable modules are loaded can be controlled via a config resource.
+ * Code that needs to be run when SystemUI is started.
+ *
+ * Which CoreStartable modules are loaded is controlled via the dagger graph. Bind them into the
+ * CoreStartable map with code such as:
+ *
+ *  <pre>
+ *  &#64;Binds
+ *  &#64;IntoMap
+ *  &#64;ClassKey(FoobarStartable::class)
+ *  abstract fun bind(impl: FoobarStartable): CoreStartable
+ *  </pre>
  *
  * @see SystemUIApplication#startServicesIfNeeded()
  */
-public abstract class CoreStartable implements Dumpable {
-    protected final Context mContext;
+public interface CoreStartable extends Dumpable {
 
-    public CoreStartable(Context context) {
-        mContext = context;
-    }
+    /** Main entry point for implementations. Called shortly after SysUI startup. */
+    void start();
 
-    /** Main entry point for implementations. Called shortly after app startup. */
-    public abstract void start();
-
-    protected void onConfigurationChanged(Configuration newConfig) {
+    /** Called when the device configuration changes. This will not be called before
+     * {@link #start()}, but it could be called before {@link #onBootCompleted()}.
+     *
+     * @see android.app.Application#onConfigurationChanged(Configuration)  */
+    default void onConfigurationChanged(Configuration newConfig) {
     }
 
     @Override
-    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+    default void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
     }
 
-    @VisibleForTesting
-    protected void onBootCompleted() {
+    /** Called immediately after the system broadcasts
+     * {@link android.content.Intent#ACTION_LOCKED_BOOT_COMPLETED} or during SysUI startup if the
+     * property {@code sys.boot_completed} is already set to 1. The latter typically occurs when
+     * starting a new SysUI instance, such as when starting SysUI for a secondary user.
+     * {@link #onBootCompleted()} will never be called before {@link #start()}. */
+    default void onBootCompleted() {
     }
 }

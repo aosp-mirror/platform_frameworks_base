@@ -48,6 +48,9 @@ public interface NavigationEdgeBackPlugin extends Plugin {
     /** Sets the base LayoutParams for the UI. */
     void setLayoutParams(WindowManager.LayoutParams layoutParams);
 
+    /** Sets the motion events handler for the plugin. */
+    default void setMotionEventsHandler(MotionEventsHandlerBase motionEventsHandler) {}
+
     /** Updates the UI based on the motion events passed in device coordinates. */
     void onMotionEvent(MotionEvent motionEvent);
 
@@ -61,5 +64,12 @@ public interface NavigationEdgeBackPlugin extends Plugin {
 
         /** Indicates that the gesture was cancelled and the system should not go back. */
         void cancelBack();
+
+        /**
+         * Indicates if back will be triggered if committed in current state.
+         *
+         * @param triggerBack if back will be triggered in current state.
+         */
+        void setTriggerBack(boolean triggerBack);
     }
 }

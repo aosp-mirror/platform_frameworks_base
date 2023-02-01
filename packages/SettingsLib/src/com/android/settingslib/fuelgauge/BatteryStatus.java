@@ -66,7 +66,7 @@ public class BatteryStatus {
     public BatteryStatus(Intent batteryChangedIntent) {
         status = batteryChangedIntent.getIntExtra(EXTRA_STATUS, BATTERY_STATUS_UNKNOWN);
         plugged = batteryChangedIntent.getIntExtra(EXTRA_PLUGGED, 0);
-        level = batteryChangedIntent.getIntExtra(EXTRA_LEVEL, 0);
+        level = getBatteryLevel(batteryChangedIntent);
         health = batteryChangedIntent.getIntExtra(EXTRA_HEALTH, BATTERY_HEALTH_UNKNOWN);
         present = batteryChangedIntent.getBooleanExtra(EXTRA_PRESENT, true);
 
@@ -135,7 +135,7 @@ public class BatteryStatus {
      * @return true if the device is charged
      */
     public boolean isCharged() {
-        return status == BATTERY_STATUS_FULL || level >= 100;
+        return isCharged(status, level);
     }
 
     /**
@@ -176,5 +176,41 @@ public class BatteryStatus {
     public String toString() {
         return "BatteryStatus{status=" + status + ",level=" + level + ",plugged=" + plugged
                 + ",health=" + health + ",maxChargingWattage=" + maxChargingWattage + "}";
+    }
+
+    /**
+     * Whether or not the device is charged. Note that some devices never return 100% for
+     * battery level, so this allows either battery level or status to determine if the
+     * battery is charged.
+     *
+     * @param batteryChangedIntent ACTION_BATTERY_CHANGED intent
+     * @return true if the device is charged
+     */
+    public static boolean isCharged(Intent batteryChangedIntent) {
+        int status = batteryChangedIntent.getIntExtra(EXTRA_STATUS, BATTERY_STATUS_UNKNOWN);
+        int level = getBatteryLevel(batteryChangedIntent);
+        return isCharged(status, level);
+    }
+
+    /**
+     * Whether or not the device is charged. Note that some devices never return 100% for
+     * battery level, so this allows either battery level or status to determine if the
+     * battery is charged.
+     *
+     * @param status values for "status" field in the ACTION_BATTERY_CHANGED Intent
+     * @param level values from 0 to 100
+     * @return true if the device is charged
+     */
+    public static boolean isCharged(int status, int level) {
+        return status == BATTERY_STATUS_FULL || level >= 100;
+    }
+
+    /** Gets the battery level from the intent. */
+    public static int getBatteryLevel(Intent batteryChangedIntent) {
+        final int level = batteryChangedIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        final int scale = batteryChangedIntent.getIntExtra(BatteryManager.EXTRA_SCALE, 0);
+        return scale == 0
+                ? -1 /*invalid battery level*/
+                : Math.round((level / (float) scale) * 100f);
     }
 }

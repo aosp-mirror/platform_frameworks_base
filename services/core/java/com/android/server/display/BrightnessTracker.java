@@ -55,8 +55,6 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.util.AtomicFile;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.Display;
 
@@ -64,6 +62,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.RingBuffer;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
 
 import libcore.io.IoUtils;
@@ -79,10 +79,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -101,8 +99,6 @@ public class BrightnessTracker {
     private static final int MAX_EVENTS = 100;
     // Discard events when reading or writing that are older than this.
     private static final long MAX_EVENT_AGE = TimeUnit.DAYS.toMillis(30);
-    // Time over which we keep lux sensor readings.
-    private static final long LUX_EVENT_HORIZON = TimeUnit.SECONDS.toNanos(10);
 
     private static final String TAG_EVENTS = "events";
     private static final String TAG_EVENT = "event";
@@ -174,8 +170,6 @@ public class BrightnessTracker {
     // Lock held while collecting data related to brightness changes.
     private final Object mDataCollectionLock = new Object();
     @GuardedBy("mDataCollectionLock")
-    private Deque<LightData> mLastSensorReadings = new ArrayDeque<>();
-    @GuardedBy("mDataCollectionLock")
     private float mLastBatteryLevel = Float.NaN;
     @GuardedBy("mDataCollectionLock")
     private float mLastBrightness = -1;
@@ -220,6 +214,11 @@ public class BrightnessTracker {
     }
 
     private void backgroundStart(float initialBrightness) {
+        synchronized (mDataCollectionLock) {
+            if (mStarted) {
+                return;
+            }
+        }
         if (DEBUG) {
             Slog.d(TAG, "Background start");
         }
@@ -250,6 +249,11 @@ public class BrightnessTracker {
 
     /** Stop listening for events */
     void stop() {
+        synchronized (mDataCollectionLock) {
+            if (!mStarted) {
+                return;
+            }
+        }
         if (DEBUG) {
             Slog.d(TAG, "Stop");
         }
@@ -317,7 +321,8 @@ public class BrightnessTracker {
      */
     public void notifyBrightnessChanged(float brightness, boolean userInitiated,
             float powerBrightnessFactor, boolean isUserSetBrightness,
-            boolean isDefaultBrightnessConfig, String uniqueDisplayId) {
+            boolean isDefaultBrightnessConfig, String uniqueDisplayId, float[] luxValues,
+            long[] luxTimestamps) {
         if (DEBUG) {
             Slog.d(TAG, String.format("notifyBrightnessChanged(brightness=%f, userInitiated=%b)",
                         brightness, userInitiated));
@@ -325,7 +330,7 @@ public class BrightnessTracker {
         Message m = mBgHandler.obtainMessage(MSG_BRIGHTNESS_CHANGED,
                 userInitiated ? 1 : 0, 0 /*unused*/, new BrightnessChangeValues(brightness,
                         powerBrightnessFactor, isUserSetBrightness, isDefaultBrightnessConfig,
-                        mInjector.currentTimeMillis(), uniqueDisplayId));
+                        mInjector.currentTimeMillis(), uniqueDisplayId, luxValues, luxTimestamps));
         m.sendToTarget();
     }
 
@@ -339,7 +344,8 @@ public class BrightnessTracker {
 
     private void handleBrightnessChanged(float brightness, boolean userInitiated,
             float powerBrightnessFactor, boolean isUserSetBrightness,
-            boolean isDefaultBrightnessConfig, long timestamp, String uniqueDisplayId) {
+            boolean isDefaultBrightnessConfig, long timestamp, String uniqueDisplayId,
+            float[] luxValues, long[] luxTimestamps) {
         BrightnessChangeEvent.Builder builder;
 
         synchronized (mDataCollectionLock) {
@@ -366,28 +372,22 @@ public class BrightnessTracker {
             builder.setIsDefaultBrightnessConfig(isDefaultBrightnessConfig);
             builder.setUniqueDisplayId(uniqueDisplayId);
 
-            final int readingCount = mLastSensorReadings.size();
-            if (readingCount == 0) {
+            if (luxValues.length == 0) {
                 // No sensor data so ignore this.
                 return;
             }
 
-            float[] luxValues = new float[readingCount];
-            long[] luxTimestamps = new long[readingCount];
+            long[] luxTimestampsMillis = new long[luxTimestamps.length];
 
-            int pos = 0;
-
-            // Convert sensor timestamp in elapsed time nanos to current time millis.
+            // Convert lux timestamp in elapsed time to current time.
             long currentTimeMillis = mInjector.currentTimeMillis();
             long elapsedTimeNanos = mInjector.elapsedRealtimeNanos();
-            for (LightData reading : mLastSensorReadings) {
-                luxValues[pos] = reading.lux;
-                luxTimestamps[pos] = currentTimeMillis -
-                        TimeUnit.NANOSECONDS.toMillis(elapsedTimeNanos - reading.timestamp);
-                ++pos;
+            for (int i = 0; i < luxTimestamps.length; i++) {
+                luxTimestampsMillis[i] = currentTimeMillis - (TimeUnit.NANOSECONDS.toMillis(
+                        elapsedTimeNanos) - luxTimestamps[i]);
             }
             builder.setLuxValues(luxValues);
-            builder.setLuxTimestamps(luxTimestamps);
+            builder.setLuxTimestamps(luxTimestampsMillis);
 
             builder.setBatteryLevel(mLastBatteryLevel);
             builder.setLastBrightness(previousBrightness);
@@ -442,9 +442,6 @@ public class BrightnessTracker {
         if (mLightSensor != lightSensor) {
             mLightSensor = lightSensor;
             stopSensorListener();
-            synchronized (mDataCollectionLock) {
-                mLastSensorReadings.clear();
-            }
             // Attempt to restart the sensor listener. It will check to see if it should be running
             // so there is no need to also check here.
             startSensorListener();
@@ -530,12 +527,36 @@ public class BrightnessTracker {
         }
     }
 
+    // Return the path to the given file, either the new path
+    // /data/system/$filename, or the old path /data/system_de/$filename if the
+    // file exists there but not at the new path.  Only use this for EVENTS_FILE
+    // and AMBIENT_BRIGHTNESS_STATS_FILE.
+    //
+    // Explanation: this service previously incorrectly stored these two files
+    // directly in /data/system_de, instead of in /data/system where they should
+    // have been.  As system_server no longer has write access to
+    // /data/system_de itself, these files were moved to /data/system.  To
+    // lazily migrate the files, we simply read from the old path if it exists
+    // and the new one doesn't, and always write to the new path.  Note that
+    // system_server doesn't have permission to delete the old files.
+    private AtomicFile getFileWithLegacyFallback(String filename) {
+        AtomicFile file = mInjector.getFile(filename);
+        if (file != null && !file.exists()) {
+            AtomicFile legacyFile = mInjector.getLegacyFile(filename);
+            if (legacyFile != null && legacyFile.exists()) {
+                Slog.i(TAG, "Reading " + filename + " from old location");
+                return legacyFile;
+            }
+        }
+        return file;
+    }
+
     private void readEvents() {
         synchronized (mEventsLock) {
             // Read might prune events so mark as dirty.
             mEventsDirty = true;
             mEvents.clear();
-            final AtomicFile readFrom = mInjector.getFile(EVENTS_FILE);
+            final AtomicFile readFrom = getFileWithLegacyFallback(EVENTS_FILE);
             if (readFrom != null && readFrom.exists()) {
                 FileInputStream input = null;
                 try {
@@ -553,7 +574,7 @@ public class BrightnessTracker {
 
     private void readAmbientBrightnessStats() {
         mAmbientBrightnessStatsTracker = new AmbientBrightnessStatsTracker(mUserManager, null);
-        final AtomicFile readFrom = mInjector.getFile(AMBIENT_BRIGHTNESS_STATS_FILE);
+        final AtomicFile readFrom = getFileWithLegacyFallback(AMBIENT_BRIGHTNESS_STATS_FILE);
         if (readFrom != null && readFrom.exists()) {
             FileInputStream input = null;
             try {
@@ -764,12 +785,6 @@ public class BrightnessTracker {
             pw.println("  mLightSensor=" + mLightSensor);
             pw.println("  mLastBatteryLevel=" + mLastBatteryLevel);
             pw.println("  mLastBrightness=" + mLastBrightness);
-            pw.println("  mLastSensorReadings.size=" + mLastSensorReadings.size());
-            if (!mLastSensorReadings.isEmpty()) {
-                pw.println("  mLastSensorReadings time span "
-                        + mLastSensorReadings.peekFirst().timestamp + "->"
-                        + mLastSensorReadings.peekLast().timestamp);
-            }
         }
         synchronized (mEventsLock) {
             pw.println("  mEventsDirty=" + mEventsDirty);
@@ -885,43 +900,6 @@ public class BrightnessTracker {
         return ParceledListSlice.emptyList();
     }
 
-    // Not allowed to keep the SensorEvent so used to copy the data we care about.
-    private static class LightData {
-        public float lux;
-        // Time in elapsedRealtimeNanos
-        public long timestamp;
-    }
-
-    private void recordSensorEvent(SensorEvent event) {
-        long horizon = mInjector.elapsedRealtimeNanos() - LUX_EVENT_HORIZON;
-        synchronized (mDataCollectionLock) {
-            if (DEBUG) {
-                Slog.v(TAG, "Sensor event " + event);
-            }
-            if (!mLastSensorReadings.isEmpty()
-                    && event.timestamp < mLastSensorReadings.getLast().timestamp) {
-                // Ignore event that came out of order.
-                return;
-            }
-            LightData data = null;
-            while (!mLastSensorReadings.isEmpty()
-                    && mLastSensorReadings.getFirst().timestamp < horizon) {
-                // Remove data that has fallen out of the window.
-                data = mLastSensorReadings.removeFirst();
-            }
-            // We put back the last one we removed so we know how long
-            // the first sensor reading was valid for.
-            if (data != null) {
-                mLastSensorReadings.addFirst(data);
-            }
-
-            data = new LightData();
-            data.timestamp = event.timestamp;
-            data.lux = event.values[0];
-            mLastSensorReadings.addLast(data);
-        }
-    }
-
     private void recordAmbientBrightnessStats(SensorEvent event) {
         mAmbientBrightnessStatsTracker.add(mCurrentUserId, event.values[0]);
     }
@@ -935,7 +913,6 @@ public class BrightnessTracker {
     private final class SensorListener implements SensorEventListener {
         @Override
         public void onSensorChanged(SensorEvent event) {
-            recordSensorEvent(event);
             recordAmbientBrightnessStats(event);
         }
 
@@ -1022,7 +999,7 @@ public class BrightnessTracker {
                     handleBrightnessChanged(values.brightness, userInitiatedChange,
                             values.powerBrightnessFactor, values.isUserSetBrightness,
                             values.isDefaultBrightnessConfig, values.timestamp,
-                            values.uniqueDisplayId);
+                            values.uniqueDisplayId, values.luxValues, values.luxTimestamps);
                     break;
                 case MSG_START_SENSOR_LISTENER:
                     startSensorListener();
@@ -1058,16 +1035,20 @@ public class BrightnessTracker {
         public final boolean isDefaultBrightnessConfig;
         public final long timestamp;
         public final String uniqueDisplayId;
+        public final float[] luxValues;
+        public final long[] luxTimestamps;
 
         BrightnessChangeValues(float brightness, float powerBrightnessFactor,
                 boolean isUserSetBrightness, boolean isDefaultBrightnessConfig,
-                long timestamp, String uniqueDisplayId) {
+                long timestamp, String uniqueDisplayId, float[] luxValues, long[] luxTimestamps) {
             this.brightness = brightness;
             this.powerBrightnessFactor = powerBrightnessFactor;
             this.isUserSetBrightness = isUserSetBrightness;
             this.isDefaultBrightnessConfig = isDefaultBrightnessConfig;
             this.timestamp = timestamp;
             this.uniqueDisplayId = uniqueDisplayId;
+            this.luxValues = luxValues;
+            this.luxTimestamps = luxTimestamps;
         }
     }
 
@@ -1099,7 +1080,7 @@ public class BrightnessTracker {
 
         public void registerReceiver(Context context,
                 BroadcastReceiver receiver, IntentFilter filter) {
-            context.registerReceiver(receiver, filter);
+            context.registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED_UNAUDITED);
         }
 
         public void unregisterReceiver(Context context,
@@ -1123,6 +1104,10 @@ public class BrightnessTracker {
         }
 
         public AtomicFile getFile(String filename) {
+            return new AtomicFile(new File(Environment.getDataSystemDirectory(), filename));
+        }
+
+        public AtomicFile getLegacyFile(String filename) {
             return new AtomicFile(new File(Environment.getDataSystemDeDirectory(), filename));
         }
 

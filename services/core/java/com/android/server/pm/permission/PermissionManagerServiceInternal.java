@@ -23,7 +23,8 @@ import android.app.AppOpsManager;
 import android.content.pm.PermissionInfo;
 import android.permission.PermissionManagerInternal;
 
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -102,6 +103,14 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
             @UserIdInt int userId);
 
     /**
+     * Reset the runtime permission state changes for all packages in a user.
+     *
+     * @param userId the user ID
+     */
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    void resetRuntimePermissionsForUser(@UserIdInt int userId);
+
+    /**
      * Read legacy permission state from package settings.
      *
      * TODO(zhanghai): This is a temporary method because we should not expose
@@ -117,6 +126,19 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
      * for permission.
      */
     void writeLegacyPermissionStateTEMP();
+
+    /**
+     * Get all the permissions definitions from a package that's installed in the system.
+     * <p>
+     * A permission definition in a normal app may not be installed if it's overridden by the
+     * platform or system app that contains a conflicting definition after system upgrade.
+     *
+     * @param packageName the name of the package
+     * @return the names of the installed permissions
+     */
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    @NonNull
+    Set<String> getInstalledPermissions(@NonNull String packageName);
 
     /**
      * Get all the permissions granted to a package.
@@ -156,11 +178,12 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
 
     /** Get all permissions that have a certain protection */
     @NonNull
-    ArrayList<PermissionInfo> getAllPermissionsWithProtection(
+    List<PermissionInfo> getAllPermissionsWithProtection(
             @PermissionInfo.Protection int protection);
 
-    /** Get all permissions that have certain protection flags */
-    @NonNull ArrayList<PermissionInfo> getAllPermissionsWithProtectionFlags(
+    /** Get all permissions that have certain protection flags
+     * @return*/
+    @NonNull List<PermissionInfo> getAllPermissionsWithProtectionFlags(
             @PermissionInfo.ProtectionFlags int protectionFlags);
 
     /**
@@ -240,13 +263,13 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
     /**
      * Callback when a package has been added.
      *
-     * @param pkg the added package
+     * @param packageState the added package
      * @param isInstantApp whether the added package is an instant app
      * @param oldPkg the old package, or {@code null} if none
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    void onPackageAdded(@NonNull AndroidPackage pkg, boolean isInstantApp,
-            @Nullable AndroidPackage oldPkg);
+    void onPackageAdded(@NonNull PackageState packageState,
+            boolean isInstantApp, @Nullable AndroidPackage oldPkg);
 
     /**
      * Callback when a package has been installed for a user.
@@ -276,16 +299,15 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
      * The package may have been fully removed from the system, or only marked as uninstalled for
      * this user but still instlaled for other users.
      *
-     * TODO: Pass PackageState instead.
-     *
      * @param packageName the name of the uninstalled package
      * @param appId the app ID of the uninstalled package
-     * @param pkg the uninstalled package, or {@code null} if unavailable
+     * @param packageState the uninstalled package, or {@code null} if unavailable
      * @param sharedUserPkgs the packages that are in the same shared user
      * @param userId the user ID the package is uninstalled for
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    void onPackageUninstalled(@NonNull String packageName, int appId, @Nullable AndroidPackage pkg,
+    void onPackageUninstalled(@NonNull String packageName, int appId,
+            @Nullable PackageState packageState, @Nullable AndroidPackage pkg,
             @NonNull List<AndroidPackage> sharedUserPkgs, @UserIdInt int userId);
 
     /**

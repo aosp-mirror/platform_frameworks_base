@@ -30,6 +30,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
@@ -45,7 +46,7 @@ import java.io.PrintWriter;
  *
  * @hide
  **/
-class SoftwareHotwordDetector extends AbstractHotwordDetector {
+class SoftwareHotwordDetector extends AbstractDetector {
     private static final String TAG = SoftwareHotwordDetector.class.getSimpleName();
     private static final boolean DEBUG = false;
 
@@ -57,23 +58,25 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
     SoftwareHotwordDetector(
             IVoiceInteractionManagerService managerService,
             AudioFormat audioFormat,
-            PersistableBundle options,
-            SharedMemory sharedMemory,
             HotwordDetector.Callback callback) {
-        super(managerService, callback, DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE);
+        super(managerService, callback);
 
         mManagerService = managerService;
         mAudioFormat = audioFormat;
         mCallback = callback;
         mHandler = new Handler(Looper.getMainLooper());
-        updateStateLocked(options, sharedMemory,
+    }
+
+    @Override
+    void initialize(@Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory) {
+        initAndVerifyDetector(options, sharedMemory,
                 new InitializationStateListener(mHandler, mCallback),
                 DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE);
     }
 
     @RequiresPermission(RECORD_AUDIO)
     @Override
-    public boolean startRecognition() {
+    public boolean startRecognition() throws IllegalDetectorStateException {
         if (DEBUG) {
             Slog.i(TAG, "#startRecognition");
         }
@@ -96,7 +99,7 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
     /** TODO: stopRecognition */
     @RequiresPermission(RECORD_AUDIO)
     @Override
-    public boolean stopRecognition() {
+    public boolean stopRecognition() throws IllegalDetectorStateException {
         if (DEBUG) {
             Slog.i(TAG, "#stopRecognition");
         }
@@ -113,15 +116,21 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
 
     @Override
     public void destroy() {
-        stopRecognition();
-        maybeCloseExistingSession();
-
         try {
-            mManagerService.shutdownHotwordDetectionService();
-        } catch (RemoteException ex) {
-            ex.rethrowFromSystemServer();
+            stopRecognition();
+        } catch (Exception e) {
+            Log.i(TAG, "failed to stopRecognition in destroy", e);
         }
+        maybeCloseExistingSession();
         super.destroy();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean isUsingSandboxedDetectionService() {
+        return true;
     }
 
     private void maybeCloseExistingSession() {
@@ -251,6 +260,7 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
     }
 
     /** @hide */
+    @Override
     public void dump(String prefix, PrintWriter pw) {
         // TODO: implement this
     }

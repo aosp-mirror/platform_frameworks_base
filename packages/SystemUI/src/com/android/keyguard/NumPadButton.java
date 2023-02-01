@@ -30,7 +30,7 @@ import androidx.annotation.Nullable;
 /**
  * Similar to the {@link NumPadKey}, but displays an image.
  */
-public class NumPadButton extends AlphaOptimizedImageButton {
+public class NumPadButton extends AlphaOptimizedImageButton implements NumPadAnimationListener {
 
     @Nullable
     private NumPadAnimator mAnimator;
@@ -103,5 +103,12 @@ public class NumPadButton extends AlphaOptimizedImageButton {
         int imageColor = a.getColor(0, 0);
         a.recycle();
         ((VectorDrawable) getDrawable()).setTintList(ColorStateList.valueOf(imageColor));
+    }
+
+    @Override
+    public void setProgress(float progress) {
+        if (mAnimator != null) {
+            mAnimator.setProgress(progress);
+        }
     }
 }

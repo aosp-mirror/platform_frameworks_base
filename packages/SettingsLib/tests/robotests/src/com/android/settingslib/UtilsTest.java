@@ -29,6 +29,9 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.hardware.usb.UsbManager;
+import android.hardware.usb.UsbPort;
+import android.hardware.usb.UsbPortStatus;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.os.BatteryManager;
@@ -53,7 +56,9 @@ import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowSettings;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
@@ -74,12 +79,19 @@ public class UtilsTest {
     private ServiceState mServiceState;
     @Mock
     private NetworkRegistrationInfo mNetworkRegistrationInfo;
+    @Mock
+    private UsbPort mUsbPort;
+    @Mock
+    private UsbManager mUsbManager;
+    @Mock
+    private UsbPortStatus mUsbPortStatus;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mContext = spy(RuntimeEnvironment.application);
         when(mContext.getSystemService(Context.LOCATION_SERVICE)).thenReturn(mLocationManager);
+        when(mContext.getSystemService(UsbManager.class)).thenReturn(mUsbManager);
         ShadowSecure.reset();
         mAudioManager = mContext.getSystemService(AudioManager.class);
     }
@@ -317,7 +329,9 @@ public class UtilsTest {
 
     @Test
     public void getBatteryStatus_statusIsFull_returnFullString() {
-        final Intent intent = new Intent().putExtra(BatteryManager.EXTRA_LEVEL, 100);
+        final Intent intent = new Intent()
+                .putExtra(BatteryManager.EXTRA_LEVEL, 100)
+                .putExtra(BatteryManager.EXTRA_SCALE, 100);
         final Resources resources = mContext.getResources();
 
         assertThat(Utils.getBatteryStatus(mContext, intent, /* compactStatus= */ false)).isEqualTo(
@@ -326,7 +340,9 @@ public class UtilsTest {
 
     @Test
     public void getBatteryStatus_statusIsFullAndUseCompactStatus_returnFullyChargedString() {
-        final Intent intent = new Intent().putExtra(BatteryManager.EXTRA_LEVEL, 100);
+        final Intent intent = new Intent()
+                .putExtra(BatteryManager.EXTRA_LEVEL, 100)
+                .putExtra(BatteryManager.EXTRA_SCALE, 100);
         final Resources resources = mContext.getResources();
 
         assertThat(Utils.getBatteryStatus(mContext, intent, /* compactStatus= */ true)).isEqualTo(
@@ -365,6 +381,17 @@ public class UtilsTest {
     }
 
     @Test
+    public void getBatteryStatus_chargingDock_returnDockChargingString() {
+        final Intent intent = new Intent();
+        intent.putExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_CHARGING);
+        intent.putExtra(BatteryManager.EXTRA_PLUGGED, BatteryManager.BATTERY_PLUGGED_DOCK);
+        final Resources resources = mContext.getResources();
+
+        assertThat(Utils.getBatteryStatus(mContext, intent, /* compactStatus= */ false)).isEqualTo(
+                resources.getString(R.string.battery_info_status_charging_dock));
+    }
+
+    @Test
     public void getBatteryStatus_chargingWireless_returnWirelessChargingString() {
         final Intent intent = new Intent();
         intent.putExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_CHARGING);
@@ -395,5 +422,67 @@ public class UtilsTest {
 
         assertThat(Utils.getBatteryStatus(mContext, intent, /* compactStatus= */ true)).isEqualTo(
                 resources.getString(R.string.battery_info_status_charging));
+    }
+
+    @Test
+    public void containsIncompatibleChargers_nullPorts_returnFalse() {
+        when(mUsbManager.getPorts()).thenReturn(null);
+        assertThat(Utils.containsIncompatibleChargers(mContext, "tag")).isFalse();
+    }
+
+    @Test
+    public void containsIncompatibleChargers_emptyPorts_returnFalse() {
+        when(mUsbManager.getPorts()).thenReturn(new ArrayList<>());
+        assertThat(Utils.containsIncompatibleChargers(mContext, "tag")).isFalse();
+    }
+
+    @Test
+    public void containsIncompatibleChargers_nullPortStatus_returnFalse() {
+        final List<UsbPort> usbPorts = new ArrayList<>();
+        usbPorts.add(mUsbPort);
+        when(mUsbManager.getPorts()).thenReturn(usbPorts);
+        when(mUsbPort.getStatus()).thenReturn(null);
+
+        assertThat(Utils.containsIncompatibleChargers(mContext, "tag")).isFalse();
+    }
+
+    @Test
+    public void containsIncompatibleChargers_returnTrue() {
+        setupIncompatibleCharging();
+        assertThat(Utils.containsIncompatibleChargers(mContext, "tag")).isTrue();
+    }
+
+    @Test
+    public void containsIncompatibleChargers_emptyComplianceWarnings_returnFalse() {
+        setupIncompatibleCharging();
+        when(mUsbPortStatus.getComplianceWarnings()).thenReturn(new int[1]);
+
+        assertThat(Utils.containsIncompatibleChargers(mContext, "tag")).isFalse();
+    }
+
+    @Test
+    public void containsIncompatibleChargers_notSupportComplianceWarnings_returnFalse() {
+        setupIncompatibleCharging();
+        when(mUsbPort.supportsComplianceWarnings()).thenReturn(false);
+
+        assertThat(Utils.containsIncompatibleChargers(mContext, "tag")).isFalse();
+    }
+
+    @Test
+    public void containsIncompatibleChargers_usbNotConnected_returnFalse() {
+        setupIncompatibleCharging();
+        when(mUsbPortStatus.isConnected()).thenReturn(false);
+
+        assertThat(Utils.containsIncompatibleChargers(mContext, "tag")).isFalse();
+    }
+
+    private void setupIncompatibleCharging() {
+        final List<UsbPort> usbPorts = new ArrayList<>();
+        usbPorts.add(mUsbPort);
+        when(mUsbManager.getPorts()).thenReturn(usbPorts);
+        when(mUsbPort.getStatus()).thenReturn(mUsbPortStatus);
+        when(mUsbPort.supportsComplianceWarnings()).thenReturn(true);
+        when(mUsbPortStatus.isConnected()).thenReturn(true);
+        when(mUsbPortStatus.getComplianceWarnings()).thenReturn(new int[]{1});
     }
 }

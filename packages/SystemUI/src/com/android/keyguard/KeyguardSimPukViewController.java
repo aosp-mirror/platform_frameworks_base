@@ -30,7 +30,6 @@ import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
@@ -69,7 +68,8 @@ public class KeyguardSimPukViewController
             if (simState == TelephonyManager.SIM_STATE_READY) {
                 mRemainingAttempts = -1;
                 mShowDefaultMessage = true;
-                getKeyguardSecurityCallback().dismiss(true, KeyguardUpdateMonitor.getCurrentUser());
+                getKeyguardSecurityCallback().dismiss(true, KeyguardUpdateMonitor.getCurrentUser(),
+                        SecurityMode.SimPuk);
             } else {
                 resetState();
             }
@@ -107,15 +107,17 @@ public class KeyguardSimPukViewController
     }
 
     @Override
-    void resetState() {
-        super.resetState();
-        mStateMachine.reset();
+    public void onResume(int reason) {
+        super.onResume(reason);
+        if (mShowDefaultMessage) {
+            showDefaultMessage();
+        }
     }
 
     @Override
-    public void reloadColors() {
-        super.reloadColors();
-        mView.reloadColors();
+    void resetState() {
+        super.resetState();
+        mStateMachine.reset();
     }
 
     @Override
@@ -172,11 +174,9 @@ public class KeyguardSimPukViewController
             if (mShowDefaultMessage) {
                 showDefaultMessage();
             }
-            boolean isEsimLocked = KeyguardEsimArea.isEsimLocked(mView.getContext(), mSubId);
 
-            KeyguardEsimArea esimButton = mView.findViewById(R.id.keyguard_esim_area);
-            esimButton.setSubscriptionId(mSubId);
-            esimButton.setVisibility(isEsimLocked ? View.VISIBLE : View.GONE);
+            mView.setESimLocked(KeyguardEsimArea.isEsimLocked(mView.getContext(), mSubId), mSubId);
+
             mPasswordEntry.requestFocus();
         }
     }
@@ -278,7 +278,8 @@ public class KeyguardSimPukViewController
                             mShowDefaultMessage = true;
 
                             getKeyguardSecurityCallback().dismiss(
-                                    true, KeyguardUpdateMonitor.getCurrentUser());
+                                    true, KeyguardUpdateMonitor.getCurrentUser(),
+                                    SecurityMode.SimPuk);
                         } else {
                             mShowDefaultMessage = false;
                             if (result.getResult() == PinResult.PIN_RESULT_TYPE_INCORRECT) {

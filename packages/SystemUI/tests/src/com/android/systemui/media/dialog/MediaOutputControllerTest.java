@@ -31,9 +31,11 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.content.Context;
 import android.graphics.drawable.Icon;
+import android.media.AudioDeviceAttributes;
 import android.media.AudioManager;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
@@ -47,6 +49,7 @@ import android.os.RemoteException;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.text.TextUtils;
+import android.view.View;
 
 import androidx.core.graphics.drawable.IconCompat;
 import androidx.test.filters.SmallTest;
@@ -57,7 +60,10 @@ import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -87,6 +93,11 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     private static final String TEST_SONG = "test_song";
     private static final String TEST_SESSION_ID = "test_session_id";
     private static final String TEST_SESSION_NAME = "test_session_name";
+    private final DialogLaunchAnimator mDialogLaunchAnimator = mock(DialogLaunchAnimator.class);
+    private final ActivityLaunchAnimator.Controller mActivityLaunchAnimatorController = mock(
+            ActivityLaunchAnimator.Controller.class);
+    private final NearbyMediaDevicesManager mNearbyMediaDevicesManager = mock(
+            NearbyMediaDevicesManager.class);
     // Mock
     private MediaController mMediaController = mock(MediaController.class);
     private MediaSessionManager mMediaSessionManager = mock(MediaSessionManager.class);
@@ -102,11 +113,12 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     private RoutingSessionInfo mRemoteSessionInfo = mock(RoutingSessionInfo.class);
     private ActivityStarter mStarter = mock(ActivityStarter.class);
     private AudioManager mAudioManager = mock(AudioManager.class);
+    private KeyguardManager mKeyguardManager = mock(KeyguardManager.class);
     private PowerExemptionManager mPowerExemptionManager = mock(PowerExemptionManager.class);
     private CommonNotifCollection mNotifCollection = mock(CommonNotifCollection.class);
-    private final DialogLaunchAnimator mDialogLaunchAnimator = mock(DialogLaunchAnimator.class);
-    private final NearbyMediaDevicesManager mNearbyMediaDevicesManager = mock(
-            NearbyMediaDevicesManager.class);
+    private FeatureFlags mFlags = mock(FeatureFlags.class);
+    private View mDialogLaunchView = mock(View.class);
+    private MediaOutputController.Callback mCallback = mock(MediaOutputController.Callback.class);
 
     private Context mSpyContext;
     private MediaOutputController mMediaOutputController;
@@ -131,8 +143,12 @@ public class MediaOutputControllerTest extends SysuiTestCase {
         mMediaOutputController = new MediaOutputController(mSpyContext, TEST_PACKAGE_NAME,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
                 mNotifCollection, mDialogLaunchAnimator,
-                Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager);
+                Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager,
+                mKeyguardManager, mFlags);
+        when(mFlags.isEnabled(Flags.OUTPUT_SWITCHER_ADVANCED_LAYOUT)).thenReturn(false);
+        when(mFlags.isEnabled(Flags.OUTPUT_SWITCHER_ROUTES_PROCESSING)).thenReturn(false);
         mLocalMediaManager = spy(mMediaOutputController.mLocalMediaManager);
+        when(mLocalMediaManager.isPreferenceRouteListingExist()).thenReturn(false);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
         MediaDescription.Builder builder = new MediaDescription.Builder();
         builder.setTitle(TEST_SONG);
@@ -144,10 +160,11 @@ public class MediaOutputControllerTest extends SysuiTestCase {
         mMediaDevices.add(mMediaDevice1);
         mMediaDevices.add(mMediaDevice2);
 
+
         when(mNearbyDevice1.getMediaRoute2Id()).thenReturn(TEST_DEVICE_1_ID);
-        when(mNearbyDevice1.getRangeZone()).thenReturn(NearbyDevice.RANGE_CLOSE);
+        when(mNearbyDevice1.getRangeZone()).thenReturn(NearbyDevice.RANGE_FAR);
         when(mNearbyDevice2.getMediaRoute2Id()).thenReturn(TEST_DEVICE_2_ID);
-        when(mNearbyDevice2.getRangeZone()).thenReturn(NearbyDevice.RANGE_FAR);
+        when(mNearbyDevice2.getRangeZone()).thenReturn(NearbyDevice.RANGE_CLOSE);
         mNearbyDevices.add(mNearbyDevice1);
         mNearbyDevices.add(mNearbyDevice2);
     }
@@ -183,7 +200,8 @@ public class MediaOutputControllerTest extends SysuiTestCase {
         mMediaOutputController = new MediaOutputController(mSpyContext, null,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
                 mNotifCollection, mDialogLaunchAnimator,
-                Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager);
+                Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager,
+                mKeyguardManager, mFlags);
 
         mMediaOutputController.start(mCb);
 
@@ -212,7 +230,8 @@ public class MediaOutputControllerTest extends SysuiTestCase {
         mMediaOutputController = new MediaOutputController(mSpyContext, null,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
                 mNotifCollection, mDialogLaunchAnimator,
-                Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager);
+                Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager,
+                mKeyguardManager, mFlags);
 
         mMediaOutputController.start(mCb);
 
@@ -233,6 +252,13 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void tryToLaunchMediaApplication_nullIntent_skip() {
+        mMediaOutputController.tryToLaunchMediaApplication();
+
+        verify(mCb, never()).dismissDialog();
+    }
+
+    @Test
     public void onDevicesUpdated_unregistersNearbyDevicesCallback() throws RemoteException {
         mMediaOutputController.start(mCb);
 
@@ -250,8 +276,20 @@ public class MediaOutputControllerTest extends SysuiTestCase {
         mMediaOutputController.onDevicesUpdated(mNearbyDevices);
         mMediaOutputController.onDeviceListUpdate(mMediaDevices);
 
-        verify(mMediaDevice1).setRangeZone(NearbyDevice.RANGE_CLOSE);
-        verify(mMediaDevice2).setRangeZone(NearbyDevice.RANGE_FAR);
+        verify(mMediaDevice1).setRangeZone(NearbyDevice.RANGE_FAR);
+        verify(mMediaDevice2).setRangeZone(NearbyDevice.RANGE_CLOSE);
+    }
+
+    @Test
+    public void onDeviceListUpdate_withNearbyDevices_rankByRangeInformation()
+            throws RemoteException {
+        mMediaOutputController.start(mCb);
+        reset(mCb);
+
+        mMediaOutputController.onDevicesUpdated(mNearbyDevices);
+        mMediaOutputController.onDeviceListUpdate(mMediaDevices);
+
+        assertThat(mMediaDevices.get(0).getId()).isEqualTo(TEST_DEVICE_1_ID);
     }
 
     @Test
@@ -265,6 +303,290 @@ public class MediaOutputControllerTest extends SysuiTestCase {
         assertThat(devices.containsAll(mMediaDevices)).isTrue();
         assertThat(devices.size()).isEqualTo(mMediaDevices.size());
         verify(mCb).onDeviceListChanged();
+    }
+
+    @Test
+    public void routeProcessSupport_onDeviceListUpdate_preferenceExist_NotUpdatesRangeInformation()
+            throws RemoteException {
+        when(mLocalMediaManager.isPreferenceRouteListingExist()).thenReturn(true);
+        when(mFlags.isEnabled(Flags.OUTPUT_SWITCHER_ROUTES_PROCESSING)).thenReturn(true);
+        when(mFlags.isEnabled(Flags.OUTPUT_SWITCHER_ADVANCED_LAYOUT)).thenReturn(true);
+        mMediaOutputController.start(mCb);
+        reset(mCb);
+
+        mMediaOutputController.onDevicesUpdated(mNearbyDevices);
+        mMediaOutputController.onDeviceListUpdate(mMediaDevices);
+
+        verify(mMediaDevice1, never()).setRangeZone(anyInt());
+        verify(mMediaDevice2, never()).setRangeZone(anyInt());
+    }
+
+    @Test
+    public void advanced_onDeviceListUpdate_verifyDeviceListCallback() {
+        when(mFlags.isEnabled(Flags.OUTPUT_SWITCHER_ADVANCED_LAYOUT)).thenReturn(true);
+        mMediaOutputController.start(mCb);
+        reset(mCb);
+
+        mMediaOutputController.onDeviceListUpdate(mMediaDevices);
+        final List<MediaDevice> devices = new ArrayList<>();
+        for (MediaItem item : mMediaOutputController.getMediaItemList()) {
+            if (item.getMediaDevice().isPresent()) {
+                devices.add(item.getMediaDevice().get());
+            }
+        }
+
+        assertThat(devices.containsAll(mMediaDevices)).isTrue();
+        assertThat(devices.size()).isEqualTo(mMediaDevices.size());
+        assertThat(mMediaOutputController.getMediaItemList().size()).isEqualTo(
+                mMediaDevices.size() + 2);
+        verify(mCb).onDeviceListChanged();
+    }
+
+    @Test
+    public void advanced_categorizeMediaItems_withSuggestedDevice_verifyDeviceListSize() {
+        when(mFlags.isEnabled(Flags.OUTPUT_SWITCHER_ADVANCED_LAYOUT)).thenReturn(true);
+        when(mMediaDevice1.isSuggestedDevice()).thenReturn(true);
+        when(mMediaDevice2.isSuggestedDevice()).thenReturn(false);
+
+        mMediaOutputController.start(mCb);
+        reset(mCb);
+        mMediaOutputController.getMediaItemList().clear();
+        mMediaOutputController.onDeviceListUpdate(mMediaDevices);
+        final List<MediaDevice> devices = new ArrayList<>();
+        int dividerSize = 0;
+        for (MediaItem item : mMediaOutputController.getMediaItemList()) {
+            if (item.getMediaDevice().isPresent()) {
+                devices.add(item.getMediaDevice().get());
+            }
+            if (item.getMediaItemType() == MediaItem.MediaItemType.TYPE_GROUP_DIVIDER) {
+                dividerSize++;
+            }
+        }
+
+        assertThat(devices.containsAll(mMediaDevices)).isTrue();
+        assertThat(devices.size()).isEqualTo(mMediaDevices.size());
+        assertThat(dividerSize).isEqualTo(2);
+        verify(mCb).onDeviceListChanged();
+    }
+
+    @Test
+    public void onDeviceListUpdate_isRefreshing_updatesNeedRefreshToTrue() {
+        mMediaOutputController.start(mCb);
+        reset(mCb);
+        mMediaOutputController.mIsRefreshing = true;
+
+        mMediaOutputController.onDeviceListUpdate(mMediaDevices);
+
+        assertThat(mMediaOutputController.mNeedRefresh).isTrue();
+    }
+
+    @Test
+    public void advanced_onDeviceListUpdate_isRefreshing_updatesNeedRefreshToTrue() {
+        when(mFlags.isEnabled(Flags.OUTPUT_SWITCHER_ADVANCED_LAYOUT)).thenReturn(true);
+        mMediaOutputController.start(mCb);
+        reset(mCb);
+        mMediaOutputController.mIsRefreshing = true;
+
+        mMediaOutputController.onDeviceListUpdate(mMediaDevices);
+
+        assertThat(mMediaOutputController.mNeedRefresh).isTrue();
+    }
+
+    @Test
+    public void cancelMuteAwaitConnection_cancelsWithMediaManager() {
+        when(mAudioManager.getMutingExpectedDevice()).thenReturn(mock(AudioDeviceAttributes.class));
+        mMediaOutputController.start(mCb);
+        reset(mCb);
+
+        mMediaOutputController.cancelMuteAwaitConnection();
+
+        verify(mAudioManager).cancelMuteAwaitConnection(any());
+    }
+
+    @Test
+    public void cancelMuteAwaitConnection_audioManagerIsNull_noAction() {
+        when(mAudioManager.getMutingExpectedDevice()).thenReturn(null);
+        mMediaOutputController.start(mCb);
+        reset(mCb);
+        mMediaOutputController.cancelMuteAwaitConnection();
+
+        verify(mAudioManager, never()).cancelMuteAwaitConnection(any());
+    }
+
+    @Test
+    public void getAppSourceName_packageNameIsNull_returnsNull() {
+        MediaOutputController testMediaOutputController = new MediaOutputController(mSpyContext,
+                "",
+                mMediaSessionManager, mLocalBluetoothManager, mStarter,
+                mNotifCollection, mDialogLaunchAnimator,
+                Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager,
+                mKeyguardManager, mFlags);
+        testMediaOutputController.start(mCb);
+        reset(mCb);
+
+        testMediaOutputController.getAppSourceName();
+
+        assertThat(testMediaOutputController.getAppSourceName()).isNull();
+    }
+
+    @Test
+    public void isActiveItem_deviceNotConnected_returnsFalse() {
+        when(mLocalMediaManager.getCurrentConnectedDevice()).thenReturn(mMediaDevice2);
+
+        assertThat(mMediaOutputController.isActiveItem(mMediaDevice1)).isFalse();
+    }
+
+    @Test
+    public void getNotificationSmallIcon_packageNameIsNull_returnsNull() {
+        MediaOutputController testMediaOutputController = new MediaOutputController(mSpyContext,
+                "",
+                mMediaSessionManager, mLocalBluetoothManager, mStarter,
+                mNotifCollection, mDialogLaunchAnimator,
+                Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager,
+                mKeyguardManager, mFlags);
+        testMediaOutputController.start(mCb);
+        reset(mCb);
+
+        testMediaOutputController.getAppSourceName();
+
+        assertThat(testMediaOutputController.getNotificationSmallIcon()).isNull();
+    }
+
+    @Test
+    public void refreshDataSetIfNeeded_needRefreshIsTrue_setsToFalse() {
+        mMediaOutputController.start(mCb);
+        reset(mCb);
+        mMediaOutputController.mNeedRefresh = true;
+
+        mMediaOutputController.refreshDataSetIfNeeded();
+
+        assertThat(mMediaOutputController.mNeedRefresh).isFalse();
+    }
+
+    @Test
+    public void isCurrentConnectedDeviceRemote_containsFeatures_returnsTrue() {
+        when(mMediaDevice1.getFeatures()).thenReturn(
+                ImmutableList.of(MediaRoute2Info.FEATURE_REMOTE_PLAYBACK));
+        when(mLocalMediaManager.getCurrentConnectedDevice()).thenReturn(mMediaDevice1);
+
+        assertThat(mMediaOutputController.isCurrentConnectedDeviceRemote()).isTrue();
+    }
+
+    @Test
+    public void addDeviceToPlayMedia_triggersFromLocalMediaManager() {
+        MediaOutputController testMediaOutputController = new MediaOutputController(mSpyContext,
+                null,
+                mMediaSessionManager, mLocalBluetoothManager, mStarter,
+                mNotifCollection, mDialogLaunchAnimator,
+                Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager,
+                mKeyguardManager, mFlags);
+
+        LocalMediaManager testLocalMediaManager = spy(testMediaOutputController.mLocalMediaManager);
+        testMediaOutputController.mLocalMediaManager = testLocalMediaManager;
+
+        testMediaOutputController.addDeviceToPlayMedia(mMediaDevice2);
+
+        verify(testLocalMediaManager).addDeviceToPlayMedia(mMediaDevice2);
+    }
+
+    @Test
+    public void removeDeviceFromPlayMedia_triggersFromLocalMediaManager() {
+        MediaOutputController testMediaOutputController = new MediaOutputController(mSpyContext,
+                null,
+                mMediaSessionManager, mLocalBluetoothManager, mStarter,
+                mNotifCollection, mDialogLaunchAnimator,
+                Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager,
+                mKeyguardManager, mFlags);
+
+        LocalMediaManager testLocalMediaManager = spy(testMediaOutputController.mLocalMediaManager);
+        testMediaOutputController.mLocalMediaManager = testLocalMediaManager;
+
+        testMediaOutputController.removeDeviceFromPlayMedia(mMediaDevice2);
+
+        verify(testLocalMediaManager).removeDeviceFromPlayMedia(mMediaDevice2);
+    }
+
+    @Test
+    public void getDeselectableMediaDevice_triggersFromLocalMediaManager() {
+        mMediaOutputController.getDeselectableMediaDevice();
+
+        verify(mLocalMediaManager).getDeselectableMediaDevice();
+    }
+
+    @Test
+    public void adjustSessionVolume_adjustWithoutId_triggersFromLocalMediaManager() {
+        int testVolume = 10;
+        mMediaOutputController.adjustSessionVolume(testVolume);
+
+        verify(mLocalMediaManager).adjustSessionVolume(testVolume);
+    }
+
+    @Test
+    public void logInteractionAdjustVolume_triggersFromMetricLogger() {
+        MediaOutputMetricLogger spyMediaOutputMetricLogger = spy(
+                mMediaOutputController.mMetricLogger);
+        mMediaOutputController.mMetricLogger = spyMediaOutputMetricLogger;
+
+        mMediaOutputController.logInteractionAdjustVolume(mMediaDevice1);
+
+        verify(spyMediaOutputMetricLogger).logInteractionAdjustVolume(mMediaDevice1);
+    }
+
+    @Test
+    public void getSessionVolumeMax_triggersFromLocalMediaManager() {
+        mMediaOutputController.getSessionVolumeMax();
+
+        verify(mLocalMediaManager).getSessionVolumeMax();
+    }
+
+    @Test
+    public void getSessionVolume_triggersFromLocalMediaManager() {
+        mMediaOutputController.getSessionVolume();
+
+        verify(mLocalMediaManager).getSessionVolume();
+    }
+
+    @Test
+    public void getSessionName_triggersFromLocalMediaManager() {
+        mMediaOutputController.getSessionName();
+
+        verify(mLocalMediaManager).getSessionName();
+    }
+
+    @Test
+    public void releaseSession_triggersFromLocalMediaManager() {
+        mMediaOutputController.releaseSession();
+
+        verify(mLocalMediaManager).releaseSession();
+    }
+
+    @Test
+    public void isAnyDeviceTransferring_noDevicesStateIsConnecting_returnsFalse() {
+        mMediaOutputController.start(mCb);
+        reset(mCb);
+
+        mMediaOutputController.onDeviceListUpdate(mMediaDevices);
+
+        assertThat(mMediaOutputController.isAnyDeviceTransferring()).isFalse();
+    }
+
+    @Test
+    public void isAnyDeviceTransferring_deviceStateIsConnecting_returnsTrue() {
+        when(mMediaDevice1.getState()).thenReturn(
+                LocalMediaManager.MediaDeviceState.STATE_CONNECTING);
+        mMediaOutputController.start(mCb);
+        reset(mCb);
+
+        mMediaOutputController.onDeviceListUpdate(mMediaDevices);
+
+        assertThat(mMediaOutputController.isAnyDeviceTransferring()).isTrue();
+    }
+
+    @Test
+    public void isPlaying_stateIsNull() {
+        when(mMediaController.getPlaybackState()).thenReturn(null);
+
+        assertThat(mMediaOutputController.isPlaying()).isFalse();
     }
 
     @Test
@@ -383,62 +705,6 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void isZeroMode_onlyFromPhoneOutput_returnTrue() {
-        // Multiple available devices
-        assertThat(mMediaOutputController.isZeroMode()).isFalse();
-        when(mMediaDevice1.getDeviceType()).thenReturn(
-                MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE);
-        mMediaDevices.clear();
-        mMediaDevices.add(mMediaDevice1);
-        mMediaOutputController.start(mCb);
-        mMediaOutputController.onDeviceListUpdate(mMediaDevices);
-
-        assertThat(mMediaOutputController.isZeroMode()).isTrue();
-
-        when(mMediaDevice1.getDeviceType()).thenReturn(
-                MediaDevice.MediaDeviceType.TYPE_3POINT5_MM_AUDIO_DEVICE);
-
-        assertThat(mMediaOutputController.isZeroMode()).isTrue();
-
-        when(mMediaDevice1.getDeviceType()).thenReturn(
-                MediaDevice.MediaDeviceType.TYPE_USB_C_AUDIO_DEVICE);
-
-        assertThat(mMediaOutputController.isZeroMode()).isTrue();
-    }
-
-    @Test
-    public void isZeroMode_notFromPhoneOutput_returnFalse() {
-        when(mMediaDevice1.getDeviceType()).thenReturn(
-                MediaDevice.MediaDeviceType.TYPE_UNKNOWN);
-        mMediaDevices.clear();
-        mMediaDevices.add(mMediaDevice1);
-        mMediaOutputController.start(mCb);
-        mMediaOutputController.onDeviceListUpdate(mMediaDevices);
-
-        assertThat(mMediaOutputController.isZeroMode()).isFalse();
-
-        when(mMediaDevice1.getDeviceType()).thenReturn(
-                MediaDevice.MediaDeviceType.TYPE_FAST_PAIR_BLUETOOTH_DEVICE);
-
-        assertThat(mMediaOutputController.isZeroMode()).isFalse();
-
-        when(mMediaDevice1.getDeviceType()).thenReturn(
-                MediaDevice.MediaDeviceType.TYPE_BLUETOOTH_DEVICE);
-
-        assertThat(mMediaOutputController.isZeroMode()).isFalse();
-
-        when(mMediaDevice1.getDeviceType()).thenReturn(
-                MediaDevice.MediaDeviceType.TYPE_CAST_DEVICE);
-
-        assertThat(mMediaOutputController.isZeroMode()).isFalse();
-
-        when(mMediaDevice1.getDeviceType()).thenReturn(
-                MediaDevice.MediaDeviceType.TYPE_CAST_GROUP_DEVICE);
-
-        assertThat(mMediaOutputController.isZeroMode()).isFalse();
-    }
-
-    @Test
     public void getGroupMediaDevices_differentDeviceOrder_showingSameOrder() {
         final MediaDevice selectedMediaDevice1 = mock(MediaDevice.class);
         final MediaDevice selectedMediaDevice2 = mock(MediaDevice.class);
@@ -517,7 +783,8 @@ public class MediaOutputControllerTest extends SysuiTestCase {
         mMediaOutputController = new MediaOutputController(mSpyContext, null,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
                 mNotifCollection, mDialogLaunchAnimator,
-                Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager);
+                Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager,
+                mKeyguardManager, mFlags);
 
         assertThat(mMediaOutputController.getNotificationIcon()).isNull();
     }
@@ -579,6 +846,44 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void getNotificationSmallIcon_withoutSmallIcon_returnsNull() {
+        final List<NotificationEntry> entryList = new ArrayList<>();
+        final NotificationEntry entry = mock(NotificationEntry.class);
+        final StatusBarNotification sbn = mock(StatusBarNotification.class);
+        final Notification notification = mock(Notification.class);
+        entryList.add(entry);
+
+        when(mNotifCollection.getAllNotifs()).thenReturn(entryList);
+        when(entry.getSbn()).thenReturn(sbn);
+        when(sbn.getNotification()).thenReturn(notification);
+        when(sbn.getPackageName()).thenReturn(TEST_PACKAGE_NAME);
+        when(notification.isMediaNotification()).thenReturn(true);
+        when(notification.getSmallIcon()).thenReturn(null);
+
+        assertThat(mMediaOutputController.getNotificationSmallIcon()).isNull();
+    }
+
+    @Test
+    public void getNotificationSmallIcon_withPackageNameAndMediaSession_returnsIconCompat() {
+        final List<NotificationEntry> entryList = new ArrayList<>();
+        final NotificationEntry entry = mock(NotificationEntry.class);
+        final StatusBarNotification sbn = mock(StatusBarNotification.class);
+        final Notification notification = mock(Notification.class);
+        final Icon icon = mock(Icon.class);
+        entryList.add(entry);
+
+        when(mNotifCollection.getAllNotifs()).thenReturn(entryList);
+        when(entry.getSbn()).thenReturn(sbn);
+        when(sbn.getNotification()).thenReturn(notification);
+        when(sbn.getPackageName()).thenReturn(TEST_PACKAGE_NAME);
+        when(notification.isMediaNotification()).thenReturn(true);
+        when(notification.getSmallIcon()).thenReturn(icon);
+
+        assertThat(mMediaOutputController.getNotificationSmallIcon()).isInstanceOf(
+                IconCompat.class);
+    }
+
+    @Test
     public void isVolumeControlEnabled_isCastWithVolumeFixed_returnsFalse() {
         when(mMediaDevice1.getDeviceType()).thenReturn(
                 MediaDevice.MediaDeviceType.TYPE_CAST_DEVICE);
@@ -612,5 +917,17 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
         verify(mPowerExemptionManager).addToTemporaryAllowList(anyString(), anyInt(), anyString(),
                 anyLong());
+    }
+
+    @Test
+    public void launchBluetoothPairing_isKeyguardLocked_dismissDialog() {
+        when(mDialogLaunchAnimator.createActivityLaunchController(mDialogLaunchView)).thenReturn(
+                mActivityLaunchAnimatorController);
+        when(mKeyguardManager.isKeyguardLocked()).thenReturn(true);
+        mMediaOutputController.mCallback = this.mCallback;
+
+        mMediaOutputController.launchBluetoothPairing(mDialogLaunchView);
+
+        verify(mCallback).dismissDialog();
     }
 }

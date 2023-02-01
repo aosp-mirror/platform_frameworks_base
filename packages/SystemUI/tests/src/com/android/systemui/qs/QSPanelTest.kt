@@ -27,6 +27,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.qs.QSTile
+import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSIconViewImpl
 import com.android.systemui.qs.tileimpl.QSTileViewImpl
 import com.google.common.truth.Truth.assertThat
@@ -34,6 +35,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -42,6 +44,9 @@ import org.mockito.MockitoAnnotations
 @RunWithLooper
 @SmallTest
 class QSPanelTest : SysuiTestCase() {
+
+    @Mock private lateinit var qsLogger: QSLogger
+
     private lateinit var testableLooper: TestableLooper
     private lateinit var qsPanel: QSPanel
 
@@ -57,7 +62,7 @@ class QSPanelTest : SysuiTestCase() {
             qsPanel = QSPanel(context, null)
             qsPanel.mUsingMediaPlayer = true
 
-            qsPanel.initialize()
+            qsPanel.initialize(qsLogger)
             // QSPanel inflates a footer inside of it, mocking it here
             footer = LinearLayout(context).apply { id = R.id.qs_footer }
             qsPanel.addView(footer, MATCH_PARENT, 100)
@@ -156,6 +161,39 @@ class QSPanelTest : SysuiTestCase() {
         context.orCreateTestableResources.addOverride(R.dimen.qs_panel_padding_bottom, padding)
         qsPanel.updatePadding()
         assertThat(qsPanel.paddingBottom).isEqualTo(padding)
+    }
+
+    @Test
+    fun testTopPadding_notCombinedHeaders() {
+        qsPanel.setUsingCombinedHeaders(false)
+        val padding = 10
+        val paddingCombined = 100
+        context.orCreateTestableResources.addOverride(R.dimen.qs_panel_padding_top, padding)
+        context.orCreateTestableResources.addOverride(
+                R.dimen.qs_panel_padding_top_combined_headers, paddingCombined)
+
+        qsPanel.updatePadding()
+        assertThat(qsPanel.paddingTop).isEqualTo(padding)
+    }
+
+    @Test
+    fun testTopPadding_combinedHeaders() {
+        qsPanel.setUsingCombinedHeaders(true)
+        val padding = 10
+        val paddingCombined = 100
+        context.orCreateTestableResources.addOverride(R.dimen.qs_panel_padding_top, padding)
+        context.orCreateTestableResources.addOverride(
+                R.dimen.qs_panel_padding_top_combined_headers, paddingCombined)
+
+        qsPanel.updatePadding()
+        assertThat(qsPanel.paddingTop).isEqualTo(paddingCombined)
+    }
+
+    @Test
+    fun testSetSquishinessFraction_noCrash() {
+        qsPanel.addView(qsPanel.mTileLayout as View, 0)
+        qsPanel.addView(FrameLayout(context))
+        qsPanel.setSquishinessFraction(0.5f)
     }
 
     private infix fun View.isLeftOf(other: View): Boolean {

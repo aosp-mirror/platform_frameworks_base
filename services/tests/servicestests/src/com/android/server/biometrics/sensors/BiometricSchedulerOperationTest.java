@@ -57,10 +57,15 @@ public class BiometricSchedulerOperationTest {
 
     public interface FakeHal {}
     public abstract static class InterruptableMonitor<T>
-            extends HalClientMonitor<T> implements  Interruptable {
+            extends HalClientMonitor<T> {
         public InterruptableMonitor() {
             super(null, null, null, null, 0, null, 0, 0,
                     mock(BiometricLogger.class), mock(BiometricContext.class));
+        }
+
+        @Override
+        public boolean isInterruptable() {
+            return true;
         }
     }
 
@@ -293,7 +298,6 @@ public class BiometricSchedulerOperationTest {
 
         assertThat(mOperation.isCanceling()).isTrue();
         verify(mClientMonitor).cancel();
-        verify(mClientMonitor, never()).cancelWithoutStarting(any());
         verify(mClientMonitor, never()).destroy();
 
         mStartedCallbackCaptor.getValue().onClientFinished(mClientMonitor, true);

@@ -21,13 +21,13 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.server.wm.ActivityInterceptorCallback.FIRST_ORDERED_ID;
-import static com.android.server.wm.ActivityInterceptorCallback.LAST_ORDERED_ID;
+import static com.android.server.wm.ActivityInterceptorCallback.MAINLINE_FIRST_ORDERED_ID;
+import static com.android.server.wm.ActivityInterceptorCallback.SYSTEM_FIRST_ORDERED_ID;
+import static com.android.server.wm.ActivityInterceptorCallback.SYSTEM_LAST_ORDERED_ID;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
@@ -42,10 +42,11 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -60,7 +61,6 @@ import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.LocaleList;
-import android.os.PowerManager;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
@@ -136,7 +136,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         assertNull(transaction.getLifecycleStateRequest());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testOnPictureInPictureRequested_cannotEnterPip() throws RemoteException {
         final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
@@ -146,11 +146,16 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
         mAtm.mActivityClientController.requestPictureInPictureMode(activity);
 
-        // Check enter no transactions with enter pip requests are made.
-        verify(lifecycleManager, times(0)).scheduleTransaction(any());
+        verify(lifecycleManager, atLeast(0))
+                .scheduleTransaction(mClientTransactionCaptor.capture());
+        final ClientTransaction transaction = mClientTransactionCaptor.getValue();
+        // Check that none are enter pip request items.
+        transaction.getCallbacks().forEach(clientTransactionItem -> {
+            assertFalse(clientTransactionItem instanceof EnterPipRequestedItem);
+        });
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testOnPictureInPictureRequested_alreadyInPIPMode() throws RemoteException {
         final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
@@ -159,8 +164,13 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
         mAtm.mActivityClientController.requestPictureInPictureMode(activity);
 
-        // Check that no transactions with enter pip requests are made.
-        verify(lifecycleManager, times(0)).scheduleTransaction(any());
+        verify(lifecycleManager, atLeast(0))
+                .scheduleTransaction(mClientTransactionCaptor.capture());
+        final ClientTransaction transaction = mClientTransactionCaptor.getValue();
+        // Check that none are enter pip request items.
+        transaction.getCallbacks().forEach(clientTransactionItem -> {
+            assertFalse(clientTransactionItem instanceof EnterPipRequestedItem);
+        });
     }
 
     @Test
@@ -212,10 +222,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         // Check that changes are reported
         Configuration c = new Configuration(newDisp1.getRequestedOverrideConfiguration());
         c.windowConfiguration.setBounds(new Rect(0, 0, 1000, 1300));
-        newDisp1.onRequestedOverrideConfigurationChanged(c);
-        mAtm.mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */,
-                newDisp1.mDisplayId, false /* markFrozenIfConfigChanged */,
-                false /* deferResume */);
+        newDisp1.performDisplayOverrideConfigUpdate(c);
         assertEquals(0, added.size());
         assertEquals(1, changed.size());
         assertEquals(0, removed.size());
@@ -339,7 +346,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
         // Assume the activity is finishing and hidden because it was crashed.
         activity.finishing = true;
-        activity.mVisibleRequested = false;
+        activity.setVisibleRequested(false);
         activity.setVisible(false);
         activity.getTask().setPausingActivity(activity);
         homeActivity.setState(PAUSED, "test");
@@ -952,11 +959,12 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
     @Test(expected = IllegalArgumentException.class)
     public void testRegisterActivityStartInterceptor_IndexTooSmall() {
-        mAtm.mInternal.registerActivityStartInterceptor(FIRST_ORDERED_ID - 1,
+        mAtm.mInternal.registerActivityStartInterceptor(SYSTEM_FIRST_ORDERED_ID - 1,
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
-                    public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
+                    public ActivityInterceptResult onInterceptActivityLaunch(
+                            @NonNull ActivityInterceptorInfo info) {
                         return null;
                     }
                 });
@@ -964,11 +972,12 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
     @Test(expected = IllegalArgumentException.class)
     public void testRegisterActivityStartInterceptor_IndexTooLarge() {
-        mAtm.mInternal.registerActivityStartInterceptor(LAST_ORDERED_ID + 1,
+        mAtm.mInternal.registerActivityStartInterceptor(SYSTEM_LAST_ORDERED_ID + 1,
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
-                    public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
+                    public ActivityInterceptResult onInterceptActivityLaunch(
+                            @NonNull ActivityInterceptorInfo info) {
                         return null;
                     }
                 });
@@ -976,19 +985,21 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
     @Test(expected = IllegalArgumentException.class)
     public void testRegisterActivityStartInterceptor_DuplicateId() {
-        mAtm.mInternal.registerActivityStartInterceptor(FIRST_ORDERED_ID,
+        mAtm.mInternal.registerActivityStartInterceptor(SYSTEM_FIRST_ORDERED_ID,
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
-                    public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
+                    public ActivityInterceptResult onInterceptActivityLaunch(
+                            @NonNull ActivityInterceptorInfo info) {
                         return null;
                     }
                 });
-        mAtm.mInternal.registerActivityStartInterceptor(FIRST_ORDERED_ID,
+        mAtm.mInternal.registerActivityStartInterceptor(SYSTEM_FIRST_ORDERED_ID,
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
-                    public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
+                    public ActivityInterceptResult onInterceptActivityLaunch(
+                            @NonNull ActivityInterceptorInfo info) {
                         return null;
                     }
                 });
@@ -998,16 +1009,43 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
     public void testRegisterActivityStartInterceptor() {
         assertEquals(0, mAtm.getActivityInterceptorCallbacks().size());
 
-        mAtm.mInternal.registerActivityStartInterceptor(FIRST_ORDERED_ID,
+        mAtm.mInternal.registerActivityStartInterceptor(SYSTEM_FIRST_ORDERED_ID,
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
-                    public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
+                    public ActivityInterceptResult onInterceptActivityLaunch(
+                            @NonNull ActivityInterceptorInfo info) {
                         return null;
                     }
                 });
 
         assertEquals(1, mAtm.getActivityInterceptorCallbacks().size());
-        assertTrue(mAtm.getActivityInterceptorCallbacks().contains(FIRST_ORDERED_ID));
+        assertTrue(mAtm.getActivityInterceptorCallbacks().contains(SYSTEM_FIRST_ORDERED_ID));
+    }
+
+    @Test
+    public void testSystemAndMainlineOrderIdsNotOverlapping() {
+        assertTrue(MAINLINE_FIRST_ORDERED_ID - SYSTEM_LAST_ORDERED_ID > 1);
+    }
+
+    @Test
+    public void testUnregisterActivityStartInterceptor() {
+        int size = mAtm.getActivityInterceptorCallbacks().size();
+        int orderId = SYSTEM_FIRST_ORDERED_ID;
+
+        mAtm.mInternal.registerActivityStartInterceptor(orderId,
+                (ActivityInterceptorCallback) info -> null);
+        assertEquals(size + 1, mAtm.getActivityInterceptorCallbacks().size());
+        assertTrue(mAtm.getActivityInterceptorCallbacks().contains(orderId));
+
+        mAtm.mInternal.unregisterActivityStartInterceptor(orderId);
+        assertEquals(size, mAtm.getActivityInterceptorCallbacks().size());
+        assertFalse(mAtm.getActivityInterceptorCallbacks().contains(orderId));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testUnregisterActivityStartInterceptor_IdNotExist() {
+        assertEquals(0, mAtm.getActivityInterceptorCallbacks().size());
+        mAtm.mInternal.unregisterActivityStartInterceptor(SYSTEM_FIRST_ORDERED_ID);
     }
 }

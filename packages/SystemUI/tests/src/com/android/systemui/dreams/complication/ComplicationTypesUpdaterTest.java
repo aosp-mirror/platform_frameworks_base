@@ -71,7 +71,7 @@ public class ComplicationTypesUpdaterTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         when(mDreamBackend.getEnabledComplications()).thenReturn(new HashSet<>());
 
-        mController = new ComplicationTypesUpdater(mContext, mDreamBackend, mExecutor,
+        mController = new ComplicationTypesUpdater(mDreamBackend, mExecutor,
                 mSecureSettings, mDreamOverlayStateController);
     }
 
@@ -106,7 +106,7 @@ public class ComplicationTypesUpdaterTest extends SysuiTestCase {
 
     private ContentObserver captureSettingsObserver() {
         verify(mSecureSettings).registerContentObserverForUser(
-                eq(Settings.Secure.SCREENSAVER_ENABLED_COMPLICATIONS),
+                eq(Settings.Secure.SCREENSAVER_COMPLICATIONS_ENABLED),
                 mSettingsObserverCaptor.capture(), eq(UserHandle.myUserId()));
         return mSettingsObserverCaptor.getValue();
     }

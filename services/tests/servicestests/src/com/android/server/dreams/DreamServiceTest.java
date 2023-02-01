@@ -16,7 +16,8 @@
 
 package com.android.server.dreams;
 
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertFalse;
 
 import android.content.ComponentName;
@@ -35,21 +36,36 @@ import org.junit.runner.RunWith;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class DreamServiceTest {
+    private static final String TEST_PACKAGE_NAME = "com.android.frameworks.servicestests";
+
     @Test
     public void testMetadataParsing() throws PackageManager.NameNotFoundException {
-        final String testPackageName = "com.android.frameworks.servicestests";
         final String testDreamClassName = "com.android.server.dreams.TestDreamService";
-        final String testSettingsActivity = "com.android.server.dreams/.TestDreamSettingsActivity";
+        final String testSettingsActivity =
+                "com.android.frameworks.servicestests/.TestDreamSettingsActivity";
+        final DreamService.DreamMetadata metadata = getDreamMetadata(testDreamClassName);
 
-        final Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-
-        final ServiceInfo si = context.getPackageManager().getServiceInfo(
-                new ComponentName(testPackageName, testDreamClassName),
-                PackageManager.ComponentInfoFlags.of(PackageManager.GET_META_DATA));
-        final DreamService.DreamMetadata metadata = DreamService.getDreamMetadata(context, si);
-
-        assertEquals(0, metadata.settingsActivity.compareTo(
-                ComponentName.unflattenFromString(testSettingsActivity)));
+        assertThat(metadata.settingsActivity).isEqualTo(
+                ComponentName.unflattenFromString(testSettingsActivity));
         assertFalse(metadata.showComplications);
+    }
+
+    @Test
+    public void testMetadataParsing_invalidSettingsActivity()
+            throws PackageManager.NameNotFoundException {
+        final String testDreamClassName =
+                "com.android.server.dreams.TestDreamServiceWithInvalidSettings";
+        final DreamService.DreamMetadata metadata = getDreamMetadata(testDreamClassName);
+
+        assertThat(metadata.settingsActivity).isNull();
+    }
+
+    private DreamService.DreamMetadata getDreamMetadata(String dreamClassName)
+            throws PackageManager.NameNotFoundException {
+        final Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        final ServiceInfo si = context.getPackageManager().getServiceInfo(
+                new ComponentName(TEST_PACKAGE_NAME, dreamClassName),
+                PackageManager.ComponentInfoFlags.of(PackageManager.GET_META_DATA));
+        return DreamService.getDreamMetadata(context, si);
     }
 }

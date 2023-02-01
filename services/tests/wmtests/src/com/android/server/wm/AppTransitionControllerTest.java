@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -24,7 +25,10 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_DREAM_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_DREAM_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CHANGE;
@@ -44,6 +48,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.clearInvocations;
@@ -52,6 +57,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.annotation.Nullable;
+import android.graphics.Rect;
 import android.gui.DropInputMode;
 import android.os.Binder;
 import android.os.IBinder;
@@ -86,6 +92,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
     @Before
     public void setUp() throws Exception {
+        assumeFalse(WindowManagerService.sEnableShellTransitions);
         mAppTransitionController = new AppTransitionController(mWm, mDisplayContent);
     }
 
@@ -115,7 +122,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         final ActivityRecord top = createActivityRecord(task);
         top.setState(ActivityRecord.State.RESUMED, "test");
         behind.setState(ActivityRecord.State.STARTED, "test");
-        behind.mVisibleRequested = true;
+        behind.setVisibleRequested(true);
 
         task.removeActivities("test", false /* excludingTaskOverlay */);
         assertFalse(mDisplayContent.mAppTransition.isReady());
@@ -149,6 +156,32 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         mDisplayContent.prepareAppTransition(TRANSIT_CLOSE);
         mDisplayContent.mClosingApps.add(translucentClosing);
         assertEquals(WindowManager.TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE,
+                AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
+                        mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
+                        mDisplayContent.mChangingContainers, null, null, false));
+    }
+
+    @Test
+    public void testDreamActivityOpenTransition() {
+        final ActivityRecord dreamActivity = createActivityRecord(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_DREAM);
+        mDisplayContent.prepareAppTransition(TRANSIT_OPEN);
+        mDisplayContent.mOpeningApps.add(dreamActivity);
+
+        assertEquals(TRANSIT_OLD_DREAM_ACTIVITY_OPEN,
+                AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
+                        mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
+                        mDisplayContent.mChangingContainers, null, null, false));
+    }
+
+    @Test
+    public void testDreamActivityCloseTransition() {
+        final ActivityRecord dreamActivity = createActivityRecord(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_DREAM);
+        mDisplayContent.prepareAppTransition(TRANSIT_CLOSE);
+        mDisplayContent.mClosingApps.add(dreamActivity);
+
+        assertEquals(TRANSIT_OLD_DREAM_ACTIVITY_CLOSE,
                 AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
                         mDisplayContent.mChangingContainers, null, null, false));
@@ -261,7 +294,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
         final ActivityRecord activity2 = createActivityRecord(mDisplayContent);
         activity2.setVisible(false);
-        activity2.mVisibleRequested = false;
+        activity2.setVisibleRequested(false);
 
         final ArraySet<ActivityRecord> opening = new ArraySet<>();
         opening.add(activity1);
@@ -286,12 +319,12 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         //                   +- [Task2] - [ActivityRecord2] (opening, visible)
         final ActivityRecord activity1 = createActivityRecord(mDisplayContent);
         activity1.setVisible(true);
-        activity1.mVisibleRequested = true;
+        activity1.setVisibleRequested(true);
         activity1.mRequestForceTransition = true;
 
         final ActivityRecord activity2 = createActivityRecord(mDisplayContent);
         activity2.setVisible(false);
-        activity2.mVisibleRequested = false;
+        activity2.setVisibleRequested(false);
         activity2.mRequestForceTransition = true;
 
         final ArraySet<ActivityRecord> opening = new ArraySet<>();
@@ -358,7 +391,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
         final ActivityRecord activity2 = createActivityRecord(mDisplayContent);
         activity2.setVisible(false);
-        activity2.mVisibleRequested = false;
+        activity2.setVisibleRequested(false);
         attrs.setTitle("AppWindow2");
         final TestWindowState appWindow2 = createWindowState(attrs, activity2);
         appWindow2.mWillReplaceWindow = true;
@@ -391,17 +424,17 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         //                               +- [ActivityRecord4] (invisible)
         final ActivityRecord activity1 = createActivityRecord(mDisplayContent);
         activity1.setVisible(false);
-        activity1.mVisibleRequested = true;
+        activity1.setVisibleRequested(true);
         final ActivityRecord activity2 = createActivityRecord(mDisplayContent,
                 activity1.getTask());
         activity2.setVisible(false);
-        activity2.mVisibleRequested = false;
+        activity2.setVisibleRequested(false);
 
         final ActivityRecord activity3 = createActivityRecord(mDisplayContent);
         final ActivityRecord activity4 = createActivityRecord(mDisplayContent,
                 activity3.getTask());
         activity4.setVisible(false);
-        activity4.mVisibleRequested = false;
+        activity4.setVisibleRequested(false);
 
         final ArraySet<ActivityRecord> opening = new ArraySet<>();
         opening.add(activity1);
@@ -426,7 +459,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         //                            +- [ActivityRecord2] (closing, visible)
         final ActivityRecord activity1 = createActivityRecord(mDisplayContent);
         activity1.setVisible(false);
-        activity1.mVisibleRequested = true;
+        activity1.setVisibleRequested(true);
         final ActivityRecord activity2 = createActivityRecord(mDisplayContent,
                 activity1.getTask());
 
@@ -457,7 +490,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
         final ActivityRecord activity1 = createActivityRecord(mDisplayContent);
         activity1.setVisible(false);
-        activity1.mVisibleRequested = true;
+        activity1.setVisibleRequested(true);
         activity1.setOccludesParent(false);
 
         final ActivityRecord activity2 = createActivityRecord(mDisplayContent,
@@ -495,13 +528,13 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
         final ActivityRecord activity1 = createActivityRecord(mDisplayContent);
         activity1.setVisible(false);
-        activity1.mVisibleRequested = true;
+        activity1.setVisibleRequested(true);
         activity1.setOccludesParent(false);
 
         final ActivityRecord activity2 = createActivityRecord(mDisplayContent,
                 activity1.getTask());
         activity2.setVisible(false);
-        activity2.mVisibleRequested = true;
+        activity2.setVisibleRequested(true);
 
         final ActivityRecord activity3 = createActivityRecord(mDisplayContent);
         activity3.setOccludesParent(false);
@@ -534,7 +567,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         final Task parentTask = createTask(mDisplayContent);
         final ActivityRecord activity1 = createActivityRecordWithParentTask(parentTask);
         activity1.setVisible(false);
-        activity1.mVisibleRequested = true;
+        activity1.setVisibleRequested(true);
         final ActivityRecord activity2 = createActivityRecordWithParentTask(parentTask);
 
         final ArraySet<ActivityRecord> opening = new ArraySet<>();
@@ -560,17 +593,17 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         final Task singleTopRoot = createTask(mDisplayContent);
         final TaskBuilder builder = new TaskBuilder(mSupervisor)
                 .setWindowingMode(WINDOWING_MODE_MULTI_WINDOW)
-                .setParentTaskFragment(singleTopRoot)
+                .setParentTask(singleTopRoot)
                 .setCreatedByOrganizer(true);
         final Task splitRoot1 = builder.build();
         final Task splitRoot2 = builder.build();
-        splitRoot1.setAdjacentTaskFragment(splitRoot2, false /* moveTogether */);
+        splitRoot1.setAdjacentTaskFragment(splitRoot2);
         final ActivityRecord activity1 = createActivityRecordWithParentTask(splitRoot1);
         activity1.setVisible(false);
-        activity1.mVisibleRequested = true;
+        activity1.setVisibleRequested(true);
         final ActivityRecord activity2 = createActivityRecordWithParentTask(splitRoot2);
         activity2.setVisible(false);
-        activity2.mVisibleRequested = true;
+        activity2.setVisibleRequested(true);
 
         final ArraySet<ActivityRecord> opening = new ArraySet<>();
         opening.add(activity1);
@@ -589,48 +622,15 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         // [DefaultTDA] - [Task] -+- [TaskFragment1] - [ActivityRecord1] (opening, invisible)
         //                        +- [TaskFragment2] - [ActivityRecord2] (closing, visible)
         final Task parentTask = createTask(mDisplayContent);
-        final TaskFragment taskFragment1 = createTaskFragmentWithParentTask(parentTask,
-                false /* createEmbeddedTask */);
+        final TaskFragment taskFragment1 = createTaskFragmentWithActivity(parentTask);
         final ActivityRecord activity1 = taskFragment1.getTopMostActivity();
         activity1.setVisible(false);
-        activity1.mVisibleRequested = true;
+        activity1.setVisibleRequested(true);
 
-        final TaskFragment taskFragment2 = createTaskFragmentWithParentTask(parentTask,
-                false /* createEmbeddedTask */);
+        final TaskFragment taskFragment2 = createTaskFragmentWithActivity(parentTask);
         final ActivityRecord activity2 = taskFragment2.getTopMostActivity();
         activity2.setVisible(true);
-        activity2.mVisibleRequested = false;
-
-        final ArraySet<ActivityRecord> opening = new ArraySet<>();
-        opening.add(activity1);
-        final ArraySet<ActivityRecord> closing = new ArraySet<>();
-        closing.add(activity2);
-
-        // Promote animation targets up to TaskFragment level, not beyond.
-        assertEquals(new ArraySet<>(new WindowContainer[]{taskFragment1}),
-                AppTransitionController.getAnimationTargets(
-                        opening, closing, true /* visible */));
-        assertEquals(new ArraySet<>(new WindowContainer[]{taskFragment2}),
-                AppTransitionController.getAnimationTargets(
-                        opening, closing, false /* visible */));
-    }
-
-    @Test
-    public void testGetAnimationTargets_openingClosingTaskFragmentWithEmbeddedTask() {
-        // [DefaultTDA] - [Task] -+- [TaskFragment1] - [ActivityRecord1] (opening, invisible)
-        //                        +- [TaskFragment2] - [ActivityRecord2] (closing, visible)
-        final Task parentTask = createTask(mDisplayContent);
-        final TaskFragment taskFragment1 = createTaskFragmentWithParentTask(parentTask,
-                true /* createEmbeddedTask */);
-        final ActivityRecord activity1 = taskFragment1.getTopMostActivity();
-        activity1.setVisible(false);
-        activity1.mVisibleRequested = true;
-
-        final TaskFragment taskFragment2 = createTaskFragmentWithParentTask(parentTask,
-                true /* createEmbeddedTask */);
-        final ActivityRecord activity2 = taskFragment2.getTopMostActivity();
-        activity2.setVisible(true);
-        activity2.mVisibleRequested = false;
+        activity2.setVisibleRequested(false);
 
         final ArraySet<ActivityRecord> opening = new ArraySet<>();
         opening.add(activity1);
@@ -651,15 +651,14 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         // [DefaultTDA] -+- [Task1] - [TaskFragment1] - [ActivityRecord1] (opening, invisible)
         //               +- [Task2] - [ActivityRecord2] (closing, visible)
         final Task task1 = createTask(mDisplayContent);
-        final TaskFragment taskFragment1 = createTaskFragmentWithParentTask(task1,
-                false /* createEmbeddedTask */);
+        final TaskFragment taskFragment1 = createTaskFragmentWithActivity(task1);
         final ActivityRecord activity1 = taskFragment1.getTopMostActivity();
         activity1.setVisible(false);
-        activity1.mVisibleRequested = true;
+        activity1.setVisibleRequested(true);
 
         final ActivityRecord activity2 = createActivityRecord(mDisplayContent);
         activity2.setVisible(true);
-        activity2.mVisibleRequested = false;
+        activity2.setVisibleRequested(false);
 
         final ArraySet<ActivityRecord> opening = new ArraySet<>();
         opening.add(activity1);
@@ -681,15 +680,14 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         // [DefaultTDA] -+- [Task1] - [TaskFragment1] - [ActivityRecord1] (closing, visible)
         //               +- [Task2] - [ActivityRecord2] (opening, invisible)
         final Task task1 = createTask(mDisplayContent);
-        final TaskFragment taskFragment1 = createTaskFragmentWithParentTask(task1,
-                false /* createEmbeddedTask */);
+        final TaskFragment taskFragment1 = createTaskFragmentWithActivity(task1);
         final ActivityRecord activity1 = taskFragment1.getTopMostActivity();
         activity1.setVisible(true);
-        activity1.mVisibleRequested = false;
+        activity1.setVisibleRequested(false);
 
         final ActivityRecord activity2 = createActivityRecord(mDisplayContent);
         activity2.setVisible(false);
-        activity2.mVisibleRequested = true;
+        activity2.setVisibleRequested(true);
 
         final ArraySet<ActivityRecord> opening = new ArraySet<>();
         opening.add(activity2);
@@ -712,13 +710,13 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         //                   +- [Task2] (embedded) - [ActivityRecord2] (opening, invisible)
         final ActivityRecord activity1 = createActivityRecord(mDisplayContent);
         activity1.setVisible(false);
-        activity1.mVisibleRequested = true;
+        activity1.setVisibleRequested(true);
 
         final Task task2 = createTask(mDisplayContent);
         task2.mRemoveWithTaskOrganizer = true;
         final ActivityRecord activity2 = createActivityRecord(task2);
         activity2.setVisible(false);
-        activity2.mVisibleRequested = true;
+        activity2.setVisibleRequested(true);
 
         final ArraySet<ActivityRecord> opening = new ArraySet<>();
         opening.add(activity1);
@@ -746,7 +744,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
         final ActivityRecord activity1 = createActivityRecord(task);
         activity1.setVisible(false);
-        activity1.mVisibleRequested = true;
+        activity1.setVisibleRequested(true);
         final ActivityRecord activity2 = createActivityRecord(task);
 
         final ArraySet<ActivityRecord> opening = new ArraySet<>();
@@ -887,7 +885,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         final Task task = createTask(mDisplayContent);
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final TestRemoteAnimationRunner remoteAnimationRunner = new TestRemoteAnimationRunner();
-        setupTaskFragmentRemoteAnimation(organizer, task.mTaskId, remoteAnimationRunner);
+        setupTaskFragmentRemoteAnimation(organizer, remoteAnimationRunner);
 
         // Create a TaskFragment with embedded activity.
         final TaskFragment taskFragment = createTaskFragmentWithEmbeddedActivity(task, organizer);
@@ -904,11 +902,77 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testOverrideTaskFragmentAdapter_noOverrideWithOnlyTaskFragmentFillingTask() {
+        final Task task = createTask(mDisplayContent);
+        final ActivityRecord closingActivity = createActivityRecord(task);
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final TestRemoteAnimationRunner remoteAnimationRunner = new TestRemoteAnimationRunner();
+        setupTaskFragmentRemoteAnimation(organizer, remoteAnimationRunner);
+
+        // Create a TaskFragment with embedded activity.
+        final TaskFragment taskFragment = createTaskFragmentWithEmbeddedActivity(task, organizer);
+
+        // Make sure the TaskFragment is not embedded.
+        assertFalse(taskFragment.isEmbeddedWithBoundsOverride());
+        final ActivityRecord openingActivity = taskFragment.getTopMostActivity();
+        prepareActivityForAppTransition(closingActivity);
+        prepareActivityForAppTransition(openingActivity);
+        final int uid = 12345;
+        closingActivity.info.applicationInfo.uid = uid;
+        openingActivity.info.applicationInfo.uid = uid;
+        task.effectiveUid = uid;
+        spyOn(mDisplayContent.mAppTransition);
+
+        // Prepare and start transition.
+        prepareAndTriggerAppTransition(openingActivity, closingActivity,
+                null /* changingTaskFragment */);
+        mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+
+        // Animation is not run by the remote handler because the activity is filling the Task.
+        assertFalse(remoteAnimationRunner.isAnimationStarted());
+    }
+
+    @Test
+    public void testOverrideTaskFragmentAdapter_overrideWithTaskFragmentNotFillingTask() {
+        final Task task = createTask(mDisplayContent);
+        final ActivityRecord closingActivity = createActivityRecord(task);
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final TestRemoteAnimationRunner remoteAnimationRunner = new TestRemoteAnimationRunner();
+        setupTaskFragmentRemoteAnimation(organizer, remoteAnimationRunner);
+
+        // Create a TaskFragment with embedded activity.
+        final TaskFragment taskFragment = createTaskFragmentWithEmbeddedActivity(task, organizer);
+
+        // Make sure the TaskFragment is embedded.
+        taskFragment.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        final Rect embeddedBounds = new Rect(task.getBounds());
+        embeddedBounds.right = embeddedBounds.left + embeddedBounds.width() / 2;
+        taskFragment.setBounds(embeddedBounds);
+        assertTrue(taskFragment.isEmbeddedWithBoundsOverride());
+        final ActivityRecord openingActivity = taskFragment.getTopMostActivity();
+        prepareActivityForAppTransition(closingActivity);
+        prepareActivityForAppTransition(openingActivity);
+        final int uid = 12345;
+        closingActivity.info.applicationInfo.uid = uid;
+        openingActivity.info.applicationInfo.uid = uid;
+        task.effectiveUid = uid;
+        spyOn(mDisplayContent.mAppTransition);
+
+        // Prepare and start transition.
+        prepareAndTriggerAppTransition(openingActivity, closingActivity,
+                null /* changingTaskFragment */);
+        mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+
+        // Animation run by the remote handler.
+        assertTrue(remoteAnimationRunner.isAnimationStarted());
+    }
+
+    @Test
     public void testOverrideTaskFragmentAdapter_overrideWithNonEmbeddedActivity() {
         final Task task = createTask(mDisplayContent);
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final TestRemoteAnimationRunner remoteAnimationRunner = new TestRemoteAnimationRunner();
-        setupTaskFragmentRemoteAnimation(organizer, task.mTaskId, remoteAnimationRunner);
+        setupTaskFragmentRemoteAnimation(organizer, remoteAnimationRunner);
 
         // Closing non-embedded activity.
         final ActivityRecord closingActivity = createActivityRecord(task);
@@ -933,7 +997,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         final Task task = createTask(mDisplayContent);
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final TestRemoteAnimationRunner remoteAnimationRunner = new TestRemoteAnimationRunner();
-        setupTaskFragmentRemoteAnimation(organizer, task.mTaskId, remoteAnimationRunner);
+        setupTaskFragmentRemoteAnimation(organizer, remoteAnimationRunner);
 
         // Closing TaskFragment with embedded activity.
         final TaskFragment taskFragment1 = createTaskFragmentWithEmbeddedActivity(task, organizer);
@@ -960,7 +1024,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         final Task task = createTask(mDisplayContent);
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final TestRemoteAnimationRunner remoteAnimationRunner = new TestRemoteAnimationRunner();
-        setupTaskFragmentRemoteAnimation(organizer, task.mTaskId, remoteAnimationRunner);
+        setupTaskFragmentRemoteAnimation(organizer, remoteAnimationRunner);
 
         // Closing activity in Task1.
         final ActivityRecord closingActivity = createActivityRecord(mDisplayContent);
@@ -984,7 +1048,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         final Task task = createTask(mDisplayContent);
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final TestRemoteAnimationRunner remoteAnimationRunner = new TestRemoteAnimationRunner();
-        setupTaskFragmentRemoteAnimation(organizer, task.mTaskId, remoteAnimationRunner);
+        setupTaskFragmentRemoteAnimation(organizer, remoteAnimationRunner);
 
         // Closing TaskFragment with embedded activity.
         final TaskFragment taskFragment = createTaskFragmentWithEmbeddedActivity(task, organizer);
@@ -1012,7 +1076,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         final Task task = createTask(mDisplayContent);
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final TestRemoteAnimationRunner remoteAnimationRunner = new TestRemoteAnimationRunner();
-        setupTaskFragmentRemoteAnimation(organizer, task.mTaskId, remoteAnimationRunner);
+        setupTaskFragmentRemoteAnimation(organizer, remoteAnimationRunner);
 
         // Create a TaskFragment with embedded activity.
         final TaskFragment taskFragment = createTaskFragmentWithEmbeddedActivity(task, organizer);
@@ -1038,7 +1102,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         final Task task = createTask(mDisplayContent);
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final TestRemoteAnimationRunner remoteAnimationRunner = new TestRemoteAnimationRunner();
-        setupTaskFragmentRemoteAnimation(organizer, task.mTaskId, remoteAnimationRunner);
+        setupTaskFragmentRemoteAnimation(organizer, remoteAnimationRunner);
 
         // Create a TaskFragment with embedded activities, one is trusted embedded, and the other
         // one is untrusted embedded.
@@ -1097,7 +1161,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         final Task task = createTask(mDisplayContent);
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final TestRemoteAnimationRunner remoteAnimationRunner = new TestRemoteAnimationRunner();
-        setupTaskFragmentRemoteAnimation(organizer, task.mTaskId, remoteAnimationRunner);
+        setupTaskFragmentRemoteAnimation(organizer, remoteAnimationRunner);
 
         // Create a TaskFragment with only trusted embedded activity
         final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
@@ -1137,7 +1201,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         final Task task = createTask(mDisplayContent);
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final TestRemoteAnimationRunner remoteAnimationRunner = new TestRemoteAnimationRunner();
-        setupTaskFragmentRemoteAnimation(organizer, task.mTaskId, remoteAnimationRunner);
+        setupTaskFragmentRemoteAnimation(organizer, remoteAnimationRunner);
 
         // Create a TaskFragment with only trusted embedded activity
         final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
@@ -1196,6 +1260,8 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     @Test
     public void testTransitionGoodToGoForTaskFragments_detachedApp() {
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final ITaskFragmentOrganizer iOrganizer = getITaskFragmentOrganizer(organizer);
+        mAtm.mTaskFragmentOrganizerController.registerOrganizer(iOrganizer);
         final Task task = createTask(mDisplayContent);
         final TaskFragment changeTaskFragment =
                 createTaskFragmentWithEmbeddedActivity(task, organizer);
@@ -1228,7 +1294,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     }
 
     /** Registers remote animation for the organizer. */
-    private void setupTaskFragmentRemoteAnimation(TaskFragmentOrganizer organizer, int taskId,
+    private void setupTaskFragmentRemoteAnimation(TaskFragmentOrganizer organizer,
             TestRemoteAnimationRunner remoteAnimationRunner) {
         final RemoteAnimationAdapter adapter = new RemoteAnimationAdapter(
                 remoteAnimationRunner, 10, 1);
@@ -1237,9 +1303,10 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         definition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_CHANGE, adapter);
         definition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_OPEN, adapter);
         definition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_CLOSE, adapter);
+        definition.addRemoteAnimation(TRANSIT_OLD_ACTIVITY_OPEN, adapter);
+        definition.addRemoteAnimation(TRANSIT_OLD_ACTIVITY_CLOSE, adapter);
         mAtm.mTaskFragmentOrganizerController.registerOrganizer(iOrganizer);
-        mAtm.mTaskFragmentOrganizerController.registerRemoteAnimations(iOrganizer, taskId,
-                definition);
+        mAtm.mTaskFragmentOrganizerController.registerRemoteAnimations(iOrganizer, definition);
     }
 
     private static ITaskFragmentOrganizer getITaskFragmentOrganizer(
@@ -1269,6 +1336,8 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         activity.allDrawn = true;
         // Skip manipulate the SurfaceControl.
         doNothing().when(activity).setDropInputMode(anyInt());
+        // Assume the activity contains a window.
+        doReturn(true).when(activity).hasChild();
         // Make sure activity can create remote animation target.
         doReturn(mock(RemoteAnimationTarget.class)).when(activity).createRemoteAnimationTarget(
                 any());

@@ -27,6 +27,7 @@
 
 #include <map>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "MouseCursorController.h"
@@ -65,7 +66,7 @@ public:
                           BitSet32 spotIdBits, int32_t displayId);
     virtual void clearSpots();
 
-    void updatePointerIcon(int32_t iconId);
+    void updatePointerIcon(PointerIconStyle iconId);
     void setCustomPointerIcon(const SpriteIcon& icon);
     void setInactivityTimeout(InactivityTimeout inactivityTimeout);
     void doInactivityTimeout();
@@ -74,6 +75,8 @@ public:
 
     void onDisplayInfosChangedLocked(const std::vector<gui::DisplayInfo>& displayInfos)
             REQUIRES(getLock());
+
+    void dump(std::string& dump);
 
 protected:
     using WindowListenerConsumer =

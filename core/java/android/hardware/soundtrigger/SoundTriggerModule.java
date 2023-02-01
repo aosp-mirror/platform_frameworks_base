@@ -102,7 +102,9 @@ public class SoundTriggerModule {
      * Detach from this module. The {@link SoundTrigger.StatusListener} callback will not be called
      * anymore and associated resources will be released.
      * All models must have been unloaded prior to detaching.
+     * @deprecated Use {@link android.media.soundtrigger.SoundTriggerManager} instead.
      */
+    @Deprecated
     @UnsupportedAppUsage
     public synchronized void detach() {
         try {
@@ -131,7 +133,9 @@ public class SoundTriggerModule {
      *         - {@link SoundTrigger#STATUS_DEAD_OBJECT} if the binder transaction to the native
      *         service fails
      *         - {@link SoundTrigger#STATUS_INVALID_OPERATION} if the call is out of sequence
+     * @deprecated Use {@link android.media.soundtrigger.SoundTriggerManager} instead.
      */
+    @Deprecated
     @UnsupportedAppUsage
     public synchronized int loadSoundModel(@NonNull SoundTrigger.SoundModel model,
             @NonNull int[] soundModelHandle) {
@@ -191,8 +195,10 @@ public class SoundTriggerModule {
      *         - {@link SoundTrigger#STATUS_BAD_VALUE} if the sound model handle is invalid
      *         - {@link SoundTrigger#STATUS_DEAD_OBJECT} if the binder transaction to the native
      *         service fails
+     * @deprecated Use {@link android.media.soundtrigger.SoundTriggerManager} instead.
      */
     @UnsupportedAppUsage
+    @Deprecated
     public synchronized int unloadSoundModel(int soundModelHandle) {
         try {
             mService.unloadModel(soundModelHandle);
@@ -219,8 +225,10 @@ public class SoundTriggerModule {
      *         - {@link SoundTrigger#STATUS_DEAD_OBJECT} if the binder transaction to the native
      *         service fails
      *         - {@link SoundTrigger#STATUS_INVALID_OPERATION} if the call is out of sequence
+     * @deprecated Use {@link android.media.soundtrigger.SoundTriggerManager} instead.
      */
     @UnsupportedAppUsage
+    @Deprecated
     public synchronized int startRecognition(int soundModelHandle,
             SoundTrigger.RecognitionConfig config) {
         try {
@@ -244,8 +252,10 @@ public class SoundTriggerModule {
      *         - {@link SoundTrigger#STATUS_DEAD_OBJECT} if the binder transaction to the native
      *         service fails
      *         - {@link SoundTrigger#STATUS_INVALID_OPERATION} if the call is out of sequence
+     * @deprecated Use {@link android.media.soundtrigger.SoundTriggerManager} instead.
      */
     @UnsupportedAppUsage
+    @Deprecated
     public synchronized int stopRecognition(int soundModelHandle) {
         try {
             mService.stopRecognition(soundModelHandle);

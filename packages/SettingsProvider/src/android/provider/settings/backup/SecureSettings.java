@@ -29,7 +29,7 @@ public class SecureSettings {
      */
     @UnsupportedAppUsage
     public static final String[] SETTINGS_TO_BACKUP = {
-        Settings.Secure.BUGREPORT_IN_POWER_MENU,                            // moved to global
+        Settings.Secure.BUGREPORT_IN_POWER_MENU,
         Settings.Secure.ALLOW_MOCK_LOCATION,
         Settings.Secure.USB_MASS_STORAGE_ENABLED,                           // moved to global
         Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
@@ -37,6 +37,7 @@ public class SecureSettings {
         Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
         Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED,
         Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED,
+        Settings.Secure.ADAPTIVE_CHARGING_ENABLED,
         Settings.Secure.ADAPTIVE_SLEEP,
         Settings.Secure.CAMERA_AUTOROTATE,
         Settings.Secure.AUTOFILL_SERVICE,
@@ -52,6 +53,7 @@ public class SecureSettings {
         Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
         Settings.Secure.ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN,
         Settings.Secure.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED,
+        Settings.Secure.CONTRAST_LEVEL,
         Settings.Secure.ACCESSIBILITY_CAPTIONING_PRESET,
         Settings.Secure.ACCESSIBILITY_CAPTIONING_ENABLED,
         Settings.Secure.ACCESSIBILITY_CAPTIONING_LOCALE,
@@ -117,6 +119,11 @@ public class SecureSettings {
         Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD,
         Settings.Secure.FACE_UNLOCK_APP_ENABLED,
         Settings.Secure.FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
+        Settings.Secure.FINGERPRINT_SIDE_FPS_KG_POWER_WINDOW,
+        Settings.Secure.FINGERPRINT_SIDE_FPS_BP_POWER_WINDOW,
+        Settings.Secure.FINGERPRINT_SIDE_FPS_ENROLL_TAP_WINDOW,
+        Settings.Secure.FINGERPRINT_SIDE_FPS_AUTH_DOWNTIME,
+        Settings.Secure.SFPS_PERFORMANT_AUTH_ENABLED,
         Settings.Secure.ACTIVE_UNLOCK_ON_WAKE,
         Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT,
         Settings.Secure.ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL,
@@ -139,6 +146,7 @@ public class SecureSettings {
         Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE,
         Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS,
         Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS,
+        Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
         Settings.Secure.SHOW_NOTIFICATION_SNOOZE,
         Settings.Secure.NOTIFICATION_HISTORY_ENABLED,
         Settings.Secure.ZEN_DURATION,
@@ -161,6 +169,11 @@ public class SecureSettings {
         Settings.Secure.BACK_GESTURE_INSET_SCALE_LEFT,
         Settings.Secure.BACK_GESTURE_INSET_SCALE_RIGHT,
         Settings.Secure.NAVIGATION_MODE,
+        Settings.Secure.TRACKPAD_GESTURE_BACK_ENABLED,
+        Settings.Secure.TRACKPAD_GESTURE_HOME_ENABLED,
+        Settings.Secure.TRACKPAD_GESTURE_OVERVIEW_ENABLED,
+        Settings.Secure.TRACKPAD_GESTURE_NOTIFICATION_ENABLED,
+        Settings.Secure.TRACKPAD_GESTURE_QUICK_SWITCH_ENABLED,
         Settings.Secure.SKIP_GESTURE_COUNT,
         Settings.Secure.SKIP_TOUCH_COUNT,
         Settings.Secure.SILENCE_ALARMS_GESTURE_COUNT,
@@ -177,6 +190,7 @@ public class SecureSettings {
         Settings.Secure.PEOPLE_STRIP,
         Settings.Secure.MEDIA_CONTROLS_RESUME,
         Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION,
+        Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN,
         Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE,
         Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
         Settings.Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY,
@@ -204,6 +218,15 @@ public class SecureSettings {
         Settings.Secure.LOCKSCREEN_SHOW_WALLET,
         Settings.Secure.LOCK_SCREEN_SHOW_QR_CODE_SCANNER,
         Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK,
-        Settings.Secure.STATUS_BAR_SHOW_VIBRATE_ICON
+        Settings.Secure.STATUS_BAR_SHOW_VIBRATE_ICON,
+        Settings.Secure.WEAR_TALKBACK_ENABLED,
+        Settings.Secure.HBM_SETTING_KEY,
+        Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED,
+        Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED,
+        Settings.Secure.BLUETOOTH_LE_BROADCAST_PROGRAM_INFO,
+        Settings.Secure.BLUETOOTH_LE_BROADCAST_CODE,
+        Settings.Secure.BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME,
+        Settings.Secure.CUSTOM_BUGREPORT_HANDLER_APP,
+        Settings.Secure.CUSTOM_BUGREPORT_HANDLER_USER
     };
 }

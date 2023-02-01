@@ -245,7 +245,9 @@ public class ImePerfTest extends ImePerfTestBase
         }
 
         long measuredTimeNs = 0;
-        while (state.keepRunning(measuredTimeNs)) {
+        boolean shouldRetry = false;
+        while (shouldRetry || state.keepRunning(measuredTimeNs)) {
+            shouldRetry = false;
             killBaselineIme();
             try (ImeSession imeSession = new ImeSession(BaselineIme.getName(
                     getInstrumentation().getContext()))) {
@@ -268,6 +270,14 @@ public class ImePerfTest extends ImePerfTestBase
                 });
 
                 measuredTimeNs = waitForAnimationStart(latchStart, startTime);
+
+                if (measuredTimeNs == ANIMATION_NOT_STARTED) {
+                    // Animation didn't start within timeout,
+                    // retry for more samples.
+                    // TODO(b/264722663): Investigate the animation start failure reason.
+                    shouldRetry = true;
+                    Log.w(TAG, "Insets animation didn't start within timeout.");
+                }
                 mActivityRule.finishActivity();
             }
         }
@@ -411,6 +421,10 @@ public class ImePerfTest extends ImePerfTestBase
 
     private void addResultToState(ManualBenchmarkState state) {
         mTraceMethods.forAllSlices((key, slices) -> {
+            if (slices.size() < 2) {
+                Log.w(TAG, "No enough samples for: " + key);
+                return;
+            }
             for (TraceMarkSlice slice : slices) {
                 state.addExtraResult(key, (long) (slice.getDurationInSeconds() * NANOS_PER_S));
             }

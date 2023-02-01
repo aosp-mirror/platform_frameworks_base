@@ -76,7 +76,6 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
@@ -171,6 +170,15 @@ public final class UiAutomation {
      * {@link Instrumentation#getUiAutomation(int)}.
      */
     public static final int FLAG_DONT_USE_ACCESSIBILITY = 0x00000002;
+
+    /**
+     * UiAutomation sets {@link AccessibilityServiceInfo#isAccessibilityTool()} true by default.
+     * This flag provides the option to set this field false for tests exercising that property.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final int FLAG_NOT_ACCESSIBILITY_TOOL = 0x00000004;
 
     /**
      * Returned by {@link #getAdoptedShellPermissions} to indicate that all permissions have been
@@ -475,7 +483,7 @@ public final class UiAutomation {
             // Calling out without a lock held.
             mUiAutomationConnection.adoptShellPermissionIdentity(Process.myUid(), null);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error executing adopting shell permission identity!", re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -500,7 +508,7 @@ public final class UiAutomation {
             // Calling out without a lock held.
             mUiAutomationConnection.adoptShellPermissionIdentity(Process.myUid(), permissions);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error executing adopting shell permission identity!", re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -516,7 +524,7 @@ public final class UiAutomation {
             // Calling out without a lock held.
             mUiAutomationConnection.dropShellPermissionIdentity();
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error executing dropping shell permission identity!", re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -534,8 +542,7 @@ public final class UiAutomation {
             final List<String> permissions = mUiAutomationConnection.getAdoptedShellPermissions();
             return permissions == null ? ALL_PERMISSIONS : new ArraySet<>(permissions);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error getting adopted shell permissions", re);
-            return Collections.emptySet();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -781,6 +788,24 @@ public final class UiAutomation {
             Log.e(LOG_TAG, "Error while injecting input event!", re);
         }
         return false;
+    }
+
+    /**
+     * Injects an arbitrary {@link InputEvent} to the accessibility input filter, for use in testing
+     * the accessibility input filter.
+     *
+     * Events injected to the input subsystem using the standard {@link #injectInputEvent} method
+     * skip the accessibility input filter to avoid feedback loops.
+     *
+     * @hide
+     */
+    @TestApi
+    public void injectInputEventToInputFilter(@NonNull InputEvent event) {
+        try {
+            mUiAutomationConnection.injectInputEventToInputFilter(event);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while injecting input event to input filter", re);
+        }
     }
 
     /**
@@ -1068,10 +1093,7 @@ public final class UiAutomation {
      * @param window Window to take a screenshot of
      *
      * @return The screenshot bitmap on success, null otherwise.
-     *
-     * @hide
      */
-    @TestApi
     @Nullable
     public Bitmap takeScreenshot(@NonNull Window window) {
         if (window == null) {

@@ -38,6 +38,7 @@ import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.DisplayCutout;
 import android.view.DisplayEventReceiver;
+import android.view.DisplayShape;
 import android.view.RoundedCorners;
 import android.view.SurfaceControl;
 
@@ -111,13 +112,13 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mSurfaceControlProxy.getPhysicalDisplayToken(physicalDisplayId);
         if (displayToken != null) {
             SurfaceControl.StaticDisplayInfo staticInfo =
-                    mSurfaceControlProxy.getStaticDisplayInfo(displayToken);
+                    mSurfaceControlProxy.getStaticDisplayInfo(physicalDisplayId);
             if (staticInfo == null) {
                 Slog.w(TAG, "No valid static info found for display device " + physicalDisplayId);
                 return;
             }
             SurfaceControl.DynamicDisplayInfo dynamicInfo =
-                    mSurfaceControlProxy.getDynamicDisplayInfo(displayToken);
+                    mSurfaceControlProxy.getDynamicDisplayInfo(physicalDisplayId);
             if (dynamicInfo == null) {
                 Slog.w(TAG, "No valid dynamic info found for display device " + physicalDisplayId);
                 return;
@@ -198,6 +199,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private DisplayDeviceInfo mInfo;
         private boolean mHavePendingChanges;
         private int mState = Display.STATE_UNKNOWN;
+        private int mCommittedState = Display.STATE_UNKNOWN;
+
         // This is only set in the runnable returned from requestDisplayStateLocked.
         private float mBrightnessState = PowerManager.BRIGHTNESS_INVALID_FLOAT;
         private float mSdrBrightnessState = PowerManager.BRIGHTNESS_INVALID_FLOAT;
@@ -207,7 +210,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private int mUserPreferredModeId = INVALID_MODE_ID;
         // This is used only for the purpose of testing, to verify if the mode was correct when the
         // device started or booted.
-        private int mActiveDisplayModeAtStartId = INVALID_MODE_ID;
+        private int mActiveSfDisplayModeAtStartId = INVALID_MODE_ID;
         private Display.Mode mUserPreferredMode;
         private int mActiveModeId = INVALID_MODE_ID;
         private boolean mDisplayModeSpecsInvalid;
@@ -223,6 +226,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private SurfaceControl.DisplayMode[] mSfDisplayModes;
         // The active display mode in SurfaceFlinger
         private SurfaceControl.DisplayMode mActiveSfDisplayMode;
+        // The active display vsync period in SurfaceFlinger
+        private float mActiveRenderFrameRate;
 
         private DisplayEventReceiver.FrameRateOverride[] mFrameRateOverrides =
                 new DisplayEventReceiver.FrameRateOverride[0];
@@ -239,7 +244,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             mSidekickInternal = LocalServices.getService(SidekickInternal.class);
             mBacklightAdapter = new BacklightAdapter(displayToken, isFirstDisplay,
                     mSurfaceControlProxy);
-            mActiveDisplayModeAtStartId = dynamicInfo.activeDisplayModeId;
+            mActiveSfDisplayModeAtStartId = dynamicInfo.activeDisplayModeId;
         }
 
         @Override
@@ -253,7 +258,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
          */
         @Override
         public Display.Mode getActiveDisplayModeAtStartLocked() {
-            return findMode(mActiveDisplayModeAtStartId);
+            return findMode(findMatchingModeIdLocked(mActiveSfDisplayModeAtStartId));
         }
 
         /**
@@ -264,7 +269,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 SurfaceControl.DesiredDisplayModeSpecs modeSpecs) {
             boolean changed = updateDisplayModesLocked(
                     dynamicInfo.supportedDisplayModes, dynamicInfo.preferredBootDisplayMode,
-                    dynamicInfo.activeDisplayModeId, modeSpecs);
+                    dynamicInfo.activeDisplayModeId, dynamicInfo.renderFrameRate, modeSpecs);
             changed |= updateStaticInfo(staticInfo);
             changed |= updateColorModesLocked(dynamicInfo.supportedColorModes,
                     dynamicInfo.activeColorMode);
@@ -280,7 +285,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
         public boolean updateDisplayModesLocked(
                 SurfaceControl.DisplayMode[] displayModes, int preferredSfDisplayModeId,
-                int activeSfDisplayModeId, SurfaceControl.DesiredDisplayModeSpecs modeSpecs) {
+                int activeSfDisplayModeId, float renderFrameRate,
+                SurfaceControl.DesiredDisplayModeSpecs modeSpecs) {
             mSfDisplayModes = Arrays.copyOf(displayModes, displayModes.length);
             mActiveSfDisplayMode = getModeById(displayModes, activeSfDisplayModeId);
             SurfaceControl.DisplayMode preferredSfDisplayMode =
@@ -376,6 +382,16 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 sendTraversalRequestLocked();
             }
 
+            boolean renderFrameRateChanged = false;
+
+            if (mActiveRenderFrameRate > 0 &&  mActiveRenderFrameRate != renderFrameRate) {
+                Slog.d(TAG, "The render frame rate was changed from SurfaceFlinger or the display"
+                        + " device to " + renderFrameRate);
+                mActiveRenderFrameRate = renderFrameRate;
+                renderFrameRateChanged = true;
+                sendTraversalRequestLocked();
+            }
+
             // Check whether surface flinger spontaneously changed display config specs out from
             // under us. If so, schedule a traversal to reapply our display config specs.
             if (mDisplayModeSpecs.baseModeId != INVALID_MODE_ID) {
@@ -385,14 +401,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 // list of available modes will take care of updating display mode specs.
                 if (activeBaseMode == INVALID_MODE_ID
                         || mDisplayModeSpecs.baseModeId != activeBaseMode
-                        || mDisplayModeSpecs.primaryRefreshRateRange.min
-                                != modeSpecs.primaryRefreshRateMin
-                        || mDisplayModeSpecs.primaryRefreshRateRange.max
-                                != modeSpecs.primaryRefreshRateMax
-                        || mDisplayModeSpecs.appRequestRefreshRateRange.min
-                                != modeSpecs.appRequestRefreshRateMin
-                        || mDisplayModeSpecs.appRequestRefreshRateRange.max
-                                != modeSpecs.appRequestRefreshRateMax) {
+                        || !mDisplayModeSpecs.primary.equals(modeSpecs.primaryRanges)
+                        || !mDisplayModeSpecs.appRequest.equals(modeSpecs.appRequestRanges)) {
                     mDisplayModeSpecsInvalid = true;
                     sendTraversalRequestLocked();
                 }
@@ -401,7 +411,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             boolean recordsChanged = records.size() != mSupportedModes.size() || modesAdded;
             // If the records haven't changed then we're done here.
             if (!recordsChanged) {
-                return activeModeChanged || preferredModeChanged;
+                return activeModeChanged || preferredModeChanged || renderFrameRateChanged;
             }
 
             mSupportedModes.clear();
@@ -411,21 +421,21 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
             // For a new display, we need to initialize the default mode ID.
             if (mDefaultModeId == INVALID_MODE_ID) {
-                mDefaultModeId = mSystemPreferredModeId != INVALID_MODE_ID
-                        ? mSystemPreferredModeId : activeRecord.mMode.getModeId();
-                mDefaultModeGroup = mSystemPreferredModeId != INVALID_MODE_ID
-                        ? preferredSfDisplayMode.group
-                        : mActiveSfDisplayMode.group;
+                mDefaultModeId = activeRecord.mMode.getModeId();
+                mDefaultModeGroup = mActiveSfDisplayMode.group;
+                mActiveRenderFrameRate = renderFrameRate;
             } else if (modesAdded && activeModeChanged) {
                 Slog.d(TAG, "New display modes are added and the active mode has changed, "
                         + "use active mode as default mode.");
                 mDefaultModeId = activeRecord.mMode.getModeId();
                 mDefaultModeGroup = mActiveSfDisplayMode.group;
+                mActiveRenderFrameRate = renderFrameRate;
             } else if (findSfDisplayModeIdLocked(mDefaultModeId, mDefaultModeGroup) < 0) {
                 Slog.w(TAG, "Default display mode no longer available, using currently"
                         + " active mode as default.");
                 mDefaultModeId = activeRecord.mMode.getModeId();
                 mDefaultModeGroup = mActiveSfDisplayMode.group;
+                mActiveRenderFrameRate = renderFrameRate;
             }
 
             // Determine whether the display mode specs' base mode is still there.
@@ -590,7 +600,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 DisplayModeRecord record = mSupportedModes.valueAt(i);
                 if (record.hasMatchingMode(mode)
                         && refreshRatesEquals(alternativeRefreshRates,
-                                record.mMode.getAlternativeRefreshRates())) {
+                                record.mMode.getAlternativeRefreshRates())
+                        && hdrTypesEqual(mode.supportedHdrTypes,
+                            record.mMode.getSupportedHdrTypes())) {
                     return record;
                 }
             }
@@ -624,6 +636,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mInfo.width = mActiveSfDisplayMode.width;
                 mInfo.height = mActiveSfDisplayMode.height;
                 mInfo.modeId = mActiveModeId;
+                mInfo.renderFrameRate = mActiveRenderFrameRate;
                 mInfo.defaultModeId = getPreferredModeId();
                 mInfo.supportedModes = getDisplayModes(mSupportedModes);
                 mInfo.colorMode = mActiveColorMode;
@@ -638,6 +651,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mInfo.appVsyncOffsetNanos = mActiveSfDisplayMode.appVsyncOffsetNanos;
                 mInfo.presentationDeadlineNanos = mActiveSfDisplayMode.presentationDeadlineNanos;
                 mInfo.state = mState;
+                mInfo.committedState = mCommittedState;
                 mInfo.uniqueId = getUniqueId();
                 final DisplayAddress.Physical physicalAddress =
                         DisplayAddress.fromPhysicalDisplayId(mPhysicalDisplayId);
@@ -691,6 +705,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mInfo.roundedCorners = RoundedCorners.fromResources(
                         res, mInfo.uniqueId, maxWidth, maxHeight, mInfo.width, mInfo.height);
                 mInfo.installOrientation = mStaticDisplayInfo.installOrientation;
+
+                mInfo.displayShape = DisplayShape.fromResources(
+                        res, mInfo.uniqueId, maxWidth, maxHeight, mInfo.width, mInfo.height);
 
                 if (mStaticDisplayInfo.isInternal) {
                     mInfo.type = Display.TYPE_INTERNAL;
@@ -764,18 +781,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             }
                         }
 
-                        // If the state change was from or to VR, then we need to tell the light
-                        // so that it can apply appropriate VR brightness settings. Also, update the
-                        // brightness so the state is propogated to light.
-                        boolean vrModeChange = false;
-                        if ((state == Display.STATE_VR || currentState == Display.STATE_VR) &&
-                                currentState != state) {
-                            setVrMode(state == Display.STATE_VR);
-                            vrModeChange = true;
-                        }
-
                         // Apply brightness changes given that we are in a non-suspended state.
-                        if (brightnessChanged || vrModeChange) {
+                        if (brightnessChanged) {
                             setDisplayBrightness(brightnessState, sdrBrightnessState);
                             mBrightnessState = brightnessState;
                             mSdrBrightnessState = sdrBrightnessState;
@@ -785,15 +792,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         if (state != currentState) {
                             setDisplayState(state);
                         }
-                    }
-
-                    private void setVrMode(boolean isVrEnabled) {
-                        if (DEBUG) {
-                            Slog.d(TAG, "setVrMode("
-                                    + "id=" + physicalDisplayId
-                                    + ", state=" + Display.stateToString(state) + ")");
-                        }
-                        mBacklightAdapter.setVrMode(isVrEnabled);
                     }
 
                     private void setDisplayState(int state) {
@@ -825,6 +823,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         } finally {
                             Trace.traceEnd(Trace.TRACE_TAG_POWER);
                         }
+                        setCommittedState(state);
                         // If we're entering a suspended (but not OFF) power state and we
                         // have a sidekick available, tell it now that it can take control.
                         if (Display.isSuspendedState(state) && state != Display.STATE_OFF
@@ -837,6 +836,16 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                                 Trace.traceEnd(Trace.TRACE_TAG_POWER);
                             }
                         }
+                    }
+
+                    private void setCommittedState(int state) {
+                        // After the display state is set, let's update the committed state.
+                        getHandler().post(() -> {
+                            synchronized (getSyncRoot()) {
+                                mCommittedState = state;
+                                updateDeviceInfoLocked();
+                            }
+                        });
                     }
 
                     private void setDisplayBrightness(float brightnessState,
@@ -897,6 +906,13 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         public void setUserPreferredDisplayModeLocked(Display.Mode mode) {
             final int oldModeId = getPreferredModeId();
             mUserPreferredMode = mode;
+            // When clearing the user preferred mode we need to also reset the default mode. This is
+            // used by DisplayModeDirector to determine the default resolution, so if we don't clear
+            // it then the resolution won't reset to what it would've been prior to setting a user
+            // preferred display mode.
+            if (mode == null && mSystemPreferredModeId != INVALID_MODE_ID) {
+                mDefaultModeId = mSystemPreferredModeId;
+            }
             if (mode != null && (mode.isRefreshRateSet() || mode.isResolutionSet())) {
                 Display.Mode matchingSupportedMode;
                 matchingSupportedMode = findMode(mode.getPhysicalWidth(),
@@ -979,10 +995,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         getDisplayTokenLocked(),
                         new SurfaceControl.DesiredDisplayModeSpecs(baseSfModeId,
                                 mDisplayModeSpecs.allowGroupSwitching,
-                                mDisplayModeSpecs.primaryRefreshRateRange.min,
-                                mDisplayModeSpecs.primaryRefreshRateRange.max,
-                                mDisplayModeSpecs.appRequestRefreshRateRange.min,
-                                mDisplayModeSpecs.appRequestRefreshRateRange.max)));
+                                mDisplayModeSpecs.primary,
+                                mDisplayModeSpecs.appRequest)));
             }
         }
 
@@ -998,8 +1012,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             updateDeviceInfoLocked();
         }
 
-        public void onActiveDisplayModeChangedLocked(int sfModeId) {
-            if (updateActiveModeLocked(sfModeId)) {
+        public void onActiveDisplayModeChangedLocked(int sfModeId, float renderFrameRate) {
+            if (updateActiveModeLocked(sfModeId, renderFrameRate)) {
                 updateDeviceInfoLocked();
             }
         }
@@ -1011,8 +1025,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             }
         }
 
-        public boolean updateActiveModeLocked(int activeSfModeId) {
-            if (mActiveSfDisplayMode.id == activeSfModeId) {
+        public boolean updateActiveModeLocked(int activeSfModeId, float renderFrameRate) {
+            if (mActiveSfDisplayMode.id == activeSfModeId
+                    && mActiveRenderFrameRate == renderFrameRate) {
                 return false;
             }
             mActiveSfDisplayMode = getModeById(mSfDisplayModes, activeSfModeId);
@@ -1021,6 +1036,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 Slog.w(TAG, "In unknown mode after setting allowed modes"
                         + ", activeModeId=" + activeSfModeId);
             }
+            mActiveRenderFrameRate = renderFrameRate;
             return true;
         }
 
@@ -1104,6 +1120,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             pw.println("mDefaultModeId=" + mDefaultModeId);
             pw.println("mUserPreferredModeId=" + mUserPreferredModeId);
             pw.println("mState=" + Display.stateToString(mState));
+            pw.println("mCommittedState=" + Display.stateToString(mCommittedState));
             pw.println("mBrightnessState=" + mBrightnessState);
             pw.println("mBacklightAdapter=" + mBacklightAdapter);
             pw.println("mAllmSupported=" + mAllmSupported);
@@ -1116,6 +1133,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 pw.println("  " + sfDisplayMode);
             }
             pw.println("mActiveSfDisplayMode=" + mActiveSfDisplayMode);
+            pw.println("mActiveRenderFrameRate=" + mActiveRenderFrameRate);
             pw.println("mSupportedModes=");
             for (int i = 0; i < mSupportedModes.size(); i++) {
                 pw.println("  " + mSupportedModes.valueAt(i));
@@ -1230,6 +1248,13 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
     }
 
+    private boolean hdrTypesEqual(int[] modeHdrTypes, int[] recordHdrTypes) {
+        int[] modeHdrTypesCopy = Arrays.copyOf(modeHdrTypes, modeHdrTypes.length);
+        Arrays.sort(modeHdrTypesCopy);
+        // Record HDR types are already sorted when we create the DisplayModeRecord
+        return Arrays.equals(modeHdrTypesCopy, recordHdrTypes);
+    }
+
     /** Supplies a context whose Resources apply runtime-overlays */
     Context getOverlayContext() {
         if (mOverlayContext == null) {
@@ -1247,7 +1272,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         DisplayModeRecord(SurfaceControl.DisplayMode mode,
                 float[] alternativeRefreshRates) {
             mMode = createMode(mode.width, mode.height, mode.refreshRate,
-                    alternativeRefreshRates);
+                    alternativeRefreshRates, mode.supportedHdrTypes);
         }
 
         /**
@@ -1261,7 +1286,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             return mMode.getPhysicalWidth() == mode.width
                     && mMode.getPhysicalHeight() == mode.height
                     && Float.floatToIntBits(mMode.getRefreshRate())
-                        == Float.floatToIntBits(mode.refreshRate);
+                    == Float.floatToIntBits(mode.refreshRate);
         }
 
         public String toString() {
@@ -1283,7 +1308,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
     public interface DisplayEventListener {
         void onHotplug(long timestampNanos, long physicalDisplayId, boolean connected);
-        void onModeChanged(long timestampNanos, long physicalDisplayId, int modeId);
+        void onModeChanged(long timestampNanos, long physicalDisplayId, int modeId,
+                long renderPeriod);
         void onFrameRateOverridesChanged(long timestampNanos, long physicalDisplayId,
                 DisplayEventReceiver.FrameRateOverride[] overrides);
 
@@ -1304,8 +1330,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public void onModeChanged(long timestampNanos, long physicalDisplayId, int modeId) {
-            mListener.onModeChanged(timestampNanos, physicalDisplayId, modeId);
+        public void onModeChanged(long timestampNanos, long physicalDisplayId, int modeId,
+                long renderPeriod) {
+            mListener.onModeChanged(timestampNanos, physicalDisplayId, modeId, renderPeriod);
         }
 
         @Override
@@ -1328,12 +1355,14 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public void onModeChanged(long timestampNanos, long physicalDisplayId, int modeId) {
+        public void onModeChanged(long timestampNanos, long physicalDisplayId, int modeId,
+                long renderPeriod) {
             if (DEBUG) {
                 Slog.d(TAG, "onModeChanged("
                         + "timestampNanos=" + timestampNanos
                         + ", physicalDisplayId=" + physicalDisplayId
-                        + ", modeId=" + modeId + ")");
+                        + ", modeId=" + modeId
+                        + ", renderPeriod=" + renderPeriod + ")");
             }
             synchronized (getSyncRoot()) {
                 LocalDisplayDevice device = mDevices.get(physicalDisplayId);
@@ -1344,7 +1373,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     }
                     return;
                 }
-                device.onActiveDisplayModeChangedLocked(modeId);
+                float renderFrameRate = 1e9f / renderPeriod;
+                device.onActiveDisplayModeChangedLocked(modeId, renderFrameRate);
             }
         }
 
@@ -1371,21 +1401,21 @@ final class LocalDisplayAdapter extends DisplayAdapter {
     }
 
     @VisibleForTesting
-    static class SurfaceControlProxy {
-        public SurfaceControl.DynamicDisplayInfo getDynamicDisplayInfo(IBinder token) {
-            return SurfaceControl.getDynamicDisplayInfo(token);
+    public static class SurfaceControlProxy {
+        public SurfaceControl.DynamicDisplayInfo getDynamicDisplayInfo(long displayId) {
+            return SurfaceControl.getDynamicDisplayInfo(displayId);
         }
 
         public long[] getPhysicalDisplayIds() {
-            return SurfaceControl.getPhysicalDisplayIds();
+            return DisplayControl.getPhysicalDisplayIds();
         }
 
         public IBinder getPhysicalDisplayToken(long physicalDisplayId) {
-            return SurfaceControl.getPhysicalDisplayToken(physicalDisplayId);
+            return DisplayControl.getPhysicalDisplayToken(physicalDisplayId);
         }
 
-        public SurfaceControl.StaticDisplayInfo getStaticDisplayInfo(IBinder displayToken) {
-            return SurfaceControl.getStaticDisplayInfo(displayToken);
+        public SurfaceControl.StaticDisplayInfo getStaticDisplayInfo(long displayId) {
+            return SurfaceControl.getStaticDisplayInfo(displayId);
         }
 
         public SurfaceControl.DesiredDisplayModeSpecs getDesiredDisplayModeSpecs(
@@ -1487,12 +1517,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 }
             } else if (mBacklight != null) {
                 mBacklight.setBrightness(backlight);
-            }
-        }
-
-        void setVrMode(boolean isVrModeEnabled) {
-            if (mBacklight != null) {
-                mBacklight.setVrMode(isVrModeEnabled);
             }
         }
 

@@ -43,10 +43,12 @@ android_test {
         "mockwebserver",
         "guava",
         "androidx.core_core",
+        "androidx.core_core-ktx",
         "androidx.test.espresso.core",
         "androidx.test.ext.junit",
         "androidx.test.runner",
         "androidx.test.rules",
+        "junit-params",
         "kotlin-test",
         "mockito-target-minus-junit4",
         "ub-uiautomator",
@@ -72,14 +74,17 @@ android_test {
         "libpowermanagertest_jni",
     ],
 
-    platform_apis: true,
     sdk_version: "core_platform",
-    test_suites: ["device-tests"],
+    test_suites: [
+        "device-tests",
+        "automotive-tests",
+    ],
 
     certificate: "platform",
 
     resource_dirs: ["res"],
     resource_zips: [":FrameworksCoreTests_apks_as_resources"],
+    java_resources: [":ApkVerityTestCertDer"],
 
     data: [
         ":BstatsTestApp",

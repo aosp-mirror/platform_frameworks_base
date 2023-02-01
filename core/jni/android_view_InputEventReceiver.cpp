@@ -329,7 +329,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
             if (!skipCallbacks && !mBatchedInputEventPending && mInputConsumer.hasPendingBatch()) {
                 // There is a pending batch.  Come back later.
                 if (!receiverObj.get()) {
-                    receiverObj.reset(jniGetReferent(env, mReceiverWeakGlobal));
+                    receiverObj.reset(GetReferent(env, mReceiverWeakGlobal));
                     if (!receiverObj.get()) {
                         ALOGW("channel '%s' ~ Receiver object was finalized "
                               "without being disposed.",
@@ -358,7 +358,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
 
         if (!skipCallbacks) {
             if (!receiverObj.get()) {
-                receiverObj.reset(jniGetReferent(env, mReceiverWeakGlobal));
+                receiverObj.reset(GetReferent(env, mReceiverWeakGlobal));
                 if (!receiverObj.get()) {
                     ALOGW("channel '%s' ~ Receiver object was finalized "
                             "without being disposed.", getInputChannelName().c_str());
@@ -380,8 +380,8 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                 if (kDebugDispatchCycle) {
                     ALOGD("channel '%s' ~ Received motion event.", getInputChannelName().c_str());
                 }
-                MotionEvent* motionEvent = static_cast<MotionEvent*>(inputEvent);
-                if ((motionEvent->getAction() & AMOTION_EVENT_ACTION_MOVE) && outConsumedBatch) {
+                const MotionEvent& motionEvent = static_cast<const MotionEvent&>(*inputEvent);
+                if ((motionEvent.getAction() & AMOTION_EVENT_ACTION_MOVE) && outConsumedBatch) {
                     *outConsumedBatch = true;
                 }
                 inputEventObj = android_view_MotionEvent_obtainAsCopy(env, motionEvent);

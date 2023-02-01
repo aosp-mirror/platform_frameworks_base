@@ -65,8 +65,6 @@ import android.service.adb.AdbDebuggingManagerProto;
 import android.util.AtomicFile;
 import android.util.Base64;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.R;
@@ -75,6 +73,8 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.dump.DualDumpOutputStream;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.FgThread;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -649,7 +649,7 @@ public class AdbDebuggingManager {
                 } else if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)) {
                     // We only care about wifi type connections
                     NetworkInfo networkInfo = (NetworkInfo) intent.getParcelableExtra(
-                            WifiManager.EXTRA_NETWORK_INFO);
+                            WifiManager.EXTRA_NETWORK_INFO, android.net.NetworkInfo.class);
                     if (networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
                         // Check for network disconnect
                         if (!networkInfo.isConnected()) {
@@ -667,6 +667,7 @@ public class AdbDebuggingManager {
                                     + " Not enabling adbwifi.");
                             Settings.Global.putInt(mContentResolver,
                                     Settings.Global.ADB_WIFI_ENABLED, 0);
+                            return;
                         }
 
                         // Check for network change
@@ -675,6 +676,7 @@ public class AdbDebuggingManager {
                             Slog.e(TAG, "Unable to get the wifi ap's BSSID. Disabling adbwifi.");
                             Settings.Global.putInt(mContentResolver,
                                     Settings.Global.ADB_WIFI_ENABLED, 0);
+                            return;
                         }
                         synchronized (mAdbConnectionInfo) {
                             if (!bssid.equals(mAdbConnectionInfo.getBSSID())) {
@@ -924,15 +926,6 @@ public class AdbDebuggingManager {
 
                 case MESSAGE_ADB_CONFIRM: {
                     String key = (String) msg.obj;
-                    if ("trigger_restart_min_framework".equals(
-                            SystemProperties.get("vold.decrypt"))) {
-                        Slog.w(TAG, "Deferring adb confirmation until after vold decrypt");
-                        if (mThread != null) {
-                            mThread.sendResponse("NO");
-                            logAdbConnectionChanged(key, AdbProtoEnums.DENIED_VOLD_DECRYPT, false);
-                        }
-                        break;
-                    }
                     String fingerprints = getFingerprints(key);
                     if ("".equals(fingerprints)) {
                         if (mThread != null) {

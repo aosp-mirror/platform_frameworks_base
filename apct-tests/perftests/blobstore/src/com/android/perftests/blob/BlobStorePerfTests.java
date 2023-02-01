@@ -257,7 +257,7 @@ public class BlobStorePerfTests {
         runShellCommand(String.format(
                 "cmd blob_store delete-blob --algo %s --digest %s --label %s --expiry %d --tag %s",
                 blobHandle.algorithm,
-                Base64.getEncoder().encode(blobHandle.digest),
+                Base64.getEncoder().encodeToString(blobHandle.digest),
                 blobHandle.label,
                 blobHandle.expiryTimeMillis,
                 blobHandle.tag));

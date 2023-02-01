@@ -31,6 +31,7 @@ import android.nfc.INfcFCardEmulation;
 import android.nfc.INfcUnlockHandler;
 import android.nfc.ITagRemovedCallback;
 import android.nfc.INfcDta;
+import android.nfc.NfcAntennaInfo;
 import android.os.Bundle;
 
 /**
@@ -72,10 +73,17 @@ interface INfcAdapter
     boolean isNfcSecureEnabled();
     boolean deviceSupportsNfcSecure();
     boolean setNfcSecure(boolean enable);
+    NfcAntennaInfo getNfcAntennaInfo();
 
     boolean setControllerAlwaysOn(boolean value);
     boolean isControllerAlwaysOn();
     boolean isControllerAlwaysOnSupported();
     void registerControllerAlwaysOnListener(in INfcControllerAlwaysOnListener listener);
     void unregisterControllerAlwaysOnListener(in INfcControllerAlwaysOnListener listener);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)")
+    boolean isTagIntentAppPreferenceSupported();
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)")
+    Map getTagIntentAppPreferenceForUser(int userId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)")
+    int setTagIntentAppPreferenceForUser(int userId, String pkg, boolean allow);
 }

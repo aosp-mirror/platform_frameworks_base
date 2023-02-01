@@ -258,7 +258,7 @@ public class WindowTokenTests extends WindowTestsBase {
      * states for its children windows and by default it shouldn't let IME window setting
      * the frozen insets state even the window of the window token is the IME layering target.
      */
-    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @SetupWindows(addWindows = W_INPUT_METHOD)
     @Test
     public void testSetInsetsFrozen_notAffectImeWindowState() {
         // Pre-condition: make the IME window be controlled by IME insets provider.

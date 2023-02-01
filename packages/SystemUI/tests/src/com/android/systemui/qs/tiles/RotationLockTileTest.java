@@ -36,9 +36,11 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DeviceStateRotationLockSettingController;
 import com.android.systemui.statusbar.policy.RotationLockController;
@@ -192,6 +194,26 @@ public class RotationLockTileTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         assertEquals("", mLockTile.getState().secondaryLabel.toString());
+    }
+
+    @Test
+    public void testIcon_whenDisabled_isOffState() {
+        QSTile.BooleanState state = new QSTile.BooleanState();
+        disableAutoRotation();
+
+        mLockTile.handleUpdateState(state, /* arg= */ null);
+
+        assertEquals(state.icon, QSTileImpl.ResourceIcon.get(R.drawable.qs_auto_rotate_icon_off));
+    }
+
+    @Test
+    public void testIcon_whenEnabled_isOnState() {
+        QSTile.BooleanState state = new QSTile.BooleanState();
+        enableAutoRotation();
+
+        mLockTile.handleUpdateState(state, /* arg= */ null);
+
+        assertEquals(state.icon, QSTileImpl.ResourceIcon.get(R.drawable.qs_auto_rotate_icon_on));
     }
 
     private void enableAutoRotation() {

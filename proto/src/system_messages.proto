@@ -61,7 +61,7 @@ message SystemMessage {
 
     // Notify the user that they should select an input method
     // Package: android
-    NOTE_SELECT_INPUT_METHOD = 8;
+    NOTE_SELECT_INPUT_METHOD = 8 [deprecated = true];
 
     // Notify the user about limited functionality before decryption
     // Package: android
@@ -286,9 +286,21 @@ message SystemMessage {
     // Package: android
     NOTE_MTE_OVERRIDE_ENABLED = 69;
 
+    // Notify the user that this is a guest session with information
+    // about first login and ephemeral state
+    // Package: android
+    NOTE_GUEST_SESSION = 70;
+
     // Inform the user of notification permissions changes.
     // Package: android
     NOTE_REVIEW_NOTIFICATION_PERMISSIONS = 71;
+
+    // Notify the user to setup their dock
+    NOTE_SETUP_DOCK = 72;
+
+    // Inform the user of wifi apm state changes.
+    // Package: android
+    NOTE_WIFI_APM_NOTIFICATION = 73;
 
     // Inform the user of bluetooth apm state changes.
     // Package: android

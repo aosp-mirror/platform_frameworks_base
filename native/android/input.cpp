@@ -295,6 +295,12 @@ int32_t AMotionEvent_getClassification(const AInputEvent* motion_event) {
             return AMOTION_EVENT_CLASSIFICATION_AMBIGUOUS_GESTURE;
         case android::MotionClassification::DEEP_PRESS:
             return AMOTION_EVENT_CLASSIFICATION_DEEP_PRESS;
+        case android::MotionClassification::TWO_FINGER_SWIPE:
+            return AMOTION_EVENT_CLASSIFICATION_TWO_FINGER_SWIPE;
+        case android::MotionClassification::MULTI_FINGER_SWIPE:
+            return AMOTION_EVENT_CLASSIFICATION_MULTI_FINGER_SWIPE;
+        case android::MotionClassification::PINCH:
+            return AMOTION_EVENT_CLASSIFICATION_PINCH;
     }
 }
 

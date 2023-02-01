@@ -36,8 +36,10 @@ import android.content.pm.PackageStats;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
+import android.content.pm.UserProperties;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -48,7 +50,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.format.Formatter;
-import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -116,13 +117,13 @@ public class ApplicationsState {
 
     final Context mContext;
     final PackageManager mPm;
-    final IconDrawableFactory mDrawableFactory;
     final IPackageManager mIpm;
     final UserManager mUm;
     final StorageStatsManager mStats;
     final int mAdminRetrieveFlags;
     final int mRetrieveFlags;
     PackageIntentReceiver mPackageIntentReceiver;
+    PackageIntentReceiver mClonePackageIntentReceiver;
 
     boolean mResumed;
     boolean mHaveDisabledApps;
@@ -194,7 +195,6 @@ public class ApplicationsState {
     private ApplicationsState(Application app, IPackageManager iPackageManager) {
         mContext = app;
         mPm = mContext.getPackageManager();
-        mDrawableFactory = IconDrawableFactory.newInstance(mContext);
         mIpm = iPackageManager;
         mUm = mContext.getSystemService(UserManager.class);
         mStats = mContext.getSystemService(StorageStatsManager.class);
@@ -264,6 +264,15 @@ public class ApplicationsState {
         if (mPackageIntentReceiver == null) {
             mPackageIntentReceiver = new PackageIntentReceiver();
             mPackageIntentReceiver.registerReceiver();
+        }
+
+        // Listen to any package additions in clone user to refresh the app list.
+        if (mClonePackageIntentReceiver == null) {
+            int cloneUserId = AppUtils.getCloneUserId(mContext);
+            if (cloneUserId != -1) {
+                mClonePackageIntentReceiver = new PackageIntentReceiver();
+                mClonePackageIntentReceiver.registerReceiverForClone(cloneUserId);
+            }
         }
 
         final List<ApplicationInfo> prevApplications = mApplications;
@@ -456,6 +465,10 @@ public class ApplicationsState {
         if (mPackageIntentReceiver != null) {
             mPackageIntentReceiver.unregisterReceiver();
             mPackageIntentReceiver = null;
+        }
+        if (mClonePackageIntentReceiver != null) {
+            mClonePackageIntentReceiver.unregisterReceiver();
+            mClonePackageIntentReceiver = null;
         }
     }
 
@@ -795,10 +808,8 @@ public class ApplicationsState {
         // Rebuilding of app list.  Synchronized on mRebuildSync.
         final Object mRebuildSync = new Object();
         boolean mRebuildRequested;
-        boolean mRebuildAsync;
         AppFilter mRebuildFilter;
         Comparator<AppEntry> mRebuildComparator;
-        ArrayList<AppEntry> mRebuildResult;
         ArrayList<AppEntry> mLastAppList;
         boolean mRebuildForeground;
 
@@ -904,11 +915,9 @@ public class ApplicationsState {
                 synchronized (mRebuildingSessions) {
                     mRebuildingSessions.add(this);
                     mRebuildRequested = true;
-                    mRebuildAsync = true;
                     mRebuildFilter = filter;
                     mRebuildComparator = comparator;
                     mRebuildForeground = foreground;
-                    mRebuildResult = null;
                     if (!mBackgroundHandler.hasMessages(BackgroundHandler.MSG_REBUILD_LIST)) {
                         Message msg = mBackgroundHandler.obtainMessage(
                                 BackgroundHandler.MSG_REBUILD_LIST);
@@ -988,15 +997,10 @@ public class ApplicationsState {
             synchronized (mRebuildSync) {
                 if (!mRebuildRequested) {
                     mLastAppList = filteredApps;
-                    if (!mRebuildAsync) {
-                        mRebuildResult = filteredApps;
-                        mRebuildSync.notifyAll();
-                    } else {
-                        if (!mMainHandler.hasMessages(MainHandler.MSG_REBUILD_COMPLETE, this)) {
-                            Message msg = mMainHandler.obtainMessage(
-                                    MainHandler.MSG_REBUILD_COMPLETE, this);
-                            mMainHandler.sendMessage(msg);
-                        }
+                    if (!mMainHandler.hasMessages(MainHandler.MSG_REBUILD_COMPLETE, this)) {
+                        Message msg = mMainHandler.obtainMessage(
+                                MainHandler.MSG_REBUILD_COMPLETE, this);
+                        mMainHandler.sendMessage(msg);
                     }
                 }
             }
@@ -1536,6 +1540,12 @@ public class ApplicationsState {
                 removeUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL));
             }
         }
+
+        public void registerReceiverForClone(int cloneId) {
+            IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
+            filter.addDataScheme("package");
+            mContext.registerReceiverAsUser(this, UserHandle.of(cloneId), filter, null, null);
+        }
     }
 
     /**
@@ -1589,8 +1599,8 @@ public class ApplicationsState {
         public long internalSize;
         public long externalSize;
         public String labelDescription;
-
         public boolean mounted;
+        public boolean showInPersonalTab;
 
         /**
          * Setting this to {@code true} prevents the entry to be filtered by
@@ -1607,6 +1617,11 @@ public class ApplicationsState {
          * Whether or not it's a Home app.
          */
         public boolean isHomeApp;
+
+        /**
+         * Whether or not it's a cloned app .
+         */
+        public boolean isCloned;
 
         public String getNormalizedLabel() {
             if (normalizedLabel != null) {
@@ -1647,6 +1662,37 @@ public class ApplicationsState {
                 ThreadUtils.postOnBackgroundThread(
                         () -> this.ensureLabelDescriptionLocked(context));
             }
+            UserManager um = UserManager.get(context);
+            this.showInPersonalTab = shouldShowInPersonalTab(um, info.uid);
+            UserInfo userInfo = um.getUserInfo(UserHandle.getUserId(info.uid));
+            if (userInfo != null) {
+                this.isCloned = userInfo.isCloneProfile();
+            }
+        }
+
+        /**
+         * Checks if the user that the app belongs to have the property
+         * {@link UserProperties#SHOW_IN_SETTINGS_WITH_PARENT} set.
+         */
+        @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+        boolean shouldShowInPersonalTab(UserManager userManager, int uid) {
+            int userId = UserHandle.getUserId(uid);
+
+            // Regardless of apk version, if the app belongs to the current user then return true.
+            if (userId == ActivityManager.getCurrentUser()) {
+                return true;
+            }
+
+            // For sdk version < 34, if the app doesn't belong to the current user,
+            // then as per earlier behaviour the app shouldn't be displayed in personal tab.
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                return false;
+            }
+
+            UserProperties userProperties = userManager.getUserProperties(
+                        UserHandle.of(userId));
+            return userProperties.getShowInSettings()
+                        == UserProperties.SHOW_IN_SETTINGS_WITH_PARENT;
         }
 
         public void ensureLabel(Context context) {
@@ -1796,7 +1842,7 @@ public class ApplicationsState {
 
         @Override
         public boolean filterApp(AppEntry entry) {
-            return UserHandle.getUserId(entry.info.uid) == mCurrentUser;
+            return entry.showInPersonalTab;
         }
     };
 
@@ -1823,7 +1869,7 @@ public class ApplicationsState {
 
         @Override
         public boolean filterApp(AppEntry entry) {
-            return UserHandle.getUserId(entry.info.uid) != mCurrentUser;
+            return !entry.showInPersonalTab;
         }
     };
 

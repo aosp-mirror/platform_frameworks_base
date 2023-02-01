@@ -32,8 +32,8 @@ import com.android.server.pm.Computer;
 import com.android.server.pm.DumpState;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.parsing.PackageInfoUtils;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageUserStateInternal;
 import com.android.server.pm.pkg.component.ParsedActivity;
@@ -290,7 +290,7 @@ public abstract class ComponentResolverBase extends WatchableImpl implements Com
                 continue;
             }
 
-            if (safeMode && !pkg.isSystem()) {
+            if (safeMode && !ps.isSystem()) {
                 continue;
             }
             if (appInfoGenerator == null) {

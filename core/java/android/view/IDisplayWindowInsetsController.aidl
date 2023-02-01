@@ -16,9 +16,10 @@
 
 package android.view;
 
+import android.content.ComponentName;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
+import android.view.inputmethod.ImeTracker;
 
 /**
  * Singular controller of insets to use when there isn't another obvious controller available.
@@ -30,10 +31,10 @@ oneway interface IDisplayWindowInsetsController {
     /**
      * Called when top focused window changes to determine whether or not to take over insets
      * control. Won't be called if config_remoteInsetsControllerControlsSystemBars is false.
-     * @param packageName: Passes the top package name
-     * @param requestedVisibilities The insets visibilities requested by the focussed window.
+     * @param component: Passes the top application component in the focused window.
+     * @param requestedVisibleTypes The insets types requested visible by the focused window.
      */
-    void topFocusedWindowChanged(String packageName, in InsetsVisibilities insetsVisibilities);
+    void topFocusedWindowChanged(in ComponentName component, int requestedVisibleTypes);
 
     /**
      * @see IWindow#insetsChanged
@@ -48,10 +49,10 @@ oneway interface IDisplayWindowInsetsController {
     /**
      * @see IWindow#showInsets
      */
-    void showInsets(int types, boolean fromIme);
+    void showInsets(int types, boolean fromIme, in @nullable ImeTracker.Token statsToken);
 
     /**
      * @see IWindow#hideInsets
      */
-    void hideInsets(int types, boolean fromIme);
+    void hideInsets(int types, boolean fromIme, in @nullable ImeTracker.Token statsToken);
 }

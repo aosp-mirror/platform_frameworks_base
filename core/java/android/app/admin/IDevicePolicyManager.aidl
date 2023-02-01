@@ -29,10 +29,12 @@ import android.app.admin.PreferentialNetworkServiceConfig;
 import android.app.admin.StartInstallingUpdateCallback;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
+import android.app.admin.PackagePolicy;
 import android.app.admin.PasswordMetrics;
 import android.app.admin.FactoryResetProtectionPolicy;
 import android.app.admin.ManagedProfileProvisioningParams;
 import android.app.admin.FullyManagedDeviceProvisioningParams;
+import android.app.admin.ManagedSubscriptionsPolicy;
 import android.app.admin.WifiSsidPolicy;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -117,7 +119,10 @@ interface IDevicePolicyManager {
 
     void lockNow(int flags, boolean parent);
 
-    void wipeDataWithReason(int flags, String wipeReasonForUser, boolean parent);
+    /**
+    * @param factoryReset only applicable when `targetSdk >= U`, either tries to factoryReset/fail or removeUser/fail otherwise
+    **/
+    void wipeDataWithReason(int flags, String wipeReasonForUser, boolean parent, boolean factoryReset);
 
     void setFactoryResetProtectionPolicy(in ComponentName who, in FactoryResetProtectionPolicy policy);
     FactoryResetProtectionPolicy getFactoryResetProtectionPolicy(in ComponentName who);
@@ -161,21 +166,21 @@ interface IDevicePolicyManager {
     boolean hasGrantedPolicy(in ComponentName policyReceiver, int usesPolicy, int userHandle);
 
     void reportPasswordChanged(in PasswordMetrics metrics, int userId);
-    void reportFailedPasswordAttempt(int userHandle);
+    void reportFailedPasswordAttempt(int userHandle, boolean parent);
     void reportSuccessfulPasswordAttempt(int userHandle);
     void reportFailedBiometricAttempt(int userHandle);
     void reportSuccessfulBiometricAttempt(int userHandle);
     void reportKeyguardDismissed(int userHandle);
     void reportKeyguardSecured(int userHandle);
 
-    boolean setDeviceOwner(in ComponentName who, String ownerName, int userId, boolean setProfileOwnerOnCurrentUserIfNecessary);
+    boolean setDeviceOwner(in ComponentName who, int userId, boolean setProfileOwnerOnCurrentUserIfNecessary);
     ComponentName getDeviceOwnerComponent(boolean callingUserOnly);
     boolean hasDeviceOwner();
     String getDeviceOwnerName();
     void clearDeviceOwner(String packageName);
     int getDeviceOwnerUserId();
 
-    boolean setProfileOwner(in ComponentName who, String ownerName, int userHandle);
+    boolean setProfileOwner(in ComponentName who, int userHandle);
     ComponentName getProfileOwnerAsUser(int userHandle);
     ComponentName getProfileOwnerOrDeviceOwnerSupervisionComponent(in UserHandle userHandle);
     boolean isSupervisionComponent(in ComponentName who);
@@ -327,6 +332,17 @@ interface IDevicePolicyManager {
     boolean getCrossProfileContactsSearchDisabledForUser(int userId);
     void startManagedQuickContact(String lookupKey, long contactId, boolean isContactIdIgnored, long directoryId, in Intent originalIntent);
 
+    void setManagedProfileCallerIdAccessPolicy(in PackagePolicy policy);
+    PackagePolicy getManagedProfileCallerIdAccessPolicy();
+    boolean hasManagedProfileCallerIdAccess(int userId, String packageName);
+
+    void setCredentialManagerPolicy(in PackagePolicy policy);
+    PackagePolicy getCredentialManagerPolicy();
+
+    void setManagedProfileContactsAccessPolicy(in PackagePolicy policy);
+    PackagePolicy getManagedProfileContactsAccessPolicy();
+    boolean hasManagedProfileContactsAccess(int userId, String packageName);
+
     void setBluetoothContactSharingDisabled(in ComponentName who, boolean disabled);
     boolean getBluetoothContactSharingDisabled(in ComponentName who);
     boolean getBluetoothContactSharingDisabledForUser(int userId);
@@ -399,7 +415,7 @@ interface IDevicePolicyManager {
     CharSequence getDeviceOwnerOrganizationName();
     CharSequence getOrganizationNameForUser(int userHandle);
 
-    int getUserProvisioningState();
+    int getUserProvisioningState(int userHandle);
     void setUserProvisioningState(int state, int userHandle);
 
     void setAffiliationIds(in ComponentName admin, in List<String> ids);
@@ -537,7 +553,7 @@ interface IDevicePolicyManager {
     int getDeviceOwnerType(in ComponentName admin);
 
     void resetDefaultCrossProfileIntentFilters(int userId);
-    boolean canAdminGrantSensorsPermissionsForUser(int userId);
+    boolean canAdminGrantSensorsPermissions();
 
     void setUsbDataSignalingEnabled(String callerPackage, boolean enabled);
     boolean isUsbDataSignalingEnabled(String callerPackage);
@@ -562,7 +578,17 @@ interface IDevicePolicyManager {
     void resetStrings(in List<String> stringIds);
     ParcelableResource getString(String stringId);
 
+    void resetShouldAllowBypassingDevicePolicyManagementRoleQualificationState();
     boolean shouldAllowBypassingDevicePolicyManagementRoleQualification();
 
     List<UserHandle> getPolicyManagedProfiles(in UserHandle userHandle);
+
+    void setApplicationExemptions(String packageName, in int[]exemptions);
+    int[] getApplicationExemptions(String packageName);
+
+    void setMtePolicy(int flag);
+    int getMtePolicy();
+
+    void setManagedSubscriptionsPolicy(in ManagedSubscriptionsPolicy policy);
+    ManagedSubscriptionsPolicy getManagedSubscriptionsPolicy();
 }

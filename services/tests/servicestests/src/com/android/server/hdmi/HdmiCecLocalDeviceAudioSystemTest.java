@@ -48,7 +48,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 @SmallTest
 @Presubmit
@@ -80,15 +79,19 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     private HdmiDeviceInfo mDeviceInfo;
     private boolean mArcSupport;
     private HdmiPortInfo[] mHdmiPortInfo;
+    private ArrayList<Integer> mLocalDeviceTypes = new ArrayList<>();
 
     @Before
     public void setUp() {
         Context context = InstrumentationRegistry.getTargetContext();
         mMyLooper = mTestLooper.getLooper();
+        mLocalDeviceTypes.add(HdmiDeviceInfo.DEVICE_PLAYBACK);
+        mLocalDeviceTypes.add(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
 
         mHdmiControlService =
             new HdmiControlService(InstrumentationRegistry.getTargetContext(),
-                    Collections.emptyList(), new FakeAudioDeviceVolumeManagerWrapper()) {
+                    mLocalDeviceTypes,
+                    new FakeAudioDeviceVolumeManagerWrapper()) {
                 @Override
                 AudioManager getAudioManager() {
                     return new AudioManager() {
@@ -172,6 +175,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                 HdmiControlManager.VOLUME_CONTROL_ENABLED);
         mMyLooper = mTestLooper.getLooper();
         mHdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(context));
+        mHdmiControlService.setDeviceConfig(new FakeDeviceConfigWrapper());
         mHdmiCecLocalDeviceAudioSystem = new HdmiCecLocalDeviceAudioSystem(mHdmiControlService);
         mHdmiCecLocalDevicePlayback = new HdmiCecLocalDevicePlayback(mHdmiControlService) {
             @Override
@@ -193,17 +197,29 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         mHdmiCecLocalDeviceAudioSystem.setRoutingControlFeatureEnabled(true);
         mHdmiPortInfo = new HdmiPortInfo[4];
         mHdmiPortInfo[0] =
-            new HdmiPortInfo(
-                0, HdmiPortInfo.PORT_INPUT, SELF_PHYSICAL_ADDRESS, true, false, false);
+            new HdmiPortInfo.Builder(0, HdmiPortInfo.PORT_INPUT, SELF_PHYSICAL_ADDRESS)
+                    .setCecSupported(true)
+                    .setMhlSupported(false)
+                    .setArcSupported(false)
+                    .build();
         mHdmiPortInfo[1] =
-            new HdmiPortInfo(
-                2, HdmiPortInfo.PORT_INPUT, HDMI_1_PHYSICAL_ADDRESS, true, false, false);
+            new HdmiPortInfo.Builder(2, HdmiPortInfo.PORT_INPUT, HDMI_1_PHYSICAL_ADDRESS)
+                    .setCecSupported(true)
+                    .setMhlSupported(false)
+                    .setArcSupported(false)
+                    .build();
         mHdmiPortInfo[2] =
-            new HdmiPortInfo(
-                1, HdmiPortInfo.PORT_INPUT, HDMI_2_PHYSICAL_ADDRESS, true, false, false);
+            new HdmiPortInfo.Builder(1, HdmiPortInfo.PORT_INPUT, HDMI_2_PHYSICAL_ADDRESS)
+                    .setCecSupported(true)
+                    .setMhlSupported(false)
+                    .setArcSupported(false)
+                    .build();
         mHdmiPortInfo[3] =
-            new HdmiPortInfo(
-                4, HdmiPortInfo.PORT_INPUT, HDMI_3_PHYSICAL_ADDRESS, true, false, false);
+            new HdmiPortInfo.Builder(4, HdmiPortInfo.PORT_INPUT, HDMI_3_PHYSICAL_ADDRESS)
+                    .setCecSupported(true)
+                    .setMhlSupported(false)
+                    .setArcSupported(false)
+                    .build();
         mNativeWrapper.setPortInfo(mHdmiPortInfo);
         mHdmiControlService.initService();
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
@@ -351,7 +367,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         HdmiCecMessage expectedMessage =
                 HdmiCecMessageBuilder.buildSetSystemAudioMode(
                         ADDR_AUDIO_SYSTEM, ADDR_BROADCAST, false);
-        assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
+        assertThat(mNativeWrapper.getResultMessages()).contains(expectedMessage);
         assertThat(mMusicMute).isTrue();
     }
 
@@ -529,6 +545,25 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                 .isEqualTo(Constants.HANDLED);
         mTestLooper.dispatchAll();
         assertThat(mNativeWrapper.getResultMessages()).contains(expectedMessage);
+    }
+
+    @Test
+    public void handleRequestArcTerminate_callbackIsPreserved() throws Exception {
+        TestCallback callback = new TestCallback();
+
+        mHdmiCecLocalDeviceAudioSystem.setArcStatus(true);
+        assertThat(mHdmiCecLocalDeviceAudioSystem.isArcEnabled()).isTrue();
+        mHdmiCecLocalDeviceAudioSystem.addAndStartAction(
+                new ArcTerminationActionFromAvr(mHdmiCecLocalDeviceAudioSystem, callback));
+
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildRequestArcTermination(ADDR_TV, ADDR_AUDIO_SYSTEM);
+        assertThat(mHdmiCecLocalDeviceAudioSystem.handleRequestArcTermination(message))
+                .isEqualTo(Constants.HANDLED);
+
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiCecLocalDeviceAudioSystem.getActions(
+                ArcTerminationActionFromAvr.class).get(0).mCallbacks.get(0)).isEqualTo(callback);
     }
 
     @Test
@@ -876,5 +911,14 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(activeSource_fromAudioSystem);
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(
                 systemAudioModeRequest_fromAudioSystem);
+    }
+
+    private static class TestCallback extends IHdmiControlCallback.Stub {
+        private final ArrayList<Integer> mCallbackResult = new ArrayList<Integer>();
+
+        @Override
+        public void onComplete(int result) {
+            mCallbackResult.add(result);
+        }
     }
 }

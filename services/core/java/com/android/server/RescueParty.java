@@ -28,12 +28,10 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.PowerManager;
 import android.os.RecoverySystem;
-import android.os.RemoteCallback;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -63,6 +61,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -188,9 +187,10 @@ public class RescueParty {
     public static void onSettingsProviderPublished(Context context) {
         handleNativeRescuePartyResets();
         ContentResolver contentResolver = context.getContentResolver();
-        Settings.Config.registerMonitorCallback(contentResolver, new RemoteCallback(result -> {
-            handleMonitorCallback(context, result);
-        }));
+        DeviceConfig.setMonitorCallback(
+                contentResolver,
+                Executors.newSingleThreadExecutor(),
+                new RescuePartyMonitorCallback(context));
     }
 
 
@@ -231,7 +231,12 @@ public class RescueParty {
             String namespaceToReset = namespaceIt.next();
             Properties properties = new Properties.Builder(namespaceToReset).build();
             try {
-                DeviceConfig.setProperties(properties);
+                if (!DeviceConfig.setProperties(properties)) {
+                    logCriticalInfo(Log.ERROR, "Failed to clear properties under "
+                            + namespaceToReset
+                            + ". Running `device_config get_sync_disabled_for_tests` will confirm"
+                            + " if config-bulk-update is enabled.");
+                }
             } catch (DeviceConfig.BadConfigException exception) {
                 logCriticalInfo(Log.WARN, "namespace " + namespaceToReset
                         + " is already banned, skip reset.");
@@ -273,27 +278,22 @@ public class RescueParty {
         return SystemClock.elapsedRealtime();
     }
 
-    private static void handleMonitorCallback(Context context, Bundle result) {
-        String callbackType = result.getString(Settings.EXTRA_MONITOR_CALLBACK_TYPE, "");
-        switch (callbackType) {
-            case Settings.EXTRA_NAMESPACE_UPDATED_CALLBACK:
-                String updatedNamespace = result.getString(Settings.EXTRA_NAMESPACE);
-                if (updatedNamespace != null) {
-                    startObservingPackages(context, updatedNamespace);
-                }
-                break;
-            case Settings.EXTRA_ACCESS_CALLBACK:
-                String callingPackage = result.getString(Settings.EXTRA_CALLING_PACKAGE, null);
-                String namespace = result.getString(Settings.EXTRA_NAMESPACE, null);
-                if (namespace != null && callingPackage != null) {
-                    RescuePartyObserver.getInstance(context).recordDeviceConfigAccess(
+    private static class RescuePartyMonitorCallback implements DeviceConfig.MonitorCallback {
+        Context mContext;
+
+        RescuePartyMonitorCallback(Context context) {
+            this.mContext = context;
+        }
+
+        public void onNamespaceUpdate(@NonNull String updatedNamespace) {
+            startObservingPackages(mContext, updatedNamespace);
+        }
+
+        public void onDeviceConfigAccess(@NonNull String callingPackage,
+                @NonNull String namespace) {
+            RescuePartyObserver.getInstance(mContext).recordDeviceConfigAccess(
                             callingPackage,
                             namespace);
-                }
-                break;
-            default:
-                Slog.w(TAG, "Unrecognized DeviceConfig callback");
-                break;
         }
     }
 
@@ -442,6 +442,13 @@ public class RescueParty {
                 thread.start();
                 break;
             case LEVEL_FACTORY_RESET:
+                // Before the completion of Reboot, if any crash happens then PackageWatchdog
+                // escalates to next level i.e. factory reset, as they happen in separate threads.
+                // Adding a check to prevent factory reset to execute before above reboot completes.
+                // Note: this reboot property is not persistent resets after reboot is completed.
+                if (isRebootPropertySet()) {
+                    break;
+                }
                 SystemProperties.set(PROP_ATTEMPTING_FACTORY_RESET, "true");
                 runnable = new Runnable() {
                     @Override

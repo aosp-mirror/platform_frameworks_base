@@ -802,7 +802,8 @@ public class BatterySaverStateMachine {
         mBatterySaverController.enableBatterySaver(enable, intReason);
 
         // Handle triggering the notification to show/hide when appropriate
-        if (intReason == BatterySaverController.REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_ON) {
+        if (intReason == BatterySaverController.REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_ON
+                || intReason == BatterySaverController.REASON_PERCENTAGE_AUTOMATIC_ON) {
             triggerDynamicModeNotification();
         } else if (!enable) {
             hideDynamicModeNotification();
@@ -828,7 +829,7 @@ public class BatterySaverStateMachine {
                     buildNotification(DYNAMIC_MODE_NOTIF_CHANNEL_ID,
                             R.string.dynamic_mode_notification_title,
                             R.string.dynamic_mode_notification_summary,
-                            Intent.ACTION_POWER_USAGE_SUMMARY),
+                            Settings.ACTION_BATTERY_SAVER_SETTINGS),
                     UserHandle.ALL);
         });
     }

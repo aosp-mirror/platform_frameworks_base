@@ -20,13 +20,17 @@ import static android.app.ActivityManager.StopUserOnSwitch;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.PermissionMethod;
+import android.annotation.PermissionName;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager.ProcessCapability;
 import android.app.ActivityManager.RestrictionLevel;
+import android.app.assist.ActivityId;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityPresentationInfo;
 import android.content.pm.ApplicationInfo;
@@ -41,10 +45,13 @@ import android.os.WorkSource;
 import android.util.ArraySet;
 import android.util.Pair;
 
+import com.android.internal.os.TimeoutRecord;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 /**
  * Activity manager local system service interface.
@@ -215,6 +222,18 @@ public abstract class ActivityManagerInternal {
     public abstract boolean isSystemReady();
 
     /**
+     * @return {@code true} if system is using the "modern" broadcast queue,
+     *         {@code false} otherwise.
+     */
+    public abstract boolean isModernQueueEnabled();
+
+    /**
+     * Enforce capability restrictions on use of the given BroadcastOptions
+     */
+    public abstract void enforceBroadcastOptionsPermissions(@Nullable Bundle options,
+            int callingUid);
+
+    /**
      * Returns package name given pid.
      *
      * @param pid The pid we are searching package name for.
@@ -288,8 +307,15 @@ public abstract class ActivityManagerInternal {
     public abstract int handleIncomingUser(int callingPid, int callingUid, @UserIdInt int userId,
             boolean allowAll, int allowMode, String name, String callerPackage);
 
-    /** Checks if the calling binder pid as the permission. */
-    public abstract void enforceCallingPermission(String permission, String func);
+    /** Checks if the calling binder pid/uid has the given permission. */
+    @PermissionMethod
+    public abstract void enforceCallingPermission(@PermissionName String permission, String func);
+
+    /**
+     * Returns the current and target user ids as a {@link Pair}. Target user id will be
+     * {@link android.os.UserHandle#USER_NULL} if there is not an ongoing user switch.
+     */
+    public abstract Pair<Integer, Integer> getCurrentAndTargetUserIds();
 
     /** Returns the current user id. */
     public abstract int getCurrentUserId();
@@ -337,7 +363,7 @@ public abstract class ActivityManagerInternal {
      */
     public abstract void updateActivityUsageStats(
             ComponentName activity, @UserIdInt int userId, int event, IBinder appToken,
-            ComponentName taskRoot);
+            ComponentName taskRoot, ActivityId activityId);
     public abstract void updateForegroundTimeIfOnBattery(
             String packageName, int uid, long cpuTimeDiff);
     public abstract void sendForegroundProfileChanged(@UserIdInt int userId);
@@ -376,6 +402,10 @@ public abstract class ActivityManagerInternal {
      */
     public abstract boolean isAppStartModeDisabled(int uid, String packageName);
 
+    /**
+     * Returns the ids of the current user and all of its profiles (if any), regardless of the
+     * running state of the profiles.
+     */
     public abstract int[] getCurrentProfileIds();
     public abstract UserInfo getCurrentUser();
     public abstract void ensureNotSpecialUser(@UserIdInt int userId);
@@ -413,16 +443,17 @@ public abstract class ActivityManagerInternal {
 
     public abstract int broadcastIntentInPackage(String packageName, @Nullable String featureId,
             int uid, int realCallingUid, int realCallingPid, Intent intent, String resolvedType,
-            IIntentReceiver resultTo, int resultCode, String resultData, Bundle resultExtras,
-            String requiredPermission, Bundle bOptions, boolean serialized, boolean sticky,
-            @UserIdInt int userId, boolean allowBackgroundActivityStarts,
-            @Nullable IBinder backgroundActivityStartsToken, @Nullable int[] broadcastAllowList);
+            IApplicationThread resultToThread, IIntentReceiver resultTo, int resultCode,
+            String resultData, Bundle resultExtras, String requiredPermission, Bundle bOptions,
+            boolean serialized, boolean sticky, @UserIdInt int userId,
+            BackgroundStartPrivileges backgroundStartPrivileges,
+            @Nullable int[] broadcastAllowList);
 
     public abstract ComponentName startServiceInPackage(int uid, Intent service,
             String resolvedType, boolean fgRequired, String callingPackage,
             @Nullable String callingFeatureId, @UserIdInt int userId,
-            boolean allowBackgroundActivityStarts,
-            @Nullable IBinder backgroundActivityStartsToken) throws TransactionTooLargeException;
+            BackgroundStartPrivileges backgroundStartPrivileges)
+            throws TransactionTooLargeException;
 
     public abstract void disconnectActivityFromServices(Object connectionHolder);
     public abstract void cleanUpServices(@UserIdInt int userId, ComponentName component,
@@ -440,10 +471,13 @@ public abstract class ActivityManagerInternal {
 
     /** Input dispatch timeout to a window, start the ANR process. Return the timeout extension,
      * in milliseconds, or 0 to abort dispatch. */
-    public abstract long inputDispatchingTimedOut(int pid, boolean aboveSystem, String reason);
+    public abstract long inputDispatchingTimedOut(int pid, boolean aboveSystem,
+            TimeoutRecord timeoutRecord);
+
     public abstract boolean inputDispatchingTimedOut(Object proc, String activityShortComponentName,
             ApplicationInfo aInfo, String parentShortComponentName, Object parentProc,
-            boolean aboveSystem, String reason);
+            boolean aboveSystem, TimeoutRecord timeoutRecord);
+
     /**
      * App started responding to input events. This signal can be used to abort the ANR process and
      * hide the ANR dialog.
@@ -550,13 +584,6 @@ public abstract class ActivityManagerInternal {
     public abstract void stopAppForUser(String pkg, @UserIdInt int userId);
 
     /**
-     * If the given app has any FGSs whose notifications are in the given channel,
-     * stop them.
-     */
-    public abstract void stopForegroundServicesForChannel(String pkg, @UserIdInt int userId,
-            String channelId);
-
-    /**
      * Registers the specified {@code processObserver} to be notified of future changes to
      * process state.
      */
@@ -618,6 +645,13 @@ public abstract class ActivityManagerInternal {
      * broadcast my be sent to; any app Ids < {@link android.os.Process#FIRST_APPLICATION_UID} are
      * automatically allowlisted.
      *
+     * @param filterExtrasForReceiver A function to filter intent extras for the given receiver by
+     * using the rules of package visibility. Returns extras with legitimate package info that the
+     * receiver is able to access, or {@code null} if none of the packages is visible to the
+     * receiver.
+     * @param serialized Specifies whether or not the broadcast should be delivered to the
+     *                   receivers in a serial order.
+     *
      * @see com.android.server.am.ActivityManagerService#broadcastIntentWithFeature(
      *      IApplicationThread, String, Intent, String, IIntentReceiver, int, String, Bundle,
      *      String[], int, Bundle, boolean, boolean, int)
@@ -625,7 +659,22 @@ public abstract class ActivityManagerInternal {
     public abstract int broadcastIntent(Intent intent,
             IIntentReceiver resultTo,
             String[] requiredPermissions, boolean serialized,
-            int userId, int[] appIdAllowList, @Nullable Bundle bOptions);
+            int userId, int[] appIdAllowList,
+            @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver,
+            @Nullable Bundle bOptions);
+
+    /**
+     * Variant of
+     * {@link #broadcastIntent(Intent, IIntentReceiver, String[], boolean, int, int[], BiFunction, Bundle)}
+     * that allows sender to receive a finish callback once the broadcast delivery is completed,
+     * but provides no ordering guarantee for how the broadcast is delivered to receivers.
+     */
+    public abstract int broadcastIntentWithCallback(Intent intent,
+            IIntentReceiver resultTo,
+            String[] requiredPermissions,
+            int userId, int[] appIdAllowList,
+            @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver,
+            @Nullable Bundle bOptions);
 
     /**
      * Add uid to the ActivityManagerService PendingStartActivityUids list.
@@ -731,10 +780,9 @@ public abstract class ActivityManagerInternal {
      */
     public interface VoiceInteractionManagerProvider {
         /**
-         * Notifies the service when a high-level activity event has been changed, for example,
-         * an activity was resumed or stopped.
+         * Notifies the service when an activity is destroyed.
          */
-        void notifyActivityEventChanged();
+        void notifyActivityDestroyed(IBinder activityToken);
     }
 
     /**
@@ -861,4 +909,58 @@ public abstract class ActivityManagerInternal {
      */
     public abstract void registerNetworkPolicyUidObserver(@NonNull IUidObserver observer,
             int which, int cutpoint, @NonNull String callingPackage);
+
+    /**
+     * Return all client package names of a service.
+     */
+    public abstract ArraySet<String> getClientPackages(String servicePackageName);
+
+    /**
+     * Retrieve an IUnsafeIntentStrictModeCallback matching the given callingUid.
+     * Returns null no match is found.
+     * @param callingPid The PID mapped with the callback.
+     * @return The callback, if it exists.
+     */
+    public abstract IUnsafeIntentStrictModeCallback getRegisteredStrictModeCallback(
+            int callingPid);
+
+    /**
+     * Unregisters an IUnsafeIntentStrictModeCallback matching the given callingUid.
+     * @param callingPid The PID mapped with the callback.
+     */
+    public abstract void unregisterStrictModeCallback(int callingPid);
+
+    /**
+     * Start a foreground service delegate.
+     * @param options foreground service delegate options.
+     * @param connection a service connection served as callback to caller.
+     * @return true if delegate is started successfully, false otherwise.
+     * @hide
+     */
+    public abstract boolean startForegroundServiceDelegate(
+            @NonNull ForegroundServiceDelegationOptions options,
+            @Nullable ServiceConnection connection);
+
+    /**
+     * Stop a foreground service delegate.
+     * @param options the foreground service delegate options.
+     * @hide
+     */
+    public abstract void stopForegroundServiceDelegate(
+            @NonNull ForegroundServiceDelegationOptions options);
+
+    /**
+     * Stop a foreground service delegate by service connection.
+     * @param connection service connection used to start delegate previously.
+     * @hide
+     */
+    public abstract void stopForegroundServiceDelegate(@NonNull ServiceConnection connection);
+
+    /**
+     * Called by PowerManager. Return whether a given procstate is allowed to hold
+     * wake locks in deep doze. Because it's called with the power manager lock held, we can't
+     * hold AM locks in it.
+     * @hide
+     */
+    public abstract boolean canHoldWakeLocksInDeepDoze(int uid, int procstate);
 }

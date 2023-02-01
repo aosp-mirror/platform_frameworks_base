@@ -19,7 +19,6 @@ package com.android.server.wm;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.os.InputConfig;
-import android.os.Process;
 import android.view.InputWindowHandle;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -82,8 +81,8 @@ class ActivityRecordInputSink {
         // Don't block touches from passing through to an activity below us in the same task, if
         // that activity is either from the same uid or if that activity has launched an activity
         // in our uid.
-        final ActivityRecord activityBelowInTask =
-                mActivityRecord.getTask().getActivityBelow(mActivityRecord);
+        final ActivityRecord activityBelowInTask = mActivityRecord.getTask() != null
+                ? mActivityRecord.getTask().getActivityBelow(mActivityRecord) : null;
         final boolean allowPassthrough = activityBelowInTask != null && (
                 activityBelowInTask.mAllowedTouchUid == mActivityRecord.getUid()
                         || activityBelowInTask.isUid(mActivityRecord.getUid()));
@@ -102,8 +101,8 @@ class ActivityRecordInputSink {
         inputWindowHandle.replaceTouchableRegionWithCrop = true;
         inputWindowHandle.name = mName;
         inputWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
-        inputWindowHandle.ownerUid = Process.myUid();
-        inputWindowHandle.ownerPid = Process.myPid();
+        inputWindowHandle.ownerPid = WindowManagerService.MY_PID;
+        inputWindowHandle.ownerUid = WindowManagerService.MY_UID;
         inputWindowHandle.inputConfig = InputConfig.NOT_FOCUSABLE | InputConfig.NO_INPUT_CHANNEL;
         return inputWindowHandle;
     }

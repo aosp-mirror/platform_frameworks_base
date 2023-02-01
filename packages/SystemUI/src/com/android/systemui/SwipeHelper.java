@@ -38,6 +38,8 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
@@ -66,7 +68,7 @@ public class SwipeHelper implements Gefingerpoken {
     private static final int MAX_DISMISS_VELOCITY = 4000; // dp/sec
     private static final int SNAP_ANIM_LEN = SLOW_ANIMATIONS ? 1000 : 150; // ms
 
-    static final float SWIPE_PROGRESS_FADE_END = 0.5f; // fraction of thumbnail width
+    public static final float SWIPE_PROGRESS_FADE_END = 0.6f; // fraction of thumbnail width
                                               // beyond which swipe progress->0
     public static final float SWIPED_FAR_ENOUGH_SIZE_FRACTION = 0.6f;
     static final float MAX_SCROLL_SIZE_FRACTION = 0.3f;
@@ -235,7 +237,11 @@ public class SwipeHelper implements Gefingerpoken {
         return Math.min(Math.max(mMinSwipeProgress, result), mMaxSwipeProgress);
     }
 
-    private float getSwipeAlpha(float progress) {
+    /**
+     * Returns the alpha value depending on the progress of the swipe.
+     */
+    @VisibleForTesting
+    public float getSwipeAlpha(float progress) {
         if (mFadeDependingOnAmountSwiped) {
             // The more progress has been fade, the lower the alpha value so that the view fades.
             return Math.max(1 - progress, 0);
@@ -260,7 +266,7 @@ public class SwipeHelper implements Gefingerpoken {
                         animView.setLayerType(View.LAYER_TYPE_NONE, null);
                     }
                 }
-                animView.setAlpha(getSwipeAlpha(swipeProgress));
+                updateSwipeProgressAlpha(animView, getSwipeAlpha(swipeProgress));
             }
         }
         invalidateGlobalRegion(animView);
@@ -559,6 +565,14 @@ public class SwipeHelper implements Gefingerpoken {
                 maxDistance);
         anim.start();
         mCallback.onChildSnappedBack(animView, targetLeft);
+    }
+
+
+    /**
+     * Called to update the content alpha while the view is swiped
+     */
+    protected void updateSwipeProgressAlpha(View animView, float alpha) {
+        animView.setAlpha(alpha);
     }
 
     /**

@@ -18,10 +18,13 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -51,9 +54,14 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.mockito.stubbing.Answer;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Tests for {@link NotificationSwipeHelper}.
@@ -66,6 +74,7 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
     private NotificationSwipeHelper mSwipeHelper;
     private NotificationSwipeHelper.NotificationCallback mCallback;
     private NotificationMenuRowPlugin.OnMenuEventListener mListener;
+    private NotificationRoundnessManager mNotificationRoundnessManager;
     private View mView;
     private MotionEvent mEvent;
     private NotificationMenuRowPlugin mMenuRow;
@@ -74,16 +83,27 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
     private Runnable mFalsingCheck;
     private FeatureFlags mFeatureFlags;
 
-    @Rule public MockitoRule mockito = MockitoJUnit.rule();
+    private static final int FAKE_ROW_WIDTH = 20;
+    private static final int FAKE_ROW_HEIGHT = 20;
+
+    @Rule
+    public MockitoRule mockito = MockitoJUnit.rule();
 
     @Before
     public void setUp() throws Exception {
         mCallback = mock(NotificationSwipeHelper.NotificationCallback.class);
         mListener = mock(NotificationMenuRowPlugin.OnMenuEventListener.class);
+        mNotificationRoundnessManager = mock(NotificationRoundnessManager.class);
         mFeatureFlags = mock(FeatureFlags.class);
         mSwipeHelper = spy(new NotificationSwipeHelper(
-                mContext.getResources(), ViewConfiguration.get(mContext),
-                new FalsingManagerFake(), mFeatureFlags, SwipeHelper.X, mCallback, mListener));
+                mContext.getResources(),
+                ViewConfiguration.get(mContext),
+                new FalsingManagerFake(),
+                mFeatureFlags,
+                SwipeHelper.X,
+                mCallback,
+                mListener,
+                mNotificationRoundnessManager));
         mView = mock(View.class);
         mEvent = mock(MotionEvent.class);
         mMenuRow = mock(NotificationMenuRowPlugin.class);
@@ -444,8 +464,8 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
         doReturn(5f).when(mEvent).getRawX();
         doReturn(10f).when(mEvent).getRawY();
 
-        doReturn(20).when(mView).getWidth();
-        doReturn(20).when(mView).getHeight();
+        doReturn(FAKE_ROW_WIDTH).when(mView).getWidth();
+        doReturn(FAKE_ROW_HEIGHT).when(mView).getHeight();
 
         Answer answer = (Answer) invocation -> {
             int[] arr = invocation.getArgument(0);
@@ -472,8 +492,8 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
         doReturn(5f).when(mEvent).getRawX();
         doReturn(10f).when(mEvent).getRawY();
 
-        doReturn(20).when(mNotificationRow).getWidth();
-        doReturn(20).when(mNotificationRow).getActualHeight();
+        doReturn(FAKE_ROW_WIDTH).when(mNotificationRow).getWidth();
+        doReturn(FAKE_ROW_HEIGHT).when(mNotificationRow).getActualHeight();
 
         Answer answer = (Answer) invocation -> {
             int[] arr = invocation.getArgument(0);
@@ -490,5 +510,57 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
 
         assertFalse("Touch is not within the view",
                 mSwipeHelper.isTouchInView(mEvent, mNotificationRow));
+    }
+
+    @Test
+    public void testContentAlphaRemainsUnchangedWhenNotificationIsNotDismissible() {
+        doReturn(FAKE_ROW_WIDTH).when(mNotificationRow).getMeasuredWidth();
+
+        mSwipeHelper.onTranslationUpdate(mNotificationRow, 12, false);
+
+        verify(mNotificationRow, never()).setContentAlpha(anyFloat());
+    }
+
+    @Test
+    public void testContentAlphaRemainsUnchangedWhenFeatureFlagIsDisabled() {
+
+        // Returning true prevents alpha fade. In an unmocked scenario the callback is instantiated
+        // within NotificationStackScrollLayoutController and returns the inverted value of the
+        // feature flag
+        doReturn(true).when(mCallback).updateSwipeProgress(any(), anyBoolean(), anyFloat());
+        doReturn(FAKE_ROW_WIDTH).when(mNotificationRow).getMeasuredWidth();
+
+        mSwipeHelper.onTranslationUpdate(mNotificationRow, 12, true);
+
+        verify(mNotificationRow, never()).setContentAlpha(anyFloat());
+    }
+
+    @Test
+    public void testContentAlphaFadeAnimationSpecs() {
+        // The alpha fade should be linear from 1f to 0f as translation progresses from 0 to 60% of
+        // view-width, and 0f at translations higher than that.
+        doReturn(FAKE_ROW_WIDTH).when(mNotificationRow).getMeasuredWidth();
+
+        List<Integer> translations = Arrays.asList(
+                -FAKE_ROW_WIDTH * 2,
+                -FAKE_ROW_WIDTH,
+                (int) (-FAKE_ROW_WIDTH * 0.3),
+                0,
+                (int) (FAKE_ROW_WIDTH * 0.3),
+                (int) (FAKE_ROW_WIDTH * 0.6),
+                FAKE_ROW_WIDTH,
+                FAKE_ROW_WIDTH * 2);
+        List<Float> expectedAlphas = translations.stream().map(translation ->
+                        mSwipeHelper.getSwipeAlpha(Math.abs((float) translation / FAKE_ROW_WIDTH)))
+                .collect(Collectors.toList());
+
+        for (Integer translation : translations) {
+            mSwipeHelper.onTranslationUpdate(mNotificationRow, translation, true);
+        }
+
+        ArgumentCaptor<Float> capturedValues = ArgumentCaptor.forClass(Float.class);
+        verify(mNotificationRow, times(translations.size())).setContentAlpha(
+                capturedValues.capture());
+        assertEquals(expectedAlphas, capturedValues.getAllValues());
     }
 }

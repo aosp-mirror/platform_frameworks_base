@@ -207,6 +207,9 @@ public class PipMenuView extends FrameLayout {
             }
         });
 
+        // this disables the ripples
+        mEnterSplitButton.setEnabled(false);
+
         findViewById(R.id.resize_handle).setAlpha(0);
 
         mActionsGroup = findViewById(R.id.actions_group);
@@ -282,7 +285,7 @@ public class PipMenuView extends FrameLayout {
                 && mSplitScreenControllerOptional.get().isTaskInSplitScreen(taskInfo.taskId);
         mFocusedTaskAllowSplitScreen = isSplitScreen
                 || (taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
-                && taskInfo.supportsSplitScreenMultiWindow
+                && taskInfo.supportsMultiWindow
                 && taskInfo.topActivityType != WindowConfiguration.ACTIVITY_TYPE_HOME);
     }
 

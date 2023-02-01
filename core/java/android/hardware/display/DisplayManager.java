@@ -33,6 +33,7 @@ import android.annotation.TestApi;
 import android.app.KeyguardManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.content.pm.IPackageManager;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.media.projection.MediaProjection;
@@ -40,11 +41,16 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Looper;
+import android.os.Process;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.Surface;
+
+import com.android.internal.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -60,6 +66,7 @@ import java.util.concurrent.Executor;
 public final class DisplayManager {
     private static final String TAG = "DisplayManager";
     private static final boolean DEBUG = false;
+    private static final boolean ENABLE_VIRTUAL_DISPLAY_REFRESH_RATE = false;
 
     private final Context mContext;
     private final DisplayManagerGlobal mGlobal;
@@ -133,7 +140,9 @@ public final class DisplayManager {
             VIRTUAL_DISPLAY_FLAG_TRUSTED,
             VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP,
             VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED,
-            VIRTUAL_DISPLAY_FLAG_TOUCH_FEEDBACK_DISABLED
+            VIRTUAL_DISPLAY_FLAG_TOUCH_FEEDBACK_DISABLED,
+            VIRTUAL_DISPLAY_FLAG_OWN_FOCUS,
+            VIRTUAL_DISPLAY_FLAG_STEAL_TOP_FOCUS_DISABLED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface VirtualDisplayFlag {}
@@ -399,6 +408,43 @@ public final class DisplayManager {
      */
     public static final int VIRTUAL_DISPLAY_FLAG_TOUCH_FEEDBACK_DISABLED = 1 << 13;
 
+    /**
+     * Virtual display flags: Indicates that the display maintains its own focus and touch mode.
+     *
+     * This flag is similar to {@link com.android.internal.R.bool.config_perDisplayFocusEnabled} in
+     * behavior, but only applies to the specific display instead of system-wide to all displays.
+     *
+     * Note: The display must be trusted in order to have its own focus.
+     *
+     * @see #createVirtualDisplay
+     * @see #VIRTUAL_DISPLAY_FLAG_TRUSTED
+     * @hide
+     */
+    @TestApi
+    public static final int VIRTUAL_DISPLAY_FLAG_OWN_FOCUS = 1 << 14;
+
+    /**
+     * Virtual display flags: Indicates that the display should not be a part of the default
+     * DisplayGroup and instead be part of a DisplayGroup associated with its virtual device.
+     *
+     * @see #createVirtualDisplay
+     * @hide
+     */
+    public static final int VIRTUAL_DISPLAY_FLAG_DEVICE_DISPLAY_GROUP = 1 << 15;
+
+
+    /**
+     * Virtual display flags: Indicates that the display should not become the top focused display
+     * by stealing the top focus from another display.
+     *
+     * @see Display#FLAG_STEAL_TOP_FOCUS_DISABLED
+     * @see #createVirtualDisplay
+     * @see #VIRTUAL_DISPLAY_FLAG_OWN_FOCUS
+     * @hide
+     */
+    @SystemApi
+    public static final int VIRTUAL_DISPLAY_FLAG_STEAL_TOP_FOCUS_DISABLED = 1 << 16;
+
     /** @hide */
     @IntDef(prefix = {"MATCH_CONTENT_FRAMERATE_"}, value = {
             MATCH_CONTENT_FRAMERATE_UNKNOWN,
@@ -435,12 +481,13 @@ public final class DisplayManager {
             SWITCHING_TYPE_NONE,
             SWITCHING_TYPE_WITHIN_GROUPS,
             SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS,
+            SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SwitchingType {}
 
     /**
-     * No mode switching will happen.
+     * No display mode switching will happen.
      * @hide
      */
     @TestApi
@@ -461,6 +508,13 @@ public final class DisplayManager {
      */
     @TestApi
     public static final int SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS = 2;
+
+    /**
+     * Allow render frame rate switches, but not physical modes.
+     * @hide
+     */
+    @TestApi
+    public static final int SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY = 3;
 
     /**
      * @hide
@@ -559,20 +613,19 @@ public final class DisplayManager {
      * @see #DISPLAY_CATEGORY_PRESENTATION
      */
     public Display[] getDisplays(String category) {
-        boolean includeDisabledDisplays = (category != null
+        boolean includeDisabled = (category != null
                 && category.equals(DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED));
-        final int[] displayIds = mGlobal.getDisplayIds(includeDisabledDisplays);
+        final int[] displayIds = mGlobal.getDisplayIds(includeDisabled);
         synchronized (mLock) {
             try {
-                if (category != null && category.equals(DISPLAY_CATEGORY_PRESENTATION)) {
+                if (DISPLAY_CATEGORY_PRESENTATION.equals(category)) {
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_WIFI);
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_EXTERNAL);
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_OVERLAY);
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_VIRTUAL);
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_INTERNAL);
-                } else if ((category == null
-                        || DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED.equals(category))) {
-                    // All displays requested.
+                } else if (category == null
+                        || DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED.equals(category)) {
                     addAllDisplaysLocked(mTempDisplays, displayIds);
                 }
                 return mTempDisplays.toArray(new Display[mTempDisplays.size()]);
@@ -858,6 +911,16 @@ public final class DisplayManager {
         return mGlobal.getUserDisabledHdrTypes();
     }
 
+    /**
+     * Overrides HDR modes for a display device.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.ACCESS_SURFACE_FLINGER)
+    @TestApi
+    public void overrideHdrTypes(int displayId, @NonNull int[] modes) {
+        mGlobal.overrideHdrTypes(displayId, modes);
+    }
 
     /**
      * Creates a virtual display.
@@ -872,6 +935,24 @@ public final class DisplayManager {
             @Nullable Surface surface,
             @VirtualDisplayFlag int flags) {
         return createVirtualDisplay(name, width, height, densityDpi, surface, flags, null, null);
+    }
+
+    /**
+     * Creates a virtual display.
+     *
+     * @see #createVirtualDisplay(String, int, int, int, float, Surface, int,
+     * Handler, VirtualDisplay.Callback)
+     */
+    @Nullable
+    public VirtualDisplay createVirtualDisplay(@NonNull String name,
+            @IntRange(from = 1) int width,
+            @IntRange(from = 1) int height,
+            @IntRange(from = 1) int densityDpi,
+            float requestedRefreshRate,
+            @Nullable Surface surface,
+            @VirtualDisplayFlag int flags) {
+        return createVirtualDisplay(name, width, height, densityDpi, requestedRefreshRate,
+                surface, flags, null, null);
     }
 
     /**
@@ -925,11 +1006,81 @@ public final class DisplayManager {
             @VirtualDisplayFlag int flags,
             @Nullable VirtualDisplay.Callback callback,
             @Nullable Handler handler) {
+        return createVirtualDisplay(name, width, height, densityDpi, 0.0f, surface,
+                flags, handler, callback);
+    }
+
+    /**
+     * Creates a virtual display.
+     * <p>
+     * The content of a virtual display is rendered to a {@link Surface} provided
+     * by the application.
+     * </p><p>
+     * The virtual display should be {@link VirtualDisplay#release released}
+     * when no longer needed.  Because a virtual display renders to a surface
+     * provided by the application, it will be released automatically when the
+     * process terminates and all remaining windows on it will be forcibly removed.
+     * </p><p>
+     * The behavior of the virtual display depends on the flags that are provided
+     * to this method.  By default, virtual displays are created to be private,
+     * non-presentation and unsecure.  Permissions may be required to use certain flags.
+     * </p><p>
+     * As of {@link android.os.Build.VERSION_CODES#KITKAT_WATCH}, the surface may
+     * be attached or detached dynamically using {@link VirtualDisplay#setSurface}.
+     * Previously, the surface had to be non-null when {@link #createVirtualDisplay}
+     * was called and could not be changed for the lifetime of the display.
+     * </p><p>
+     * Detaching the surface that backs a virtual display has a similar effect to
+     * turning off the screen.
+     * </p>
+     *
+     * @param name The name of the virtual display, must be non-empty.
+     * @param width The width of the virtual display in pixels, must be greater than 0.
+     * @param height The height of the virtual display in pixels, must be greater than 0.
+     * @param densityDpi The density of the virtual display in dpi, must be greater than 0.
+     * @param requestedRefreshRate The requested refresh rate in frames per second.
+     * For best results, specify a divisor of the physical refresh rate, e.g., 30 or 60 on
+     * 120hz display. If an arbitrary refresh rate is specified, the rate will be rounded
+     * up or down to a divisor of the physical display. If 0 is specified, the virtual
+     * display is refreshed at the physical display refresh rate.
+     * @param surface The surface to which the content of the virtual display should
+     * be rendered, or null if there is none initially.
+     * @param flags A combination of virtual display flags:
+     * {@link #VIRTUAL_DISPLAY_FLAG_PUBLIC}, {@link #VIRTUAL_DISPLAY_FLAG_PRESENTATION},
+     * {@link #VIRTUAL_DISPLAY_FLAG_SECURE}, {@link #VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY},
+     * or {@link #VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR}.
+     * @param handler The handler on which the listener should be invoked, or null
+     * if the listener should be invoked on the calling thread's looper.
+     * @param callback Callback to call when the state of the {@link VirtualDisplay} changes
+     * @return The newly created virtual display, or null if the application could
+     * not create the virtual display.
+     *
+     * @throws SecurityException if the caller does not have permission to create
+     * a virtual display with the specified flags.
+     */
+    @Nullable
+    public VirtualDisplay createVirtualDisplay(@NonNull String name,
+            @IntRange(from = 1) int width,
+            @IntRange(from = 1) int height,
+            @IntRange(from = 1) int densityDpi,
+            float requestedRefreshRate,
+            @Nullable Surface surface,
+            @VirtualDisplayFlag int flags,
+            @Nullable Handler handler,
+            @Nullable VirtualDisplay.Callback callback) {
+        if (!ENABLE_VIRTUAL_DISPLAY_REFRESH_RATE && requestedRefreshRate != 0.0f) {
+            Slog.e(TAG, "Please turn on ENABLE_VIRTUAL_DISPLAY_REFRESH_RATE to use the new api");
+            return null;
+        }
+
         final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(name, width,
                 height, densityDpi);
         builder.setFlags(flags);
         if (surface != null) {
             builder.setSurface(surface);
+        }
+        if (requestedRefreshRate != 0.0f) {
+            builder.setRequestedRefreshRate(requestedRefreshRate);
         }
         return createVirtualDisplay(null /* projection */, builder.build(), callback, handler,
                 null /* windowContext */);
@@ -1239,6 +1390,54 @@ public final class DisplayManager {
     }
 
     /**
+     * Sets the HDR conversion mode for the device.
+     *
+     * @param hdrConversionMode The {@link HdrConversionMode} to set.
+     * Note, {@code HdrConversionMode.preferredHdrOutputType} is only applicable when
+     * {@code HdrConversionMode.conversionMode} is {@link HdrConversionMode#HDR_CONVERSION_FORCE}.
+     *
+     * @throws IllegalArgumentException if hdrConversionMode.preferredHdrOutputType is not set
+     * when hdrConversionMode.conversionMode is {@link HdrConversionMode#HDR_CONVERSION_FORCE}.
+     * @throws IllegalArgumentException if hdrConversionMode.preferredHdrOutputType is set but
+     * hdrConversionMode.conversionMode is not {@link HdrConversionMode#HDR_CONVERSION_FORCE}.
+     *
+     * @see #getHdrConversionMode
+     * @see #getSupportedHdrOutputTypes
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.MODIFY_HDR_CONVERSION_MODE)
+    public void setHdrConversionMode(@NonNull HdrConversionMode hdrConversionMode) {
+        mGlobal.setHdrConversionMode(hdrConversionMode);
+    }
+
+    /**
+     * Returns the {@link HdrConversionMode} of the device, which is set by the user.
+     *
+     * @see #setHdrConversionMode
+     * @see #getSupportedHdrOutputTypes
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    public HdrConversionMode getHdrConversionMode() {
+        return mGlobal.getHdrConversionMode();
+    }
+
+    /**
+     * Returns the HDR output types supported by the device.
+     *
+     * @see #getHdrConversionMode
+     * @see #setHdrConversionMode
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    public @HdrType int[] getSupportedHdrOutputTypes() {
+        return mGlobal.getSupportedHdrOutputTypes();
+    }
+
+    /**
      * When enabled the app requested mode is always selected regardless of user settings and
      * policies for low brightness, low battery, etc.
      *
@@ -1260,6 +1459,22 @@ public final class DisplayManager {
     @RequiresPermission(Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS)
     public boolean shouldAlwaysRespectAppRequestedMode() {
         return mGlobal.shouldAlwaysRespectAppRequestedMode();
+    }
+
+    /**
+     * Returns whether device supports seamless refresh rate switching.
+     *
+     * Match content frame rate setting has three options: seamless, non-seamless and never.
+     * The seamless option does nothing if the device does not support seamless refresh rate
+     * switching. This API is used in such a case to hide the seamless option.
+     *
+     * @see DisplayManager#setRefreshRateSwitchingType
+     * @see DisplayManager#getMatchContentFrameRateUserPreference
+     * @hide
+     */
+    public boolean supportsSeamlessRefreshRateSwitching() {
+        return mContext.getResources().getBoolean(
+                R.bool.config_supportsSeamlessRefreshRateSwitching);
     }
 
     /**
@@ -1297,6 +1512,7 @@ public final class DisplayManager {
         switch (switchingType) {
             case SWITCHING_TYPE_NONE:
                 return MATCH_CONTENT_FRAMERATE_NEVER;
+            case SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY:
             case SWITCHING_TYPE_WITHIN_GROUPS:
                 return MATCH_CONTENT_FRAMERATE_SEAMLESSS_ONLY;
             case SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS:
@@ -1305,6 +1521,61 @@ public final class DisplayManager {
                 Slog.e(TAG, switchingType + " is not a valid value of switching type.");
                 return MATCH_CONTENT_FRAMERATE_UNKNOWN;
         }
+    }
+
+    /**
+     * Creates a VirtualDisplay that will mirror the content of displayIdToMirror
+     * @param name The name for the virtual display
+     * @param width The initial width for the virtual display
+     * @param height The initial height for the virtual display
+     * @param displayIdToMirror The displayId that will be mirrored into the virtual display.
+     * @return VirtualDisplay that can be used to update properties.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.CAPTURE_VIDEO_OUTPUT)
+    @Nullable
+    @SystemApi
+    public static VirtualDisplay createVirtualDisplay(@NonNull String name, int width, int height,
+            int displayIdToMirror, @Nullable Surface surface) {
+        IDisplayManager sDm = IDisplayManager.Stub.asInterface(
+                ServiceManager.getService(Context.DISPLAY_SERVICE));
+        IPackageManager sPackageManager = IPackageManager.Stub.asInterface(
+                ServiceManager.getService("package"));
+
+        // Density doesn't matter since this virtual display is only used for mirroring.
+        VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(name, width,
+                height, 1 /* densityDpi */)
+                .setFlags(VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR)
+                .setDisplayIdToMirror(displayIdToMirror);
+        if (surface != null) {
+            builder.setSurface(surface);
+        }
+        VirtualDisplayConfig virtualDisplayConfig = builder.build();
+
+        String[] packages;
+        try {
+            packages = sPackageManager.getPackagesForUid(Process.myUid());
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+
+        // Just use the first one since it just needs to match the package when looking it up by
+        // calling UID in system server.
+        // The call may come from a rooted device, in that case the requesting uid will be root so
+        // it will not have any package name
+        String packageName = packages == null ? null : packages[0];
+        DisplayManagerGlobal.VirtualDisplayCallback
+                callbackWrapper = new DisplayManagerGlobal.VirtualDisplayCallback(null, null);
+        int displayId;
+        try {
+            displayId = sDm.createVirtualDisplay(virtualDisplayConfig, callbackWrapper, null,
+                    packageName);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+        return DisplayManagerGlobal.getInstance().createVirtualDisplayWrapper(virtualDisplayConfig,
+                null, callbackWrapper, displayId);
     }
 
     /**
@@ -1451,5 +1722,15 @@ public final class DisplayManager {
          * @hide
          */
         String KEY_HIGH_REFRESH_RATE_BLACKLIST = "high_refresh_rate_blacklist";
+
+        /**
+         * Key for the brightness throttling data as a String formatted:
+         * <displayId>,<no of throttling levels>,[<severity as string>,<brightness cap>]
+         * Where the latter part is repeated for each throttling level, and the entirety is repeated
+         * for each display, separated by a semicolon.
+         * For example:
+         * 123,1,critical,0.8;456,2,moderate,0.9,critical,0.7
+         */
+        String KEY_BRIGHTNESS_THROTTLING_DATA = "brightness_throttling_data";
     }
 }

@@ -21,8 +21,10 @@ import static android.app.job.JobInfo.getPriorityString;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_NONE;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
+import android.annotation.BytesLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Notification;
 import android.app.job.IJobCallback;
 import android.app.job.IJobService;
 import android.app.job.JobInfo;
@@ -34,6 +36,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.Network;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -43,9 +46,11 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.IndentingPrintWriter;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.TimeUtils;
 
@@ -59,6 +64,8 @@ import com.android.server.job.controllers.JobStatus;
 import com.android.server.tare.EconomicPolicy;
 import com.android.server.tare.EconomyManagerInternal;
 import com.android.server.tare.JobSchedulerEconomicPolicy;
+
+import java.util.Objects;
 
 /**
  * Handles client binding and lifecycle of a job. Jobs execute one at a time on an instance of this
@@ -107,6 +114,7 @@ public final class JobServiceContext implements ServiceConnection {
     /** Make callbacks to {@link JobSchedulerService} to inform on job completion status. */
     private final JobCompletedListener mCompletedListener;
     private final JobConcurrencyManager mJobConcurrencyManager;
+    private final JobNotificationCoordinator mNotificationCoordinator;
     private final JobSchedulerService mService;
     /** Used for service binding, etc. */
     private final Context mContext;
@@ -167,6 +175,11 @@ public final class JobServiceContext implements ServiceConnection {
     /** The absolute maximum amount of time the job can run */
     private long mMaxExecutionTimeMillis;
 
+    private long mEstimatedDownloadBytes;
+    private long mEstimatedUploadBytes;
+    private long mTransferredDownloadBytes;
+    private long mTransferredUploadBytes;
+
     /**
      * The stop reason for a pending cancel. If there's not pending cancel, then the value should be
      * {@link JobParameters#STOP_REASON_UNDEFINED}.
@@ -174,6 +187,8 @@ public final class JobServiceContext implements ServiceConnection {
     private int mPendingStopReason = JobParameters.STOP_REASON_UNDEFINED;
     private int mPendingInternalStopReason;
     private String mPendingDebugStopReason;
+
+    private Network mPendingNetworkChange;
 
     // Debugging: reason this job was last stopped.
     public String mStoppedReason;
@@ -184,6 +199,18 @@ public final class JobServiceContext implements ServiceConnection {
     final class JobCallback extends IJobCallback.Stub {
         public String mStoppedReason;
         public long mStoppedTime;
+
+        @Override
+        public void acknowledgeGetTransferredDownloadBytesMessage(int jobId, int workId,
+                @BytesLong long transferredBytes) {
+            doAcknowledgeGetTransferredDownloadBytesMessage(this, jobId, workId, transferredBytes);
+        }
+
+        @Override
+        public void acknowledgeGetTransferredUploadBytesMessage(int jobId, int workId,
+                @BytesLong long transferredBytes) {
+            doAcknowledgeGetTransferredUploadBytesMessage(this, jobId, workId, transferredBytes);
+        }
 
         @Override
         public void acknowledgeStartMessage(int jobId, boolean ongoing) {
@@ -209,9 +236,28 @@ public final class JobServiceContext implements ServiceConnection {
         public void jobFinished(int jobId, boolean reschedule) {
             doJobFinished(this, jobId, reschedule);
         }
+
+        @Override
+        public void updateEstimatedNetworkBytes(int jobId, JobWorkItem item,
+                long downloadBytes, long uploadBytes) {
+            doUpdateEstimatedNetworkBytes(this, jobId, item, downloadBytes, uploadBytes);
+        }
+
+        @Override
+        public void updateTransferredNetworkBytes(int jobId, JobWorkItem item,
+                long downloadBytes, long uploadBytes) {
+            doUpdateTransferredNetworkBytes(this, jobId, item, downloadBytes, uploadBytes);
+        }
+
+        @Override
+        public void setNotification(int jobId, int notificationId,
+                Notification notification, int jobEndNotificationPolicy) {
+            doSetNotification(this, jobId, notificationId, notification, jobEndNotificationPolicy);
+        }
     }
 
     JobServiceContext(JobSchedulerService service, JobConcurrencyManager concurrencyManager,
+            JobNotificationCoordinator notificationCoordinator,
             IBatteryStats batteryStats, JobPackageTracker tracker, Looper looper) {
         mContext = service.getContext();
         mLock = service.getLock();
@@ -221,6 +267,7 @@ public final class JobServiceContext implements ServiceConnection {
         mJobPackageTracker = tracker;
         mCallbackHandler = new JobServiceHandler(looper);
         mJobConcurrencyManager = concurrencyManager;
+        mNotificationCoordinator = notificationCoordinator;
         mCompletedListener = service;
         mPowerManager = mContext.getSystemService(PowerManager.class);
         mAvailable = true;
@@ -248,6 +295,7 @@ public final class JobServiceContext implements ServiceConnection {
             mRunningJob = job;
             mRunningJobWorkType = workType;
             mRunningCallback = new JobCallback();
+            mPendingNetworkChange = null;
             final boolean isDeadlineExpired =
                     job.hasDeadlineConstraint() &&
                             (job.getLatestRunTimeElapsed() < sElapsedRealtimeClock.millis());
@@ -262,14 +310,19 @@ public final class JobServiceContext implements ServiceConnection {
                 job.changedAuthorities.toArray(triggeredAuthorities);
             }
             final JobInfo ji = job.getJob();
-            mParams = new JobParameters(mRunningCallback, job.getJobId(), ji.getExtras(),
+            mParams = new JobParameters(mRunningCallback, job.getNamespace(), job.getJobId(),
+                    ji.getExtras(),
                     ji.getTransientExtras(), ji.getClipData(), ji.getClipGrantFlags(),
                     isDeadlineExpired, job.shouldTreatAsExpeditedJob(),
-                    triggeredUris, triggeredAuthorities, job.network);
+                    job.shouldTreatAsUserInitiatedJob(), triggeredUris, triggeredAuthorities,
+                    job.network);
             mExecutionStartTimeElapsed = sElapsedRealtimeClock.millis();
             mMinExecutionGuaranteeMillis = mService.getMinJobExecutionGuaranteeMs(job);
             mMaxExecutionTimeMillis =
                     Math.max(mService.getMaxJobExecutionTimeMs(job), mMinExecutionGuaranteeMillis);
+            mEstimatedDownloadBytes = job.getEstimatedNetworkDownloadBytes();
+            mEstimatedUploadBytes = job.getEstimatedNetworkUploadBytes();
+            mTransferredDownloadBytes = mTransferredUploadBytes = 0;
 
             final long whenDeferred = job.getWhenStandbyDeferred();
             if (whenDeferred > 0) {
@@ -302,11 +355,20 @@ public final class JobServiceContext implements ServiceConnection {
                     getStartActionId(job), String.valueOf(job.getJobId()));
             mVerb = VERB_BINDING;
             scheduleOpTimeOutLocked();
-            final Intent intent = new Intent().setComponent(job.getServiceComponent());
+            // Use FLAG_FROM_BACKGROUND to avoid resetting the bad-app tracking.
+            final Intent intent = new Intent().setComponent(job.getServiceComponent())
+                    .setFlags(Intent.FLAG_FROM_BACKGROUND);
             boolean binding = false;
             try {
                 final int bindFlags;
-                if (job.shouldTreatAsExpeditedJob()) {
+                if (job.shouldTreatAsUserInitiatedJob()) {
+                    // TODO (191785864, 261999509): add an appropriate flag so user-initiated jobs
+                    //    can bypass data saver
+                    bindFlags = Context.BIND_AUTO_CREATE
+                            | Context.BIND_ALMOST_PERCEPTIBLE
+                            | Context.BIND_BYPASS_POWER_NETWORK_RESTRICTIONS
+                            | Context.BIND_NOT_APP_COMPONENT_USAGE;
+                } else if (job.shouldTreatAsExpeditedJob()) {
                     bindFlags = Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
                             | Context.BIND_ALMOST_PERCEPTIBLE
                             | Context.BIND_BYPASS_POWER_NETWORK_RESTRICTIONS
@@ -360,7 +422,22 @@ public final class JobServiceContext implements ServiceConnection {
                     job.getJob().isPrefetch(),
                     job.getJob().getPriority(),
                     job.getEffectivePriority(),
-                    job.getNumFailures());
+                    job.getNumPreviousAttempts(),
+                    job.getJob().getMaxExecutionDelayMillis(),
+                    isDeadlineExpired,
+                    job.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_CHARGING),
+                    job.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_BATTERY_NOT_LOW),
+                    job.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_STORAGE_NOT_LOW),
+                    job.isConstraintSatisfied(JobStatus.CONSTRAINT_TIMING_DELAY),
+                    job.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_DEVICE_IDLE),
+                    job.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY),
+                    job.isConstraintSatisfied(JobStatus.CONSTRAINT_CONTENT_TRIGGER));
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
+                // Use the context's ID to distinguish traces since there'll only be one job
+                // running per context.
+                Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "JobScheduler",
+                        job.getTag(), getId());
+            }
             try {
                 mBatteryStats.noteJobStart(job.getBatteryName(), job.getSourceUid());
             } catch (RemoteException e) {
@@ -445,17 +522,44 @@ public final class JobServiceContext implements ServiceConnection {
         return mTimeoutElapsed;
     }
 
+    long getRemainingGuaranteedTimeMs(long nowElapsed) {
+        return Math.max(0, mExecutionStartTimeElapsed + mMinExecutionGuaranteeMillis - nowElapsed);
+    }
+
+    void informOfNetworkChangeLocked(Network newNetwork) {
+        if (mVerb != VERB_EXECUTING) {
+            Slog.w(TAG, "Sending onNetworkChanged for a job that isn't started. " + mRunningJob);
+            if (mVerb == VERB_BINDING || mVerb == VERB_STARTING) {
+                // The network changed before the job has fully started. Hold the change push
+                // until the job has started executing.
+                mPendingNetworkChange = newNetwork;
+            }
+            return;
+        }
+        try {
+            mParams.setNetwork(newNetwork);
+            mPendingNetworkChange = null;
+            service.onNetworkChanged(mParams);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Error sending onNetworkChanged to client.", e);
+            // The job's host app apparently crashed during the job, so we should reschedule.
+            closeAndCleanupJobLocked(/* reschedule */ true,
+                    "host crashed when trying to inform of network change");
+        }
+    }
+
     boolean isWithinExecutionGuaranteeTime() {
         return sElapsedRealtimeClock.millis()
                 < mExecutionStartTimeElapsed + mMinExecutionGuaranteeMillis;
     }
 
     @GuardedBy("mLock")
-    boolean timeoutIfExecutingLocked(String pkgName, int userId, boolean matchJobId, int jobId,
-            String reason) {
+    boolean timeoutIfExecutingLocked(String pkgName, int userId, @Nullable String namespace,
+            boolean matchJobId, int jobId, String reason) {
         final JobStatus executing = getRunningJobLocked();
         if (executing != null && (userId == UserHandle.USER_ALL || userId == executing.getUserId())
                 && (pkgName == null || pkgName.equals(executing.getSourcePackageName()))
+                && Objects.equals(namespace, executing.getNamespace())
                 && (!matchJobId || jobId == executing.getJobId())) {
             if (mVerb == VERB_EXECUTING) {
                 mParams.setStopReason(JobParameters.STOP_REASON_TIMEOUT,
@@ -465,6 +569,16 @@ public final class JobServiceContext implements ServiceConnection {
             }
         }
         return false;
+    }
+
+    @GuardedBy("mLock")
+    Pair<Long, Long> getEstimatedNetworkBytes() {
+        return Pair.create(mEstimatedDownloadBytes, mEstimatedUploadBytes);
+    }
+
+    @GuardedBy("mLock")
+    Pair<Long, Long> getTransferredNetworkBytes() {
+        return Pair.create(mTransferredDownloadBytes, mTransferredUploadBytes);
     }
 
     void doJobFinished(JobCallback cb, int jobId, boolean reschedule) {
@@ -481,6 +595,28 @@ public final class JobServiceContext implements ServiceConnection {
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private void doAcknowledgeGetTransferredDownloadBytesMessage(JobCallback cb, int jobId,
+            int workId, @BytesLong long transferredBytes) {
+        // TODO(255393346): Make sure apps call this appropriately and monitor for abuse
+        synchronized (mLock) {
+            if (!verifyCallerLocked(cb)) {
+                return;
+            }
+            mTransferredDownloadBytes = transferredBytes;
+        }
+    }
+
+    private void doAcknowledgeGetTransferredUploadBytesMessage(JobCallback cb, int jobId,
+            int workId, @BytesLong long transferredBytes) {
+        // TODO(255393346): Make sure apps call this appropriately and monitor for abuse
+        synchronized (mLock) {
+            if (!verifyCallerLocked(cb)) {
+                return;
+            }
+            mTransferredUploadBytes = transferredBytes;
         }
     }
 
@@ -512,6 +648,9 @@ public final class JobServiceContext implements ServiceConnection {
                             "last work dequeued");
                     // This will finish the job.
                     doCallbackLocked(false, "last work dequeued");
+                } else {
+                    // Delivery count has been updated, so persist JobWorkItem change.
+                    mService.mJobs.touchJob(mRunningJob);
                 }
                 return work;
             }
@@ -529,7 +668,56 @@ public final class JobServiceContext implements ServiceConnection {
                     // Exception-throwing-can down the road to JobParameters.completeWork >:(
                     return true;
                 }
+                mService.mJobs.touchJob(mRunningJob);
                 return mRunningJob.completeWorkLocked(workId);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private void doUpdateEstimatedNetworkBytes(JobCallback cb, int jobId,
+            @Nullable JobWorkItem item, long downloadBytes, long uploadBytes) {
+        // TODO(255393346): Make sure apps call this appropriately and monitor for abuse
+        synchronized (mLock) {
+            if (!verifyCallerLocked(cb)) {
+                return;
+            }
+            mEstimatedDownloadBytes = downloadBytes;
+            mEstimatedUploadBytes = uploadBytes;
+        }
+    }
+
+    private void doUpdateTransferredNetworkBytes(JobCallback cb, int jobId,
+            @Nullable JobWorkItem item, long downloadBytes, long uploadBytes) {
+        // TODO(255393346): Make sure apps call this appropriately and monitor for abuse
+        synchronized (mLock) {
+            if (!verifyCallerLocked(cb)) {
+                return;
+            }
+            mTransferredDownloadBytes = downloadBytes;
+            mTransferredUploadBytes = uploadBytes;
+        }
+    }
+
+    private void doSetNotification(JobCallback cb, int jodId, int notificationId,
+            Notification notification, int jobEndNotificationPolicy) {
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                if (!verifyCallerLocked(cb)) {
+                    return;
+                }
+                if (callingUid != mRunningJob.getUid()) {
+                    Slog.wtfStack(TAG, "Calling UID isn't the same as running job's UID...");
+                    throw new SecurityException("Can't post notification on behalf of another app");
+                }
+                final String callingPkgName = mRunningJob.getServiceComponent().getPackageName();
+                mNotificationCoordinator.enqueueNotification(this, callingPkgName,
+                        callingPid, callingUid, notificationId,
+                        notification, jobEndNotificationPolicy);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -730,10 +918,10 @@ public final class JobServiceContext implements ServiceConnection {
     @GuardedBy("mLock")
     private void doCancelLocked(@JobParameters.StopReason int stopReasonCode,
             int internalStopReasonCode, @Nullable String debugReason) {
-        if (mVerb == VERB_FINISHED) {
+        if (mVerb == VERB_FINISHED || mVerb == VERB_STOPPING) {
             if (DEBUG) {
                 Slog.d(TAG,
-                        "Trying to process cancel for torn-down context, ignoring.");
+                        "Too late to process cancel for context (verb=" + mVerb + "), ignoring.");
             }
             return;
         }
@@ -817,6 +1005,13 @@ public final class JobServiceContext implements ServiceConnection {
                     return;
                 }
                 scheduleOpTimeOutLocked();
+                if (mPendingNetworkChange != null
+                        && !Objects.equals(mParams.getNetwork(), mPendingNetworkChange)) {
+                    informOfNetworkChangeLocked(mPendingNetworkChange);
+                }
+                if (mRunningJob.isUserVisibleJob()) {
+                    mService.informObserversOfUserVisibleJobChange(this, mRunningJob, true);
+                }
                 break;
             default:
                 Slog.e(TAG, "Handling started job but job wasn't starting! Was "
@@ -999,6 +1194,7 @@ public final class JobServiceContext implements ServiceConnection {
         applyStoppedReasonLocked(reason);
         completedJob = mRunningJob;
         final int internalStopReason = mParams.getInternalStopReasonCode();
+        final int stopReason = mParams.getStopReason();
         mPreviousJobHadSuccessfulFinish =
                 (internalStopReason == JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH);
         if (!mPreviousJobHadSuccessfulFinish) {
@@ -1019,11 +1215,24 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.hasContentTriggerConstraint(),
                 completedJob.isRequestedExpeditedJob(),
                 completedJob.startedAsExpeditedJob,
-                mParams.getStopReason(),
+                stopReason,
                 completedJob.getJob().isPrefetch(),
                 completedJob.getJob().getPriority(),
                 completedJob.getEffectivePriority(),
-                completedJob.getNumFailures());
+                completedJob.getNumPreviousAttempts(),
+                completedJob.getJob().getMaxExecutionDelayMillis(),
+                mParams.isOverrideDeadlineExpired(),
+                completedJob.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_CHARGING),
+                completedJob.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_BATTERY_NOT_LOW),
+                completedJob.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_STORAGE_NOT_LOW),
+                completedJob.isConstraintSatisfied(JobStatus.CONSTRAINT_TIMING_DELAY),
+                completedJob.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_DEVICE_IDLE),
+                completedJob.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY),
+                completedJob.isConstraintSatisfied(JobStatus.CONSTRAINT_CONTENT_TRIGGER));
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
+            Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_SYSTEM_SERVER, "JobScheduler",
+                    getId());
+        }
         try {
             mBatteryStats.noteJobFinish(mRunningJob.getBatteryName(), mRunningJob.getSourceUid(),
                     internalStopReason);
@@ -1036,6 +1245,7 @@ public final class JobServiceContext implements ServiceConnection {
                     JobSchedulerEconomicPolicy.ACTION_JOB_TIMEOUT,
                     String.valueOf(mRunningJob.getJobId()));
         }
+        mNotificationCoordinator.removeNotificationAssociation(this);
         if (mWakeLock != null) {
             mWakeLock.release();
         }
@@ -1053,8 +1263,13 @@ public final class JobServiceContext implements ServiceConnection {
         mPendingStopReason = JobParameters.STOP_REASON_UNDEFINED;
         mPendingInternalStopReason = 0;
         mPendingDebugStopReason = null;
+        mPendingNetworkChange = null;
         removeOpTimeOutLocked();
-        mCompletedListener.onJobCompletedLocked(completedJob, internalStopReason, reschedule);
+        if (completedJob.isUserVisibleJob()) {
+            mService.informObserversOfUserVisibleJobChange(this, completedJob, false);
+        }
+        mCompletedListener.onJobCompletedLocked(completedJob, stopReason, internalStopReason,
+                reschedule);
         mJobConcurrencyManager.onJobCompletedLocked(this, completedJob, workType);
     }
 
@@ -1077,6 +1292,7 @@ public final class JobServiceContext implements ServiceConnection {
     private void scheduleOpTimeOutLocked() {
         removeOpTimeOutLocked();
 
+        // TODO(260848384): enforce setNotification timeout for user-initiated jobs
         final long timeoutMillis;
         switch (mVerb) {
             case VERB_EXECUTING:

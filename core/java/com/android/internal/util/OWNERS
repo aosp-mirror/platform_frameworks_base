@@ -5,3 +5,4 @@ per-file *ContrastColor* = file:/services/core/java/com/android/server/notificat
 per-file Protocol* = etancohen@google.com, lorenzo@google.com
 per-file State* = jchalard@google.com, lorenzo@google.com, satk@google.com
 per-file *Dump* = file:/core/java/com/android/internal/util/dump/OWNERS
+per-file *Screenshot* = file:/packages/SystemUI/src/com/android/systemui/screenshot/OWNERS

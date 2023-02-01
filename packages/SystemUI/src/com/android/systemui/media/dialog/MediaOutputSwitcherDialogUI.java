@@ -1,0 +1,71 @@
+/*
+ * Copyright (C) 2023 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.systemui.media.dialog;
+
+import android.annotation.MainThread;
+import android.content.Context;
+import android.text.TextUtils;
+import android.util.Log;
+
+import com.android.systemui.CoreStartable;
+import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
+import com.android.systemui.statusbar.CommandQueue;
+
+import javax.inject.Inject;
+
+/** Controls display of media output switcher. */
+@SysUISingleton
+public class MediaOutputSwitcherDialogUI implements CoreStartable, CommandQueue.Callbacks {
+
+    private static final String TAG = "MediaOutputSwitcherDialogUI";
+
+    private final CommandQueue mCommandQueue;
+    private final MediaOutputDialogFactory mMediaOutputDialogFactory;
+    private final FeatureFlags mFeatureFlags;
+
+    @Inject
+    public MediaOutputSwitcherDialogUI(
+            Context context,
+            CommandQueue commandQueue,
+            MediaOutputDialogFactory mediaOutputDialogFactory,
+            FeatureFlags featureFlags) {
+        mCommandQueue = commandQueue;
+        mMediaOutputDialogFactory = mediaOutputDialogFactory;
+        mFeatureFlags = featureFlags;
+    }
+
+    @Override
+    public void start() {
+        if (mFeatureFlags.isEnabled(Flags.OUTPUT_SWITCHER_SHOW_API_ENABLED)) {
+            mCommandQueue.addCallback(this);
+        } else {
+            Log.w(TAG, "Show media output switcher is not enabled.");
+        }
+    }
+
+    @Override
+    @MainThread
+    public void showMediaOutputSwitcher(String packageName) {
+        if (!TextUtils.isEmpty(packageName)) {
+            mMediaOutputDialogFactory.create(packageName, false, null);
+        } else {
+            Log.e(TAG, "Unable to launch media output dialog. Package name is empty.");
+        }
+    }
+}

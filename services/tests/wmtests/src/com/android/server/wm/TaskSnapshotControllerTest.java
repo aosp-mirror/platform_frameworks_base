@@ -190,7 +190,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         }
     }
 
-    @UseTestDisplay(addWindows = {W_ACTIVITY, W_INPUT_METHOD})
+    @SetupWindows(addWindows = { W_ACTIVITY, W_INPUT_METHOD })
     @Test
     public void testCreateTaskSnapshotWithExcludingIme() {
         Task task = mAppWindow.mActivityRecord.getTask();
@@ -202,14 +202,14 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         // Verify no NPE happens when calling createTaskSnapshot.
         try {
             final TaskSnapshot.Builder builder = new TaskSnapshot.Builder();
-            mWm.mTaskSnapshotController.createTaskSnapshot(mAppWindow.mActivityRecord.getTask(),
+            mWm.mTaskSnapshotController.createSnapshot(mAppWindow.mActivityRecord.getTask(),
                     1f /* scaleFraction */, PixelFormat.UNKNOWN, null /* outTaskSize */, builder);
         } catch (NullPointerException e) {
             fail("There should be no exception when calling createTaskSnapshot");
         }
     }
 
-    @UseTestDisplay(addWindows = {W_ACTIVITY, W_INPUT_METHOD})
+    @SetupWindows(addWindows = { W_ACTIVITY, W_INPUT_METHOD })
     @Test
     public void testCreateTaskSnapshotWithIncludingIme() {
         Task task = mAppWindow.mActivityRecord.getTask();
@@ -223,7 +223,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         try {
             final TaskSnapshot.Builder builder = new TaskSnapshot.Builder();
             spyOn(builder);
-            mWm.mTaskSnapshotController.createTaskSnapshot(
+            mWm.mTaskSnapshotController.createSnapshot(
                     mAppWindow.mActivityRecord.getTask(), 1f /* scaleFraction */,
                     PixelFormat.UNKNOWN, null /* outTaskSize */, builder);
             // Verify the builder should includes IME surface.
@@ -237,7 +237,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         }
     }
 
-    @UseTestDisplay(addWindows = W_ACTIVITY)
+    @SetupWindows(addWindows = W_ACTIVITY)
     @Test
     public void testPrepareTaskSnapshot() {
         mAppWindow.mWinAnimator.mLastAlpha = 1f;

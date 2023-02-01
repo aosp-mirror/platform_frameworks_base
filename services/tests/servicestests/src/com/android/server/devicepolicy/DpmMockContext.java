@@ -203,6 +203,11 @@ public class DpmMockContext extends MockContext {
     }
 
     @Override
+    public String getOpPackageName() {
+        return getPackageName();
+    }
+
+    @Override
     public ApplicationInfo getApplicationInfo() {
         if (applicationInfo != null) {
             return applicationInfo;
@@ -239,6 +244,8 @@ public class DpmMockContext extends MockContext {
                 return mMockSystemServices.locationManager;
             case Context.ROLE_SERVICE:
                 return mMockSystemServices.roleManager;
+            case Context.TELEPHONY_SUBSCRIPTION_SERVICE:
+                return mMockSystemServices.subscriptionManager;
         }
         throw new UnsupportedOperationException();
     }
@@ -442,7 +449,8 @@ public class DpmMockContext extends MockContext {
     @Override
     public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
         mMockSystemServices.registerReceiver(receiver, filter, null);
-        return spiedContext.registerReceiver(receiver, filter);
+        return spiedContext.registerReceiver(receiver, filter,
+                Context.RECEIVER_EXPORTED_UNAUDITED);
     }
 
     @Override

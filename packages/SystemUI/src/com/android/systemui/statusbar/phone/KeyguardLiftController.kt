@@ -22,6 +22,7 @@ import android.hardware.Sensor
 import android.hardware.TriggerEvent
 import android.hardware.TriggerEventListener
 import com.android.keyguard.ActiveUnlockConfig
+import com.android.keyguard.FaceAuthApiRequestReason
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.CoreStartable
@@ -46,7 +47,7 @@ class KeyguardLiftController @Inject constructor(
     private val asyncSensorManager: AsyncSensorManager,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val dumpManager: DumpManager
-) : Dumpable, CoreStartable(context) {
+) : Dumpable, CoreStartable {
 
     private val pickupSensor = asyncSensorManager.getDefaultSensor(Sensor.TYPE_PICK_UP_GESTURE)
     private var isListening = false
@@ -71,7 +72,9 @@ class KeyguardLiftController @Inject constructor(
             // Not listening anymore since trigger events unregister themselves
             isListening = false
             updateListeningState()
-            keyguardUpdateMonitor.requestFaceAuth(true)
+            keyguardUpdateMonitor.requestFaceAuth(
+                FaceAuthApiRequestReason.PICK_UP_GESTURE_TRIGGERED
+            )
             keyguardUpdateMonitor.requestActiveUnlock(
                 ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN.WAKE,
                 "KeyguardLiftController")
@@ -84,7 +87,7 @@ class KeyguardLiftController @Inject constructor(
             updateListeningState()
         }
 
-        override fun onKeyguardVisibilityChanged(showing: Boolean) {
+        override fun onKeyguardVisibilityChanged(visible: Boolean) {
             updateListeningState()
         }
     }

@@ -16,31 +16,26 @@
 
 package com.android.server.wm.flicker.ime
 
+import android.platform.test.annotations.Presubmit
 import android.view.WindowInsets.Type.ime
 import android.view.WindowInsets.Type.navigationBars
 import android.view.WindowInsets.Type.statusBars
-
-import android.app.Instrumentation
-import android.platform.test.annotations.Presubmit
-import android.view.Surface
-import android.view.WindowManagerPolicyConstants
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
-import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.FlickerBuilderProvider
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.BaseTest
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
+import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.service.PlatformConsts
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 
 /**
  * Test IME snapshot mechanism won't apply when transitioning from non-IME focused dialog activity.
@@ -50,83 +45,54 @@ import org.junit.Assert.assertTrue
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class LaunchAppShowImeAndDialogThemeAppTest(private val testSpec: FlickerTestParameter) {
-    private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
-    private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
+class LaunchAppShowImeAndDialogThemeAppTest(flicker: FlickerTest) : BaseTest(flicker) {
+    private val testApp = ImeAppAutoFocusHelper(instrumentation, flicker.scenario.startRotation)
 
-    @FlickerBuilderProvider
-    fun buildFlicker(): FlickerBuilder {
-        return FlickerBuilder(instrumentation).apply {
-            setup {
-                eachRun {
-                    testApp.launchViaIntent(wmHelper)
-                    wmHelper.waitImeShown()
-                    testApp.startDialogThemedActivity(wmHelper)
-                    // Verify IME insets isn't visible on dialog since it's non-IME focusable window
-                    assertFalse(testApp.getInsetsVisibleFromDialog(ime()))
-                    assertTrue(testApp.getInsetsVisibleFromDialog(statusBars()))
-                    assertTrue(testApp.getInsetsVisibleFromDialog(navigationBars()))
-                }
-            }
-            teardown {
-                eachRun {
-                    testApp.exit()
-                }
-            }
-            transitions {
-                testApp.dismissDialog(wmHelper)
-            }
+    /** {@inheritDoc} */
+    override val transition: FlickerBuilder.() -> Unit = {
+        setup {
+            testApp.launchViaIntent(wmHelper)
+            wmHelper.StateSyncBuilder().withImeShown().waitForAndVerify()
+            testApp.startDialogThemedActivity(wmHelper)
+            // Verify IME insets isn't visible on dialog since it's non-IME focusable window
+            assertFalse(testApp.getInsetsVisibleFromDialog(ime()))
+            assertTrue(testApp.getInsetsVisibleFromDialog(statusBars()))
+            assertTrue(testApp.getInsetsVisibleFromDialog(navigationBars()))
         }
+        teardown { testApp.exit(wmHelper) }
+        transitions { testApp.dismissDialog(wmHelper) }
     }
 
-    /**
-     * Checks that [FlickerComponentName.IME] layer becomes visible during the transition
-     */
-    @FlakyTest(bugId = 215884488)
-    @Test
-    fun imeWindowIsAlwaysVisible() = testSpec.imeWindowIsAlwaysVisible()
+    /** Checks that [ComponentNameMatcher.IME] layer becomes visible during the transition */
+    @Presubmit @Test fun imeWindowIsAlwaysVisible() = flicker.imeWindowIsAlwaysVisible()
 
-    /**
-     * Checks that [FlickerComponentName.IME] layer is visible at the end of the transition
-     */
-    @FlakyTest(bugId = 227142436)
+    /** Checks that [ComponentNameMatcher.IME] layer is visible at the end of the transition */
+    @Presubmit
     @Test
     fun imeLayerExistsEnd() {
-        testSpec.assertLayersEnd {
-            this.isVisible(FlickerComponentName.IME)
-        }
+        flicker.assertLayersEnd { this.isVisible(ComponentNameMatcher.IME) }
     }
 
-    /**
-     * Checks that [FlickerComponentName.IME_SNAPSHOT] layer is invisible always.
-     */
+    /** Checks that [ComponentNameMatcher.IME_SNAPSHOT] layer is invisible always. */
     @Presubmit
     @Test
     fun imeSnapshotNotVisible() {
-        testSpec.assertLayers {
-            this.isInvisible(FlickerComponentName.IME_SNAPSHOT)
-        }
+        flicker.assertLayers { this.isInvisible(ComponentNameMatcher.IME_SNAPSHOT) }
     }
 
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
-         * repetitions, screen orientation and navigation modes.
+         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                    .getConfigNonRotationTests(
-                            repetitions = 3,
-                            supportedRotations = listOf(Surface.ROTATION_0),
-                            supportedNavigationModes = listOf(
-                                    WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
-                                    WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                            )
-                    )
+        fun getParams(): Collection<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+            )
         }
     }
 }

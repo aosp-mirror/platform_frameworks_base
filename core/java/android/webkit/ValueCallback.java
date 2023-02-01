@@ -25,4 +25,4 @@ public interface ValueCallback<T> {
      * @param value The value.
      */
     public void onReceiveValue(T value);
-};
+}

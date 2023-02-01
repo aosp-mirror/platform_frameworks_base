@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.DisplayCutout.NO_CUTOUT;
 import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
@@ -23,6 +24,7 @@ import static android.view.RoundedCorners.NO_ROUNDED_CORNERS;
 import static android.view.Surface.ROTATION_0;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
@@ -35,23 +37,29 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BA
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
-import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_BOTTOM;
-import static com.android.server.wm.utils.WmDisplayCutout.NO_CUTOUT;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.DisplayInfo;
+import android.view.DisplayShape;
 import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.PrivacyIndicatorBounds;
@@ -162,7 +170,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
                 dimmingNonImTarget, imeNonDrawNavBar, NAV_BAR_BOTTOM));
     }
 
-    @UseTestDisplay(addWindows = { W_NAVIGATION_BAR })
+    @SetupWindows(addWindows = W_NAVIGATION_BAR)
     @Test
     public void testUpdateLightNavigationBarLw() {
         DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
@@ -177,7 +185,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
         mDisplayContent.setLayoutNeeded();
         mDisplayContent.performLayout(true /* initial */, false /* updateImeWindows */);
 
-        final InsetsSource navSource = new InsetsSource(ITYPE_NAVIGATION_BAR);
+        final InsetsSource navSource = new InsetsSource(ITYPE_NAVIGATION_BAR, navigationBars());
         navSource.setFrame(mNavBarWindow.getFrame());
         opaqueDarkNavBar.mAboveInsetsState.addSource(navSource);
         opaqueLightNavBar.mAboveInsetsState.addSource(navSource);
@@ -199,7 +207,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
                 APPEARANCE_LIGHT_NAVIGATION_BARS, opaqueLightNavBar));
     }
 
-    @UseTestDisplay(addWindows = {W_ACTIVITY, W_STATUS_BAR})
+    @SetupWindows(addWindows = { W_ACTIVITY, W_STATUS_BAR })
     @Test
     public void testComputeTopFullscreenOpaqueWindow() {
         final WindowManager.LayoutParams attrs = mAppWindow.mAttrs;
@@ -247,14 +255,15 @@ public class DisplayPolicyTests extends WindowTestsBase {
 
     @Test
     public void testOverlappingWithNavBar() {
-        final InsetsSource navSource = new InsetsSource(ITYPE_NAVIGATION_BAR);
+        final InsetsSource navSource = new InsetsSource(ITYPE_NAVIGATION_BAR, navigationBars());
         navSource.setFrame(new Rect(100, 200, 200, 300));
         testOverlappingWithNavBarType(navSource);
     }
 
     @Test
     public void testOverlappingWithExtraNavBar() {
-        final InsetsSource navSource = new InsetsSource(ITYPE_EXTRA_NAVIGATION_BAR);
+        final InsetsSource navSource =
+                new InsetsSource(ITYPE_EXTRA_NAVIGATION_BAR, navigationBars());
         navSource.setFrame(new Rect(100, 200, 200, 300));
         testOverlappingWithNavBarType(navSource);
     }
@@ -281,13 +290,25 @@ public class DisplayPolicyTests extends WindowTestsBase {
                 DisplayPolicy.isOverlappingWithNavBar(targetWin));
     }
 
-    private WindowState createNavigationBarWindow() {
-        final WindowState win = createWindow(null, TYPE_NAVIGATION_BAR, "NavigationBar");
-        win.mHasSurface = true;
-        return win;
+    @Test
+    public void testUpdateDisplayConfigurationByDecor() {
+        final WindowState navbar = createNavBarWithProvidedInsets(mDisplayContent);
+        final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
+        final DisplayInfo di = mDisplayContent.getDisplayInfo();
+        final int prevScreenHeightDp = mDisplayContent.getConfiguration().screenHeightDp;
+        assertTrue(navbar.providesNonDecorInsets() && displayPolicy.updateDecorInsetsInfo());
+        assertEquals(NAV_BAR_HEIGHT, displayPolicy.getDecorInsetsInfo(di.rotation,
+                di.logicalWidth, di.logicalHeight).mConfigInsets.bottom);
+        mDisplayContent.sendNewConfiguration();
+        assertNotEquals(prevScreenHeightDp, mDisplayContent.getConfiguration().screenHeightDp);
+        assertFalse(navbar.providesNonDecorInsets() && displayPolicy.updateDecorInsetsInfo());
+
+        navbar.removeIfPossible();
+        assertEquals(0, displayPolicy.getDecorInsetsInfo(di.rotation, di.logicalWidth,
+                di.logicalHeight).mNonDecorInsets.bottom);
     }
 
-    @UseTestDisplay(addWindows = { W_NAVIGATION_BAR, W_INPUT_METHOD })
+    @SetupWindows(addWindows = { W_NAVIGATION_BAR, W_INPUT_METHOD })
     @Test
     public void testImeMinimalSourceFrame() {
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
@@ -302,8 +323,9 @@ public class DisplayPolicyTests extends WindowTestsBase {
         mNavBarWindow.getControllableInsetProvider().setServerVisible(true);
         final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
         mImeWindow.mAboveInsetsState.set(state);
-        mDisplayContent.mDisplayFrames = new DisplayFrames(mDisplayContent.getDisplayId(),
-                state, displayInfo, NO_CUTOUT, NO_ROUNDED_CORNERS, new PrivacyIndicatorBounds());
+        mDisplayContent.mDisplayFrames = new DisplayFrames(
+                state, displayInfo, NO_CUTOUT, NO_ROUNDED_CORNERS, new PrivacyIndicatorBounds(),
+                DisplayShape.NONE);
 
         mDisplayContent.setInputMethodWindowLocked(mImeWindow);
         mImeWindow.mAttrs.setFitInsetsSides(Side.all() & ~Side.BOTTOM);
@@ -323,7 +345,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
         assertTrue(imeSource.getFrame().contains(navBarSource.getFrame()));
     }
 
-    @UseTestDisplay(addWindows = { W_NAVIGATION_BAR })
+    @SetupWindows(addWindows = W_NAVIGATION_BAR)
     @Test
     public void testInsetsGivenContentFrame() {
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
@@ -343,5 +365,25 @@ public class DisplayPolicyTests extends WindowTestsBase {
         final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
         final InsetsSource navBarSource = state.peekSource(ITYPE_NAVIGATION_BAR);
         assertEquals(attrs.height - 10, navBarSource.getFrame().height());
+    }
+
+    @Test
+    public void testCanSystemBarsBeShownByUser() {
+        ((TestWindowManagerPolicy) mWm.mPolicy).mIsUserSetupComplete = true;
+        final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
+        final WindowState windowState = mock(WindowState.class);
+        final InsetsSourceProvider provider = mock(InsetsSourceProvider.class);
+        final InsetsControlTarget controlTarget = mock(InsetsControlTarget.class);
+        when(provider.getControlTarget()).thenReturn(controlTarget);
+        when(windowState.getControllableInsetProvider()).thenReturn(provider);
+        when(controlTarget.isRequestedVisible(anyInt())).thenReturn(true);
+
+        displayPolicy.setCanSystemBarsBeShownByUser(false);
+        displayPolicy.requestTransientBars(windowState, true);
+        verify(controlTarget, never()).showInsets(anyInt(), anyBoolean(), any() /* statsToken */);
+
+        displayPolicy.setCanSystemBarsBeShownByUser(true);
+        displayPolicy.requestTransientBars(windowState, true);
+        verify(controlTarget).showInsets(anyInt(), anyBoolean(), any() /* statsToken */);
     }
 }

@@ -324,8 +324,9 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
             listenerCopy = new ArrayList<>(sDurationScaleChangeListeners);
         }
 
-        for (WeakReference<DurationScaleChangeListener> listenerRef : listenerCopy) {
-            final DurationScaleChangeListener listener = listenerRef.get();
+        int listenersSize = listenerCopy.size();
+        for (int i = 0; i < listenersSize; i++) {
+            final DurationScaleChangeListener listener = listenerCopy.get(i).get();
             if (listener != null) {
                 listener.onChanged(durationScale);
             }
@@ -624,7 +625,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     public void setValues(PropertyValuesHolder... values) {
         int numValues = values.length;
         mValues = values;
-        mValuesMap = new HashMap<String, PropertyValuesHolder>(numValues);
+        mValuesMap = new HashMap<>(numValues);
         for (int i = 0; i < numValues; ++i) {
             PropertyValuesHolder valuesHolder = values[i];
             mValuesMap.put(valuesHolder.getPropertyName(), valuesHolder);
@@ -658,9 +659,11 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     @CallSuper
     void initAnimation() {
         if (!mInitialized) {
-            int numValues = mValues.length;
-            for (int i = 0; i < numValues; ++i) {
-                mValues[i].init();
+            if (mValues != null) {
+                int numValues = mValues.length;
+                for (int i = 0; i < numValues; ++i) {
+                    mValues[i].init();
+                }
             }
             mInitialized = true;
         }
@@ -1105,16 +1108,28 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         }
     }
 
-    private void notifyStartListeners() {
+    private void notifyStartListeners(boolean isReversing) {
         if (mListeners != null && !mStartListenersCalled) {
             ArrayList<AnimatorListener> tmpListeners =
                     (ArrayList<AnimatorListener>) mListeners.clone();
             int numListeners = tmpListeners.size();
             for (int i = 0; i < numListeners; ++i) {
-                tmpListeners.get(i).onAnimationStart(this, mReversing);
+                tmpListeners.get(i).onAnimationStart(this, isReversing);
             }
         }
         mStartListenersCalled = true;
+    }
+
+    private void notifyEndListeners(boolean isReversing) {
+        if (mListeners != null && mStartListenersCalled) {
+            ArrayList<AnimatorListener> tmpListeners =
+                    (ArrayList<AnimatorListener>) mListeners.clone();
+            int numListeners = tmpListeners.size();
+            for (int i = 0; i < numListeners; ++i) {
+                tmpListeners.get(i).onAnimationEnd(this, isReversing);
+            }
+        }
+        mStartListenersCalled = false;
     }
 
     /**
@@ -1207,12 +1222,16 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         if ((mStarted || mRunning) && mListeners != null) {
             if (!mRunning) {
                 // If it's not yet running, then start listeners weren't called. Call them now.
-                notifyStartListeners();
+                notifyStartListeners(mReversing);
             }
-            ArrayList<AnimatorListener> tmpListeners =
-                    (ArrayList<AnimatorListener>) mListeners.clone();
-            for (AnimatorListener listener : tmpListeners) {
-                listener.onAnimationCancel(this);
+            int listenersSize = mListeners.size();
+            if (listenersSize > 0) {
+                ArrayList<AnimatorListener> tmpListeners =
+                        (ArrayList<AnimatorListener>) mListeners.clone();
+                for (int i = 0; i < listenersSize; i++) {
+                    AnimatorListener listener = tmpListeners.get(i);
+                    listener.onAnimationCancel(this);
+                }
             }
         }
         endAnimation();
@@ -1317,22 +1336,14 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         boolean notify = (mStarted || mRunning) && mListeners != null;
         if (notify && !mRunning) {
             // If it's not yet running, then start listeners weren't called. Call them now.
-            notifyStartListeners();
+            notifyStartListeners(mReversing);
         }
         mRunning = false;
         mStarted = false;
-        mStartListenersCalled = false;
         mLastFrameTime = -1;
         mFirstFrameTime = -1;
         mStartTime = -1;
-        if (notify && mListeners != null) {
-            ArrayList<AnimatorListener> tmpListeners =
-                    (ArrayList<AnimatorListener>) mListeners.clone();
-            int numListeners = tmpListeners.size();
-            for (int i = 0; i < numListeners; ++i) {
-                tmpListeners.get(i).onAnimationEnd(this, mReversing);
-            }
-        }
+        notifyEndListeners(mReversing);
         // mReversing needs to be reset *after* notifying the listeners for the end callbacks.
         mReversing = false;
         if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
@@ -1359,9 +1370,8 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         } else {
             mOverallFraction = 0f;
         }
-        if (mListeners != null) {
-            notifyStartListeners();
-        }
+
+        notifyStartListeners(mReversing);
     }
 
     /**
@@ -1452,16 +1462,32 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      * will be called.
      */
     @Override
-    void animateBasedOnPlayTime(long currentPlayTime, long lastPlayTime, boolean inReverse) {
-        if (currentPlayTime < 0 || lastPlayTime < 0) {
+    void animateValuesInRange(long currentPlayTime, long lastPlayTime, boolean notify) {
+        if (currentPlayTime < 0 || lastPlayTime < -1) {
             throw new UnsupportedOperationException("Error: Play time should never be negative.");
         }
 
         initAnimation();
+        long duration = getTotalDuration();
+        if (notify) {
+            if (lastPlayTime < 0 || (lastPlayTime == 0 && currentPlayTime > 0)) {
+                notifyStartListeners(false);
+            } else if (lastPlayTime > duration
+                    || (lastPlayTime == duration && currentPlayTime < duration)
+            ) {
+                notifyStartListeners(true);
+            }
+        }
+        if (duration >= 0) {
+            lastPlayTime = Math.min(duration, lastPlayTime);
+        }
+        lastPlayTime -= mStartDelay;
+        currentPlayTime -= mStartDelay;
+
         // Check whether repeat callback is needed only when repeat count is non-zero
         if (mRepeatCount > 0) {
-            int iteration = (int) (currentPlayTime / mDuration);
-            int lastIteration = (int) (lastPlayTime / mDuration);
+            int iteration = Math.max(0, (int) (currentPlayTime / mDuration));
+            int lastIteration = Math.max(0, (int) (lastPlayTime / mDuration));
 
             // Clamp iteration to [0, mRepeatCount]
             iteration = Math.min(iteration, mRepeatCount);
@@ -1477,13 +1503,34 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
             }
         }
 
-        if (mRepeatCount != INFINITE && currentPlayTime >= (mRepeatCount + 1) * mDuration) {
-            skipToEndValue(inReverse);
+        if (mRepeatCount != INFINITE && currentPlayTime > (mRepeatCount + 1) * mDuration) {
+            throw new IllegalStateException("Can't animate a value outside of the duration");
         } else {
             // Find the current fraction:
-            float fraction = currentPlayTime / (float) mDuration;
-            fraction = getCurrentIterationFraction(fraction, inReverse);
+            float fraction = Math.max(0, currentPlayTime) / (float) mDuration;
+            fraction = getCurrentIterationFraction(fraction, false);
             animateValue(fraction);
+        }
+    }
+
+    @Override
+    void animateSkipToEnds(long currentPlayTime, long lastPlayTime, boolean notify) {
+        boolean inReverse = currentPlayTime < lastPlayTime;
+        boolean doSkip;
+        if (currentPlayTime <= 0 && lastPlayTime > 0) {
+            doSkip = true;
+        } else {
+            long duration = getTotalDuration();
+            doSkip = duration >= 0 && currentPlayTime >= duration && lastPlayTime < duration;
+        }
+        if (doSkip) {
+            if (notify) {
+                notifyStartListeners(inReverse);
+            }
+            skipToEndValue(inReverse);
+            if (notify) {
+                notifyEndListeners(inReverse);
+            }
         }
     }
 
@@ -1640,6 +1687,9 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         if (TRACE_ANIMATION_FRACTION) {
             Trace.traceCounter(Trace.TRACE_TAG_VIEW, getNameForTrace() + hashCode(),
                     (int) (fraction * 1000));
+        }
+        if (mValues == null) {
+            return;
         }
         fraction = mInterpolator.getInterpolation(fraction);
         mCurrentFraction = fraction;

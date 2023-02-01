@@ -30,6 +30,7 @@ import static com.android.server.accessibility.AccessibilityTraceFileProto.ENTRY
 import static com.android.server.accessibility.AccessibilityTraceFileProto.MAGIC_NUMBER;
 import static com.android.server.accessibility.AccessibilityTraceFileProto.MAGIC_NUMBER_H;
 import static com.android.server.accessibility.AccessibilityTraceFileProto.MAGIC_NUMBER_L;
+import static com.android.server.accessibility.AccessibilityTraceFileProto.REAL_TO_ELAPSED_TIME_OFFSET_NANOS;
 import static com.android.server.accessibility.AccessibilityTraceProto.ACCESSIBILITY_SERVICE;
 import static com.android.server.accessibility.AccessibilityTraceProto.CALENDAR_TIME;
 import static com.android.server.accessibility.AccessibilityTraceProto.CALLING_PARAMS;
@@ -57,6 +58,7 @@ import android.content.pm.PackageManagerInternal;
 import android.graphics.BLASTBufferQueue;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -116,6 +118,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class contains the accessibility related logic of the window manager.
@@ -138,7 +141,7 @@ final class AccessibilityController {
     private final SparseArray<WindowsForAccessibilityObserver> mWindowsForAccessibilityObserver =
             new SparseArray<>();
     private SparseArray<IBinder> mFocusedWindow = new SparseArray<>();
-    private int mFocusedDisplay = -1;
+    private int mFocusedDisplay = Display.INVALID_DISPLAY;
     private final SparseBooleanArray mIsImeVisibleArray = new SparseBooleanArray();
     // Set to true if initializing window population complete.
     private boolean mAllObserversInitialized = true;
@@ -420,7 +423,7 @@ final class AccessibilityController {
         if (mAccessibilityTracing.isTracingEnabled(FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK)) {
             mAccessibilityTracing.logTrace(TAG + ".onSomeWindowResizedOrMoved",
                     FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK,
-                    "displayIds={" + displayIds.toString() + "}", "".getBytes(), callingUid);
+                    "displayIds={" + Arrays.toString(displayIds) + "}", "".getBytes(), callingUid);
         }
         // Not relevant for the display magnifier.
         for (int i = 0; i < displayIds.length; i++) {
@@ -888,8 +891,7 @@ final class AccessibilityController {
                 // to show the border. We will do so when the pending message is handled.
                 if (!mHandler.hasMessages(
                         MyHandler.MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED)) {
-                    setMagnifiedRegionBorderShown(
-                            isMagnifying() || isForceShowingMagnifiableBounds(), true);
+                    setMagnifiedRegionBorderShown(isForceShowingMagnifiableBounds(), true);
                 }
             }
 
@@ -1019,6 +1021,27 @@ final class AccessibilityController {
                 }
             }
 
+            private Region getLetterboxBounds(WindowState windowState) {
+                final ActivityRecord appToken = windowState.mActivityRecord;
+                if (appToken == null) {
+                    return new Region();
+                }
+
+                final Rect boundsWithoutLetterbox = windowState.getBounds();
+                final Rect letterboxInsets = appToken.getLetterboxInsets();
+
+                final Rect boundsIncludingLetterbox = Rect.copyOrNull(boundsWithoutLetterbox);
+                // Letterbox insets from mActivityRecord are positive, so we negate them to grow the
+                // bounds to include the letterbox.
+                boundsIncludingLetterbox.inset(
+                        Insets.subtract(Insets.NONE, Insets.of(letterboxInsets)));
+
+                final Region letterboxBounds = new Region();
+                letterboxBounds.set(boundsIncludingLetterbox);
+                letterboxBounds.op(boundsWithoutLetterbox, Region.Op.DIFFERENCE);
+                return letterboxBounds;
+            }
+
             private boolean isExcludedWindowType(int windowType) {
                 return windowType == TYPE_MAGNIFICATION_OVERLAY
                         // Omit the touch region of window magnification to avoid the cut out of the
@@ -1033,7 +1056,7 @@ final class AccessibilityController {
                 // rotation or folding/unfolding the device. In the rotation case, the screenshot
                 // used for rotation already has the border. After the rotation is complete
                 // we will show the border.
-                if (isMagnifying() || isForceShowingMagnifiableBounds()) {
+                if (isForceShowingMagnifiableBounds()) {
                     setMagnifiedRegionBorderShown(false, false);
                     final long delay = (long) (mLongAnimationDuration
                             * mService.getWindowAnimationScaleLocked());
@@ -1374,8 +1397,7 @@ final class AccessibilityController {
 
                     case MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED : {
                         synchronized (mService.mGlobalLock) {
-                            if (mMagnifedViewport.isMagnifying()
-                                    || isForceShowingMagnifiableBounds()) {
+                            if (isForceShowingMagnifiableBounds()) {
                                 mMagnifedViewport.setMagnifiedRegionBorderShown(true, true);
                                 mService.scheduleAnimationLocked();
                             }
@@ -1407,20 +1429,6 @@ final class AccessibilityController {
         final InsetsSource source = displayContent.getInsetsStateController().getRawInsetsState()
                 .peekSource(ITYPE_NAVIGATION_BAR);
         return source != null ? source.getFrame() : EMPTY_RECT;
-    }
-
-    static Region getLetterboxBounds(WindowState windowState) {
-        final ActivityRecord appToken = windowState.mActivityRecord;
-        if (appToken == null) {
-            return new Region();
-        }
-        final Rect letterboxInsets = appToken.getLetterboxInsets();
-        final Rect nonLetterboxRect = windowState.getBounds();
-        nonLetterboxRect.inset(letterboxInsets);
-        final Region letterboxBounds = new Region();
-        letterboxBounds.set(windowState.getBounds());
-        letterboxBounds.op(nonLetterboxRect, Region.Op.DIFFERENCE);
-        return letterboxBounds;
     }
 
     /**
@@ -1676,18 +1684,17 @@ final class AccessibilityController {
                 a11yWindow.getTouchableRegionInScreen(touchableRegion);
                 unaccountedSpace.op(touchableRegion, unaccountedSpace,
                         Region.Op.REVERSE_DIFFERENCE);
-                // Account for the space of letterbox.
-                final Region letterboxBounds = mTempRegion1;
-                if (a11yWindow.setLetterBoxBoundsIfNeeded(letterboxBounds)) {
-                    unaccountedSpace.op(letterboxBounds,
-                            unaccountedSpace, Region.Op.REVERSE_DIFFERENCE);
-                }
             }
         }
 
         private static void addPopulatedWindowInfo(AccessibilityWindow a11yWindow,
                 Region regionInScreen, List<WindowInfo> out, Set<IBinder> tokenOut) {
             final WindowInfo window = a11yWindow.getWindowInfo();
+            if (window.token == null) {
+                // The window was used in calculating visible windows but does not have an
+                // associated IWindow token, so exclude it from the list returned to accessibility.
+                return;
+            }
             window.regionInScreen.set(regionInScreen);
             window.layer = tokenOut.size();
             out.add(window);
@@ -2215,6 +2222,10 @@ final class AccessibilityController {
             try {
                 ProtoOutputStream proto = new ProtoOutputStream();
                 proto.write(MAGIC_NUMBER, MAGIC_NUMBER_VALUE);
+                long timeOffsetNs =
+                        TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis())
+                        - SystemClock.elapsedRealtimeNanos();
+                proto.write(REAL_TO_ELAPSED_TIME_OFFSET_NANOS, timeOffsetNs);
                 mBuffer.writeTraceToFile(mTraceFile, proto);
             } catch (IOException e) {
                 Slog.e(TAG, "Unable to write buffer to file", e);

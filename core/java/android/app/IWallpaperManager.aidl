@@ -50,9 +50,10 @@ interface IWallpaperManager {
             IWallpaperManagerCallback completion, int userId);
 
     /**
-     * Set the live wallpaper. This only affects the system wallpaper.
+     * Set the live wallpaper.
      */
-    void setWallpaperComponentChecked(in ComponentName name, in String callingPackage, int userId);
+    void setWallpaperComponentChecked(in ComponentName name, in String callingPackage, int which,
+            int userId);
 
     /**
      * Set the live wallpaper. This only affects the system wallpaper.
@@ -73,7 +74,8 @@ interface IWallpaperManager {
      * Get the wallpaper for a given user.
      */
     ParcelFileDescriptor getWallpaperWithFeature(String callingPkg, String callingFeatureId,
-            IWallpaperManagerCallback cb, int which, out Bundle outParams, int userId);
+            IWallpaperManagerCallback cb, int which, out Bundle outParams, int userId,
+            boolean getCropped);
 
     /**
      * Retrieve the given user's current wallpaper ID of the given kind.
@@ -87,6 +89,18 @@ interface IWallpaperManager {
      */
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     WallpaperInfo getWallpaperInfo(int userId);
+
+    /**
+     * If the current wallpaper for destination `which` is a live wallpaper component, return the
+     * information about that wallpaper.  Otherwise, if it is a static image, simply return null.
+     */
+    WallpaperInfo getWallpaperInfoWithFlags(int which, int userId);
+
+    /**
+     * Return a file descriptor for the file that contains metadata about the given user's
+     * wallpaper.
+     */
+    ParcelFileDescriptor getWallpaperInfoFile(int userId);
 
     /**
      * Clear the system wallpaper.
@@ -211,6 +225,7 @@ interface IWallpaperManager {
      *
      * @hide
      */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT)")
     oneway void setWallpaperDimAmount(float dimAmount);
 
     /**
@@ -219,6 +234,7 @@ interface IWallpaperManager {
      *
      * @hide
      */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT)")
     float getWallpaperDimAmount();
 
     /**

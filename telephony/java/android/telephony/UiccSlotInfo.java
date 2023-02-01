@@ -129,7 +129,7 @@ public class UiccSlotInfo implements Parcelable {
         this.mLogicalSlotIdx = logicalSlotIdx;
         this.mIsExtendedApduSupported = isExtendedApduSupported;
         this.mIsRemovable = false;
-        this.mPortList = null;
+        this.mPortList = new ArrayList<UiccPortInfo>();
     }
 
     /**

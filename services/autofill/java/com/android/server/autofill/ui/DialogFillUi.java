@@ -117,7 +117,9 @@ final class DialogFillUi {
         final LayoutInflater inflater = LayoutInflater.from(mContext);
         final View decor = inflater.inflate(R.layout.autofill_fill_dialog, null);
 
-        setServiceIcon(decor, serviceIcon);
+        if (response.getShowFillDialogIcon()) {
+            setServiceIcon(decor, serviceIcon);
+        }
         setHeader(decor, response);
 
         mVisibleDatasetsMaxCount = getVisibleDatasetsMaxCount();

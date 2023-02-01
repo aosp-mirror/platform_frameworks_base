@@ -976,7 +976,7 @@ class RecentTasks {
                 continue;
             }
 
-            res.add(createRecentTaskInfo(task, true /* stripExtras */));
+            res.add(createRecentTaskInfo(task, true /* stripExtras */, getTasksAllowed));
         }
         return res;
     }
@@ -1348,8 +1348,7 @@ class RecentTasks {
                     + " activityType=" + task.getActivityType()
                     + " windowingMode=" + task.getWindowingMode()
                     + " isAlwaysOnTopWhenVisible=" + task.isAlwaysOnTopWhenVisible()
-                    + " intentFlags=" + task.getBaseIntent().getFlags()
-                    + " isEmbedded=" + task.isEmbedded());
+                    + " intentFlags=" + task.getBaseIntent().getFlags());
         }
 
         switch (task.getActivityType()) {
@@ -1385,15 +1384,10 @@ class RecentTasks {
             return false;
         }
 
-        // Ignore the task if it is a embedded task
-        if (task.isEmbedded()) {
-            return false;
-        }
-
         // Ignore the task if it is started on a display which is not allow to show its tasks on
         // Recents.
         if (task.getDisplayContent() != null
-                && !task.getDisplayContent().canShowTasksInRecents()) {
+                && !task.getDisplayContent().canShowTasksInHostDeviceRecents()) {
             return false;
         }
 
@@ -1895,7 +1889,8 @@ class RecentTasks {
     /**
      * Creates a new RecentTaskInfo from a Task.
      */
-    ActivityManager.RecentTaskInfo createRecentTaskInfo(Task tr, boolean stripExtras) {
+    ActivityManager.RecentTaskInfo createRecentTaskInfo(Task tr, boolean stripExtras,
+            boolean getTasksAllowed) {
         final ActivityManager.RecentTaskInfo rti = new ActivityManager.RecentTaskInfo();
         // If the recent Task is detached, we consider it will be re-attached to the default
         // TaskDisplayArea because we currently only support recent overview in the default TDA.
@@ -1907,6 +1902,9 @@ class RecentTasks {
         rti.id = rti.isRunning ? rti.taskId : INVALID_TASK_ID;
         rti.persistentId = rti.taskId;
         rti.lastSnapshotData.set(tr.mLastTaskSnapshotData);
+        if (!getTasksAllowed) {
+            Task.trimIneffectiveInfo(tr, rti);
+        }
 
         // Fill in organized child task info for the task created by organizer.
         if (tr.mCreatedByOrganizer) {

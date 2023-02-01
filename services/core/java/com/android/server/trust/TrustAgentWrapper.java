@@ -107,6 +107,7 @@ public class TrustAgentWrapper {
     // Trust state
     private boolean mTrusted;
     private boolean mWaitingForTrustableDowngrade = false;
+    private boolean mWithinSecurityLockdownWindow = false;
     private boolean mTrustable;
     private CharSequence mMessage;
     private boolean mDisplayTrustGrantedMessage;
@@ -132,7 +133,7 @@ public class TrustAgentWrapper {
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            ComponentName component = intent.getParcelableExtra(EXTRA_COMPONENT_NAME);
+            ComponentName component = intent.getParcelableExtra(EXTRA_COMPONENT_NAME, android.content.ComponentName.class);
             if (TRUST_EXPIRED_ACTION.equals(intent.getAction())
                     && mName.equals(component)) {
                 mHandler.removeMessages(MSG_TRUST_TIMEOUT);
@@ -160,6 +161,7 @@ public class TrustAgentWrapper {
                     mDisplayTrustGrantedMessage = (flags & FLAG_GRANT_TRUST_DISPLAY_MESSAGE) != 0;
                     if ((flags & FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE) != 0) {
                         mWaitingForTrustableDowngrade = true;
+                        setSecurityWindowTimer();
                     } else {
                         mWaitingForTrustableDowngrade = false;
                     }
@@ -452,6 +454,9 @@ public class TrustAgentWrapper {
             if (mBound) {
                 scheduleRestart();
             }
+            if (mWithinSecurityLockdownWindow) {
+                mTrustManagerService.lockUser(mUserId);
+            }
             // mTrustDisabledByDpm maintains state
         }
     };
@@ -673,6 +678,22 @@ public class TrustAgentWrapper {
         }
     }
 
+    private void setSecurityWindowTimer() {
+        mWithinSecurityLockdownWindow = true;
+        long expiration = SystemClock.elapsedRealtime() + (15 * 1000); // timer for 15 seconds
+        mAlarmManager.setExact(
+                AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                expiration,
+                TAG,
+                new AlarmManager.OnAlarmListener() {
+                    @Override
+                    public void onAlarm() {
+                        mWithinSecurityLockdownWindow = false;
+                    }
+                },
+                Handler.getMain());
+    }
+
     public boolean isManagingTrust() {
         return mManagingTrust && !mTrustDisabledByDpm;
     }
@@ -691,7 +712,6 @@ public class TrustAgentWrapper {
 
     public void destroy() {
         mHandler.removeMessages(MSG_RESTART_TIMEOUT);
-
         if (!mBound) {
             return;
         }

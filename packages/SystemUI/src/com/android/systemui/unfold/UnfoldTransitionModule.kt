@@ -17,10 +17,14 @@
 package com.android.systemui.unfold
 
 import android.content.Context
-import android.view.IWindowManager
+import android.hardware.devicestate.DeviceStateManager
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.LifecycleScreenStatusProvider
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
+import com.android.systemui.unfold.system.SystemUnfoldSharedModule
 import com.android.systemui.unfold.updates.FoldStateProvider
+import com.android.systemui.unfold.updates.RotationChangeProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
 import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
@@ -31,13 +35,28 @@ import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import java.util.Optional
+import java.util.concurrent.Executor
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Module(includes = [UnfoldSharedModule::class])
+@Module(includes = [UnfoldSharedModule::class, SystemUnfoldSharedModule::class])
 class UnfoldTransitionModule {
 
     @Provides @UnfoldTransitionATracePrefix fun tracingTagPrefix() = "systemui"
+
+    /** A globally available FoldStateListener that allows one to query the fold state. */
+    @Provides
+    @Singleton
+    fun providesFoldStateListener(
+        deviceStateManager: DeviceStateManager,
+        @Application context: Context,
+        @Main executor: Executor
+    ): DeviceStateManager.FoldStateListener {
+        val listener = DeviceStateManager.FoldStateListener(context)
+        deviceStateManager.registerCallback(executor, listener)
+
+        return listener
+    }
 
     @Provides
     @Singleton
@@ -62,18 +81,13 @@ class UnfoldTransitionModule {
 
     @Provides
     @Singleton
-    fun provideUnfoldTransitionConfig(context: Context): UnfoldTransitionConfig =
-        createConfig(context)
-
-    @Provides
-    @Singleton
     fun provideNaturalRotationProgressProvider(
         context: Context,
-        windowManager: IWindowManager,
+        rotationChangeProvider: RotationChangeProvider,
         unfoldTransitionProgressProvider: Optional<UnfoldTransitionProgressProvider>
     ): Optional<NaturalRotationUnfoldProgressProvider> =
         unfoldTransitionProgressProvider.map { provider ->
-            NaturalRotationUnfoldProgressProvider(context, windowManager, provider)
+            NaturalRotationUnfoldProgressProvider(context, rotationChangeProvider, provider)
         }
 
     @Provides

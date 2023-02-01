@@ -182,6 +182,11 @@ public class QwertyKeyListener extends BaseKeyListener {
                     char accent = content.charAt(selStart);
                     int composed = event.getDeadChar(accent, i);
 
+                    // Prevent a dead key repetition from inserting
+                    if (i == composed && event.getRepeatCount() > 0) {
+                        return true;
+                    }
+
                     if (composed != 0) {
                         i = composed;
                         replace = true;

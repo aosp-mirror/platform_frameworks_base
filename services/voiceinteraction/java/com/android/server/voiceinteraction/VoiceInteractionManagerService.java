@@ -72,6 +72,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
+import android.service.voice.IVisualQueryDetectionVoiceInteractionCallback;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.service.voice.VoiceInteractionService;
@@ -86,6 +87,7 @@ import android.util.Slog;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
+import com.android.internal.app.IVisualQueryDetectionAttentionListener;
 import com.android.internal.app.IVoiceActionCheckCallback;
 import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.internal.app.IVoiceInteractionSessionListener;
@@ -95,6 +97,7 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.LatencyTracker;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -102,6 +105,7 @@ import com.android.server.UiThread;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 import com.android.server.soundtrigger.SoundTriggerInternal;
+import com.android.server.utils.Slogf;
 import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
@@ -138,14 +142,14 @@ public class VoiceInteractionManagerService extends SystemService {
         super(context);
         mContext = context;
         mResolver = context.getContentResolver();
+        mUserManagerInternal = Objects.requireNonNull(
+                LocalServices.getService(UserManagerInternal.class));
         mDbHelper = new DatabaseHelper(context);
         mServiceStub = new VoiceInteractionManagerServiceStub();
         mAmInternal = Objects.requireNonNull(
                 LocalServices.getService(ActivityManagerInternal.class));
         mAtmInternal = Objects.requireNonNull(
                 LocalServices.getService(ActivityTaskManagerInternal.class));
-        mUserManagerInternal = Objects.requireNonNull(
-                LocalServices.getService(UserManagerInternal.class));
 
         LegacyPermissionManagerInternal permissionManagerInternal = LocalServices.getService(
                 LegacyPermissionManagerInternal.class);
@@ -170,11 +174,11 @@ public class VoiceInteractionManagerService extends SystemService {
         mAmInternal.setVoiceInteractionManagerProvider(
                 new ActivityManagerInternal.VoiceInteractionManagerProvider() {
                     @Override
-                    public void notifyActivityEventChanged() {
+                    public void notifyActivityDestroyed(IBinder activityToken) {
                         if (DEBUG) {
-                            Slog.d(TAG, "call notifyActivityEventChanged");
+                            Slog.d(TAG, "notifyActivityDestroyed activityToken=" + activityToken);
                         }
-                        mServiceStub.notifyActivityEventChanged();
+                        mServiceStub.notifyActivityDestroyed(activityToken);
                     }
                 });
     }
@@ -187,6 +191,8 @@ public class VoiceInteractionManagerService extends SystemService {
             mSoundTriggerInternal = LocalServices.getService(SoundTriggerInternal.class);
         } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
             mServiceStub.systemRunning(isSafeMode());
+        } else if (phase == PHASE_BOOT_COMPLETED) {
+            mServiceStub.registerVoiceInteractionSessionListener(mLatencyLoggingListener);
         }
     }
 
@@ -223,12 +229,13 @@ public class VoiceInteractionManagerService extends SystemService {
 
     class LocalService extends VoiceInteractionManagerInternal {
         @Override
-        public void startLocalVoiceInteraction(IBinder callingActivity, Bundle options) {
+        public void startLocalVoiceInteraction(@NonNull IBinder callingActivity,
+                @Nullable String attributionTag, @NonNull Bundle options) {
             if (DEBUG) {
                 Slog.i(TAG, "startLocalVoiceInteraction " + callingActivity);
             }
             VoiceInteractionManagerService.this.mServiceStub.startLocalVoiceInteraction(
-                    callingActivity, options);
+                    callingActivity, attributionTag, options);
         }
 
         @Override
@@ -300,6 +307,15 @@ public class VoiceInteractionManagerService extends SystemService {
             }
             return hotwordDetectionConnection.mIdentity;
         }
+
+        // TODO(b/226201975): remove this method once RoleService supports pre-created users
+        @Override
+        public void onPreCreatedUserConversion(int userId) {
+            Slogf.d(TAG, "onPreCreatedUserConversion(%d): calling onRoleHoldersChanged() again",
+                    userId);
+            mServiceStub.mRoleObserver.onRoleHoldersChanged(RoleManager.ROLE_ASSISTANT,
+                                                UserHandle.of(userId));
+        }
     }
 
     // implementation entry point and binder service
@@ -316,11 +332,19 @@ public class VoiceInteractionManagerService extends SystemService {
         @GuardedBy("this")
         private boolean mTemporarilyDisabled;
 
+        /** The start value of showSessionId */
+        private static final int SHOW_SESSION_START_ID = 0;
+
+        @GuardedBy("this")
+        private int mShowSessionId = SHOW_SESSION_START_ID;
+
         private final boolean mEnableService;
+        // TODO(b/226201975): remove reference once RoleService supports pre-created users
+        private final RoleObserver mRoleObserver;
 
         VoiceInteractionManagerServiceStub() {
             mEnableService = shouldEnableService(mContext);
-            new RoleObserver(mContext.getMainExecutor());
+            mRoleObserver = new RoleObserver(mContext.getMainExecutor());
         }
 
         void handleUserStop(String packageName, int userHandle) {
@@ -330,6 +354,24 @@ public class VoiceInteractionManagerService extends SystemService {
                     Slog.d(TAG, "switchImplementation for user stop.");
                     switchImplementationIfNeededLocked(true);
                 }
+            }
+        }
+
+        int getNextShowSessionId() {
+            synchronized (this) {
+                // Reset the showSessionId to SHOW_SESSION_START_ID to avoid the value exceeds
+                // Integer.MAX_VALUE
+                if (mShowSessionId == Integer.MAX_VALUE - 1) {
+                    mShowSessionId = SHOW_SESSION_START_ID;
+                }
+                mShowSessionId++;
+                return mShowSessionId;
+            }
+        }
+
+        int getShowSessionId() {
+            synchronized (this) {
+                return mShowSessionId;
             }
         }
 
@@ -383,14 +425,15 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         // TODO: VI Make sure the caller is the current user or profile
-        void startLocalVoiceInteraction(final IBinder token, Bundle options) {
+        void startLocalVoiceInteraction(@NonNull final IBinder token,
+                @Nullable String attributionTag, @NonNull Bundle options) {
             if (mImpl == null) return;
 
             final int callingUid = Binder.getCallingUid();
             final long caller = Binder.clearCallingIdentity();
             try {
                 mImpl.showSessionLocked(options,
-                        VoiceInteractionSession.SHOW_SOURCE_ACTIVITY,
+                        VoiceInteractionSession.SHOW_SOURCE_ACTIVITY, attributionTag,
                         new IVoiceInteractionSessionShowCallback.Stub() {
                             @Override
                             public void onFailed() {
@@ -432,11 +475,12 @@ public class VoiceInteractionManagerService extends SystemService {
             return mImpl.supportsLocalVoiceInteraction();
         }
 
-        void notifyActivityEventChanged() {
+        void notifyActivityDestroyed(@NonNull IBinder activityToken) {
             synchronized (this) {
-                if (mImpl == null) return;
+                if (mImpl == null || activityToken == null) return;
 
-                Binder.withCleanCallingIdentity(() -> mImpl.notifyActivityEventChangedLocked());
+                Binder.withCleanCallingIdentity(
+                        () -> mImpl.notifyActivityDestroyedLocked(activityToken));
             }
         }
 
@@ -779,8 +823,10 @@ public class VoiceInteractionManagerService extends SystemService {
             if (TextUtils.isEmpty(curInteractor)) {
                 return null;
             }
-            if (DEBUG) Slog.d(TAG, "getCurInteractor curInteractor=" + curInteractor
+            if (DEBUG) {
+                Slog.d(TAG, "getCurInteractor curInteractor=" + curInteractor
                     + " user=" + userHandle);
+            }
             return ComponentName.unflattenFromString(curInteractor);
         }
 
@@ -788,8 +834,9 @@ public class VoiceInteractionManagerService extends SystemService {
             Settings.Secure.putStringForUser(mContext.getContentResolver(),
                     Settings.Secure.VOICE_INTERACTION_SERVICE,
                     comp != null ? comp.flattenToShortString() : "", userHandle);
-            if (DEBUG) Slog.d(TAG, "setCurInteractor comp=" + comp
-                    + " user=" + userHandle);
+            if (DEBUG) {
+                Slog.d(TAG, "setCurInteractor comp=" + comp + " user=" + userHandle);
+            }
         }
 
         ComponentName findAvailRecognizer(String prefPackage, int userHandle) {
@@ -898,13 +945,13 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public void showSession(Bundle args, int flags) {
+        public void showSession(@NonNull Bundle args, int flags, @Nullable String attributionTag) {
             synchronized (this) {
                 enforceIsCurrentVoiceInteractionService();
 
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.showSessionLocked(args, flags, null, null);
+                    mImpl.showSessionLocked(args, flags, attributionTag, null, null);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -929,7 +976,8 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public boolean showSessionFromSession(IBinder token, Bundle sessionArgs, int flags) {
+        public boolean showSessionFromSession(@NonNull IBinder token, @NonNull Bundle sessionArgs,
+                int flags, @Nullable String attributionTag) {
             synchronized (this) {
                 if (mImpl == null) {
                     Slog.w(TAG, "showSessionFromSession without running voice interaction service");
@@ -937,7 +985,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    return mImpl.showSessionLocked(sessionArgs, flags, null, null);
+                    return mImpl.showSessionLocked(sessionArgs, flags, attributionTag, null, null);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -961,8 +1009,8 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public int startVoiceActivity(IBinder token, Intent intent, String resolvedType,
-                String callingFeatureId) {
+        public int startVoiceActivity(@NonNull IBinder token, @NonNull Intent intent,
+                @Nullable String resolvedType, @Nullable String attributionTag) {
             synchronized (this) {
                 if (mImpl == null) {
                     Slog.w(TAG, "startVoiceActivity without running voice interaction service");
@@ -980,8 +1028,8 @@ public class VoiceInteractionManagerService extends SystemService {
                     } else {
                         Slog.w(TAG, "Cannot find ActivityInfo in startVoiceActivity.");
                     }
-                    return mImpl.startVoiceActivityLocked(
-                            callingFeatureId, callingPid, callingUid, token, intent, resolvedType);
+                    return mImpl.startVoiceActivityLocked(attributionTag, callingPid, callingUid,
+                            token, intent, resolvedType);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -989,8 +1037,8 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public int startAssistantActivity(IBinder token, Intent intent, String resolvedType,
-                String callingFeatureId) {
+        public int startAssistantActivity(@NonNull IBinder token, @NonNull Intent intent,
+                @Nullable String resolvedType, @Nullable String attributionTag) {
             synchronized (this) {
                 if (mImpl == null) {
                     Slog.w(TAG, "startAssistantActivity without running voice interaction service");
@@ -1000,7 +1048,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    return mImpl.startAssistantActivityLocked(callingFeatureId, callingPid,
+                    return mImpl.startAssistantActivityLocked(attributionTag, callingPid,
                             callingUid, token, intent, resolvedType);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
@@ -1149,9 +1197,11 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
         @Override
         public void setDisabled(boolean disabled) {
-            enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
+            super.setDisabled_enforcePermission();
+
             synchronized (this) {
                 if (mTemporarilyDisabled == disabled) {
                     if (DEBUG) Slog.d(TAG, "setDisabled(): already " + disabled);
@@ -1205,34 +1255,67 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
+        @Override
+        public void notifyActivityEventChanged(@NonNull IBinder activityToken, int type) {
+            synchronized (this) {
+                if (mImpl == null || activityToken == null) {
+                    return;
+                }
+                Binder.withCleanCallingIdentity(
+                        () -> mImpl.notifyActivityEventChangedLocked(activityToken, type));
+            }
+        }
         //----------------- Hotword Detection/Validation APIs --------------------------------//
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION)
         @Override
         public void updateState(
-                @NonNull Identity voiceInteractorIdentity,
                 @Nullable PersistableBundle options,
                 @Nullable SharedMemory sharedMemory,
-                IHotwordRecognitionStatusCallback callback,
-                int detectorType) {
-            enforceCallingPermission(Manifest.permission.MANAGE_HOTWORD_DETECTION);
+                @NonNull IBinder token) {
+            super.updateState_enforcePermission();
+
             synchronized (this) {
                 enforceIsCurrentVoiceInteractionService();
 
-                if (mImpl == null) {
-                    Slog.w(TAG, "updateState without running voice interaction service");
-                    return;
-                }
+                Binder.withCleanCallingIdentity(
+                        () -> mImpl.updateStateLocked(options, sharedMemory, token));
+            }
+        }
+
+        @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION)
+        @Override
+        public void initAndVerifyDetector(
+                @NonNull Identity voiceInteractorIdentity,
+                @Nullable PersistableBundle options,
+                @Nullable SharedMemory sharedMemory,
+                @NonNull IBinder token,
+                IHotwordRecognitionStatusCallback callback,
+                int detectorType) {
+            super.initAndVerifyDetector_enforcePermission();
+
+            synchronized (this) {
+                enforceIsCurrentVoiceInteractionService();
 
                 voiceInteractorIdentity.uid = Binder.getCallingUid();
                 voiceInteractorIdentity.pid = Binder.getCallingPid();
 
-                final long caller = Binder.clearCallingIdentity();
-                try {
-                    mImpl.updateStateLocked(
-                            voiceInteractorIdentity, options, sharedMemory, callback, detectorType);
-                } finally {
-                    Binder.restoreCallingIdentity(caller);
+                Binder.withCleanCallingIdentity(
+                        () -> mImpl.initAndVerifyDetectorLocked(voiceInteractorIdentity, options,
+                                sharedMemory, token, callback, detectorType));
+            }
+        }
+
+        @Override
+        public void destroyDetector(@NonNull IBinder token) {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "destroyDetector without running voice interaction service");
+                    return;
                 }
+
+                Binder.withCleanCallingIdentity(
+                        () -> mImpl.destroyDetectorLocked(token));
             }
         }
 
@@ -1250,6 +1333,79 @@ public class VoiceInteractionManagerService extends SystemService {
                 final long caller = Binder.clearCallingIdentity();
                 try {
                     mImpl.shutdownHotwordDetectionServiceLocked();
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
+        @android.annotation.EnforcePermission(
+                android.Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
+        @Override
+        public void enableVisualQueryDetection(
+                IVisualQueryDetectionAttentionListener listener) {
+            super.enableVisualQueryDetection_enforcePermission();
+            synchronized (this) {
+
+                if (mImpl == null) {
+                    Slog.w(TAG,
+                            "enableVisualQueryDetection without running voice interaction service");
+                    return;
+                }
+                this.mImpl.setVisualQueryDetectionAttentionListenerLocked(listener);
+            }
+        }
+
+        @android.annotation.EnforcePermission(
+                android.Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
+        @Override
+        public void disableVisualQueryDetection() {
+            super.disableVisualQueryDetection_enforcePermission();
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG,
+                            "disableVisualQueryDetection without running voice interaction"
+                                    + " service");
+                    return;
+                }
+                this.mImpl.setVisualQueryDetectionAttentionListenerLocked(null);
+            }
+        }
+
+        @Override
+        public void startPerceiving(
+                IVisualQueryDetectionVoiceInteractionCallback callback)
+                throws RemoteException {
+            enforceCallingPermission(Manifest.permission.RECORD_AUDIO);
+            enforceCallingPermission(Manifest.permission.CAMERA);
+            synchronized (this) {
+                enforceIsCurrentVoiceInteractionService();
+
+                if (mImpl == null) {
+                    Slog.w(TAG, "startPerceiving without running voice interaction service");
+                    return;
+                }
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mImpl.startPerceivingLocked(callback);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
+        @Override
+        public void stopPerceiving() throws RemoteException {
+            synchronized (this) {
+                enforceIsCurrentVoiceInteractionService();
+
+                if (mImpl == null) {
+                    Slog.w(TAG, "stopPerceiving without running voice interaction service");
+                    return;
+                }
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mImpl.stopPerceivingLocked();
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -1284,6 +1440,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 ParcelFileDescriptor audioStream,
                 AudioFormat audioFormat,
                 PersistableBundle options,
+                @NonNull IBinder token,
                 IMicrophoneHotwordDetectionVoiceInteractionCallback callback)
                 throws RemoteException {
             synchronized (this) {
@@ -1296,8 +1453,8 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.startListeningFromExternalSourceLocked(
-                            audioStream, audioFormat, options, callback);
+                    mImpl.startListeningFromExternalSourceLocked(audioStream, audioFormat, options,
+                            token, callback);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -1669,10 +1826,14 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
         @Override
-        public boolean showSessionForActiveService(Bundle args, int sourceFlags,
-                IVoiceInteractionSessionShowCallback showCallback, IBinder activityToken) {
-            enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
+        public boolean showSessionForActiveService(@NonNull Bundle args, int sourceFlags,
+                @Nullable String attributionTag,
+                @Nullable IVoiceInteractionSessionShowCallback showCallback,
+                @Nullable IBinder activityToken) {
+            super.showSessionForActiveService_enforcePermission();
+
             if (DEBUG_USER) Slog.d(TAG, "showSessionForActiveService()");
 
             synchronized (this) {
@@ -1693,16 +1854,18 @@ public class VoiceInteractionManagerService extends SystemService {
                             sourceFlags
                                     | VoiceInteractionSession.SHOW_WITH_ASSIST
                                     | VoiceInteractionSession.SHOW_WITH_SCREENSHOT,
-                            showCallback, activityToken);
+                            attributionTag, showCallback, activityToken);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
         @Override
         public void hideCurrentSession() throws RemoteException {
-            enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
+
+            super.hideCurrentSession_enforcePermission();
 
             if (mImpl == null) {
                 return;
@@ -1721,9 +1884,11 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
         @Override
         public void launchVoiceAssistFromKeyguard() {
-            enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
+            super.launchVoiceAssistFromKeyguard_enforcePermission();
+
             synchronized (this) {
                 if (mImpl == null) {
                     Slog.w(TAG, "launchVoiceAssistFromKeyguard without running voice interaction"
@@ -1739,34 +1904,42 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
         @Override
         public boolean isSessionRunning() {
-            enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
+            super.isSessionRunning_enforcePermission();
+
             synchronized (this) {
                 return mImpl != null && mImpl.mActiveSession != null;
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
         @Override
         public boolean activeServiceSupportsAssist() {
-            enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
+            super.activeServiceSupportsAssist_enforcePermission();
+
             synchronized (this) {
                 return mImpl != null && mImpl.mInfo != null && mImpl.mInfo.getSupportsAssist();
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
         @Override
         public boolean activeServiceSupportsLaunchFromKeyguard() throws RemoteException {
-            enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
+            super.activeServiceSupportsLaunchFromKeyguard_enforcePermission();
+
             synchronized (this) {
                 return mImpl != null && mImpl.mInfo != null
                         && mImpl.mInfo.getSupportsLaunchFromKeyguard();
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
         @Override
         public void onLockscreenShown() {
-            enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
+            super.onLockscreenShown_enforcePermission();
+
             synchronized (this) {
                 if (mImpl == null) {
                     return;
@@ -1786,19 +1959,23 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
         @Override
         public void registerVoiceInteractionSessionListener(
                 IVoiceInteractionSessionListener listener) {
-            enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
+            super.registerVoiceInteractionSessionListener_enforcePermission();
+
             synchronized (this) {
                 mVoiceInteractionSessionListeners.register(listener);
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
         @Override
         public void getActiveServiceSupportedActions(List<String> voiceActions,
                 IVoiceActionCheckCallback callback) {
-            enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
+            super.getActiveServiceSupportedActions_enforcePermission();
+
             synchronized (this) {
                 if (mImpl == null) {
                     try {
@@ -1996,6 +2173,28 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
 
                 List<String> roleHolders = mRm.getRoleHoldersAsUser(roleName, user);
+
+                if (DEBUG) {
+                    Slogf.d(TAG, "onRoleHoldersChanged(%s, %s): roleHolders=%s", roleName, user,
+                            roleHolders);
+                }
+
+                // TODO(b/226201975): this method is beling called when a pre-created user is added,
+                // at which point it doesn't have any role holders. But it's not called again when
+                // the actual user is added (i.e., when the  pre-created user is converted), so we
+                // need to save the user id and call this method again when it's converted
+                // (at onPreCreatedUserConversion()).
+                // Once RoleService properly handles pre-created users, this workaround should be
+                // removed.
+                if (roleHolders.isEmpty()) {
+                    UserInfo userInfo = mUserManagerInternal.getUserInfo(user.getIdentifier());
+                    if (userInfo != null && userInfo.preCreated) {
+                        Slogf.d(TAG, "onRoleHoldersChanged(): ignoring pre-created user %s for now,"
+                                + " this method will be called again when it's converted to a real"
+                                + " user", userInfo.toFullString());
+                        return;
+                    }
+                }
 
                 int userId = user.getIdentifier();
                 if (roleHolders.isEmpty()) {
@@ -2291,4 +2490,36 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         };
     }
+
+    /**
+     * End the latency tracking log for keyphrase hotword invocation.
+     * The measurement covers from when the SoundTrigger HAL emits an event, captured in
+     * {@link com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareLogging}
+     * to when the {@link android.service.voice.VoiceInteractionSession} system UI view is shown.
+     */
+    private final IVoiceInteractionSessionListener mLatencyLoggingListener =
+            new IVoiceInteractionSessionListener.Stub() {
+                @Override
+                public void onVoiceSessionShown() throws RemoteException {}
+
+                @Override
+                public void onVoiceSessionHidden() throws RemoteException {}
+
+                @Override
+                public void onVoiceSessionWindowVisibilityChanged(boolean visible)
+                        throws RemoteException {
+                    if (visible) {
+                        LatencyTracker.getInstance(mContext)
+                                .onActionEnd(LatencyTracker.ACTION_SHOW_VOICE_INTERACTION);
+                    }
+                }
+
+                @Override
+                public void onSetUiHints(Bundle args) throws RemoteException {}
+
+                @Override
+                public IBinder asBinder() {
+                    return mServiceStub;
+                }
+            };
 }

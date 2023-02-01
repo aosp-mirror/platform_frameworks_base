@@ -22,20 +22,18 @@ import static com.android.internal.R.bool.config_unfoldTransitionEnabled;
 import static com.android.server.wm.ActivityTaskManagerService.POWER_MODE_REASON_CHANGE_DISPLAY;
 
 import android.animation.ValueAnimator;
-import android.content.Context;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Rect;
-import android.hardware.devicestate.DeviceStateManager;
-import android.os.HandlerExecutor;
+import android.window.DisplayAreaInfo;
 import android.window.TransitionRequestInfo;
+import android.window.WindowContainerTransaction;
 
 public class PhysicalDisplaySwitchTransitionLauncher {
 
     private final DisplayContent mDisplayContent;
-    private final DeviceStateManager mDeviceStateManager;
-    private final Context mContext;
+    private final WindowManagerService mService;
     private final TransitionController mTransitionController;
-
-    private DeviceStateListener mDeviceStateListener;
 
     /**
      * If on a foldable device represents whether the device is folded or not
@@ -46,23 +44,17 @@ public class PhysicalDisplaySwitchTransitionLauncher {
     public PhysicalDisplaySwitchTransitionLauncher(DisplayContent displayContent,
             TransitionController transitionController) {
         mDisplayContent = displayContent;
-        mContext = mDisplayContent.mWmService.mContext;
+        mService = displayContent.mWmService;
         mTransitionController = transitionController;
-
-        mDeviceStateManager = mContext.getSystemService(DeviceStateManager.class);
-
-        if (mDeviceStateManager != null) {
-            mDeviceStateListener = new DeviceStateListener(mContext);
-            mDeviceStateManager
-                    .registerCallback(new HandlerExecutor(mDisplayContent.mWmService.mH),
-                            mDeviceStateListener);
-        }
     }
 
-    public void destroy() {
-        if (mDeviceStateManager != null) {
-            mDeviceStateManager.unregisterCallback(mDeviceStateListener);
-        }
+    /**
+     *   Called by the DeviceStateManager callback when the state changes.
+     */
+    void foldStateChanged(DeviceStateController.DeviceState newDeviceState) {
+        // Ignore transitions to/from half-folded.
+        if (newDeviceState == DeviceStateController.DeviceState.HALF_FOLDED) return;
+        mIsFolded = newDeviceState == DeviceStateController.DeviceState.FOLDED;
     }
 
     /**
@@ -74,7 +66,7 @@ public class PhysicalDisplaySwitchTransitionLauncher {
         if (!mDisplayContent.getLastHasContent()) return;
 
         boolean shouldRequestUnfoldTransition = !mIsFolded
-                && mContext.getResources().getBoolean(config_unfoldTransitionEnabled)
+                && mService.mContext.getResources().getBoolean(config_unfoldTransitionEnabled)
                 && ValueAnimator.areAnimatorsEnabled();
 
         if (!shouldRequestUnfoldTransition) {
@@ -97,22 +89,46 @@ public class PhysicalDisplaySwitchTransitionLauncher {
 
         if (t != null) {
             mDisplayContent.mAtmService.startLaunchPowerMode(POWER_MODE_REASON_CHANGE_DISPLAY);
-            mTransitionController.collectForDisplayChange(mDisplayContent, t);
             mTransition = t;
         }
     }
 
-    public void onDisplayUpdated() {
-        if (mTransition != null) {
-            mTransition.setAllReady();
-            mTransition = null;
+    /**
+     * Called when physical display is getting updated, this could happen e.g. on foldable
+     * devices when the physical underlying display is replaced.
+     *
+     * @param fromRotation rotation before the display change
+     * @param toRotation rotation after the display change
+     * @param newDisplayAreaInfo display area info after the display change
+     */
+    public void onDisplayUpdated(int fromRotation, int toRotation,
+            @NonNull DisplayAreaInfo newDisplayAreaInfo) {
+        if (mTransition == null) return;
+
+        final boolean started = mDisplayContent.mRemoteDisplayChangeController
+                .performRemoteDisplayChange(fromRotation, toRotation, newDisplayAreaInfo,
+                        this::continueDisplayUpdate);
+
+        if (!started) {
+            markTransitionAsReady();
         }
     }
 
-    class DeviceStateListener extends DeviceStateManager.FoldStateListener {
+    private void continueDisplayUpdate(@Nullable WindowContainerTransaction transaction) {
+        if (mTransition == null) return;
 
-        DeviceStateListener(Context context) {
-            super(context, newIsFolded -> mIsFolded = newIsFolded);
+        if (transaction != null) {
+            mService.mAtmService.mWindowOrganizerController.applyTransaction(transaction);
         }
+
+        markTransitionAsReady();
     }
+
+    private void markTransitionAsReady() {
+        if (mTransition == null) return;
+
+        mTransition.setAllReady();
+        mTransition = null;
+    }
+
 }

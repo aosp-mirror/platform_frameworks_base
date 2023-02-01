@@ -189,6 +189,7 @@ struct JTuner : public RefBase {
     int scan(const FrontendSettings& settings, FrontendScanType scanType);
     int stopScan();
     int setLnb(sp<LnbClient> lnbClient);
+    bool isLnaSupported();
     int setLna(bool enable);
     jobject openLnbByHandle(int handle);
     jobject openLnbByName(jstring name);
@@ -197,6 +198,7 @@ struct JTuner : public RefBase {
     jobject openDescrambler();
     jobject openDvr(DvrType type, jlong bufferSize);
     jobject getDemuxCaps();
+    jobject getDemuxInfo(int handle);
     jobject getFrontendStatus(jintArray types);
     Result openDemux(int handle);
     jint close();
@@ -216,7 +218,8 @@ protected:
 private:
     jclass mClass;
     jweak mObject;
-    static sp<TunerClient> mTunerClient;
+    static sp<TunerClient> sTunerClient;
+    static std::mutex sTunerClientMutex;
     sp<FrontendClient> mFeClient;
     sp<FrontendClientCallbackImpl> mFeClientCb;
     int mFeId;

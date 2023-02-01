@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -61,6 +62,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.function.IntConsumer;
 
 /**
  * Proxying implementation of Context that simply delegates all of its calls to
@@ -1071,6 +1073,15 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @NonNull
+    public Context createContextForSdkInSandbox(@NonNull ApplicationInfo sdkInfo, int flags)
+            throws PackageManager.NameNotFoundException {
+        return mBase.createContextForSdkInSandbox(sdkInfo, flags);
+    }
+
+    /** @hide */
+    @Override
     public Context createContextForSplit(String splitName)
             throws PackageManager.NameNotFoundException {
         return mBase.createContextForSplit(splitName);
@@ -1096,6 +1107,11 @@ public class ContextWrapper extends Context {
     @Override
     public Context createDisplayContext(Display display) {
         return mBase.createDisplayContext(display);
+    }
+
+    @Override
+    public @NonNull Context createDeviceContext(int deviceId) {
+        return mBase.createDeviceContext(deviceId);
     }
 
     @Override
@@ -1164,6 +1180,35 @@ public class ContextWrapper extends Context {
     @Override
     public void updateDisplay(int displayId) {
         mBase.updateDisplay(displayId);
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void updateDeviceId(int deviceId) {
+        mBase.updateDeviceId(deviceId);
+    }
+
+    @Override
+    public int getDeviceId() {
+        return mBase.getDeviceId();
+    }
+
+    @Override
+    public boolean isDeviceContext() {
+        return mBase.isDeviceContext();
+    }
+
+    @Override
+    public void registerDeviceIdChangeListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull IntConsumer listener) {
+        mBase.registerDeviceIdChangeListener(executor, listener);
+    }
+
+    @Override
+    public void unregisterDeviceIdChangeListener(@NonNull IntConsumer listener) {
+        mBase.unregisterDeviceIdChangeListener(listener);
     }
 
     @Override
@@ -1235,6 +1280,14 @@ public class ContextWrapper extends Context {
     @Override
     public IApplicationThread getIApplicationThread() {
         return mBase.getIApplicationThread();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public IBinder getProcessToken() {
+        return mBase.getProcessToken();
     }
 
     /**

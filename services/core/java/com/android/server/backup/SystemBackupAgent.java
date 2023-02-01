@@ -18,9 +18,9 @@ package com.android.server.backup;
 
 import android.app.IWallpaperManager;
 import android.app.backup.BackupAgentHelper;
+import android.app.backup.BackupAnnotations.BackupDestination;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupHelper;
-import android.app.backup.BackupManager;
 import android.app.backup.FullBackup;
 import android.app.backup.FullBackupDataOutput;
 import android.app.backup.WallpaperBackupHelper;
@@ -58,6 +58,7 @@ public class SystemBackupAgent extends BackupAgentHelper {
     private static final String SLICES_HELPER = "slices";
     private static final String PEOPLE_HELPER = "people";
     private static final String APP_LOCALES_HELPER = "app_locales";
+    private static final String APP_GENDER_HELPER = "app_gender";
 
     // These paths must match what the WallpaperManagerService uses.  The leaf *_FILENAME
     // are also used in the full-backup file format, so must not change unless steps are
@@ -84,13 +85,14 @@ public class SystemBackupAgent extends BackupAgentHelper {
     private static final String WALLPAPER_IMAGE_KEY = WallpaperBackupHelper.WALLPAPER_IMAGE_KEY;
 
     private static final Set<String> sEligibleForMultiUser = Sets.newArraySet(
-            PERMISSION_HELPER, NOTIFICATION_HELPER, SYNC_SETTINGS_HELPER, APP_LOCALES_HELPER);
+            PERMISSION_HELPER, NOTIFICATION_HELPER, SYNC_SETTINGS_HELPER, APP_LOCALES_HELPER,
+            ACCOUNT_MANAGER_HELPER, USAGE_STATS_HELPER, PREFERRED_HELPER);
 
     private int mUserId = UserHandle.USER_SYSTEM;
 
     @Override
-    public void onCreate(UserHandle user, @BackupManager.OperationType int operationType) {
-        super.onCreate(user, operationType);
+    public void onCreate(UserHandle user, @BackupDestination int backupDestination) {
+        super.onCreate(user, backupDestination);
 
         mUserId = user.getIdentifier();
 
@@ -98,12 +100,13 @@ public class SystemBackupAgent extends BackupAgentHelper {
         addHelper(PREFERRED_HELPER, new PreferredActivityBackupHelper(mUserId));
         addHelper(NOTIFICATION_HELPER, new NotificationBackupHelper(mUserId));
         addHelper(PERMISSION_HELPER, new PermissionBackupHelper(mUserId));
-        addHelper(USAGE_STATS_HELPER, new UsageStatsBackupHelper(this));
+        addHelper(USAGE_STATS_HELPER, new UsageStatsBackupHelper(mUserId));
         addHelper(SHORTCUT_MANAGER_HELPER, new ShortcutBackupHelper());
-        addHelper(ACCOUNT_MANAGER_HELPER, new AccountManagerBackupHelper());
+        addHelper(ACCOUNT_MANAGER_HELPER, new AccountManagerBackupHelper(mUserId));
         addHelper(SLICES_HELPER, new SliceBackupHelper(this));
         addHelper(PEOPLE_HELPER, new PeopleBackupHelper(mUserId));
         addHelper(APP_LOCALES_HELPER, new AppSpecificLocalesBackupHelper(mUserId));
+        addHelper(APP_GENDER_HELPER, new AppGrammaticalGenderBackupHelper(mUserId));
     }
 
     @Override

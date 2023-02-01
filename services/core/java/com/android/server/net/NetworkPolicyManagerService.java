@@ -123,6 +123,7 @@ import static android.telephony.CarrierConfigManager.KEY_DATA_RAPID_NOTIFICATION
 import static android.telephony.CarrierConfigManager.KEY_DATA_WARNING_NOTIFICATION_BOOL;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
 import static com.android.internal.util.ArrayUtils.appendInt;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
@@ -238,8 +239,6 @@ import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 import android.util.SparseSetArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.R;
@@ -254,6 +253,8 @@ import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.StatLogger;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.net.module.util.NetworkIdentityUtils;
 import com.android.net.module.util.NetworkStatsUtils;
 import com.android.net.module.util.PermissionUtils;
@@ -1299,7 +1300,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // on background handler thread, and verified MANAGE_NETWORK_POLICY
             // permission above.
 
-            final NetworkTemplate template = intent.getParcelableExtra(EXTRA_NETWORK_TEMPLATE);
+            final NetworkTemplate template = intent.getParcelableExtra(EXTRA_NETWORK_TEMPLATE, android.net.NetworkTemplate.class);
             if (ACTION_SNOOZE_WARNING.equals(intent.getAction())) {
                 performSnooze(template, TYPE_WARNING);
             } else if (ACTION_SNOOZE_RAPID.equals(intent.getAction())) {
@@ -1367,8 +1368,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final boolean roamingChanged = updateCapabilityChange(
                         mNetworkRoaming, newRoaming, network);
 
-                if (meteredChanged || roamingChanged) {
+                final boolean shouldUpdateNetworkRules = meteredChanged || roamingChanged;
+
+                if (meteredChanged) {
                     mLogger.meterednessChanged(network.getNetId(), newMetered);
+                }
+
+                if (roamingChanged) {
+                    mLogger.roamingChanged(network.getNetId(), newRoaming);
+                }
+
+                if (shouldUpdateNetworkRules) {
                     updateNetworkRulesNL();
                 }
             }
@@ -1381,6 +1391,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final boolean ifacesChanged = updateNetworkToIfacesNL(network.getNetId(),
                         newIfaces);
                 if (ifacesChanged) {
+                    mLogger.interfacesChanged(network.getNetId(), newIfaces);
                     updateNetworkRulesNL();
                 }
             }
@@ -3148,7 +3159,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * active merge set [A,B], we'd return a new template that primarily matches
      * A, but also matches B.
      */
-    private static NetworkTemplate normalizeTemplate(@NonNull NetworkTemplate template,
+    @VisibleForTesting(visibility = PRIVATE)
+    static NetworkTemplate normalizeTemplate(@NonNull NetworkTemplate template,
             @NonNull List<String[]> mergedList) {
         // Now there are several types of network which uses Subscriber Id to store network
         // information. For instance:
@@ -3158,6 +3170,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (template.getSubscriberIds().isEmpty()) return template;
 
         for (final String[] merged : mergedList) {
+            // In some rare cases (e.g. b/243015487), merged subscriberId list might contain
+            // duplicated items. Deduplication for better error handling.
+            final ArraySet mergedSet = new ArraySet(merged);
+            if (mergedSet.size() != merged.length) {
+                Log.wtf(TAG, "Duplicated merged list detected: " + Arrays.toString(merged));
+            }
             // TODO: Handle incompatible subscriberIds if that happens in practice.
             for (final String subscriberId : template.getSubscriberIds()) {
                 if (com.android.net.module.util.CollectionUtils.contains(merged, subscriberId)) {
@@ -3165,7 +3183,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     // a template that matches all merged subscribers.
                     return new NetworkTemplate.Builder(template.getMatchRule())
                             .setWifiNetworkKeys(template.getWifiNetworkKeys())
-                            .setSubscriberIds(Set.of(merged))
+                            .setSubscriberIds(mergedSet)
                             .setMeteredness(template.getMeteredness())
                             .build();
                 }
@@ -4032,6 +4050,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 for (int i = 0; i < size; ++i) {
                     fout.print("u" + mMeteredRestrictedUids.keyAt(i) + ": ");
                     fout.println(mMeteredRestrictedUids.valueAt(i));
+                }
+                fout.decreaseIndent();
+
+                fout.println("Network to interfaces:");
+                fout.increaseIndent();
+                for (int i = 0; i < mNetworkToIfaces.size(); ++i) {
+                    final int key = mNetworkToIfaces.keyAt(i);
+                    fout.println(key + ": " + mNetworkToIfaces.get(key));
                 }
                 fout.decreaseIndent();
 

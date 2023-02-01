@@ -21,12 +21,20 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
+import android.system.ErrnoException;
+import android.system.Os;
 
 import java.io.Closeable;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 
 /**
  * File descriptor of an entry in the AssetManager.  This provides your own
@@ -203,19 +211,26 @@ public class AssetFileDescriptor implements Parcelable, Closeable {
      */
     public static class AutoCloseInputStream
             extends ParcelFileDescriptor.AutoCloseInputStream {
-        private long mRemaining;
+        /** Size of current file. */
+        private long mTotalSize;
+        /** The absolute position of current file start point. */
+        private final long mFileOffset;
+        /** The relative position where input stream is against mFileOffset. */
+        private long mOffset;
+        private OffsetCorrectFileChannel mOffsetCorrectFileChannel;
 
         public AutoCloseInputStream(AssetFileDescriptor fd) throws IOException {
             super(fd.getParcelFileDescriptor());
-            super.skip(fd.getStartOffset());
-            mRemaining = (int) fd.getLength();
+            mTotalSize = fd.getLength();
+            mFileOffset = fd.getStartOffset();
         }
 
         @Override
         public int available() throws IOException {
-            return mRemaining >= 0
-                    ? (mRemaining < 0x7fffffff ? (int) mRemaining : 0x7fffffff)
-                    : super.available();
+            long available = mTotalSize - mOffset;
+            return available >= 0
+                    ? (available < 0x7fffffff ? (int) available : 0x7fffffff)
+                    : 0;
         }
 
         @Override
@@ -227,15 +242,24 @@ public class AssetFileDescriptor implements Parcelable, Closeable {
 
         @Override
         public int read(byte[] buffer, int offset, int count) throws IOException {
-            if (mRemaining >= 0) {
-                if (mRemaining == 0) return -1;
-                if (count > mRemaining) count = (int) mRemaining;
-                int res = super.read(buffer, offset, count);
-                if (res >= 0) mRemaining -= res;
-                return res;
+            int available = available();
+            if (available <= 0) {
+                return -1;
             }
 
-            return super.read(buffer, offset, count);
+            if (count > available) count = available;
+            try {
+                int res = Os.pread(getFD(), buffer, offset, count, mFileOffset + mOffset);
+                // pread returns 0 at end of file, while java's InputStream interface requires -1
+                if (res == 0) res = -1;
+                if (res > 0) {
+                    mOffset += res;
+                    updateChannelPosition(mOffset + mFileOffset);
+                }
+                return res;
+            } catch (ErrnoException e) {
+                throw new IOException(e);
+            }
         }
 
         @Override
@@ -245,41 +269,185 @@ public class AssetFileDescriptor implements Parcelable, Closeable {
 
         @Override
         public long skip(long count) throws IOException {
-            if (mRemaining >= 0) {
-                if (mRemaining == 0) return -1;
-                if (count > mRemaining) count = mRemaining;
-                long res = super.skip(count);
-                if (res >= 0) mRemaining -= res;
-                return res;
+            int available = available();
+            if (available <= 0) {
+                return -1;
             }
 
-            return super.skip(count);
+            if (count > available) count = available;
+            mOffset += count;
+            updateChannelPosition(mOffset + mFileOffset);
+            return count;
         }
 
         @Override
         public void mark(int readlimit) {
-            if (mRemaining >= 0) {
-                // Not supported.
-                return;
-            }
-            super.mark(readlimit);
+            // Not supported.
+            return;
         }
 
         @Override
         public boolean markSupported() {
-            if (mRemaining >= 0) {
-                return false;
-            }
-            return super.markSupported();
+            return false;
         }
 
         @Override
         public synchronized void reset() throws IOException {
-            if (mRemaining >= 0) {
-                // Not supported.
-                return;
+            // Not supported.
+            return;
+        }
+
+        @Override
+        public FileChannel getChannel() {
+            if (mOffsetCorrectFileChannel == null) {
+                mOffsetCorrectFileChannel = new OffsetCorrectFileChannel(super.getChannel());
             }
-            super.reset();
+            try {
+                updateChannelPosition(mOffset + mFileOffset);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            return mOffsetCorrectFileChannel;
+        }
+
+        /**
+         * Update the position of mOffsetCorrectFileChannel only after it is constructed.
+         *
+         * @param newPosition The absolute position mOffsetCorrectFileChannel needs to be moved to.
+         */
+        private void updateChannelPosition(long newPosition) throws IOException {
+            if (mOffsetCorrectFileChannel != null) {
+                mOffsetCorrectFileChannel.position(newPosition);
+            }
+        }
+
+        /**
+         * A FileChannel wrapper that will update mOffset of the AutoCloseInputStream
+         * to correct position when using FileChannel to read. All occurrence of position
+         * should be using absolute solution and each override method just do Delegation
+         * besides additional check. All methods related to write mode have been disabled
+         * and will throw UnsupportedOperationException with customized message.
+         */
+        private class OffsetCorrectFileChannel extends FileChannel {
+            private final FileChannel mDelegate;
+            private static final String METHOD_NOT_SUPPORTED_MESSAGE =
+                    "This Method is not supported in AutoCloseInputStream FileChannel.";
+
+            OffsetCorrectFileChannel(FileChannel fc) {
+                mDelegate = fc;
+            }
+
+            @Override
+            public int read(ByteBuffer dst) throws IOException {
+                if (available() <= 0) return -1;
+                int bytesRead = mDelegate.read(dst);
+                if (bytesRead != -1) mOffset += bytesRead;
+                return bytesRead;
+            }
+
+            @Override
+            public long read(ByteBuffer[] dsts, int offset, int length) throws IOException {
+                if (available() <= 0) return -1;
+                if (mOffset + length > mTotalSize) {
+                    length = (int) (mTotalSize - mOffset);
+                }
+                long bytesRead = mDelegate.read(dsts, offset, length);
+                if (bytesRead != -1) mOffset += bytesRead;
+                return bytesRead;
+            }
+
+            @Override
+            /**The only read method that does not move channel position*/
+            public int read(ByteBuffer dst, long position) throws IOException {
+                if (position - mFileOffset > mTotalSize) return -1;
+                return mDelegate.read(dst, position);
+            }
+
+            @Override
+            public long position() throws IOException {
+                return mDelegate.position();
+            }
+
+            @Override
+            public FileChannel position(long newPosition) throws IOException {
+                mOffset = newPosition - mFileOffset;
+                return mDelegate.position(newPosition);
+            }
+
+            @Override
+            public long size() throws IOException {
+                return mTotalSize;
+            }
+
+            @Override
+            public long transferTo(long position, long count, WritableByteChannel target)
+                    throws IOException {
+                if (position - mFileOffset > mTotalSize) {
+                    return 0;
+                }
+                if (position - mFileOffset + count > mTotalSize) {
+                    count = mTotalSize - (position - mFileOffset);
+                }
+                return mDelegate.transferTo(position, count, target);
+            }
+
+            @Override
+            public MappedByteBuffer map(MapMode mode, long position, long size) throws IOException {
+                if (position - mFileOffset > mTotalSize) {
+                    throw new IOException(
+                            "Cannot map to buffer because position exceed current file size.");
+                }
+                if (position - mFileOffset + size > mTotalSize) {
+                    size = mTotalSize - (position - mFileOffset);
+                }
+                return mDelegate.map(mode, position, size);
+            }
+
+            @Override
+            protected void implCloseChannel() throws IOException {
+                mDelegate.close();
+            }
+
+            @Override
+            public int write(ByteBuffer src) throws IOException {
+                throw new UnsupportedOperationException(METHOD_NOT_SUPPORTED_MESSAGE);
+            }
+
+            @Override
+            public long write(ByteBuffer[] srcs, int offset, int length) throws IOException {
+                throw new UnsupportedOperationException(METHOD_NOT_SUPPORTED_MESSAGE);
+            }
+
+            @Override
+            public int write(ByteBuffer src, long position) throws IOException {
+                throw new UnsupportedOperationException(METHOD_NOT_SUPPORTED_MESSAGE);
+            }
+
+            @Override
+            public long transferFrom(ReadableByteChannel src, long position, long count)
+                    throws IOException {
+                throw new UnsupportedOperationException(METHOD_NOT_SUPPORTED_MESSAGE);
+            }
+
+            @Override
+            public FileChannel truncate(long size) throws IOException {
+                throw new UnsupportedOperationException(METHOD_NOT_SUPPORTED_MESSAGE);
+            }
+
+            @Override
+            public void force(boolean metaData) throws IOException {
+                throw new UnsupportedOperationException(METHOD_NOT_SUPPORTED_MESSAGE);
+            }
+
+            @Override
+            public FileLock lock(long position, long size, boolean shared) throws IOException {
+                throw new UnsupportedOperationException(METHOD_NOT_SUPPORTED_MESSAGE);
+            }
+
+            @Override
+            public FileLock tryLock(long position, long size, boolean shared) throws IOException {
+                throw new UnsupportedOperationException(METHOD_NOT_SUPPORTED_MESSAGE);
+            }
         }
     }
 

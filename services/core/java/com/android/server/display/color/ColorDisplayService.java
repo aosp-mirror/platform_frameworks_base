@@ -50,6 +50,7 @@ import android.database.ContentObserver;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.ColorDisplayManager.AutoMode;
 import android.hardware.display.ColorDisplayManager.ColorMode;
+import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.IColorDisplayManager;
 import android.hardware.display.Time;
 import android.net.Uri;
@@ -107,11 +108,6 @@ public final class ColorDisplayService extends SystemService {
         Matrix.setIdentityM(MATRIX_IDENTITY, 0);
     }
 
-    /**
-     * The transition time, in milliseconds, for Night Display to turn on/off.
-     */
-    private static final long TRANSITION_DURATION = 3000L;
-
     private static final int MSG_USER_CHANGED = 0;
     private static final int MSG_SET_UP = 1;
     private static final int MSG_APPLY_NIGHT_DISPLAY_IMMEDIATE = 2;
@@ -154,7 +150,8 @@ public final class ColorDisplayService extends SystemService {
 
     @VisibleForTesting
     final DisplayWhiteBalanceTintController mDisplayWhiteBalanceTintController =
-            new DisplayWhiteBalanceTintController();
+            new DisplayWhiteBalanceTintController(
+                    LocalServices.getService(DisplayManagerInternal.class));
     private final NightDisplayTintController mNightDisplayTintController =
             new NightDisplayTintController();
     private final TintController mGlobalSaturationTintController =
@@ -661,7 +658,7 @@ public final class ColorDisplayService extends SystemService {
             TintValueAnimator valueAnimator = TintValueAnimator.ofMatrix(COLOR_MATRIX_EVALUATOR,
                     from == null ? MATRIX_IDENTITY : from, to);
             tintController.setAnimator(valueAnimator);
-            valueAnimator.setDuration(TRANSITION_DURATION);
+            valueAnimator.setDuration(tintController.getTransitionDurationMilliseconds());
             valueAnimator.setInterpolator(AnimationUtils.loadInterpolator(
                     getContext(), android.R.interpolator.fast_out_slow_in));
             valueAnimator.addUpdateListener((ValueAnimator animator) -> {
@@ -740,7 +737,8 @@ public final class ColorDisplayService extends SystemService {
         mDisplayWhiteBalanceTintController.setActivated(isDisplayWhiteBalanceSettingEnabled()
                 && !mNightDisplayTintController.isActivated()
                 && !isAccessibilityEnabled()
-                && dtm.needsLinearColorMatrix());
+                && dtm.needsLinearColorMatrix()
+                && mDisplayWhiteBalanceTintController.isAllowed());
         boolean activated = mDisplayWhiteBalanceTintController.isActivated();
 
         if (mDisplayWhiteBalanceListener != null && oldActivated != activated) {
@@ -956,6 +954,8 @@ public final class ColorDisplayService extends SystemService {
                         R.array.config_availableColorModes);
                 if (availableColorModes.length > 0) {
                     colorMode = availableColorModes[0];
+                } else {
+                    colorMode = NOT_SET;
                 }
             }
         }
@@ -1451,6 +1451,12 @@ public final class ColorDisplayService extends SystemService {
      */
     public class ColorDisplayServiceInternal {
 
+        /** Sets whether DWB should be allowed in the current state. */
+        public void setDisplayWhiteBalanceAllowed(boolean allowed)  {
+            mDisplayWhiteBalanceTintController.setAllowed(allowed);
+            updateDisplayWhiteBalanceStatus();
+        }
+
         /**
          * Set the current CCT value for the display white balance transform, and if the transform
          * is enabled, apply it.
@@ -1511,6 +1517,10 @@ public final class ColorDisplayService extends SystemService {
          */
         public boolean isReduceBrightColorsActivated() {
             return mReduceBrightColorsTintController.isActivated();
+        }
+
+        public int getReduceBrightColorsStrength() {
+            return mReduceBrightColorsTintController.getStrength();
         }
 
         /**
@@ -1664,11 +1674,11 @@ public final class ColorDisplayService extends SystemService {
             return true;
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS)
         @Override
         public boolean isSaturationActivated() {
-            getContext().enforceCallingPermission(
-                    Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS,
-                    "Permission required to get display saturation level");
+            super.isSaturationActivated_enforcePermission();
+
             final long token = Binder.clearCallingIdentity();
             try {
                 return !mGlobalSaturationTintController.isActivatedStateNotSet()
@@ -1678,11 +1688,11 @@ public final class ColorDisplayService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS)
         @Override
         public boolean setAppSaturationLevel(String packageName, int level) {
-            getContext().enforceCallingPermission(
-                    Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS,
-                    "Permission required to set display saturation level");
+            super.setAppSaturationLevel_enforcePermission();
+
             final String callingPackageName = LocalServices.getService(PackageManagerInternal.class)
                     .getNameForUid(Binder.getCallingUid());
             final long token = Binder.clearCallingIdentity();
@@ -1693,10 +1703,10 @@ public final class ColorDisplayService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS)
         public int getTransformCapabilities() {
-            getContext().enforceCallingPermission(
-                    Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS,
-                    "Permission required to query transform capabilities");
+            super.getTransformCapabilities_enforcePermission();
+
             final long token = Binder.clearCallingIdentity();
             try {
                 return getTransformCapabilitiesInternal();

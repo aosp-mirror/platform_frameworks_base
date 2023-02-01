@@ -28,4 +28,7 @@ interface IDreamOverlayCallback {
     * Invoked to request the dream exit.
     */
     void onExitRequested();
+
+    /** Invoked when the dream overlay wakeUp animation is complete. */
+    void onWakeUpComplete();
 }

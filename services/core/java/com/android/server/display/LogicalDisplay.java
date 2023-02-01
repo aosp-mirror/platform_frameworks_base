@@ -18,7 +18,6 @@ package com.android.server.display;
 
 import static com.android.server.display.DisplayDeviceInfo.TOUCH_NONE;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Point;
@@ -67,34 +66,6 @@ import java.util.Objects;
  */
 final class LogicalDisplay {
     private static final String TAG = "LogicalDisplay";
-
-    /**
-     * Phase indicating the logical display's existence is hidden from the rest of the framework.
-     * This can happen if the current layout has specifically requested to keep this display
-     * disabled.
-     */
-    static final int DISPLAY_PHASE_DISABLED = -1;
-
-    /**
-     * Phase indicating that the logical display is going through a layout transition.
-     * When in this phase, other systems can choose to special case power-state handling of a
-     * display that might be in a transition.
-     */
-    static final int DISPLAY_PHASE_LAYOUT_TRANSITION = 0;
-
-    /**
-     * The display is exposed to the rest of the system and its power state is determined by a
-     * power-request from PowerManager.
-     */
-    static final int DISPLAY_PHASE_ENABLED = 1;
-
-    @IntDef(prefix = {"DISPLAY_PHASE" }, value = {
-        DISPLAY_PHASE_DISABLED,
-        DISPLAY_PHASE_LAYOUT_TRANSITION,
-        DISPLAY_PHASE_ENABLED
-    })
-    @interface DisplayPhase {}
-
     // The layer stack we use when the display has been blanked to prevent any
     // of its content from appearing.
     private static final int BLANK_LAYER_STACK = -1;
@@ -159,14 +130,6 @@ final class LogicalDisplay {
     private final Rect mTempDisplayRect = new Rect();
 
     /**
-     * Indicates the current phase of the display. Generally, phases supersede any
-     * requests from PowerManager in DPC's calculation for the display state. Only when the
-     * phase is ENABLED does PowerManager's request for the display take effect.
-     */
-    @DisplayPhase
-    private int mPhase = DISPLAY_PHASE_ENABLED;
-
-    /**
      * The UID mappings for refresh rate override
      */
     private DisplayEventReceiver.FrameRateOverride[] mFrameRateOverrides;
@@ -181,12 +144,22 @@ final class LogicalDisplay {
      */
     private final SparseArray<Float> mTempFrameRateOverride;
 
+    // Indicates the display is enabled (allowed to be ON).
+    private boolean mIsEnabled;
+
+    // Indicates the display is part of a transition from one device-state ({@link
+    // DeviceStateManager}) to another. Being a "part" of a transition means that either
+    // the {@link mIsEnabled} is changing, or the underlying mPrimiaryDisplayDevice is changing.
+    private boolean mIsInTransition;
+
     public LogicalDisplay(int displayId, int layerStack, DisplayDevice primaryDisplayDevice) {
         mDisplayId = displayId;
         mLayerStack = layerStack;
         mPrimaryDisplayDevice = primaryDisplayDevice;
         mPendingFrameRateOverrideUids = new ArraySet<>();
         mTempFrameRateOverride = new SparseArray<>();
+        mIsEnabled = true;
+        mIsInTransition = false;
     }
 
     /**
@@ -233,6 +206,7 @@ final class LogicalDisplay {
                 info.displayCutout = mOverrideDisplayInfo.displayCutout;
                 info.logicalDensityDpi = mOverrideDisplayInfo.logicalDensityDpi;
                 info.roundedCorners = mOverrideDisplayInfo.roundedCorners;
+                info.displayShape = mOverrideDisplayInfo.displayShape;
             }
             mInfo.set(info);
         }
@@ -384,6 +358,12 @@ final class LogicalDisplay {
             if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_TOUCH_FEEDBACK_DISABLED) != 0) {
                 mBaseDisplayInfo.flags |= Display.FLAG_TOUCH_FEEDBACK_DISABLED;
             }
+            if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_OWN_FOCUS) != 0) {
+                mBaseDisplayInfo.flags |= Display.FLAG_OWN_FOCUS;
+            }
+            if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_STEAL_TOP_FOCUS_DISABLED) != 0) {
+                mBaseDisplayInfo.flags |= Display.FLAG_STEAL_TOP_FOCUS_DISABLED;
+            }
             Rect maskingInsets = getMaskingInsets(deviceInfo);
             int maskedWidth = deviceInfo.width - maskingInsets.left - maskingInsets.right;
             int maskedHeight = deviceInfo.height - maskingInsets.top - maskingInsets.bottom;
@@ -399,6 +379,7 @@ final class LogicalDisplay {
             mBaseDisplayInfo.logicalHeight = maskedHeight;
             mBaseDisplayInfo.rotation = Surface.ROTATION_0;
             mBaseDisplayInfo.modeId = deviceInfo.modeId;
+            mBaseDisplayInfo.renderFrameRate = deviceInfo.renderFrameRate;
             mBaseDisplayInfo.defaultModeId = deviceInfo.defaultModeId;
             mBaseDisplayInfo.supportedModes = Arrays.copyOf(
                     deviceInfo.supportedModes, deviceInfo.supportedModes.length);
@@ -416,6 +397,7 @@ final class LogicalDisplay {
             mBaseDisplayInfo.appVsyncOffsetNanos = deviceInfo.appVsyncOffsetNanos;
             mBaseDisplayInfo.presentationDeadlineNanos = deviceInfo.presentationDeadlineNanos;
             mBaseDisplayInfo.state = deviceInfo.state;
+            mBaseDisplayInfo.committedState = deviceInfo.committedState;
             mBaseDisplayInfo.smallestNominalAppWidth = maskedWidth;
             mBaseDisplayInfo.smallestNominalAppHeight = maskedHeight;
             mBaseDisplayInfo.largestNominalAppWidth = maskedWidth;
@@ -433,6 +415,7 @@ final class LogicalDisplay {
             mBaseDisplayInfo.brightnessDefault = deviceInfo.brightnessDefault;
             mBaseDisplayInfo.roundedCorners = deviceInfo.roundedCorners;
             mBaseDisplayInfo.installOrientation = deviceInfo.installOrientation;
+            mBaseDisplayInfo.displayShape = deviceInfo.displayShape;
             mPrimaryDisplayDeviceInfo = deviceInfo;
             mInfo.set(null);
         }
@@ -522,10 +505,12 @@ final class LogicalDisplay {
         // Set the layer stack.
         device.setLayerStackLocked(t, isBlanked ? BLANK_LAYER_STACK : mLayerStack);
         // Also inform whether the device is the same one sent to inputflinger for its layerstack.
+        // Prevent displays that are disabled from receiving input.
         // TODO(b/188914255): Remove once input can dispatch against device vs layerstack.
         device.setDisplayFlagsLocked(t,
-                device.getDisplayDeviceInfoLocked().touch != TOUCH_NONE
-                        ? SurfaceControl.DISPLAY_RECEIVES_INPUT : 0);
+                (isEnabledLocked() && device.getDisplayDeviceInfoLocked().touch != TOUCH_NONE)
+                        ? SurfaceControl.DISPLAY_RECEIVES_INPUT
+                        : 0);
 
         // Set the color mode and allowed display mode.
         if (device == mPrimaryDisplayDevice) {
@@ -765,32 +750,45 @@ final class LogicalDisplay {
         return old;
     }
 
-    public void setPhase(@DisplayPhase int phase) {
-        mPhase = phase;
-    }
-
-    /**
-     * Returns the currently set phase for this LogicalDisplay. Phases are used when transitioning
-     * from one device state to another. {@see LogicalDisplayMapper}.
-     */
-    @DisplayPhase
-    public int getPhase() {
-        return mPhase;
-    }
-
     /**
      * @return {@code true} if the LogicalDisplay is enabled or {@code false}
      * if disabled indicating that the display should be hidden from the rest of the apps and
      * framework.
      */
-    public boolean isEnabled() {
-        // DISPLAY_PHASE_LAYOUT_TRANSITION is still considered an 'enabled' phase.
-        return mPhase == DISPLAY_PHASE_ENABLED || mPhase == DISPLAY_PHASE_LAYOUT_TRANSITION;
+    public boolean isEnabledLocked() {
+        return mIsEnabled;
+    }
+
+    /**
+     * Sets the display as enabled.
+     *
+     * @param enable True if enabled, false otherwise.
+     */
+    public void setEnabledLocked(boolean enabled) {
+        mIsEnabled = enabled;
+    }
+
+    /**
+     * @return {@code true} if the LogicalDisplay is in a transition phase. This is used to indicate
+     * that we are getting ready to swap the underlying display-device and the display should be
+     * rendered appropriately to reduce jank.
+     */
+    public boolean isInTransitionLocked() {
+        return mIsInTransition;
+    }
+
+    /**
+     * Sets the transition phase.
+     * @param isInTransition True if it display is in transition.
+     */
+    public void setIsInTransitionLocked(boolean isInTransition) {
+        mIsInTransition = isInTransition;
     }
 
     public void dumpLocked(PrintWriter pw) {
         pw.println("mDisplayId=" + mDisplayId);
-        pw.println("mPhase=" + mPhase);
+        pw.println("mIsEnabled=" + mIsEnabled);
+        pw.println("mIsInTransition=" + mIsInTransition);
         pw.println("mLayerStack=" + mLayerStack);
         pw.println("mHasContent=" + mHasContent);
         pw.println("mDesiredDisplayModeSpecs={" + mDesiredDisplayModeSpecs + "}");

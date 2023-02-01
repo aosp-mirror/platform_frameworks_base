@@ -866,13 +866,44 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static final int KEYCODE_DEMO_APP_3 = 303;
     /** Key code constant: Demo Application key #4. */
     public static final int KEYCODE_DEMO_APP_4 = 304;
+    /** Key code constant: Keyboard backlight down */
+    public static final int KEYCODE_KEYBOARD_BACKLIGHT_DOWN = 305;
+    /** Key code constant: Keyboard backlight up */
+    public static final int KEYCODE_KEYBOARD_BACKLIGHT_UP = 306;
+    /** Key code constant: Keyboard backlight toggle */
+    public static final int KEYCODE_KEYBOARD_BACKLIGHT_TOGGLE = 307;
+    /**
+     * Key code constant: The primary button on the barrel of a stylus.
+     * This is usually the button closest to the tip of the stylus.
+     */
+    public static final int KEYCODE_STYLUS_BUTTON_PRIMARY = 308;
+    /**
+     * Key code constant: The secondary button on the barrel of a stylus.
+     * This is usually the second button from the tip of the stylus.
+     */
+    public static final int KEYCODE_STYLUS_BUTTON_SECONDARY = 309;
+    /**
+     * Key code constant: The tertiary button on the barrel of a stylus.
+     * This is usually the third button from the tip of the stylus.
+     */
+    public static final int KEYCODE_STYLUS_BUTTON_TERTIARY = 310;
+    /**
+     * Key code constant: A button on the tail end of a stylus.
+     * The use of this button does not usually correspond to the function of an eraser.
+     */
+    public static final int KEYCODE_STYLUS_BUTTON_TAIL = 311;
+    /**
+     * Key code constant: To open recent apps view (a.k.a. Overview).
+     * This key is handled by the framework and is never delivered to applications.
+     */
+    public static final int KEYCODE_RECENT_APPS = 312;
 
    /**
      * Integer value of the last KEYCODE. Increases as new keycodes are added to KeyEvent.
      * @hide
      */
     @TestApi
-    public static final int LAST_KEYCODE = KEYCODE_DEMO_APP_4;
+    public static final int LAST_KEYCODE = KEYCODE_RECENT_APPS;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
@@ -1975,7 +2006,6 @@ public class KeyEvent extends InputEvent implements Parcelable {
             case KeyEvent.KEYCODE_MEDIA_PLAY:
             case KeyEvent.KEYCODE_MEDIA_PAUSE:
             case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-            case KeyEvent.KEYCODE_MUTE:
             case KeyEvent.KEYCODE_HEADSETHOOK:
             case KeyEvent.KEYCODE_MEDIA_STOP:
             case KeyEvent.KEYCODE_MEDIA_NEXT:
@@ -1996,6 +2026,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
             case KeyEvent.KEYCODE_MENU:
             case KeyEvent.KEYCODE_SOFT_RIGHT:
             case KeyEvent.KEYCODE_HOME:
+            case KeyEvent.KEYCODE_RECENT_APPS:
             case KeyEvent.KEYCODE_BACK:
             case KeyEvent.KEYCODE_CALL:
             case KeyEvent.KEYCODE_ENDCALL:
@@ -2019,6 +2050,9 @@ public class KeyEvent extends InputEvent implements Parcelable {
             case KeyEvent.KEYCODE_SEARCH:
             case KeyEvent.KEYCODE_BRIGHTNESS_DOWN:
             case KeyEvent.KEYCODE_BRIGHTNESS_UP:
+            case KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_DOWN:
+            case KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_UP:
+            case KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_TOGGLE:
             case KeyEvent.KEYCODE_MEDIA_AUDIO_TRACK:
             case KeyEvent.KEYCODE_SYSTEM_NAVIGATION_UP:
             case KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN:

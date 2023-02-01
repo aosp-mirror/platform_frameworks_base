@@ -66,6 +66,8 @@ public class ZenLog {
     private static final int TYPE_SET_NOTIFICATION_POLICY = 16;
     private static final int TYPE_SET_CONSOLIDATED_ZEN_POLICY = 17;
     private static final int TYPE_MATCHES_CALL_FILTER = 18;
+    private static final int TYPE_RECORD_CALLER = 19;
+    private static final int TYPE_CHECK_REPEAT_CALLER = 20;
 
     private static int sNext;
     private static int sSize;
@@ -167,11 +169,28 @@ public class ZenLog {
             + hintsToString(newHints) + ",listeners=" + listenerCount);
     }
 
-    /*
+    /**
      * Trace calls to matchesCallFilter with the result of the call and the reason for the result.
      */
-    public static void traceMatchesCallFilter(boolean result, String reason) {
-        append(TYPE_MATCHES_CALL_FILTER, "result=" + result + ", reason=" + reason);
+    public static void traceMatchesCallFilter(boolean result, String reason, int callingUid) {
+        append(TYPE_MATCHES_CALL_FILTER, "result=" + result + ", reason=" + reason
+                + ", calling uid=" + callingUid);
+    }
+
+    /**
+     * Trace what information is available about an incoming call when it's recorded
+     */
+    public static void traceRecordCaller(boolean hasPhone, boolean hasUri) {
+        append(TYPE_RECORD_CALLER, "has phone number=" + hasPhone + ", has uri=" + hasUri);
+    }
+
+    /**
+     * Trace what information was provided about a caller when checking whether it is from a repeat
+     * caller
+     */
+    public static void traceCheckRepeatCaller(boolean found, boolean hasPhone, boolean hasUri) {
+        append(TYPE_CHECK_REPEAT_CALLER, "res=" + found + ", given phone number=" + hasPhone
+                + ", given uri=" + hasUri);
     }
 
     private static String subscribeResult(IConditionProvider provider, RemoteException e) {
@@ -198,6 +217,8 @@ public class ZenLog {
             case TYPE_SET_NOTIFICATION_POLICY: return "set_notification_policy";
             case TYPE_SET_CONSOLIDATED_ZEN_POLICY: return "set_consolidated_policy";
             case TYPE_MATCHES_CALL_FILTER: return "matches_call_filter";
+            case TYPE_RECORD_CALLER: return "record_caller";
+            case TYPE_CHECK_REPEAT_CALLER: return "check_repeat_caller";
             default: return "unknown";
         }
     }

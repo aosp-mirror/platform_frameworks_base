@@ -16,6 +16,8 @@
 
 package android.content;
 
+import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
+
 import android.annotation.SystemService;
 import android.app.Activity;
 import android.app.admin.DevicePolicyManager;
@@ -487,14 +489,19 @@ public class RestrictionsManager {
     }
 
     public Intent createLocalApprovalIntent() {
+        Intent result = null;
         try {
             if (mService != null) {
-                return mService.createLocalApprovalIntent();
+                result = mService.createLocalApprovalIntent();
+                if (result != null) {
+                    result.prepareToEnterProcess(LOCAL_FLAG_FROM_SYSTEM,
+                            mContext.getAttributionSource());
+                }
             }
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
-        return null;
+        return result;
     }
 
     /**

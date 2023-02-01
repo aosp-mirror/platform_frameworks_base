@@ -45,17 +45,23 @@ using namespace android;
 #define COLORSPACE_SRGB       1
 #define COLORSPACE_DISPLAY_P3 2
 
-static void usage(const char* pname, DisplayId displayId)
+static void usage(const char* pname, std::optional<PhysicalDisplayId> displayId)
 {
+    std::string defaultDisplayStr = "";
+    if (!displayId) {
+        defaultDisplayStr = "";
+    } else {
+        defaultDisplayStr = " (default: " + to_string(*displayId) + ")";
+    }
     fprintf(stderr,
             "usage: %s [-hp] [-d display-id] [FILENAME]\n"
             "   -h: this message\n"
             "   -p: save the file as a png.\n"
-            "   -d: specify the display ID to capture (default: %s)\n"
+            "   -d: specify the display ID to capture%s\n"
             "       see \"dumpsys SurfaceFlinger --display-id\" for valid display IDs.\n"
             "If FILENAME ends with .png it will be saved as a png.\n"
             "If FILENAME is not given, the results will be printed to stdout.\n",
-            pname, to_string(displayId).c_str());
+            pname, defaultDisplayStr.c_str());
 }
 
 static int32_t flinger2bitmapFormat(PixelFormat f)
@@ -121,12 +127,12 @@ static status_t notifyMediaScanner(const char* fileName) {
 
 int main(int argc, char** argv)
 {
-    std::optional<DisplayId> displayId = SurfaceComposerClient::getInternalDisplayId();
-    if (!displayId) {
-        fprintf(stderr, "Failed to get ID for internal display\n");
+    const std::vector<PhysicalDisplayId> ids = SurfaceComposerClient::getPhysicalDisplayIds();
+    if (ids.empty()) {
+        fprintf(stderr, "Failed to get ID for any displays.\n");
         return 1;
     }
-
+    std::optional<PhysicalDisplayId> displayId;
     const char* pname = argv[0];
     bool png = false;
     int c;
@@ -136,18 +142,34 @@ int main(int argc, char** argv)
                 png = true;
                 break;
             case 'd':
-                displayId = DisplayId::fromValue(atoll(optarg));
+                displayId = DisplayId::fromValue<PhysicalDisplayId>(atoll(optarg));
                 if (!displayId) {
-                    fprintf(stderr, "Invalid display ID\n");
+                    fprintf(stderr, "Invalid display ID: %s\n", optarg);
                     return 1;
                 }
                 break;
             case '?':
             case 'h':
-                usage(pname, *displayId);
+                if (ids.size() == 1) {
+                    displayId = ids.front();
+                } 
+                usage(pname, displayId);
                 return 1;
         }
     }
+
+    if (!displayId) { // no diplsay id is specified
+        displayId = ids.front();
+        if (ids.size() > 1) {
+            fprintf(stderr,
+                    "[Warning] Multiple displays were found, but no display id was specified! "
+                    "Defaulting to the first display found, however this default is not guaranteed "
+                    "to be consistent across captures. A display id should be specified.\n");
+            fprintf(stderr, "A display ID can be specified with the [-d display-id] option.\n");
+            fprintf(stderr, "See \"dumpsys SurfaceFlinger --display-id\" for valid display IDs.\n");
+        }
+    }
+
     argc -= optind;
     argv += optind;
 
@@ -169,7 +191,7 @@ int main(int argc, char** argv)
     }
 
     if (fd == -1) {
-        usage(pname, *displayId);
+        usage(pname, displayId);
         return 1;
     }
 
@@ -193,7 +215,7 @@ int main(int argc, char** argv)
     }
 
     ScreenCaptureResults captureResults = captureListener->waitForResults();
-    if (captureResults.result != NO_ERROR) {
+    if (!captureResults.fenceResult.ok()) {
         close(fd);
         return 1;
     }

@@ -214,7 +214,8 @@ public class FullScreenMagnificationControllerTest {
     }
 
     private void notRegistered_publicMethodsShouldBeBenign(int displayId) {
-        assertFalse(mFullScreenMagnificationController.isMagnifying(displayId));
+        checkActivatedAndMagnifyingState(/* activated= */false, /* magnifying= */false, displayId);
+
         assertFalse(
                 mFullScreenMagnificationController.magnificationRegionContains(displayId, 100,
                         100));
@@ -646,9 +647,9 @@ public class FullScreenMagnificationControllerTest {
                 .setScale(displayId, 1.5f, startCenter.x, startCenter.y, false,
                         SERVICE_ID_2);
         assertFalse(mFullScreenMagnificationController.resetIfNeeded(displayId, SERVICE_ID_1));
-        assertTrue(mFullScreenMagnificationController.isMagnifying(displayId));
+        checkActivatedAndMagnifyingState(/* activated= */true, /* magnifying= */true, displayId);
         assertTrue(mFullScreenMagnificationController.resetIfNeeded(displayId, SERVICE_ID_2));
-        assertFalse(mFullScreenMagnificationController.isMagnifying(displayId));
+        checkActivatedAndMagnifyingState(/* activated= */false, /* magnifying= */false, displayId);
     }
 
     @Test
@@ -667,7 +668,7 @@ public class FullScreenMagnificationControllerTest {
         assertTrue(mFullScreenMagnificationController.resetIfNeeded(displayId, false));
         verify(mRequestObserver).onFullScreenMagnificationChanged(eq(displayId),
                 eq(INITIAL_MAGNIFICATION_REGION), any(MagnificationConfig.class));
-        assertFalse(mFullScreenMagnificationController.isMagnifying(displayId));
+        checkActivatedAndMagnifyingState(/* activated= */false, /* magnifying= */false, displayId);
         assertFalse(mFullScreenMagnificationController.resetIfNeeded(displayId, false));
     }
 
@@ -731,7 +732,7 @@ public class FullScreenMagnificationControllerTest {
         mTargetAnimationListener.onAnimationUpdate(mMockValueAnimator);
         mStateListener.onAnimationEnd(mMockValueAnimator);
 
-        assertFalse(mFullScreenMagnificationController.isMagnifying(DISPLAY_0));
+        checkActivatedAndMagnifyingState(/* activated= */false, /* magnifying= */false, displayId);
         verify(lastAnimationCallback).onResult(true);
     }
 
@@ -749,8 +750,8 @@ public class FullScreenMagnificationControllerTest {
         mMessageCapturingHandler.sendAllMessages();
         br.onReceive(mMockContext, null);
         mMessageCapturingHandler.sendAllMessages();
-        assertFalse(mFullScreenMagnificationController.isMagnifying(DISPLAY_0));
-        assertFalse(mFullScreenMagnificationController.isMagnifying(DISPLAY_1));
+        checkActivatedAndMagnifyingState(/* activated= */false, /* magnifying= */false, DISPLAY_0);
+        checkActivatedAndMagnifyingState(/* activated= */false, /* magnifying= */false, DISPLAY_1);
     }
 
     @Test
@@ -768,7 +769,7 @@ public class FullScreenMagnificationControllerTest {
         mMessageCapturingHandler.sendAllMessages();
         callbacks.onUserContextChanged();
         mMessageCapturingHandler.sendAllMessages();
-        assertFalse(mFullScreenMagnificationController.isMagnifying(displayId));
+        checkActivatedAndMagnifyingState(/* activated= */false, /* magnifying= */false, displayId);
     }
 
     @Test
@@ -784,10 +785,10 @@ public class FullScreenMagnificationControllerTest {
         MagnificationCallbacks callbacks = getMagnificationCallbacks(displayId);
         zoomIn2xToMiddle(displayId);
         mMessageCapturingHandler.sendAllMessages();
-        assertTrue(mFullScreenMagnificationController.isMagnifying(displayId));
+        checkActivatedAndMagnifyingState(/* activated= */true, /* magnifying= */true, displayId);
         callbacks.onDisplaySizeChanged();
         mMessageCapturingHandler.sendAllMessages();
-        assertFalse(mFullScreenMagnificationController.isMagnifying(displayId));
+        checkActivatedAndMagnifyingState(/* activated= */false, /* magnifying= */false, DISPLAY_0);
     }
 
     @Test
@@ -1133,20 +1134,14 @@ public class FullScreenMagnificationControllerTest {
     }
 
     @Test
-    public void testSetForceShowMagnifiableBounds() {
+    public void testZoomTo1x_shouldActivatedAndForceShowMagnifiableBounds() {
         register(DISPLAY_0);
+        final float scale = 1.0f;
+        mFullScreenMagnificationController.setScaleAndCenter(
+                DISPLAY_0, scale, Float.NaN, Float.NaN, true, SERVICE_ID_1);
 
-        mFullScreenMagnificationController.setForceShowMagnifiableBounds(DISPLAY_0, true);
-
+        checkActivatedAndMagnifyingState(/* activated= */true, /* magnifying= */false, DISPLAY_0);
         verify(mMockWindowManager).setForceShowMagnifiableBounds(DISPLAY_0, true);
-    }
-
-    @Test
-    public void testIsForceShowMagnifiableBounds() {
-        register(DISPLAY_0);
-        mFullScreenMagnificationController.setForceShowMagnifiableBounds(DISPLAY_0, true);
-
-        assertTrue(mFullScreenMagnificationController.isForceShowMagnifiableBounds(DISPLAY_0));
     }
 
     @Test
@@ -1220,7 +1215,15 @@ public class FullScreenMagnificationControllerTest {
         float scale = 2.0f;
         mFullScreenMagnificationController.setScale(displayId, scale, startCenter.x, startCenter.y,
                 false, SERVICE_ID_1);
-        assertTrue(mFullScreenMagnificationController.isMagnifying(displayId));
+        checkActivatedAndMagnifyingState(/* activated= */true, /* magnifying= */true, displayId);
+    }
+
+    private void checkActivatedAndMagnifyingState(
+            boolean activated, boolean magnifying, int displayId) {
+        final boolean isActivated = mFullScreenMagnificationController.isActivated(displayId);
+        final boolean isMagnifying = mFullScreenMagnificationController.getScale(displayId) > 1.0f;
+        assertTrue(isActivated == activated);
+        assertTrue(isMagnifying == magnifying);
     }
 
     private MagnificationCallbacks getMagnificationCallbacks(int displayId) {

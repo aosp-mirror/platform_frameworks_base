@@ -15,13 +15,17 @@
  */
 
 #include "RecordingCanvas.h"
-#include <hwui/Paint.h>
 
 #include <GrRecordingContext.h>
+#include <SkMesh.h>
+#include <hwui/Paint.h>
 
 #include <experimental/type_traits>
+#include <log/log.h>
+#include <utility>
 
 #include "SkAndroidFrameworkUtils.h"
+#include "SkBlendMode.h"
 #include "SkCanvas.h"
 #include "SkCanvasPriv.h"
 #include "SkColor.h"
@@ -29,14 +33,19 @@
 #include "SkDrawShadowInfo.h"
 #include "SkImage.h"
 #include "SkImageFilter.h"
+#include "SkImageInfo.h"
 #include "SkLatticeIter.h"
-#include "SkMath.h"
+#include "SkPaint.h"
 #include "SkPicture.h"
+#include "SkRRect.h"
 #include "SkRSXform.h"
+#include "SkRect.h"
 #include "SkRegion.h"
 #include "SkTextBlob.h"
 #include "SkVertices.h"
 #include "VectorDrawable.h"
+#include "include/gpu/GpuTypes.h" // from Skia
+#include "include/gpu/GrDirectContext.h"
 #include "pipeline/skia/AnimatedDrawables.h"
 #include "pipeline/skia/FunctorDrawable.h"
 
@@ -58,16 +67,24 @@ static void copy_v(void* dst) {}
 
 template <typename S, typename... Rest>
 static void copy_v(void* dst, const S* src, int n, Rest&&... rest) {
-    SkASSERTF(((uintptr_t)dst & (alignof(S) - 1)) == 0,
-              "Expected %p to be aligned for at least %zu bytes.", dst, alignof(S));
-    sk_careful_memcpy(dst, src, n * sizeof(S));
-    copy_v(SkTAddOffset<void>(dst, n * sizeof(S)), std::forward<Rest>(rest)...);
+    LOG_FATAL_IF(((uintptr_t)dst & (alignof(S) - 1)) != 0,
+                 "Expected %p to be aligned for at least %zu bytes.",
+                 dst, alignof(S));
+    // If n is 0, there is nothing to copy into dst from src.
+    if (n > 0) {
+        memcpy(dst, src, n * sizeof(S));
+        dst = reinterpret_cast<void*>(
+                reinterpret_cast<uint8_t*>(dst) + n * sizeof(S));
+    }
+    // Repeat for the next items, if any
+    copy_v(dst, std::forward<Rest>(rest)...);
 }
 
 // Helper for getting back at arrays which have been copy_v'd together after an Op.
 template <typename D, typename T>
 static const D* pod(const T* op, size_t offset = 0) {
-    return SkTAddOffset<const D>(op + 1, offset);
+    return reinterpret_cast<const D*>(
+                reinterpret_cast<const uint8_t*>(op + 1) + offset);
 }
 
 namespace {
@@ -266,7 +283,6 @@ struct DrawDRRect final : Op {
     SkPaint paint;
     void draw(SkCanvas* c, const SkMatrix&) const { c->drawDRRect(outer, inner, paint); }
 };
-
 struct DrawAnnotation final : Op {
     static const auto kType = Type::DrawAnnotation;
     DrawAnnotation(const SkRect& rect, SkData* value) : rect(rect), value(sk_ref_sp(value)) {}
@@ -448,6 +464,47 @@ struct DrawVertices final : Op {
         c->drawVertices(vertices, mode, paint);
     }
 };
+struct DrawMesh final : Op {
+    static const auto kType = Type::DrawMesh;
+    DrawMesh(const SkMesh& mesh, sk_sp<SkBlender> blender, const SkPaint& paint)
+            : cpuMesh(mesh), blender(std::move(blender)), paint(paint) {
+        isGpuBased = false;
+    }
+
+    SkMesh cpuMesh;
+    mutable SkMesh gpuMesh;
+    sk_sp<SkBlender> blender;
+    SkPaint paint;
+    mutable bool isGpuBased;
+    mutable GrDirectContext::DirectContextID contextId;
+    void draw(SkCanvas* c, const SkMatrix&) const {
+        GrDirectContext* directContext = c->recordingContext()->asDirectContext();
+        GrDirectContext::DirectContextID id = directContext->directContextID();
+        if (!isGpuBased || contextId != id) {
+            sk_sp<SkMesh::VertexBuffer> vb =
+                    SkMesh::CopyVertexBuffer(directContext, cpuMesh.refVertexBuffer());
+            if (!cpuMesh.indexBuffer()) {
+                gpuMesh = SkMesh::Make(cpuMesh.refSpec(), cpuMesh.mode(), vb, cpuMesh.vertexCount(),
+                                       cpuMesh.vertexOffset(), cpuMesh.refUniforms(),
+                                       cpuMesh.bounds())
+                                  .mesh;
+            } else {
+                sk_sp<SkMesh::IndexBuffer> ib =
+                        SkMesh::CopyIndexBuffer(directContext, cpuMesh.refIndexBuffer());
+                gpuMesh = SkMesh::MakeIndexed(cpuMesh.refSpec(), cpuMesh.mode(), vb,
+                                              cpuMesh.vertexCount(), cpuMesh.vertexOffset(), ib,
+                                              cpuMesh.indexCount(), cpuMesh.indexOffset(),
+                                              cpuMesh.refUniforms(), cpuMesh.bounds())
+                                  .mesh;
+            }
+
+            isGpuBased = true;
+            contextId = id;
+        }
+
+        c->drawMesh(gpuMesh, blender, paint);
+    }
+};
 struct DrawAtlas final : Op {
     static const auto kType = Type::DrawAtlas;
     DrawAtlas(const SkImage* atlas, int count, SkBlendMode mode, const SkSamplingOptions& sampling,
@@ -554,7 +611,7 @@ public:
                 GrRecordingContext* directContext = c->recordingContext();
                 mLayerImageInfo =
                         c->imageInfo().makeWH(deviceBounds.width(), deviceBounds.height());
-                mLayerSurface = SkSurface::MakeRenderTarget(directContext, SkBudgeted::kYes,
+                mLayerSurface = SkSurface::MakeRenderTarget(directContext, skgpu::Budgeted::kYes,
                                                             mLayerImageInfo, 0,
                                                             kTopLeft_GrSurfaceOrigin, nullptr);
             }
@@ -589,18 +646,23 @@ public:
 };
 }
 
+static constexpr inline bool is_power_of_two(int value) {
+    return (value & (value - 1)) == 0;
+}
+
 template <typename T, typename... Args>
 void* DisplayListData::push(size_t pod, Args&&... args) {
     size_t skip = SkAlignPtr(sizeof(T) + pod);
-    SkASSERT(skip < (1 << 24));
+    LOG_FATAL_IF(skip >= (1 << 24));
     if (fUsed + skip > fReserved) {
-        static_assert(SkIsPow2(SKLITEDL_PAGE), "This math needs updating for non-pow2.");
+        static_assert(is_power_of_two(SKLITEDL_PAGE),
+                      "This math needs updating for non-pow2.");
         // Next greater multiple of SKLITEDL_PAGE.
         fReserved = (fUsed + skip + SKLITEDL_PAGE) & ~(SKLITEDL_PAGE - 1);
         fBytes.realloc(fReserved);
         LOG_ALWAYS_FATAL_IF(fBytes.get() == nullptr, "realloc(%zd) failed", fReserved);
     }
-    SkASSERT(fUsed + skip <= fReserved);
+    LOG_FATAL_IF((fUsed + skip) > fReserved);
     auto op = (T*)(fBytes.get() + fUsed);
     fUsed += skip;
     new (op) T{std::forward<Args>(args)...};
@@ -730,7 +792,7 @@ void DisplayListData::drawImageLattice(sk_sp<const SkImage> image, const SkCanva
     int fs = lattice.fRectTypes ? (xs + 1) * (ys + 1) : 0;
     size_t bytes = (xs + ys) * sizeof(int) + fs * sizeof(SkCanvas::Lattice::RectType) +
                    fs * sizeof(SkColor);
-    SkASSERT(lattice.fBounds);
+    LOG_FATAL_IF(!lattice.fBounds);
     void* pod = this->push<DrawImageLattice>(bytes, std::move(image), xs, ys, fs, *lattice.fBounds,
                                              dst, filter, paint, palette);
     copy_v(pod, lattice.fXDivs, xs, lattice.fYDivs, ys, lattice.fColors, fs, lattice.fRectTypes,
@@ -758,6 +820,10 @@ void DisplayListData::drawPoints(SkCanvas::PointMode mode, size_t count, const S
 }
 void DisplayListData::drawVertices(const SkVertices* vert, SkBlendMode mode, const SkPaint& paint) {
     this->push<DrawVertices>(0, vert, mode, paint);
+}
+void DisplayListData::drawMesh(const SkMesh& mesh, const sk_sp<SkBlender>& blender,
+                               const SkPaint& paint) {
+    this->push<DrawMesh>(0, mesh, blender, paint);
 }
 void DisplayListData::drawAtlas(const SkImage* atlas, const SkRSXform xforms[], const SkRect texs[],
                                 const SkColor colors[], int count, SkBlendMode xfermode,
@@ -1100,6 +1166,10 @@ void RecordingCanvas::onDrawPoints(SkCanvas::PointMode mode, size_t count, const
 void RecordingCanvas::onDrawVerticesObject(const SkVertices* vertices,
                                            SkBlendMode mode, const SkPaint& paint) {
     fDL->drawVertices(vertices, mode, paint);
+}
+void RecordingCanvas::onDrawMesh(const SkMesh& mesh, sk_sp<SkBlender> blender,
+                                 const SkPaint& paint) {
+    fDL->drawMesh(mesh, blender, paint);
 }
 void RecordingCanvas::onDrawAtlas2(const SkImage* atlas, const SkRSXform xforms[],
                                    const SkRect texs[], const SkColor colors[], int count,

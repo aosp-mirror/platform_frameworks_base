@@ -35,9 +35,16 @@ public interface KeyguardStateController extends CallbackController<Callback> {
     }
 
     /**
-     * If the lock screen is visible.
-     * The keyguard is also visible when the device is asleep or in always on mode, except when
-     * the screen timed out and the user can unlock by quickly pressing power.
+     * If the keyguard is visible. This is unrelated to being locked or not.
+     */
+    default boolean isVisible() {
+        return isShowing() && !isOccluded();
+    }
+
+    /**
+     * If the keyguard is showing. This includes when it's occluded by an activity, and when
+     * the device is asleep or in always on mode, except when the screen timed out and the user
+     * can unlock by quickly pressing power.
      *
      * This is unrelated to being locked or not.
      *
@@ -109,28 +116,15 @@ public interface KeyguardStateController extends CallbackController<Callback> {
      * we're bypassing
      */
     default long getShortenedFadingAwayDuration() {
-        if (isBypassFadingAnimation()) {
-            return getKeyguardFadingAwayDuration();
-        } else {
-            return getKeyguardFadingAwayDuration() / 2;
-        }
-    }
-
-    /**
-     * @return {@code true} if the current fading away animation is the fast bypass fading.
-     */
-    default boolean isBypassFadingAnimation() {
-        return false;
+        return getKeyguardFadingAwayDuration() / 2;
     }
 
     /**
      * Notifies that the Keyguard is fading away with the specified timings.
      * @param delay the precalculated animation delay in milliseconds
      * @param fadeoutDuration the duration of the exit animation, in milliseconds
-     * @param isBypassFading is this a fading away animation while bypassing
      */
-    default void notifyKeyguardFadingAway(long delay, long fadeoutDuration,
-            boolean isBypassFading) {
+    default void notifyKeyguardFadingAway(long delay, long fadeoutDuratio) {
     }
 
     /**

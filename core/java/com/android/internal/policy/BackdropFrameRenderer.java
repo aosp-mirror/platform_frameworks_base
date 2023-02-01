@@ -206,6 +206,10 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         try {
             Looper.prepare();
             synchronized (this) {
+                if (mRenderer == null) {
+                    // This can happen if 'releaseRenderer' is called immediately after 'start'.
+                    return;
+                }
                 mChoreographer = Choreographer.getInstance();
             }
             Looper.loop();

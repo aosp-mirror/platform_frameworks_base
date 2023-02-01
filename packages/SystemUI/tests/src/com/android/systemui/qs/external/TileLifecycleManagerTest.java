@@ -15,11 +15,17 @@
  */
 package com.android.systemui.qs.external;
 
+import static android.service.quicksettings.TileService.START_ACTIVITY_NEEDS_PENDING_INTENT;
+
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
@@ -29,6 +35,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.compat.CompatChanges;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -59,6 +66,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.MockitoSession;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -77,11 +85,16 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
     private Handler mHandler;
     private TileLifecycleManager mStateManager;
     private TestContextWrapper mWrappedContext;
+    private MockitoSession mMockitoSession;
 
     @Before
     public void setUp() throws Exception {
         setPackageEnabled(true);
         mTileServiceComponentName = new ComponentName(mContext, "FakeTileService.class");
+        mMockitoSession = mockitoSession()
+                .initMocks(this)
+                .mockStatic(CompatChanges.class)
+                .startMocking();
 
         // Stub.asInterface will just return itself.
         when(mMockTileService.queryLocalInterface(anyString())).thenReturn(mMockTileService);
@@ -106,7 +119,13 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
 
     @After
     public void tearDown() throws Exception {
-        mThread.quit();
+        if (mMockitoSession != null) {
+            mMockitoSession.finishMocking();
+        }
+        if (mThread != null) {
+            mThread.quit();
+        }
+
         mStateManager.handleDestroy();
     }
 
@@ -288,6 +307,50 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
         verify(falseContext).bindServiceAsUser(any(), captor.capture(), anyInt(), any());
 
         verify(falseContext).unbindService(captor.getValue());
+    }
+
+    @Test
+    public void testVersionUDoesNotBindsAllowBackgroundActivity() {
+        mockChangeEnabled(START_ACTIVITY_NEEDS_PENDING_INTENT, true);
+        Context falseContext = mock(Context.class);
+        TileLifecycleManager manager = new TileLifecycleManager(mHandler, falseContext,
+                mock(IQSService.class),
+                mMockPackageManagerAdapter,
+                mMockBroadcastDispatcher,
+                mTileServiceIntent,
+                mUser);
+
+        manager.setBindService(true);
+        int flags = Context.BIND_AUTO_CREATE
+                | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE
+                | Context.BIND_WAIVE_PRIORITY;
+
+        verify(falseContext).bindServiceAsUser(any(), any(), eq(flags), any());
+    }
+
+    @Test
+    public void testVersionLessThanUBindsAllowBackgroundActivity() {
+        mockChangeEnabled(START_ACTIVITY_NEEDS_PENDING_INTENT, false);
+        Context falseContext = mock(Context.class);
+        TileLifecycleManager manager = new TileLifecycleManager(mHandler, falseContext,
+                mock(IQSService.class),
+                mMockPackageManagerAdapter,
+                mMockBroadcastDispatcher,
+                mTileServiceIntent,
+                mUser);
+
+        manager.setBindService(true);
+        int flags = Context.BIND_AUTO_CREATE
+                | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE
+                | Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS
+                | Context.BIND_WAIVE_PRIORITY;
+
+        verify(falseContext).bindServiceAsUser(any(), any(), eq(flags), any());
+    }
+
+    private void mockChangeEnabled(long changeId, boolean enabled) {
+        doReturn(enabled).when(() -> CompatChanges.isChangeEnabled(eq(changeId), anyString(),
+                any(UserHandle.class)));
     }
 
     private static class TestContextWrapper extends ContextWrapper {

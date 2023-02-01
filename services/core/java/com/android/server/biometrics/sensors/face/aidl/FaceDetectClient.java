@@ -115,7 +115,8 @@ public class FaceDetectClient extends AcquisitionClient<AidlSession> implements 
         final AidlSession session = getFreshDaemon();
 
         if (session.hasContextMethods()) {
-            return session.getSession().detectInteractionWithContext(getOperationContext());
+            return session.getSession().detectInteractionWithContext(
+                    getOperationContext().toAidlContext());
         } else {
             return session.getSession().detectInteraction();
         }

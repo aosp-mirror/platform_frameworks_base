@@ -27,6 +27,6 @@
     <dimen name="settingslib_switch_title_margin">24dp</dimen>
 
     <!-- SwitchBar sub settings margin start / end -->
-    <dimen name="settingslib_switchbar_subsettings_margin_start">72dp</dimen>
+    <dimen name="settingslib_switchbar_subsettings_margin_start">56dp</dimen>
     <dimen name="settingslib_switchbar_subsettings_margin_end">16dp</dimen>
 </resources>

@@ -24,6 +24,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Build;
+import android.text.method.OffsetMapping;
 import android.text.style.ReplacementSpan;
 import android.text.style.UpdateLayout;
 import android.text.style.WrapTogetherSpan;
@@ -1095,10 +1096,27 @@ public class DynamicLayout extends Layout {
         }
 
         public void beforeTextChanged(CharSequence s, int where, int before, int after) {
-            // Intentionally empty
+            final DynamicLayout dynamicLayout = mLayout.get();
+            if (dynamicLayout != null && dynamicLayout.mDisplay instanceof OffsetMapping) {
+                final OffsetMapping transformedText = (OffsetMapping) dynamicLayout.mDisplay;
+                if (mTransformedTextUpdate == null) {
+                    mTransformedTextUpdate = new OffsetMapping.TextUpdate(where, before, after);
+                } else {
+                    mTransformedTextUpdate.where = where;
+                    mTransformedTextUpdate.before = before;
+                    mTransformedTextUpdate.after = after;
+                }
+                transformedText.originalToTransformed(mTransformedTextUpdate);
+            }
         }
 
         public void onTextChanged(CharSequence s, int where, int before, int after) {
+            final DynamicLayout dynamicLayout = mLayout.get();
+            if (dynamicLayout != null && dynamicLayout.mDisplay instanceof OffsetMapping) {
+                where = mTransformedTextUpdate.where;
+                before = mTransformedTextUpdate.before;
+                after = mTransformedTextUpdate.after;
+            }
             reflow(s, where, before, after);
         }
 
@@ -1106,14 +1124,34 @@ public class DynamicLayout extends Layout {
             // Intentionally empty
         }
 
+        /**
+         * Reflow the {@link DynamicLayout} at the given range from {@code start} to the
+         * {@code end}.
+         * If the display text in this {@link DynamicLayout} is a {@link OffsetMapping} instance
+         * (which means it's also a transformed text), it will transform the given range first and
+         * then reflow.
+         */
+        private void transformAndReflow(Spannable s, int start, int end) {
+            final DynamicLayout dynamicLayout = mLayout.get();
+            if (dynamicLayout != null && dynamicLayout.mDisplay instanceof OffsetMapping) {
+                final OffsetMapping transformedText = (OffsetMapping) dynamicLayout.mDisplay;
+                start = transformedText.originalToTransformed(start,
+                        OffsetMapping.MAP_STRATEGY_CHARACTER);
+                end = transformedText.originalToTransformed(end,
+                        OffsetMapping.MAP_STRATEGY_CHARACTER);
+            }
+            reflow(s, start, end - start, end - start);
+        }
+
         public void onSpanAdded(Spannable s, Object o, int start, int end) {
-            if (o instanceof UpdateLayout)
-                reflow(s, start, end - start, end - start);
+            if (o instanceof UpdateLayout) {
+                transformAndReflow(s, start, end);
+            }
         }
 
         public void onSpanRemoved(Spannable s, Object o, int start, int end) {
             if (o instanceof UpdateLayout)
-                reflow(s, start, end - start, end - start);
+                transformAndReflow(s, start, end);
         }
 
         public void onSpanChanged(Spannable s, Object o, int start, int end, int nstart, int nend) {
@@ -1123,12 +1161,13 @@ public class DynamicLayout extends Layout {
                     // instead of causing an exception
                     start = 0;
                 }
-                reflow(s, start, end - start, end - start);
-                reflow(s, nstart, nend - nstart, nend - nstart);
+                transformAndReflow(s, start, end);
+                transformAndReflow(s, nstart, nend);
             }
         }
 
         private WeakReference<DynamicLayout> mLayout;
+        private OffsetMapping.TextUpdate mTransformedTextUpdate;
     }
 
     @Override

@@ -17,11 +17,8 @@
 package com.android.server.job;
 
 import android.annotation.Nullable;
-import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.util.proto.ProtoOutputStream;
-
-import java.util.List;
 
 /**
  * JobScheduler local system service interface.
@@ -30,15 +27,12 @@ import java.util.List;
 public interface JobSchedulerInternal {
 
     /**
-     * Returns a list of pending jobs scheduled by the system service.
-     */
-    List<JobInfo> getSystemScheduledPendingJobs();
-
-    /**
      * Cancel the jobs for a given uid (e.g. when app data is cleared)
+     *
+     * @param includeProxiedJobs Include jobs scheduled for this UID by other apps
      */
-    void cancelJobsForUid(int uid, @JobParameters.StopReason int reason, int debugReasonCode,
-            String debugReason);
+    void cancelJobsForUid(int uid, boolean includeProxiedJobs,
+            @JobParameters.StopReason int reason, int debugReasonCode, String debugReason);
 
     /**
      * These are for activity manager to communicate to use what is currently performing backups.

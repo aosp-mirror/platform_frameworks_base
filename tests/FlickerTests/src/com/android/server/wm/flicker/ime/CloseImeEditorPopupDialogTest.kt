@@ -16,23 +16,17 @@
 
 package com.android.server.wm.flicker.ime
 
-import android.app.Instrumentation
-import android.platform.test.annotations.Postsubmit
-import android.view.Surface
-import android.view.WindowManagerPolicyConstants
+import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
-import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.FlickerBuilderProvider
-import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.annotation.Group4
-import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.BaseTest
+import com.android.server.wm.flicker.FlickerBuilder
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.ImeEditorPopupDialogAppHelper
-import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.statusBarWindowIsVisible
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.traces.region.RegionSubject
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,73 +37,61 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group4
-class CloseImeEditorPopupDialogTest(private val testSpec: FlickerTestParameter) {
-    private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
-    private val imeTestApp = ImeEditorPopupDialogAppHelper(instrumentation, testSpec.startRotation)
+class CloseImeEditorPopupDialogTest(flicker: FlickerTest) : BaseTest(flicker) {
+    private val imeTestApp = ImeEditorPopupDialogAppHelper(instrumentation)
 
-    @FlickerBuilderProvider
-    fun buildFlicker(): FlickerBuilder {
-        return FlickerBuilder(instrumentation).apply {
-            setup {
-                eachRun {
-                    imeTestApp.launchViaIntent(wmHelper)
-                    imeTestApp.openIME(device, wmHelper)
-                }
-            }
-            transitions {
-                imeTestApp.dismissDialog(wmHelper)
-                instrumentation.uiAutomation.syncInputTransactions()
-            }
-            teardown {
-                eachRun {
-                    device.pressHome()
-                    wmHelper.waitForHomeActivityVisible()
-                    imeTestApp.exit()
-                }
-            }
+    /** {@inheritDoc} */
+    override val transition: FlickerBuilder.() -> Unit = {
+        setup {
+            tapl.setExpectedRotationCheckEnabled(false)
+            imeTestApp.launchViaIntent(wmHelper)
+            imeTestApp.openIME(wmHelper)
+        }
+        transitions {
+            imeTestApp.dismissDialog(wmHelper)
+            wmHelper.StateSyncBuilder().withImeGone().waitForAndVerify()
+        }
+        teardown {
+            tapl.goHome()
+            wmHelper.StateSyncBuilder().withHomeActivityVisible().waitForAndVerify()
+            imeTestApp.exit(wmHelper)
         }
     }
 
-    @Postsubmit
-    @Test
-    fun navBarWindowIsVisible() = testSpec.navBarWindowIsVisible()
+    @Presubmit @Test fun imeWindowBecameInvisible() = flicker.imeWindowBecomesInvisible()
 
-    @Postsubmit
-    @Test
-    fun statusBarWindowIsVisible() = testSpec.statusBarWindowIsVisible()
-
-    @Postsubmit
-    @Test
-    fun imeWindowBecameInvisible() = testSpec.imeWindowBecomesInvisible()
-
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeLayerAndImeSnapshotVisibleOnScreen() {
-        testSpec.assertLayers {
-            this.isVisible(FlickerComponentName.IME)
-                    .then()
-                    .isVisible(FlickerComponentName.IME_SNAPSHOT)
-                    .then()
-                    .isInvisible(FlickerComponentName.IME_SNAPSHOT)
-                    .isInvisible(FlickerComponentName.IME)
+        flicker.assertLayers {
+            this.isVisible(ComponentNameMatcher.IME)
+                .then()
+                .isVisible(ComponentNameMatcher.IME_SNAPSHOT)
+                .then()
+                .isInvisible(ComponentNameMatcher.IME_SNAPSHOT, isOptional = true)
+                .isInvisible(ComponentNameMatcher.IME)
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun imeSnapshotAssociatedOnAppVisibleRegion() {
-        testSpec.assertLayers {
+        flicker.assertLayers {
             this.invoke("imeSnapshotAssociatedOnAppVisibleRegion") {
-                val imeSnapshotLayers = it.subjects.filter {
-                    subject -> subject.name.contains(
-                        FlickerComponentName.IME_SNAPSHOT.toLayerName()) && subject.isVisible
-                }
+                val imeSnapshotLayers =
+                    it.subjects.filter { subject ->
+                        subject.name.contains(ComponentNameMatcher.IME_SNAPSHOT.toLayerName()) &&
+                            subject.isVisible
+                    }
                 if (imeSnapshotLayers.isNotEmpty()) {
-                    val visibleAreas = imeSnapshotLayers.mapNotNull { imeSnapshotLayer ->
-                        imeSnapshotLayer.layer?.visibleRegion }.toTypedArray()
+                    val visibleAreas =
+                        imeSnapshotLayers
+                            .mapNotNull { imeSnapshotLayer ->
+                                imeSnapshotLayer.layer?.visibleRegion
+                            }
+                            .toTypedArray()
                     val imeVisibleRegion = RegionSubject.assertThat(visibleAreas, this, timestamp)
-                    val appVisibleRegion = it.visibleRegion(imeTestApp.component)
+                    val appVisibleRegion = it.visibleRegion(imeTestApp)
                     if (imeVisibleRegion.region.isNotEmpty) {
                         imeVisibleRegion.coversAtMost(appVisibleRegion.region)
                     }
@@ -121,16 +103,10 @@ class CloseImeEditorPopupDialogTest(private val testSpec: FlickerTestParameter) 
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTestParameter> {
-            return FlickerTestParameterFactory.getInstance()
-                    .getConfigNonRotationTests(
-                            repetitions = 2,
-                            supportedNavigationModes = listOf(
-                                    WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
-                                    WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                            ),
-                            supportedRotations = listOf(Surface.ROTATION_0)
-                    )
+        fun getParams(): Collection<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+            )
         }
     }
 }

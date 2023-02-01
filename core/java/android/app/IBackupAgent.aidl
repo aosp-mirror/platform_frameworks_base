@@ -16,9 +16,12 @@
 
 package android.app;
 
+import android.app.backup.BackupRestoreEventLogger;
 import android.app.backup.IBackupCallback;
 import android.app.backup.IBackupManager;
 import android.os.ParcelFileDescriptor;
+
+import com.android.internal.infra.AndroidFuture;
  
 /**
  * Interface presented by applications being asked to participate in the
@@ -193,4 +196,14 @@ oneway interface IBackupAgent {
      * @param message The message to be passed to the agent's application in an exception.
      */
     void fail(String message);
+
+    /**
+     * Provides the logging results that were accumulated in the BackupAgent during a backup or
+     * restore operation. This method should be called after the agent completes its backup or
+     * restore.
+     *
+     * @param resultsFuture a future that is completed with the logging results.
+     */
+    void getLoggerResults(
+            in AndroidFuture<List<BackupRestoreEventLogger.DataTypeResult>> resultsFuture);
 }

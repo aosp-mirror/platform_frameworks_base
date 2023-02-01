@@ -115,7 +115,7 @@ public class FaceEnrollClient extends EnrollClient<AidlSession> {
     @Override
     protected ClientMonitorCallback wrapCallbackForStart(@NonNull ClientMonitorCallback callback) {
         return new ClientMonitorCompositeCallback(mPreviewHandleDeleterCallback,
-                getLogger().createALSCallback(true /* startWithClient */), callback);
+                getLogger().getAmbientLightProbe(true /* startWithClient */), callback);
     }
 
     @Override
@@ -199,7 +199,8 @@ public class FaceEnrollClient extends EnrollClient<AidlSession> {
 
         if (session.hasContextMethods()) {
             return session.getSession().enrollWithContext(
-                    hat, EnrollmentType.DEFAULT, features, mHwPreviewHandle, getOperationContext());
+                    hat, EnrollmentType.DEFAULT, features, mHwPreviewHandle,
+                    getOperationContext().toAidlContext());
         } else {
             return session.getSession().enroll(hat, EnrollmentType.DEFAULT, features,
                     mHwPreviewHandle);

@@ -25,6 +25,7 @@
     android:focusable="true"
     android:clipChildren="false"
     android:clipToPadding="false"
+    android:paddingStart="8dp"
     >
 
         <LinearLayout

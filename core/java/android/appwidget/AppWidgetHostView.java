@@ -66,7 +66,7 @@ import java.util.concurrent.Executor;
  * between updates, and will try recycling old views for each incoming
  * {@link RemoteViews}.
  */
-public class AppWidgetHostView extends FrameLayout {
+public class AppWidgetHostView extends FrameLayout implements AppWidgetHost.AppWidgetHostListener {
 
     static final String TAG = "AppWidgetHostView";
     private static final String KEY_JAILED_ARRAY = "jail";
@@ -103,7 +103,6 @@ public class AppWidgetHostView extends FrameLayout {
     private boolean mOnLightBackground;
     private SizeF mCurrentSize = null;
     private RemoteViews.ColorResources mColorResources = null;
-    private SparseIntArray mColorMapping = null;
     // Stores the last remote views last inflated.
     private RemoteViews mLastInflatedRemoteViews = null;
     private long mLastInflatedRemoteViewsId = -1;
@@ -493,8 +492,11 @@ public class AppWidgetHostView extends FrameLayout {
     /**
      * Update the AppWidgetProviderInfo for this view, and reset it to the
      * initial layout.
+     *
+     * @hide
      */
-    void resetAppWidget(AppWidgetProviderInfo info) {
+    @Override
+    public void onUpdateProviderInfo(@Nullable AppWidgetProviderInfo info) {
         setAppWidget(mAppWidgetId, info);
         mViewMode = VIEW_MODE_NOINIT;
         updateAppWidget(null);
@@ -504,6 +506,7 @@ public class AppWidgetHostView extends FrameLayout {
      * Process a set of {@link RemoteViews} coming in as an update from the
      * AppWidget provider. Will animate into these new views as needed
      */
+    @Override
     public void updateAppWidget(RemoteViews remoteViews) {
         mLastInflatedRemoteViews = remoteViews;
         applyRemoteViews(remoteViews, true);
@@ -694,8 +697,11 @@ public class AppWidgetHostView extends FrameLayout {
     /**
      * Process data-changed notifications for the specified view in the specified
      * set of {@link RemoteViews} views.
+     *
+     * @hide
      */
-    void viewDataChanged(int viewId) {
+    @Override
+    public void onViewDataChanged(int viewId) {
         View v = findViewById(viewId);
         if ((v != null) && (v instanceof AdapterView<?>)) {
             AdapterView<?> adapterView = (AdapterView<?>) v;
@@ -900,11 +906,19 @@ public class AppWidgetHostView extends FrameLayout {
      * {@link android.R.color#system_neutral1_500}.
      */
     public void setColorResources(@NonNull SparseIntArray colorMapping) {
-        if (mColorMapping != null && isSameColorMapping(mColorMapping, colorMapping)) {
+        if (mColorResources != null
+                && isSameColorMapping(mColorResources.getColorMapping(), colorMapping)) {
             return;
         }
-        mColorMapping = colorMapping.clone();
-        mColorResources = RemoteViews.ColorResources.create(mContext, mColorMapping);
+        setColorResources(RemoteViews.ColorResources.create(mContext, colorMapping));
+    }
+
+    /** @hide **/
+    public void setColorResources(RemoteViews.ColorResources colorResources) {
+        if (colorResources == mColorResources) {
+            return;
+        }
+        mColorResources = colorResources;
         mColorMappingChanged = true;
         mViewMode = VIEW_MODE_NOINIT;
         reapplyLastRemoteViews();
@@ -934,7 +948,6 @@ public class AppWidgetHostView extends FrameLayout {
     public void resetColorResources() {
         if (mColorResources != null) {
             mColorResources = null;
-            mColorMapping = null;
             mColorMappingChanged = true;
             mViewMode = VIEW_MODE_NOINIT;
             reapplyLastRemoteViews();

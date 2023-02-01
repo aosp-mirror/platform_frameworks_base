@@ -20,18 +20,19 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
+import android.app.BroadcastOptions;
 import android.app.trust.TrustManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.hardware.display.DisplayManagerInternal;
-import android.hardware.input.InputManagerInternal;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.BatteryStats;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IWakeLockCallback;
 import android.os.Looper;
@@ -59,11 +60,13 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
+import com.android.server.input.InputManagerInternal;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.PrintWriter;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -138,6 +141,7 @@ public class Notifier {
     private final Executor mBackgroundExecutor;
     private final Intent mScreenOnIntent;
     private final Intent mScreenOffIntent;
+    private final Bundle mScreenOnOffOptions;
 
     // True if the device should suspend when the screen is off due to proximity.
     private final boolean mSuspendWhenScreenOffDueToProximityConfig;
@@ -203,6 +207,7 @@ public class Notifier {
         mScreenOffIntent.addFlags(
                 Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND
                 | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
+        mScreenOnOffOptions = createScreenOnOffBroadcastOptions();
 
         mSuspendWhenScreenOffDueToProximityConfig = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_suspendWhenScreenOffDueToProximity);
@@ -217,6 +222,27 @@ public class Notifier {
         } catch (RemoteException ex) { }
         FrameworkStatsLog.write(FrameworkStatsLog.INTERACTIVE_STATE_CHANGED,
                 FrameworkStatsLog.INTERACTIVE_STATE_CHANGED__STATE__ON);
+    }
+
+    /**
+     * Create the {@link BroadcastOptions} bundle that will be used with sending the
+     * {@link Intent#ACTION_SCREEN_ON} and {@link Intent#ACTION_SCREEN_OFF} broadcasts.
+     */
+    private Bundle createScreenOnOffBroadcastOptions() {
+        final BroadcastOptions options = BroadcastOptions.makeBasic();
+        // This allows the broadcasting system to discard any older broadcasts
+        // waiting to be delivered to a process.
+        options.setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT);
+        // Set namespace and key to identify which older broadcasts can be discarded.
+        // We could use any strings here but namespace needs to be unlikely to be reused with in
+        // the system_server process, as that could result in potentially discarding some
+        // non-screen on/off related broadcast.
+        options.setDeliveryGroupMatchingKey(
+                UUID.randomUUID().toString(),
+                Intent.ACTION_SCREEN_ON);
+        // This allows the broadcast delivery to be delayed to apps in the Cached state.
+        options.setDeferUntilActive(true);
+        return options.toBundle();
     }
 
     /**
@@ -571,7 +597,8 @@ public class Notifier {
     /**
      * Called when there has been user activity.
      */
-    public void onUserActivity(int displayGroupId, int event, int uid) {
+    public void onUserActivity(int displayGroupId, @PowerManager.UserActivityEvent int event,
+            int uid) {
         if (DEBUG) {
             Slog.d(TAG, "onUserActivity: event=" + event + ", uid=" + uid);
         }
@@ -613,7 +640,7 @@ public class Notifier {
         } catch (RemoteException ex) {
             // Ignore
         }
-        FrameworkStatsLog.write(FrameworkStatsLog.DISPLAY_WAKE_REPORTED, reason);
+        FrameworkStatsLog.write(FrameworkStatsLog.DISPLAY_WAKE_REPORTED, reason, reasonUid);
     }
 
     /**
@@ -712,7 +739,8 @@ public class Notifier {
         }
         TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
         tm.notifyUserActivity();
-        mPolicy.userActivity();
+        mInputManagerInternal.notifyUserActivity();
+        mPolicy.userActivity(displayGroupId, event);
         mFaceDownDetector.userActivity(event);
         mScreenUndimDetector.userActivity(displayGroupId);
     }
@@ -786,17 +814,19 @@ public class Notifier {
         }
 
         if (mActivityManagerInternal.isSystemReady()) {
-            mContext.sendOrderedBroadcastAsUser(mScreenOnIntent, UserHandle.ALL, null,
-                    mWakeUpBroadcastDone, mHandler, 0, null, null);
+            final boolean ordered = !mActivityManagerInternal.isModernQueueEnabled();
+            mActivityManagerInternal.broadcastIntent(mScreenOnIntent, mWakeUpBroadcastDone,
+                    null, ordered, UserHandle.USER_ALL, null, null, mScreenOnOffOptions);
         } else {
             EventLog.writeEvent(EventLogTags.POWER_SCREEN_BROADCAST_STOP, 2, 1);
             sendNextBroadcast();
         }
     }
 
-    private final BroadcastReceiver mWakeUpBroadcastDone = new BroadcastReceiver() {
+    private final IIntentReceiver mWakeUpBroadcastDone = new IIntentReceiver.Stub() {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void performReceive(Intent intent, int resultCode, String data, Bundle extras,
+                boolean ordered, boolean sticky, int sendingUser) {
             EventLog.writeEvent(EventLogTags.POWER_SCREEN_BROADCAST_DONE, 1,
                     SystemClock.uptimeMillis() - mBroadcastStartTime, 1);
             sendNextBroadcast();
@@ -809,17 +839,19 @@ public class Notifier {
         }
 
         if (mActivityManagerInternal.isSystemReady()) {
-            mContext.sendOrderedBroadcastAsUser(mScreenOffIntent, UserHandle.ALL, null,
-                    mGoToSleepBroadcastDone, mHandler, 0, null, null);
+            final boolean ordered = !mActivityManagerInternal.isModernQueueEnabled();
+            mActivityManagerInternal.broadcastIntent(mScreenOffIntent, mGoToSleepBroadcastDone,
+                    null, ordered, UserHandle.USER_ALL, null, null, mScreenOnOffOptions);
         } else {
             EventLog.writeEvent(EventLogTags.POWER_SCREEN_BROADCAST_STOP, 3, 1);
             sendNextBroadcast();
         }
     }
 
-    private final BroadcastReceiver mGoToSleepBroadcastDone = new BroadcastReceiver() {
+    private final IIntentReceiver mGoToSleepBroadcastDone = new IIntentReceiver.Stub() {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void performReceive(Intent intent, int resultCode, String data, Bundle extras,
+                boolean ordered, boolean sticky, int sendingUser) {
             EventLog.writeEvent(EventLogTags.POWER_SCREEN_BROADCAST_DONE, 0,
                     SystemClock.uptimeMillis() - mBroadcastStartTime, 1);
             sendNextBroadcast();

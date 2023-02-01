@@ -67,6 +67,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -78,7 +79,6 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.IDisplayFoldListener;
-import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
@@ -92,6 +92,7 @@ import com.android.server.wm.DisplayRotation;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 
 /**
  * This interface supplies all UI-specific behavior of the window manager.  An
@@ -137,10 +138,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     @IntDef({NAV_BAR_LEFT, NAV_BAR_RIGHT, NAV_BAR_BOTTOM})
     @interface NavigationBarPosition {}
 
-    @Retention(SOURCE)
-    @IntDef({ALT_BAR_UNKNOWN, ALT_BAR_LEFT, ALT_BAR_RIGHT, ALT_BAR_BOTTOM, ALT_BAR_TOP})
-    @interface AltBarPosition {}
-
     /**
      * Pass this event to the user / app.  To be returned from
      * {@link #interceptKeyBeforeQueueing}.
@@ -156,10 +153,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     int FINISH_LAYOUT_REDO_ANIM = 0x0008;
     /** Layer for the screen off animation */
     int COLOR_FADE_LAYER = 0x40000001;
-    /** Layer for Input overlays for capturing inputs for gesture detection, etc. */
-    int INPUT_DISPLAY_OVERLAY_LAYER = 0x7f000000;
-    /** Layer for Screen Decoration: The top most visible layer just below input overlay layers */
-    int SCREEN_DECOR_DISPLAY_OVERLAY_LAYER = INPUT_DISPLAY_OVERLAY_LAYER - 1;
 
     /**
      * Register shortcuts for window manager to dispatch.
@@ -176,10 +169,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     void onKeyguardOccludedChangedLw(boolean occluded);
 
     /**
-     * Applies a keyguard occlusion change if one happened.
-     * @param transitionStarted Whether keyguard (un)occlude transition is starting or not.
+     * @param notify {@code true} if the status change should be immediately notified via
+     *        {@link com.android.internal.policy.IKeyguardService}
      */
-    int applyKeyguardOcclusionChange(boolean transitionStarted);
+    int applyKeyguardOcclusionChange(boolean notify);
 
     /**
      * Interface to the Window Manager state associated with a particular
@@ -339,14 +332,38 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         /**
          * Hint to window manager that the user is interacting with a display that should be treated
          * as the top display.
+         *
+         * Calling this method does not guarantee that the display will be moved to top. The window
+         * manager will make the final decision whether or not to move the display.
          */
-        void moveDisplayToTop(int displayId);
+        void moveDisplayToTopIfAllowed(int displayId);
 
         /**
          * Return whether the app transition state is idle.
          * @return {@code true} if app transition state is idle on the default display.
          */
         boolean isAppTransitionStateIdle();
+
+        /**
+         * Enables the screen if all conditions are met.
+         */
+        void enableScreenIfNeeded();
+
+        /**
+         * Updates the current screen rotation based on the current state of the world.
+         *
+         * @param alwaysSendConfiguration Flag to force a new configuration to be evaluated.
+         *                                This can be used when there are other parameters in
+         *                                configuration that are changing.
+         * @param forceRelayout If true, the window manager will always do a relayout of its
+         *                      windows even if the rotation hasn't changed.
+         */
+        void updateRotation(boolean alwaysSendConfiguration, boolean forceRelayout);
+
+        /**
+         * Invoked when a screenshot is taken of the given display to notify registered listeners.
+         */
+        List<ComponentName> notifyScreenshotListeners(int displayId);
     }
 
     /**
@@ -395,8 +412,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      *
      * @param context The system context we are running in.
      */
-    public void init(Context context, IWindowManager windowManager,
-            WindowManagerFuncs windowManagerFuncs);
+    void init(Context context, WindowManagerFuncs windowManagerFuncs);
 
     /**
      * Check permissions when adding a window.
@@ -996,7 +1012,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * Called when userActivity is signalled in the power manager.
      * This is safe to call from any thread, with any window manager locks held or not.
      */
-    public void userActivity();
+    void userActivity(int displayGroupId, int event);
 
     /**
      * Called when we have finished booting and can now display the home
@@ -1119,11 +1135,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
 
     /**
      * Notifies the keyguard to start fading out.
+     *  @param startTime the start time of the animation in uptime milliseconds
      *
-     * @param startTime the start time of the animation in uptime milliseconds
-     * @param fadeoutDuration the duration of the exit animation, in milliseconds
      */
-    void startKeyguardExitAnimation(long startTime, long fadeoutDuration);
+    void startKeyguardExitAnimation(long startTime);
 
     /**
      * Called when System UI has been started.
@@ -1179,4 +1194,12 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * A new window on default display has been focused.
      */
     default void onDefaultDisplayFocusChangedLw(WindowState newFocus) {}
+
+    /**
+     * Returns {@code true} if the key will be handled globally and not forwarded to all apps.
+     *
+     * @param keyCode the key code to check
+     * @return {@code true} if the key will be handled globally.
+     */
+    boolean isGlobalKey(int keyCode);
 }

@@ -22,6 +22,11 @@
 #include "SkiaDisplayList.h"
 #include "pipeline/skia/AnimatedDrawables.h"
 
+class SkBitmap;
+class SkMatrix;
+class SkPaint;
+class SkRRect;
+
 namespace android {
 namespace uirenderer {
 namespace skiapipeline {
@@ -45,7 +50,7 @@ public:
         initDisplayList(renderNode, width, height);
     }
 
-    virtual void punchHole(const SkRRect& rect) override;
+    virtual void punchHole(const SkRRect& rect, float alpha) override;
 
     virtual void finishRecording(uirenderer::RenderNode* destination) override;
     std::unique_ptr<SkiaDisplayList> finishRecording();

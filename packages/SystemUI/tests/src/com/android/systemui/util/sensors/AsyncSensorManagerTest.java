@@ -28,8 +28,8 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.SensorManagerPlugin;
-import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.concurrency.FakeThreadFactory;
 import com.android.systemui.util.time.FakeSystemClock;

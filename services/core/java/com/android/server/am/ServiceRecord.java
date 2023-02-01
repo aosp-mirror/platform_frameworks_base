@@ -19,7 +19,9 @@ package com.android.server.am;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.os.PowerExemptionManager.REASON_DENIED;
+import static android.os.Process.INVALID_UID;
 
+import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOREGROUND_SERVICE;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -27,6 +29,7 @@ import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.BackgroundStartPrivileges;
 import android.app.IApplicationThread;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -118,6 +121,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     boolean fgWaiting;      // is a timeout for going foreground already scheduled?
     boolean isNotAppComponentUsage; // is service binding not considered component/package usage?
     boolean isForeground;   // is service currently in foreground mode?
+    boolean inSharedIsolatedProcess; // is the service in a shared isolated process
     int foregroundId;       // Notification ID of last foreground req.
     Notification foregroundNoti; // Notification record of foreground state.
     long fgDisplayTime;     // time at which the FGS notification should become visible
@@ -128,6 +132,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     boolean delayedStop;    // service has been stopped but is in a delayed start?
     boolean stopIfKilled;   // last onStart() said to stop if service killed?
     boolean callStart;      // last onStart() has asked to always be called on restart.
+    int startCommandResult; // last result from onStartCommand(), only for dumpsys.
     int executeNesting;     // number of outstanding operations keeping foreground.
     boolean executeFg;      // should we be executing in the foreground?
     long executingStart;    // start time of last execute request.
@@ -151,18 +156,20 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
     // any current binding to this service has BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS flag?
     private boolean mIsAllowedBgActivityStartsByBinding;
-    // is this service currently allowed to start activities from background by providing
-    // allowBackgroundActivityStarts=true to startServiceLocked()?
-    private boolean mIsAllowedBgActivityStartsByStart;
     // used to clean up the state of mIsAllowedBgActivityStartsByStart after a timeout
     private Runnable mCleanUpAllowBgActivityStartsByStartCallback;
     private ProcessRecord mAppForAllowingBgActivityStartsByStart;
-    // These are the originating tokens that currently allow bg activity starts by service start.
-    // This is used to trace back the grant when starting activities. We only pass such token to the
-    // ProcessRecord if it's the *only* cause for bg activity starts exemption, otherwise we pass
-    // null.
+    // These are the privileges that currently allow bg activity starts by service start.
+    // Each time the contents of this list change #mBackgroundStartPrivilegesByStartMerged has to
+    // be updated to reflect the merged state. The merged state retains the attribution to the
+    // originating token only if it is the only cause for being privileged.
     @GuardedBy("ams")
-    private List<IBinder> mBgActivityStartsByStartOriginatingTokens = new ArrayList<>();
+    private ArrayList<BackgroundStartPrivileges> mBackgroundStartPrivilegesByStart =
+            new ArrayList<>();
+
+    // merged privileges for mBackgroundStartPrivilegesByStart (for performance)
+    private BackgroundStartPrivileges mBackgroundStartPrivilegesByStartMerged =
+            BackgroundStartPrivileges.NONE;
 
     // allow while-in-use permissions in foreground service or not.
     // while-in-use permissions in FGS started from background might be restricted.
@@ -201,10 +208,16 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     ActivityManagerService.FgsTempAllowListItem mInfoTempFgsAllowListReason;
     // Is the same mInfoAllowStartForeground string has been logged before? Used for dedup.
     boolean mLoggedInfoAllowStartForeground;
-    // The number of times Service.startForeground() is called;
+    // The number of times Service.startForeground() is called, after this service record is
+    // created. (i.e. due to "bound" or "start".) It never decreases, even when stopForeground()
+    // is called.
     int mStartForegroundCount;
     // Last time mAllowWhileInUsePermissionInFgs or mAllowStartForeground is set.
     long mLastSetFgsRestrictionTime;
+
+    // This is a service record of a FGS delegate (not a service record of a real service)
+    boolean mIsFgsDelegate;
+    @Nullable ForegroundServiceDelegation mFgsDelegation;
 
     String stringName;      // caching of toString
 
@@ -233,6 +246,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         final boolean taskRemoved;
         final int id;
         final int callingId;
+        final String mCallingProcessName;
         final Intent intent;
         final NeededUriGrants neededGrants;
         long deliveredTime;
@@ -242,14 +256,16 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
         String stringName;      // caching of toString
 
-        StartItem(ServiceRecord _sr, boolean _taskRemoved, int _id, Intent _intent,
-                NeededUriGrants _neededGrants, int _callingId) {
+        StartItem(ServiceRecord _sr, boolean _taskRemoved, int _id,
+                Intent _intent, NeededUriGrants _neededGrants, int _callingId,
+                String callingProcessName) {
             sr = _sr;
             taskRemoved = _taskRemoved;
             id = _id;
             intent = _intent;
             neededGrants = _neededGrants;
             callingId = _callingId;
+            mCallingProcessName = callingProcessName;
         }
 
         UriPermissionOwner getUriPermissionsLocked() {
@@ -305,6 +321,84 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                             // start() arguments which been delivered.
     final ArrayList<StartItem> pendingStarts = new ArrayList<StartItem>();
                             // start() arguments that haven't yet been delivered.
+
+    /**
+     * Information specific to "SHORT_SERVICE" FGS.
+     */
+    class ShortFgsInfo {
+        /** Time FGS started */
+        private final long mStartTime;
+
+        /**
+         * Copied from {@link #mStartForegroundCount}. If this is different from the parent's,
+         * that means this instance is stale.
+         */
+        private int mStartForegroundCount;
+
+        /** Service's "start ID" when this short-service started. */
+        private int mStartId;
+
+        ShortFgsInfo(long startTime) {
+            mStartTime = startTime;
+            update();
+        }
+
+        /**
+         * Update {@link #mStartForegroundCount} and {@link #mStartId}.
+         * (but not {@link #mStartTime})
+         */
+        public void update() {
+            this.mStartForegroundCount = ServiceRecord.this.mStartForegroundCount;
+            this.mStartId = getLastStartId();
+        }
+
+        long getStartTime() {
+            return mStartTime;
+        }
+
+        int getStartForegroundCount() {
+            return mStartForegroundCount;
+        }
+
+        int getStartId() {
+            return mStartId;
+        }
+
+        /**
+         * @return whether this {@link ShortFgsInfo} is still "current" or not -- i.e.
+         * it's "start foreground count" is the same as that of the ServiceRecord's.
+         *
+         * Note, we do _not_ check the "start id" here, because the start id increments if the
+         * app calls startService() or startForegroundService() on the same service,
+         * but that will _not_ update the ShortFgsInfo, and will not extend the timeout.
+         */
+        boolean isCurrent() {
+            return this.mStartForegroundCount == ServiceRecord.this.mStartForegroundCount;
+        }
+
+        /** Time when Service.onTimeout() should be called */
+        long getTimeoutTime() {
+            return mStartTime + ams.mConstants.mShortFgsTimeoutDuration;
+        }
+
+        /** Time when the procstate should be lowered. */
+        long getProcStateDemoteTime() {
+            return mStartTime + ams.mConstants.mShortFgsTimeoutDuration
+                    + ams.mConstants.mShortFgsProcStateExtraWaitDuration;
+        }
+
+        /** Time when the app should be declared ANR. */
+        long getAnrTime() {
+            return mStartTime + ams.mConstants.mShortFgsTimeoutDuration
+                    + ams.mConstants.mShortFgsAnrExtraWaitDuration;
+        }
+    }
+
+    /**
+     * Keep track of short-fgs specific information. This field gets cleared when the timeout
+     * stops.
+     */
+    private ShortFgsInfo mShortFgsInfo;
 
     void dumpStartList(PrintWriter pw, String prefix, List<StartItem> list, long now) {
         final int N = list.size();
@@ -391,6 +485,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             proto.write(ServiceRecordProto.Start.DELAYED_STOP, delayedStop);
             proto.write(ServiceRecordProto.Start.STOP_IF_KILLED, stopIfKilled);
             proto.write(ServiceRecordProto.Start.LAST_START_ID, lastStartId);
+            proto.write(ServiceRecordProto.Start.START_COMMAND_RESULT, startCommandResult);
             proto.end(startToken);
         }
 
@@ -446,6 +541,21 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                 }
             }
         }
+        if (mShortFgsInfo != null && mShortFgsInfo.isCurrent()) {
+            final long shortFgsToken = proto.start(ServiceRecordProto.SHORT_FGS_INFO);
+            proto.write(ServiceRecordProto.ShortFgsInfo.START_TIME,
+                    mShortFgsInfo.getStartTime());
+            proto.write(ServiceRecordProto.ShortFgsInfo.START_ID,
+                    mShortFgsInfo.getStartId());
+            proto.write(ServiceRecordProto.ShortFgsInfo.TIMEOUT_TIME,
+                    mShortFgsInfo.getTimeoutTime());
+            proto.write(ServiceRecordProto.ShortFgsInfo.PROC_STATE_DEMOTE_TIME,
+                    mShortFgsInfo.getProcStateDemoteTime());
+            proto.write(ServiceRecordProto.ShortFgsInfo.ANR_TIME,
+                    mShortFgsInfo.getAnrTime());
+            proto.end(shortFgsToken);
+        }
+
         proto.end(token);
     }
 
@@ -478,9 +588,9 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             pw.print(prefix); pw.print("mIsAllowedBgActivityStartsByBinding=");
             pw.println(mIsAllowedBgActivityStartsByBinding);
         }
-        if (mIsAllowedBgActivityStartsByStart) {
+        if (mBackgroundStartPrivilegesByStartMerged.allowsAny()) {
             pw.print(prefix); pw.print("mIsAllowedBgActivityStartsByStart=");
-            pw.println(mIsAllowedBgActivityStartsByStart);
+            pw.println(mBackgroundStartPrivilegesByStartMerged);
         }
         pw.print(prefix); pw.print("allowWhileInUsePermissionInFgs=");
                 pw.println(mAllowWhileInUsePermissionInFgs);
@@ -499,8 +609,28 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         }
         if (isForeground || foregroundId != 0) {
             pw.print(prefix); pw.print("isForeground="); pw.print(isForeground);
-                    pw.print(" foregroundId="); pw.print(foregroundId);
-                    pw.print(" foregroundNoti="); pw.println(foregroundNoti);
+            pw.print(" foregroundId="); pw.print(foregroundId);
+            pw.printf(" types=%08X", foregroundServiceType);
+            pw.print(" foregroundNoti="); pw.println(foregroundNoti);
+
+            if (isShortFgs() && mShortFgsInfo != null) {
+                pw.print(prefix); pw.print("isShortFgs=true");
+                pw.print(" startId="); pw.print(mShortFgsInfo.getStartId());
+                pw.print(" startForegroundCount=");
+                pw.print(mShortFgsInfo.getStartForegroundCount());
+                pw.print(" startTime=");
+                TimeUtils.formatDuration(mShortFgsInfo.getStartTime(), now, pw);
+                pw.print(" timeout=");
+                TimeUtils.formatDuration(mShortFgsInfo.getTimeoutTime(), now, pw);
+                pw.print(" demoteTime=");
+                TimeUtils.formatDuration(mShortFgsInfo.getProcStateDemoteTime(), now, pw);
+                pw.print(" anrTime=");
+                TimeUtils.formatDuration(mShortFgsInfo.getAnrTime(), now, pw);
+                pw.println();
+            }
+        }
+        if (mIsFgsDelegate) {
+            pw.print(prefix); pw.print("isFgsDelegate="); pw.println(mIsFgsDelegate);
         }
         pw.print(prefix); pw.print("createTime=");
                 TimeUtils.formatDuration(createRealTime, nowReal, pw);
@@ -523,6 +653,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                     pw.print(" stopIfKilled="); pw.print(stopIfKilled);
                     pw.print(" callStart="); pw.print(callStart);
                     pw.print(" lastStartId="); pw.println(lastStartId);
+                    pw.print(" startCommandResult="); pw.println(startCommandResult);
         }
         if (executeNesting != 0) {
             pw.print(prefix); pw.print("executeNesting="); pw.print(executeNesting);
@@ -578,19 +709,46 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         }
     }
 
-    ServiceRecord(ActivityManagerService ams, ComponentName name,
-            ComponentName instanceName, String definingPackageName, int definingUid,
-            Intent.FilterComparison intent, ServiceInfo sInfo, boolean callerIsFg,
-            Runnable restarter) {
-        this(ams, name, instanceName, definingPackageName, definingUid, intent, sInfo, callerIsFg,
-                restarter, null, 0, null);
+    /** Used only for tests */
+    private ServiceRecord(ActivityManagerService ams) {
+        this.ams = ams;
+        name = null;
+        instanceName = null;
+        shortInstanceName = null;
+        definingPackageName = null;
+        definingUid = 0;
+        intent = null;
+        serviceInfo = null;
+        userId = 0;
+        packageName = null;
+        processName = null;
+        permission = null;
+        exported = false;
+        restarter = null;
+        createRealTime = 0;
+        isSdkSandbox = false;
+        sdkSandboxClientAppUid = 0;
+        sdkSandboxClientAppPackage = null;
+        inSharedIsolatedProcess = false;
+    }
+
+    public static ServiceRecord newEmptyInstanceForTest(ActivityManagerService ams) {
+        return new ServiceRecord(ams);
     }
 
     ServiceRecord(ActivityManagerService ams, ComponentName name,
             ComponentName instanceName, String definingPackageName, int definingUid,
             Intent.FilterComparison intent, ServiceInfo sInfo, boolean callerIsFg,
-            Runnable restarter, String sdkSandboxProcessName, int sdkSandboxClientAppUid,
-            String sdkSandboxClientAppPackage) {
+            Runnable restarter) {
+        this(ams, name, instanceName, definingPackageName, definingUid, intent, sInfo, callerIsFg,
+                restarter, sInfo.processName, INVALID_UID, null, false);
+    }
+
+    ServiceRecord(ActivityManagerService ams, ComponentName name,
+            ComponentName instanceName, String definingPackageName, int definingUid,
+            Intent.FilterComparison intent, ServiceInfo sInfo, boolean callerIsFg,
+            Runnable restarter, String processName, int sdkSandboxClientAppUid,
+            String sdkSandboxClientAppPackage, boolean inSharedIsolatedProcess) {
         this.ams = ams;
         this.name = name;
         this.instanceName = instanceName;
@@ -601,16 +759,11 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         serviceInfo = sInfo;
         appInfo = sInfo.applicationInfo;
         packageName = sInfo.applicationInfo.packageName;
-        this.isSdkSandbox = sdkSandboxProcessName != null;
+        this.isSdkSandbox = sdkSandboxClientAppUid != INVALID_UID;
         this.sdkSandboxClientAppUid = sdkSandboxClientAppUid;
         this.sdkSandboxClientAppPackage = sdkSandboxClientAppPackage;
-        if ((sInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) != 0) {
-            processName = sInfo.processName + ":" + instanceName.getClassName();
-        } else if (sdkSandboxProcessName != null) {
-            processName = sdkSandboxProcessName;
-        } else {
-            processName = sInfo.processName;
-        }
+        this.inSharedIsolatedProcess = inSharedIsolatedProcess;
+        this.processName = processName;
         permission = sInfo.permission;
         exported = sInfo.exported;
         this.restarter = restarter;
@@ -634,7 +787,9 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                     serviceInfo.applicationInfo.uid,
                     serviceInfo.applicationInfo.longVersionCode,
                     serviceInfo.processName, serviceInfo.name);
-            tracker.applyNewOwner(this);
+            if (tracker != null) {
+                tracker.applyNewOwner(this);
+            }
         }
         return tracker;
     }
@@ -671,27 +826,28 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             if (mAppForAllowingBgActivityStartsByStart != null) {
                 if (mAppForAllowingBgActivityStartsByStart != proc) {
                     mAppForAllowingBgActivityStartsByStart
-                            .removeAllowBackgroundActivityStartsToken(this);
+                            .removeBackgroundStartPrivileges(this);
                     ams.mHandler.removeCallbacks(mCleanUpAllowBgActivityStartsByStartCallback);
                 }
             }
             // Make sure the cleanup callback knows about the new process.
-            mAppForAllowingBgActivityStartsByStart = mIsAllowedBgActivityStartsByStart
+            mAppForAllowingBgActivityStartsByStart =
+                    mBackgroundStartPrivilegesByStartMerged.allowsAny()
                     ? proc : null;
-            if (mIsAllowedBgActivityStartsByStart
+            if (mBackgroundStartPrivilegesByStartMerged.allowsAny()
                     || mIsAllowedBgActivityStartsByBinding) {
-                proc.addOrUpdateAllowBackgroundActivityStartsToken(this,
-                        getExclusiveOriginatingToken());
+                proc.addOrUpdateBackgroundStartPrivileges(this,
+                        getBackgroundStartPrivilegesWithExclusiveToken());
             } else {
-                proc.removeAllowBackgroundActivityStartsToken(this);
+                proc.removeBackgroundStartPrivileges(this);
             }
         }
         if (app != null && app != proc) {
             // If the old app is allowed to start bg activities because of a service start, leave it
             // that way until the cleanup callback runs. Otherwise we can remove its bg activity
             // start ability immediately (it can't be bound now).
-            if (!mIsAllowedBgActivityStartsByStart) {
-                app.removeAllowBackgroundActivityStartsToken(this);
+            if (mBackgroundStartPrivilegesByStartMerged.allowsNothing()) {
+                app.removeBackgroundStartPrivileges(this);
             }
             app.mServices.updateBoundClientUids();
             app.mServices.updateHostingComonentTypeForBindingsLocked();
@@ -738,7 +894,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
         // if we have a process attached, add bound client uid of this connection to it
         if (app != null) {
-            app.mServices.addBoundClientUid(c.clientUid);
+            app.mServices.addBoundClientUid(c.clientUid, c.clientPackageName, c.flags);
             app.mProfile.addHostingComponentType(HOSTING_COMPONENT_TYPE_BOUND_SERVICE);
         }
     }
@@ -757,6 +913,9 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
      *         has no reason to start again. Note this condition doesn't consider the bindings.
      */
     boolean canStopIfKilled(boolean isStartCanceled) {
+        if (isShortFgs()) { // Short-FGS should always stop if killed.
+            return true;
+        }
         return startRequested && (stopIfKilled || isStartCanceled) && pendingStarts.isEmpty();
     }
 
@@ -788,9 +947,11 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
      * timeout. Note that the ability for starting background activities persists for the process
      * even if the service is subsequently stopped.
      */
-    void allowBgActivityStartsOnServiceStart(@Nullable IBinder originatingToken) {
-        mBgActivityStartsByStartOriginatingTokens.add(originatingToken);
-        setAllowedBgActivityStartsByStart(true);
+    void allowBgActivityStartsOnServiceStart(BackgroundStartPrivileges backgroundStartPrivileges) {
+        checkArgument(backgroundStartPrivileges.allowsAny());
+        mBackgroundStartPrivilegesByStart.add(backgroundStartPrivileges);
+        setAllowedBgActivityStartsByStart(
+                backgroundStartPrivileges.merge(mBackgroundStartPrivilegesByStartMerged));
         if (app != null) {
             mAppForAllowingBgActivityStartsByStart = app;
         }
@@ -799,26 +960,31 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         if (mCleanUpAllowBgActivityStartsByStartCallback == null) {
             mCleanUpAllowBgActivityStartsByStartCallback = () -> {
                 synchronized (ams) {
-                    mBgActivityStartsByStartOriginatingTokens.remove(0);
-                    if (!mBgActivityStartsByStartOriginatingTokens.isEmpty()) {
+                    mBackgroundStartPrivilegesByStart.remove(0);
+                    if (!mBackgroundStartPrivilegesByStart.isEmpty()) {
+                        // recalculate the merged token
+                        mBackgroundStartPrivilegesByStartMerged =
+                                BackgroundStartPrivileges.merge(mBackgroundStartPrivilegesByStart);
+
                         // There are other callbacks in the queue, let's just update the originating
                         // token
-                        if (mIsAllowedBgActivityStartsByStart) {
+                        if (mBackgroundStartPrivilegesByStartMerged.allowsAny()) {
                             // mAppForAllowingBgActivityStartsByStart can be null here for example
                             // if get 2 calls to allowBgActivityStartsOnServiceStart() without a
                             // process attached to this ServiceRecord, so we need to perform a null
                             // check here.
                             if (mAppForAllowingBgActivityStartsByStart != null) {
                                 mAppForAllowingBgActivityStartsByStart
-                                        .addOrUpdateAllowBackgroundActivityStartsToken(
-                                                this, getExclusiveOriginatingToken());
+                                        .addOrUpdateBackgroundStartPrivileges(this,
+                                                getBackgroundStartPrivilegesWithExclusiveToken());
                             }
                         } else {
                             Slog.wtf(TAG,
                                     "Service callback to revoke bg activity starts by service "
                                             + "start triggered but "
-                                            + "mIsAllowedBgActivityStartsByStart = false. This "
-                                            + "should never happen.");
+                                            + "mBackgroundStartPrivilegesByStartMerged = "
+                                            + mBackgroundStartPrivilegesByStartMerged
+                                            + ". This should never happen.");
                         }
                     } else {
                         // Last callback on the queue
@@ -826,12 +992,12 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                             // The process we allowed is still running the service. We remove
                             // the ability by start, but it may still be allowed via bound
                             // connections.
-                            setAllowedBgActivityStartsByStart(false);
+                            setAllowedBgActivityStartsByStart(BackgroundStartPrivileges.NONE);
                         } else if (mAppForAllowingBgActivityStartsByStart != null) {
                             // The process we allowed is not running the service. It therefore can't
                             // be bound so we can unconditionally remove the ability.
                             mAppForAllowingBgActivityStartsByStart
-                                    .removeAllowBackgroundActivityStartsToken(ServiceRecord.this);
+                                    .removeBackgroundStartPrivileges(ServiceRecord.this);
                         }
                         mAppForAllowingBgActivityStartsByStart = null;
                     }
@@ -845,8 +1011,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                 ams.mConstants.SERVICE_BG_ACTIVITY_START_TIMEOUT);
     }
 
-    private void setAllowedBgActivityStartsByStart(boolean newValue) {
-        mIsAllowedBgActivityStartsByStart = newValue;
+    private void setAllowedBgActivityStartsByStart(BackgroundStartPrivileges newValue) {
+        mBackgroundStartPrivilegesByStartMerged = newValue;
         updateParentProcessBgActivityStartsToken();
     }
 
@@ -857,46 +1023,42 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
      * {@code mIsAllowedBgActivityStartsByBinding}. If either is true, this ServiceRecord
      * should be contributing as a token in parent ProcessRecord.
      *
-     * @see com.android.server.am.ProcessRecord#addOrUpdateAllowBackgroundActivityStartsToken(
-     * Binder, IBinder)
-     * @see com.android.server.am.ProcessRecord#removeAllowBackgroundActivityStartsToken(Binder)
+     * @see com.android.server.am.ProcessRecord#addOrUpdateBackgroundStartPrivileges(Binder,
+     *         BackgroundStartPrivileges)
+     * @see com.android.server.am.ProcessRecord#removeBackgroundStartPrivileges(Binder)
      */
     private void updateParentProcessBgActivityStartsToken() {
         if (app == null) {
             return;
         }
-        if (mIsAllowedBgActivityStartsByStart || mIsAllowedBgActivityStartsByBinding) {
+        if (mBackgroundStartPrivilegesByStartMerged.allowsAny()
+                || mIsAllowedBgActivityStartsByBinding) {
             // if the token is already there it's safe to "re-add it" - we're dealing with
             // a set of Binder objects
-            app.addOrUpdateAllowBackgroundActivityStartsToken(this, getExclusiveOriginatingToken());
+            app.addOrUpdateBackgroundStartPrivileges(this,
+                    getBackgroundStartPrivilegesWithExclusiveToken());
         } else {
-            app.removeAllowBackgroundActivityStartsToken(this);
+            app.removeBackgroundStartPrivileges(this);
         }
     }
 
     /**
-     * Returns the originating token if that's the only reason background activity starts are
-     * allowed. In order for that to happen the service has to be allowed only due to starts, since
-     * bindings are not associated with originating tokens, and all the start tokens have to be the
-     * same and there can't be any null originating token in the queue.
+     * Returns {@link BackgroundStartPrivileges} that represents the privileges a specific
+     * originating token or a generic aggregate token.
      *
-     * Originating tokens are optional, so the caller could provide null when it allows bg activity
-     * starts.
+     * If all privileges are associated with the same token (i.e. the service is only allowed due
+     * to starts) the token will be retained, otherwise (e.g. the privileges were granted by
+     * bindings) the originating token will be empty.
      */
     @Nullable
-    private IBinder getExclusiveOriginatingToken() {
-        if (mIsAllowedBgActivityStartsByBinding
-                || mBgActivityStartsByStartOriginatingTokens.isEmpty()) {
-            return null;
+    private BackgroundStartPrivileges getBackgroundStartPrivilegesWithExclusiveToken() {
+        if (mIsAllowedBgActivityStartsByBinding) {
+            return BackgroundStartPrivileges.ALLOW_BAL;
         }
-        IBinder firstToken = mBgActivityStartsByStartOriginatingTokens.get(0);
-        for (int i = 1, n = mBgActivityStartsByStartOriginatingTokens.size(); i < n; i++) {
-            IBinder token = mBgActivityStartsByStartOriginatingTokens.get(i);
-            if (token != firstToken) {
-                return null;
-            }
+        if (mBackgroundStartPrivilegesByStart.isEmpty()) {
+            return BackgroundStartPrivileges.NONE;
         }
-        return firstToken;
+        return mBackgroundStartPrivilegesByStartMerged;
     }
 
     @GuardedBy("ams")
@@ -909,7 +1071,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     }
 
     public AppBindRecord retrieveAppBindingLocked(Intent intent,
-            ProcessRecord app) {
+            ProcessRecord app, ProcessRecord attributedApp) {
         Intent.FilterComparison filter = new Intent.FilterComparison(intent);
         IntentBindRecord i = bindings.get(filter);
         if (i == null) {
@@ -920,7 +1082,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         if (a != null) {
             return a;
         }
-        a = new AppBindRecord(this, i, app);
+        a = new AppBindRecord(this, i, app, attributedApp);
         i.apps.put(app, a);
         return a;
     }
@@ -1210,5 +1372,95 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
     public ComponentName getComponentName() {
         return name;
+    }
+
+    /**
+     * @return true if it's a foreground service of the "short service" type and don't have
+     * other fgs type bits set.
+     */
+    public boolean isShortFgs() {
+        // Note if the type contains FOREGROUND_SERVICE_TYPE_SHORT_SERVICE but also other bits
+        // set, it's _not_ considered be a short service. (because we shouldn't apply
+        // the short-service restrictions)
+        // (But we should be preventing mixture of FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
+        // and other types in Service.startForeground().)
+        return startRequested && isForeground
+                && (foregroundServiceType == ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE);
+    }
+
+    public ShortFgsInfo getShortFgsInfo() {
+        return isShortFgs() ? mShortFgsInfo : null;
+    }
+
+    /**
+     * Call it when a short FGS starts.
+     */
+    public void setShortFgsInfo(long uptimeNow) {
+        this.mShortFgsInfo = new ShortFgsInfo(uptimeNow);
+    }
+
+    /** @return whether {@link #mShortFgsInfo} is set or not. */
+    public boolean hasShortFgsInfo() {
+        return mShortFgsInfo != null;
+    }
+
+    /**
+     * Call it when a short FGS stops.
+     */
+    public void clearShortFgsInfo() {
+        this.mShortFgsInfo = null;
+    }
+
+    /**
+     * @return true if it's a short FGS that's still up and running, and should be timed out.
+     */
+    public boolean shouldTriggerShortFgsTimeout() {
+        if (!isAppAlive()) {
+            return false;
+        }
+        if (!this.startRequested || !isShortFgs() || mShortFgsInfo == null
+                || !mShortFgsInfo.isCurrent()) {
+            return false;
+        }
+        return mShortFgsInfo.getTimeoutTime() <= SystemClock.uptimeMillis();
+    }
+
+    /**
+     * @return true if it's a short FGS's procstate should be demoted.
+     */
+    public boolean shouldDemoteShortFgsProcState() {
+        if (!isAppAlive()) {
+            return false;
+        }
+        if (!this.startRequested || !isShortFgs() || mShortFgsInfo == null
+                || !mShortFgsInfo.isCurrent()) {
+            return false;
+        }
+        return mShortFgsInfo.getProcStateDemoteTime() <= SystemClock.uptimeMillis();
+    }
+
+    /**
+     * @return true if it's a short FGS that's still up and running, and should be declared
+     * an ANR.
+     */
+    public boolean shouldTriggerShortFgsAnr() {
+        if (!isAppAlive()) {
+            return false;
+        }
+        if (!this.startRequested || !isShortFgs() || mShortFgsInfo == null
+                || !mShortFgsInfo.isCurrent()) {
+            return false;
+        }
+        return mShortFgsInfo.getAnrTime() <= SystemClock.uptimeMillis();
+    }
+
+    private boolean isAppAlive() {
+        if (app == null) {
+            return false;
+        }
+        if (app.getThread() == null || app.isKilled() || app.isKilledByAm()) {
+            return false;
+        }
+        return true;
     }
 }

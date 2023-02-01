@@ -177,7 +177,7 @@ final class SaveUi {
            @Nullable String servicePackageName, @NonNull ComponentName componentName,
            @NonNull SaveInfo info, @NonNull ValueFinder valueFinder,
            @NonNull OverlayControl overlayControl, @NonNull OnSaveListener listener,
-           boolean nightMode, boolean isUpdate, boolean compatMode) {
+           boolean nightMode, boolean isUpdate, boolean compatMode, boolean showServiceIcon) {
         if (sVerbose) Slog.v(TAG, "nightMode: " + nightMode);
         mThemeId = nightMode ? THEME_ID_DARK : THEME_ID_LIGHT;
         mPendingUi = pendingUi;
@@ -199,8 +199,10 @@ final class SaveUi {
                 intent.putExtra(AutofillManager.EXTRA_RESTORE_CROSS_ACTIVITY, true);
 
                 PendingIntent p = PendingIntent.getActivityAsUser(this, /* requestCode= */ 0,
-                        intent, PendingIntent.FLAG_MUTABLE, /* options= */ null,
-                        UserHandle.CURRENT);
+                        intent,
+                        PendingIntent.FLAG_MUTABLE
+                                | PendingIntent.FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT,
+                        /* options= */ null, UserHandle.CURRENT);
                 if (sDebug) {
                     Slog.d(TAG, "startActivity add save UI restored with intent=" + intent);
                 }
@@ -288,7 +290,9 @@ final class SaveUi {
         }
         titleView.setText(mTitle);
 
-        setServiceIcon(context, view, serviceIcon);
+        if (showServiceIcon) {
+            setServiceIcon(context, view, serviceIcon);
+        }
 
         final boolean hasCustomDescription =
                 applyCustomDescription(context, view, valueFinder, info);
@@ -357,6 +361,7 @@ final class SaveUi {
         params.width = WindowManager.LayoutParams.MATCH_PARENT;
         params.accessibilityTitle = context.getString(R.string.autofill_save_accessibility_title);
         params.windowAnimations = R.style.AutofillSaveAnimation;
+        params.setTrustedOverlay();
 
         show();
     }

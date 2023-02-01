@@ -93,7 +93,7 @@
             android:layout_height="36dp"
             android:layout_marginTop="6dp"
             android:layout_marginBottom="6dp"
-            style="@style/AutofillHalfSheetOutlinedButton"
+            style="?android:attr/borderlessButtonStyle"
             android:text="@string/autofill_save_no">
         </Button>
 

@@ -15,6 +15,9 @@
  */
 package com.android.systemui.qs.external;
 
+import static android.service.quicksettings.TileService.START_ACTIVITY_NEEDS_PENDING_INTENT;
+
+import android.app.compat.CompatChanges;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -36,18 +39,19 @@ import android.util.ArraySet;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
+
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedFactory;
+import dagger.assisted.AssistedInject;
 
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import dagger.assisted.Assisted;
-import dagger.assisted.AssistedFactory;
-import dagger.assisted.AssistedInject;
 
 /**
  * Manages the lifecycle of a TileService.
@@ -123,8 +127,14 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     /** Injectable factory for TileLifecycleManager. */
     @AssistedFactory
     public interface Factory {
-        /** */
+        /**
+         *
+         */
         TileLifecycleManager create(Intent intent, UserHandle userHandle);
+    }
+
+    public int getUserId() {
+        return mUser.getIdentifier();
     }
 
     public ComponentName getComponent() {
@@ -156,7 +166,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
      * Determines whether the associated TileService is a Boolean Tile.
      *
      * @return true if {@link TileService#META_DATA_TOGGLEABLE_TILE} is set to {@code true} for this
-     *         tile
+     * tile
      * @see TileService#META_DATA_TOGGLEABLE_TILE
      */
     public boolean isToggleableTile() {
@@ -178,6 +188,10 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         setBindService(true);
     }
 
+    /**
+     * Binds or unbinds to IQSService
+     */
+    @WorkerThread
     public void setBindService(boolean bind) {
         if (mBound && mUnbindImmediate) {
             // If we are already bound and expecting to unbind, this means we should stay bound
@@ -198,12 +212,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
             if (DEBUG) Log.d(TAG, "Binding service " + mIntent + " " + mUser);
             mBindTryCount++;
             try {
-                mIsBound = mContext.bindServiceAsUser(mIntent, this,
-                        Context.BIND_AUTO_CREATE
-                                | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE
-                                | Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS
-                                | Context.BIND_WAIVE_PRIORITY,
-                        mUser);
+                mIsBound = bindServices();
                 if (!mIsBound) {
                     mContext.unbindService(this);
                 }
@@ -226,6 +235,24 @@ public class TileLifecycleManager extends BroadcastReceiver implements
                 mIsBound = false;
             }
         }
+    }
+
+    private boolean bindServices() {
+        String packageName = mIntent.getComponent().getPackageName();
+        if (CompatChanges.isChangeEnabled(START_ACTIVITY_NEEDS_PENDING_INTENT, packageName,
+                mUser)) {
+            return mContext.bindServiceAsUser(mIntent, this,
+                    Context.BIND_AUTO_CREATE
+                            | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE
+                            | Context.BIND_WAIVE_PRIORITY,
+                    mUser);
+        }
+        return mContext.bindServiceAsUser(mIntent, this,
+                Context.BIND_AUTO_CREATE
+                        | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE
+                        | Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS
+                        | Context.BIND_WAIVE_PRIORITY,
+                mUser);
     }
 
     @Override
@@ -409,8 +436,11 @@ public class TileLifecycleManager extends BroadcastReceiver implements
             mPackageManagerAdapter.getPackageInfoAsUser(packageName, 0, mUser.getIdentifier());
             return true;
         } catch (PackageManager.NameNotFoundException e) {
-            if (DEBUG) Log.d(TAG, "Package not available: " + packageName, e);
-            else Log.d(TAG, "Package not available: " + packageName);
+            if (DEBUG) {
+                Log.d(TAG, "Package not available: " + packageName, e);
+            } else {
+                Log.d(TAG, "Package not available: " + packageName);
+            }
         }
         return false;
     }
@@ -506,14 +536,5 @@ public class TileLifecycleManager extends BroadcastReceiver implements
 
     public interface TileChangeListener {
         void onTileChanged(ComponentName tile);
-    }
-
-    public static boolean isTileAdded(Context context, ComponentName component) {
-        return context.getSharedPreferences(TILES, 0).getBoolean(component.flattenToString(), false);
-    }
-
-    public static void setTileAdded(Context context, ComponentName component, boolean added) {
-        context.getSharedPreferences(TILES, 0).edit().putBoolean(component.flattenToString(),
-                added).commit();
     }
 }

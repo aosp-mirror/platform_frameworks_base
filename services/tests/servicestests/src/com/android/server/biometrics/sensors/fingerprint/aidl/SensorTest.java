@@ -34,8 +34,8 @@ import androidx.test.filters.SmallTest;
 
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
+import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.BiometricScheduler;
-import com.android.server.biometrics.sensors.CoexCoordinator;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
@@ -72,6 +72,8 @@ public class SensorTest {
     private BiometricLogger mLogger;
     @Mock
     private BiometricContext mBiometricContext;
+    @Mock
+    private AuthSessionCoordinator mAuthSessionCoordinator;
 
     private final TestLooper mLooper = new TestLooper();
     private final LockoutCache mLockoutCache = new LockoutCache();
@@ -84,6 +86,7 @@ public class SensorTest {
         MockitoAnnotations.initMocks(this);
 
         when(mContext.getSystemService(Context.BIOMETRIC_SERVICE)).thenReturn(mBiometricService);
+        when(mBiometricContext.getAuthSessionCoordinator()).thenReturn(mAuthSessionCoordinator);
 
         mScheduler = new UserAwareBiometricScheduler(TAG,
                 new Handler(mLooper.getLooper()),
@@ -91,8 +94,7 @@ public class SensorTest {
                 null /* gestureAvailabilityDispatcher */,
                 mBiometricService,
                 () -> USER_ID,
-                mUserSwitchCallback,
-                CoexCoordinator.getInstance());
+                mUserSwitchCallback);
         mHalCallback = new Sensor.HalSessionCallback(mContext, new Handler(mLooper.getLooper()),
                 TAG, mScheduler, SENSOR_ID,
                 USER_ID, mLockoutCache, mLockoutResetDispatcher, mHalSessionCallback);
@@ -109,7 +111,7 @@ public class SensorTest {
         mScheduler.scheduleClientMonitor(new FingerprintResetLockoutClient(mContext,
                 () -> new AidlSession(1, mSession, USER_ID, mHalCallback),
                 USER_ID, TAG, SENSOR_ID, mLogger, mBiometricContext, HAT, mLockoutCache,
-                mLockoutResetDispatcher));
+                mLockoutResetDispatcher, 0 /* biometricStrength */));
         mLooper.dispatchAll();
 
         verifyNotLocked();
