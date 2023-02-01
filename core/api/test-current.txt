@@ -822,6 +822,7 @@ package android.content.pm {
     field public static final float OVERRIDE_MIN_ASPECT_RATIO_MEDIUM_VALUE = 1.5f;
     field public static final long OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY = 203647190L; // 0xc2368d6L
     field public static final long OVERRIDE_MIN_ASPECT_RATIO_TO_ALIGN_WITH_SPLIT_SCREEN = 208648326L; // 0xc6fb886L
+    field public static final long OVERRIDE_SANDBOX_VIEW_BOUNDS_APIS = 237531167L; // 0xe28701fL
     field public static final int RESIZE_MODE_RESIZEABLE = 2; // 0x2
   }
 
@@ -3154,7 +3155,9 @@ package android.view {
   }
 
   @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
+    method public void getBoundsOnScreen(@NonNull android.graphics.Rect, boolean);
     method public android.view.View getTooltipView();
+    method public void getWindowDisplayFrame(@NonNull android.graphics.Rect);
     method public boolean isAutofilled();
     method public static boolean isDefaultFocusHighlightEnabled();
     method public boolean isDefaultFocusHighlightNeeded(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
