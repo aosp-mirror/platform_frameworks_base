@@ -88,6 +88,7 @@ cc_library_shared {
         "android.hidl.memory@1.0",
         "android.hidl.token@1.0-utils",
         "android.hardware.drm-V1-ndk",
+        "android.hardware.tv.tuner-V2-ndk",
     ],
 
     header_libs: [
