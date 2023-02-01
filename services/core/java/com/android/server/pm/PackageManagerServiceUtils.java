@@ -1372,7 +1372,21 @@ public class PackageManagerServiceUtils {
      */
     public static boolean isSystemOrRoot() {
         final int uid = Binder.getCallingUid();
+        return isSystemOrRoot(uid);
+    }
+
+    /**
+     * Check if a UID is system UID or root's UID.
+     */
+    public static boolean isSystemOrRoot(int uid) {
         return uid == Process.SYSTEM_UID || uid == Process.ROOT_UID;
+    }
+
+    /**
+     * Check if a UID is system UID or shell's UID.
+     */
+    public static boolean isRootOrShell(int uid) {
+        return uid == Process.ROOT_UID || uid == Process.SHELL_UID;
     }
 
     /**

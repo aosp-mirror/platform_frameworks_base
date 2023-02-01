@@ -34,6 +34,22 @@ import org.junit.runners.JUnit4;
 public final class SchemeVibrantTest extends SysuiTestCase {
 
     @Test
+    public void testKeyColors() {
+        SchemeVibrant scheme = new SchemeVibrant(Hct.fromInt(0xff0000ff), false, 0.0);
+
+        assertThat(MaterialDynamicColors.primaryPaletteKeyColor.getArgb(scheme))
+                .isSameColorAs(0xff080CFF);
+        assertThat(MaterialDynamicColors.secondaryPaletteKeyColor.getArgb(scheme))
+                .isSameColorAs(0xff7B7296);
+        assertThat(MaterialDynamicColors.tertiaryPaletteKeyColor.getArgb(scheme))
+                .isSameColorAs(0xff886C9D);
+        assertThat(MaterialDynamicColors.neutralPaletteKeyColor.getArgb(scheme))
+                .isSameColorAs(0xff777682);
+        assertThat(MaterialDynamicColors.neutralVariantPaletteKeyColor.getArgb(scheme))
+                .isSameColorAs(0xff767685);
+    }
+
+    @Test
     public void lightTheme_minContrast_primary() {
         SchemeVibrant scheme = new SchemeVibrant(Hct.fromInt(0xff0000ff), false, -1.0);
         assertThat(MaterialDynamicColors.primary.getArgb(scheme)).isSameColorAs(0xff5660ff);
@@ -195,18 +211,18 @@ public final class SchemeVibrantTest extends SysuiTestCase {
     @Test
     public void darkTheme_minContrast_surface() {
         SchemeVibrant scheme = new SchemeVibrant(Hct.fromInt(0xff0000ff), true, -1.0);
-        assertThat(MaterialDynamicColors.surface.getArgb(scheme)).isSameColorAs(0xff12131a);
+        assertThat(MaterialDynamicColors.surface.getArgb(scheme)).isSameColorAs(0xff12131C);
     }
 
     @Test
     public void darkTheme_standardContrast_surface() {
         SchemeVibrant scheme = new SchemeVibrant(Hct.fromInt(0xff0000ff), true, 0.0);
-        assertThat(MaterialDynamicColors.surface.getArgb(scheme)).isSameColorAs(0xff12131a);
+        assertThat(MaterialDynamicColors.surface.getArgb(scheme)).isSameColorAs(0xff12131C);
     }
 
     @Test
     public void darkTheme_maxContrast_surface() {
         SchemeVibrant scheme = new SchemeVibrant(Hct.fromInt(0xff0000ff), true, 1.0);
-        assertThat(MaterialDynamicColors.surface.getArgb(scheme)).isSameColorAs(0xff12131a);
+        assertThat(MaterialDynamicColors.surface.getArgb(scheme)).isSameColorAs(0xff12131C);
     }
 }

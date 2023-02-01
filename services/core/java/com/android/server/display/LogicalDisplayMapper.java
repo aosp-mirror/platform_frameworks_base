@@ -638,7 +638,8 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                         & DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY) != 0
                         && !nextDeviceInfo.address.equals(deviceInfo.address)) {
                     layout.createDisplayLocked(nextDeviceInfo.address,
-                            /* isDefault= */ true, /* isEnabled= */ true, mIdProducer);
+                            /* isDefault= */ true, /* isEnabled= */ true, mIdProducer,
+                            /* brightnessThrottlingMapId= */ null);
                     applyLayoutLocked();
                     return;
                 }
@@ -989,6 +990,10 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             }
 
             setEnabledLocked(newDisplay, displayLayout.isEnabled());
+            newDisplay.setBrightnessThrottlingDataIdLocked(
+                    displayLayout.getBrightnessThrottlingMapId() == null
+                            ? DisplayDeviceConfig.DEFAULT_BRIGHTNESS_THROTTLING_DATA_ID
+                            : displayLayout.getBrightnessThrottlingMapId());
         }
 
     }
@@ -1063,7 +1068,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         }
         final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         layout.createDisplayLocked(info.address, /* isDefault= */ true, /* isEnabled= */ true,
-                mIdProducer);
+                mIdProducer, /* brightnessThrottlingMapId= */ null);
     }
 
     private int assignLayerStackLocked(int displayId) {

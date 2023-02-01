@@ -32,6 +32,21 @@ import org.junit.runners.JUnit4;
 @SmallTest
 @RunWith(JUnit4.class)
 public final class SchemeFidelityTest extends SysuiTestCase {
+    @Test
+    public void testKeyColors() {
+        SchemeFidelity scheme = new SchemeFidelity(Hct.fromInt(0xff0000ff), false, 0.0);
+
+        assertThat(MaterialDynamicColors.primaryPaletteKeyColor.getArgb(scheme))
+                .isSameColorAs(0xff080CFF);
+        assertThat(MaterialDynamicColors.secondaryPaletteKeyColor.getArgb(scheme))
+                .isSameColorAs(0xff656DD3);
+        assertThat(MaterialDynamicColors.tertiaryPaletteKeyColor.getArgb(scheme))
+                .isSameColorAs(0xff9D0002);
+        assertThat(MaterialDynamicColors.neutralPaletteKeyColor.getArgb(scheme))
+                .isSameColorAs(0xff767684);
+        assertThat(MaterialDynamicColors.neutralVariantPaletteKeyColor.getArgb(scheme))
+                .isSameColorAs(0xff757589);
+    }
 
     @Test
     public void lightTheme_minContrast_primary() {
@@ -251,5 +266,4 @@ public final class SchemeFidelityTest extends SysuiTestCase {
         SchemeFidelity scheme = new SchemeFidelity(Hct.fromInt(0xff0000ff), true, 1.0);
         assertThat(MaterialDynamicColors.surface.getArgb(scheme)).isSameColorAs(0xff12121d);
     }
-
 }

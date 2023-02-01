@@ -294,10 +294,10 @@ open class PipAppHelper(instrumentation: Instrumentation) :
             .StateSyncBuilder()
             .add("pipWindowMinimized") {
                 val pipAppWindow =
-                        it.wmState.visibleWindows.firstOrNull { window ->
-                            this.windowMatchesAnyOf(window)
-                        }
-                                ?: return@add false
+                    it.wmState.visibleWindows.firstOrNull { window ->
+                        this.windowMatchesAnyOf(window)
+                    }
+                        ?: return@add false
                 val pipRegion = pipAppWindow.frameRegion
                 return@add windowRect.coversMoreThan(pipRegion)
             }

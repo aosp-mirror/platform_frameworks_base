@@ -57,19 +57,19 @@ public final class MaterialDynamicColors {
     public static final DynamicColor surfaceDim =
             DynamicColor.fromPalette((s) -> s.neutralPalette, (s) -> s.isDark ? 6.0 : 87.0);
 
-    public static final DynamicColor surfaceSub2 =
+    public static final DynamicColor surfaceContainerLowest =
             DynamicColor.fromPalette((s) -> s.neutralPalette, (s) -> s.isDark ? 4.0 : 100.0);
 
-    public static final DynamicColor surfaceSub1 =
+    public static final DynamicColor surfaceContainerLow =
             DynamicColor.fromPalette((s) -> s.neutralPalette, (s) -> s.isDark ? 10.0 : 96.0);
 
     public static final DynamicColor surfaceContainer =
             DynamicColor.fromPalette((s) -> s.neutralPalette, (s) -> s.isDark ? 12.0 : 94.0);
 
-    public static final DynamicColor surfaceAdd1 =
+    public static final DynamicColor surfaceContainerHigh =
             DynamicColor.fromPalette((s) -> s.neutralPalette, (s) -> s.isDark ? 17.0 : 92.0);
 
-    public static final DynamicColor surfaceAdd2 =
+    public static final DynamicColor surfaceContainerHighest =
             DynamicColor.fromPalette((s) -> s.neutralPalette, (s) -> s.isDark ? 22.0 : 90.0);
 
     public static final DynamicColor onSurface =
@@ -365,6 +365,27 @@ public final class MaterialDynamicColors {
     // textColorHintInverse documented, in both M3 & GM3, as N10/N90
     public static final DynamicColor textHintInverse =
             DynamicColor.fromPalette((s) -> s.neutralPalette, (s) -> s.isDark ? 10.0 : 90.0);
+
+    public static final DynamicColor primaryPaletteKeyColor =
+            DynamicColor.fromPalette(
+                    (s) -> s.primaryPalette, (s) -> s.primaryPalette.getKeyColor().getTone());
+
+    public static final DynamicColor secondaryPaletteKeyColor =
+            DynamicColor.fromPalette(
+                    (s) -> s.secondaryPalette, (s) -> s.secondaryPalette.getKeyColor().getTone());
+
+    public static final DynamicColor tertiaryPaletteKeyColor =
+            DynamicColor.fromPalette(
+                    (s) -> s.tertiaryPalette, (s) -> s.tertiaryPalette.getKeyColor().getTone());
+
+    public static final DynamicColor neutralPaletteKeyColor =
+            DynamicColor.fromPalette(
+                    (s) -> s.neutralPalette, (s) -> s.neutralPalette.getKeyColor().getTone());
+
+    public static final DynamicColor neutralVariantPaletteKeyColor =
+            DynamicColor.fromPalette(
+                    (s) -> s.neutralVariantPalette,
+                    (s) -> s.neutralVariantPalette.getKeyColor().getTone());
 
     private static ViewingConditions viewingConditionsForAlbers(DynamicScheme scheme) {
         return ViewingConditions.defaultWithBackgroundLstar(scheme.isDark ? 30.0 : 80.0);

@@ -281,7 +281,7 @@ public final class RouteListingPreference implements Parcelable {
         /** @hide */
         @Retention(RetentionPolicy.SOURCE)
         @IntDef(
-                prefix = {"DISABLE_REASON_"},
+                prefix = {"SUBTEXT_"},
                 value = {
                     SUBTEXT_NONE,
                     SUBTEXT_SUBSCRIPTION_REQUIRED,

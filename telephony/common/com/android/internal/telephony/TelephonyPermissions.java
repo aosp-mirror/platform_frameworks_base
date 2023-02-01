@@ -20,6 +20,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -859,7 +860,7 @@ public final class TelephonyPermissions {
             if ((subManager != null) &&
                     (!subManager.isSubscriptionAssociatedWithUser(subId, callerUserHandle))) {
                 // If subId is not associated with calling user, return false.
-                Log.e(LOG_TAG,"User[User ID:" + callerUserHandle.getIdentifier()
+                Log.e(LOG_TAG, "User[User ID:" + callerUserHandle.getIdentifier()
                         + "] is not associated with Subscription ID:" + subId);
                 return false;
 
@@ -868,5 +869,28 @@ public final class TelephonyPermissions {
             Binder.restoreCallingIdentity(token);
         }
         return true;
+    }
+
+    /**
+     * Ensure the caller (or self, if not processing an IPC) has
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE} or
+     * {@link android.Manifest.permission#READ_PHONE_NUMBERS}.
+     *
+     * @throws SecurityException if the caller does not have the required permission/privileges
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PHONE_NUMBERS,
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE
+    })
+    public static boolean checkCallingOrSelfReadPrivilegedPhoneStatePermissionOrReadPhoneNumber(
+            Context context, int subId, String callingPackage, @Nullable String callingFeatureId,
+            String message) {
+        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+            return false;
+        }
+        return (context.checkCallingOrSelfPermission(
+                Manifest.permission.READ_PRIVILEGED_PHONE_STATE) == PERMISSION_GRANTED
+                || checkCallingOrSelfReadPhoneNumber(context, subId, callingPackage,
+                callingFeatureId, message));
     }
 }

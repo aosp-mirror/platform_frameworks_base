@@ -559,7 +559,7 @@ object Flags {
 
     @JvmField
     val CONTROLS_MANAGEMENT_NEW_FLOWS =
-        unreleasedFlag(2002, "controls_management_new_flows", teamfood = true)
+        releasedFlag(2002, "controls_management_new_flows", teamfood = true)
 
     // 2100 - Falsing Manager
     @JvmField val FALSING_FOR_LONG_TAPS = releasedFlag(2100, "falsing_for_long_taps")

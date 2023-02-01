@@ -25,6 +25,7 @@ import android.view.DisplayAddress;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Holds a collection of {@link Display}s. A single instance of this class describes
@@ -76,7 +77,7 @@ public class Layout {
      */
     public Display createDisplayLocked(
             @NonNull DisplayAddress address, boolean isDefault, boolean isEnabled,
-            DisplayIdProducer idProducer) {
+            DisplayIdProducer idProducer, String brightnessThrottlingMapId) {
         if (contains(address)) {
             Slog.w(TAG, "Attempting to add second definition for display-device: " + address);
             return null;
@@ -93,7 +94,8 @@ public class Layout {
         // different layouts, a logical display can be destroyed and later recreated with the
         // same logical display ID.
         final int logicalDisplayId = idProducer.getId(isDefault);
-        final Display display = new Display(address, logicalDisplayId, isEnabled);
+        final Display display = new Display(address, logicalDisplayId, isEnabled,
+                brightnessThrottlingMapId);
 
         mDisplays.add(display);
         return display;
@@ -195,11 +197,19 @@ public class Layout {
         // {@link DeviceStateToLayoutMap.POSITION_UNKNOWN} is unspecified.
         private int mPosition;
 
-        Display(@NonNull DisplayAddress address, int logicalDisplayId, boolean isEnabled) {
+        // The ID of the brightness throttling map that should be used. This can change e.g. in
+        // concurrent displays mode in which a stricter brightness throttling policy might need to
+        // be used.
+        @Nullable
+        private final String mBrightnessThrottlingMapId;
+
+        Display(@NonNull DisplayAddress address, int logicalDisplayId, boolean isEnabled,
+                String brightnessThrottlingMapId) {
             mAddress = address;
             mLogicalDisplayId = logicalDisplayId;
             mIsEnabled = isEnabled;
             mPosition = POSITION_UNKNOWN;
+            mBrightnessThrottlingMapId = brightnessThrottlingMapId;
         }
 
         @Override
@@ -209,6 +219,7 @@ public class Layout {
                     + "(" + (mIsEnabled ? "ON" : "OFF") + ")"
                     + ", addr: " + mAddress
                     +  ((mPosition == POSITION_UNKNOWN) ? "" : ", position: " + mPosition)
+                    + ", brightnessThrottlingMapId: " + mBrightnessThrottlingMapId
                     + "}";
         }
 
@@ -223,7 +234,9 @@ public class Layout {
             return otherDisplay.mIsEnabled == this.mIsEnabled
                     && otherDisplay.mPosition == this.mPosition
                     && otherDisplay.mLogicalDisplayId == this.mLogicalDisplayId
-                    && this.mAddress.equals(otherDisplay.mAddress);
+                    && this.mAddress.equals(otherDisplay.mAddress)
+                    && Objects.equals(mBrightnessThrottlingMapId,
+                    otherDisplay.mBrightnessThrottlingMapId);
         }
 
         @Override
@@ -233,6 +246,7 @@ public class Layout {
             result = 31 * result + mPosition;
             result = 31 * result + mLogicalDisplayId;
             result = 31 * result + mAddress.hashCode();
+            result = 31 * result + mBrightnessThrottlingMapId.hashCode();
             return result;
         }
 
@@ -250,6 +264,13 @@ public class Layout {
 
         public void setPosition(int position) {
             mPosition = position;
+        }
+
+        /**
+         * @return The ID of the brightness throttling map that this display should use.
+         */
+        public String getBrightnessThrottlingMapId() {
+            return mBrightnessThrottlingMapId;
         }
     }
 }

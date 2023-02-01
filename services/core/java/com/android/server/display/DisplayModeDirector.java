@@ -1373,7 +1373,7 @@ public class DisplayModeDirector {
             mDefaultRefreshRate =
                     (displayDeviceConfig == null) ? (float) mContext.getResources().getInteger(
                         R.integer.config_defaultRefreshRate)
-                        : (float) displayDeviceConfig.getDefaultRefreshRate();
+                        : (float) displayDeviceConfig.getDefaultLowRefreshRate();
         }
 
         public void observe() {
@@ -1460,7 +1460,7 @@ public class DisplayModeDirector {
                 defaultPeakRefreshRate =
                         (displayDeviceConfig == null) ? (float) mContext.getResources().getInteger(
                                 R.integer.config_defaultPeakRefreshRate)
-                                : (float) displayDeviceConfig.getDefaultPeakRefreshRate();
+                                : (float) displayDeviceConfig.getDefaultHighRefreshRate();
             }
             mDefaultPeakRefreshRate = defaultPeakRefreshRate;
         }
@@ -1819,26 +1819,8 @@ public class DisplayModeDirector {
             return mHighAmbientBrightnessThresholds;
         }
 
-        /**
-         * @return the refresh rate to lock to when in a high brightness zone
-         */
-        @VisibleForTesting
-        int getRefreshRateInHighZone() {
-            return mRefreshRateInHighZone;
-        }
-
-        /**
-         * @return the refresh rate to lock to when in a low brightness zone
-         */
-        @VisibleForTesting
-        int getRefreshRateInLowZone() {
-            return mRefreshRateInLowZone;
-        }
-
         private void loadLowBrightnessThresholds(DisplayDeviceConfig displayDeviceConfig,
                 boolean attemptLoadingFromDeviceConfig) {
-            loadRefreshRateInHighZone(displayDeviceConfig, attemptLoadingFromDeviceConfig);
-            loadRefreshRateInLowZone(displayDeviceConfig, attemptLoadingFromDeviceConfig);
             mLowDisplayBrightnessThresholds = loadBrightnessThresholds(
                     () -> mDeviceConfigDisplaySettings.getLowDisplayBrightnessThresholds(),
                     () -> displayDeviceConfig.getLowDisplayBrightnessThresholds(),
@@ -1857,44 +1839,6 @@ public class DisplayModeDirector {
                         + ", ambientBrightnessThresholds="
                         + Arrays.toString(mLowAmbientBrightnessThresholds));
             }
-        }
-
-        private void loadRefreshRateInLowZone(DisplayDeviceConfig displayDeviceConfig,
-                boolean attemptLoadingFromDeviceConfig) {
-            int refreshRateInLowZone =
-                    (displayDeviceConfig == null) ? mContext.getResources().getInteger(
-                        R.integer.config_defaultRefreshRateInZone)
-                        : displayDeviceConfig.getDefaultLowBlockingZoneRefreshRate();
-            if (attemptLoadingFromDeviceConfig) {
-                try {
-                    refreshRateInLowZone = mDeviceConfig.getInt(
-                        DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
-                        DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_LOW_ZONE,
-                        refreshRateInLowZone);
-                } catch (Exception exception) {
-                    // Do nothing
-                }
-            }
-            mRefreshRateInLowZone = refreshRateInLowZone;
-        }
-
-        private void loadRefreshRateInHighZone(DisplayDeviceConfig displayDeviceConfig,
-                boolean attemptLoadingFromDeviceConfig) {
-            int refreshRateInHighZone =
-                    (displayDeviceConfig == null) ? mContext.getResources().getInteger(
-                        R.integer.config_fixedRefreshRateInHighZone) : displayDeviceConfig
-                        .getDefaultHighBlockingZoneRefreshRate();
-            if (attemptLoadingFromDeviceConfig) {
-                try {
-                    refreshRateInHighZone = mDeviceConfig.getInt(
-                        DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
-                        DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_HIGH_ZONE,
-                        refreshRateInHighZone);
-                } catch (Exception exception) {
-                    // Do nothing
-                }
-            }
-            mRefreshRateInHighZone = refreshRateInHighZone;
         }
 
         private void loadHighBrightnessThresholds(DisplayDeviceConfig displayDeviceConfig,
@@ -1950,6 +1894,14 @@ public class DisplayModeDirector {
         }
 
         /**
+         * @return the refresh to lock to when in a low brightness zone
+         */
+        @VisibleForTesting
+        int getRefreshRateInLowZone() {
+            return mRefreshRateInLowZone;
+        }
+
+        /**
          * @return the display brightness thresholds for the low brightness zones
          */
         @VisibleForTesting
@@ -1994,17 +1946,8 @@ public class DisplayModeDirector {
                 mHighAmbientBrightnessThresholds = highAmbientBrightnessThresholds;
             }
 
-            final int refreshRateInLowZone = mDeviceConfigDisplaySettings
-                    .getRefreshRateInLowZone();
-            if (refreshRateInLowZone != -1) {
-                mRefreshRateInLowZone = refreshRateInLowZone;
-            }
-
-            final int refreshRateInHighZone = mDeviceConfigDisplaySettings
-                    .getRefreshRateInHighZone();
-            if (refreshRateInHighZone != -1) {
-                mRefreshRateInHighZone = refreshRateInHighZone;
-            }
+            mRefreshRateInLowZone = mDeviceConfigDisplaySettings.getRefreshRateInLowZone();
+            mRefreshRateInHighZone = mDeviceConfigDisplaySettings.getRefreshRateInHighZone();
 
             restartObserver();
             mDeviceConfigDisplaySettings.startListening();
@@ -2058,10 +2001,6 @@ public class DisplayModeDirector {
             restartObserver();
         }
 
-        /**
-         * Used to reload the lower blocking zone refresh rate in case of changes in the
-         * DeviceConfig properties.
-         */
         public void onDeviceConfigRefreshRateInLowZoneChanged(int refreshRate) {
             if (refreshRate != mRefreshRateInLowZone) {
                 mRefreshRateInLowZone = refreshRate;
@@ -2085,10 +2024,6 @@ public class DisplayModeDirector {
             restartObserver();
         }
 
-        /**
-         * Used to reload the higher blocking zone refresh rate in case of changes in the
-         * DeviceConfig properties.
-         */
         public void onDeviceConfigRefreshRateInHighZoneChanged(int refreshRate) {
             if (refreshRate != mRefreshRateInHighZone) {
                 mRefreshRateInHighZone = refreshRate;
@@ -2939,10 +2874,15 @@ public class DisplayModeDirector {
         }
 
         public int getRefreshRateInLowZone() {
-            return mDeviceConfig.getInt(
-                    DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
-                    DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_LOW_ZONE, -1);
+            int defaultRefreshRateInZone = mContext.getResources().getInteger(
+                    R.integer.config_defaultRefreshRateInZone);
 
+            int refreshRate = mDeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
+                    DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_LOW_ZONE,
+                    defaultRefreshRateInZone);
+
+            return refreshRate;
         }
 
         /*
@@ -2964,10 +2904,15 @@ public class DisplayModeDirector {
         }
 
         public int getRefreshRateInHighZone() {
-            return mDeviceConfig.getInt(
+            int defaultRefreshRateInZone = mContext.getResources().getInteger(
+                    R.integer.config_fixedRefreshRateInHighZone);
+
+            int refreshRate = mDeviceConfig.getInt(
                     DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
                     DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_HIGH_ZONE,
-                    -1);
+                    defaultRefreshRateInZone);
+
+            return refreshRate;
         }
 
         public int getRefreshRateInHbmSunlight() {
@@ -3015,29 +2960,23 @@ public class DisplayModeDirector {
 
             int[] lowDisplayBrightnessThresholds = getLowDisplayBrightnessThresholds();
             int[] lowAmbientBrightnessThresholds = getLowAmbientBrightnessThresholds();
-            final int refreshRateInLowZone = getRefreshRateInLowZone();
+            int refreshRateInLowZone = getRefreshRateInLowZone();
 
             mHandler.obtainMessage(MSG_LOW_BRIGHTNESS_THRESHOLDS_CHANGED,
                     new Pair<>(lowDisplayBrightnessThresholds, lowAmbientBrightnessThresholds))
                     .sendToTarget();
-
-            if (refreshRateInLowZone != -1) {
-                mHandler.obtainMessage(MSG_REFRESH_RATE_IN_LOW_ZONE_CHANGED, refreshRateInLowZone,
-                        0).sendToTarget();
-            }
+            mHandler.obtainMessage(MSG_REFRESH_RATE_IN_LOW_ZONE_CHANGED, refreshRateInLowZone, 0)
+                    .sendToTarget();
 
             int[] highDisplayBrightnessThresholds = getHighDisplayBrightnessThresholds();
             int[] highAmbientBrightnessThresholds = getHighAmbientBrightnessThresholds();
-            final int refreshRateInHighZone = getRefreshRateInHighZone();
+            int refreshRateInHighZone = getRefreshRateInHighZone();
 
             mHandler.obtainMessage(MSG_HIGH_BRIGHTNESS_THRESHOLDS_CHANGED,
                     new Pair<>(highDisplayBrightnessThresholds, highAmbientBrightnessThresholds))
                     .sendToTarget();
-
-            if (refreshRateInHighZone != -1) {
-                mHandler.obtainMessage(MSG_REFRESH_RATE_IN_HIGH_ZONE_CHANGED, refreshRateInHighZone,
-                        0).sendToTarget();
-            }
+            mHandler.obtainMessage(MSG_REFRESH_RATE_IN_HIGH_ZONE_CHANGED, refreshRateInHighZone, 0)
+                    .sendToTarget();
 
             final int refreshRateInHbmSunlight = getRefreshRateInHbmSunlight();
             mHandler.obtainMessage(MSG_REFRESH_RATE_IN_HBM_SUNLIGHT_CHANGED,

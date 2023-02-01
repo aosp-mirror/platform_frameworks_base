@@ -16,13 +16,17 @@
 
 package com.android.server.display;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -46,8 +50,11 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.server.LocalServices;
+import com.android.server.am.BatteryStatsService;
 import com.android.server.display.RampAnimator.DualRampAnimator;
+import com.android.server.display.color.ColorDisplayService;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.testutils.OffsettableClock;
 
@@ -58,7 +65,9 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.MockitoSession;
+import org.mockito.quality.Strictness;
+import org.mockito.stubbing.Answer;
 
 import java.util.List;
 
@@ -67,8 +76,9 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 public final class DisplayPowerController2Test {
     private static final String UNIQUE_DISPLAY_ID = "unique_id_test123";
-    private static final int DISPLAY_ID = 42;
+    private static final int DISPLAY_ID = Display.DEFAULT_DISPLAY;
 
+    private MockitoSession mSession;
     private OffsettableClock mClock;
     private TestLooper mTestLooper;
     private Handler mHandler;
@@ -105,13 +115,20 @@ public final class DisplayPowerController2Test {
     private DualRampAnimator<DisplayPowerState> mDualRampAnimatorMock;
     @Mock
     private WakelockController mWakelockController;
+    @Mock
+    private ColorDisplayService.ColorDisplayServiceInternal mCdsiMock;
 
     @Captor
     private ArgumentCaptor<SensorEventListener> mSensorEventListenerCaptor;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        mSession = ExtendedMockito.mockitoSession()
+                .initMocks(this)
+                .strictness(Strictness.LENIENT)
+                .spyStatic(LocalServices.class)
+                .spyStatic(BatteryStatsService.class)
+                .startMocking();
         mContextSpy = spy(new ContextWrapper(ApplicationProvider.getApplicationContext()));
         mClock = new OffsettableClock.Stopped();
         mTestLooper = new TestLooper(mClock::now);
@@ -156,10 +173,17 @@ public final class DisplayPowerController2Test {
 
         when(mContextSpy.getSystemService(eq(PowerManager.class))).thenReturn(mPowerManagerMock);
         when(mContextSpy.getResources()).thenReturn(mResourcesMock);
+
+        doAnswer((Answer<ColorDisplayService.ColorDisplayServiceInternal>) invocationOnMock ->
+                mCdsiMock).when(() -> LocalServices.getService(
+                ColorDisplayService.ColorDisplayServiceInternal.class));
+        doAnswer((Answer<Void>) invocationOnMock -> null).when(() ->
+                BatteryStatsService.getService());
     }
 
     @After
     public void tearDown() {
+        mSession.finishMocking();
         LocalServices.removeServiceForTest(WindowManagerPolicy.class);
     }
 
@@ -205,6 +229,32 @@ public final class DisplayPowerController2Test {
                 WakelockController.WAKE_LOCK_UNFINISHED_BUSINESS);
         verify(mWakelockController).acquireWakelock(
                 WakelockController.WAKE_LOCK_PROXIMITY_DEBOUNCE);
+    }
+
+    @Test
+    public void testProximitySensorListenerNotRegisteredForNonDefaultDisplay() throws Exception {
+        setUpDisplay(1, UNIQUE_DISPLAY_ID);
+
+        Sensor proxSensor = setUpProxSensor();
+
+        DisplayPowerController2 dpc = new DisplayPowerController2(
+                mContextSpy, mInjector, mDisplayPowerCallbacksMock, mHandler,
+                mSensorManagerMock, mDisplayBlankerMock, mLogicalDisplayMock,
+                mBrightnessTrackerMock, mBrightnessSettingMock, () -> {
+        }, mHighBrightnessModeMetadataMock);
+
+        when(mDisplayPowerStateMock.getScreenState()).thenReturn(Display.STATE_ON);
+        // send a display power request
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_BRIGHT;
+        dpr.useProximitySensor = true;
+        dpc.requestPowerState(dpr, false /* waitForNegativeProximity */);
+
+        // Run updatePowerState
+        advanceTime(1);
+
+        verify(mSensorManagerMock, never()).registerListener(any(SensorEventListener.class),
+                eq(proxSensor), anyInt(), any(Handler.class));
     }
 
     /**
