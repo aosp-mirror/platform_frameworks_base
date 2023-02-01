@@ -32,6 +32,7 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import java.lang.RuntimeException
 import kotlinx.coroutines.Dispatchers
 import org.junit.Before
 import org.junit.Test
@@ -111,6 +112,24 @@ class NotificationMemoryLoggerTest : SysuiTestCase() {
         assertThat(logger.onPullAtom(SysUiStatsLog.NOTIFICATION_MEMORY_USE, data))
             .isEqualTo(StatsManager.PULL_SUCCESS)
         assertThat(data).hasSize(2)
+    }
+
+    @Test
+    fun onPullAtom_throwsInterruptedException_failsGracefully() {
+        val pipeline: NotifPipeline = mock()
+        whenever(pipeline.allNotifs).thenAnswer { throw InterruptedException("Timeout") }
+        val logger = NotificationMemoryLogger(pipeline, statsManager, immediate, bgExecutor)
+        assertThat(logger.onPullAtom(SysUiStatsLog.NOTIFICATION_MEMORY_USE, mutableListOf()))
+            .isEqualTo(StatsManager.PULL_SKIP)
+    }
+
+    @Test
+    fun onPullAtom_throwsRuntimeException_failsGracefully() {
+        val pipeline: NotifPipeline = mock()
+        whenever(pipeline.allNotifs).thenThrow(RuntimeException("Something broke!"))
+        val logger = NotificationMemoryLogger(pipeline, statsManager, immediate, bgExecutor)
+        assertThat(logger.onPullAtom(SysUiStatsLog.NOTIFICATION_MEMORY_USE, mutableListOf()))
+            .isEqualTo(StatsManager.PULL_SKIP)
     }
 
     private fun createLoggerWithNotifications(
