@@ -357,7 +357,7 @@ object Flags {
 
     // TODO(b/266739309): Tracking Bug
     @JvmField
-    val MEDIA_RECOMMENDATION_CARD_UPDATE = unreleasedFlag(914, "media_recommendation_card_update")
+    val MEDIA_RECOMMENDATION_CARD_UPDATE = releasedFlag(914, "media_recommendation_card_update")
 
     // TODO(b/267007629): Tracking Bug
     val MEDIA_RESUME_PROGRESS = unreleasedFlag(915, "media_resume_progress")
