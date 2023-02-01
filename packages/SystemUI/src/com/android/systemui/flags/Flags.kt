@@ -350,17 +350,17 @@ object Flags {
         unreleasedFlag(912, "media_ttt_dismiss_gesture", teamfood = true)
 
     // TODO(b/266157412): Tracking Bug
-    val MEDIA_RETAIN_SESSIONS = unreleasedFlag(913, "media_retain_sessions")
+    val MEDIA_RETAIN_SESSIONS = releasedFlag(913, "media_retain_sessions")
 
     // TODO(b/266739309): Tracking Bug
     @JvmField
     val MEDIA_RECOMMENDATION_CARD_UPDATE = unreleasedFlag(914, "media_recommendation_card_update")
 
     // TODO(b/267007629): Tracking Bug
-    val MEDIA_RESUME_PROGRESS = unreleasedFlag(915, "media_resume_progress")
+    val MEDIA_RESUME_PROGRESS = releasedFlag(915, "media_resume_progress")
 
     // TODO(b/267166152) : Tracking Bug
-    val MEDIA_RETAIN_RECOMMENDATIONS = unreleasedFlag(916, "media_retain_recommendations")
+    val MEDIA_RETAIN_RECOMMENDATIONS = releasedFlag(916, "media_retain_recommendations")
 
     // 1000 - dock
     val SIMULATE_DOCK_THROUGH_CHARGING = releasedFlag(1000, "simulate_dock_through_charging")
