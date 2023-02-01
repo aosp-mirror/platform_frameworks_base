@@ -699,19 +699,6 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         return bounds.width() > bounds.height();
     }
 
-    /** Reverse the split position. */
-    @SplitPosition
-    public static int reversePosition(@SplitPosition int position) {
-        switch (position) {
-            case SPLIT_POSITION_TOP_OR_LEFT:
-                return SPLIT_POSITION_BOTTOM_OR_RIGHT;
-            case SPLIT_POSITION_BOTTOM_OR_RIGHT:
-                return SPLIT_POSITION_TOP_OR_LEFT;
-            default:
-                return SPLIT_POSITION_UNDEFINED;
-        }
-    }
-
     /**
      * Return if this layout is landscape.
      */
