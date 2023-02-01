@@ -270,38 +270,6 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
     var currentHeight: Float = 0f
         private set
 
-    /**
-     * True if the ripple should stayed filled in as it expands to give a filled-in circle effect.
-     * False for a ring effect.
-     *
-     * <p>You must reset fade params after changing this.
-     *
-     * TODO(b/265326983): Remove this and only expose fade params.
-     */
-    var rippleFill: Boolean = false
-        set(value) {
-            if (value) {
-                baseRingFadeParams.fadeOutStart = 1f
-                baseRingFadeParams.fadeOutEnd = 1f
-
-                centerFillFadeParams.fadeInStart = 0f
-                centerFillFadeParams.fadeInEnd = 0f
-                centerFillFadeParams.fadeOutStart = 1f
-                centerFillFadeParams.fadeOutEnd = 1f
-            } else {
-                // Set back to the original fade parameters.
-                // Ideally this should be set by the client as they know the initial value.
-                baseRingFadeParams.fadeOutStart = DEFAULT_BASE_RING_FADE_OUT_START
-                baseRingFadeParams.fadeOutEnd = DEFAULT_FADE_OUT_END
-
-                centerFillFadeParams.fadeInStart = DEFAULT_FADE_IN_START
-                centerFillFadeParams.fadeInEnd = DEFAULT_CENTER_FILL_FADE_IN_END
-                centerFillFadeParams.fadeOutStart = DEFAULT_CENTER_FILL_FADE_OUT_START
-                centerFillFadeParams.fadeOutEnd = DEFAULT_CENTER_FILL_FADE_OUT_END
-            }
-            field = value
-        }
-
     /** Parameters that are used to fade in/ out of the sparkle ring. */
     val sparkleRingFadeParams =
         FadeParams(
@@ -324,12 +292,7 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
             DEFAULT_FADE_OUT_END
         )
 
-    /**
-     * Parameters that are used to fade in/ out of the center fill.
-     *
-     * <p>Note that if [rippleFill] is set to true, those will be ignored and the center fill will
-     * be always full alpha.
-     */
+    /** Parameters that are used to fade in/ out of the center fill. */
     val centerFillFadeParams =
         FadeParams(
             DEFAULT_FADE_IN_START,
