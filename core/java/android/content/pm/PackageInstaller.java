@@ -1956,16 +1956,22 @@ public class PackageInstaller {
         /**
          * Optionally set the app metadata. The size of this data cannot exceed the maximum allowed.
          * Any existing data from the previous install will not be retained even if no data is set
-         * for the current install session.
+         * for the current install session. Setting data to null or an empty PersistableBundle will
+         * remove any metadata that has previously been set in the same session.
          *
-         * @param data a PersistableBundle containing the app metadata. If this is set to null then
-         *     any existing app metadata will be removed.
+         * @param data a PersistableBundle containing the app metadata.
          * @throws IOException if writing the data fails.
          */
         public void setAppMetadata(@Nullable PersistableBundle data) throws IOException {
-            if (data == null) {
+            if (data == null || data.isEmpty()) {
+                try {
+                    mSession.removeAppMetadata();
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
                 return;
             }
+            Objects.requireNonNull(data);
             try (OutputStream outputStream = openWriteAppMetadata()) {
                 data.writeToStream(outputStream);
             }
