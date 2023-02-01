@@ -605,31 +605,6 @@ void SkiaPipeline::dumpResourceCacheUsage() const {
     ALOGD("%s", log.c_str());
 }
 
-void SkiaPipeline::setHardwareBuffer(AHardwareBuffer* buffer) {
-    if (mHardwareBuffer) {
-        AHardwareBuffer_release(mHardwareBuffer);
-        mHardwareBuffer = nullptr;
-    }
-
-    if (buffer) {
-        AHardwareBuffer_acquire(buffer);
-        mHardwareBuffer = buffer;
-    }
-}
-
-sk_sp<SkSurface> SkiaPipeline::getBufferSkSurface(
-        const renderthread::HardwareBufferRenderParams& bufferParams) {
-    auto bufferColorSpace = bufferParams.getColorSpace();
-    if (mBufferSurface == nullptr || mBufferColorSpace == nullptr ||
-        !SkColorSpace::Equals(mBufferColorSpace.get(), bufferColorSpace.get())) {
-        mBufferSurface = SkSurface::MakeFromAHardwareBuffer(
-                mRenderThread.getGrContext(), mHardwareBuffer, kTopLeft_GrSurfaceOrigin,
-                bufferColorSpace, nullptr, true);
-        mBufferColorSpace = bufferColorSpace;
-    }
-    return mBufferSurface;
-}
-
 void SkiaPipeline::setSurfaceColorProperties(ColorMode colorMode) {
     mColorMode = colorMode;
     switch (colorMode) {
@@ -642,17 +617,24 @@ void SkiaPipeline::setSurfaceColorProperties(ColorMode colorMode) {
             mSurfaceColorSpace = DeviceInfo::get()->getWideColorSpace();
             break;
         case ColorMode::Hdr:
-            mSurfaceColorType = SkColorType::kRGBA_F16_SkColorType;
-            mSurfaceColorSpace = SkColorSpace::MakeRGB(GetPQSkTransferFunction(), SkNamedGamut::kRec2020);
-            break;
-        case ColorMode::Hdr10:
-            mSurfaceColorType = SkColorType::kRGBA_1010102_SkColorType;
-            mSurfaceColorSpace = SkColorSpace::MakeRGB(GetPQSkTransferFunction(), SkNamedGamut::kRec2020);
+            mSurfaceColorType = SkColorType::kN32_SkColorType;
+            mSurfaceColorSpace = SkColorSpace::MakeRGB(
+                    GetExtendedTransferFunction(mTargetSdrHdrRatio), SkNamedGamut::kDisplayP3);
             break;
         case ColorMode::A8:
             mSurfaceColorType = SkColorType::kAlpha_8_SkColorType;
             mSurfaceColorSpace = nullptr;
             break;
+    }
+}
+
+void SkiaPipeline::setTargetSdrHdrRatio(float ratio) {
+    if (mColorMode == ColorMode::Hdr) {
+        mTargetSdrHdrRatio = ratio;
+        mSurfaceColorSpace = SkColorSpace::MakeRGB(GetExtendedTransferFunction(mTargetSdrHdrRatio),
+                                                   SkNamedGamut::kDisplayP3);
+    } else {
+        mTargetSdrHdrRatio = 1.f;
     }
 }
 

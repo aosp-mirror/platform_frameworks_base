@@ -99,7 +99,6 @@ class WallpaperWindowToken extends WindowToken {
         }
     }
 
-    /** Returns {@code true} if visibility is changed. */
     void updateWallpaperWindows(boolean visible) {
         boolean changed = false;
         if (mVisibleRequested != visible) {
@@ -117,6 +116,10 @@ class WallpaperWindowToken extends WindowToken {
                     linkFixedRotationTransform(wallpaperTarget.mToken);
                 }
             }
+            // If wallpaper is in transition, setVisible() will be called from commitVisibility()
+            // when finishing transition. Otherwise commitVisibility() is already called from above
+            // setVisibility().
+            return;
         }
 
         final WindowState wallpaperTarget =

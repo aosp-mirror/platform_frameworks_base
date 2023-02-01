@@ -29,6 +29,7 @@ import com.android.systemui.keyguard.data.BouncerView
 import com.android.systemui.keyguard.data.repository.BiometricRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
+import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepositoryImpl
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
@@ -65,7 +66,7 @@ class UdfpsKeyguardViewControllerWithCoroutinesTest : UdfpsKeyguardViewControlle
         allowTestableLooperAsMainThread() // repeatWhenAttached requires the main thread
         MockitoAnnotations.initMocks(this)
         keyguardBouncerRepository =
-            KeyguardBouncerRepository(
+            KeyguardBouncerRepositoryImpl(
                 mock(com.android.keyguard.ViewMediatorCallback::class.java),
                 FakeSystemClock(),
                 TestCoroutineScope(),

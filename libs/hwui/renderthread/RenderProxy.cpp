@@ -85,18 +85,6 @@ void RenderProxy::setName(const char* name) {
     mRenderThread.queue().runSync([this, name]() { mContext->setName(std::string(name)); });
 }
 
-void RenderProxy::setHardwareBuffer(AHardwareBuffer* buffer) {
-    if (buffer) {
-        AHardwareBuffer_acquire(buffer);
-    }
-    mRenderThread.queue().post([this, hardwareBuffer = buffer]() mutable {
-        mContext->setHardwareBuffer(hardwareBuffer);
-        if (hardwareBuffer) {
-            AHardwareBuffer_release(hardwareBuffer);
-        }
-    });
-}
-
 void RenderProxy::setSurface(ANativeWindow* window, bool enableTimeout) {
     if (window) { ANativeWindow_acquire(window); }
     mRenderThread.queue().post([this, win = window, enableTimeout]() mutable {
@@ -143,8 +131,20 @@ void RenderProxy::setOpaque(bool opaque) {
     mRenderThread.queue().post([=]() { mContext->setOpaque(opaque); });
 }
 
-void RenderProxy::setColorMode(ColorMode mode) {
-    mRenderThread.queue().post([=]() { mContext->setColorMode(mode); });
+float RenderProxy::setColorMode(ColorMode mode) {
+    // We only need to figure out what the renderer supports for HDR, otherwise this can stay
+    // an async call since we already know the return value
+    if (mode == ColorMode::Hdr) {
+        return mRenderThread.queue().runSync(
+                [=]() -> float { return mContext->setColorMode(mode); });
+    } else {
+        mRenderThread.queue().post([=]() { mContext->setColorMode(mode); });
+        return 1.f;
+    }
+}
+
+void RenderProxy::setRenderSdrHdrRatio(float ratio) {
+    mDrawFrameTask.setRenderSdrHdrRatio(ratio);
 }
 
 int64_t* RenderProxy::frameInfo() {
@@ -338,10 +338,6 @@ void RenderProxy::drawRenderNode(RenderNode* node) {
 
 void RenderProxy::setContentDrawBounds(int left, int top, int right, int bottom) {
     mDrawFrameTask.setContentDrawBounds(left, top, right, bottom);
-}
-
-void RenderProxy::setHardwareBufferRenderParams(const HardwareBufferRenderParams& params) {
-    mDrawFrameTask.setHardwareBufferRenderParams(params);
 }
 
 void RenderProxy::setPictureCapturedCallback(

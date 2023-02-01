@@ -219,5 +219,12 @@
         <attr name="biometricsEnrollProgressHelp" format="reference|color" />
         <attr name="biometricsEnrollProgressHelpWithTalkback" format="reference|color" />
     </declare-styleable>
+
+    <declare-styleable name="SeekBarWithIconButtonsView_Layout">
+        <attr name="max" format="integer" />
+        <attr name="progress" format="integer" />
+        <attr name="iconStartContentDescription" format="reference" />
+        <attr name="iconEndContentDescription" format="reference" />
+    </declare-styleable>
 </resources>
 

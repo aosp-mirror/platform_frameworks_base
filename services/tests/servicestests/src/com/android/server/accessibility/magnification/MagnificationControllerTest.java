@@ -26,6 +26,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -404,6 +405,22 @@ public class MagnificationControllerTest {
     }
 
     @Test
+    public void
+            configTransitionToWindowModeAndActivatedFalse_fullScreenMagnifying_doNotEnableWindow()
+            throws RemoteException {
+        activateMagnifier(MODE_FULLSCREEN, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y);
+
+        MagnificationConfig config = (new MagnificationConfig.Builder())
+                .setMode(MODE_WINDOW).setActivated(false).build();
+        mMagnificationController.transitionMagnificationConfigMode(TEST_DISPLAY,
+                config, false, TEST_SERVICE_ID);
+
+        verify(mMockConnection.getConnection(), never()).enableWindowMagnification(anyInt(),
+                anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyFloat(),
+                nullable(IRemoteMagnificationAnimationCallback.class));
+    }
+
+    @Test
     public void configTransitionToFullScreen_windowMagnifying_disableWindowAndEnableFullScreen()
             throws RemoteException {
         final boolean animate = true;
@@ -417,6 +434,49 @@ public class MagnificationControllerTest {
         verify(mScreenMagnificationController).setScaleAndCenter(TEST_DISPLAY,
                 DEFAULT_SCALE, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y,
                 animate, TEST_SERVICE_ID);
+    }
+
+    @Test
+    public void
+            configTransitionToFullScreenAndActivatedFalse_windowMagnifying_doNotEnableFullScreen()
+            throws RemoteException {
+        final boolean animate = true;
+        activateMagnifier(MODE_WINDOW, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y);
+        MagnificationConfig config = (new MagnificationConfig.Builder())
+                .setMode(MODE_FULLSCREEN).setActivated(false).build();
+        mMagnificationController.transitionMagnificationConfigMode(TEST_DISPLAY,
+                config, animate, TEST_SERVICE_ID);
+        mMockConnection.invokeCallbacks();
+
+        verify(mScreenMagnificationController, never()).setScaleAndCenter(anyInt(),
+                anyFloat(), anyFloat(), anyFloat(),
+                anyBoolean(), anyInt());
+    }
+
+    @Test
+    public void configTransitionToActivatedFalse_fullScreenMagnifying_disableFullScreen()
+            throws RemoteException {
+        activateMagnifier(MODE_FULLSCREEN, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y);
+        MagnificationConfig config = (new MagnificationConfig.Builder())
+                .setMode(MODE_FULLSCREEN).setActivated(false).build();
+        mMagnificationController.transitionMagnificationConfigMode(TEST_DISPLAY,
+                config, false, TEST_SERVICE_ID);
+
+        verify(mScreenMagnificationController).reset(eq(TEST_DISPLAY), eq(false));
+    }
+
+    @Test
+    public void configTransitionToActivatedFalse_windowMagnifying_disableWindow()
+            throws RemoteException {
+        final boolean animate = true;
+        activateMagnifier(MODE_WINDOW, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y);
+        MagnificationConfig config = (new MagnificationConfig.Builder())
+                .setMode(MODE_WINDOW).setActivated(false).build();
+        mMagnificationController.transitionMagnificationConfigMode(TEST_DISPLAY,
+                config, animate, TEST_SERVICE_ID);
+
+        verify(mMockConnection.getConnection()).disableWindowMagnification(anyInt(),
+                nullable(IRemoteMagnificationAnimationCallback.class));
     }
 
     @Test

@@ -504,6 +504,8 @@ SkCodec::Result ImageDecoder::extractGainmap(Bitmap* destination) {
     ImageDecoder decoder{std::move(gainmapCodec)};
     // Gainmap inherits the origin of the containing image
     decoder.mOverrideOrigin.emplace(getOrigin());
+    // Update mDecodeSize / mTargetSize for the overridden origin
+    decoder.setTargetSize(decoder.width(), decoder.height());
 
     const bool isScaled = width() != mTargetSize.width() || height() != mTargetSize.height();
 

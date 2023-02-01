@@ -21,6 +21,7 @@ import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.BiometricUnlockModel.Companion.isWakeAndUnlock
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.WakefulnessModel.Companion.isWakingOrStartingToWake
@@ -44,6 +45,7 @@ constructor(
 
     override fun start() {
         listenForDozingToLockscreen()
+        listenForDozingToGone()
     }
 
     private fun listenForDozingToLockscreen() {
@@ -60,6 +62,28 @@ constructor(
                                 name,
                                 KeyguardState.DOZING,
                                 KeyguardState.LOCKSCREEN,
+                                getAnimator(),
+                            )
+                        )
+                    }
+                }
+        }
+    }
+
+    private fun listenForDozingToGone() {
+        scope.launch {
+            keyguardInteractor.biometricUnlockState
+                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .collect { (biometricUnlockState, lastStartedTransition) ->
+                    if (
+                        lastStartedTransition.to == KeyguardState.DOZING &&
+                            isWakeAndUnlock(biometricUnlockState)
+                    ) {
+                        keyguardTransitionRepository.startTransition(
+                            TransitionInfo(
+                                name,
+                                KeyguardState.DOZING,
+                                KeyguardState.GONE,
                                 getAnimator(),
                             )
                         )

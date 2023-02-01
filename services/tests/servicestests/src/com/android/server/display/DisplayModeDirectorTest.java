@@ -754,7 +754,7 @@ public class DisplayModeDirectorTest {
 
     @Test
     public void testVotingWithSwitchingTypeRenderFrameRateOnlyRenderRateIsNotPhysicalRefreshRate() {
-        DisplayModeDirector director = createDirectorFromFpsRange(90, 120);
+        DisplayModeDirector director = createDirectorFromFpsRange(60, 120);
         SparseArray<Vote> votes = new SparseArray<>();
         SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
         votesByDisplay.put(DISPLAY_ID, votes);
@@ -775,23 +775,23 @@ public class DisplayModeDirectorTest {
         assertThat(desiredSpecs.appRequest.physical.max).isPositiveInfinity();
         assertThat(desiredSpecs.appRequest.render.min).isWithin(FLOAT_TOLERANCE).of(0);
         assertThat(desiredSpecs.appRequest.render.max).isWithin(FLOAT_TOLERANCE).of(60);
-        assertThat(desiredSpecs.baseModeId).isEqualTo(90);
+        assertThat(desiredSpecs.baseModeId).isEqualTo(60);
 
         director.setModeSwitchingType(DisplayManager.SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY);
         assertThat(director.getModeSwitchingType())
                 .isEqualTo(DisplayManager.SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY);
 
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
-        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(90);
-        assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(60);
         assertThat(desiredSpecs.primary.render.min).isWithin(FLOAT_TOLERANCE).of(60);
         assertThat(desiredSpecs.primary.render.max).isWithin(FLOAT_TOLERANCE).of(60);
-        assertThat(desiredSpecs.appRequest.physical.min).isWithin(FLOAT_TOLERANCE).of(90);
-        assertThat(desiredSpecs.appRequest.physical.max).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.appRequest.physical.min).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.appRequest.physical.max).isWithin(FLOAT_TOLERANCE).of(60);
         assertThat(desiredSpecs.appRequest.render.min).isWithin(FLOAT_TOLERANCE).of(0);
         assertThat(desiredSpecs.appRequest.render.max).isWithin(FLOAT_TOLERANCE).of(60);
 
-        assertThat(desiredSpecs.baseModeId).isEqualTo(90);
+        assertThat(desiredSpecs.baseModeId).isEqualTo(60);
     }
 
     @Test
@@ -1728,6 +1728,31 @@ public class DisplayModeDirectorTest {
         assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(120);
         assertThat(desiredSpecs.primary.render.min).isWithin(FLOAT_TOLERANCE).of(0);
         assertThat(desiredSpecs.primary.render.max).isWithin(FLOAT_TOLERANCE).of(120);
+        assertThat(desiredSpecs.baseModeId).isEqualTo(90);
+    }
+
+    @Test
+    public void testRenderFrameRateIsAchievableWhenSwitchingTypeNone() {
+        Display.Mode[] modes = new Display.Mode[2];
+        modes[0] = new Display.Mode(
+                /*modeId=*/60, /*width=*/1000, /*height=*/1000, 60);
+        modes[1] = new Display.Mode(
+                /*modeId=*/90, /*width=*/1000, /*height=*/1000, 90);
+
+        DisplayModeDirector director = createDirectorFromModeArray(modes, modes[1]);
+        director.setModeSwitchingType(DisplayManager.SWITCHING_TYPE_NONE);
+
+        SparseArray<Vote> votes = new SparseArray<>();
+        SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
+        votesByDisplay.put(DISPLAY_ID, votes);
+        votes.put(Vote.PRIORITY_APP_REQUEST_RENDER_FRAME_RATE_RANGE,
+                Vote.forRenderFrameRates(0, 60));
+        director.injectVotesByDisplay(votesByDisplay);
+        DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.primary.render.min).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.primary.render.max).isWithin(FLOAT_TOLERANCE).of(90);
         assertThat(desiredSpecs.baseModeId).isEqualTo(90);
     }
 

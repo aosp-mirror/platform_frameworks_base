@@ -32,8 +32,6 @@ import androidx.annotation.IdRes
 import com.android.internal.widget.CachingIconView
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.R
-import com.android.systemui.animation.Interpolators
-import com.android.systemui.animation.ViewHierarchyAnimator
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
 import com.android.systemui.common.shared.model.Text.Companion.loadText
@@ -78,6 +76,7 @@ constructor(
     configurationController: ConfigurationController,
     dumpManager: DumpManager,
     powerManager: PowerManager,
+    private val chipbarAnimator: ChipbarAnimator,
     private val falsingManager: FalsingManager,
     private val falsingCollector: FalsingCollector,
     private val swipeChipbarAwayGestureHandler: SwipeChipbarAwayGestureHandler?,
@@ -206,23 +205,17 @@ constructor(
     }
 
     override fun animateViewIn(view: ViewGroup) {
+        // We can only request focus once the animation finishes.
         val onAnimationEnd = Runnable {
             maybeGetAccessibilityFocus(view.getTag(INFO_TAG) as ChipbarInfo?, view)
         }
-        val added =
-            ViewHierarchyAnimator.animateAddition(
-                view.getInnerView(),
-                ViewHierarchyAnimator.Hotspot.TOP,
-                Interpolators.EMPHASIZED_DECELERATE,
-                duration = ANIMATION_IN_DURATION,
-                includeMargins = true,
-                includeFadeIn = true,
-                // We can only request focus once the animation finishes.
-                onAnimationEnd = onAnimationEnd,
-            )
-        // If the view doesn't get animated, the [onAnimationEnd] runnable won't get run. So, just
-        // run it immediately.
-        if (!added) {
+        val animatedIn = chipbarAnimator.animateViewIn(view.getInnerView(), onAnimationEnd)
+
+        // If the view doesn't get animated, the [onAnimationEnd] runnable won't get run and the
+        // views would remain un-displayed. So, just force-set/run those items immediately.
+        if (!animatedIn) {
+            logger.logAnimateInFailure()
+            chipbarAnimator.forceDisplayView(view.getInnerView())
             onAnimationEnd.run()
         }
     }
@@ -230,18 +223,11 @@ constructor(
     override fun animateViewOut(view: ViewGroup, removalReason: String?, onAnimationEnd: Runnable) {
         val innerView = view.getInnerView()
         innerView.accessibilityLiveRegion = ACCESSIBILITY_LIVE_REGION_NONE
-        val removed =
-            ViewHierarchyAnimator.animateRemoval(
-                innerView,
-                ViewHierarchyAnimator.Hotspot.TOP,
-                Interpolators.EMPHASIZED_ACCELERATE,
-                ANIMATION_OUT_DURATION,
-                includeMargins = true,
-                onAnimationEnd,
-            )
+        val removed = chipbarAnimator.animateViewOut(innerView, onAnimationEnd)
         // If the view doesn't get animated, the [onAnimationEnd] runnable won't get run. So, just
         // run it immediately.
         if (!removed) {
+            logger.logAnimateOutFailure()
             onAnimationEnd.run()
         }
 
@@ -299,8 +285,6 @@ constructor(
     }
 }
 
-private const val ANIMATION_IN_DURATION = 500L
-private const val ANIMATION_OUT_DURATION = 250L
 @IdRes private val INFO_TAG = R.id.tag_chipbar_info
 private const val SWIPE_UP_GESTURE_REASON = "SWIPE_UP_GESTURE_DETECTED"
 private const val TAG = "ChipbarCoordinator"

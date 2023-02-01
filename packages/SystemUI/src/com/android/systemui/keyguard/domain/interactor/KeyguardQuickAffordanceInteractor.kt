@@ -154,7 +154,7 @@ constructor(
         val slots = repository.get().getSlotPickerRepresentations()
         val slot = slots.find { it.id == slotId } ?: return false
         val selections =
-            repository.get().getSelections().getOrDefault(slotId, emptyList()).toMutableList()
+            repository.get().getCurrentSelections().getOrDefault(slotId, emptyList()).toMutableList()
         val alreadySelected = selections.remove(affordanceId)
         if (!alreadySelected) {
             while (selections.size > 0 && selections.size >= slot.maxSelectedAffordances) {
@@ -193,7 +193,7 @@ constructor(
 
         if (affordanceId.isNullOrEmpty()) {
             return if (
-                repository.get().getSelections().getOrDefault(slotId, emptyList()).isEmpty()
+                repository.get().getCurrentSelections().getOrDefault(slotId, emptyList()).isEmpty()
             ) {
                 false
             } else {
@@ -203,7 +203,7 @@ constructor(
         }
 
         val selections =
-            repository.get().getSelections().getOrDefault(slotId, emptyList()).toMutableList()
+            repository.get().getCurrentSelections().getOrDefault(slotId, emptyList()).toMutableList()
         return if (selections.remove(affordanceId)) {
             repository
                 .get()
@@ -220,7 +220,7 @@ constructor(
     /** Returns affordance IDs indexed by slot ID, for all known slots. */
     suspend fun getSelections(): Map<String, List<KeyguardQuickAffordancePickerRepresentation>> {
         val slots = repository.get().getSlotPickerRepresentations()
-        val selections = repository.get().getSelections()
+        val selections = repository.get().getCurrentSelections()
         val affordanceById =
             getAffordancePickerRepresentations().associateBy { affordance -> affordance.id }
         return slots.associate { slot ->

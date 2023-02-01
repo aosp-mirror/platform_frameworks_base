@@ -1171,7 +1171,8 @@ final class InstallPackageHelper {
         request.setName(pkgName);
         if (parsedPackage.isTestOnly()) {
             if ((installFlags & PackageManager.INSTALL_ALLOW_TEST) == 0) {
-                throw new PrepareFailure(INSTALL_FAILED_TEST_ONLY, "installPackageLI");
+                throw new PrepareFailure(INSTALL_FAILED_TEST_ONLY,
+                        "Failed to install test-only apk. Did you forget to add -t?");
             }
         }
 
@@ -2857,10 +2858,12 @@ final class InstallPackageHelper {
                 }
                 // Send to PermissionController for all update users, even if it may not be running
                 // for some users
-                mPm.sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
-                        extras, 0 /*flags*/,
-                        mPm.mRequiredPermissionControllerPackage, null /*finishedReceiver*/,
-                        updateUserIds, instantUserIds, null /* broadcastAllowList */, null);
+                if (BroadcastHelper.isPrivacySafetyLabelChangeNotificationsEnabled()) {
+                    mPm.sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
+                            extras, 0 /*flags*/,
+                            mPm.mRequiredPermissionControllerPackage, null /*finishedReceiver*/,
+                            updateUserIds, instantUserIds, null /* broadcastAllowList */, null);
+                }
                 // Notify required verifier(s) that are not the installer of record for the package.
                 for (String verifierPackageName : mPm.mRequiredVerifierPackages) {
                     if (verifierPackageName != null && !verifierPackageName.equals(

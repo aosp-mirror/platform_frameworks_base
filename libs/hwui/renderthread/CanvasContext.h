@@ -125,19 +125,20 @@ public:
     // Won't take effect until next EGLSurface creation
     void setSwapBehavior(SwapBehavior swapBehavior);
 
-    void setHardwareBuffer(AHardwareBuffer* buffer);
     void setSurface(ANativeWindow* window, bool enableTimeout = true);
     void setSurfaceControl(ASurfaceControl* surfaceControl);
     bool pauseSurface();
     void setStopped(bool stopped);
-    bool isStopped() { return mStopped || !hasOutputTarget(); }
-    bool hasOutputTarget() const { return mNativeSurface.get() || mHardwareBuffer; }
+    bool isStopped() { return mStopped || !hasSurface(); }
+    bool hasSurface() const { return mNativeSurface.get(); }
     void allocateBuffers();
 
     void setLightAlpha(uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
     void setLightGeometry(const Vector3& lightCenter, float lightRadius);
     void setOpaque(bool opaque);
-    void setColorMode(ColorMode mode);
+    float setColorMode(ColorMode mode);
+    float targetSdrHdrRatio() const;
+    void setTargetSdrHdrRatio(float ratio);
     bool makeCurrent();
     void prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t syncQueued, RenderNode* target);
     // Returns the DequeueBufferDuration.
@@ -207,10 +208,6 @@ public:
         mASurfaceTransactionCallback = callback;
     }
 
-    void setHardwareBufferRenderParams(const HardwareBufferRenderParams& params) {
-        mBufferParams = params;
-    }
-
     bool mergeTransaction(ASurfaceTransaction* transaction, ASurfaceControl* control);
 
     void setPrepareSurfaceControlForWebviewCallback(const std::function<void()>& callback) {
@@ -265,9 +262,6 @@ private:
     int32_t mLastFrameHeight = 0;
 
     RenderThread& mRenderThread;
-
-    AHardwareBuffer* mHardwareBuffer = nullptr;
-    HardwareBufferRenderParams mBufferParams;
     std::unique_ptr<ReliableSurface> mNativeSurface;
     // The SurfaceControl reference is passed from ViewRootImpl, can be set to
     // NULL to remove the reference
@@ -352,6 +346,9 @@ private:
     nsecs_t mLastDequeueBufferDuration = 0;
     nsecs_t mSyncDelayDuration = 0;
     nsecs_t mIdleDuration = 0;
+
+    ColorMode mColorMode = ColorMode::Default;
+    float mTargetSdrHdrRatio = 1.f;
 };
 
 } /* namespace renderthread */

@@ -62,18 +62,43 @@ public abstract class UserManagerInternal {
     })
     public @interface UserAssignmentResult {}
 
-    // TODO(b/248408342): Move keep annotation to the method referencing these fields reflectively.
-    @Keep public static final int USER_START_MODE_FOREGROUND = 1;
-    @Keep public static final int USER_START_MODE_BACKGROUND = 2;
-    @Keep public static final int USER_START_MODE_BACKGROUND_VISIBLE = 3;
-
     private static final String PREFIX_USER_START_MODE = "USER_START_MODE_";
+
+    /**
+     * Type used to indicate how a user started.
+     */
     @IntDef(flag = false, prefix = {PREFIX_USER_START_MODE}, value = {
             USER_START_MODE_FOREGROUND,
             USER_START_MODE_BACKGROUND,
             USER_START_MODE_BACKGROUND_VISIBLE
     })
     public @interface UserStartMode {}
+
+    // TODO(b/248408342): Move keep annotations below to the method referencing these fields
+    // reflectively.
+
+    /** (Full) user started on foreground (a.k.a. "current user"). */
+    @Keep public static final int USER_START_MODE_FOREGROUND = 1;
+
+    /**
+     * User (full or profile) started on background and is
+     * {@link UserManager#isUserVisible() invisible}.
+     *
+     * <p>This is the "traditional" way of starting a background user, and can be used to start
+     * profiles as well, although starting an invisible profile is not common from the System UI
+     * (it could be done through APIs or adb, though).
+     */
+    @Keep public static final int USER_START_MODE_BACKGROUND = 2;
+
+    /**
+     * User (full or profile) started on background and is
+     * {@link UserManager#isUserVisible() visible}.
+     *
+     * <p>This is the "traditional" way of starting a profile (i.e., when the profile of the current
+     * user is the current foreground user), but it can also be used to start a full user associated
+     * with a display (which is the case on automotives with passenger displays).
+     */
+    @Keep public static final int USER_START_MODE_BACKGROUND_VISIBLE = 3;
 
     public interface UserRestrictionsListener {
         /**

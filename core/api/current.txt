@@ -3538,6 +3538,7 @@ package android.accessibilityservice {
     method public float getCenterY();
     method public int getMode();
     method public float getScale();
+    method public boolean isActivated();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.accessibilityservice.MagnificationConfig> CREATOR;
     field public static final int MAGNIFICATION_MODE_DEFAULT = 0; // 0x0
@@ -3548,6 +3549,7 @@ package android.accessibilityservice {
   public static final class MagnificationConfig.Builder {
     ctor public MagnificationConfig.Builder();
     method @NonNull public android.accessibilityservice.MagnificationConfig build();
+    method @NonNull public android.accessibilityservice.MagnificationConfig.Builder setActivated(boolean);
     method @NonNull public android.accessibilityservice.MagnificationConfig.Builder setCenterX(float);
     method @NonNull public android.accessibilityservice.MagnificationConfig.Builder setCenterY(float);
     method @NonNull public android.accessibilityservice.MagnificationConfig.Builder setMode(int);
@@ -10851,6 +10853,7 @@ package android.content {
     field public static final String EXTRA_CHANGED_PACKAGE_LIST = "android.intent.extra.changed_package_list";
     field public static final String EXTRA_CHANGED_UID_LIST = "android.intent.extra.changed_uid_list";
     field public static final String EXTRA_CHOOSER_CUSTOM_ACTIONS = "android.intent.extra.CHOOSER_CUSTOM_ACTIONS";
+    field public static final String EXTRA_CHOOSER_PAYLOAD_RESELECTION_ACTION = "android.intent.extra.CHOOSER_PAYLOAD_RESELECTION_ACTION";
     field public static final String EXTRA_CHOOSER_REFINEMENT_INTENT_SENDER = "android.intent.extra.CHOOSER_REFINEMENT_INTENT_SENDER";
     field public static final String EXTRA_CHOOSER_TARGETS = "android.intent.extra.CHOOSER_TARGETS";
     field public static final String EXTRA_CHOSEN_COMPONENT = "android.intent.extra.CHOSEN_COMPONENT";
@@ -15308,29 +15311,6 @@ package android.graphics {
 
   public class EmbossMaskFilter extends android.graphics.MaskFilter {
     ctor @Deprecated public EmbossMaskFilter(float[], float, float, float);
-  }
-
-  public class HardwareBufferRenderer implements java.lang.AutoCloseable {
-    ctor public HardwareBufferRenderer(@NonNull android.hardware.HardwareBuffer);
-    method public void close();
-    method public boolean isClosed();
-    method @NonNull public android.graphics.HardwareBufferRenderer.RenderRequest obtainRenderRequest();
-    method public void setContentRoot(@Nullable android.graphics.RenderNode);
-    method public void setLightSourceAlpha(@FloatRange(from=0.0f, to=1.0f) float, @FloatRange(from=0.0f, to=1.0f) float);
-    method public void setLightSourceGeometry(float, float, @FloatRange(from=0.0f) float, @FloatRange(from=0.0f) float);
-  }
-
-  public final class HardwareBufferRenderer.RenderRequest {
-    method public void draw(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.graphics.HardwareBufferRenderer.RenderResult>);
-    method @NonNull public android.graphics.HardwareBufferRenderer.RenderRequest setBufferTransform(int);
-    method @NonNull public android.graphics.HardwareBufferRenderer.RenderRequest setColorSpace(@Nullable android.graphics.ColorSpace);
-  }
-
-  public static final class HardwareBufferRenderer.RenderResult {
-    method @NonNull public android.hardware.SyncFence getFence();
-    method public int getStatus();
-    field public static final int ERROR_UNKNOWN = 1; // 0x1
-    field public static final int SUCCESS = 0; // 0x0
   }
 
   public class HardwareRenderer {

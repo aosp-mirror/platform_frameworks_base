@@ -20,6 +20,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_FAILURE;
+import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE;
 import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE;
 import static com.android.server.pm.UserVisibilityChangedEvent.onInvisible;
 import static com.android.server.pm.UserVisibilityChangedEvent.onVisible;
@@ -73,8 +74,8 @@ public final class UserVisibilityMediatorMUPANDTest
         assertUserCanBeAssignedExtraDisplay(USER_ID, OTHER_SECONDARY_DISPLAY_ID);
 
         // Make sure another user cannot be started on default display
-        int result2 = mMediator.assignUserToDisplayOnStart(otherUserId, visibleBgUserId,
-                BG_VISIBLE, DEFAULT_DISPLAY);
+        int result2 = mMediator.assignUserToDisplayOnStart(otherUserId, otherUserId, BG_VISIBLE,
+                DEFAULT_DISPLAY);
         assertStartUserResult(result2, USER_ASSIGNMENT_RESULT_FAILURE,
                 "when user (%d) is starting on default display after it was started by user %d",
                 otherUserId, visibleBgUserId);
@@ -117,13 +118,69 @@ public final class UserVisibilityMediatorMUPANDTest
         assertUserCanBeAssignedExtraDisplay(USER_ID, OTHER_SECONDARY_DISPLAY_ID);
 
         // Make sure another user cannot be started on default display
-        int result2 = mMediator.assignUserToDisplayOnStart(otherUserId, visibleBgUserId,
-                BG_VISIBLE, DEFAULT_DISPLAY);
+        int result2 = mMediator.assignUserToDisplayOnStart(otherUserId, otherUserId, BG_VISIBLE,
+                DEFAULT_DISPLAY);
         assertStartUserResult(result2, USER_ASSIGNMENT_RESULT_FAILURE,
                 "when user (%d) is starting on default display after it was started by user %d",
                 otherUserId, visibleBgUserId);
         expectVisibleUsers(currentUserId, visibleBgUserId);
 
+        listener.verify();
+    }
+
+    @Test
+    public void testStartVisibleBgProfile_onDefaultDisplay_whenParentIsStartedVisibleOnBg()
+            throws Exception {
+        AsyncUserVisibilityListener listener = addListenerForEvents(
+                onVisible(PARENT_USER_ID),
+                onVisible(PROFILE_USER_ID));
+        startUserInSecondaryDisplay(PARENT_USER_ID, DEFAULT_DISPLAY);
+
+        int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID,
+                BG_VISIBLE, DEFAULT_DISPLAY);
+        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
+
+        // Assert parent user visibility
+        expectUserIsVisible(PARENT_USER_ID);
+        expectUserIsVisibleOnDisplay(PARENT_USER_ID, DEFAULT_DISPLAY);
+        expectUserIsNotVisibleOnDisplay(PARENT_USER_ID, INVALID_DISPLAY);
+        expectDisplayAssignedToUser(PARENT_USER_ID, DEFAULT_DISPLAY);
+        expectUserAssignedToDisplay(DEFAULT_DISPLAY, PARENT_USER_ID);
+        assertUserCanBeAssignedExtraDisplay(PARENT_USER_ID, OTHER_SECONDARY_DISPLAY_ID);
+
+        // Assert profile user visibility
+        expectUserIsVisible(PROFILE_USER_ID);
+        expectUserIsVisibleOnDisplay(PROFILE_USER_ID, DEFAULT_DISPLAY);
+        expectUserIsNotVisibleOnDisplay(PROFILE_USER_ID, INVALID_DISPLAY);
+        // Only full user (parent) is assigned to the display
+        expectDisplayAssignedToUser(PROFILE_USER_ID, INVALID_DISPLAY);
+        assertUserCannotBeAssignedExtraDisplay(PROFILE_USER_ID, OTHER_SECONDARY_DISPLAY_ID);
+
+        listener.verify();
+    }
+
+    @Test
+    public void testStartBgProfile_onDefaultDisplay_whenParentIsStartedVisibleOnBg()
+            throws Exception {
+        AsyncUserVisibilityListener listener = addListenerForEvents(onVisible(PARENT_USER_ID));
+        startUserInSecondaryDisplay(PARENT_USER_ID, DEFAULT_DISPLAY);
+
+        int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID, BG,
+                DEFAULT_DISPLAY);
+        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE);
+
+        // Assert parent user visibility
+        expectUserIsVisible(PARENT_USER_ID);
+        expectUserIsVisibleOnDisplay(PARENT_USER_ID, DEFAULT_DISPLAY);
+        expectUserIsNotVisibleOnDisplay(PARENT_USER_ID, INVALID_DISPLAY);
+        expectDisplayAssignedToUser(PARENT_USER_ID, DEFAULT_DISPLAY);
+        expectUserAssignedToDisplay(DEFAULT_DISPLAY, PARENT_USER_ID);
+        assertUserCanBeAssignedExtraDisplay(PARENT_USER_ID, OTHER_SECONDARY_DISPLAY_ID);
+
+        // Assert profile user visibility
+        expectUserIsNotVisibleAtAll(PROFILE_USER_ID);
+        expectNoDisplayAssignedToUser(PROFILE_USER_ID);
+        assertUserCannotBeAssignedExtraDisplay(PROFILE_USER_ID, OTHER_SECONDARY_DISPLAY_ID);
         listener.verify();
     }
 }

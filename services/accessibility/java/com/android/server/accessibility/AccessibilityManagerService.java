@@ -612,6 +612,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
+    private void onSomePackagesChangedLocked() {
+        final AccessibilityUserState userState = getCurrentUserStateLocked();
+        // Reload the installed services since some services may have different attributes
+        // or resolve info (does not support equals), etc. Remove them then to force reload.
+        userState.mInstalledServices.clear();
+        if (readConfigurationForUserStateLocked(userState)) {
+            onUserStateChangedLocked(userState);
+        }
+    }
+
     private void registerBroadcastReceivers() {
         PackageMonitor monitor = new PackageMonitor() {
             @Override
@@ -627,15 +637,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     if (getChangingUserId() != mCurrentUserId) {
                         return;
                     }
-                    // We will update when the automation service dies.
-                    final AccessibilityUserState userState = getCurrentUserStateLocked();
-                    // We have to reload the installed services since some services may
-                    // have different attributes, resolve info (does not support equals),
-                    // etc. Remove them then to force reload.
-                    userState.mInstalledServices.clear();
-                    if (readConfigurationForUserStateLocked(userState)) {
-                        onUserStateChangedLocked(userState);
-                    }
+                    onSomePackagesChangedLocked();
                 }
             }
 
@@ -766,6 +768,24 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         // package changes
         monitor.register(mContext, null,  UserHandle.ALL, true);
+
+        // Register an additional observer for new packages using PackageManagerInternal, which
+        // generally notifies observers much sooner than the BroadcastReceiver-based PackageMonitor.
+        final PackageManagerInternal pm = LocalServices.getService(
+                PackageManagerInternal.class);
+        if (pm != null) {
+            pm.getPackageList(new PackageManagerInternal.PackageListObserver() {
+                @Override
+                public void onPackageAdded(String packageName, int uid) {
+                    final int userId = UserHandle.getUserId(uid);
+                    synchronized (mLock) {
+                        if (userId == mCurrentUserId) {
+                            onSomePackagesChangedLocked();
+                        }
+                    }
+                }
+            });
+        }
 
         // user change and unlock
         IntentFilter intentFilter = new IntentFilter();

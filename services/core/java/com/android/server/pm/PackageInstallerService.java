@@ -184,6 +184,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     private volatile boolean mOkToSendBroadcasts = false;
     private volatile boolean mBypassNextStagedInstallerCheck = false;
     private volatile boolean mBypassNextAllowedApexUpdateCheck = false;
+    private volatile int mDisableVerificationForUid = INVALID_UID;
 
     /**
      * File storing persisted {@link #mSessions} metadata.
@@ -705,14 +706,23 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
         }
 
-        if (Build.IS_DEBUGGABLE || isCalledBySystemOrShell(callingUid)) {
+        if (Build.IS_DEBUGGABLE || isCalledBySystem(callingUid)) {
             params.installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
         } else {
             params.installFlags &= ~PackageManager.INSTALL_ALLOW_DOWNGRADE;
             params.installFlags &= ~PackageManager.INSTALL_REQUEST_DOWNGRADE;
         }
 
-        if ((params.installFlags & ADB_DEV_MODE) != ADB_DEV_MODE) {
+        if (mDisableVerificationForUid != INVALID_UID) {
+            if (callingUid == mDisableVerificationForUid) {
+                params.installFlags |= PackageManager.INSTALL_DISABLE_VERIFICATION;
+            } else {
+                // Clear the flag if current calling uid doesn't match the requested uid.
+                params.installFlags &= ~PackageManager.INSTALL_DISABLE_VERIFICATION;
+            }
+            // Reset the field as this is a one-off request.
+            mDisableVerificationForUid = INVALID_UID;
+        } else if ((params.installFlags & ADB_DEV_MODE) != ADB_DEV_MODE) {
             // Only tools under specific conditions (test app installed through ADB, and
             // verification disabled flag specified) can disable verification.
             params.installFlags &= ~PackageManager.INSTALL_DISABLE_VERIFICATION;
@@ -904,6 +914,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             Slog.d(TAG, "Created session id=" + sessionId + " staged=" + params.isStaged);
         }
         return sessionId;
+    }
+
+    private static boolean isCalledBySystem(int callingUid) {
+        return callingUid == Process.SYSTEM_UID || callingUid == Process.ROOT_UID;
     }
 
     private boolean isCalledBySystemOrShell(int callingUid) {
@@ -1365,6 +1379,14 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             throw new SecurityException("Caller not allowed to bypass allowed apex update check");
         }
         mBypassNextAllowedApexUpdateCheck = value;
+    }
+
+    @Override
+    public void disableVerificationForUid(int uid) {
+        if (!isCalledBySystemOrShell(Binder.getCallingUid())) {
+            throw new SecurityException("Operation not allowed for caller");
+        }
+        mDisableVerificationForUid = uid;
     }
 
     /**
