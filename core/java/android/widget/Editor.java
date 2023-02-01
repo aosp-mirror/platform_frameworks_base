@@ -187,20 +187,34 @@ public class Editor {
     // Tag used when the Editor maintains its own separate UndoManager.
     private static final String UNDO_OWNER_TAG = "Editor";
 
-    // Ordering constants used to place the Action Mode or context menu items in their menu.
-    private static final int MENU_ITEM_ORDER_ASSIST = 0;
-    private static final int MENU_ITEM_ORDER_UNDO = 2;
-    private static final int MENU_ITEM_ORDER_REDO = 3;
-    private static final int MENU_ITEM_ORDER_CUT = 4;
-    private static final int MENU_ITEM_ORDER_COPY = 5;
-    private static final int MENU_ITEM_ORDER_PASTE = 6;
-    private static final int MENU_ITEM_ORDER_SHARE = 7;
-    private static final int MENU_ITEM_ORDER_SELECT_ALL = 8;
-    private static final int MENU_ITEM_ORDER_REPLACE = 9;
-    private static final int MENU_ITEM_ORDER_AUTOFILL = 10;
-    private static final int MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT = 11;
-    private static final int MENU_ITEM_ORDER_SECONDARY_ASSIST_ACTIONS_START = 50;
-    private static final int MENU_ITEM_ORDER_PROCESS_TEXT_INTENT_ACTIONS_START = 100;
+    // Ordering constants used to place the Action Mode items in their menu.
+    private static final int ACTION_MODE_MENU_ITEM_ORDER_ASSIST = 0;
+    private static final int ACTION_MODE_MENU_ITEM_ORDER_CUT = 4;
+    private static final int ACTION_MODE_MENU_ITEM_ORDER_COPY = 5;
+    private static final int ACTION_MODE_MENU_ITEM_ORDER_PASTE = 6;
+    private static final int ACTION_MODE_MENU_ITEM_ORDER_SHARE = 7;
+    private static final int ACTION_MODE_MENU_ITEM_ORDER_SELECT_ALL = 8;
+    private static final int ACTION_MODE_MENU_ITEM_ORDER_REPLACE = 9;
+    private static final int ACTION_MODE_MENU_ITEM_ORDER_AUTOFILL = 10;
+    private static final int ACTION_MODE_MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT = 11;
+    private static final int ACTION_MODE_MENU_ITEM_ORDER_SECONDARY_ASSIST_ACTIONS_START = 50;
+    private static final int ACTION_MODE_MENU_ITEM_ORDER_PROCESS_TEXT_INTENT_ACTIONS_START = 100;
+
+    // Ordering constants used to place the Context Menu items in their menu.
+    private static final int CONTEXT_MENU_ITEM_ORDER_UNDO = 2;
+    private static final int CONTEXT_MENU_ITEM_ORDER_REDO = 3;
+    private static final int CONTEXT_MENU_ITEM_ORDER_CUT = 4;
+    private static final int CONTEXT_MENU_ITEM_ORDER_COPY = 5;
+    private static final int CONTEXT_MENU_ITEM_ORDER_PASTE = 6;
+    private static final int CONTEXT_MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT = 7;
+    private static final int CONTEXT_MENU_ITEM_ORDER_SELECT_ALL = 8;
+    private static final int CONTEXT_MENU_ITEM_ORDER_SHARE = 9;
+    private static final int CONTEXT_MENU_ITEM_ORDER_AUTOFILL = 10;
+    private static final int CONTEXT_MENU_ITEM_ORDER_REPLACE = 11;
+
+    private static final int CONTEXT_MENU_GROUP_UNDO_REDO = Menu.FIRST;
+    private static final int CONTEXT_MENU_GROUP_CLIPBOARD = Menu.FIRST + 1;
+    private static final int CONTEXT_MENU_GROUP_MISC = Menu.FIRST + 2;
 
     private static final int FLAG_MISSPELLED_OR_GRAMMAR_ERROR =
             SuggestionSpan.FLAG_MISSPELLED | SuggestionSpan.FLAG_GRAMMAR_ERROR;
@@ -3114,8 +3128,8 @@ public class Editor {
             for (int i = 0; i < suggestionInfoArray.length; i++) {
                 suggestionInfoArray[i] = new SuggestionInfo();
             }
-            final SubMenu subMenu = menu.addSubMenu(Menu.NONE, Menu.NONE, MENU_ITEM_ORDER_REPLACE,
-                    com.android.internal.R.string.replace);
+            final SubMenu subMenu = menu.addSubMenu(Menu.NONE, Menu.NONE,
+                    CONTEXT_MENU_ITEM_ORDER_REPLACE, com.android.internal.R.string.replace);
             final int numItems = mSuggestionHelper.getSuggestionInfo(suggestionInfoArray, null);
             for (int i = 0; i < numItems; i++) {
                 final SuggestionInfo info = suggestionInfoArray[i];
@@ -3133,47 +3147,51 @@ public class Editor {
         final int keyboard = mTextView.getResources().getConfiguration().keyboard;
         menu.setQwertyMode(keyboard == Configuration.KEYBOARD_QWERTY);
 
-        menu.add(Menu.NONE, TextView.ID_UNDO, MENU_ITEM_ORDER_UNDO,
+        menu.setGroupDividerEnabled(true);
+
+        menu.add(CONTEXT_MENU_GROUP_UNDO_REDO, TextView.ID_UNDO, CONTEXT_MENU_ITEM_ORDER_UNDO,
                 com.android.internal.R.string.undo)
                 .setAlphabeticShortcut('z')
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
                 .setEnabled(mTextView.canUndo());
-        menu.add(Menu.NONE, TextView.ID_REDO, MENU_ITEM_ORDER_REDO,
+        menu.add(CONTEXT_MENU_GROUP_UNDO_REDO, TextView.ID_REDO, CONTEXT_MENU_ITEM_ORDER_REDO,
                 com.android.internal.R.string.redo)
                 .setAlphabeticShortcut('z', KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON)
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
                 .setEnabled(mTextView.canRedo());
 
-        menu.add(Menu.NONE, TextView.ID_CUT, MENU_ITEM_ORDER_CUT,
+        menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_CUT, CONTEXT_MENU_ITEM_ORDER_CUT,
                 com.android.internal.R.string.cut)
                 .setAlphabeticShortcut('x')
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
                 .setEnabled(mTextView.canCut());
-        menu.add(Menu.NONE, TextView.ID_COPY, MENU_ITEM_ORDER_COPY,
+        menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_COPY, CONTEXT_MENU_ITEM_ORDER_COPY,
                 com.android.internal.R.string.copy)
                 .setAlphabeticShortcut('c')
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
                 .setEnabled(mTextView.canCopy());
-        menu.add(Menu.NONE, TextView.ID_PASTE, MENU_ITEM_ORDER_PASTE,
+        menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_PASTE, CONTEXT_MENU_ITEM_ORDER_PASTE,
                 com.android.internal.R.string.paste)
                 .setAlphabeticShortcut('v')
                 .setEnabled(mTextView.canPaste())
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
-        menu.add(Menu.NONE, TextView.ID_PASTE_AS_PLAIN_TEXT, MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT,
+        menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_PASTE_AS_PLAIN_TEXT,
+                        CONTEXT_MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT,
                 com.android.internal.R.string.paste_as_plain_text)
                 .setAlphabeticShortcut('v', KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON)
                 .setEnabled(mTextView.canPasteAsPlainText())
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
-        menu.add(Menu.NONE, TextView.ID_SHARE, MENU_ITEM_ORDER_SHARE,
-                com.android.internal.R.string.share)
-                .setEnabled(mTextView.canShare())
-                .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
-        menu.add(Menu.NONE, TextView.ID_SELECT_ALL, MENU_ITEM_ORDER_SELECT_ALL,
-                com.android.internal.R.string.selectAll)
+        menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_SELECT_ALL,
+                        CONTEXT_MENU_ITEM_ORDER_SELECT_ALL, com.android.internal.R.string.selectAll)
                 .setAlphabeticShortcut('a')
                 .setEnabled(mTextView.canSelectAllText())
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
-        menu.add(Menu.NONE, TextView.ID_AUTOFILL, MENU_ITEM_ORDER_AUTOFILL,
+
+        menu.add(CONTEXT_MENU_GROUP_MISC, TextView.ID_SHARE, CONTEXT_MENU_ITEM_ORDER_SHARE,
+                com.android.internal.R.string.share)
+                .setEnabled(mTextView.canShare())
+                .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
+        menu.add(CONTEXT_MENU_GROUP_MISC, TextView.ID_AUTOFILL, CONTEXT_MENU_ITEM_ORDER_AUTOFILL,
                 android.R.string.autofill)
                 .setEnabled(mTextView.canRequestAutofill())
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
@@ -4355,28 +4373,28 @@ public class Editor {
 
         private void populateMenuWithItems(Menu menu) {
             if (mTextView.canCut()) {
-                menu.add(Menu.NONE, TextView.ID_CUT, MENU_ITEM_ORDER_CUT,
+                menu.add(Menu.NONE, TextView.ID_CUT, ACTION_MODE_MENU_ITEM_ORDER_CUT,
                         com.android.internal.R.string.cut)
                                 .setAlphabeticShortcut('x')
                                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
             }
 
             if (mTextView.canCopy()) {
-                menu.add(Menu.NONE, TextView.ID_COPY, MENU_ITEM_ORDER_COPY,
+                menu.add(Menu.NONE, TextView.ID_COPY, ACTION_MODE_MENU_ITEM_ORDER_COPY,
                         com.android.internal.R.string.copy)
                                 .setAlphabeticShortcut('c')
                                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
             }
 
             if (mTextView.canPaste()) {
-                menu.add(Menu.NONE, TextView.ID_PASTE, MENU_ITEM_ORDER_PASTE,
+                menu.add(Menu.NONE, TextView.ID_PASTE, ACTION_MODE_MENU_ITEM_ORDER_PASTE,
                         com.android.internal.R.string.paste)
                                 .setAlphabeticShortcut('v')
                                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
             }
 
             if (mTextView.canShare()) {
-                menu.add(Menu.NONE, TextView.ID_SHARE, MENU_ITEM_ORDER_SHARE,
+                menu.add(Menu.NONE, TextView.ID_SHARE, ACTION_MODE_MENU_ITEM_ORDER_SHARE,
                         com.android.internal.R.string.share)
                         .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             }
@@ -4384,7 +4402,7 @@ public class Editor {
             if (mTextView.canRequestAutofill()) {
                 final String selected = mTextView.getSelectedText();
                 if (selected == null || selected.isEmpty()) {
-                    menu.add(Menu.NONE, TextView.ID_AUTOFILL, MENU_ITEM_ORDER_AUTOFILL,
+                    menu.add(Menu.NONE, TextView.ID_AUTOFILL, ACTION_MODE_MENU_ITEM_ORDER_AUTOFILL,
                             com.android.internal.R.string.autofill)
                             .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
                 }
@@ -4394,7 +4412,7 @@ public class Editor {
                 menu.add(
                         Menu.NONE,
                         TextView.ID_PASTE_AS_PLAIN_TEXT,
-                        MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT,
+                                ACTION_MODE_MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT,
                         com.android.internal.R.string.paste_as_plain_text)
                         .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             }
@@ -4421,7 +4439,7 @@ public class Editor {
             boolean canSelectAll = mTextView.canSelectAllText();
             boolean selectAllItemExists = menu.findItem(TextView.ID_SELECT_ALL) != null;
             if (canSelectAll && !selectAllItemExists) {
-                menu.add(Menu.NONE, TextView.ID_SELECT_ALL, MENU_ITEM_ORDER_SELECT_ALL,
+                menu.add(Menu.NONE, TextView.ID_SELECT_ALL, ACTION_MODE_MENU_ITEM_ORDER_SELECT_ALL,
                         com.android.internal.R.string.selectAll)
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             } else if (!canSelectAll && selectAllItemExists) {
@@ -4433,7 +4451,7 @@ public class Editor {
             boolean canReplace = mTextView.isSuggestionsEnabled() && shouldOfferToShowSuggestions();
             boolean replaceItemExists = menu.findItem(TextView.ID_REPLACE) != null;
             if (canReplace && !replaceItemExists) {
-                menu.add(Menu.NONE, TextView.ID_REPLACE, MENU_ITEM_ORDER_REPLACE,
+                menu.add(Menu.NONE, TextView.ID_REPLACE, ACTION_MODE_MENU_ITEM_ORDER_REPLACE,
                         com.android.internal.R.string.replace)
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             } else if (!canReplace && replaceItemExists) {
@@ -4459,12 +4477,12 @@ public class Editor {
                 // Primary assist action (Always shown).
                 final MenuItem item = addAssistMenuItem(menu,
                         textClassification.getActions().get(0), TextView.ID_ASSIST,
-                        MENU_ITEM_ORDER_ASSIST, MenuItem.SHOW_AS_ACTION_ALWAYS);
+                        ACTION_MODE_MENU_ITEM_ORDER_ASSIST, MenuItem.SHOW_AS_ACTION_ALWAYS);
                 item.setIntent(textClassification.getIntent());
             } else if (hasLegacyAssistItem(textClassification)) {
                 // Legacy primary assist action (Always shown).
                 final MenuItem item = menu.add(
-                        TextView.ID_ASSIST, TextView.ID_ASSIST, MENU_ITEM_ORDER_ASSIST,
+                        TextView.ID_ASSIST, TextView.ID_ASSIST, ACTION_MODE_MENU_ITEM_ORDER_ASSIST,
                         textClassification.getLabel())
                         .setIcon(textClassification.getIcon())
                         .setIntent(textClassification.getIntent());
@@ -4478,7 +4496,7 @@ public class Editor {
             for (int i = 1; i < count; i++) {
                 // Secondary assist action (Never shown).
                 addAssistMenuItem(menu, textClassification.getActions().get(i), Menu.NONE,
-                        MENU_ITEM_ORDER_SECONDARY_ASSIST_ACTIONS_START + i - 1,
+                        ACTION_MODE_MENU_ITEM_ORDER_SECONDARY_ASSIST_ACTIONS_START + i - 1,
                         MenuItem.SHOW_AS_ACTION_NEVER);
             }
             mPrevTextClassification = textClassification;
@@ -7923,7 +7941,7 @@ public class Editor {
             for (int i = 0; i < size; i++) {
                 final ResolveInfo resolveInfo = mSupportedActivities.get(i);
                 menu.add(Menu.NONE, Menu.NONE,
-                        Editor.MENU_ITEM_ORDER_PROCESS_TEXT_INTENT_ACTIONS_START + i,
+                        Editor.ACTION_MODE_MENU_ITEM_ORDER_PROCESS_TEXT_INTENT_ACTIONS_START + i,
                         getLabel(resolveInfo))
                         .setIntent(createProcessTextIntentForResolveInfo(resolveInfo))
                         .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
