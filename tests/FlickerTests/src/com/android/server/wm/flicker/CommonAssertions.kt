@@ -259,7 +259,7 @@ fun FlickerTest.snapshotStartingWindowLayerCoversExactlyOnApp(component: ICompon
                     snapshotLayers
                         .mapNotNull { snapshotLayer -> snapshotLayer.layer?.visibleRegion }
                         .toTypedArray()
-                val snapshotRegion = RegionSubject.assertThat(visibleAreas, this, timestamp)
+                val snapshotRegion = RegionSubject(visibleAreas, this, timestamp)
                 val appVisibleRegion = it.visibleRegion(component)
                 if (snapshotRegion.region.isNotEmpty) {
                     snapshotRegion.coversExactly(appVisibleRegion.region)

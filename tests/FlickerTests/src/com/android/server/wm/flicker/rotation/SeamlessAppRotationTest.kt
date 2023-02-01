@@ -111,9 +111,9 @@ open class SeamlessAppRotationTest(flicker: FlickerTest) : RotationTransition(fl
                 val appWindow = it.windowState(testApp.`package`)
                 val flags = appWindow.windowState?.attributes?.flags ?: 0
                 appWindow
-                    .verify("isFullScreen")
+                    .check { "isFullScreen" }
                     .that(flags.and(WindowManager.LayoutParams.FLAG_FULLSCREEN))
-                    .isGreaterThan(0)
+                    .isGreater(0)
             }
         }
     }
@@ -127,13 +127,13 @@ open class SeamlessAppRotationTest(flicker: FlickerTest) : RotationTransition(fl
                 val appWindow = it.windowState(testApp.`package`)
                 val rotationAnimation = appWindow.windowState?.attributes?.rotationAnimation ?: 0
                 appWindow
-                    .verify("isRotationSeamless")
+                    .check { "isRotationSeamless" }
                     .that(
                         rotationAnimation.and(
                             WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS
                         )
                     )
-                    .isGreaterThan(0)
+                    .isGreater(0)
             }
         }
     }

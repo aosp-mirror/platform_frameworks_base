@@ -90,7 +90,7 @@ class CloseImeOnDismissPopupDialogTest(flicker: FlickerTest) : BaseTest(flicker)
                                 imeSnapshotLayer.layer?.visibleRegion
                             }
                             .toTypedArray()
-                    val imeVisibleRegion = RegionSubject.assertThat(visibleAreas, this, timestamp)
+                    val imeVisibleRegion = RegionSubject(visibleAreas, this, timestamp)
                     val appVisibleRegion = it.visibleRegion(imeTestApp)
                     if (imeVisibleRegion.region.isNotEmpty) {
                         imeVisibleRegion.coversAtMost(appVisibleRegion.region)
