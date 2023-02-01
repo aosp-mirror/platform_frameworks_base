@@ -16,17 +16,18 @@
 
 package com.android.wm.shell.flicker.bubble
 
-import android.content.Context
-import android.graphics.Point
+import android.os.SystemClock
 import android.platform.test.annotations.Presubmit
-import android.util.DisplayMetrics
-import android.view.WindowManager
 import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.By
+import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
+import org.junit.Assume
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -34,37 +35,52 @@ import org.junit.runners.Parameterized
 /**
  * Test launching a new activity from bubble.
  *
- * To run this test: `atest WMShellFlickerTests:DismissBubbleScreen`
+ * To run this test: `atest WMShellFlickerTests:MultiBubblesScreen`
  *
  * Actions:
  * ```
- *     Dismiss a bubble notification
+ *     Switch in different bubble notifications
  * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-open class DismissBubbleScreen(flicker: FlickerTest) : BaseBubbleScreen(flicker) {
+open class ChangeActiveActivityFromBubbleTest(flicker: FlickerTest) : BaseBubbleScreen(flicker) {
 
-    private val wm = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-    private val displaySize = DisplayMetrics()
+    @Before
+    open fun before() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+    }
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition {
             setup {
-                val addBubbleBtn = waitAndGetAddBubbleBtn()
-                addBubbleBtn?.click() ?: error("Add Bubble not found")
-            }
-            transitions {
-                wm.run { wm.defaultDisplay.getMetrics(displaySize) }
-                val dist = Point((displaySize.widthPixels / 2), displaySize.heightPixels)
+                for (i in 1..3) {
+                    val addBubbleBtn = waitAndGetAddBubbleBtn() ?: error("Add Bubble not found")
+                    addBubbleBtn.click()
+                    SystemClock.sleep(1000)
+                }
                 val showBubble =
                     device.wait(
                         Until.findObject(By.res(SYSTEM_UI_PACKAGE, BUBBLE_RES_NAME)),
                         FIND_OBJECT_TIMEOUT
                     )
-                showBubble?.run { drag(dist, 1000) } ?: error("Show bubble not found")
+                        ?: error("Show bubble not found")
+                showBubble.click()
+                SystemClock.sleep(1000)
+            }
+            transitions {
+                val bubbles: List<UiObject2> =
+                    device.wait(
+                        Until.findObjects(By.res(SYSTEM_UI_PACKAGE, BUBBLE_RES_NAME)),
+                        FIND_OBJECT_TIMEOUT
+                    )
+                        ?: error("No bubbles found")
+                for (entry in bubbles) {
+                    entry.click()
+                    SystemClock.sleep(1000)
+                }
             }
         }
 

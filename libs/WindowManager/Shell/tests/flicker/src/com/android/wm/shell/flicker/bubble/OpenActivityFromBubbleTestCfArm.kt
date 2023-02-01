@@ -23,4 +23,4 @@ import org.junit.runners.Parameterized
 
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-open class MultiBubblesScreenCfArm(flicker: FlickerTest) : MultiBubblesScreen(flicker)
+class OpenActivityFromBubbleTestCfArm(flicker: FlickerTest) : OpenActivityFromBubbleTest(flicker)

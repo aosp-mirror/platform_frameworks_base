@@ -28,33 +28,36 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 /**
- * Test creating a bubble notification
+ * Test launching a new activity from bubble.
  *
- * To run this test: `atest WMShellFlickerTests:LaunchBubbleScreen`
+ * To run this test: `atest WMShellFlickerTests:ExpandBubbleScreen`
  *
  * Actions:
  * ```
  *     Launch an app and enable app's bubble notification
  *     Send a bubble notification
+ *     The activity for the bubble is launched
  * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-open class LaunchBubbleScreen(flicker: FlickerTest) : BaseBubbleScreen(flicker) {
+open class OpenActivityFromBubbleTest(flicker: FlickerTest) : BaseBubbleScreen(flicker) {
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition {
-            transitions {
+            setup {
                 val addBubbleBtn = waitAndGetAddBubbleBtn()
-                addBubbleBtn?.click() ?: error("Bubble widget not found")
-
-                device.wait(
-                    Until.findObjects(By.res(SYSTEM_UI_PACKAGE, BUBBLE_RES_NAME)),
-                    FIND_OBJECT_TIMEOUT
-                )
-                    ?: error("No bubbles found")
+                addBubbleBtn?.click() ?: error("Add Bubble not found")
+            }
+            transitions {
+                val showBubble =
+                    device.wait(
+                        Until.findObject(By.res("com.android.systemui", "bubble_view")),
+                        FIND_OBJECT_TIMEOUT
+                    )
+                showBubble?.run { showBubble.click() } ?: error("Bubble notify not found")
             }
         }
 

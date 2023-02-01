@@ -23,4 +23,5 @@ import org.junit.runners.Parameterized
 
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-class DismissBubbleScreenCfArm(flicker: FlickerTest) : DismissBubbleScreen(flicker)
+class DragToDismissBubbleScreenTestCfArm(flicker: FlickerTest) :
+    DragToDismissBubbleScreenTest(flicker)
