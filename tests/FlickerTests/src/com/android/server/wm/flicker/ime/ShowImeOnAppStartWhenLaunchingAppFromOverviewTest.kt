@@ -22,7 +22,7 @@ import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
+import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
@@ -41,8 +41,9 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class ReOpenImeWindowTest(flicker: FlickerTest) : BaseTest(flicker) {
-    private val testApp = ImeAppAutoFocusHelper(instrumentation, flicker.scenario.startRotation)
+open class ShowImeOnAppStartWhenLaunchingAppFromOverviewTest(flicker: FlickerTest) :
+    BaseTest(flicker) {
+    private val testApp = ImeShownOnAppStartHelper(instrumentation, flicker.scenario.startRotation)
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {

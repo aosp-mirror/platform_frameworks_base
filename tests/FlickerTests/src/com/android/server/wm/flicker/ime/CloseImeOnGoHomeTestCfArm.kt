@@ -26,4 +26,4 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class OpenImeWindowToOverViewTestCfArm(flicker: FlickerTest) : OpenImeWindowToOverViewTest(flicker)
+class CloseImeOnGoHomeTestCfArm(flicker: FlickerTest) : CloseImeOnGoHomeTest(flicker)

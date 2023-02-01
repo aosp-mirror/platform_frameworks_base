@@ -23,7 +23,7 @@ import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
+import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
@@ -47,9 +47,11 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Presubmit
-open class SwitchImeWindowsFromGestureNavTest(flicker: FlickerTest) : BaseTest(flicker) {
+open class ShowImeOnAppStartWhenLaunchingAppFromQuickSwitchTest(flicker: FlickerTest) :
+    BaseTest(flicker) {
     private val testApp = SimpleAppHelper(instrumentation)
-    private val imeTestApp = ImeAppAutoFocusHelper(instrumentation, flicker.scenario.startRotation)
+    private val imeTestApp =
+        ImeShownOnAppStartHelper(instrumentation, flicker.scenario.startRotation)
 
     @Before
     open fun before() {

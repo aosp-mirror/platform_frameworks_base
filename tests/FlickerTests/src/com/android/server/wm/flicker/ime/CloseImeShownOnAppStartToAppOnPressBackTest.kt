@@ -16,15 +16,15 @@
 
 package com.android.server.wm.flicker.ime
 
-import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.helpers.ImeAppHelper
+import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -32,46 +32,55 @@ import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
-/** Test IME window opening transitions. To run this test: `atest FlickerTests:OpenImeWindowTest` */
+/**
+ * Test IME window closing back to app window transitions.
+ *
+ * This test doesn't work on 90 degrees. According to the InputMethodService documentation:
+ * ```
+ *     Don't show if this is not explicitly requested by the user and the input method
+ *     is fullscreen. That would be too disruptive.
+ * ```
+ * More details on b/190352379
+ *
+ * To run this test: `atest FlickerTests:CloseImeAutoOpenWindowToAppTest`
+ */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class OpenImeWindowTest(flicker: FlickerTest) : BaseTest(flicker) {
-    private val testApp = ImeAppHelper(instrumentation)
+open class CloseImeShownOnAppStartToAppOnPressBackTest(flicker: FlickerTest) : BaseTest(flicker) {
+    private val testApp = ImeShownOnAppStartHelper(instrumentation, flicker.scenario.startRotation)
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup { testApp.launchViaIntent(wmHelper) }
-        transitions { testApp.openIME(wmHelper) }
-        teardown {
-            testApp.closeIME(wmHelper)
-            testApp.exit(wmHelper)
-        }
+        teardown { testApp.exit(wmHelper) }
+        transitions { testApp.closeIME(wmHelper) }
     }
-
-    @Test
-    @IwTest(focusArea = "ime")
-    override fun cujCompleted() {
-        super.cujCompleted()
-        imeWindowBecomesVisible()
-        appWindowAlwaysVisibleOnTop()
-        layerAlwaysVisible()
-    }
-
-    @Presubmit @Test fun imeWindowBecomesVisible() = flicker.imeWindowBecomesVisible()
 
     @Presubmit
     @Test
-    fun appWindowAlwaysVisibleOnTop() {
+    fun imeAppWindowIsAlwaysVisible() {
         flicker.assertWm { this.isAppWindowOnTop(testApp) }
     }
 
-    @Presubmit @Test fun imeLayerBecomesVisible() = flicker.imeLayerBecomesVisible()
+    @Presubmit
+    @Test
+    fun imeLayerVisibleStart() {
+        flicker.assertLayersStart { this.isVisible(ComponentNameMatcher.IME) }
+    }
 
     @Presubmit
     @Test
-    fun layerAlwaysVisible() {
+    fun imeLayerInvisibleEnd() {
+        flicker.assertLayersEnd { this.isInvisible(ComponentNameMatcher.IME) }
+    }
+
+    @Presubmit @Test fun imeLayerBecomesInvisible() = flicker.imeLayerBecomesInvisible()
+
+    @Presubmit
+    @Test
+    fun imeAppLayerIsAlwaysVisible() {
         flicker.assertLayers { this.isVisible(testApp) }
     }
 
@@ -80,6 +89,7 @@ open class OpenImeWindowTest(flicker: FlickerTest) : BaseTest(flicker) {
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
+                // b/190352379 (IME doesn't show on app launch in 90 degrees)
                 supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
             )
         }

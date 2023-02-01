@@ -26,5 +26,5 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class LaunchAppShowImeOnStartTestCfArm(flicker: FlickerTest) :
-    LaunchAppShowImeOnStartTest(flicker)
+class CloseImeShownOnAppStartToAppOnPressBackTestCfArm(flicker: FlickerTest) :
+    CloseImeShownOnAppStartToAppOnPressBackTest(flicker)

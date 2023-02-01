@@ -31,7 +31,7 @@ import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import java.util.regex.Pattern
 
-class ImeAppAutoFocusHelper
+class ImeShownOnAppStartHelper
 @JvmOverloads
 constructor(
     instr: Instrumentation,
@@ -121,11 +121,14 @@ constructor(
     }
 
     fun toggleFixPortraitOrientation(wmHelper: WindowManagerStateHelper) {
-        val button = uiDevice.wait(Until.findObject(By.res(getPackage(),
-                "toggle_fixed_portrait_btn")), FIND_TIMEOUT)
+        val button =
+            uiDevice.wait(
+                Until.findObject(By.res(getPackage(), "toggle_fixed_portrait_btn")),
+                FIND_TIMEOUT
+            )
         require(button != null) {
             "Button not found, this usually happens when the device " +
-                    "was left in an unknown state (e.g. Screen turned off)"
+                "was left in an unknown state (e.g. Screen turned off)"
         }
         button.click()
         mInstrumentation.waitForIdleSync()

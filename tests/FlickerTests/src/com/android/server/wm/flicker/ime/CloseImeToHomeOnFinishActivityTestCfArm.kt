@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.ime
 
-import android.platform.test.annotations.Presubmit
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import org.junit.FixMethodOrder
@@ -27,6 +26,5 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Presubmit
-open class SwitchImeWindowsFromGestureNavTestCfArm(flicker: FlickerTest) :
-    SwitchImeWindowsFromGestureNavTest(flicker)
+open class CloseImeToHomeOnFinishActivityTestCfArm(flicker: FlickerTest) :
+    CloseImeToHomeOnFinishActivityTest(flicker)
