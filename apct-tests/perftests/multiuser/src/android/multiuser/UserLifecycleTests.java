@@ -271,32 +271,108 @@ public class UserLifecycleTests {
 
     /**
      * Tests starting an uninitialized user, with wait times in between iterations.
-     * Measures the time until the ProgressListener callback.
+     *
+     * The first iteration will take longer due to the process of setting policy permissions for
+     * a new user.
      */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
-    public void startUser_realistic() throws RemoteException {
+    public void startUser_uninitializedUser() throws RemoteException {
+        startUser_measuresAfterFirstIterations(/* numberOfIterationsToSkip */0);
+    }
+
+    /**
+     * Tests the second iteration of start user that has a problem that it takes too long to run, a
+     * bug has been created (b/266574680) and after investigating or fix this problem,
+     * this test can be removed.
+     */
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
+    public void startUser_startOnceBefore() throws RemoteException {
+        startUser_measuresAfterFirstIterations(/* numberOfIterationsToSkip */1);
+    }
+
+    /**
+     * Tests a specific iteration of the start user process.
+     * Measures the time until ACTION_USER_STARTED is received.
+     * @param numberOfIterationsToSkip number of iterations that must be skipped in the preStartUser
+     *                                 method.
+     */
+    private void startUser_measuresAfterFirstIterations(int numberOfIterationsToSkip)
+            throws RemoteException {
+        /**
+         * Run start user and stop for the next iteration, measures time while mRunner.keepRunning()
+         * return true.
+         */
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
+
             final int userId = createUserNoFlags();
-            final ProgressWaiter waiter = new ProgressWaiter();
+
+            preStartUser(userId, numberOfIterationsToSkip);
 
             waitForBroadcastIdle();
-            mRunner.resumeTiming();
-            Log.i(TAG, "Starting timer");
+            waitCoolDownPeriod();
 
-            final boolean success = mIam.startUserInBackgroundWithListener(userId, waiter)
-                    && waiter.waitForFinish(TIMEOUT_IN_SECOND * 1000);
+            runThenWaitForBroadcasts(userId, () -> {
+                mRunner.resumeTiming();
+                Log.i(TAG, "Starting timer");
+
+                mIam.startUserInBackground(userId);
+            }, Intent.ACTION_USER_STARTED);
 
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
 
-            assertTrue("Error: could not start user " + userId, success);
-
             removeUser(userId);
-            waitCoolDownPeriod();
             mRunner.resumeTimingForNextIteration();
         }
     }
+
+    /**
+     * Tests starting an initialized user, with wait times in between iterations stopping between
+     * iterations,this test will skip the first two iterations and only measure the next ones.
+     *
+     * The first iteration will take longer due to the process of setting policy permissions for
+     * a new user.
+     *
+     * The second iteration takes longer than expected and has a bug (b/266574680) to investigate
+     * it.
+     *
+     * The next iterations take the expected time to start a user.
+     */
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
+    public void startUser_startTwiceBefore() throws RemoteException {
+        final int userId = createUserNoFlags();
+
+        //TODO(b/266681181) Reduce iteration number by 1 after investigation and possible fix.
+        preStartUser(userId, /* numberOfIterations */2);
+
+        /**
+         * Run start user and stop for the next iteration, measures time while mRunner.keepRunning()
+         * return true.
+         */
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+
+            waitForBroadcastIdle();
+            waitCoolDownPeriod();
+
+            runThenWaitForBroadcasts(userId, () -> {
+                mRunner.resumeTiming();
+                Log.i(TAG, "Starting timer");
+
+                mIam.startUserInBackground(userId);
+            }, Intent.ACTION_USER_STARTED);
+
+            mRunner.pauseTiming();
+            Log.i(TAG, "Stopping timer");
+
+            stopUser(userId, /* force */true);
+            mRunner.resumeTimingForNextIteration();
+        }
+
+        removeUser(userId);
+    }
+
 
     /**
      * Tests starting & unlocking an uninitialized user.
@@ -318,6 +394,46 @@ public class UserLifecycleTests {
             removeUser(userId);
             mRunner.resumeTimingForNextIteration();
         }
+    }
+
+    /**
+     * Tests starting & unlocking an initialized user, stopping the user at the end simulating real
+     * usage where the user is not removed after created and initialized.
+     * Measures the time until unlock listener is triggered and user is unlocked.
+     * This test will skip the first two iterations and only measure the next ones.
+     *
+     * The first iteration will take longer due to the process of setting policy permissions for a
+     * new user.
+     *
+     * The second iteration takes longer than expected and has a bug (b/266574680) to investigate
+     * it.
+     *
+     * The next iterations take the expected time to start a user.
+     */
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
+    public void startAndUnlockUser_startTwiceBefore() throws RemoteException {
+        final int userId = createUserNoFlags();
+
+        //TODO(b/266681181) Reduce iteration number by 1 after investigation and possible fix.
+        preStartUser(userId, /* numberOfIterations */2);
+
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+
+            waitCoolDownPeriod();
+            mRunner.resumeTiming();
+            Log.i(TAG, "Starting timer");
+
+            // Waits for UserState.mUnlockProgress.finish().
+            startUserInBackgroundAndWaitForUnlock(userId);
+
+            mRunner.pauseTiming();
+            Log.i(TAG, "Stopping timer");
+            stopUser(userId, /* force */true);
+            mRunner.resumeTimingForNextIteration();
+        }
+
+        removeUser(userId);
     }
 
     /**
@@ -404,28 +520,36 @@ public class UserLifecycleTests {
         }
     }
 
-    /** Tests switching to a previously-started, but no-longer-running, user with wait
-     * times between iterations */
+    /**
+     * Tests switching to a previously-started, but no-longer-running, user with wait
+     * times between iterations
+     **/
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void switchUser_stopped_realistic() throws RemoteException {
-        final int startUser = ActivityManager.getCurrentUser();
-        final int testUser = initializeNewUserAndSwitchBack(/* stopNewUser */ true);
+        final int currentUserId = ActivityManager.getCurrentUser();
+        final int userId = initializeNewUserAndSwitchBack(/* stopNewUser */ true);
+
+        /**
+         * Skip the second iteration of start user process that is taking a long time to finish.
+         */
+        preStartUser(userId, /* numberOfIterations */1);
+
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             waitCoolDownPeriod();
             Log.d(TAG, "Starting timer");
             mRunner.resumeTiming();
 
-            switchUser(testUser);
+            switchUser(userId);
 
             mRunner.pauseTiming();
             Log.d(TAG, "Stopping timer");
-            switchUserNoCheck(startUser);
-            stopUserAfterWaitingForBroadcastIdle(testUser, true);
-            attestFalse("Failed to stop user " + testUser, mAm.isUserRunning(testUser));
+            switchUserNoCheck(currentUserId);
+            stopUserAfterWaitingForBroadcastIdle(userId, /* force */true);
+            attestFalse("Failed to stop user " + userId, mAm.isUserRunning(userId));
             mRunner.resumeTimingForNextIteration();
         }
-        removeUser(testUser);
+        removeUser(userId);
     }
 
     /** Tests switching to a previously-started, but no-longer-running, user with wait
@@ -1375,6 +1499,24 @@ public class UserLifecycleTests {
                 }
                 mUm.removeUser(user.id);
             }
+        }
+    }
+
+    /**
+     * Start the user and stop after that, will repeat numberOfIterations times.
+     * Make sure the user is started before proceeding with the test.
+     * @param userId identifier of the user that will be started.
+     * @param numberOfIterations number of iterations that must be skipped.
+     */
+    private void preStartUser(int userId, int numberOfIterations) throws RemoteException {
+        for (int i = 0; i < numberOfIterations; i++) {
+            final ProgressWaiter preWaiter = new ProgressWaiter();
+
+            final boolean preStartComplete = mIam.startUserInBackgroundWithListener(userId,
+                    preWaiter) && preWaiter.waitForFinish(TIMEOUT_IN_SECOND * 1000);
+            stopUserAfterWaitingForBroadcastIdle(userId, /* force */true);
+
+            assertTrue("Pre start was not performed for user" + userId, preStartComplete);
         }
     }
 
