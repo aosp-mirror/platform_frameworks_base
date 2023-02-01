@@ -36,7 +36,7 @@ import java.lang.annotation.RetentionPolicy;
  * card, library card, transit pass, etc. Cards are identified by a String identifier and contain a
  * card type, card image, card image content description, and a {@link PendingIntent} to be used if
  * the user clicks on the card. Cards may be displayed with an icon and label, though these are
- * optional. Valuable cards will also have a second image that will be displayed when the card is
+ * optional. Non-payment cards will also have a second image that will be displayed when the card is
  * tapped.
  */
 
@@ -54,10 +54,10 @@ public final class WalletCard implements Parcelable {
     public static final int CARD_TYPE_PAYMENT = 1;
 
     /**
-     * Valuable cards refer to any cards that are not used for cash-equivalent payment.
-     * This includes event tickets, flights, offers, loyalty cards, gift cards and transit tickets.
+     * Non-payment cards refer to any cards that are not used for cash-equivalent payment, including
+     * event tickets, flights, offers, loyalty cards, gift cards and transit tickets.
      */
-    public static final int CARD_TYPE_VALUABLE = 2;
+    public static final int CARD_TYPE_NON_PAYMENT = 2;
 
     private final String mCardId;
     private final int mCardType;
@@ -66,7 +66,7 @@ public final class WalletCard implements Parcelable {
     private final PendingIntent mPendingIntent;
     private final Icon mCardIcon;
     private final CharSequence mCardLabel;
-    private final Icon mValuableCardSecondaryImage;
+    private final Icon mNonPaymentCardSecondaryImage;
 
     private WalletCard(Builder builder) {
         this.mCardId = builder.mCardId;
@@ -76,7 +76,7 @@ public final class WalletCard implements Parcelable {
         this.mPendingIntent = builder.mPendingIntent;
         this.mCardIcon = builder.mCardIcon;
         this.mCardLabel = builder.mCardLabel;
-        this.mValuableCardSecondaryImage = builder.mValuableCardSecondaryImage;
+        this.mNonPaymentCardSecondaryImage = builder.mNonPaymentCardSecondaryImage;
     }
 
     /**
@@ -86,7 +86,7 @@ public final class WalletCard implements Parcelable {
     @IntDef(prefix = {"CARD_TYPE_"}, value = {
             CARD_TYPE_UNKNOWN,
             CARD_TYPE_PAYMENT,
-            CARD_TYPE_VALUABLE
+            CARD_TYPE_NON_PAYMENT
     })
     public @interface CardType {
     }
@@ -105,7 +105,7 @@ public final class WalletCard implements Parcelable {
         PendingIntent.writePendingIntentOrNullToParcel(mPendingIntent, dest);
         writeIconIfNonNull(mCardIcon, dest, flags);
         TextUtils.writeToParcel(mCardLabel, dest, flags);
-        writeIconIfNonNull(mValuableCardSecondaryImage, dest, flags);
+        writeIconIfNonNull(mNonPaymentCardSecondaryImage, dest, flags);
 
     }
 
@@ -128,14 +128,14 @@ public final class WalletCard implements Parcelable {
         PendingIntent pendingIntent = PendingIntent.readPendingIntentOrNullFromParcel(source);
         Icon cardIcon = source.readByte() == 0 ? null : Icon.CREATOR.createFromParcel(source);
         CharSequence cardLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
-        Icon valuableCardSecondaryImage = source.readByte() == 0 ? null :
+        Icon nonPaymentCardSecondaryImage = source.readByte() == 0 ? null :
                 Icon.CREATOR.createFromParcel(source);
         Builder builder = new Builder(cardId, cardType, cardImage, contentDesc, pendingIntent)
                 .setCardIcon(cardIcon)
                 .setCardLabel(cardLabel);
 
-        return cardType == CARD_TYPE_VALUABLE
-                ? builder.setValuableCardSecondaryImage(valuableCardSecondaryImage).build() :
+        return cardType == CARD_TYPE_NON_PAYMENT
+                ? builder.setNonPaymentCardSecondaryImage(nonPaymentCardSecondaryImage).build() :
                  builder.build();
     }
 
@@ -225,12 +225,12 @@ public final class WalletCard implements Parcelable {
     }
 
     /**
-    * Visual representation of the card when it is tapped. Includes a barcode to scan the card in
-     * addition to the information in the primary image.
-    */
+     * Visual representation of the card when it is tapped. May include additional information
+     *  unique to the card, such as a barcode or number. Only valid for CARD_TYPE_NON_PAYMENT.
+     */
     @Nullable
-    public Icon getValuableCardSecondaryImage() {
-        return mValuableCardSecondaryImage;
+    public Icon getNonPaymentCardSecondaryImage() {
+        return mNonPaymentCardSecondaryImage;
     }
 
     /**
@@ -246,7 +246,7 @@ public final class WalletCard implements Parcelable {
         private PendingIntent mPendingIntent;
         private Icon mCardIcon;
         private CharSequence mCardLabel;
-        private Icon mValuableCardSecondaryImage;
+        private Icon mNonPaymentCardSecondaryImage;
 
         /**
          * @param cardId             The card id must be non-null and unique within the list of
@@ -254,7 +254,7 @@ public final class WalletCard implements Parcelable {
          *                           </b> this card ID should <b>not</b> contain PII (Personally
          *                           Identifiable Information, such as username or email address).
          * @param cardType           Integer representing the card type. The card type must be
-         *                           non-null. If not provided, it defaults to unknown.
+         *                           non-null.
          * @param cardImage          The visual representation of the card. If the card image Icon
          *                           is a bitmap, it should have a width of {@link
          *                           GetWalletCardsRequest#getCardWidthPx()} and a height of {@link
@@ -289,8 +289,8 @@ public final class WalletCard implements Parcelable {
         }
 
         /**
-         * Called when a card type is not provided. Calls {@link
-         * Builder#Builder(String, int, Icon, CharSequence, PendingIntent)} with default card type
+         * Called when a card type is not provided, in which case it defaults to CARD_TYPE_UNKNOWN.
+         * Calls {@link Builder#Builder(String, int, Icon, CharSequence, PendingIntent)}
          */
         public Builder(@NonNull String cardId,
                 @NonNull Icon cardImage,
@@ -332,14 +332,15 @@ public final class WalletCard implements Parcelable {
         }
 
         /**
-         * Visual representation of the card when it is tapped. Includes a barcode to scan the card
-         * in addition to the information in the primary image.
+         * Visual representation of the card when it is tapped. May include additional information
+         *  unique to the card, such as a barcode or number. Only valid for CARD_TYPE_NON_PAYMENT.
          */
         @NonNull
-        public Builder setValuableCardSecondaryImage(@Nullable Icon valuableCardSecondaryImage) {
-            Preconditions.checkState(mCardType == CARD_TYPE_VALUABLE,
-                    "This field can only be set on valuable cards");
-            mValuableCardSecondaryImage = valuableCardSecondaryImage;
+        public Builder
+                setNonPaymentCardSecondaryImage(@Nullable Icon nonPaymentCardSecondaryImage) {
+            Preconditions.checkState(mCardType == CARD_TYPE_NON_PAYMENT,
+                    "This field can only be set on non-payment cards");
+            mNonPaymentCardSecondaryImage = nonPaymentCardSecondaryImage;
             return this;
         }
 
