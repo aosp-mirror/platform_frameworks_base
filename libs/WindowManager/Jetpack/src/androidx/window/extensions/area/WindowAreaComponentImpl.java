@@ -25,6 +25,7 @@ import android.hardware.devicestate.DeviceStateRequest;
 import android.util.ArraySet;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.window.extensions.core.util.function.Consumer;
 
 import com.android.internal.R;
@@ -183,6 +184,27 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
             mCurrentDeviceState = state;
             updateStatusConsumers(getCurrentStatus());
         }
+    }
+
+    @Override
+    public void addRearDisplayPresentationStatusListener(
+            @NonNull Consumer<ExtensionWindowAreaStatus> consumer) {}
+
+    @Override
+    public void removeRearDisplayPresentationStatusListener(
+            @NonNull Consumer<ExtensionWindowAreaStatus> consumer) {}
+
+    @Override
+    public void startRearDisplayPresentationSession(@NonNull Activity activity,
+            @NonNull Consumer<@WindowAreaSessionState Integer> consumer) {}
+
+    @Override
+    public void endRearDisplayPresentationSession() {}
+
+    @Override
+    @Nullable
+    public ExtensionWindowAreaPresentation getRearDisplayPresentation() {
+        return null;
     }
 
     @GuardedBy("mLock")
