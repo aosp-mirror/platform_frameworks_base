@@ -47,7 +47,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidJUnit4.class)
 public final class DisplayBrightnessControllerTest {
     private static final int DISPLAY_ID = 1;
-    private static final float DEFAULT_BRIGHTNESS = 0.4f;
+    private static final float DEFAULT_BRIGHTNESS = 0.15f;
 
     @Mock
     private DisplayBrightnessStrategySelector mDisplayBrightnessStrategySelector;
@@ -70,8 +70,15 @@ public final class DisplayBrightnessControllerTest {
                 return mDisplayBrightnessStrategySelector;
             }
         };
+        when(mBrightnessSetting.getBrightness()).thenReturn(Float.NaN);
         mDisplayBrightnessController = new DisplayBrightnessController(mContext, injector,
                 DISPLAY_ID, DEFAULT_BRIGHTNESS, mBrightnessSetting, mOnBrightnessChangeRunnable);
+    }
+
+    @Test
+    public void testIfFirstScreenBrightnessIsDefault() {
+        assertEquals(mDisplayBrightnessController.getCurrentBrightness(), DEFAULT_BRIGHTNESS,
+                0.0f);
     }
 
     @Test

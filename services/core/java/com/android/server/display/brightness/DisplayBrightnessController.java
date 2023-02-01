@@ -92,9 +92,9 @@ public final class DisplayBrightnessController {
         // TODO: b/186428377 update brightness setting when display changes
         mBrightnessSetting = brightnessSetting;
         mPendingScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        mScreenBrightnessDefault = BrightnessUtils.clampAbsoluteBrightness(defaultScreenBrightness);
         mCurrentScreenBrightness = getScreenBrightnessSetting();
         mOnBrightnessChangeRunnable = onBrightnessChangeRunnable;
-        mScreenBrightnessDefault = BrightnessUtils.clampAbsoluteBrightness(defaultScreenBrightness);
         mDisplayBrightnessStrategySelector = injector.getDisplayBrightnessStrategySelector(context,
                 displayId);
     }
