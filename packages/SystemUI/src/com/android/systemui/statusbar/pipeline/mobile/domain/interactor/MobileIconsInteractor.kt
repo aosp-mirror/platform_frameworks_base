@@ -23,6 +23,9 @@ import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logDiffsForTable
+import com.android.systemui.statusbar.pipeline.dagger.MobileSummaryLog
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
@@ -104,6 +107,7 @@ constructor(
     private val mobileConnectionsRepo: MobileConnectionsRepository,
     private val carrierConfigTracker: CarrierConfigTracker,
     private val logger: ConnectivityPipelineLogger,
+    @MobileSummaryLog private val tableLogger: TableLogBuffer,
     userSetupRepo: UserSetupRepository,
     @Application private val scope: CoroutineScope,
 ) : MobileIconsInteractor {
@@ -173,7 +177,13 @@ constructor(
             }
         }
             .distinctUntilChanged()
-            .onEach { logger.logFilteredSubscriptionsChanged(it) }
+            .logDiffsForTable(
+                tableLogger,
+                LOGGING_PREFIX,
+                columnName = "filteredSubscriptions",
+                initialValue = listOf(),
+            )
+            .stateIn(scope, SharingStarted.WhileSubscribed(), listOf())
 
     override val defaultDataSubId = mobileConnectionsRepo.defaultDataSubId
 
@@ -195,6 +205,12 @@ constructor(
                 delay(2000)
                 emit(false)
             }
+            .logDiffsForTable(
+                tableLogger,
+                LOGGING_PREFIX,
+                columnName = "forcingValidation",
+                initialValue = false,
+            )
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val defaultMobileNetworkConnectivity: StateFlow<MobileConnectivityModel> =
@@ -211,6 +227,12 @@ constructor(
                     networkConnectivity
                 }
             }
+            .distinctUntilChanged()
+            .logDiffsForTable(
+                tableLogger,
+                columnPrefix = "$LOGGING_PREFIX.defaultConnection",
+                initialValue = mobileConnectionsRepo.defaultMobileNetworkConnectivity.value,
+            )
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
@@ -259,6 +281,12 @@ constructor(
                     !connectivityModel.isValidated
                 }
             }
+            .logDiffsForTable(
+                tableLogger,
+                LOGGING_PREFIX,
+                columnName = "isDefaultConnectionFailed",
+                initialValue = false,
+            )
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val isUserSetup: StateFlow<Boolean> = userSetupRepo.isUserSetupFlow
@@ -277,4 +305,8 @@ constructor(
             isDefaultConnectionFailed,
             mobileConnectionsRepo.getRepoForSubId(subId),
         )
+
+    companion object {
+        private const val LOGGING_PREFIX = "Intr"
+    }
 }

@@ -79,6 +79,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
                 connectionsRepository,
                 carrierConfigTracker,
                 logger = mock(),
+                tableLogger = mock(),
                 userSetupRepository,
                 testScope.backgroundScope,
             )
