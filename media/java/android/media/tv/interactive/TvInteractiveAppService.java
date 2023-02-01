@@ -606,10 +606,10 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
-         * Receives requested recording info.
+         * Receives the requested {@link android.media.tv.TvRecordingInfo}.
          *
-         * @param recordingInfo The requested recording info. Null if recording not found.
-         * @hide
+         * @see #requestTvRecordingInfo(String)
+         * @param recordingInfo The requested recording info. {@code null} if no recording found.
          */
         public void onTvRecordingInfo(@Nullable TvRecordingInfo recordingInfo) {
         }
