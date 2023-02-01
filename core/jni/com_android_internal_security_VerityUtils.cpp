@@ -38,13 +38,8 @@ namespace android {
 
 namespace {
 
-int enableFsverity(JNIEnv *env, jobject /* clazz */, jstring filePath) {
-    ScopedUtfChars path(env, filePath);
-    if (path.c_str() == nullptr) {
-        return EINVAL;
-    }
-    ::android::base::unique_fd rfd(open(path.c_str(), O_RDONLY | O_CLOEXEC));
-    if (rfd.get() < 0) {
+int enableFsverityForFd(JNIEnv *env, jobject clazz, jint fd) {
+    if (fd < 0) {
         return errno;
     }
 
@@ -55,10 +50,19 @@ int enableFsverity(JNIEnv *env, jobject /* clazz */, jstring filePath) {
     arg.salt_size = 0;
     arg.salt_ptr = reinterpret_cast<uintptr_t>(nullptr);
 
-    if (ioctl(rfd.get(), FS_IOC_ENABLE_VERITY, &arg) < 0) {
+    if (ioctl(fd, FS_IOC_ENABLE_VERITY, &arg) < 0) {
         return errno;
     }
     return 0;
+}
+
+int enableFsverity(JNIEnv *env, jobject clazz, jstring filePath) {
+    ScopedUtfChars path(env, filePath);
+    if (path.c_str() == nullptr) {
+        return EINVAL;
+    }
+    ::android::base::unique_fd rfd(open(path.c_str(), O_RDONLY | O_CLOEXEC));
+    return enableFsverityForFd(env, clazz, rfd.get());
 }
 
 // Returns whether the file has fs-verity enabled.
@@ -126,6 +130,7 @@ int measureFsverity(JNIEnv *env, jobject /* clazz */, jstring filePath, jbyteArr
 }
 const JNINativeMethod sMethods[] = {
         {"enableFsverityNative", "(Ljava/lang/String;)I", (void *)enableFsverity},
+        {"enableFsverityForFdNative", "(I)I", (void *)enableFsverityForFd},
         {"statxForFsverityNative", "(Ljava/lang/String;)I", (void *)statxForFsverity},
         {"measureFsverityNative", "(Ljava/lang/String;[B)I", (void *)measureFsverity},
 };
