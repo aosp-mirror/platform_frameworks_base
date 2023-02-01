@@ -38,6 +38,7 @@ import android.app.INotificationManager;
 import android.app.SystemServiceRegistry;
 import android.app.admin.DevicePolicySafetyChecker;
 import android.app.usage.UsageStatsManagerInternal;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -2890,6 +2891,27 @@ public final class SystemServer implements Dumpable {
                 }
                 if (cshs instanceof DevicePolicySafetyChecker) {
                     dpms.setDevicePolicySafetyChecker((DevicePolicySafetyChecker) cshs);
+                }
+                t.traceEnd();
+            }
+
+            if (isWatch) {
+                t.traceBegin("StartWearService");
+                String wearServiceComponentNameString =
+                    context.getString(R.string.config_wearServiceComponent);
+
+                if (!TextUtils.isEmpty(wearServiceComponentNameString)) {
+                    ComponentName wearServiceComponentName = ComponentName.unflattenFromString(
+                        wearServiceComponentNameString);
+
+                    if (wearServiceComponentName != null) {
+                        Intent intent = new Intent();
+                        intent.setComponent(wearServiceComponentName);
+                        intent.addFlags(Intent.FLAG_DIRECT_BOOT_AUTO);
+                        context.startServiceAsUser(intent, UserHandle.SYSTEM);
+                    } else {
+                        Slog.d(TAG, "Null wear service component name.");
+                    }
                 }
                 t.traceEnd();
             }
