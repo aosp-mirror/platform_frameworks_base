@@ -23,15 +23,18 @@ import androidx.lifecycle.Observer
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.RingerModeTracker
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -45,6 +48,7 @@ class MuteQuickAffordanceCoreStartable @Inject constructor(
     private val userFileManager: UserFileManager,
     private val keyguardQuickAffordanceRepository: KeyguardQuickAffordanceRepository,
     @Application private val coroutineScope: CoroutineScope,
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) : CoreStartable {
 
     private val observer = Observer(this::updateLastNonSilentRingerMode)
@@ -72,15 +76,17 @@ class MuteQuickAffordanceCoreStartable @Inject constructor(
     }
 
     private fun updateLastNonSilentRingerMode(lastRingerMode: Int) {
-        if (AudioManager.RINGER_MODE_SILENT != lastRingerMode) {
-            userFileManager.getSharedPreferences(
-                MuteQuickAffordanceConfig.MUTE_QUICK_AFFORDANCE_PREFS_FILE_NAME,
-                Context.MODE_PRIVATE,
-                userTracker.userId
-            )
-            .edit()
-            .putInt(MuteQuickAffordanceConfig.LAST_NON_SILENT_RINGER_MODE_KEY, lastRingerMode)
-            .apply()
+        coroutineScope.launch(backgroundDispatcher) {
+            if (AudioManager.RINGER_MODE_SILENT != lastRingerMode) {
+                userFileManager.getSharedPreferences(
+                        MuteQuickAffordanceConfig.MUTE_QUICK_AFFORDANCE_PREFS_FILE_NAME,
+                        Context.MODE_PRIVATE,
+                        userTracker.userId
+                )
+                .edit()
+                .putInt(MuteQuickAffordanceConfig.LAST_NON_SILENT_RINGER_MODE_KEY, lastRingerMode)
+                .apply()
+            }
         }
     }
 }
