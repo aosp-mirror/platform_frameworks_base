@@ -40,6 +40,7 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.collection.render.NodeController;
@@ -100,6 +101,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
     private final SmartReplyConstants mSmartReplyConstants;
     private final SmartReplyController mSmartReplyController;
     private final ExpandableNotificationRowDragController mDragController;
+    private final NotificationDismissibilityProvider mDismissibilityProvider;
     private final ExpandableNotificationRow.ExpandableNotificationRowLogger mLoggerCallback =
             new ExpandableNotificationRow.ExpandableNotificationRowLogger() {
                 @Override
@@ -157,7 +159,8 @@ public class ExpandableNotificationRowController implements NotifViewController 
             FeatureFlags featureFlags,
             PeopleNotificationIdentifier peopleNotificationIdentifier,
             Optional<BubblesManager> bubblesManagerOptional,
-            ExpandableNotificationRowDragController dragController) {
+            ExpandableNotificationRowDragController dragController,
+            NotificationDismissibilityProvider dismissibilityProvider) {
         mView = view;
         mListContainer = listContainer;
         mRemoteInputViewSubcomponentFactory = rivSubcomponentFactory;
@@ -189,6 +192,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
         mLogBufferLogger = logBufferLogger;
         mSmartReplyConstants = smartReplyConstants;
         mSmartReplyController = smartReplyController;
+        mDismissibilityProvider = dismissibilityProvider;
     }
 
     /**
@@ -217,6 +221,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
                 mOnUserInteractionCallback,
                 mBubblesManagerOptional,
                 mNotificationGutsManager,
+                mDismissibilityProvider,
                 mMetricsLogger,
                 mSmartReplyConstants,
                 mSmartReplyController,

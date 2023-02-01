@@ -483,7 +483,7 @@ public class StackScrollAlgorithm {
         return stackHeight / stackEndHeight;
     }
 
-    public boolean hasOngoingNotifs(StackScrollAlgorithmState algorithmState) {
+    private boolean hasNonDismissableNotifs(StackScrollAlgorithmState algorithmState) {
         for (int i = 0; i < algorithmState.visibleChildren.size(); i++) {
             View child = algorithmState.visibleChildren.get(i);
             if (!(child instanceof ExpandableNotificationRow)) {
@@ -565,7 +565,7 @@ public class StackScrollAlgorithm {
                 ((FooterView.FooterViewState) viewState).hideContent =
                         isShelfShowing || noSpaceForFooter
                                 || (ambientState.isClearAllInProgress()
-                                && !hasOngoingNotifs(algorithmState));
+                                && !hasNonDismissableNotifs(algorithmState));
             }
         } else {
             if (view instanceof EmptyShadeView) {
