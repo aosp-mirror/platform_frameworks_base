@@ -350,6 +350,16 @@ public class LogModule {
     }
 
     /**
+     * Provides a {@link LogBuffer} for use by {@link com.android.systemui.ScreenDecorations}.
+     */
+    @Provides
+    @SysUISingleton
+    @ScreenDecorationsLog
+    public static LogBuffer provideScreenDecorationsLog(LogBufferFactory factory) {
+        return factory.create("ScreenDecorationsLog", 200);
+    }
+
+    /**
      * Provides a {@link LogBuffer} for bluetooth-related logs.
      */
     @Provides
