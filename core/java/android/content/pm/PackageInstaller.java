@@ -2616,8 +2616,17 @@ public class PackageInstaller {
             installFlags |= PackageManager.INSTALL_FORCE_PERMISSION_PROMPT;
         }
 
-        /** {@hide} */
-        @SystemApi
+        /**
+         * Requests that the system not kill any of the package's running
+         * processes as part of a {@link SessionParams#MODE_INHERIT_EXISTING}
+         * session in which splits being added. By default, all installs will
+         * result in the package's running processes being killed before the
+         * install completes.
+         *
+         * @param dontKillApp set to {@code true} to request that the processes
+         *                    belonging to the package not be killed as part of
+         *                    this install.
+         */
         public void setDontKillApp(boolean dontKillApp) {
             if (dontKillApp) {
                 installFlags |= PackageManager.INSTALL_DONT_KILL_APP;
@@ -3456,10 +3465,7 @@ public class PackageInstaller {
 
         /**
          * Get the value set in {@link SessionParams#setDontKillApp(boolean)}.
-         *
-         * @hide
          */
-        @SystemApi
         public boolean getDontKillApp() {
             return (installFlags & PackageManager.INSTALL_DONT_KILL_APP) != 0;
         }
