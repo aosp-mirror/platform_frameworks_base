@@ -734,9 +734,14 @@ public class MediaControlPanel {
             contentDescription =
                     mRecommendationViewHolder.getGutsViewHolder().getGutsText().getText();
         } else if (data != null) {
-            contentDescription = mContext.getString(
-                    R.string.controls_media_smartspace_rec_description,
-                    data.getAppName(mContext));
+            if (mFeatureFlags.isEnabled(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE)) {
+                contentDescription = mContext.getString(
+                        R.string.controls_media_smartspace_rec_header);
+            } else {
+                contentDescription = mContext.getString(
+                        R.string.controls_media_smartspace_rec_description,
+                        data.getAppName(mContext));
+            }
         } else {
             contentDescription = null;
         }
