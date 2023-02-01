@@ -703,6 +703,16 @@ public class Notification implements Parcelable
      */
     public static final int FLAG_BUBBLE = 0x00001000;
 
+    /**
+     * Bit to be bitswised-ored into the {@link #flags} field that should be
+     * set by the system if this notification is not dismissible.
+     *
+     * This flag is for internal use only; applications cannot set this flag directly.
+     * @hide
+     */
+    public static final int FLAG_NO_DISMISS = 0x00002000;
+
+
     private static final List<Class<? extends Style>> PLATFORM_STYLE_CLASSES = Arrays.asList(
             BigTextStyle.class, BigPictureStyle.class, InboxStyle.class, MediaStyle.class,
             DecoratedCustomViewStyle.class, DecoratedMediaCustomViewStyle.class,

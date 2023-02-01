@@ -24,6 +24,7 @@ import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.Notification.FLAG_INSISTENT;
 import static android.app.Notification.FLAG_NO_CLEAR;
+import static android.app.Notification.FLAG_NO_DISMISS;
 import static android.app.Notification.FLAG_ONGOING_EVENT;
 import static android.app.Notification.FLAG_ONLY_ALERT_ONCE;
 import static android.app.NotificationChannel.CONVERSATION_CHANNEL_ID_FORMAT;
@@ -575,6 +576,9 @@ public class NotificationManagerService extends SystemService {
     private AudioAttributes mInCallNotificationAudioAttributes;
     private float mInCallNotificationVolume;
     private Binder mCallNotificationToken = null;
+
+    private static final boolean ONGOING_DISMISSAL = SystemProperties.getBoolean(
+            "persist.sysui.notification.ongoing_dismissal", true);
 
     // used as a mutex for access to all active notifications & listeners
     final Object mNotificationLock = new Object();
@@ -1201,10 +1205,13 @@ public class NotificationManagerService extends SystemService {
                     id = r.getSbn().getId();
                 }
             }
-            int mustNotHaveFlags = FLAG_ONGOING_EVENT;
-            cancelNotification(callingUid, callingPid, pkg, tag, id, 0,
-                    mustNotHaveFlags,
-                    true, userId, REASON_CANCEL, nv.rank, nv.count,null);
+
+            int mustNotHaveFlags = ONGOING_DISMISSAL ? FLAG_NO_DISMISS : FLAG_ONGOING_EVENT;
+            cancelNotification(callingUid, callingPid, pkg, tag, id,
+                    /* mustHaveFlags= */ 0,
+                    /* mustNotHaveFlags= */ mustNotHaveFlags,
+                    /* sendDelete= */ true,
+                    userId, REASON_CANCEL, nv.rank, nv.count, /* listener= */ null);
             nv.recycle();
         }
 
@@ -6689,6 +6696,16 @@ public class NotificationManagerService extends SystemService {
                 (userId == UserHandle.USER_ALL) ? USER_SYSTEM : userId);
         Notification.addFieldsFromContext(ai, notification);
 
+        // Only notifications that can be non-dismissible can have the flag FLAG_NO_DISMISS
+        if (ONGOING_DISMISSAL) {
+            if (((notification.flags & FLAG_ONGOING_EVENT) > 0)
+                    && canBeNonDismissible(ai, notification)) {
+                notification.flags |= FLAG_NO_DISMISS;
+            } else {
+                notification.flags &= ~FLAG_NO_DISMISS;
+            }
+        }
+
         int canColorize = mPackageManagerClient.checkPermission(
                 android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, pkg);
         if (canColorize == PERMISSION_GRANTED) {
@@ -6773,6 +6790,23 @@ public class NotificationManagerService extends SystemService {
 
         // Remote views? Are they too big?
         checkRemoteViews(pkg, tag, id, notification);
+    }
+
+    /**
+     * Whether a notification can be non-dismissible.
+     * A notification should be dismissible, unless it's exempted for some reason.
+     */
+    private boolean canBeNonDismissible(ApplicationInfo ai, Notification notification) {
+        // Check if the app is on the system partition, or an update to an app on the system
+        // partition.
+        boolean isSystemAppExempt = (ai.flags
+                & (ApplicationInfo.FLAG_UPDATED_SYSTEM_APP | ApplicationInfo.FLAG_SYSTEM)) > 0;
+        return isSystemAppExempt || notification.isMediaNotification() || isEnterpriseExempted();
+    }
+
+    // TODO: b/266237746 Enterprise app exemptions
+    private boolean isEnterpriseExempted() {
+        return false;
     }
 
     private void checkRemoteViews(String pkg, String tag, int id, Notification notification) {
