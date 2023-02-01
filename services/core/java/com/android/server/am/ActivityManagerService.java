@@ -13589,6 +13589,17 @@ public class ActivityManagerService extends IActivityManager.Stub
             // not be used generally, so we will be marking them as exported by default
             boolean requireExplicitFlagForDynamicReceivers = CompatChanges.isChangeEnabled(
                     DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED, callingUid);
+
+            // A receiver that is visible to instant apps must also be exported.
+            final boolean unexportedReceiverVisibleToInstantApps =
+                    ((flags & Context.RECEIVER_VISIBLE_TO_INSTANT_APPS) != 0) && (
+                            (flags & Context.RECEIVER_NOT_EXPORTED) != 0);
+            if (unexportedReceiverVisibleToInstantApps && requireExplicitFlagForDynamicReceivers) {
+                throw new IllegalArgumentException(
+                        "Receiver can't specify both RECEIVER_VISIBLE_TO_INSTANT_APPS and "
+                                + "RECEIVER_NOT_EXPORTED flag");
+            }
+
             // STOPSHIP(b/259139792): Allow apps that are currently targeting U and in process of
             // updating their receivers to be exempt from this requirement until their receivers
             // are flagged.
