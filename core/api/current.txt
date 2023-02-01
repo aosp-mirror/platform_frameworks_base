@@ -32138,9 +32138,11 @@ package android.os {
     method public void onEarlyReportFinished();
     method public void onError(int);
     method public void onFinished();
+    method public void onFinished(@NonNull String);
     method public void onProgress(@FloatRange(from=0.0f, to=100.0f) float);
     field public static final int BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS = 5; // 0x5
     field public static final int BUGREPORT_ERROR_INVALID_INPUT = 1; // 0x1
+    field public static final int BUGREPORT_ERROR_NO_BUGREPORT_TO_RETRIEVE = 6; // 0x6
     field public static final int BUGREPORT_ERROR_RUNTIME = 2; // 0x2
     field public static final int BUGREPORT_ERROR_USER_CONSENT_TIMED_OUT = 4; // 0x4
     field public static final int BUGREPORT_ERROR_USER_DENIED_CONSENT = 3; // 0x3
