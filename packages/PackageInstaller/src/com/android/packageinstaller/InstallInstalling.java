@@ -141,7 +141,7 @@ public class InstallInstalling extends AlertActivity {
                 File file = new File(mPackageURI.getPath());
                 try {
                     final InstallInfo result = getPackageManager().getPackageInstaller()
-                            .getInstallInfo(file, 0);
+                            .readInstallInfo(file, 0);
                     params.setAppPackageName(result.getPackageName());
                     params.setInstallLocation(result.getInstallLocation());
                     try {

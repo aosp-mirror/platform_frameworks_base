@@ -12202,7 +12202,6 @@ package android.content.pm {
     method @Nullable public String getInstallerAttributionTag();
     method @Nullable public String getInstallerPackageName();
     method public int getInstallerUid();
-    method @NonNull public boolean getIsPreApprovalRequested();
     method public int getMode();
     method public int getOriginatingUid();
     method @Nullable public android.net.Uri getOriginatingUri();
@@ -12222,6 +12221,7 @@ package android.content.pm {
     method public boolean isApplicationEnabledSettingPersistent();
     method public boolean isCommitted();
     method public boolean isMultiPackage();
+    method public boolean isPreApprovalRequested();
     method public boolean isRequestUpdateOwnership();
     method public boolean isSealed();
     method public boolean isStaged();

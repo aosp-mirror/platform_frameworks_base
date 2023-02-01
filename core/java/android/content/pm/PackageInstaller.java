@@ -2042,7 +2042,7 @@ public class PackageInstaller {
      */
     @SystemApi
     @NonNull
-    public InstallInfo getInstallInfo(@NonNull File file, int flags)
+    public InstallInfo readInstallInfo(@NonNull File file, int flags)
             throws PackageParsingException {
         final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
         final ParseResult<PackageLite> result = ApkLiteParseUtils.parsePackageLite(
@@ -3740,7 +3740,7 @@ public class PackageInstaller {
         /**
          * Returns whether this session has requested user pre-approval.
          */
-        public @NonNull boolean getIsPreApprovalRequested() {
+        public boolean isPreApprovalRequested() {
             return isPreapprovalRequested;
         }
 
