@@ -531,6 +531,9 @@ public class InternetTile extends QSTileImpl<SignalState> {
         if (DEBUG) {
             Log.d(TAG, "handleUpdateEthernetState: " + "EthernetCallbackInfo = " + cb.toString());
         }
+        if (!cb.mConnected) {
+            return;
+        }
         final Resources r = mContext.getResources();
         state.label = r.getString(R.string.quick_settings_internet_label);
         state.state = Tile.STATE_ACTIVE;
