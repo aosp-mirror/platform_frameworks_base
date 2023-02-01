@@ -670,8 +670,12 @@ public abstract class BaseCanvas {
     /**
      * Draws a mesh object to the screen.
      *
+     * <p>Note: antialiasing is not supported, therefore {@link Paint#ANTI_ALIAS_FLAG} is
+     * ignored.</p>
+     *
      * @param mesh {@link Mesh} object that will be drawn to the screen
-     * @param blendMode {@link BlendMode} used to blend mesh primitives with the Paint color/shader
+     * @param blendMode {@link BlendMode} used to blend mesh primitives as the destination color
+     *            with the Paint color/shader as the source color.
      * @param paint {@link Paint} used to provide a color/shader/blend mode.
      */
     public void drawMesh(@NonNull Mesh mesh, BlendMode blendMode, @NonNull Paint paint) {
