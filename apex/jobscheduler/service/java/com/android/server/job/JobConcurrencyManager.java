@@ -129,6 +129,10 @@ class JobConcurrencyManager {
     static final String KEY_ENABLE_MAX_WAIT_TIME_BYPASS =
             CONFIG_KEY_PREFIX_CONCURRENCY + "enable_max_wait_time_bypass";
     private static final boolean DEFAULT_ENABLE_MAX_WAIT_TIME_BYPASS = true;
+    @VisibleForTesting
+    static final String KEY_MAX_WAIT_UI_MS = CONFIG_KEY_PREFIX_CONCURRENCY + "max_wait_ui_ms";
+    @VisibleForTesting
+    static final long DEFAULT_MAX_WAIT_UI_MS = 5 * MINUTE_IN_MILLIS;
     private static final String KEY_MAX_WAIT_EJ_MS =
             CONFIG_KEY_PREFIX_CONCURRENCY + "max_wait_ej_ms";
     @VisibleForTesting
@@ -431,6 +435,12 @@ class JobConcurrencyManager {
     private int mPkgConcurrencyLimitRegular = DEFAULT_PKG_CONCURRENCY_LIMIT_REGULAR;
 
     private boolean mMaxWaitTimeBypassEnabled = DEFAULT_ENABLE_MAX_WAIT_TIME_BYPASS;
+
+    /**
+     * The maximum time a user-initiated job would have to be potentially waiting for an available
+     * slot before we would consider creating a new slot for it.
+     */
+    private long mMaxWaitUIMs = DEFAULT_MAX_WAIT_UI_MS;
 
     /**
      * The maximum time an expedited job would have to be potentially waiting for an available
@@ -825,6 +835,13 @@ class JobConcurrencyManager {
                 if (js.startedWithImmediacyPrivilege) {
                     info.numRunningImmediacyPrivileged++;
                 }
+                if (js.shouldTreatAsUserInitiatedJob()) {
+                    info.numRunningUi++;
+                } else if (js.startedAsExpeditedJob) {
+                    info.numRunningEj++;
+                } else {
+                    info.numRunningReg++;
+                }
             }
 
             assignment.preferredUid = jsc.getPreferredUid();
@@ -880,6 +897,13 @@ class JobConcurrencyManager {
         JobStatus nextPending;
         int projectedRunningCount = activeServices.size();
         long minChangedWaitingTimeMs = Long.MAX_VALUE;
+        // Only allow the Context creation bypass for each type if one of that type isn't already
+        // running. That way, we don't run into issues (creating too many additional contexts)
+        // if new jobs become ready to run in rapid succession and we end up going through this
+        // loop many times before running jobs have had a decent chance to finish.
+        boolean allowMaxWaitContextBypassUi = info.numRunningUi == 0;
+        boolean allowMaxWaitContextBypassEj = info.numRunningEj == 0;
+        boolean allowMaxWaitContextBypassOthers = info.numRunningReg == 0;
         while ((nextPending = pendingJobQueue.next()) != null) {
             if (mRunningJobs.contains(nextPending)) {
                 // Should never happen.
@@ -957,7 +981,9 @@ class JobConcurrencyManager {
                                         > (mWorkTypeConfig.getMaxTotal() / 2);
                     }
                     if (!canReplace && mMaxWaitTimeBypassEnabled) { // Case 5
-                        if (nextPending.shouldTreatAsExpeditedJob()) {
+                        if (nextPending.shouldTreatAsUserInitiatedJob()) {
+                            canReplace = minWaitingTimeMs >= mMaxWaitUIMs;
+                        } else if (nextPending.shouldTreatAsExpeditedJob()) {
                             canReplace = minWaitingTimeMs >= mMaxWaitEjMs;
                         } else {
                             canReplace = minWaitingTimeMs >= mMaxWaitRegularMs;
@@ -1055,9 +1081,25 @@ class JobConcurrencyManager {
                             (workType != WORK_TYPE_NONE) ? workType : WORK_TYPE_TOP;
                 }
             } else if (selectedContext == null && mMaxWaitTimeBypassEnabled) {
-                final boolean wouldBeWaitingTooLong = nextPending.shouldTreatAsExpeditedJob()
-                        ? minWaitingTimeMs >= mMaxWaitEjMs
-                        : minWaitingTimeMs >= mMaxWaitRegularMs;
+                final boolean wouldBeWaitingTooLong;
+                if (nextPending.shouldTreatAsUserInitiatedJob() && allowMaxWaitContextBypassUi) {
+                    wouldBeWaitingTooLong = minWaitingTimeMs >= mMaxWaitUIMs;
+                    // We want to create at most one additional context for each type.
+                    allowMaxWaitContextBypassUi = !wouldBeWaitingTooLong;
+                } else if (nextPending.shouldTreatAsExpeditedJob() && allowMaxWaitContextBypassEj) {
+                    wouldBeWaitingTooLong = minWaitingTimeMs >= mMaxWaitEjMs;
+                    // We want to create at most one additional context for each type.
+                    allowMaxWaitContextBypassEj = !wouldBeWaitingTooLong;
+                } else if (allowMaxWaitContextBypassOthers) {
+                    // The way things are set up a UIJ or EJ could end up here and create a 2nd
+                    // context as if it were a "regular" job. That's fine for now since they would
+                    // still be subject to the higher waiting time threshold here.
+                    wouldBeWaitingTooLong = minWaitingTimeMs >= mMaxWaitRegularMs;
+                    // We want to create at most one additional context for each type.
+                    allowMaxWaitContextBypassOthers = !wouldBeWaitingTooLong;
+                } else {
+                    wouldBeWaitingTooLong = false;
+                }
                 if (wouldBeWaitingTooLong) {
                     if (DEBUG) {
                         Slog.d(TAG, "Allowing additional context because job would wait too long");
@@ -1490,10 +1532,14 @@ class JobConcurrencyManager {
                     minWaitingTimeMs = Math.min(minWaitingTimeMs,
                             mActiveServices.get(i).getRemainingGuaranteedTimeMs(nowElapsed));
                 }
-                final boolean wouldBeWaitingTooLong =
-                        mWorkCountTracker.getPendingJobCount(WORK_TYPE_EJ) > 0
-                                ? minWaitingTimeMs >= mMaxWaitEjMs
-                                : minWaitingTimeMs >= mMaxWaitRegularMs;
+                final boolean wouldBeWaitingTooLong;
+                if (mWorkCountTracker.getPendingJobCount(WORK_TYPE_UI) > 0) {
+                    wouldBeWaitingTooLong = minWaitingTimeMs >= mMaxWaitUIMs;
+                } else if (mWorkCountTracker.getPendingJobCount(WORK_TYPE_EJ) > 0) {
+                    wouldBeWaitingTooLong = minWaitingTimeMs >= mMaxWaitEjMs;
+                } else {
+                    wouldBeWaitingTooLong = minWaitingTimeMs >= mMaxWaitRegularMs;
+                }
                 respectConcurrencyLimit = !wouldBeWaitingTooLong;
             }
             if (respectConcurrencyLimit) {
@@ -1908,8 +1954,11 @@ class JobConcurrencyManager {
 
         mMaxWaitTimeBypassEnabled = properties.getBoolean(
                 KEY_ENABLE_MAX_WAIT_TIME_BYPASS, DEFAULT_ENABLE_MAX_WAIT_TIME_BYPASS);
-        // EJ max wait must be in the range [0, infinity).
-        mMaxWaitEjMs = Math.max(0, properties.getLong(KEY_MAX_WAIT_EJ_MS, DEFAULT_MAX_WAIT_EJ_MS));
+        // UI max wait must be in the range [0, infinity).
+        mMaxWaitUIMs = Math.max(0, properties.getLong(KEY_MAX_WAIT_UI_MS, DEFAULT_MAX_WAIT_UI_MS));
+        // EJ max wait must be in the range [UI max wait, infinity).
+        mMaxWaitEjMs = Math.max(mMaxWaitUIMs,
+                properties.getLong(KEY_MAX_WAIT_EJ_MS, DEFAULT_MAX_WAIT_EJ_MS));
         // Regular max wait must be in the range [EJ max wait, infinity).
         mMaxWaitRegularMs = Math.max(mMaxWaitEjMs,
                 properties.getLong(KEY_MAX_WAIT_REGULAR_MS, DEFAULT_MAX_WAIT_REGULAR_MS));
@@ -1928,6 +1977,7 @@ class JobConcurrencyManager {
             pw.print(KEY_PKG_CONCURRENCY_LIMIT_EJ, mPkgConcurrencyLimitEj).println();
             pw.print(KEY_PKG_CONCURRENCY_LIMIT_REGULAR, mPkgConcurrencyLimitRegular).println();
             pw.print(KEY_ENABLE_MAX_WAIT_TIME_BYPASS, mMaxWaitTimeBypassEnabled).println();
+            pw.print(KEY_MAX_WAIT_UI_MS, mMaxWaitUIMs).println();
             pw.print(KEY_MAX_WAIT_EJ_MS, mMaxWaitEjMs).println();
             pw.print(KEY_MAX_WAIT_REGULAR_MS, mMaxWaitRegularMs).println();
             pw.println();
@@ -2790,10 +2840,16 @@ class JobConcurrencyManager {
     static final class AssignmentInfo {
         public long minPreferredUidOnlyWaitingTimeMs;
         public int numRunningImmediacyPrivileged;
+        public int numRunningUi;
+        public int numRunningEj;
+        public int numRunningReg;
 
         void clear() {
             minPreferredUidOnlyWaitingTimeMs = 0;
             numRunningImmediacyPrivileged = 0;
+            numRunningUi = 0;
+            numRunningEj = 0;
+            numRunningReg = 0;
         }
     }
 
