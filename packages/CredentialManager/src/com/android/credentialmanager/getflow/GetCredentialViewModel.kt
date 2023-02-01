@@ -26,11 +26,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.android.credentialmanager.CredentialManagerRepo
+import com.android.credentialmanager.common.CredentialType
 import com.android.credentialmanager.common.Constants
 import com.android.credentialmanager.common.DialogState
 import com.android.credentialmanager.common.ProviderActivityResult
 import com.android.credentialmanager.common.ProviderActivityState
-import com.android.credentialmanager.jetpack.developer.PublicKeyCredential
 import com.android.internal.util.Preconditions
 
 data class GetCredentialUiState(
@@ -258,9 +258,9 @@ internal class CredentialEntryInfoComparatorByTypeThenTimestamp : Comparator<Cre
     override fun compare(p0: CredentialEntryInfo, p1: CredentialEntryInfo): Int {
         // First prefer passkey type for its security benefits
         if (p0.credentialType != p1.credentialType) {
-            if (PublicKeyCredential.TYPE_PUBLIC_KEY_CREDENTIAL == p0.credentialType) {
+            if (CredentialType.PASSKEY == p0.credentialType) {
                 return -1
-            } else if (PublicKeyCredential.TYPE_PUBLIC_KEY_CREDENTIAL == p1.credentialType) {
+            } else if (CredentialType.PASSKEY == p1.credentialType) {
                 return 1
             }
         }
@@ -272,9 +272,9 @@ internal class CredentialEntryInfoComparatorByTypeThenTimestamp : Comparator<Cre
             } else if (p0.lastUsedTimeMillis > p1.lastUsedTimeMillis) {
                 return -1
             }
-        } else if (p0.lastUsedTimeMillis != null && p0.lastUsedTimeMillis > 0) {
+        } else if (p0.lastUsedTimeMillis != null) {
             return -1
-        } else if (p1.lastUsedTimeMillis != null && p1.lastUsedTimeMillis > 0) {
+        } else if (p1.lastUsedTimeMillis != null) {
             return 1
         }
         return 0

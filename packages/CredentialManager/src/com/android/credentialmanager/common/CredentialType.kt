@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.jetpack.developer
+package com.android.credentialmanager.common
 
-/**
- * Internal exception used to indicate a parsing error while converting from a framework type to
- * a jetpack type.
- *
- * @hide
- */
-internal class FrameworkClassParsingException : Exception()
+enum class CredentialType {
+    UNKNOWN, PASSKEY, PASSWORD,
+}
